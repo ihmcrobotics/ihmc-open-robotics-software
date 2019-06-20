@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateUpdater;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
@@ -13,10 +12,10 @@ import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HexapodHighLevelControlManager
 {
@@ -24,7 +23,6 @@ public class HexapodHighLevelControlManager
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final ControlledBodiesCommand controlledBodiesCommand = new ControlledBodiesCommand();
    private final ControllerCoreCommand controllerCoreCommandList;
    private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode = new YoEnum<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final HexapodBodySpatialManager bodySpatialManager;
@@ -107,21 +105,9 @@ public class HexapodHighLevelControlManager
       controllerCoreCommandList.clear();
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
       
-      addBodiesToControl(bodySpatialManager.getRigidBodiesToControl());
-      addBodiesToControl(stepController.getRigidBodiesToControl());
-      controllerCoreCommandList.addVirtualModelControlCommand(controlledBodiesCommand);
-
       ret.addCommand(bodySpatialManager.getSpatialFeedbackControlCommand());
       ret.addCommand(stepController.getFeedbackControlTemplate());
 
       return ret;
-   }
-   
-   private void addBodiesToControl(RigidBodyBasics[] rigidBodiesToControl)
-   {
-      for (RigidBodyBasics rigidBody : rigidBodiesToControl)
-      {
-         controlledBodiesCommand.addBodyToControl(rigidBody);
-      }
    }
 }

@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlan

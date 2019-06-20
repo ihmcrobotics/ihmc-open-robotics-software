@@ -1,112 +1,48 @@
 package us.ihmc.atlas;
 
+import java.io.IOException;
+
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.avatar.visualization.GainControllerSliderBoard;
-import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
-import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
-import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
+public class RemoteAtlasVisualizer
 {
-   private static final int DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ = 6;
-   private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER;
+   /** The update rate of the visualizer in milliseconds. If you experience delay build-up increase this value. */
+   private static final int DEFAULT_UPDATE_RATE = 6;
 
-   public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
-
-   public RemoteAtlasVisualizer(int bufferSize, int displayOneInNPacketsFactor)
+   private static void startVisualizer(int bufferSize, int updateRateInMs) throws IOException
    {
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
-      scsVisualizer.setDisplayOneInNPackets(displayOneInNPacketsFactor);
-      scsVisualizer.addSCSVisualizerStateListener(this);
+      scsVisualizer.setVariableUpdateRate(updateRateInMs);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, new RemoteAtlasVisualizerLogFilter());
-      client.start();
+      YoVariableClient client = new YoVariableClient(scsVisualizer);
+      client.startWithHostSelector();
    }
 
-   @Override
-   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
-   {
-      switch (defaultSliderBoardType)
-      {
-         case WALK_CONTROLLER :
-            new WalkControllerSliderBoard(scs, registry, null);
-
-            break;
-
-         case GAIN_CONTROLLER :
-            new GainControllerSliderBoard(scs, registry);
-
-            break;
-
-         case JOINT_ANGLE_OFFSET :
-            new JointAngleOffsetSliderBoard(scs, registry);
-
-            break;
-      }
-   }
-
-   public static void main(String[] args) throws JSAPException
+   public static void main(String[] args) throws JSAPException, IOException
    {
       int bufferSize = 16384;
       JSAP jsap = new JSAP();
 
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
-
-      FlaggedOption oneInNPacketsFactor = new FlaggedOption("displayOneInNPackets").setLongFlag("display-one-in-n-packets").setShortFlag('p').setStringParser(JSAP.INTEGER_PARSER).setRequired(false);
-      oneInNPacketsFactor.setHelp("Visualize one in ever N packets, where N is the argument passed in. Default value is 6 (displays one in every 6 packets)");
-      oneInNPacketsFactor.setDefault("" + DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ);
-
-      Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
-
-
-      jsap.registerParameter(robotModel);
-      jsap.registerParameter(runningOnRealRobot);
-      jsap.registerParameter(oneInNPacketsFactor);
+      FlaggedOption updateRate = new FlaggedOption("updateRate").setLongFlag("rate").setShortFlag('r').setStringParser(JSAP.INTEGER_PARSER).setRequired(false);
+      updateRate.setHelp("Determines how often the GUI will update its parameters in milliseconds.");
+      updateRate.setDefault(Integer.toString(DEFAULT_UPDATE_RATE));
+      jsap.registerParameter(updateRate);
 
       JSAPResult config = jsap.parse(args);
-
-      try
+      int updateRateInMs = DEFAULT_UPDATE_RATE;
+      if (config.contains("displayOneInNPackets"))
       {
-        int oneInNPacketsValue = DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ;
-
-         if (config.contains("displayOneInNPackets"))
-         {
-            oneInNPacketsValue = config.getInt("displayOneInNPackets");
-         }
-
-         new RemoteAtlasVisualizer(bufferSize, oneInNPacketsValue);
+         updateRateInMs = config.getInt("displayOneInNPackets");
       }
-      catch(IllegalArgumentException e)
-      {
-         System.err.println();
-         System.err.println("Usage: java " + RemoteAtlasVisualizer.class.getName());
-         System.err.println("                " + jsap.getUsage());
-         System.err.println();
-         System.exit(1);
-      }
-   }
-
-   private class RemoteAtlasVisualizerLogFilter implements LogProducerDisplay.LogSessionFilter
-   {
-      @Override
-      public boolean shouldAddToDisplay(Announcement description)
-      {
-         return description.getHostNameAsString().startsWith("cpu") || description.getHostNameAsString().equals("atlas");
-      }
+      startVisualizer(bufferSize, updateRateInMs);
    }
 }

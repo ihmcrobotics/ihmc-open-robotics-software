@@ -10,6 +10,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
@@ -18,7 +19,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,7 +38,8 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private final YoDouble planningHorizonLength;
 
    public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
-                                    SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry)
+                                    SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
+                                    BipedalFootstepPlannerListener... listeners)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
@@ -63,7 +64,20 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
-      footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
+      for (BipedalFootstepPlannerListener listener : listeners)
+      {
+         nodeChecker.addPlannerListener(listener);
+      }
+
+      if (listeners.length > 0)
+      {
+         footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, listeners[0], null,
+                                                    registry);
+      }
+      else
+      {
+         footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, registry);
+      }
 
       parentRegistry.addChild(registry);
    }

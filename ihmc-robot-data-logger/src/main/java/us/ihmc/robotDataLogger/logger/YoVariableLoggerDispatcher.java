@@ -16,24 +16,23 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
 {
    private final DataServerDiscoveryClient discoveryClient;
 
-   
    private final Object lock = new Object();
-   
+
    /**
     * List of sessions for which we started a logger.
-    * 
+    *
     * This is to avoid double logging should there be multiple known IPs for a single host.
     */
-   private final HashSet<HashAnnouncement> activeLogSessions = new HashSet<HashAnnouncement>(); 
-   
+   private final HashSet<HashAnnouncement> activeLogSessions = new HashSet<HashAnnouncement>();
+
    private final YoVariableLoggerOptions options;
 
    /**
     * Create a new YovariableLoggerDispatcher.
-    * 
+    *
     * For every log that comes online, a YoVariableLogger is created.
-    * 
-    * 
+    *
+    *
     * @param options
     * @throws IOException
     */
@@ -41,12 +40,11 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
    {
       this.options = options;
       LogTools.info("Starting YoVariableLoggerDispatcher");
-      
+
       boolean enableAutoDiscovery = !options.isDisableAutoDiscovery();
       discoveryClient = new DataServerDiscoveryClient(this, enableAutoDiscovery);
       discoveryClient.addHosts(StaticHostListLoader.load());
-      
-      
+
       LogTools.info("Client started, waiting for data server sessions");
    }
 
@@ -56,22 +54,21 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
       new YoVariableLoggerDispatcher(options);
    }
 
-
    @Override
    public void connected(HTTPDataServerConnection connection)
    {
-      synchronized(lock)
+      synchronized (lock)
       {
          Announcement announcement = connection.getAnnouncement();
          HashAnnouncement hashAnnouncement = new HashAnnouncement(announcement);
-         LogTools.info("New control session came online on " + connection.getTarget() + ". Identifier: " + announcement.getIdentifierAsString());
-         if(activeLogSessions.contains(hashAnnouncement))
+         LogTools.warn("New control session came online\n" + connection.getTarget() + " (" + announcement.getHostNameAsString() + ")");
+         if (activeLogSessions.contains(hashAnnouncement))
          {
             LogTools.warn("A logging sessions for " + announcement.getNameAsString() + " is already started.");
          }
          else
          {
-            if(announcement.getLog())
+            if (announcement.getLog())
             {
                try
                {
@@ -79,16 +76,16 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
                   activeLogSessions.add(hashAnnouncement);
                   LogTools.info("Logging session started for " + announcement.getNameAsString());
                }
-               catch(Exception e)
+               catch (Exception e)
                {
                   e.printStackTrace();
                }
             }
+            else
+            {
+               LogTools.info("Not logging.");
+            }
          }
-         
-         
-         
-
       }
    }
 
@@ -99,22 +96,25 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
 
    /**
     * When a log is finished succesfully, this function removes the active session from the list of sessions
-    * 
-    * This is useful in the case the network connection to the robot gets interrupted. When the robot regains network connectivity, a new log will start.
-    *  
+    *
+    * This is useful in the case the network connection to the robot gets interrupted. When the robot regains network
+    * connectivity, a new log will start.
+    *
     * @param request
     */
    private void finishedLog(Announcement request)
    {
+      LogTools.info("Finishing Log.");
       synchronized (lock)
       {
+         LogTools.info("Removing log session.");
          HashAnnouncement hashRequest = new HashAnnouncement(request);
          activeLogSessions.remove(hashRequest);
          LogTools.info("Logging session for " + request.getNameAsString() + " has finished.");
 
       }
    }
-   
+
    /**
     * Simple hashcode calculator for announcements to allow it in a HashSet
     *
@@ -124,16 +124,16 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
    private static class HashAnnouncement
    {
       private final Announcement announcement;
-      
+
       public HashAnnouncement(Announcement announcement)
       {
          this.announcement = announcement;
       }
-      
+
       @Override
       public boolean equals(Object other)
       {
-         if(other instanceof HashAnnouncement)
+         if (other instanceof HashAnnouncement)
          {
             return announcement.equals(((HashAnnouncement) other).announcement);
          }
@@ -142,8 +142,7 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
             return false;
          }
       }
-      
-      
+
       @Override
       public int hashCode()
       {

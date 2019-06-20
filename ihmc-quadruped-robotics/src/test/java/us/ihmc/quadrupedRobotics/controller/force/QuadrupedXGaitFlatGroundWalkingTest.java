@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -285,8 +287,9 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private void testFlatGroundPacing(double walkingSpeed)
    {
       stepTeleopManager.setStanceWidth(getPacingWidth());
-      stepTeleopManager.setStepDuration(getPacingStepDuration());
-      stepTeleopManager.setEndDoubleSupportDuration(getPacingEndDoubleSupportDuration());
+      stepTeleopManager.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.PACE.getEndPhaseShift(), getPacingStepDuration());
+      stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.PACE.getEndPhaseShift(), getPacingEndDoubleSupportDuration());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -314,8 +317,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
    {
       stepTeleopManager.setStanceWidth(getPacingWidth());
-      stepTeleopManager.setStepDuration(getPacingStepDuration());
-      stepTeleopManager.setEndDoubleSupportDuration(getPacingEndDoubleSupportDuration());
+      stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.PACE.getEndPhaseShift(), getPacingStepDuration());
+      stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.PACE.getEndPhaseShift(), getPacingEndDoubleSupportDuration());
 
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

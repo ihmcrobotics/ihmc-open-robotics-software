@@ -11,6 +11,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class HeadTrajectoryCommand
       implements Command<HeadTrajectoryCommand, HeadTrajectoryMessage>, FrameBasedCommand<HeadTrajectoryMessage>, EpsilonComparable<HeadTrajectoryCommand>
 {
+   private long sequenceId;
    private final SO3TrajectoryControllerCommand so3Trajectory;
 
    public HeadTrajectoryCommand()
@@ -26,24 +27,27 @@ public class HeadTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       so3Trajectory.clear();
    }
 
    @Override
    public void set(HeadTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       so3Trajectory.set(other.so3Trajectory);
    }
 
    @Override
    public void setFromMessage(HeadTrajectoryMessage message)
    {
-      so3Trajectory.setFromMessage(message.getSo3Trajectory());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
@@ -98,5 +102,11 @@ public class HeadTrajectoryCommand
    public double getExecutionTime()
    {
       return so3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

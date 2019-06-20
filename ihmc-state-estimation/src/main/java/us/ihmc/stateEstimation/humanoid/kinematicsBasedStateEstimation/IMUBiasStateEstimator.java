@@ -1,7 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -112,10 +110,10 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          imuToIndexMap.put(imuSensor, i);
 
-         AlphaFilteredYoFrameVector angularVelocityBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
+         AlphaFilteredYoFrameVector angularVelocityBias = new AlphaFilteredYoFrameVector("estimated" + sensorName + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
          angularVelocityBiases.add(angularVelocityBias);
 
-         AlphaFilteredYoFrameVector linearAccelerationBias = createAlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
+         AlphaFilteredYoFrameVector linearAccelerationBias = new AlphaFilteredYoFrameVector("estimated" + sensorName + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
          linearAccelerationBiases.add(linearAccelerationBias);
 
          YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);

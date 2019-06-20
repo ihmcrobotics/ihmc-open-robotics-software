@@ -15,6 +15,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>,
       WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
 {
+   private long sequenceId;
    private int rigidBodyHashCode;
    private RigidBodyBasics rigidBody;
    private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
@@ -40,6 +41,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    @Override
    public void clear()
    {
+      sequenceId = 0;
       rigidBodyHashCode = 0;
       rigidBody = null;
       degreesOfFreedomToExplore.clear();
@@ -51,6 +53,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    public void set(RigidBodyExplorationConfigurationCommand other)
    {
       clear();
+
+      sequenceId = other.sequenceId;
 
       rigidBodyHashCode = other.rigidBodyHashCode;
       rigidBody = other.rigidBody;
@@ -75,6 +79,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    {
       clear();
 
+      sequenceId = message.getSequenceId();
       rigidBodyHashCode = message.getRigidBodyHashCode();
       if (rigidBodyHashMap == null)
          rigidBody = null;
@@ -124,5 +129,11 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
    public boolean isCommandValid()
    {
       return rigidBody != null;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

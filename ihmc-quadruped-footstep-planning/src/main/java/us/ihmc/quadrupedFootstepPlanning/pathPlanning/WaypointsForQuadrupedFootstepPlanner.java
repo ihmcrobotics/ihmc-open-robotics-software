@@ -22,4 +22,6 @@ public interface WaypointsForQuadrupedFootstepPlanner
 
    FramePose3DReadOnly getInitialBodyPose();
    FramePose3DReadOnly getGoalBodyPose();
+
+   void setFallbackRegionSize(double size);
 }

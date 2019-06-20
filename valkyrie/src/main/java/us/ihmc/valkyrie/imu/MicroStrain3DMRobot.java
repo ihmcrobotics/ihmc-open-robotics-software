@@ -19,7 +19,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
-@SuppressWarnings("serial")
 public class MicroStrain3DMRobot extends Robot
 {
    private static double MS3DM_MASS = 0.0018;

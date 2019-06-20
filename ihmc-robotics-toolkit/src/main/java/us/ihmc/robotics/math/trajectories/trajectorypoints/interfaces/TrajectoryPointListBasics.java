@@ -37,7 +37,7 @@ public interface TrajectoryPointListBasics<T extends TrajectoryPointBasics>
 
    default T getLastTrajectoryPoint()
    {
-      return getTrajectoryPoint(getNumberOfTrajectoryPoints());
+      return getTrajectoryPoint(getNumberOfTrajectoryPoints() - 1);
    }
 
    default double getTrajectoryTime()

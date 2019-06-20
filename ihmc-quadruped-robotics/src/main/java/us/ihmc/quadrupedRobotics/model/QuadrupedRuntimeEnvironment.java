@@ -6,11 +6,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,14 +26,15 @@ public class QuadrupedRuntimeEnvironment
    private final FullQuadrupedRobotModel fullRobotModel;
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
-   private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private final HighLevelControllerParameters highLevelControllerParameters;
+   private final DCMPlannerParameters dcmPlannerParameters;
    private final QuadrupedSitDownParameters sitDownParameters;
    private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
    private final QuadrupedFallDetectionParameters fallDetectionParameters;
+   private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    private final double gravityZ;
 
@@ -39,15 +42,17 @@ public class QuadrupedRuntimeEnvironment
    private final List<ContactablePlaneBody> contactablePlaneBodies;
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches;
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
-                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
-                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters, QuadrupedFallDetectionParameters fallDetectionParameters)
+                                      QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches,
+                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, DCMPlannerParameters dcmPlannerParameters,
+                                      QuadrupedSitDownParameters sitDownParameters, QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
+                                      QuadrupedFallDetectionParameters fallDetectionParameters, RobotMotionStatusHolder robotMotionStatusHolder)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -55,17 +60,19 @@ public class QuadrupedRuntimeEnvironment
       this.fullRobotModel = fullRobotModel;
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
-      this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.footSwitches = footSwitches;
+      this.estimatorFootSwitches = estimatorFootSwitches;
       this.contactableFeet = contactableFeet;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.gravityZ = Math.abs(gravity);
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.highLevelControllerParameters = highLevelControllerParameters;
+      this.dcmPlannerParameters = dcmPlannerParameters;
       this.sitDownParameters = sitDownParameters;
       this.privilegedConfigurationParameters = privilegedConfigurationParameters;
       this.fallDetectionParameters = fallDetectionParameters;
+      this.robotMotionStatusHolder = robotMotionStatusHolder;
    }
 
    public double getControlDT()
@@ -98,10 +105,6 @@ public class QuadrupedRuntimeEnvironment
       return graphicsListRegistry;
    }
 
-   public YoGraphicsListRegistry getGraphicsListRegistryForDetachedOverhead()
-   {
-      return graphicsListRegistryForDetachedOverhead;
-   }
 
    public ControllerCoreOptimizationSettings getControllerCoreOptimizationSettings()
    {
@@ -111,6 +114,11 @@ public class QuadrupedRuntimeEnvironment
    public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
+   }
+
+   public QuadrantDependentList<FootSwitchInterface> getEstimatorFootSwitches()
+   {
+      return estimatorFootSwitches;
    }
 
    public QuadrantDependentList<ContactablePlaneBody> getContactableFeet()
@@ -138,6 +146,11 @@ public class QuadrupedRuntimeEnvironment
       return highLevelControllerParameters;
    }
 
+   public DCMPlannerParameters getDCMPlannerParameters()
+   {
+      return dcmPlannerParameters;
+   }
+
    public QuadrupedSitDownParameters getSitDownParameters()
    {
       return sitDownParameters;
@@ -151,5 +164,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedFallDetectionParameters getFallDetectionParameters()
    {
       return fallDetectionParameters;
+   }
+
+   public RobotMotionStatusHolder getRobotMotionStatusHolder()
+   {
+      return robotMotionStatusHolder;
    }
 }

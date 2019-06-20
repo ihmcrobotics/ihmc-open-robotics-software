@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -14,6 +15,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -86,7 +89,7 @@ public class PelvisICPBasedTranslationManager
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private FrameConvexPolygon2D supportPolygon;
+   private FrameConvexPolygon2DReadOnly supportPolygon;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
@@ -101,6 +104,7 @@ public class PelvisICPBasedTranslationManager
    private final YoLong numberOfQueuedCommands;
    private final PelvisTrajectoryCommand commandBeingProcessed = new PelvisTrajectoryCommand();
    private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class, PelvisTrajectoryCommand::set);
+   private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisXY");
 
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
@@ -141,7 +145,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2D actualICP)
+   public void compute(RobotSide supportLeg, FramePoint2DReadOnly actualICP)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
@@ -179,6 +183,7 @@ public class PelvisICPBasedTranslationManager
          if (!isTrajectoryStopped.getBooleanValue())
          {
             double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
+            statusHelper.updateWithTimeInTrajectory(deltaTime);
             positionTrajectoryGenerator.compute(deltaTime);
 
             if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
@@ -238,12 +243,15 @@ public class PelvisICPBasedTranslationManager
       if (!linearSelectionMatrix.isXSelected() && !linearSelectionMatrix.isYSelected())
          return; // The user does not want to control the x and y of the pelvis, do nothing.
 
+      se3Trajectory.setSequenceId(command.getSequenceId());
+
       if (se3Trajectory.getExecutionMode() == ExecutionMode.OVERRIDE)
       {
          isReadyToHandleQueuedCommands.set(true);
          clearCommandQueue(se3Trajectory.getCommandId());
          initialPelvisPositionTime.set(yoTime.getDoubleValue());
          initializeTrajectoryGenerator(command, 0.0);
+         statusHelper.registerNewTrajectory(se3Trajectory);
          return;
       }
       else if (se3Trajectory.getExecutionMode() == ExecutionMode.QUEUE)
@@ -254,6 +262,10 @@ public class PelvisICPBasedTranslationManager
             isReadyToHandleQueuedCommands.set(false);
             clearCommandQueue(INVALID_MESSAGE_ID);
             holdCurrentPosition();
+         }
+         else
+         {
+            statusHelper.registerNewTrajectory(se3Trajectory);
          }
          return;
       }
@@ -500,5 +512,10 @@ public class PelvisICPBasedTranslationManager
       positionTrajectoryGenerator.appendWaypoint(0.0, tempPosition, tempVelocity);
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return statusHelper.pollStatusMessage(desiredPelvisPosition, currentPelvisPosition);
    }
 }

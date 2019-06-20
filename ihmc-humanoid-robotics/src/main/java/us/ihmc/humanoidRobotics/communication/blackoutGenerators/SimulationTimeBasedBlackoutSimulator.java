@@ -26,6 +26,6 @@ public class SimulationTimeBasedBlackoutSimulator extends StandardBlackoutSimula
    @Override
    public void receivedPacket(RobotConfigurationData packet)
    {
-      currentSimTime.set(packet.getTimestamp());
+      currentSimTime.set(packet.getMonotonicTime());
    }
 }

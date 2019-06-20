@@ -2,6 +2,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 
 import java.io.InputStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -15,8 +16,6 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverCinderBlocksTest
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -101,12 +100,6 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
          {
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-
                @Override
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {

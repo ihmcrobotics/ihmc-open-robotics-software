@@ -22,6 +22,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final AppearanceDefinition appearance;
 
    private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final Vector3D terrainNormal = new Vector3D();
 
    public PlanarRegionTerrainObject(PlanarRegion planarRegion, double allowablePenetrationThickness)
    {
@@ -36,6 +37,11 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.linkGraphics = setupLinkGraphics();
 
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
+
+      planarRegion.getNormal(terrainNormal);
+
+      if(terrainNormal.getZ() < 0.0)
+         terrainNormal.negate();
    }
 
    @Override
@@ -58,7 +64,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       {
          if (normalToPack != null)
          {
-            planarRegion.getNormal(normalToPack);
+            normalToPack.set(terrainNormal);
          }
 
          return planarRegion.getPlaneZGivenXY(x, y);
@@ -98,7 +104,15 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       tempPoint3dForCheckInside.setY(y);
       tempPoint3dForCheckInside.setZ(z);
 
-      boolean isPointInside = planarRegion.isPointOnOrSlightlyBelow(tempPoint3dForCheckInside, allowablePenetrationThickness);
+      boolean isPointInside;
+      if(planarRegion.getNormal().getZ() > 0.0)
+      {
+         isPointInside = planarRegion.isPointOnOrSlightlyBelow(tempPoint3dForCheckInside, allowablePenetrationThickness);
+      }
+      else
+      {
+         isPointInside = planarRegion.isPointOnOrSlightlyAbove(tempPoint3dForCheckInside, allowablePenetrationThickness);
+      }
 
       if (isPointInside)
       {
@@ -109,7 +123,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
 
          if (normalToPack != null)
          {
-            planarRegion.getNormal(normalToPack);
+            normalToPack.set(terrainNormal);
          }
       }
 
@@ -125,7 +139,8 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private Graphics3DObject setupLinkGraphics()
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, appearance);
+      double thickness = Math.max(allowablePenetrationThickness, 1e-4);
+      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, thickness, appearance);
       return graphics3DObject;
    }
 }

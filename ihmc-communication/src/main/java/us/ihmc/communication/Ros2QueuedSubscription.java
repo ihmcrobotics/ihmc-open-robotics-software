@@ -6,6 +6,11 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.Ros2Subscription;
 
+/**
+ * TODO This class is broken and not thread safe.
+ * @deprecated Be careful using this class! TODO undeprecate and make thread safe, using ROS2Callback
+ * @param <T>
+ */
 public class Ros2QueuedSubscription<T> implements NewMessageListener<T>
 {
    private final T data;

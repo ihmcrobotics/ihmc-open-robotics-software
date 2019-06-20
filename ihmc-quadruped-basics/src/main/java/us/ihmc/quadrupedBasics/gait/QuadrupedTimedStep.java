@@ -6,6 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTim
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
@@ -16,13 +17,13 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    {
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint3D goalPosition, double groundClearance, TimeIntervalBasics timeInterval)
    {
       super(robotQuadrant, goalPosition, groundClearance);
       setTimeInterval(timeInterval);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeIntervalBasics timeInterval)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -33,16 +34,16 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
 
    public QuadrupedTimedStep(QuadrupedTimedStep other)
    {
-      this(other.getRobotQuadrant(), other.getGoalPosition(), other.getGroundClearance(), other.getTimeInterval());
+      this(other.getRobotQuadrant(), other.getGoalPositionInternal(), other.getGroundClearance(), other.getTimeInterval());
    }
 
    @Override
-   public TimeInterval getTimeInterval()
+   public TimeIntervalBasics getTimeInterval()
    {
       return timeInterval;
    }
 
-   public void setTimeInterval(TimeInterval timeInterval)
+   public void setTimeInterval(TimeIntervalBasics timeInterval)
    {
       getTimeInterval().set(timeInterval);
    }
@@ -73,7 +74,23 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
       return super.epsilonEquals(other, epsilon) && getTimeInterval().epsilonEquals(other.getTimeInterval(), epsilon);
+   }
 
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      QuadrupedTimedStep other = (QuadrupedTimedStep) obj;
+
+      if (!getTimeInterval().epsilonEquals(other.getTimeInterval(), 0.0))
+         return false;
+
+      return super.equals(other);
    }
 
    @Override

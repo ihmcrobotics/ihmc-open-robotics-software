@@ -68,7 +68,8 @@ public class LIPMDDPCalculatorVisualizer
    private static final double nominalComHeight = 1.0;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
 
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -120,7 +121,7 @@ public class LIPMDDPCalculatorVisualizer
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          double xToAnkle = 0.0;
          double yToAnkle = 0.0;
-         double zToAnkle = 0.084;
+         double zToAnkle = 0.0;
          List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
@@ -167,13 +168,13 @@ public class LIPMDDPCalculatorVisualizer
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet);
       List<FootstepTiming> timings = new ArrayList<>();

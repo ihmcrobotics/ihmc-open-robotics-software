@@ -8,6 +8,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, FootLoadBearingMessage>
 {
+   private long sequenceId;
    private final SideDependentList<LoadBearingRequest> footRequests = new SideDependentList<>();
    
    /** the time to delay this command on the controller side before being executed **/
@@ -23,6 +24,7 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    @Override
    public void clear()
    {
+      sequenceId = 0;
       footRequests.clear();
    }
 
@@ -30,6 +32,7 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    public void setFromMessage(FootLoadBearingMessage message)
    {
       clear();
+      sequenceId = message.getSequenceId();
       LoadBearingRequest request = LoadBearingRequest.fromByte(message.getLoadBearingRequest());
       RobotSide robotSide = RobotSide.fromByte(message.getRobotSide());
       footRequests.put(robotSide, request);
@@ -40,6 +43,7 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    public void set(FootLoadBearingCommand other)
    {
       clear();
+      sequenceId = other.sequenceId;
       executionDelayTime = other.getExecutionDelayTime();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -117,4 +121,9 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
       return true;
    }
 
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
+   }
 }

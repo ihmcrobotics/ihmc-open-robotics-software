@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.model;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public class QuadrupedInitialOffsetAndYaw
 {
@@ -27,12 +28,12 @@ public class QuadrupedInitialOffsetAndYaw
       this(new Vector3D(offsetX, offsetY, offsetZ), Math.atan2(offsetY, offsetX));
    }
 
-   public QuadrupedInitialOffsetAndYaw(Vector3D additionalOffset)
+   public QuadrupedInitialOffsetAndYaw(Tuple3DReadOnly additionalOffset)
    {
       this(additionalOffset, 0.0);
    }
 
-   public QuadrupedInitialOffsetAndYaw(Vector3D additionalOffset, double yaw)
+   public QuadrupedInitialOffsetAndYaw(Tuple3DReadOnly additionalOffset, double yaw)
    {
       this.additionalOffset.set(additionalOffset);
       this.yaw = yaw;

@@ -5,7 +5,6 @@ import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
@@ -13,7 +12,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 class BoundingBoxCollisionDetector
@@ -107,6 +105,15 @@ class BoundingBoxCollisionDetector
                   double dx = Math.abs(tempPoint1.getX()) - 0.5 * parameters.getBodyBoxDepth();
                   double dy = Math.abs(tempPoint1.getY()) - 0.5 * parameters.getBodyBoxWidth();
                   collisionData.setDistanceFromBoundingBox(getMinimumPositiveValue(dx, dy, collisionData.getDistanceFromBoundingBox()));
+
+                  if(tempPoint1.getX() < 0.0 && dx > 0.0)
+                  {
+                     collisionData.setDistanceOfClosestPointInBack(getMinimumPositiveValue(dx, collisionData.getDistanceOfClosestPointInBack()));
+                  }
+                  else if(tempPoint1.getX() > 0.0 && dx > 0.0)
+                  {
+                     collisionData.setDistanceOfClosestPointInFront(getMinimumPositiveValue(dx, collisionData.getDistanceOfClosestPointInFront()));
+                  }
                }
 
                setDimensionsToUpperBound();

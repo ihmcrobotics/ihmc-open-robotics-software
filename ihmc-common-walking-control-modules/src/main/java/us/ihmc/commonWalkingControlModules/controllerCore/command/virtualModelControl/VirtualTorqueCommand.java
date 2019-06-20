@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -25,9 +27,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  * {@link VirtualTorqueCommand} is a command meant to be submitted to the
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
- * The objective of a {@link VirtualTorqueCommand} is to notify the virtual model control
- * module that the given end-effector is to execute a desired torque during the
- * next control tick.
+ * The objective of a {@link VirtualTorqueCommand} is to notify the virtual model control module
+ * that the given end-effector is to execute a desired torque during the next control tick.
  * </p>
  * <p>
  * It is usually either the result of the {@link SpatialFeedbackController}.
@@ -42,18 +43,18 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    private final FramePose3D controlFramePose = new FramePose3D();
 
    /**
-    * It defines the desired angular torque of the origin of the control frame, with respect to
-    * the base. The vector is expressed in the control frame.
+    * It defines the desired angular torque of the origin of the control frame, with respect to the
+    * base. The vector is expressed in the control frame.
     */
    private final Vector3D desiredAngularTorque = new Vector3D();
 
    /**
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, it is assumed that the selection frame is equal to the control
+    * frame.
     * </p>
     */
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
@@ -66,13 +67,10 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    /** The end-effector is the rigid-body to be controlled. */
    private RigidBodyBasics endEffector;
 
-   private String baseName;
-   private String endEffectorName;
-
    /**
-    *  Creates an empty command. It needs to be configured before being submitted to the controller
-    *  core.
-     */
+    * Creates an empty command. It needs to be configured before being submitted to the controller
+    * core.
+    */
    public VirtualTorqueCommand()
    {
    }
@@ -83,15 +81,14 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void set(VirtualTorqueCommand other)
    {
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+
+      desiredAngularTorque.set(other.desiredAngularTorque);
       selectionMatrix.set(other.selectionMatrix);
+
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
 
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularTorque.set(other.desiredAngularTorque);
    }
 
    /**
@@ -105,8 +102,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       command.getAngularSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
-      baseName = command.getBaseName();
-      endEffectorName = command.getEndEffectorName();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
@@ -115,8 +110,8 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    /**
     * Specifies the rigid-body to be controlled, i.e. {@code endEffector}.
     * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints that
+    * can be used to control the end-effector.
     * </p>
     *
     * @param base the rigid-body located right before the first joint to be used for controlling the
@@ -127,21 +122,18 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
     * Sets the desired angular torque to submit for the optimization to zero.
     * <p>
-    * This is useful when the end-effector is in contact with the environment. Its torque has
-    * to be set to zero so it can exert the required wrench from the contact optimization.
+    * This is useful when the end-effector is in contact with the environment. Its torque has to be set
+    * to zero so it can exert the required wrench from the contact optimization.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -164,21 +156,21 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * It is important that the angular torque describes the torque of the control frame.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     *
-    * @param controlFrame specifies the location  of interest for controlling the end-effector.
-    * @param desiredWrench the desired end-effector wrench with respect to the expressed in the control frame.
-    * @throws ReferenceFrameMismatchException if the {@code desiredAngularTorque} is not setup
-    *            as follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
-    *            {@code baseFrame = base.getBodyFixedFrame()},
-    *            {@code expressedInFrame = controlFrame}.
+    * @param controlFrame specifies the location of interest for controlling the end-effector.
+    * @param desiredWrench the desired end-effector wrench with respect to the expressed in the control
+    *           frame.
+    * @throws ReferenceFrameMismatchException if the {@code desiredAngularTorque} is not setup as
+    *            follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
+    *            {@code baseFrame = base.getBodyFixedFrame()}, {@code expressedInFrame = controlFrame}.
     */
    public void setAngularTorque(ReferenceFrame controlFrame, WrenchReadOnly desiredWrench)
    {
@@ -193,13 +185,13 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    /**
     * Sets the desired angular torque to submit for the optimization.
     * <p>
-    * The {@code desiredAngularTorque} has to defined the desired angular torque of the
-    * origin of the {@code controlFrame}. It has to be expressed in {@code controlFrame}.
+    * The {@code desiredAngularTorque} has to defined the desired angular torque of the origin of the
+    * {@code controlFrame}. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -208,10 +200,10 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     *
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
-    * @param desiredAngularTorque the desired angular torque of the origin of the control
-    *           frame with respect to the base. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code desiredAngularTorque} is not expressed
-    *             control frame.
+    * @param desiredAngularTorque the desired angular torque of the origin of the control frame with
+    *           respect to the base. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code desiredAngularTorque} is not expressed control
+    *            frame.
     */
    public void setAngularTorque(ReferenceFrame controlFrame, FrameVector3D desiredAngularTorque)
    {
@@ -234,11 +226,11 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    }
 
    /**
-    * Convenience method that sets up the selection matrix applying the given selection matrix
-    * to the angular part.
+    * Convenience method that sets up the selection matrix applying the given selection matrix to the
+    * angular part.
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     *
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
@@ -252,13 +244,13 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    /**
     * Sets this command's selection matrix to the given one.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
@@ -268,12 +260,17 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       this.selectionMatrix.set(selectionMatrix);
    }
 
+   public Vector3DBasics getDesiredAngularTorque()
+   {
+      return desiredAngularTorque;
+   }
+
    /**
     * Packs the control frame and desired angular torque held in this command.
     * <p>
     * The first argument {@code controlFrameToPack} is required to properly express the
-    * {@code desiredAngularTorque}. Indeed the desired angular torque has to be
-    * expressed in the control frame.
+    * {@code desiredAngularTorque}. Indeed the desired angular torque has to be expressed in the
+    * control frame.
     * </p>
     *
     * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
@@ -287,15 +284,14 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    }
 
    /**
-    * Packs the value of the desired angular torque of the end-effector with respect to the
-    * base, expressed in the control frame.
+    * Packs the value of the desired angular torque of the end-effector with respect to the base,
+    * expressed in the control frame.
     * <p>
     * The control frame can be obtained via {@link #getControlFrame(PoseReferenceFrame)}.
     * </p>
     *
-    * @param desiredAngularTorqueToPack the 3-by-1 matrix in which the value of the desired
-    *           angular torque is stored. The given matrix is reshaped to ensure proper size.
-    *           Modified.
+    * @param desiredAngularTorqueToPack the 3-by-1 matrix in which the value of the desired angular
+    *           torque is stored. The given matrix is reshaped to ensure proper size. Modified.
     */
    public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
    {
@@ -308,13 +304,12 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * Packs the control frame and desired wrench held in this command.
     * <p>
     * The first argument {@code controlFrameToPack} is required to properly express the
-    * {@code desiredWrenchToPack}. Indeed the desired wrench has to be
-    * expressed in the control frame.
+    * {@code desiredWrenchToPack}. Indeed the desired wrench has to be expressed in the control frame.
     * </p>
     *
     * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
-    * @param desiredWrenchToPack the desired wrench of the end-effector
-    *           with respect to the base, expressed in the control frame. Modified.
+    * @param desiredWrenchToPack the desired wrench of the end-effector with respect to the base,
+    *           expressed in the control frame. Modified.
     */
    public void getDesiredWrench(PoseReferenceFrame controlFrameToPack, Wrench desiredWrenchToPack)
    {
@@ -330,9 +325,13 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       getDesiredAngularTorque(desiredEffortToPack);
    }
 
+   public FramePose3DBasics getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
    /**
-    * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this
-    * command.
+    * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this command.
     * <p>
     * The control frame is assumed to be attached to the end-effector.
     * </p>
@@ -343,6 +342,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
     *           Modified.
     */
+   @Override
    public void getControlFrame(PoseReferenceFrame controlFrameToPack)
    {
       controlFramePose.changeFrame(controlFrameToPack.getParent());
@@ -371,6 +371,11 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    {
       positionToPack.setIncludingFrame(controlFramePose.getPosition());
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
+   }
+
+   public SelectionMatrix3D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    /** {@inheritDoc} */
@@ -403,23 +408,9 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**
@@ -434,10 +425,38 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualTorqueCommand)
+      {
+         VirtualTorqueCommand other = (VirtualTorqueCommand) object;
+
+         if (!controlFramePose.equals(other.controlFramePose))
+            return false;
+         if (!desiredAngularTorque.equals(other.desiredAngularTorque))
+            return false;
+         if (!selectionMatrix.equals(other.selectionMatrix))
+            return false;
+         if (base != other.base)
+            return false;
+         if (endEffector != other.endEffector)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", angular = "
-            + desiredAngularTorque;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", angular = " + desiredAngularTorque;
    }
 }

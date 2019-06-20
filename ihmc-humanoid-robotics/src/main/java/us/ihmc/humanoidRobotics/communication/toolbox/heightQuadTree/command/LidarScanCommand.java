@@ -13,6 +13,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
 {
+   private long sequenceId;
    private long timestamp = -1L;
    private final RecyclingArrayList<Point3D32> scan = new RecyclingArrayList<>(Point3D32.class);
    private final ReferenceFrame pointCloudFrame = ReferenceFrame.getWorldFrame();
@@ -21,6 +22,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    @Override
    public void clear()
    {
+      sequenceId = 0;
       timestamp = -1L;
       scan.clear();
    }
@@ -28,6 +30,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    @Override
    public void set(LidarScanCommand other)
    {
+      sequenceId = other.sequenceId;
       timestamp = other.timestamp;
       lidarPose.setIncludingFrame(other.lidarPose);
       scan.clear();
@@ -39,6 +42,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    @Override
    public void setFromMessage(LidarScanMessage message)
    {
+      sequenceId = message.getSequenceId();
       timestamp = message.getRobotTimestamp();
       lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());
 
@@ -95,5 +99,11 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    public boolean isCommandValid()
    {
       return timestamp != -1L && !scan.isEmpty();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

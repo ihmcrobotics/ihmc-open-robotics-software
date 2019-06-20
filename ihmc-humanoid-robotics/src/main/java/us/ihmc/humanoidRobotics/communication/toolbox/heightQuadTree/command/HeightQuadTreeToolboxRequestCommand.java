@@ -5,12 +5,14 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTreeToolboxRequestCommand, HeightQuadTreeToolboxRequestMessage>
 {
+   private long sequenceId;
    private boolean requestClearQuadTree;
    private boolean requestQuadTreeUpdate;
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       requestClearQuadTree = false;
       requestQuadTreeUpdate = false;
    }
@@ -18,6 +20,7 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    @Override
    public void set(HeightQuadTreeToolboxRequestCommand other)
    {
+      sequenceId = other.sequenceId;
       requestClearQuadTree = other.requestClearQuadTree;
       requestQuadTreeUpdate = other.requestQuadTreeUpdate;
    }
@@ -25,7 +28,7 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    @Override
    public void setFromMessage(HeightQuadTreeToolboxRequestMessage message)
    {
-      
+      sequenceId = message.getSequenceId();
       requestClearQuadTree = message.getRequestClearQuadTree();
       requestQuadTreeUpdate = message.getRequestQuadTreeUpdate();
    }
@@ -56,5 +59,11 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    public String toString()
    {
       return getClass().getSimpleName() + ": clear request = " + requestClearQuadTree + ", quadTree request = " + requestQuadTreeUpdate;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

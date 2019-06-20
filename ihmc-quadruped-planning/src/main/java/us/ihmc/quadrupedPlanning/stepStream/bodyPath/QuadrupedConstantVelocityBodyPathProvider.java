@@ -1,12 +1,16 @@
 package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -15,6 +19,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,7 +36,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final YoBoolean footstepPlanHasBeenComputed = new YoBoolean("footstepPlanHasBeenComputed", registry);
    private final YoBoolean shiftPlanBasedOnStepAdjustment = new YoBoolean("shiftPlanBasedOnStepAdjustment", registry);
 
-   private final YoFramePoint2D startPoint = new YoFramePoint2D("startPoint", worldFrame, registry);
+   private final YoFramePoint2D centerStartPoint = new YoFramePoint2D("centerStartPoint", worldFrame, registry);
+   private final List<YoFramePoint2D> footStartPoints = new ArrayList<>();
    private final YoDouble startYaw = new YoDouble("startYaw", registry);
    private final YoDouble startTime = new YoDouble("startTime", registry);
    private final DoubleProvider firstStepDelay;
@@ -45,11 +52,16 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final AtomicBoolean recomputeInitialPose = new AtomicBoolean();
    private final AtomicBoolean recomputeStepAdjustment = new AtomicBoolean();
 
+   private final List<QuadrupedFootstepStatusMessage> sortedMessageList = new ArrayList<>();
    private final FramePose2D tempPose = new FramePose2D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
+   private static final int howFarBackToLook = 3;
+   private static final double inflationWeight = 1.0;
+
    public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                    DoubleProvider firstStepDelay, YoDouble timestamp, YoVariableRegistry parentRegistry)
+                                                    DoubleProvider firstStepDelay, YoDouble timestamp, YoVariableRegistry parentRegistry,
+                                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       this.firstStepDelay = firstStepDelay;
@@ -58,6 +70,17 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       {
          footstepStartStatuses.set(quadrant, new AtomicReference<>());
          footstepCompleteStatuses.set(quadrant, new AtomicReference<>());
+      }
+
+      centerStartPoint.setToNaN();
+      yoGraphicsListRegistry.registerYoGraphic("bodyPathProvider", new YoGraphicPosition("centerStartPoint", centerStartPoint.getYoX(), centerStartPoint.getYoY(), 0.05, YoAppearance
+            .Red(), YoGraphicPosition.GraphicType.CROSS));
+      for (int i = 0; i < howFarBackToLook; i++)
+      {
+         YoFramePoint2D footStartPoint = new YoFramePoint2D("footStartPoint" + i, worldFrame, registry);
+         footStartPoint.setToNaN();
+         footStartPoints.add(footStartPoint);
+         yoGraphicsListRegistry.registerYoGraphic("bodyPathProvider", new YoGraphicPosition("footStartPoint" + i, footStartPoint.getYoX(), footStartPoint.getYoY(), 0.05, YoAppearance.Red(), YoGraphicPosition.GraphicType.CROSS));
       }
 
       this.xGaitSettings = xGaitSettings;
@@ -115,7 +138,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          setStartConditionsFromCurrent();
       }
 
-      initialPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+      initialPose.set(centerStartPoint.getX(), centerStartPoint.getY(), startYaw.getDoubleValue());
       if (shiftPlanBasedOnStepAdjustment.getBooleanValue())
       {
          initialPose.prependTranslation(achievedStepAdjustment.getX(), achievedStepAdjustment.getY());
@@ -161,45 +184,74 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
       startTime.set(timestamp.getDoubleValue() + firstStepDelay.getValue() + xGaitSettings.getStepDuration());
       startYaw.set(supportTransform.getRotationMatrix().getYaw());
-      startPoint.set(supportTransform.getTranslationVector());
+      centerStartPoint.set(supportTransform.getTranslationVector());
    }
 
    private void setStartConditionsFromFootstepStatus()
    {
-      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
+//      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
+      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestCompleteStatusMessage(1);
       if (latestStatusMessage == null)
          return;
 
       double previousStartTime = startTime.getDoubleValue();
       double newStartTime = latestStatusMessage.getDesiredStepInterval().getEndTime();
-      startTime.set(newStartTime);
+      double previousStartYaw = startYaw.getDoubleValue();
+      double newStartYaw = desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime) + previousStartYaw;
 
       if (shiftPlanBasedOnStepAdjustment.getBooleanValue())
       {
-         RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestStatusMessage.getFootstepQuadrant());
-         Point3DReadOnly latestMessageSoleDesiredPosition = latestStatusMessage.getDesiredTouchdownPositionInWorld();
-         double halfStanceLength = quadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
-         double halfStanceWidth = quadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
+         centerStartPoint.setToZero();
+         double totalInflation = 0;
+         for (int depth = 1; depth <= howFarBackToLook; depth++)
+         {
+            QuadrupedFootstepStatusMessage statusMessage = getLatestCompleteStatusMessage(depth);
+            if (statusMessage != null)
+            {
+               RobotQuadrant robotQuadrant = RobotQuadrant.fromByte((byte) statusMessage.getFootstepQuadrant());
+               Point3DReadOnly soleDesiredPosition = statusMessage.getDesiredTouchdownPositionInWorld();
+               double halfStanceLength = robotQuadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
+               double halfStanceWidth = robotQuadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
 
-         tempPose.set(halfStanceLength, halfStanceWidth, 0.0);
-         tempTransform.setRotationYaw(startYaw.getDoubleValue());
-         tempPose.applyTransform(tempTransform);
-         tempPose.prependTranslation(latestMessageSoleDesiredPosition.getX(), latestMessageSoleDesiredPosition.getY());
-         startPoint.set(tempPose.getPosition());
-         startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
+               double timeAtStatusMessage = statusMessage.getDesiredStepInterval().getEndTime();
+               double yawAtStatusMessage = desiredPlanarVelocity.getZ() * (timeAtStatusMessage - previousStartTime) + previousStartYaw;
+
+               footStartPoints.get(depth - 1).set(soleDesiredPosition);
+               tempPose.set(halfStanceLength, halfStanceWidth, 0.0);
+               tempTransform.setRotationYaw(yawAtStatusMessage);
+               tempPose.applyTransform(tempTransform);
+               tempPose.prependTranslation(footStartPoints.get(depth - 1));
+               extrapolatePose(newStartTime - timeAtStatusMessage, tempPose, tempPose, desiredPlanarVelocity);
+
+               double inflation = inflationWeight * MathTools.square(howFarBackToLook - (depth - 1));
+               tempPose.getPosition().scale(inflation);
+               centerStartPoint.add(tempPose.getPosition());
+//               startPose.appendTranslation(tempPose.getPosition());
+//               startPose.appendRotation(tempPose.getYaw());
+
+               totalInflation += inflation;
+            }
+         }
+
+//         centerStartPoint.set(startPose.getPosition());
+         centerStartPoint.scale(1.0 / totalInflation);
+         startYaw.set(newStartYaw);
       }
       else
       {
-         tempPose.set(startPoint.getX(), startPoint.getY(), startYaw.getDoubleValue());
+         tempPose.set(centerStartPoint.getX(), centerStartPoint.getY(), startYaw.getDoubleValue());
          extrapolatePose(newStartTime - previousStartTime, tempPose, tempPose, desiredPlanarVelocity);
-         startPoint.set(tempPose.getPosition());
+         centerStartPoint.set(tempPose.getPosition());
          startYaw.add(desiredPlanarVelocity.getZ() * (newStartTime - previousStartTime));
       }
+
+      startTime.set(newStartTime);
+
    }
 
    private void computeStepAdjustmentFromFootstepStatus()
    {
-      QuadrupedFootstepStatusMessage latestCompleteStatusMessage = getLatestCompleteStatusMessage();
+      QuadrupedFootstepStatusMessage latestCompleteStatusMessage = getLatestCompleteStatusMessage(1);
       RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestCompleteStatusMessage.getFootstepQuadrant());
       QuadrupedFootstepStatusMessage startStatusMessage = footstepStartStatuses.get(quadrant).get();
 
@@ -213,36 +265,45 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       achievedStepAdjustment.sub(soleDesiredAtTouchdown, soleDesiredAtStartOfStep);
    }
 
-   private QuadrupedFootstepStatusMessage getLatestStartStatusMessage()
+   private QuadrupedFootstepStatusMessage getLatestStartStatusMessage(int depth)
    {
-      double latestEndTime = Double.NEGATIVE_INFINITY;
-      QuadrupedFootstepStatusMessage latestMessage = null;
-      for (RobotQuadrant quadrant : RobotQuadrant.values)
-      {
-         QuadrupedFootstepStatusMessage message = footstepStartStatuses.get(quadrant).get();
-         if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
-         {
-            latestEndTime = message.getDesiredStepInterval().getEndTime();
-            latestMessage = message;
-         }
-      }
-      return latestMessage;
+      return getLatestStatusMessage(footstepStartStatuses, depth);
    }
 
-   private QuadrupedFootstepStatusMessage getLatestCompleteStatusMessage()
+   private QuadrupedFootstepStatusMessage getLatestCompleteStatusMessage(int depth)
    {
-      double latestEndTime = Double.NEGATIVE_INFINITY;
-      QuadrupedFootstepStatusMessage latestMessage = null;
+      return getLatestStatusMessage(footstepCompleteStatuses, depth);
+   }
+
+   private QuadrupedFootstepStatusMessage getLatestStatusMessage(QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepStatuses, int depth)
+   {
+      if (depth < 1)
+      {
+         throw new IllegalArgumentException("Depth is 1 indexed.");
+      }
+      else if(depth > 4)
+      {
+         throw new IllegalArgumentException("Depth cannot be greater than 4");
+      }
+
+      sortedMessageList.clear();
+
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         QuadrupedFootstepStatusMessage message = footstepCompleteStatuses.get(quadrant).get();
-         if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
+         QuadrupedFootstepStatusMessage message = footstepStatuses.get(quadrant).get();
+         if (message != null)
          {
-            latestEndTime = message.getDesiredStepInterval().getEndTime();
-            latestMessage = message;
+            sortedMessageList.add(message);
          }
       }
-      return latestMessage;
+
+      if(sortedMessageList.isEmpty())
+      {
+         return null;
+      }
+
+      sortedMessageList.sort((message1, message2) -> Double.compare(message2.getDesiredStepInterval().getEndTime(), message1.getDesiredStepInterval().getEndTime()));
+      return sortedMessageList.get(Math.min(sortedMessageList.size(), depth) - 1);
    }
 
    public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)

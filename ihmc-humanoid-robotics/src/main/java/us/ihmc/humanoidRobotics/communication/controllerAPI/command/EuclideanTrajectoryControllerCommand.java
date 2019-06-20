@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class EuclideanTrajectoryControllerCommand extends QueueableCommand<EuclideanTrajectoryControllerCommand, EuclideanTrajectoryMessage>
       implements FrameBasedCommand<EuclideanTrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -61,6 +62,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -86,27 +88,30 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
+   public void setFromMessage(EuclideanTrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
-
-      clear(dataFrame);
-      setFromMessage(message);
-
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrame(linearSelectionFrame);
-
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrame(linearWeightFrame);
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(EuclideanTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
    {
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
+
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -124,13 +129,15 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
-   }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, EuclideanTrajectoryMessage message)
-   {
-      this.trajectoryFrame = trajectoryFrame;
-      clear(dataFrame);
-      setFromMessage(message);
+      if (resolver != null)
+      {
+         ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
+         selectionMatrix.setSelectionFrame(linearSelectionFrame);
+         
+         ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
+         weightMatrix.setWeightFrame(linearWeightFrame);
+      }
    }
 
    /**
@@ -142,6 +149,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void setPropertiesOnly(EuclideanTrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
+      sequenceId = other.sequenceId;
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
       trajectoryFrame = other.getTrajectoryFrame();
@@ -310,5 +318,16 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public Class<EuclideanTrajectoryMessage> getMessageClass()
    {
       return EuclideanTrajectoryMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

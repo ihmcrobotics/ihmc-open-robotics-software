@@ -13,8 +13,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -37,12 +35,6 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
       {
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
-            @Override
-            public boolean alwaysAllowMomentum()
-            {
-               return true;
-            }
-
             @Override
             public ICPOptimizationParameters getICPOptimizationParameters()
             {

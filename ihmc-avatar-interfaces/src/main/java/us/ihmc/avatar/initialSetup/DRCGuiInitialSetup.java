@@ -10,8 +10,8 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -72,8 +72,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotCameraParameters[] cameraInfo = sensorInformation.getCameraParameters();
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      AvatarRobotCameraParameters[] cameraInfo = sensorInformation.getCameraParameters();
       if (cameraInfo != null)
       {
          for (int i = 0; i < cameraInfo.length; i++)
@@ -110,6 +110,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
          TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(scs, robot);
+         dataExporter.setRootDirectory("D:/DataAndVideos/");
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }

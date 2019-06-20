@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
@@ -146,12 +145,6 @@ public enum ControllerCoreCommandType
    VIRTUAL_TORQUE,
 
    /**
-    * Represents the list of controlled bodies using the  {@link ControlledBodiesCommand} for the {@link WholeBodyVirtualModelControlSolver}.
-    * // TODO remove this command.
-    */
-   CONTROLLED_BODIES,
-
-   /**
     * An objective for the wrench exerted by a body in contact {@link WholeBodyInverseDynamicsSolver}. This is different from the
     * {@link #EXTERNAL_WRENCH} command in that it will be added to the optimization. E.g. this can be used to request that the
     * inverse dynamics optimization try to put a certain force on one foot or to constrain the foot wrench.
@@ -173,7 +166,7 @@ public enum ControllerCoreCommandType
          JOINT_ACCELERATION_INTEGRATION, CONTACT_WRENCH, COMMAND_LIST, OPTIMIZATION_SETTINGS};
 
    private static final ControllerCoreCommandType[] virtualModelControlCommands = {MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH,
-         VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, CONTROLLED_BODIES, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};
+         VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] feedbackControlCommands = {TASKSPACE, POINT, ORIENTATION, JOINTSPACE, MOMENTUM, COMMAND_LIST};
 
@@ -210,7 +203,7 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyInverseKinematicsSolver}.
+    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyInverseKinematicsSolver}.
     */
    public static boolean isInverseKinematicsCommand(ControllerCoreCommandType commandType)
    {
@@ -224,7 +217,7 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyInverseDynamicsSolver}.
+    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyInverseDynamicsSolver}.
     */
    public static boolean isInverseDynamicsCommand(ControllerCoreCommandType commandType)
    {
@@ -238,7 +231,7 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyVirtualModelControlSolver}.
+    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyVirtualModelControlSolver}.
     */
    public static boolean isVirtualModelControlCommand(ControllerCoreCommandType commandType)
    {
@@ -252,7 +245,7 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyFeedbackController}.
+    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyFeedbackController}.
     */
    public static boolean isFeedbackControlCommand(ControllerCoreCommandType commandType)
    {

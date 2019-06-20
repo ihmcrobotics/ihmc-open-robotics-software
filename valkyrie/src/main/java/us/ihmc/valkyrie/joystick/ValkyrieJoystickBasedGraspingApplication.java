@@ -5,9 +5,9 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -23,9 +23,9 @@ public class ValkyrieJoystickBasedGraspingApplication extends Application
    {
       String robotTargetString = getParameters().getNamed().getOrDefault("robotTarget", "REAL_ROBOT");
       RobotTarget robotTarget = RobotTarget.valueOf(robotTargetString);
-      PrintTools.info("-------------------------------------------------------------------");
-      PrintTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
-      PrintTools.info("-------------------------------------------------------------------");
+      LogTools.info("-------------------------------------------------------------------");
+      LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
+      LogTools.info("-------------------------------------------------------------------");
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false, "DEFAULT", null, false, true);
       String robotName = robotModel.getSimpleRobotName();
 

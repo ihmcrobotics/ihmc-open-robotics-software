@@ -1,12 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
-import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.log.LogTools;
 
 public interface FootstepPlannerParameters
 {
@@ -29,11 +27,13 @@ public interface FootstepPlannerParameters
 
    /**
     * Returns the ideal step width for walking on flat ground.
+    * This is ONLY used when assumed to be walking on flat ground.
     */
    double getIdealFootstepWidth();
 
    /**
     * Returns the ideal step length for walking on flat ground.
+    * This is ONLY used when assumed to be walking on flat ground.
     */
    double getIdealFootstepLength();
 
@@ -97,6 +97,10 @@ public interface FootstepPlannerParameters
     * <p>
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
+    * </p>
+    *
+    * <p>
+    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    double getMinimumStepWidth();
@@ -317,6 +321,10 @@ public interface FootstepPlannerParameters
     * <p>
     * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
     * </p>
+    *
+    * <p>
+    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    * </p>
     */
    double getMaximumStepWidth();
 
@@ -465,43 +473,17 @@ public interface FootstepPlannerParameters
       return 0.0;
    }
 
+   /**
+    * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+    */
+   default double getFinalTurnProximity()
+   {
+      return 1.0;
+   }
+
    default FootstepPlannerCostParameters getCostParameters()
    {
       return new DefaultFootstepPlannerCostParameters();
-   }
-
-   default SteppableRegionFilter getSteppableRegionFilter()
-   {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
-
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
-
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
-
-            return true;
-         }
-      };
-   }
-
-   default BodyCollisionRegionFilter getBodyCollisionRegionFilter()
-   {
-      return new BodyCollisionRegionFilter()
-      {
-         @Override
-         public boolean isPlanarRegionCollidable(PlanarRegion query, double groundHeight, double minHeight, double maxHeight)
-         {
-            if (query.getBoundingBox3dInWorld().getMaxZ() < minHeight + groundHeight)
-               return false;
-
-            return maxHeight + groundHeight > query.getBoundingBox3dInWorld().getMinZ();
-         }
-      };
    }
 
    /**
@@ -510,5 +492,46 @@ public interface FootstepPlannerParameters
    default AdaptiveSwingParameters getAdaptiveSwingParameters()
    {
       return null;
+   }
+
+   default void printValues()
+   {
+      LogTools.info("wiggleIntoConvexHullOfPlanarRegions: {}", getWiggleIntoConvexHullOfPlanarRegions ()  );
+      LogTools.info("rejectIfCannotFullyWiggleInside    : {}", getRejectIfCannotFullyWiggleInside     ()  );
+      LogTools.info("returnBestEffortPlan               : {}", getReturnBestEffortPlan                ()  );
+      LogTools.info("checkForBodyBoxCollisions          : {}", checkForBodyBoxCollisions              ()  );
+      LogTools.info("performHeuristicSearchPolicies     : {}", performHeuristicSearchPolicies         ()  );
+      LogTools.info("minimumStepsForBestEffortPlan      : {}", getMinimumStepsForBestEffortPlan       ()  );
+      LogTools.info("idealFootstepWidth                 : {}", getIdealFootstepWidth                  ()  );
+      LogTools.info("idealFootstepLength                : {}", getIdealFootstepLength                 ()  );
+      LogTools.info("wiggleInsideDelta                  : {}", getWiggleInsideDelta                   ()  );
+      LogTools.info("maximumXYWiggleDistance            : {}", getMaximumXYWiggleDistance             ()  );
+      LogTools.info("maximumYawWiggle                   : {}", getMaximumYawWiggle                    ()  );
+      LogTools.info("maxStepReach                       : {}", getMaximumStepReach                    ()  );
+      LogTools.info("maxStepYaw                         : {}", getMaximumStepYaw                      ()  );
+      LogTools.info("minStepWidth                       : {}", getMinimumStepWidth                    ()  );
+      LogTools.info("minStepLength                      : {}", getMinimumStepLength                   ()  );
+      LogTools.info("minStepYaw                         : {}", getMinimumStepYaw                      ()  );
+      LogTools.info("maxStepZ                           : {}", getMaximumStepZ                        ()  );
+      LogTools.info("minFootholdPercent                 : {}", getMinimumFootholdPercent              ()  );
+      LogTools.info("minSurfaceIncline                  : {}", getMinimumSurfaceInclineRadians        ()  );
+      LogTools.info("maxStepWidth                       : {}", getMaximumStepWidth                    ()  );
+      LogTools.info("minXClearanceFromStance            : {}", getMinXClearanceFromStance             ()  );
+      LogTools.info("minYClearanceFromStance            : {}", getMinYClearanceFromStance             ()  );
+      LogTools.info("maximumStepReachWhenSteppingUp     : {}", getMaximumStepReachWhenSteppingUp      ()  );
+      LogTools.info("maximumStepZWhenSteppingUp         : {}", getMaximumStepZWhenSteppingUp          ()  );
+      LogTools.info("maximumStepXWhenForwardAndDown     : {}", getMaximumStepXWhenForwardAndDown      ()  );
+      LogTools.info("maximumStepZWhenForwardAndDown     : {}", getMaximumStepZWhenForwardAndDown      ()  );
+      LogTools.info("maximumZPenetrationOnValleyRegions : {}", getMaximumZPenetrationOnValleyRegions  ()  );
+      LogTools.info("cliffHeightToAvoid                 : {}", getCliffHeightToAvoid                  ()  );
+      LogTools.info("minimumDistanceFromCliffBottoms    : {}", getMinimumDistanceFromCliffBottoms     ()  );
+      LogTools.info("bodyGroundClearance                : {}", getBodyGroundClearance                 ()  );
+      LogTools.info("bodyBoxWidth                       : {}", getBodyBoxWidth                        ()  );
+      LogTools.info("bodyBoxHeight                      : {}", getBodyBoxHeight                       ()  );
+      LogTools.info("bodyBoxDepth                       : {}", getBodyBoxDepth                        ()  );
+      LogTools.info("bodyBoxBaseX                       : {}", getBodyBoxBaseX                        ()  );
+      LogTools.info("bodyBoxBaseY                       : {}", getBodyBoxBaseY                        ()  );
+      LogTools.info("bodyBoxBaseZ                       : {}", getBodyBoxBaseZ                        ()  );
+      LogTools.info("finalTurnProximity                 : {}", getFinalTurnProximity                  ()  );
    }
 }

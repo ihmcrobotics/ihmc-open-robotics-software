@@ -6,7 +6,7 @@ import java.util.Random;
 
 public enum FootstepPlannerType
 {
-   SIMPLE_PATH_TURN_WALK_TURN, VIS_GRAPH_WITH_TURN_WALK_TURN, A_STAR;
+   SIMPLE_PATH_TURN_WALK_TURN, VIS_GRAPH_WITH_TURN_WALK_TURN, A_STAR, VIS_GRAPH_WITH_A_STAR;
 
    public static final FootstepPlannerType[] values = values();
 

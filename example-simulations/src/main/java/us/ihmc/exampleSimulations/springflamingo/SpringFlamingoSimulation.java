@@ -2,12 +2,14 @@ package us.ihmc.exampleSimulations.springflamingo;
 
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
@@ -61,6 +63,8 @@ public class SpringFlamingoSimulation
    private boolean BENCHMARK = false;
    private boolean RUN_AND_COMPARE = false;
    private boolean SHOW_GUI = true;
+
+   private boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
 
    private final SimulationConstructionSet sim;
 
@@ -263,14 +267,14 @@ public class SpringFlamingoSimulation
 
       sim.setFastSimulate(true);
 
-      if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
-      {
-         sim.readState("resources/initial_state.state");
-      }
-      else if (controllerToUse == FAST_WALKING_CONTROLLER)
-      {
-//       sim.readState("resources/initial_state.state");
-      }
+//      if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
+//      {
+//         sim.readState("resources/initial_state.state");
+//      }
+//      else if (controllerToUse == FAST_WALKING_CONTROLLER)
+//      {
+////       sim.readState("resources/initial_state.state");
+//      }
 
       if (ENABLE_FREEZE_FRAME & SHOW_GUI)
       {
@@ -327,6 +331,15 @@ public class SpringFlamingoSimulation
             System.err.println(message);
             JOptionPane.showMessageDialog(null, message);
          }
+      }
+      
+      if (SHOW_EXPORT_TORQUE_AND_SPEED)
+      {
+         JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
+         TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(sim, springFlamingos[0]);
+         dataExporter.setRootDirectory("D:/DataAndVideos");
+         exportTorqueAndSpeedButton.addActionListener(dataExporter);
+         sim.addButton(exportTorqueAndSpeedButton);
       }
    }
 

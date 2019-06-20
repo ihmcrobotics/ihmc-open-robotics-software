@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -26,6 +27,7 @@ import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotDataLogger.logger.LogAliveListener;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.robotDataLogger.websocket.server.discovery.DataServerLocationBroadcastSender;
 
@@ -51,11 +53,12 @@ public class WebsocketDataProducer implements DataProducer
    private final String name;
    private final LogModelProvider logModelProvider;
    private final VariableChangedListener variableChangedListener;
-   
+   private final LogAliveListener logAliveListener;
+
    private final int port;
    
    private final Object lock = new Object();
-   private Channel ch = null;
+   private Channel channel = null;
    
    private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
    
@@ -79,11 +82,13 @@ public class WebsocketDataProducer implements DataProducer
 
    private int nextBufferID = 0;
 
-   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, DataServerSettings dataServerSettings)
+   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener,
+                                LogAliveListener logAliveListener, DataServerSettings dataServerSettings)
    {
       this.name = name;
       this.logModelProvider = logModelProvider;
       this.variableChangedListener = variableChangedListener;
+      this.logAliveListener = logAliveListener;
       this.port = dataServerSettings.getPort();
       this.log = dataServerSettings.isLogSession();
       this.autoDiscoverable = dataServerSettings.isAutoDiscoverable();
@@ -96,12 +101,22 @@ public class WebsocketDataProducer implements DataProducer
       {
          try
          {
-            broadcastSender.stop();
-            broadcaster.stop();
-            ch.close().sync();
+            if (broadcastSender != null)
+               broadcastSender.stop();
+            if (broadcaster != null)
+               broadcaster.stop();
             
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            if (channel != null)
+            {
+               ChannelFuture closeFuture = channel.close();
+               closeFuture.sync();
+            }
+
+            if (bossGroup != null)
+               bossGroup.shutdownGracefully();
+
+            if (workerGroup != null)
+               workerGroup.shutdownGracefully();
          }
          catch (InterruptedException e)
          {
@@ -164,11 +179,12 @@ public class WebsocketDataProducer implements DataProducer
          try
          {
             int numberOfRegistryBuffers = nextBufferID;  // Next buffer ID is incremented the last time a registry was added
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize, numberOfRegistryBuffers));
-   
-            ch = b.bind(port).sync().channel();
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
+                           .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, logAliveListener,
+                                                                            maximumBufferSize, numberOfRegistryBuffers));
+
+            channel = serverBootstrap.bind(port).sync().channel();
    
             if(autoDiscoverable)
             {

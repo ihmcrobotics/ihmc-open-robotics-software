@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,6 +24,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -63,8 +63,6 @@ public abstract class FootstepPlannerDataSetTest
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
    private QuadrupedBodyPathAndFootstepPlanner planner = null;
-
-   protected abstract FootstepPlannerType getPlannerType();
 
    protected abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
 
@@ -148,7 +146,7 @@ public abstract class FootstepPlannerDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -156,12 +154,12 @@ public abstract class FootstepPlannerDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
    @Disabled
    @Test
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void runInDevelopmentTests()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -169,17 +167,13 @@ public abstract class FootstepPlannerDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsInDevelopment();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
-   protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
-   {
-      DataSet dataSet = DataSetIOTools.loadDataSet(datasetName);
-      String errorMessages = dataSetTester.apply(dataSet);
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
-   }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
+
+
+   private void runAssertionsOnAllDatasets(List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -198,7 +192,7 @@ public abstract class FootstepPlannerDataSetTest
             LogTools.info("Testing file: " + dataset.getName());
 
          numbberOfTestedSets++;
-         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
+         String errorMessagesForCurrentFile = runAssertions(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
             numberOfFailingTests++;
@@ -230,6 +224,12 @@ public abstract class FootstepPlannerDataSetTest
       {
          Assert.assertEquals(message, 0, numberOfFailingTests);
       }
+   }
+
+   protected String runAssertions(DataSetName dataSetName)
+   {
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
+      return runAssertions(dataSet);
    }
 
    protected String runAssertions(DataSet dataset)
@@ -289,11 +289,11 @@ public abstract class FootstepPlannerDataSetTest
 
       FootstepPlanningResult pathResult = planner.planPath();
       if (!pathResult.validForExecution())
-         return "Path plan for " + datasetName + " is invalid.";
+         return "Path plan for " + datasetName + " is invalid. Got path result " + pathResult;
 
       FootstepPlanningResult planResult = planner.plan();
       if (!planResult.validForExecution())
-         return "Footstep plan for " + datasetName + " is invalid.";
+         return "Footstep plan for " + datasetName + " is invalid. Got plan result " + planResult;
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 
@@ -331,6 +331,8 @@ public abstract class FootstepPlannerDataSetTest
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
+      errorMessage += checkStepOrder(datasetName, plannedSteps);
+
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
 
@@ -346,10 +348,23 @@ public abstract class FootstepPlannerDataSetTest
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
-            finalSteps.put(step.getRobotQuadrant(), step.getGoalPosition());
+            finalSteps.put(step.getRobotQuadrant(), new Point3D(step.getGoalPosition()));
       }
 
       return finalSteps;
+   }
+
+   private static String checkStepOrder(String dataseName, FootstepPlan plannedSteps)
+   {
+      String errorMessage = "";
+      RobotQuadrant movingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
+      {
+         if (movingQuadrant.getNextRegularGaitSwingQuadrant() != plannedSteps.getFootstep(i).getRobotQuadrant())
+            errorMessage += dataseName + " step " + i + " in the plan is out of order.\n";
+      }
+
+      return errorMessage;
    }
 
    private void visualizePlan(FootstepPlan plan, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)

@@ -38,7 +38,7 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
       
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-      DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
+      new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
             WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
       

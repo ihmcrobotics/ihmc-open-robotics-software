@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -86,6 +87,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    private final FramePoint3D tempContactPointPosition = new FramePoint3D();
 
+   public void attachContactChangeListener(VariableChangedListener variableChangedListener)
+   {
+      inContact.addVariableChangedListener(variableChangedListener);
+   }
+
    @Override
    public void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack)
    {
@@ -125,7 +131,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          throw new RuntimeException("The rigid body in the command does not match this rigid body: command.rigidBody = " + planeContactStateCommand.getContactingRigidBody() + ", contactState.rigidBody = " + rigidBody);
 
       coefficientOfFriction.set(planeContactStateCommand.getCoefficientOfFriction());
-      planeContactStateCommand.getContactNormal(contactNormalFrameVector);
+      contactNormalFrameVector.setIncludingFrame(planeContactStateCommand.getContactNormal());
 
       hasContactStateChanged.set(planeContactStateCommand.getHasContactStateChanged());
 
@@ -136,9 +142,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
       {
-         planeContactStateCommand.getContactPoint(i, tempContactPointPosition);
          YoContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.setPosition(tempContactPointPosition);
+         contactPoint.setPosition(planeContactStateCommand.getContactPoint(i));
          contactPoint.setInContact(true);
 
          double maxContactPointNormalForce = planeContactStateCommand.getMaxContactPointNormalForce(i);

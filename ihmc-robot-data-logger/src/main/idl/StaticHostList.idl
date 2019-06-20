@@ -13,6 +13,6 @@ module robotDataLogger{
 		sequence<Host, 128> hosts;
 	};
 
-}
-}
-}
+};
+};
+};

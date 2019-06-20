@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import java.util.List;
-
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public interface JointDesiredOutputListBasics extends JointDesiredOutputListReadOnly
@@ -63,33 +61,6 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       {
          OneDoFJointBasics joint = joints[i];
          setJointControlMode(joint, controlMode);
-      }
-   }
-
-   default void setDesiredTorqueFromJoints(List<OneDoFJointBasics> joints)
-   {
-      for (int i = 0; i < joints.size(); i++)
-      {
-         OneDoFJointBasics joint = joints.get(i);
-         setDesiredJointTorque(joint, joint.getTau());
-      }
-   }
-
-   default void setDesiredTorqueFromJoints(OneDoFJointBasics[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJointBasics joint = joints[i];
-         setDesiredJointTorque(joint, joint.getTau());
-      }
-   }
-
-   default void setDesiredAccelerationFromJoints(OneDoFJointBasics[] joints)
-   {
-      for (int i = 0; i < joints.length; i++)
-      {
-         OneDoFJointBasics joint = joints[i];
-         setDesiredJointAcceleration(joint, joint.getQdd());
       }
    }
 
@@ -246,7 +217,10 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    JointDesiredOutputBasics getJointDesiredOutput(int index);
 
    @Override
-   JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint);
+   default JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint)
+   {
+      return getJointDesiredOutputFromHash(joint.hashCode());
+   }
 
    @Override
    JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode);
@@ -259,5 +233,10 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    static void throwJointNotRegisteredException(int index)
    {
       throw new RuntimeException("The joint index : " + index + " has not been registered.");
+   }
+
+   static void throwJointAlreadyRegisteredException(OneDoFJointBasics joint)
+   {
+      throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
    }
 }

@@ -20,14 +20,14 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraspAndTurnValveBehavior extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private PoseReferenceFrame valvePose = null;
    private double valveRadius = 0;
@@ -50,6 +50,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
@@ -91,7 +92,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            publishTextToSpeack("Moving Hand To Approach Location");
+            publishTextToSpeech("Moving Hand To Approach Location");
          }
       };
 
@@ -168,7 +169,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("rotate Valve");
+            publishTextToSpeech("rotate Valve");
             FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
             GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
@@ -188,7 +189,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      publishTextToSpeack(description);
+      publishTextToSpeech(description);
 
       //      Vector3d orient = new Vector3d();
       //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);

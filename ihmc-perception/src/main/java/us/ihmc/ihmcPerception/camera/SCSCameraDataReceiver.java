@@ -1,12 +1,13 @@
 package us.ihmc.ihmcPerception.camera;
 
+import java.util.function.LongUnaryOperator;
+
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -18,11 +19,12 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 {
    private static final boolean DEBUG = false;
    private final RobotSide robotSide;
-   
-   public SCSCameraDataReceiver(RobotSide robotSide, FullHumanoidRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
-                                Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+
+   public SCSCameraDataReceiver(RobotSide robotSide, FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf,
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
+                                Ros2Node ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
    {
-      super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(ros2Node), ppsTimestampOffsetProvider);
+      super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(ros2Node), robotMonotonicTimeCalculator);
       
       this.robotSide = robotSide;
 

@@ -7,6 +7,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 public class WholeBodyTrajectoryToolboxConfigurationCommand
       implements Command<WholeBodyTrajectoryToolboxConfigurationCommand, WholeBodyTrajectoryToolboxConfigurationMessage>
 {
+   private long sequenceId;
    private int numberOfInitialGuesses = -1;
    private int maximumExpansionSize = -1;
    private boolean hasInitialConfiguration = false;
@@ -19,6 +20,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       numberOfInitialGuesses = -1;
       maximumExpansionSize = -1;
       hasInitialConfiguration = false;
@@ -28,6 +30,9 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    public void set(WholeBodyTrajectoryToolboxConfigurationCommand other)
    {
       clear();
+
+      sequenceId = other.sequenceId;
+
       numberOfInitialGuesses = other.numberOfInitialGuesses;
       maximumExpansionSize = other.maximumExpansionSize;
       hasInitialConfiguration = other.hasInitialConfiguration;
@@ -39,6 +44,7 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    public void setFromMessage(WholeBodyTrajectoryToolboxConfigurationMessage message)
    {
       clear();
+      sequenceId = message.getSequenceId();
       numberOfInitialGuesses = message.getNumberOfInitialGuesses();
       maximumExpansionSize = message.getMaximumExpansionSize();
       hasInitialConfiguration = message.getInitialConfiguration() != null;
@@ -76,5 +82,11 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

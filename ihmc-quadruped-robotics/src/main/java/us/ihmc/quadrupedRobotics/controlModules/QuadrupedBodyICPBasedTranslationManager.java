@@ -32,11 +32,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.*;
 
 public class QuadrupedBodyICPBasedTranslationManager
 {
@@ -64,9 +60,15 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final YoFrameVector2D desiredICPOffsetAction = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
    private final Vector2DReadOnly userOffset = new ParameterVector2D("userDesiredICPOffset", new Vector2D(), registry);
 
+   private final YoFramePoint3D originalDCMWithNoOffset = new YoFramePoint3D("originalDCMWithNoOffset", worldFrame, registry);
+   private final FramePoint3D originalDCMToModify = new FramePoint3D();
+
+
    private final YoBoolean isEnabled = new YoBoolean("isBodyTranslationManagerEnabled", registry);
    private final YoBoolean isRunning = new YoBoolean("isBodyTranslationManagerRunning", registry);
    private final YoBoolean isFrozen = new YoBoolean("isBodyTranslationManagerFrozen", registry);
+
+   private final YoBoolean constrainAdjustedDCMToBeInSupport = new YoBoolean("constrainAdjustedDCMToBeInSupport", registry);
 
    private final BooleanParameter manualMode = new BooleanParameter("manualModeICPOffset", registry, false);
 
@@ -386,10 +388,10 @@ public class QuadrupedBodyICPBasedTranslationManager
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2D();
 
-   private final FramePoint3D originalDCMToModify = new FramePoint3D();
 
    public void addDCMOffset(FixedFramePoint3DBasics desiredICPToModify)
    {
+      originalDCMWithNoOffset.setMatchingFrame(desiredICPToModify);
       originalDCMToModify.setIncludingFrame(desiredICPToModify);
       originalDCMToModify.changeFrame(centerFeetZUpFrame);
 
@@ -422,12 +424,15 @@ public class QuadrupedBodyICPBasedTranslationManager
          tempICPOffset.changeFrame(desiredICPToModify.getReferenceFrame());
          desiredICPToModify.add(tempICPOffset);
 
-         convexPolygonShrinker.scaleConvexPolygon(quadrupedSupportPolygons.getSupportPolygonInMidFeetZUp(), supportPolygonSafeMargin.getDoubleValue(),
-                                                  safeSupportPolygonToConstrainICPOffset);
-         tempPosition2d.setIncludingFrame(desiredICPToModify);
-         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(tempPosition2d);
-         tempPosition2d.changeFrame(desiredICPToModify.getReferenceFrame());
-         desiredICPToModify.set(tempPosition2d);
+         if (constrainAdjustedDCMToBeInSupport.getBooleanValue())
+         {
+            convexPolygonShrinker.scaleConvexPolygon(quadrupedSupportPolygons.getSupportPolygonInMidFeetZUp(), supportPolygonSafeMargin.getDoubleValue(),
+                    safeSupportPolygonToConstrainICPOffset);
+            tempPosition2d.setIncludingFrame(desiredICPToModify);
+            safeSupportPolygonToConstrainICPOffset.orthogonalProjection(tempPosition2d);
+            tempPosition2d.changeFrame(desiredICPToModify.getReferenceFrame());
+            desiredICPToModify.set(tempPosition2d);
+         }
 
          icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
          originalDCMToModify.changeFrame(desiredICPToModify.getReferenceFrame());

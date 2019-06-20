@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -244,6 +245,15 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    public void setMaxVelocityError(double maxVelocityError)
    {
       this.maxVelocityError.set(maxVelocityError);
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof JointDesiredOutputReadOnly)
+         return JointDesiredOutputBasics.super.equals((JointDesiredOutputReadOnly) object);
+      else
+         return false;
    }
 
    @Override

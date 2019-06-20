@@ -1,17 +1,22 @@
 package us.ihmc.quadrupedBasics.referenceFrames;
 
+import java.util.EnumMap;
+
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.partNames.LegJointName;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.*;
+import us.ihmc.robotics.robotSide.EndDependentList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.EnumMap;
 
 public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 {
@@ -236,12 +241,4 @@ public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFram
    {
       return null;
    }
-
-   @Override
-   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
-   {
-      return null;
-   }
-
-
 }

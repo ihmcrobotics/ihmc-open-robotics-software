@@ -1,12 +1,11 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampsTest;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -62,6 +61,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortStepsALittleTooLow();
    }
 
+   @Disabled // FIXME This test often hangs on Bamboo. 
    @Override
    @Test
    public void testHeightReinitialization() throws SimulationExceededMaximumTimeException

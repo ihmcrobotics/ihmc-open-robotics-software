@@ -60,8 +60,8 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
     * Adds the commands contained in the given list to this list using the method
     * {@link #addCommand(InverseDynamicsCommand)} for each element.
     * 
-    * @param commandList the list of commands to register. The command's reference is saved, no copy
-    *           is done. Not modified.
+    * @param commandList the list of commands to register. The command's reference is saved, no copy is
+    *           done. Not modified.
     */
    public void addCommandList(InverseDynamicsCommandList commandList)
    {
@@ -95,6 +95,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
     * Removes and returns the last command of this list.
     * 
     * @return the last command.
+    * @deprecated this method should be removed and it is not really useful anyway.
     */
    public InverseDynamicsCommand<?> pollCommand()
    {
@@ -144,6 +145,33 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.COMMAND_LIST;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof InverseDynamicsCommandList)
+      {
+         InverseDynamicsCommandList other = (InverseDynamicsCommandList) object;
+
+         if (getNumberOfCommands() != other.getNumberOfCommands())
+            return false;
+         for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)
+         {
+            if (!getCommand(commandIndex).equals(other.getCommand(commandIndex)))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override

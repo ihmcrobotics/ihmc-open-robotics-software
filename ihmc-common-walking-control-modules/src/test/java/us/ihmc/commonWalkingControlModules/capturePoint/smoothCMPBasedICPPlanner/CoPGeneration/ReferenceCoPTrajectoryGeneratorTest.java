@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +14,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -34,6 +31,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -75,7 +73,6 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
    private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
-   private final ArrayList<YoDouble> touchdownDurations = new ArrayList<>();
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
    private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
@@ -116,7 +113,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
          contactStates.put(side, contactState);
       }
       midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, parentRegistry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleZUpFrames, parentRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       numberOfFootstepsToConsider.set(plannerParameters.getNumberOfFootstepsToConsider());
 
@@ -126,14 +123,12 @@ public class ReferenceCoPTrajectoryGeneratorTest
          YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, parentRegistry);
          YoDouble swingDurationShiftFraction = new YoDouble("swingDurationShiftFraction" + i, parentRegistry);
          YoDouble transferDuration = new YoDouble("transferDuration" + i, parentRegistry);
-         YoDouble touchdownDuration = new YoDouble("touchdownDuration" + i, parentRegistry);
          YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, parentRegistry);
 
          swingDurations.add(swingDuration);
          swingSplitFractions.add(swingSplitFraction);
          swingDurationShiftFractions.add(swingDurationShiftFraction);
          transferDurations.add(transferDuration);
-         touchdownDurations.add(touchdownDuration);
          transferSplitFractions.add(transferSplitFraction);
       }
       YoDouble transferDuration = new YoDouble("transferDuration" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
@@ -143,9 +138,10 @@ public class ReferenceCoPTrajectoryGeneratorTest
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
-      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons,
-                                                             contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
-                                                             swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, parentRegistry);
+      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
+                                                             numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
+                                                             swingDurationShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps,
+                                                             upcomingFootstepsData, soleZUpFrames, parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }

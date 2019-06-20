@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
@@ -303,6 +305,74 @@ public class BoundingBoxCollisionDetectorTest
       // test just inside along x
       collisionChecker.setBoxPose(-0.75 + 0.01, -0.45, 0.0, Math.toRadians(90.0));
       assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+   }
+
+   @Test
+   public void testClosestPointsInFrontAndBack()
+   {
+      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getBodyBoxDepth()
+         {
+            return 0.5;
+         }
+
+         @Override
+         public double getBodyBoxWidth()
+         {
+            return 1.0;
+         }
+
+         @Override
+         public double getBodyBoxHeight()
+         {
+            return 1.0;
+         }
+
+         @Override
+         public FootstepPlannerCostParameters getCostParameters()
+         {
+            return new DefaultFootstepPlannerCostParameters()
+            {
+               @Override
+               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+               {
+                  return 0.25;
+               }
+            };
+         }
+      };
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double cubeX = 0.25;
+      double cubeY = -0.5;
+      double cubeZ = 0.25;
+      generator.translate(cubeX, cubeY, cubeZ);
+      generator.rotate(0.25 * Math.PI, Axis.Z);
+
+      double epsilon = 1e-7;
+      double distanceOutsideRegion = 0.001;
+
+      double squareWidth = 0.25 * Math.sqrt(2.0);
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      collisionChecker.setPlanarRegionsList(planarRegionsList);
+
+      // test just outside along world y
+      collisionChecker.setBoxPose(0.25, distanceOutsideRegion, 0.0, Math.toRadians(90.0));
+      BodyCollisionData collisionData = collisionChecker.checkForCollision();
+      Assertions.assertEquals(collisionData.getDistanceOfClosestPointInBack(), distanceOutsideRegion, epsilon);
+      Assertions.assertTrue(Double.isNaN(collisionData.getDistanceOfClosestPointInFront()));
+
+      // test just ouside along world x
+      collisionChecker.setBoxPose(-0.25 - distanceOutsideRegion, -0.25, 0.0, 0.0);
+      collisionData = collisionChecker.checkForCollision();
+      Assertions.assertEquals(collisionData.getDistanceOfClosestPointInFront(), distanceOutsideRegion, epsilon);
+      Assertions.assertTrue(Double.isNaN(collisionData.getDistanceOfClosestPointInBack()));
    }
 
    private static PlanarRegionsList getSquarePlanarRegionsList(double x, double y, double z, double yaw, double sideLength)

@@ -3,9 +3,9 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -48,7 +48,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * Internal object used for frame changes and to store the weights into an actual 3-by-3 weight
     * matrix.
     */
-   private final FrameMatrix3D frameMatrix = new FrameMatrix3D();
+   private final transient FrameMatrix3D frameMatrix = new FrameMatrix3D();
 
    /**
     * Creates a new weight matrix. This weight matrix is initialized with all the weights
@@ -241,7 +241,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
          frameMatrix.setM22(zWeight);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(weightMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, weightMatrixToPack);
       }
    }
 
@@ -318,7 +318,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
          frameMatrix.setM22(zWeight);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(weightMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, weightMatrixToPack);
          MatrixTools.removeZeroRows(weightMatrixToPack, startRow, startRow + 2, EPSILON);
       }
    }
@@ -393,9 +393,10 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    {
       return "(" + xWeight + ", " + yWeight + ", " + zWeight + ") " + weightFrame;
    }
-   
+
    /**
     * Returns true if any weight equals {@code SolverWeightLevels.HARD_CONSTRAINT}.
+    * 
     * @return
     */
    public boolean containsHardConstraint()
@@ -404,7 +405,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
       {
          return true;
       }
-      
+
       return false;
    }
 
@@ -426,52 +427,45 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(Object object)
    {
-      if (this == obj)
+      if (object instanceof WeightMatrix3D)
+         return equals((WeightMatrix3D) object);
+      else
+         return false;
+   }
+
+   public boolean equals(WeightMatrix3D other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
          return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      WeightMatrix3D other = (WeightMatrix3D) obj;
-      if (weightFrame == null)
+      }
+      else
       {
-         if (other.weightFrame != null)
+         if (weightFrame == null)
+         {
+            if (other.weightFrame != null)
+               return false;
+         }
+         else if (!weightFrame.equals(other.weightFrame))
+         {
             return false;
-      }
-      else if (!weightFrame.equals(other.weightFrame))
-         return false;
+         }
 
-      if(Double.isNaN(xWeight) ^ Double.isNaN(other.xWeight)) // xor is correct
-      {
-         return false;
-      }
+         if (Double.compare(xWeight, other.xWeight) != 0)
+            return false;
+         if (Double.compare(yWeight, other.yWeight) != 0)
+            return false;
+         if (Double.compare(zWeight, other.zWeight) != 0)
+            return false;
 
-      if(Double.isNaN(yWeight) ^ Double.isNaN(other.yWeight)) // xor is correct
-      {
-         return false;
+         return true;
       }
-      
-      if(Double.isNaN(zWeight) ^ Double.isNaN(other.zWeight)) // xor is correct
-      {
-         return false;
-      }
-      
-      if (!Double.isNaN(xWeight) && !Double.isNaN(other.xWeight) && xWeight != other.xWeight)
-      {
-         return false;
-      }
-      if (!Double.isNaN(yWeight) && !Double.isNaN(other.yWeight) && yWeight != other.yWeight)
-      {
-         return false;
-      }
-      if (!Double.isNaN(zWeight) && !Double.isNaN(other.zWeight) && zWeight != other.zWeight)
-      {
-         return false;
-      }
-
-      return true;
    }
 
    @Override

@@ -13,6 +13,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class HandTrajectoryCommand
       implements Command<HandTrajectoryCommand, HandTrajectoryMessage>, FrameBasedCommand<HandTrajectoryMessage>, EpsilonComparable<HandTrajectoryCommand>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final SE3TrajectoryControllerCommand se3Trajectory;
    private final WrenchTrajectoryControllerCommand wrenchTrajectory;
@@ -40,6 +41,7 @@ public class HandTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       se3Trajectory.clear();
       wrenchTrajectory.clear();
       robotSide = null;
@@ -55,6 +57,7 @@ public class HandTrajectoryCommand
    @Override
    public void set(HandTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       se3Trajectory.set(other.se3Trajectory);
       wrenchTrajectory.set(other.wrenchTrajectory);
       robotSide = other.robotSide;
@@ -67,6 +70,7 @@ public class HandTrajectoryCommand
     */
    public void setPropertiesOnly(HandTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       se3Trajectory.setPropertiesOnly(other.se3Trajectory);
       wrenchTrajectory.setPropertiesOnly(other.wrenchTrajectory);
       robotSide = other.robotSide;
@@ -75,14 +79,13 @@ public class HandTrajectoryCommand
    @Override
    public void setFromMessage(HandTrajectoryMessage message)
    {
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
-      wrenchTrajectory.setFromMessage(message.getWrenchTrajectory());
-      robotSide = RobotSide.fromByte(message.getRobotSide());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       se3Trajectory.set(resolver, message.getSe3Trajectory());
       wrenchTrajectory.set(resolver, message.getWrenchTrajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
@@ -156,5 +159,11 @@ public class HandTrajectoryCommand
    public double getExecutionTime()
    {
       return se3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

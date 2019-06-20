@@ -12,7 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -88,12 +88,11 @@ public class FootstepPlannerParametersUIController
 
    private static final double metersToPixel = 200;
 
-   private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
    public FootstepPlannerParametersUIController()
    {
-      File configurationFile = new File(CONFIGURATION_FILE_NAME);
+      File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
       try
       {
          configurationFile.getParentFile().mkdirs();

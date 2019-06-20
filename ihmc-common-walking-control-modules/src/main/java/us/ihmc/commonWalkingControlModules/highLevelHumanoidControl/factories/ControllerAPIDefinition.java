@@ -1,22 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateAdjustFootstepMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmDesiredAccelerationsMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateChestTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateFootLoadBearingMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateFootTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateFootstepDataListMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateGoHomeMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateHandTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateHeadTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateNeckDesiredAccelerationsMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateNeckTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validatePelvisHeightTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validatePelvisOrientationTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validatePelvisTrajectoryMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSpineDesiredAccelerationsMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSpineTrajectoryMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +31,7 @@ import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
@@ -58,10 +43,10 @@ import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -156,6 +141,8 @@ public class ControllerAPIDefinition
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
       statusMessages.add(TextToSpeechPacket.class);
       statusMessages.add(ControllerCrashNotificationPacket.class);
+      statusMessages.add(JointspaceTrajectoryStatusMessage.class);
+      statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }

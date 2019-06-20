@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+
 public interface AnytimeFootstepPlanner extends FootstepPlanner
 {
    /**

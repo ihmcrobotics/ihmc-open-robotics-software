@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -33,7 +34,7 @@ import java.util.List;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-public class DCMPlanner
+public class DCMPlanner implements DCMPlannerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -48,12 +49,13 @@ public class DCMPlanner
 
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
-   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
+   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoDouble controllerTime;
+   private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
@@ -74,36 +76,34 @@ public class DCMPlanner
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final DoubleProvider maximumWeightShiftForward = new DoubleParameter("maximumWeightShiftForward", registry, 0.0);
-   private final DoubleProvider angleForMaxWeightShiftForward = new DoubleParameter("angleForMaxWeightShiftForward", registry, Math.toRadians(20.0));
-
    private final boolean debug;
 
-   public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(gravity, nominalHeight, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+      this(dcmPlannerParameters, omega, gravity, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
-   public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
    {
+      this.omega = omega;
       this.controllerTime = robotTimestamp;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      WeightDistributionCalculator weightDistributionCalculator = (pitchAngle ->
-      {
-         double percentTotal = MathTools.clamp(pitchAngle / angleForMaxWeightShiftForward.getValue(), 1.0);
-         return percentTotal * maximumWeightShiftForward.getValue();
-      });
+      omega.addVariableChangedListener(v ->
+            comHeight.set(gravity / MathTools.square(omega.getDoubleValue()))
+      );
 
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
-      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, weightDistributionCalculator, registry);
+
+      DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, omega, gravity, registry);
+      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, yoDcmPlannerParameters, registry);
 
       parentRegistry.addChild(registry);
 
@@ -117,7 +117,7 @@ public class DCMPlanner
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
-      dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
+      dcmTrajectory.setupVisualizers(yoGraphicsListRegistry, POINT_SIZE);
 
       YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.002, YoAppearance.BlueViolet());
 
@@ -137,9 +137,12 @@ public class DCMPlanner
       numberOfStepsInPlanner.set(0);
    }
 
-   public void setCoMHeight(double comHeight)
+   public void beganStep()
    {
-      this.comHeight.set(comHeight);
+   }
+
+   public void completedStep()
+   {
    }
 
    public void addStepToSequence(QuadrupedTimedStep step)
@@ -156,8 +159,8 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition,
-                                     FrameVector3DReadOnly dcmVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
+                                     FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
 
@@ -169,8 +172,8 @@ public class DCMPlanner
          // compute dcm trajectory
          computeDcmTrajectory(currentContactStates);
 
-         dcmPositionAtStartOfState.setMatchingFrame(dcmPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(dcmVelocity);
+         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
+         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
          timeAtStartOfState.set(controllerTime.getDoubleValue());
          computeTransitionTrajectory();
       }
@@ -181,7 +184,7 @@ public class DCMPlanner
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
       timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
-      piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
+      piecewiseConstantCopTrajectory.initializeTrajectory(currentTime, timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
       int numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();
@@ -189,7 +192,6 @@ public class DCMPlanner
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       tempPoint.add(0, 0, comHeight.getDoubleValue());
 
-      dcmTrajectory.setComHeight(comHeight.getDoubleValue());
       dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(),
                                          piecewiseConstantCopTrajectory.getCopPositionsAtStartOfInterval(),
                                          piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
@@ -287,8 +289,9 @@ public class DCMPlanner
       desiredDCMPositionToPack.set(desiredDCMPosition);
       desiredDCMVelocityToPack.set(desiredDCMVelocity);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectCMPPosition);
    }
+
 
    private void runOutputDebugChecks()
    {
@@ -308,9 +311,10 @@ public class DCMPlanner
       finalDesiredDCMToPack.setMatchingFrame(finalDCM);
    }
 
-   public void getPerfectCMPPosition(FramePoint2D perfectCMPPositionToPack)
+   @Override
+   public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
    {
-      perfectCMPPositionToPack.setIncludingFrame(perfectCMPPosition);
+      desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
    }
 
    public double getFinalTime()

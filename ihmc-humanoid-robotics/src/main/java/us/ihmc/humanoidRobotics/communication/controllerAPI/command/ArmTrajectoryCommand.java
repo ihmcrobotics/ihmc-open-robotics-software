@@ -9,17 +9,20 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryCommand>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public ArmTrajectoryCommand()
    {
+      sequenceId = 0;
       robotSide = null;
       jointspaceTrajectory = new JointspaceTrajectoryCommand();
    }
 
    public ArmTrajectoryCommand(Random random)
    {
+      sequenceId = random.nextInt();
       robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       jointspaceTrajectory = new JointspaceTrajectoryCommand(random);
    }
@@ -27,6 +30,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       jointspaceTrajectory.clear();
    }
@@ -46,6 +50,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public void setFromMessage(ArmTrajectoryMessage message)
    {
       clear(RobotSide.fromByte(message.getRobotSide()));
+      sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
@@ -53,6 +58,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public void set(ArmTrajectoryCommand other)
    {
       clear(other.getRobotSide());
+      sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
 
@@ -116,5 +122,11 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public double getExecutionTime()
    {
       return jointspaceTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

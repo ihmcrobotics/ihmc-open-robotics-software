@@ -441,4 +441,52 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof InverseDynamicsOptimizationSettingsCommand)
+      {
+         InverseDynamicsOptimizationSettingsCommand other = (InverseDynamicsOptimizationSettingsCommand) object;
+         if (Double.compare(rhoMin, other.rhoMin) != 0)
+            return false;
+         if (Double.compare(jointAccelerationMax, other.jointAccelerationMax) != 0)
+            return false;
+         if (Double.compare(rhoWeight, other.rhoWeight) != 0)
+            return false;
+         if (Double.compare(rhoRateWeight, other.rhoRateWeight) != 0)
+            return false;
+         if (centerOfPressureWeight.containsNaN() ^ other.centerOfPressureWeight.containsNaN())
+            return false;
+         if (!centerOfPressureWeight.containsNaN() && !centerOfPressureWeight.equals(other.centerOfPressureWeight))
+            return false;
+         if (centerOfPressureRateWeight.containsNaN() ^ other.centerOfPressureRateWeight.containsNaN())
+            return false;
+         if (!centerOfPressureRateWeight.containsNaN() && !centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+            return false;
+         if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
+            return false;
+         if (Double.compare(jointJerkWeight, other.jointJerkWeight) != 0)
+            return false;
+         if (Double.compare(jointTorqueWeight, other.jointTorqueWeight) != 0)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": rho min: " + rhoMin + ", qdd max: " + jointAccelerationMax + ", rho weight: " + rhoWeight + ", rho rate weight: "
+            + rhoRateWeight + ", CoP weight: " + centerOfPressureWeight + ", CoP rate weight: " + centerOfPressureRateWeight + ", qdd weight: "
+            + jointAccelerationWeight + ", qddd weight: " + jointJerkWeight + ", tau weight: " + jointTorqueWeight;
+   }
 }

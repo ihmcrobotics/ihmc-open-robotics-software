@@ -5,10 +5,13 @@ import com.jme3.math.Transform;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
@@ -16,20 +19,17 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -47,16 +47,19 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract double getStandPrepAngle(String jointName);
 
-   public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+   public default RobotROSClockCalculator getROSClockCalculator()
+   {
+      return new WallTimeBasedROSClockCalculator();
+   }
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
 
-   public abstract MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                                  ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                                  RealtimeRos2Node realtimeRos2Node,
-                                                                                  CloseableAndDisposableRegistry closeableAndDisposableRegistry);
+   public default SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   {
+      return null;
+   }
 
-   public abstract LogSettings getLogSettings();
+   public abstract DataServerSettings getLogSettings();
 
    public abstract LogModelProvider getLogModelProvider();
 
@@ -96,7 +99,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     *
     * @return the custom output writer.
     */
-   public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
+                                                                           HumanoidRobotContextData contextData)
    {
       return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
    }

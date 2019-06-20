@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceBasedStepDelayer;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -33,6 +34,8 @@ public class QuadrupedStepController implements EventState
    private final YoDouble clampedSpeedUpTime = new YoDouble("clampedSpeedUpTime", registry);
    private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
 
+   private final QuadrupedBalanceBasedStepDelayer stepDelayer;
+
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
@@ -44,6 +47,8 @@ public class QuadrupedStepController implements EventState
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
+      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -53,16 +58,16 @@ public class QuadrupedStepController implements EventState
       // initialize state
       stepMessageHandler.initialize();
 
-      // update task space estimates
       controllerToolbox.update();
-
-      bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
-      bodyOrientationManager.initialize();
 
       feetManager.reset();
       feetManager.requestFullContact();
 
-      stepMessageHandler.process();
+      controllerToolbox.updateSupportPolygon();
+
+      bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+      bodyOrientationManager.initialize();
+
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -72,13 +77,20 @@ public class QuadrupedStepController implements EventState
    @Override
    public void doAction(double timeInState)
    {
-      stepMessageHandler.process();
+      stepMessageHandler.updateActiveSteps();
 
+      List<? extends QuadrupedTimedStep> activeSteps = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(),
+                                                                                         stepMessageHandler.getStepSequence(),
+                                                                                         balanceManager.getDesiredDcmPosition(),
+                                                                                         controllerToolbox.getDCMPositionEstimate(),
+                                                                                         balanceManager.computeNormalizedEllipticDcmErrorForDelayedLiftOff());
       // trigger step events
-      feetManager.triggerSteps(stepMessageHandler.getActiveSteps());
+      feetManager.triggerSteps(activeSteps);
 
       // update desired contact state and sole forces
       feetManager.compute();
+
+      controllerToolbox.updateSupportPolygon();
 
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
@@ -87,14 +99,13 @@ public class QuadrupedStepController implements EventState
       balanceManager.compute();
 
       // update step adjustment and swing speed up
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(),
+                                                                                             stepMessageHandler.isStepPlanAdjustable());
       if (balanceManager.stepHasBeenAdjusted())
       {
          feetManager.adjustSteps(adjustedSteps);
-
-         // update swing speed up
-         requestSwingSpeedUpIfNeeded();
       }
+      requestSwingSpeedUpIfNeeded();
 
 
       // update desired body orientation, angular velocity, and torque
@@ -137,12 +148,6 @@ public class QuadrupedStepController implements EventState
    @Override
    public void onExit()
    {
-      stepMessageHandler.reset();
-   }
-
-   public void halt()
-   {
-      stepMessageHandler.halt();
    }
 
    public YoVariableRegistry getYoVariableRegistry()

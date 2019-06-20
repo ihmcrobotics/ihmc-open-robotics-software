@@ -1,26 +1,27 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -95,6 +96,18 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
       success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
+
+      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
+      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
+      Point3D expectedPelvis = new Point3D();
+      expectedPelvis.interpolate(step1, step2, 0.5);
+      expectedPelvis.setZ(desiredHeight);
+      Vector3D margin = new Vector3D(0.25, 0.25, 0.25);
+      Point3D min = new Point3D(expectedPelvis);
+      Point3D max = new Point3D(expectedPelvis);
+      min.sub(margin);
+      max.add(margin);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }

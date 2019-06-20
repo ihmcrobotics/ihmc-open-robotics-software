@@ -1,6 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +16,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -22,7 +24,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SelectionMatrix3DTest
@@ -189,7 +190,7 @@ public class SelectionMatrix3DTest
                selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
                if (selectionFrame != null)
                   frameMatrix3D.changeFrame(destinationFrame);
-               frameMatrix3D.getDenseMatrix(expectedSelectionMatrix);
+               frameMatrix3D.get(expectedSelectionMatrix);
                assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
 
                // Verifies that it has the intended application: Being able to apply the selection to any frame

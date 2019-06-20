@@ -49,6 +49,10 @@ public class DoubleSpinnerValueFactory extends SpinnerValueFactory<Double>
       {
          valueProperty().set(Double.MAX_VALUE);
       }
+      else if (Double.isNaN(getValue()))
+      {
+         valueProperty().set(Double.NaN);
+      }
       else
       {
          BigDecimal value = BigDecimal.valueOf(getValue());
@@ -78,6 +82,10 @@ public class DoubleSpinnerValueFactory extends SpinnerValueFactory<Double>
       else if (getValue() == Double.NEGATIVE_INFINITY)
       {
          valueProperty().set(-Double.MAX_VALUE);
+      }
+      else if (Double.isNaN(getValue()))
+      {
+         valueProperty().set(Double.NaN);
       }
       else
       {

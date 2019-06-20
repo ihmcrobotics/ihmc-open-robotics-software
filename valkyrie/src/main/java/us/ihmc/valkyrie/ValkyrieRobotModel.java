@@ -15,9 +15,8 @@ import com.jme3.math.Vector3f;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -45,7 +44,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -53,15 +52,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
@@ -79,12 +75,10 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
-   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
 
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -95,6 +89,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieCalibrationParameters calibrationParameters;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
+   @SuppressWarnings("unchecked")
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
    private final RobotTarget target;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
@@ -214,10 +209,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      if (USE_SMOOTH_CMP_PLANNER)
-         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters();
-      else
-         capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(target);
+      capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters();
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
       collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
@@ -428,28 +420,19 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
-   {
-      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
-   }
-
-   @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, jointMap,
+      return new ValkyrieSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getROSClockCalculator(), sensorInformation, jointMap,
                                             target);
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                         ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         RealtimeRos2Node realtimeRos2Node,
-                                                                         CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
       if (!ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
          return null;
       else
-         return new SimulatedValkyrieFingerController(simulatedRobot, threadDataSynchronizer, realtimeRos2Node, closeableAndDisposableRegistry, this,
+         return new SimulatedValkyrieFingerController(simulatedRobot, realtimeRos2Node, this,
                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
    }
@@ -467,15 +450,15 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public LogSettings getLogSettings()
+   public DataServerSettings getLogSettings()
    {
       if (target == RobotTarget.REAL_ROBOT)
       {
-         return LogSettings.VALKYRIE_JSC;
+         return new DataServerSettings(true, "ValkyrieJSCGUI");
       }
       else
       {
-         return LogSettings.SIMULATION;
+         return new DataServerSettings(false, "SimulationGUI");
       }
    }
 

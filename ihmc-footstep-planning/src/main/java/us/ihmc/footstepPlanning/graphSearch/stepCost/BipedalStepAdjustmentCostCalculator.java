@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tools.YawPitchRollTools;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -111,9 +113,9 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       cost += penalizeCandidateFootstep(upwardCostVector, upwardCostScalar.getDoubleValue());
       cost += penalizeCandidateFootstep(downwardVector, downwardPenalizationWeightConsideringStancePitch);
 
-      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getYaw().getDoubleValue());
-      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getPitch().getDoubleValue());
-      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getRoll().getDoubleValue());
+      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getYaw());
+      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getPitch());
+      cost += angularCostScalar.getDoubleValue() * Math.abs(idealToCandidateOrientation.getRoll());
 
       cost += (1.0 - percentageOfFoothold) * negativeFootholdLinearCostScalar.getDoubleValue();
 
@@ -144,7 +146,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private void setOrientationFromPoseToPose(YoFrameYawPitchRoll frameOrientationToPack, FramePose3D fromPose, FramePose3D toPose)
    {
-      frameOrientationToPack.getFrameOrientation().difference(toPose.getOrientation(), fromPose.getOrientation());
+      YawPitchRollTools.multiply(toPose.getOrientation(), true, fromPose.getOrientation(), false, frameOrientationToPack);
    }
 
    private void setVectorFromPoseToPose(YoFrameVector3D frameVectorToPack, FramePose3D fromPose, FramePose3D toPose)

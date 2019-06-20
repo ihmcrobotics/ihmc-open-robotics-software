@@ -42,7 +42,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    public void onBehaviorEntered()
    {
       //reset necessary values so this behavior can run again properly
-      publishTextToSpeack("Waiting For User Validation");
+      publishTextToSpeech("Waiting For User Validation");
       validated = false;
       recievedMessage = false;
       //maybe let the UI know this specific behavior has started
@@ -53,7 +53,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("Got User Validation");
+      publishTextToSpeech("Got User Validation");
       //let the UI know this specific behavior has ended
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 0);
       coactiveBehaviorsNetworkManager.sendToUI("WaitingForValidation", 0);

@@ -48,7 +48,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (5000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -89,7 +89,7 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLidarPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLidarOrientation(), cdr);
-      if(data.getScan().size() <= 5000)
+      if(data.getScan().size() <= 200000)
       cdr.write_type_e(data.getScan());else
           throw new RuntimeException("scan field exceeds the maximum length");
 

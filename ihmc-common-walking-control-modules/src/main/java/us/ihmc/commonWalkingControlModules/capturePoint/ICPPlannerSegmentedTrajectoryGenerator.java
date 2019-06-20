@@ -263,6 +263,16 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       double omega0 = this.omega0.getDoubleValue();
       double dtInitial = startOfSplineTime;
       double dtFinal = endOfSplineTime - timeSpentOnInitialCMP;
+
+      startOfSplineICPInitialFrame.setToZero(initialICPInitialFrame.getReferenceFrame());
+      startOfSplineICPVelocityInitialFrame.setToZero(initialICPInitialFrame.getReferenceFrame());
+      startOfSplineICPFinalFrame.setToZero(initialICPInitialFrame.getReferenceFrame());
+      startOfSplineICPVelocityFinalFrame.setToZero(initialICPInitialFrame.getReferenceFrame());
+      endOfSplineICPInitialFrame.setToZero(finalCornerPointInitialFrame.getReferenceFrame());
+      endOfSplineICPVelocityInitialFrame.setToZero(finalCornerPointInitialFrame.getReferenceFrame());
+      endOfSplineICPFinalFrame.setToZero(finalCornerPointFinalFrame.getReferenceFrame());
+      endOfSplineICPVelocityFinalFrame.setToZero(finalCornerPointFinalFrame.getReferenceFrame());
+
       computeDesiredCapturePointPosition(omega0, dtInitial, initialICPInitialFrame, initialCMPInitialFrame, startOfSplineICPInitialFrame);
       computeDesiredCapturePointVelocity(omega0, dtInitial, initialICPInitialFrame, initialCMPInitialFrame, startOfSplineICPVelocityInitialFrame);
       computeDesiredCapturePointPosition(omega0, dtFinal, finalCornerPointInitialFrame, finalCMPInitialFrame, endOfSplineICPInitialFrame);

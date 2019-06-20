@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="771.0" prefWidth="1163.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <bottom>
+      <BorderPane prefWidth="1163.0" BorderPane.alignment="CENTER">
+         <right>
+            <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="TOP_LEFT">
+              <tabs>
+      
+                      <Tab text="Direct">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="195.0">
+                                  <children>
+                                      <fx:include fx:id="directRobotUI" source="DirectRobotUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+              </tabs>
+            </TabPane>
+         </right>
+         <center>
+              <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                  <tabs>
+      
+                      <Tab text="Patrol">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="601.0">
+                                  <children>
+                                      <fx:include fx:id="patrolBehaviorUI" source="PatrolBehaviorUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Step in Place">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <children>
+                                      <fx:include fx:id="stepInPlaceBehaviorUI" source="StepInPlaceBehaviorUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+
+                      <Tab text="Planner Parameters">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <children>
+                                      <fx:include fx:id="plannerParametersUI" source="PlannerParametersUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+      
+                  </tabs>
+              </TabPane>
+         </center>
+      </BorderPane>
+   </bottom>
+</BorderPane>

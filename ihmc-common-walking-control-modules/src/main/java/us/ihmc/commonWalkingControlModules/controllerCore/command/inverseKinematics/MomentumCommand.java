@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -52,9 +53,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
-    * are to be controlled. It is initialized such that the controller will by default control all
-    * the DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that are
+    * to be controlled. It is initialized such that the controller will by default control all the
+    * DoFs.
     * <p>
     * If the selection frame is not set, it is assumed that the selection frame is equal to the
     * centroidal frame.
@@ -84,8 +85,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Copies all the fields of the given {@link MomentumRateCommand} into this except for the
-    * desired rate of change of momentum.
+    * Copies all the fields of the given {@link MomentumRateCommand} into this except for the desired
+    * rate of change of momentum.
     * 
     * @param command the command to copy the properties from. Not modified.
     */
@@ -106,8 +107,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    /**
     * Sets the desired momentum to submit for the optimization.
     * <p>
-    * It is assumed to represent the desired momentum at the center of mass while the data is
-    * expressed in world frame.
+    * It is assumed to represent the desired momentum at the center of mass while the data is expressed
+    * in world frame.
     * </p>
     * 
     * @param momentum the desired momentum at the center of mass expressed in world frame. Not
@@ -121,15 +122,15 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    /**
     * Sets the desired momentum to submit for the optimization.
     * <p>
-    * It is assumed to represent the desired momentum at the center of mass while the data is
-    * expressed in world frame.
+    * It is assumed to represent the desired momentum at the center of mass while the data is expressed
+    * in world frame.
     * </p>
     * 
     * @param angularMomentum the desired angular momentum at the center of mass expressed in world
     *           frame. Not modified.
     * @param linearMomentum the desired linear momentum in world frame. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code angularMomentum} or {@code linearMomentum}
-    *            is not expressed in world frame.
+    * @throws ReferenceFrameMismatchException if {@code angularMomentum} or {@code linearMomentum} is
+    *            not expressed in world frame.
     */
    public void setMomentum(FrameVector3D angularMomentum, FrameVector3D linearMomentum)
    {
@@ -144,8 +145,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * Sets the desired angular momentum to submit for the optimization and sets the linear part to
     * zero.
     * <p>
-    * It is assumed to represent the desired momentum at the center of mass while the data is
-    * expressed in world frame.
+    * It is assumed to represent the desired momentum at the center of mass while the data is expressed
+    * in world frame.
     * </p>
     * 
     * @param angularMomentum the desired angular momentum at the center of mass expressed in world
@@ -214,8 +215,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Convenience method that sets up the selection matrix such that only the x and y components of
-    * the linear part of this command will be considered in the optimization.
+    * Convenience method that sets up the selection matrix such that only the x and y components of the
+    * linear part of this command will be considered in the optimization.
     */
    public void setSelectionMatrixForLinearXYControl()
    {
@@ -235,13 +236,13 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    /**
     * Sets this command's selection matrix to the given one.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
-    * are to be controlled. It is initialized such that the controller will by default control all
-    * the DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that are
+    * to be controlled. It is initialized such that the controller will by default control all the
+    * DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the centroidal frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the centroidal frame.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
@@ -252,8 +253,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard constraint.
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will be
+    * treated as a hard constraint.
     * <p>
     * This is usually undesired as with improper commands setup as hard constraints the optimization
     * problem can simply be impossible to solve.
@@ -328,8 +329,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * 
     * @param weightMatrix dense matrix holding the weights to use for each component of the desired
     *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY}, {@code linearZ}.
+    *           Not modified.
     */
    public void setWeights(WeightMatrix6D weightMatrix)
    {
@@ -387,9 +388,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * Sets the weights to use in the optimization problem for each rotational degree of freedom to
     * zero.
     * <p>
-    * By doing so, the angular part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForLinearControl()} as by doing so
-    * the angular part will not be submitted to the optimization.
+    * By doing so, the angular part of this command will be ignored during the optimization. Note that
+    * it is less expensive to call {@link #setSelectionMatrixForLinearControl()} as by doing so the
+    * angular part will not be submitted to the optimization.
     * </p>
     */
    public void setAngularWeightsToZero()
@@ -398,12 +399,12 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Sets the weights to use in the optimization problem for each translational degree of freedom
-    * to zero.
+    * Sets the weights to use in the optimization problem for each translational degree of freedom to
+    * zero.
     * <p>
-    * By doing so, the linear part of this command will be ignored during the optimization. Note
-    * that it is less expensive to call {@link #setSelectionMatrixForAngularControl()} as by doing
-    * so the linear part will not be submitted to the optimization.
+    * By doing so, the linear part of this command will be ignored during the optimization. Note that
+    * it is less expensive to call {@link #setSelectionMatrixForAngularControl()} as by doing so the
+    * linear part will not be submitted to the optimization.
     * </p>
     */
    public void setLinearWeightsToZero()
@@ -418,8 +419,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * {@link SolverWeightLevels#HARD_CONSTRAINT}.
     * </p>
     * 
-    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
-    *         is it should be part of the optimization objective.
+    * @return {@code true} if this command should be considered as a hard constraint, {@code false} is
+    *         it should be part of the optimization objective.
     */
    public boolean isHardConstraint()
    {
@@ -438,8 +439,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     *     \ 0  0  0  0  0  w5 /
     * </pre>
     * <p>
-    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
-    * command. The three others (w3, w4, w5) are for the linear part.
+    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this command.
+    * The three others (w3, w4, w5) are for the linear part.
     * </p>
     * <p>
     * The packed matrix is a 6-by-6 matrix independently from the selection matrix.
@@ -465,11 +466,10 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
-    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
-    * this command.
+    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
+    * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed
-    *           in.
+    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
@@ -489,6 +489,11 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       selectionMatrixToPack.set(selectionMatrix);
    }
 
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
    /**
     * Gets the reference to the desired momentum carried by this command.
     * <p>
@@ -506,8 +511,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    /**
     * Packs the value of the desired momentum into two frame vectors.
     * 
-    * @param angularPartToPack frame vector to pack the desired angular momentum at the center of
-    *           mass. Modified.
+    * @param angularPartToPack frame vector to pack the desired angular momentum at the center of mass.
+    *           Modified.
     * @param linearPartToPack frame vector to pack the desired linear momentum. Modified.
     */
    public void getMomentumRate(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack)
@@ -525,6 +530,32 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.MOMENTUM;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof MomentumCommand)
+      {
+         MomentumCommand other = (MomentumCommand) object;
+
+         if (!MatrixFeatures.isEquals(momentum, other.momentum))
+            return false;
+         if (!weightMatrix.equals(other.weightMatrix))
+            return false;
+         if (!selectionMatrix.equals(other.selectionMatrix))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override

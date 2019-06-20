@@ -13,20 +13,20 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristicsBuilder;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.SpeedAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
@@ -34,16 +34,18 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecki
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.PlanarRegionCliffAvoider;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.VariableResolutionNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,7 +56,7 @@ import java.util.List;
 
 public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootstepPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
@@ -62,12 +64,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final PlanarRegionConstraintDataHolder highLevelConstraintDataHolder = new PlanarRegionConstraintDataHolder();
+   private final PlanarRegionConstraintDataParameters highLevelPlanarRegionConstraintDataParameters = new PlanarRegionConstraintDataParameters();
+   private final FootstepPlannerParameters parameters;
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
-   private FramePose3DReadOnly startPose;
    private FramePose3DReadOnly goalPose;
    private FootstepNode startNode;
    private FootstepNode goalNode;
@@ -84,6 +87,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final FootstepNodeExpansion nodeExpansion;
    private final FootstepCost stepCostCalculator;
    private final FootstepNodeSnapper snapper;
+   private final FootstepNodeSnapper postProcessingSnapper;
 
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
@@ -103,7 +107,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
    public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeChecker nodeChecker,
                                         CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
-                                        FootstepNodeSnapper snapper, QuadrupedFootstepPlannerListener listener, YoVariableRegistry parentRegistry)
+                                        FootstepNodeSnapper snapper, FootstepNodeSnapper postProcessingSnapper, QuadrupedFootstepPlannerListener listener,
+                                        YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
@@ -113,9 +118,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.stepCostCalculator = stepCostCalculator;
       this.listener = listener;
       this.snapper = snapper;
+      this.postProcessingSnapper = postProcessingSnapper;
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
+      highLevelPlanarRegionConstraintDataParameters.enforceTranslationLessThanGridCell = true;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
@@ -139,6 +146,18 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    }
 
    @Override
+   public WaypointsForQuadrupedFootstepPlanner getWaypointPathPlanner()
+   {
+      return null;
+   }
+
+   @Override
+   public QuadrupedFootstepPlanner getFootstepPlanner()
+   {
+      return this;
+   }
+
+   @Override
    public void setTimeout(double timeoutInSeconds)
    {
       timeout.set(timeoutInSeconds);
@@ -149,8 +168,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    {
       checkGoalType(start);
 
-      startPose = start.getTargetPose();
-
       startNode = getNodeFromTarget(start.getInitialQuadrant(), start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
 
@@ -160,7 +177,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          {
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant));
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant), new Quaternion());
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
@@ -170,24 +187,28 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-            Point3DReadOnly projectedPoint;
+            Point3D projectedPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+
+            PlanarRegion planarRegion = null;
             if (planarRegionsList != null)
             {
-               projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
-               if (projectedPoint == null)
+               planarRegion = PlanarRegionSnapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant),
+                                                          planarRegionsList.getPlanarRegionsAsList(), highLevelConstraintDataHolder,
+                                                                      highLevelPlanarRegionConstraintDataParameters);
+
+               if (planarRegion == null)
                {
-                  // FIXME should probably not be at 0.0
-                  addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0);
-                  projectedPoint = startPoint;
+                  planarRegion = addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0, start.getTargetPose().getYaw());
+               }
+               else
+               {
+                  projectedPoint.setZ(planarRegion.getPlaneZGivenXY(startPoint.getX(), startPoint.getY()));
                }
             }
-            else
-            {
-               projectedPoint = startPoint;
-            }
+
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint);
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint, new Quaternion());
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
@@ -239,7 +260,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
          hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
-         nodeToReturn = new FootstepNode(quadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
+         nodeToReturn = new FootstepNode(quadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
                                          xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
@@ -254,7 +275,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
-         nodeToReturn = new FootstepNode(quadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+         nodeToReturn = new FootstepNode(quadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
                                          hindRightGoalPosition.getY(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
@@ -270,8 +291,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
+      highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistanceForExpansion();
+      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHullDuringExpansion();
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
+      postProcessingSnapper.setPlanarRegions(planarRegionsList);
       this.planarRegionsList = planarRegionsList;
    }
 
@@ -294,8 +318,31 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       FootstepPlanningResult result = checkResult();
 
-      if (result.validForExecution() && listener != null)
+      if (result.validForExecution())
+      {
+         if (listener != null)
          listener.plannerFinished(null);
+
+      // checking path
+         List<FootstepNode> path = graph.getPathFromStart(endNode);
+         addGoalNodesToEnd(path);
+         for (int i = 0; i < path.size(); i++)
+         {
+            FootstepNode node = path.get(i);
+            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
+
+            FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+            RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+            if (snapTransform.containsNaN())
+            {
+               if (debug)
+                  System.out.println("Failed to snap in post processing.");
+               result =  FootstepPlanningResult.NO_PATH_EXISTS;
+               break;
+            }
+         }
+      }
 
       if (debug)
       {
@@ -318,38 +365,48 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          return null;
 
       FootstepPlan plan = new FootstepPlan();
-
-      plan.setStartPose(startPose);
-      plan.setGoalPose(goalPose);
+      plan.setLowLevelPlanGoal(goalPose);
 
       List<FootstepNode> path = graph.getPathFromStart(endNode);
       addGoalNodesToEnd(path);
 
-      double currentTime = 0;
+      double lastStepStartTime = 0;
 
-      for (int i = 0; i < path.size(); i++)
+      for (int i = 1; i < path.size(); i++)
       {
-         currentTime += xGaitSettings.getEndDoubleSupportDuration();
-
          FootstepNode node = path.get(i);
 
          RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
          QuadrupedTimedOrientedStep newStep = new QuadrupedTimedOrientedStep();
          newStep.setRobotQuadrant(robotQuadrant);
+         newStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
 
-         TimeInterval timeInterval = newStep.getTimeInterval();
-         timeInterval.setStartTime(currentTime);
-         currentTime += xGaitSettings.getStepDuration();
-         timeInterval.setEndTime(currentTime);
+         double endTimeShift;
+         if (i == 1)
+         {
+            endTimeShift = 0.0;
+         }
+         else
+         {
+            endTimeShift = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(robotQuadrant.getNextReversedRegularGaitSwingQuadrant(), xGaitSettings);
+         }
+         double thisStepStartTime = lastStepStartTime + endTimeShift;
+         double thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();
+
+         newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
-         position.applyTransform(snapData.getSnapTransform());
+         FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+         position.applyTransform(snapTransform);
 
          newStep.setGoalPosition(position);
 
          plan.addFootstep(newStep);
+
+         lastStepStartTime = thisStepStartTime;
       }
 
       return plan;
@@ -407,19 +464,18 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(startPoint, snapper
-               .getOrCreateSteppableRegions(startNode.getRoundedX(robotQuadrant), startNode.getRoundedY(robotQuadrant)));
+         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList.getPlanarRegionsAsList());
 
          if (startPos == null)
          {
             if (debug)
                PrintTools.info("adding plane at start foot");
-            addPlanarRegionAtHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+            addPlanarRegionAtHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0, startNode.getNominalYaw());
          }
       }
    }
 
-   private void addPlanarRegionAtHeight(double xLocation, double yLocation, double height)
+   private PlanarRegion addPlanarRegionAtHeight(double xLocation, double yLocation, double height, double yaw)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(0.3, 0.3);
@@ -428,8 +484,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       polygon.addVertex(-0.3, -0.25);
       polygon.update();
 
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, height)), polygon);
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(yaw, 0.0, 0.0), new Vector3D(xLocation, yLocation, height)), polygon);
       planarRegionsList.addPlanarRegion(planarRegion);
+
+      return planarRegion;
    }
 
    @Override
@@ -529,7 +587,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (nodeToExpand.xGaitGeometricallyEquals(goalNode))
+      if (nodeToExpand.geometricallyEquals(goalNode) || nodeToExpand.xGaitGeometricallyEquals(goalNode))
       {
          endNode = nodeToExpand;
          return true;
@@ -545,42 +603,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       while (!endNode.geometricallyEquals(goalNode))
       {
-         if (!endNode.quadrantGeometricallyEquals(movingQuadrant, goalNode))
-         {
-            int xFrontLeft = endNode.getXIndex(RobotQuadrant.FRONT_LEFT);
-            int yFrontLeft = endNode.getYIndex(RobotQuadrant.FRONT_LEFT);
-            int xFrontRight = endNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
-            int yFrontRight = endNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
-            int xHindLeft = endNode.getXIndex(RobotQuadrant.HIND_LEFT);
-            int yHindLeft = endNode.getYIndex(RobotQuadrant.HIND_LEFT);
-            int xHindRight = endNode.getXIndex(RobotQuadrant.HIND_RIGHT);
-            int yHindRight = endNode.getYIndex(RobotQuadrant.HIND_RIGHT);
+         FootstepNode nodeAtGoal = FootstepNode.constructNodeFromOtherNode(movingQuadrant, goalNode.getXIndex(movingQuadrant), goalNode.getYIndex(movingQuadrant), endNode);
 
-            switch (movingQuadrant)
-            {
-            case FRONT_LEFT:
-               xFrontLeft = goalNode.getXIndex(RobotQuadrant.FRONT_LEFT);
-               yFrontLeft = goalNode.getYIndex(RobotQuadrant.FRONT_LEFT);
-               break;
-            case FRONT_RIGHT:
-               xFrontRight = goalNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
-               yFrontRight = goalNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
-               break;
-            case HIND_LEFT:
-               xHindLeft = goalNode.getXIndex(RobotQuadrant.HIND_LEFT);
-               yHindLeft = goalNode.getYIndex(RobotQuadrant.HIND_LEFT);
-               break;
-            case HIND_RIGHT:
-               xHindRight = goalNode.getXIndex(RobotQuadrant.HIND_RIGHT);
-               yHindRight = goalNode.getYIndex(RobotQuadrant.HIND_RIGHT);
-               break;
-            }
-            FootstepNode nodeAtGoal = new FootstepNode(movingQuadrant, xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight,
-                                                       yHindRight, endNode.getNominalStanceLength(), endNode.getNominalStanceWidth());
-
-            nodePathToPack.add(nodeAtGoal);
-            endNode = nodeAtGoal;
-         }
+         nodePathToPack.add(nodeAtGoal);
+         endNode = nodeAtGoal;
 
          movingQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
       }
@@ -627,31 +653,39 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    }
 
    public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                             QuadrupedFootstepPlannerListener listener, FootstepNodeExpansion expansion,
-                                                             YoVariableRegistry registry)
+                                                             QuadrupedFootstepPlannerListener listener, YoVariableRegistry registry)
    {
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
-      //      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      SimplePlanarRegionFootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
+                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
+
+      FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters);
+      CostToGoHeuristicsBuilder heuristicsBuilder = new CostToGoHeuristicsBuilder();
+      heuristicsBuilder.setFootstepPlannerParameters(parameters);
+      heuristicsBuilder.setXGaitSettings(xGaitSettings);
+      heuristicsBuilder.setSnapper(snapper);
+      heuristicsBuilder.setUseDistanceBasedHeuristics(true);
+
+      CostToGoHeuristics heuristics = heuristicsBuilder.buildHeuristics();
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludePitchAndRollCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
       QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, expansion, footstepCost,
-                                                                                postProcessingSnapper, listener, registry);
+                                                                                snapper, postProcessingSnapper, listener, registry);
 
       return planner;
    }

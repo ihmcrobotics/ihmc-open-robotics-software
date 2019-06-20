@@ -26,6 +26,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, SE3TrajectoryMessage>
       implements FrameBasedCommand<SE3TrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
@@ -47,6 +48,8 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
 
    public SE3TrajectoryControllerCommand(Random random)
    {
+      sequenceId = random.nextInt();
+
       int randomNumberOfPoints = random.nextInt(16) + 1;
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
@@ -63,6 +66,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -71,6 +75,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
 
    public void clear(ReferenceFrame referenceFrame)
    {
+      sequenceId = 0;
       trajectoryPointList.clear(referenceFrame);
       clearQueuableCommandVariables();
       selectionMatrix.resetSelection();
@@ -88,29 +93,30 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
+   public void setFromMessage(SE3TrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
-
-      clear(dataFrame);
-      setFromMessage(message);
-
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromHashCode(message.getAngularWeightMatrix().getWeightFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getLinearWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(SE3TrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
+
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -130,13 +136,17 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
-   }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)
-   {
-      this.trajectoryFrame = trajectoryFrame;
-      clear(dataFrame);
-      setFromMessage(message);
+      if (resolver != null)
+      {
+         ReferenceFrame angularSelectionFrame = resolver.getReferenceFrame(message.getAngularSelectionMatrix().getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getLinearSelectionMatrix().getSelectionFrameId());
+         selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
+
+         ReferenceFrame angularWeightFrame = resolver.getReferenceFrame(message.getAngularWeightMatrix().getWeightFrameId());
+         ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getLinearWeightMatrix().getWeightFrameId());
+         weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
+      }
    }
 
    /**
@@ -147,6 +157,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
     */
    public void setPropertiesOnly(SE3TrajectoryControllerCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
@@ -317,5 +328,16 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    public Class<SE3TrajectoryMessage> getMessageClass()
    {
       return SE3TrajectoryMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

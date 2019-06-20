@@ -15,11 +15,8 @@ import us.ihmc.avatar.obstacleCourseTests.AvatarLeapOfFaithTest;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {

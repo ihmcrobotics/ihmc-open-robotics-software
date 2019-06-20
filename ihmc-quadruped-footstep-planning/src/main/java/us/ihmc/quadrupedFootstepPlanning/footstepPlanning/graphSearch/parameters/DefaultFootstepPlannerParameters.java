@@ -4,7 +4,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 {
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
+   {
+      return 0.5;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumFrontStepLength()
    {
       return 0.45;
    }
@@ -18,14 +25,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepCycleDistance()
-   {
-      return 0.6;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumStepLength()
+   public double getMinimumFrontStepLength()
    {
       return -0.2;
    }
@@ -41,14 +41,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.5;
+      return 0.25;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinimumStepYaw()
    {
-      return -0.5;
+      return -0.25;
    }
 
    /** {@inheritDoc} */
@@ -60,51 +60,84 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepCycleChangeZ()
-   {
-      return 0.3;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getBodyGroundClearance()
    {
       return 0.35;
    }
 
-   public double getForwardWeight()
+   @Override
+   public double getDistanceHeuristicWeight()
    {
       return 1.0;
    }
 
-   public double getLateralWeight()
+   @Override
+   public double getXGaitWeight()
    {
-      return 1.0;
+      return 0.05;
    }
 
+   @Override
    public double getYawWeight()
    {
-      return 0.1;
+      return 1.0;
    }
 
+   @Override
    public double getCostPerStep()
    {
-      return 0.1;
+      return 0.25;
    }
 
+   @Override
    public double getStepUpWeight()
    {
       return 0.0;
    }
 
+   @Override
    public double getStepDownWeight()
    {
       return 0.0;
    }
 
-   public double getHeuristicsWeight()
+   @Override
+   public double getHeuristicsInflationWeight()
    {
-      return 3.0;
+      return 1.75;
+   }
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForExpansion()
+   {
+      return 0.02;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForPostProcessing()
+   {
+      return 0.04;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 0.03;
    }
 
    @Override

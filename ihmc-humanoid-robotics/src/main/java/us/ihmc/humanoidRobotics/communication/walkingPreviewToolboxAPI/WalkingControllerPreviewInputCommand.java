@@ -6,6 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 
 public class WalkingControllerPreviewInputCommand implements Command<WalkingControllerPreviewInputCommand, WalkingControllerPreviewInputMessage>
 {
+   private long sequenceId;
    private final FootstepDataListCommand foostepCommand = new FootstepDataListCommand();
 
    public WalkingControllerPreviewInputCommand()
@@ -15,18 +16,21 @@ public class WalkingControllerPreviewInputCommand implements Command<WalkingCont
    @Override
    public void clear()
    {
+      sequenceId = 0;
       foostepCommand.clear();
    }
    
    @Override
    public void setFromMessage(WalkingControllerPreviewInputMessage message)
    {
+      sequenceId = message.getSequenceId();
       foostepCommand.setFromMessage(message.getFootsteps());
    }
 
    @Override
    public void set(WalkingControllerPreviewInputCommand other)
    {
+      sequenceId = other.sequenceId;
       foostepCommand.set(other.foostepCommand);
    }
 
@@ -45,5 +49,11 @@ public class WalkingControllerPreviewInputCommand implements Command<WalkingCont
    public boolean isCommandValid()
    {
       return foostepCommand.isCommandValid();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

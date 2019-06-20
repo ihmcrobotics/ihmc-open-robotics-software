@@ -11,7 +11,16 @@ public interface RootJointDesiredConfigurationDataBasics extends RootJointDesire
 {
    void clear();
 
-   void set(RootJointDesiredConfigurationDataReadOnly other);
+   default void set(RootJointDesiredConfigurationDataReadOnly other)
+   {
+      clear();
+      if (other.hasDesiredConfiguration())
+         setDesiredConfiguration(other.getDesiredConfiguration());
+      if (other.hasDesiredVelocity())
+         setDesiredVelocity(other.getDesiredVelocity());
+      if (other.hasDesiredAcceleration())
+         setDesiredAcceleration(other.getDesiredAcceleration());
+   }
 
    void completeWith(RootJointDesiredConfigurationDataReadOnly other);
 

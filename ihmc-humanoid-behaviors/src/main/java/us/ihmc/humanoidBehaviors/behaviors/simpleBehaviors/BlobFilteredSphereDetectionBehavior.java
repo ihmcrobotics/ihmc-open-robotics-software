@@ -145,7 +145,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       //      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
       //      sendPacket(depthDataStateCommand);
 
-      publishTextToSpeack("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
+      publishTextToSpeech("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
    }
 
    @Override

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +48,12 @@ public class PlaneContactWrenchProcessor
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
-      Map<RigidBodyBasics, ReferenceFrame> soleFrames = new HashMap<>();
+      List<RigidBodyBasics> feet = new ArrayList<>();
 
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
       {
-         soleFrames.put(contactableBody.getRigidBody(), contactableBody.getSoleFrame());
+         feet.add(contactableBody.getRigidBody());
 
          String name = contactableBody.getSoleFrame().getName();
          YoDouble forceMagnitude = new YoDouble(name + "ForceMagnitude", registry);
@@ -90,7 +90,7 @@ public class PlaneContactWrenchProcessor
          }
       }
 
-      desiredCenterOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames);
+      desiredCenterOfPressureDataHolder = new CenterOfPressureDataHolder(feet);
 
       parentRegistry.addChild(registry);
    }

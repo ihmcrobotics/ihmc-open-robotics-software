@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.bodyTeleopPort;
 
 public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 {
@@ -31,7 +32,7 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
                                     boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider,startYoVariableServer,
-            new DataServerSettings(logYoVariables, true, 8009, "BodyTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
+            new DataServerSettings(logYoVariables, true, bodyTeleopPort, "BodyTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
       bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotDataReceiver, registry);
 
@@ -45,7 +46,7 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> processTimestamp(s.takeNextData().getTimestamp()));
+                                           s -> processTimestamp(s.takeNextData().getMonotonicTime()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));

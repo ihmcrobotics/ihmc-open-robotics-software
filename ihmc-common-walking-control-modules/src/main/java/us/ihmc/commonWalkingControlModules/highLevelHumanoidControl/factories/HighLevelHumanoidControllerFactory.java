@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -33,6 +34,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -41,9 +43,6 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ContactSensor;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -52,8 +51,8 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -63,6 +62,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
+   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("ihmc_controller", ROS2Tools.HUMANOID_CONTROL_MODULE);
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -200,7 +201,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       if (controllerToolbox != null)
       {
-         System.out.println("In createdQueuedControllerCommandGenerator");
+         LogTools.info("Creating queued controller command generator");
 
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -349,10 +350,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                        ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputList lowLevelControllerOutput, JointBasics... jointsToIgnore)
+                                        YoGraphicsListRegistry yoGraphicsListRegistry, HumanoidRobotSensorInformation sensorInformation,
+                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                        JointDesiredOutputListBasics lowLevelControllerOutput, JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -372,16 +372,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, contactSensorHolder, totalRobotWeight,
-                                                                               yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
-                                                                 yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies,
-                                                                 yoGraphicsListRegistry, jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0,
+                                                                 feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -394,12 +392,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
-                                                                              defaultInitialTransferTime, defaultFinalTransferTime, feet,
-                                                                              statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, feet, statusMessageOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -420,8 +417,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
-                                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                                     ContactSensorHolder contactSensorHolder, double totalRobotWeight,
+                                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder, double totalRobotWeight,
                                                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
@@ -432,10 +428,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       {
          String footName = bipedFeet.get(robotSide).getName();
          ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
-         ContactSensor footContactSensor = contactSensorHolder == null ? null : contactSensorHolder.getByName(footContactSensorNames.get(robotSide));
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName, bipedFeet.get(robotSide),
                                                                           Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())), footForceSensor,
-                                                                          footContactSensor, totalRobotWeight, yoGraphicsListRegistry, registry);
+                                                                          totalRobotWeight, yoGraphicsListRegistry, registry);
          footSwitches.put(robotSide, footSwitch);
       }
 

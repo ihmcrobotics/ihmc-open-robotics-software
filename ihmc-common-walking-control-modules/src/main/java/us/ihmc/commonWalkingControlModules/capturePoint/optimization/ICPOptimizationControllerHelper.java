@@ -1,21 +1,17 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.ejml.data.D1Matrix64F;
-import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
-import org.ejml.ops.CommonOps;
+
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class ICPOptimizationControllerHelper
 {

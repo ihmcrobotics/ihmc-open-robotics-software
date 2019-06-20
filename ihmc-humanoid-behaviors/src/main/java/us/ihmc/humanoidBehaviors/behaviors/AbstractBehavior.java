@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -16,9 +17,10 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -61,10 +63,12 @@ public abstract class AbstractBehavior implements RobotController
 
    private final List<BehaviorService> behaviorsServices;
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+
    protected final String robotName;
 
-   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
-   private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+   protected final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   protected final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
 
    protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
    protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
@@ -104,6 +108,8 @@ public abstract class AbstractBehavior implements RobotController
       behaviorPubGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
+
    }
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
@@ -191,11 +197,11 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
-      publishTextToSpeack("Aborting Behavior");
+      publishTextToSpeech("Aborting Behavior");
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
-         behaviorService.pause();
+         behaviorService.destroy();
       }
 
       onBehaviorAborted();
@@ -210,7 +216,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void pause()
    {
-      publishTextToSpeack("Pausing Behavior");
+      publishTextToSpeech("Pausing Behavior");
       isPaused.set(true);
 
       for (BehaviorService behaviorService : behaviorsServices)
@@ -229,7 +235,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void resume()
    {
-      publishTextToSpeack("Resuming Behavior");
+      publishTextToSpeech("Resuming Behavior");
       isPaused.set(false);
       isPaused.set(false);
 
@@ -241,10 +247,24 @@ public abstract class AbstractBehavior implements RobotController
       onBehaviorResumed();
    }
 
-   public void publishTextToSpeack(String textToSpeak)
+   public void publishTextToSpeech(String textToSpeak)
    {
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
+   
+   
+   public void publishUIPositionCheckerPacket(Point3DReadOnly position)
+   {
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position));
+
+   }
+
+   public void publishUIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
+   {
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position,orientation));
+
+   }
+
 
    public abstract void onBehaviorResumed();
 
@@ -281,11 +301,6 @@ public abstract class AbstractBehavior implements RobotController
    public BehaviorStatus getBehaviorStatus()
    {
       return yoBehaviorStatus.getEnumValue();
-   }
-
-   public CoactiveElement getCoactiveElement()
-   {
-      return null;
    }
 
    @Override

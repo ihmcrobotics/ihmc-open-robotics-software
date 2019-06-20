@@ -1,6 +1,7 @@
 package us.ihmc.atlas.calib;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,8 +16,6 @@ import java.util.Random;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 
 import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
 import boofcv.abst.fiducial.calib.ConfigChessboard;
@@ -29,7 +28,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -63,7 +61,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    RigidBodyTransform targetToEE;
 
-   ReferenceFrame cameraImageFrame = ReferenceFrame.
+   ReferenceFrame cameraImageFrame = ReferenceFrameTools.
          constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
    boolean isleft = true;
@@ -97,11 +95,6 @@ public class KinematicCalibrationHeadLoopResidualTest
       targetToEE = new RigidBodyTransform();
       targetToEE.setTranslation(tran);
       targetToEE.setRotation(rotFull);
-   }
-
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    /**
@@ -295,7 +288,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("boardFrame", leftEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 

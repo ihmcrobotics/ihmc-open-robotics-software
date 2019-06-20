@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -49,4 +50,9 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0,
                                                               boolean isRecoveringFromPush, FeetManager feetManager);
+
+   default TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return null;
+   }
 }

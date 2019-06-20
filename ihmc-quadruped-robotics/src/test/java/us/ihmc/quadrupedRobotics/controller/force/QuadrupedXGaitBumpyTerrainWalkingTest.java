@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -61,7 +63,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(speed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 5.0);
+      conductor.addTimeLimit(variables.getYoTime(), 10.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
    }
@@ -109,10 +111,11 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
 
-      stepTeleopManager.setEndPhaseShift(180.0);
-      stepTeleopManager.setEndDoubleSupportDuration(0.1);
+      stepTeleopManager.setQuadrupedSpeed(QuadrupedSpeed.FAST);
+      stepTeleopManager.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
+      stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.FAST, QuadrupedGait.TROT.getEndPhaseShift(), 0.1);
+      stepTeleopManager.setStepDuration(QuadrupedSpeed.FAST, QuadrupedGait.TROT.getEndPhaseShift(), 0.35);
       stepTeleopManager.setStanceWidth(0.35);
-      stepTeleopManager.setStepDuration(0.35);
       stepTeleopManager.setStepGroundClearance(0.1);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);

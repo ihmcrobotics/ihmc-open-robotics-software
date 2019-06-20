@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -16,27 +17,15 @@ import java.util.Collections;
 public class FootstepPlan
 {
    private final ArrayList<QuadrupedTimedOrientedStep> footsteps = new ArrayList<>();
-   private FramePose3DReadOnly lowLevelPlanGoal = null;
-   private final FramePose3D startPose = new FramePose3D();
-   private final FramePose3D goalPose = new FramePose3D();
+   private final FramePose3D lowLevelPlanGoal = new FramePose3D();
 
    public FootstepPlan()
    {
    }
 
-   public void setStartPose(FramePose3DReadOnly startPose)
-   {
-      this.startPose.setIncludingFrame(startPose);
-   }
-
-   public void setGoalPose(FramePose3DReadOnly goalPose)
-   {
-      this.goalPose.setIncludingFrame(goalPose);
-   }
-
    public void setLowLevelPlanGoal(FramePose3DReadOnly lowLevelPlanGoal)
    {
-      this.lowLevelPlanGoal = lowLevelPlanGoal;
+      this.lowLevelPlanGoal.setIncludingFrame(lowLevelPlanGoal);
    }
 
    public int getNumberOfSteps()
@@ -59,17 +48,18 @@ public class FootstepPlan
       footsteps.addAll(other.footsteps);
    }
 
-   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, TimeInterval timeInterval)
+   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double groundClearance, TimeInterval timeInterval)
    {
-      return addFootstep(robotQuadrant, soleFramePoint, timeInterval.getStartTime(), timeInterval.getEndTime());
+      return addFootstep(robotQuadrant, soleFramePoint, timeInterval.getStartTime(), groundClearance, timeInterval.getEndTime());
    }
 
-   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double startTime, double endTime)
+   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double groundClearance, double startTime, double endTime)
    {
       QuadrupedTimedOrientedStep footstep = new QuadrupedTimedOrientedStep();
       footstep.setRobotQuadrant(robotQuadrant);
       footstep.setGoalPosition(soleFramePoint);
       footstep.getTimeInterval().setInterval(startTime, endTime);
+      footstep.setGroundClearance(groundClearance);
       footsteps.add(footstep);
       return footstep;
    }
@@ -81,7 +71,7 @@ public class FootstepPlan
 
    public void clear()
    {
-      lowLevelPlanGoal = null;
+      lowLevelPlanGoal.setToNaN();
       footsteps.clear();
    }
 
@@ -90,20 +80,9 @@ public class FootstepPlan
       footsteps.remove(footstepIndex);
    }
 
-   public boolean hasLowLevelPlanGoal()
-   {
-      return lowLevelPlanGoal != null;
-   }
-
    public FramePose3DReadOnly getLowLevelPlanGoal()
    {
-      if (hasLowLevelPlanGoal())
-         lowLevelPlanGoal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      lowLevelPlanGoal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       return lowLevelPlanGoal;
-   }
-
-   public FramePose3DReadOnly getStartPose()
-   {
-      return startPose;
    }
 }

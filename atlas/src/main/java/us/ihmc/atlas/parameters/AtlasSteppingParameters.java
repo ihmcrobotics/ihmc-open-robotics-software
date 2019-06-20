@@ -17,6 +17,12 @@ public class AtlasSteppingParameters implements SteppingParameters
    {
       return 0.10 * jointMap.getModelScale();
    }
+   
+   @Override
+   public double getMaxSwingHeightFromStanceFoot()
+   {
+      return 0.30 * jointMap.getModelScale();
+   }
 
    @Override
    public double getFootForwardOffset()
@@ -82,12 +88,6 @@ public class AtlasSteppingParameters implements SteppingParameters
    public double getMaxStepDown()
    {
       return 0.2 * jointMap.getModelScale();
-   }
-
-   @Override
-   public double getMaxSwingHeightFromStanceFoot()
-   {
-      return 0.30 * jointMap.getModelScale();
    }
 
    @Override

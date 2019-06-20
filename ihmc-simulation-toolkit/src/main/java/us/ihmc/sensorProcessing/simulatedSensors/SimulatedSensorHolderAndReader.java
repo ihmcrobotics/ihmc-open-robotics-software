@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -84,6 +83,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       forceTorqueSensors.add(Pair.of(forceSensorDefinition, groundContactPointBasedWrenchCalculator));
    }
 
+   @Override
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
       return sensorProcessing;
@@ -95,7 +95,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       return sensorProcessing;
    }
 
-   public void read()
+   @Override
+   public long read(SensorDataContext sensorDataContextToSet)
    {
       for (int i = 0; i < jointPositionSensors.size(); i++)
       {
@@ -146,10 +147,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();
-   }
-
-   @Override public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
+      return timestamp;
    }
 }

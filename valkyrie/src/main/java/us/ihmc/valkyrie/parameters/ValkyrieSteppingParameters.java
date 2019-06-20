@@ -96,13 +96,18 @@ public class ValkyrieSteppingParameters implements SteppingParameters
       return 0.3;
    }
 
-   @Override
-   public double getMinSwingHeightFromStanceFoot()
+   @Override public double getDefaultSwingHeightFromStanceFoot()
    {
       if (target == RobotTarget.REAL_ROBOT)
          return 0.05; //changed from 0.025 to 0.05 in 11/2018 to help with foot getting caught on pallet
       else
-         return SteppingParameters.super.getMinSwingHeightFromStanceFoot();
+         return 0.1;
+   }
+
+   @Override
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.025;
    }
 
    @Override

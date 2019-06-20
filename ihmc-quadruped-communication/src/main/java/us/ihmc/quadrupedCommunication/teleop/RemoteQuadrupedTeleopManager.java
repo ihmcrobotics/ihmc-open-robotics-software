@@ -7,19 +7,24 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import javax.tools.Tool;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,7 +33,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 public class RemoteQuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoQuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final YoBoolean walking = new YoBoolean("walking", registry);
    private final Ros2Node ros2Node;
 
@@ -41,6 +46,10 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
    private final IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
    private final IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListControllerPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingMessagePublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingMessagePublisher;
+   private final IHMCROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingMessagePublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredHeight> desiredHeightPublisher;
@@ -52,7 +61,7 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<ToolboxStateMessage> footstepPlannerStatePublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListTeleopPublisher;
    private final IHMCROS2Publisher<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
@@ -88,18 +97,21 @@ public class RemoteQuadrupedTeleopManager
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
+      planarRegionsListControllerPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, controllerSubGenerator);
+      pauseWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      abortWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
+      loadBearingMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
       desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
       desiredHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopSubGenerator);
-
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
       heightTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopSubGenerator);
       bodyTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopSubGenerator);
       footstepPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
-      planarRegionsListPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
+      planarRegionsListTeleopPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
       stepXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubGenerator);
       bodyPathPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopSubGenerator);
 
@@ -126,7 +138,7 @@ public class RemoteQuadrupedTeleopManager
       bodyOrientationPublisher.publish(message);
    }
 
-   public void publishXGaitSettings(YoQuadrupedXGaitSettings xGaitSettings)
+   public void publishXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
       plannerXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
@@ -159,6 +171,21 @@ public class RemoteQuadrupedTeleopManager
       controllerStatePublisher.publish(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.STAND_TRANSITION_STATE));
    }
 
+   public void requestPauseWalking(boolean pauseWalking)
+   {
+      pauseWalkingMessagePublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(pauseWalking));
+   }
+
+   public void requestAbortWalking()
+   {
+      abortWalkingMessagePublisher.publish(new AbortWalkingMessage());
+   }
+
+   public void requestLoadBearing(RobotQuadrant quadrant)
+   {
+      loadBearingMessagePublisher.publish(QuadrupedMessageTools.createLoadBearingMessage(quadrant));
+   }
+
    private void requestStopWalking()
    {
       QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
@@ -168,6 +195,7 @@ public class RemoteQuadrupedTeleopManager
 
    public void requestBodyTeleop()
    {
+      heightTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
       bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
    }
 
@@ -205,7 +233,8 @@ public class RemoteQuadrupedTeleopManager
 
    public void submitPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      planarRegionsListPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      planarRegionsListControllerPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      planarRegionsListTeleopPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
    }
 
    public void submitBodyPathPlan(QuadrupedBodyPathPlanMessage message)
@@ -213,15 +242,64 @@ public class RemoteQuadrupedTeleopManager
       bodyPathPublisher.publish(message);
    }
 
-   public void setEndDoubleSupportDuration(double endDoubleSupportDuration)
+   public void setEndDoubleSupportDuration(QuadrupedSpeed speed, double endPhaseShift, double endDoubleSupportDuration)
    {
-      xGaitSettings.setEndDoubleSupportDuration(endDoubleSupportDuration);
-      publishXGaitSettings(xGaitSettings);
+      if (endPhaseShift < 90.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getPaceSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getPaceMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getPaceFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }
+      else if (endPhaseShift < 180.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getAmbleSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getAmbleFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }
+      else
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getTrotSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getTrotFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }      publishXGaitSettings(xGaitSettings);
    }
 
    public void setEndPhaseShift(double endPhaseShift)
    {
       xGaitSettings.setEndPhaseShift(endPhaseShift);
+      publishXGaitSettings(xGaitSettings);
+   }
+
+   public void setQuadrupedSpeed(QuadrupedSpeed speed)
+   {
+      xGaitSettings.setQuadrupedSpeed(speed);
       publishXGaitSettings(xGaitSettings);
    }
 
@@ -243,9 +321,53 @@ public class RemoteQuadrupedTeleopManager
       publishXGaitSettings(xGaitSettings);
    }
 
-   public void setStepDuration(double stepDuration)
+   public void setStepDuration(QuadrupedSpeed speed, double endPhaseShift, double stepDuration)
    {
-      xGaitSettings.setStepDuration(stepDuration);
+      if (endPhaseShift < 90.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getPaceSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getPaceMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getPaceFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
+      else if (endPhaseShift < 180.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getAmbleSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getAmbleMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getAmbleFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
+      else
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getTrotSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getTrotMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getTrotFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
       publishXGaitSettings(xGaitSettings);
    }
 
@@ -260,22 +382,9 @@ public class RemoteQuadrupedTeleopManager
       publishXGaitSettings(this.xGaitSettings);
    }
 
-   public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
+   public QuadrupedXGaitSettingsBasics getXGaitSettings()
    {
       return xGaitSettings;
-   }
-
-   public void setPaused(boolean pause)
-   {
-      paused.set(pause);
-
-      steppingStateChangeMessage.set(null);
-      walking.set(false);
-   }
-
-   public boolean isPaused()
-   {
-      return paused.get();
    }
 
    public Ros2Node getRos2Node()

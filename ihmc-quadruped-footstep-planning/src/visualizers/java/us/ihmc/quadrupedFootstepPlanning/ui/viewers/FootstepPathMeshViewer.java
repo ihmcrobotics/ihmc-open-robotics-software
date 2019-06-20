@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static final double RADIUS = 0.05;
+   private static final double DEFAULT_RADIUS = 0.05;
    private static final double zOffset = 0.01;
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
@@ -54,12 +54,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-   public static final QuadrantDependentList<Color> solutionFootstepColors = new QuadrantDependentList<>(Color.GREEN, Color.RED, Color.DARKGREEN, Color.DARKRED);
+   public static final QuadrantDependentList<Color> defaultSolutionFootstepColors = new QuadrantDependentList<>(Color.GREEN, Color.RED, Color.DARKGREEN, Color.DARKRED);
    private static final QuadrantDependentList<Color> intermediateFootstepColors = new QuadrantDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
 
    private final Messager messager;
    private final Topic<Boolean> showFootstepPlanTopic;
    private final Topic<Boolean> showFootstepPreviewTopic;
+
+   private QuadrantDependentList<Color> solutionFootstepColors = defaultSolutionFootstepColors;
+   private double footstepRadius = DEFAULT_RADIUS;
 
    public FootstepPathMeshViewer(Messager messager, Topic<FootstepPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
                                  Topic<Boolean> showFootstepPreviewTopic)
@@ -75,7 +78,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         Sphere previewSphere = new Sphere(RADIUS);
+         Sphere previewSphere = new Sphere(footstepRadius);
          previewSphere.setMouseTransparent(true);
 
          Point3D position = new Point3D();
@@ -89,6 +92,21 @@ public class FootstepPathMeshViewer extends AnimationTimer
       messager.registerTopicListener(computePathTopic, data -> reset.set(true));
       messager.registerTopicListener(showFootstepPlanTopic, this::handleShowSolution);
       messager.registerTopicListener(showFootstepPreviewTopic, this::handleShowPreview);
+   }
+
+   public void setFootstepColors(QuadrantDependentList<Color> colors)
+   {
+      solutionFootstepColors = colors;
+   }
+
+   public void setFootstepRadius(double radius)
+   {
+      this.footstepRadius = radius;
+   }
+
+   public QuadrantDependentList<Color> getSolutionFootstepColors()
+   {
+      return solutionFootstepColors;
    }
 
    public QuadrantDependentList<Point3D> getPreviewFootstepPositions()
@@ -130,10 +148,10 @@ public class FootstepPathMeshViewer extends AnimationTimer
          QuadrupedTimedStep footstep = plan.getFootstep(i);
          Color regionColor = colors.get(footstep.getRobotQuadrant());
 
-         footstep.getGoalPosition(footPosition);
+         footPosition.set(footstep.getGoalPosition());
          footPosition.addZ(zOffset);
 
-         meshBuilder.addSphere(RADIUS, footPosition, regionColor);
+         meshBuilder.addSphere(footstepRadius, footPosition, regionColor);
       }
 
       meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));

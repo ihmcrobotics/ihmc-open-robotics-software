@@ -194,7 +194,7 @@ public class CommandInputManager
    {
       if (message == null)
       {
-         LogTools.warn(printStatementPrefix + "Received a null message, ignored.");
+         LogTools.warn("{}Received a null message, ignored.", printStatementPrefix);
          return;
       }
 
@@ -214,13 +214,13 @@ public class CommandInputManager
       ConcurrentRingBuffer buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
-         LogTools.error(printStatementPrefix + "The message type " + message.getClass().getSimpleName() + " is not supported.");
+         LogTools.error("{}The message type {} is not supported.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
       Command nextCommand = (Command) buffer.next();
       if (nextCommand == null)
       {
-         LogTools.warn(printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
+         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
 
@@ -295,14 +295,14 @@ public class CommandInputManager
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)
       {
-         LogTools.error(printStatementPrefix + "The command type " + command.getClass().getSimpleName() + " is not supported.");
+         LogTools.error("{}The command type {} is not supported.", printStatementPrefix, command.getClass().getSimpleName());
          return;
       }
 
       Command<C, ?> nextModifiableMessage = (Command<C, ?>) buffer.next();
       if (nextModifiableMessage == null)
       {
-         LogTools.warn(printStatementPrefix + "The buffer for the command: " + command.getClass().getSimpleName() + " is full. Command ignored.");
+         LogTools.warn("{}The buffer for the command: {} is full. Command ignored.", printStatementPrefix, command.getClass().getSimpleName());
          return;
       }
       nextModifiableMessage.set(command);
@@ -352,6 +352,7 @@ public class CommandInputManager
     * Throw away any new available commands.
     * @deprecated Use {@link #clearAllCommands()} instead
     */
+   @Deprecated
    public void flushAllCommands()
    {
       clearAllCommands();
@@ -372,6 +373,7 @@ public class CommandInputManager
     * @param commandClassToFlush Used to know what type of command is to be thrown away.
     * @deprecated Use {@link #clearCommands(Class<C>)} instead
     */
+   @Deprecated
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       clearCommands(commandClassToFlush);

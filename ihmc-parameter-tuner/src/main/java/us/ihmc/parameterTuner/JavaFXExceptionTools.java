@@ -13,7 +13,7 @@ public class JavaFXExceptionTools
       });
    }
 
-   private static void createExceptionDialog(Throwable e)
+   public static void createExceptionDialog(Throwable e)
    {
       e.printStackTrace();
 

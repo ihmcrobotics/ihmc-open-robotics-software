@@ -58,7 +58,7 @@ public class GenericQuadrupedWalkOverSteppingStonesTest extends QuadrupedWalkOve
       FramePoint3D goalPosition17 = new FramePoint3D(baseBlockFrame, 1.95, 0.15, 0.0);
       FramePoint3D goalPosition18 = new FramePoint3D(baseBlockFrame, 1.25, -0.35, 0.0);
       FramePoint3D goalPosition19 = new FramePoint3D(baseBlockFrame, 2.0, -0.2, 0.0);
-      FramePoint3D goalPosition20 = new FramePoint3D(baseBlockFrame, 1.4, 0.08, 0.0);
+      FramePoint3D goalPosition20 = new FramePoint3D(baseBlockFrame, 1.4, 0.04, 0.0);
 
 
 
@@ -73,7 +73,7 @@ public class GenericQuadrupedWalkOverSteppingStonesTest extends QuadrupedWalkOve
       FramePoint3D goalPosition25 = new FramePoint3D(baseBlockFrame, 2.95, 0.10, 0.0);
       FramePoint3D goalPosition26 = new FramePoint3D(baseBlockFrame, 2.1, -0.2, 0.0);
       FramePoint3D goalPosition27 = new FramePoint3D(baseBlockFrame, 3.1, -0.15, 0.0);
-      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 2.1, 0.15, 0.0);
+      FramePoint3D goalPosition28 = new FramePoint3D(baseBlockFrame, 2.05, 0.15, 0.0);
 
       FramePoint3D goalPosition29 = new FramePoint3D(baseBlockFrame, 3.55, 0.10, 0.0);
       FramePoint3D goalPosition30 = new FramePoint3D(baseBlockFrame, 2.45, -0.15, 0.0);

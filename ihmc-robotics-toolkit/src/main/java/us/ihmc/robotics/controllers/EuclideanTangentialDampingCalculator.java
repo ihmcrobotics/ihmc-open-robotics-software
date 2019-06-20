@@ -1,13 +1,13 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
@@ -76,7 +76,7 @@ public class EuclideanTangentialDampingCalculator
          transformedGains.setElement(2, 0, alpha * transformedGains.getElement(2, 0));
 
          transformedGains.changeFrame(bodyFrame);
-         transformedGains.getMatrix(derivativeGainsToPack);
+         derivativeGainsToPack.set(transformedGains);
       }
    }
 

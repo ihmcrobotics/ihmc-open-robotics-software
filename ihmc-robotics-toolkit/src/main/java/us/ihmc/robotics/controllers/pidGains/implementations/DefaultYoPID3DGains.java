@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -335,5 +336,22 @@ public class DefaultYoPID3DGains implements YoPID3DGains
    public YoDouble getYoMaximumProportionalError()
    {
       return maxProportionalError;
+   }
+
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PID3DGainsReadOnly)
+         return YoPID3DGains.super.equals((PID3DGainsReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": kp: " + Arrays.toString(getProportionalGains()) + ", kd: " + Arrays.toString(getDerivativeGains()) + ", ki: "
+            + Arrays.toString(getIntegralGains());
    }
 }

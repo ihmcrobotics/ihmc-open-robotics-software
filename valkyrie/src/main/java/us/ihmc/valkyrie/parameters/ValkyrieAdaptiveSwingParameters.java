@@ -11,7 +11,7 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
    @Override
    public double getMinimumSwingHeight()
    {
-      return 0.05;
+      return 0.03;
    }
 
    @Override
@@ -23,7 +23,7 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
    @Override
    public double getMaximumStepHeightForMinimumSwingHeight()
    {
-      return 0.05;
+      return 0.02;
    }
 
    @Override
@@ -31,7 +31,7 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
    {
       return 0.1;
    }
-   
+
    /**
     * Parameters for setting swing time as a function of horizontal and vertical step displacement
     */
