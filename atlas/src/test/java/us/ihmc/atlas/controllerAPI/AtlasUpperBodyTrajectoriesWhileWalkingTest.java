@@ -1,6 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +25,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -44,7 +42,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -60,8 +57,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       simulationTestingParameters.setUsePefectSensors(true);
       simulationTestingParameters.setKeepSCSUp(false);
    }
-
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -92,7 +87,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    @Test
    public void testWalkingWithArmsHoldingInFeetFrame() throws Exception
    {
-      Random random = new Random(564654L);
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -139,7 +133,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       double timePerWaypoint = 0.5;
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
-      double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
 
       SideDependentList<OneDoFJointBasics[]> armsJoints = new SideDependentList<>();
       SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();
@@ -181,9 +174,9 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                   trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
                }
 
-               trajectoryPoint1DCalculator.computeTrajectoryPointTimes(timePerWaypoint, trajectoryTime);
-               trajectoryPoint1DCalculator.computeTrajectoryPointVelocities(true);
+               trajectoryPoint1DCalculator.compute(timePerWaypoint * (numberOfTrajectoryPoints - 1));
                OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
+               trajectoryData.addTimeOffset(timePerWaypoint);
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {

@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -113,14 +114,14 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       drcSimulationTestHelper.publishToController(zeroSpineJointMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT() * 3.0));
-      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
 
       ClearDelayQueueMessage clearMessage = HumanoidMessageTools.createClearDelayQueueMessage(SpineTrajectoryMessage.class);
       drcSimulationTestHelper.publishToController(clearMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0));
       //send a taskspace command, then delayed a jointspace command and then cleared the delay queue, so we should be in taskspace still
-      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
    }
 
    @BeforeEach

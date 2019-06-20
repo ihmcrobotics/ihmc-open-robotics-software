@@ -8,6 +8,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
@@ -188,6 +190,16 @@ public class VirtualModelControlOptimizationControlModule
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       wrenchMatrixCalculator.submitPlaneContactStateCommand(command);
+   }
+
+   public void submitCenterOfPressureCommand(CenterOfPressureCommand command)
+   {
+      wrenchMatrixCalculator.submitCenterOfPressureCommand(command);
+   }
+
+   public void submitContactWrenchCommand(ContactWrenchCommand command)
+   {
+      wrenchMatrixCalculator.submitContactWrenchCommand(command);
    }
 
    public void submitExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly wrench)

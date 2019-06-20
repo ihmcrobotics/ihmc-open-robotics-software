@@ -89,7 +89,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
 
       ThreadTools.sleepForever();
       test.tearDown();

@@ -5,13 +5,13 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import optiTrack.MocapMarker;
 import optiTrack.MocapRigidBody;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToPelvisFrameConverter;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,13 +22,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 @Tag("gui-slow")
 public class MocapToPelvisFrameConverterVisualTest
@@ -51,7 +50,6 @@ public class MocapToPelvisFrameConverterVisualTest
          ThreadTools.sleepForever();
       }
 
-      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -74,8 +72,8 @@ public class MocapToPelvisFrameConverterVisualTest
       RigidBodyTransform worldToPelvisTranform = new RigidBodyTransform(pelvisToWorldTransform);
       worldToPelvisTranform.invert();
 
-      ReferenceFrame pelvisFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("originalPelvisFrame", ReferenceFrame.getWorldFrame(), pelvisToWorldTransform);
-      ReferenceFrame mocapFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("mocapFrame", ReferenceFrame.getWorldFrame(), mocapToWorldTransform);
+      ReferenceFrame pelvisFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("originalPelvisFrame", ReferenceFrame.getWorldFrame(), pelvisToWorldTransform);
+      ReferenceFrame mocapFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("mocapFrame", ReferenceFrame.getWorldFrame(), mocapToWorldTransform);
 
       RigidBodyTransform pelvisToMarker2Transform = MocapToPelvisFrameConverter.getPelvisToMarker2Transform();
       Vector3D pelvisToMarker2Translation = new Vector3D();

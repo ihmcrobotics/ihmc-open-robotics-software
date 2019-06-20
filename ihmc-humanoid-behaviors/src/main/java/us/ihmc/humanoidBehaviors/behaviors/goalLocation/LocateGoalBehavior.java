@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.Ros2Node;
 
@@ -35,13 +36,19 @@ public class LocateGoalBehavior extends AbstractBehavior
          double yaw = Math.toDegrees(foundFiducialPose.getYaw()), pitch = Math.toDegrees(foundFiducialPose.getPitch()),
                roll = Math.toDegrees(foundFiducialPose.getRoll());
 
-         publishTextToSpeack(String.format("Target object located at [%s, %s, %s], rotation (%s, %s, %s)", decimalFormat.format(x), decimalFormat.format(y),
-                                           decimalFormat.format(z), decimalFormat.format(yaw), decimalFormat.format(pitch), decimalFormat.format(roll)));
+         //publishTextToSpeech(String.format("Target object located at [%s, %s, %s], rotation (%s, %s, %s)", decimalFormat.format(x), decimalFormat.format(y),
+         //                                  decimalFormat.format(z), decimalFormat.format(yaw), decimalFormat.format(pitch), decimalFormat.format(roll)));
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
+         foundFiducialPose.get(location, orientation);
+         publishUIPositionCheckerPacket(location, orientation);
+
+         
          done.set(true);
       }
       else
       {
-         publishTextToSpeack("Target object not located");
+         //publishTextToSpeech("Target object not located");
          done.set(false);
       }
    }

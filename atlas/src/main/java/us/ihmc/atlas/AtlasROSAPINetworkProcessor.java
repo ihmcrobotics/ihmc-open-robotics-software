@@ -14,7 +14,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -47,8 +46,7 @@ public class AtlasROSAPINetworkProcessor
          networkProcessorParameters.enableUiModule(true);
          networkProcessorParameters.enableROSAPICommunicator(true);
          networkProcessorParameters.enableControllerCommunicator(true);
-         DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
-//         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPICommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
+         new DRCNetworkProcessor(robotModel, networkProcessorParameters);
       }
       else 
       {

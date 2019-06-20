@@ -38,8 +38,11 @@ import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -50,13 +53,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorModeSubscriber;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -91,7 +94,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    private final HighLevelStateChangeStatusMessage stateChangeMessage = new HighLevelStateChangeStatusMessage();
    private final WalkingControllerFailureStatusMessage walkingControllerFailureStatusMessage = new WalkingControllerFailureStatusMessage();
 
-   private final BooleanProvider trustFootSwitches;
+   private final BooleanProvider trustFootSwitchesInSwing;
+   private final BooleanProvider trustFootSwitchesInSupport;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
 
@@ -110,7 +114,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
       HighLevelControllerName.setName(sitDownStateName, QuadrupedSitDownControllerState.name);
       requestedControllerState = new YoEnum<>("requestedControllerState", registry, HighLevelControllerName.class, true);
-      trustFootSwitches = new BooleanParameter("trustFootSwitches", registry, physicalProperties.trustFootSwitches());
+      trustFootSwitchesInSwing = new BooleanParameter("trustFootSwitchesInSwing", registry, physicalProperties.trustFootSwitchesInSwing());
+      trustFootSwitchesInSupport = new BooleanParameter("trustFootSwitchesInSupport", registry, physicalProperties.trustFootSwitchesInSupport());
 
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
@@ -155,6 +160,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialControllerState, calibrationState);
    }
 
+   public void registerHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> listener)
+   {
+      stateMachine.addStateChangedListener(listener);
+   }
+
    public State getState(HighLevelControllerName state)
    {
       return stateMachine.getState(state);
@@ -168,6 +178,10 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    @Override
    public void doControl()
    {
+      QuadrantDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footSwitches.get(robotQuadrant).updateMeasurement();
+
       if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
       {
          requestedControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
@@ -194,13 +208,18 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       case CUSTOM1:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(false);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSwing(false);
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSupport(false);
          }
 
-         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_LEFT).setFootContactState(false);
-         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
-         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
+            runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).setFootContactState(false);
+         }
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+         runtimeEnvironment.getEstimatorFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+
          if (stateEstimatorModeSubscriber != null)
             stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
@@ -208,8 +227,12 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(trustFootSwitches.getValue());
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSwing(trustFootSwitchesInSwing.getValue());
+            runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).trustFootSwitchInSwing(trustFootSwitchesInSwing.getValue());
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSupport(trustFootSwitchesInSupport.getValue());
+            runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).trustFootSwitchInSupport(trustFootSwitchesInSupport.getValue());
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
+            runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
          if (stateEstimatorModeSubscriber != null)
             stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
@@ -219,9 +242,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       default:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(trustFootSwitches.getValue());
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSwing(trustFootSwitchesInSwing.getValue());
+            runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitchInSupport(trustFootSwitchesInSupport.getValue());
             boolean inContact = controllerToolbox.getContactState(robotQuadrant) == ContactState.IN_CONTACT;
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(inContact);
+            runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).setFootContactState(inContact);
          }
          break;
       }

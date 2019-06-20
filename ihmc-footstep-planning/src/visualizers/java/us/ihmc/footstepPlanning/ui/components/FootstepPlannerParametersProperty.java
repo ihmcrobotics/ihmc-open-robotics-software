@@ -1,13 +1,10 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 import javafx.beans.property.Property;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettableFootstepPlannerParameters>
 {

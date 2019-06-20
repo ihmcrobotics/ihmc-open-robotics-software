@@ -7,13 +7,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -53,6 +53,12 @@ public class PlanningTestTools
 
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
                                         YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   {
+      visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, PlannerTools.createDefaultFootPolygon(), registry, graphicsListRegistry);
+   }
+
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+                                        ConvexPolygon2D defaultFoothold, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       if (registry != null)
@@ -95,7 +101,7 @@ public class PlanningTestTools
       if (footseps != null)
       {
          YoFrameConvexPolygon2D yoDefaultFootPolygon = new YoFrameConvexPolygon2D("DefaultFootPolygon", worldFrame, 4, vizRegistry);
-         yoDefaultFootPolygon.set(PlannerTools.createDefaultFootPolygon());
+         yoDefaultFootPolygon.set(defaultFoothold);
 
          int numberOfSteps = footseps.getNumberOfSteps();
 

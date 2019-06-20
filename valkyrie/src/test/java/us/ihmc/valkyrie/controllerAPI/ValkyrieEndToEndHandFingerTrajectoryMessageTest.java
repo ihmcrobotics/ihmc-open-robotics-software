@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 
@@ -12,8 +12,6 @@ import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.controllerAPI.EndToEndHandFingerTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;

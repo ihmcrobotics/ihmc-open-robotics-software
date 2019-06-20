@@ -132,9 +132,8 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (YoDouble) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches,
-            null, null, yoTime, gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
-
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches, null, yoTime,
+                                                                          gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
    }
 
    private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(YoVariableHolder yoVariableHolder)
@@ -204,7 +203,12 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public void trustFootSwitch(boolean trustFootSwitch)
+            public void trustFootSwitchInSwing(boolean trustFootSwitch)
+            {
+            }
+
+            @Override
+            public void trustFootSwitchInSupport(boolean trustFootSwitch)
             {
             }
          };

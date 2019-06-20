@@ -10,6 +10,8 @@ import us.ihmc.quadrupedRobotics.estimator.PitchEstimator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.List;
+
 public class QuadrupedCenterOfPressureTools
 {
    /**
@@ -22,7 +24,7 @@ public class QuadrupedCenterOfPressureTools
                                               QuadrantDependentList<MutableDouble> contactPressure)
    {
       // Compute center of pressure given the vertical force at each contact.
-      double pressure = 1e-6;
+      double pressure = 0.0;
       copPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       copPosition.setToZero();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -31,15 +33,19 @@ public class QuadrupedCenterOfPressureTools
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          copPosition.scaleAdd(contactPressure.get(robotQuadrant).doubleValue(), solePosition.get(robotQuadrant), copPosition);
       }
-      copPosition.scale(1.0 / pressure);
+      if (pressure > 0.0)
+         copPosition.scale(1.0 / pressure);
+      else
+         copPosition.setToNaN();
    }
 
    /**
     * Compute nominal pressure distribution for a given contact state.
-    * @param contactPressure nominal vertical ground reaction forces for each quadrant
+    * @param contactPressureToPack nominal vertical ground reaction forces for each quadrant
     * @param contactState contact state for each quadrant
     */
-   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure, QuadrantDependentList<ContactState> contactState)
+   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressureToPack,
+                                                              QuadrantDependentList<ContactState> contactState)
    {
       // Compute vertical force distribution assuming equal loading of hind and front ends.
       int numberOfHindFeetInContact = 0;
@@ -56,11 +62,11 @@ public class QuadrupedCenterOfPressureTools
             {
                numberOfHindFeetInContact++;
             }
-            contactPressure.get(robotQuadrant).setValue(1.0);
+            contactPressureToPack.get(robotQuadrant).setValue(1.0);
          }
          else
          {
-            contactPressure.get(robotQuadrant).setValue(0.0);
+            contactPressureToPack.get(robotQuadrant).setValue(0.0);
          }
       }
 
@@ -76,10 +82,56 @@ public class QuadrupedCenterOfPressureTools
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         double pressure = contactPressure.get(robotQuadrant).doubleValue();
+         double pressure = contactPressureToPack.get(robotQuadrant).doubleValue();
          pressure /= Math.max(numberOfEndsInContact, 1.0);
          pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
-         contactPressure.get(robotQuadrant).setValue(pressure);
+         contactPressureToPack.get(robotQuadrant).setValue(pressure);
+      }
+   }
+
+   /**
+    * Compute nominal pressure distribution for a given contact state.
+    * @param contactPressuresToPack nominal vertical ground reaction forces for each quadrant
+    * @param feetInContact feet that are in contact
+    */
+   public static void computeNominalNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressuresToPack,
+                                                              List<RobotQuadrant> feetInContact)
+   {
+      // Compute vertical force distribution assuming equal loading of hind and front ends.
+      int numberOfHindFeetInContact = 0;
+      int numberOfFrontFeetInContact = 0;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactPressuresToPack.get(robotQuadrant).setValue(0.0);
+
+      for (int footIndex = 0; footIndex < feetInContact.size(); footIndex++)
+      {
+         RobotQuadrant quadrantInContact = feetInContact.get(footIndex);
+         if (quadrantInContact.isQuadrantInFront())
+            numberOfFrontFeetInContact++;
+         else
+            numberOfHindFeetInContact++;
+
+         contactPressuresToPack.get(quadrantInContact).setValue(1.0);
+      }
+
+
+      double numberOfEndsInContact = 0.0;
+      if ((numberOfHindFeetInContact > 0) ^ (numberOfFrontFeetInContact > 0))
+      {
+         numberOfEndsInContact = 1.0;
+      }
+      if ((numberOfHindFeetInContact > 0) && (numberOfFrontFeetInContact > 0))
+      {
+         numberOfEndsInContact = 2.0;
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         double pressure = contactPressuresToPack.get(robotQuadrant).doubleValue();
+         pressure /= Math.max(numberOfEndsInContact, 1.0);
+         pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
+         contactPressuresToPack.get(robotQuadrant).setValue(pressure);
       }
    }
 

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.fest.swing.util.Pair;
+
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -42,9 +44,13 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxO
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -62,6 +68,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager commandInputManager;
 
+   private final List<String> armJointNames = new ArrayList<String>();
+   private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
+   private final WholeBodyTrajectoryPointCalculator fullRobotModelTrajectoryCalculator;
+   private static final double searchingTimeTickForVelocityBound = 0.002;
+   private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = true;
+
    private final KinematicsPlanningToolboxOutputStatus solution;
    private final KinematicsPlanningToolboxOutputConverter outputConverter;
 
@@ -76,10 +88,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final List<KinematicsToolboxCenterOfMassMessage> ikCenterOfMassMessages;
    private final AtomicReference<KinematicsToolboxConfigurationMessage> ikConfigurationMessage;
 
-   private final static double keyFrameTimeEpsilon = 0.01;
+   private static final double keyFrameTimeEpsilon = 0.01;
    private final TDoubleArrayList keyFrameTimes;
 
    private final HumanoidKinematicsToolboxController ikController;
+   private final KinematicsToolboxOutputStatus initialRobotConfiguration;
    private final CommandInputManager ikCommandInputManager = new CommandInputManager(getClass().getSimpleName(), KinematicsToolboxModule.supportedCommands());
 
    private final YoInteger indexOfCurrentKeyFrame;
@@ -94,6 +107,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       super(statusOutputManager, parentRegistry);
 
       this.desiredFullRobotModel = fullRobotModel;
+
+      armJointVelocityLimitMap = new HashMap<>();
+      fullRobotModelTrajectoryCalculator = new WholeBodyTrajectoryPointCalculator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
       solution.setDestination(-1);
@@ -117,6 +133,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
                                                              parentRegistry);
+      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
       totalComputationTime = new YoDouble("totalComputationTime", parentRegistry);
@@ -196,9 +213,31 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!initialized)
          throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
 
+      armJointVelocityLimitMap.clear();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         JointBasics armJoint = desiredFullRobotModel.getHand(robotSide).getParentJoint();
+         while (armJoint.getPredecessor() != desiredFullRobotModel.getElevator())
+         {
+            String armJointName = armJoint.getName();
+            if (armJointName.contains(robotSide.getLowerCaseName()))
+            {
+               armJointNames.add(armJointName);
+               OneDoFJointBasics oneDoFJointByName = desiredFullRobotModel.getOneDoFJointByName(armJointName);
+               Pair<Double, Double> velocityLimit = new Pair<Double, Double>(oneDoFJointByName.getVelocityLimitLower(),
+                                                                             oneDoFJointByName.getVelocityLimitUpper());
+               armJointVelocityLimitMap.put(armJointName, velocityLimit);
+            }
+            armJoint = armJoint.getPredecessor().getParentJoint();
+         }
+      }
+
+      solution.setPlanId(-1);
       solution.getKeyFrameTimes().clear();
       solution.getRobotConfigurations().clear();
       solution.setSolutionQuality(0.0);
+      solution.getKeyFrameTimes().add(0.0);
+      solution.getRobotConfigurations().add().set(initialRobotConfiguration);
 
       for (int i = 0; i < getNumberOfKeyFrames(); i++)
          solution.getKeyFrameTimes().add(keyFrameTimes.get(i));
@@ -410,17 +449,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          if (DEBUG)
             System.out.println("solved " + solutionQualityConvergenceDetector.isValid() + " " + solutionQualityConvergenceDetector.getNumberOfIteration());
-         if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
-         {
-            isDone.set(true);
-            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-            outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
-            outputConverter.computeWholeBodyTrajectoryMessage(solution);
-            solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
 
-            if (DEBUG)
-               System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime());
-            reportMessage(solution);
+         appendRobotConfigurationOnToolboxSolution();
+
+         if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
+         {
+            packSolution();
          }
          else
          {
@@ -444,20 +478,86 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
-   private boolean appendRobotConfigurationOnToolboxSolution()
+   private void packSolution()
    {
-      if (solutionQualityConvergenceDetector.isValid())
-      {
-         solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
-         solution.getRobotConfigurations().add().set(new KinematicsToolboxOutputStatus(ikController.getSolution()));
+      isDone.set(true);
 
-         return true;
-      }
-      else
+      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false
+            : true;
+
+      generateTrajectoriesToPreview(false);
+      if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
       {
-         solution.setSolutionQuality(-1);
-         return false;
+         System.out.println("re planning for velocity optimization");
+         generateTrajectoriesToPreview(true);
       }
+
+      if (isVelocityLimitExceeded() && isOptimalSolution)
+      {
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
+         isOptimalSolution = false;
+      }
+
+      fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
+
+      convertWholeBodyTrajectoryMessage();
+
+      if (isOptimalSolution)
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
+
+      if (DEBUG)
+         System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime() + ", PlanId = " + solution.getPlanId());
+      reportMessage(solution);
+   }
+
+   private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
+   {
+      fullRobotModelTrajectoryCalculator.clear();
+      fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
+      fullRobotModelTrajectoryCalculator.initializeCalculator();
+      if (useKeyFrameOptimizer)
+         fullRobotModelTrajectoryCalculator.computeOptimizingKeyFrameTimes();
+      else
+         fullRobotModelTrajectoryCalculator.computeForFixedKeyFrameTimes();
+      fullRobotModelTrajectoryCalculator.computeVelocityBounds(searchingTimeTickForVelocityBound);
+   }
+
+   private boolean isVelocityLimitExceeded()
+   {
+      for (String armJointName : armJointNames)
+      {
+         double jointVelocityLowerBound = fullRobotModelTrajectoryCalculator.getJointVelocityLowerBound(armJointName);
+         double jointVelocityUpperBound = fullRobotModelTrajectoryCalculator.getJointVelocityUpperBound(armJointName);
+
+         Pair<Double, Double> velocityLimit = armJointVelocityLimitMap.get(armJointName);
+         if (velocityLimit.i > jointVelocityLowerBound || velocityLimit.ii < jointVelocityUpperBound)
+         {
+            System.out.println(armJointName + " trajectory exceeds joint velocity limit." + " " + jointVelocityLowerBound + " " + jointVelocityUpperBound);
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private void convertWholeBodyTrajectoryMessage()
+   {
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
+      outputConverter.computeWholeBodyTrajectoryMessage(solution);
+      solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
+   }
+
+   private void appendRobotConfigurationOnToolboxSolution()
+   {
+      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
+      solution.getRobotConfigurations().add().set(keyFrame);
+
+      solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
+
+      if (!solutionQualityConvergenceDetector.isValid())
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME);
    }
 
    private boolean submitKeyFrameMessages()
@@ -487,8 +587,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          return false;
       }
 
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
-                                                                      FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel()));
+      FloatingJointBasics rootJoint = getDesiredFullRobotModel().getRootJoint();
+      OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel());
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, rootJoint, allJointsExcludingHands);
+      MessageTools.packDesiredJointState(initialRobotConfiguration, rootJoint, allJointsExcludingHands);
 
       ikController.updateRobotConfigurationData(currentRobotConfiguration);
 

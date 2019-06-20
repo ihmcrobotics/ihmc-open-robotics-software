@@ -165,7 +165,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
             float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
             float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
-            long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
+            long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getMonotonicTime());
             Time t = Time.fromNano(timeStamp);
 
             if (robotConfigurationData.getJointNameHash() != jointNameHash)

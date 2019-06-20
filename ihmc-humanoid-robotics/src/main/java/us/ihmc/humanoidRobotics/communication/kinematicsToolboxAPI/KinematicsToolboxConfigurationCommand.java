@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class KinematicsToolboxConfigurationCommand implements Command<KinematicsToolboxConfigurationCommand, KinematicsToolboxConfigurationMessage>
 {
+   private long sequenceId;
    private boolean hasPrivilegedRootJointPosition = false;
    private final Point3D privilegedRootJointPosition = new Point3D();
    private boolean hasPrivilegedRootJointOrientation = false;
@@ -24,6 +25,7 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    @Override
    public void clear()
    {
+      sequenceId = 0;
       hasPrivilegedRootJointPosition = false;
       privilegedRootJointPosition.setToNaN();
       hasPrivilegedRootJointOrientation = false;
@@ -35,6 +37,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    @Override
    public void set(KinematicsToolboxConfigurationCommand other)
    {
+      sequenceId = other.sequenceId;
+
       hasPrivilegedRootJointPosition = other.hasPrivilegedRootJointPosition;
       if (hasPrivilegedRootJointPosition)
          privilegedRootJointPosition.set(other.getPrivilegedRootJointPosition());
@@ -64,6 +68,7 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    @Override
    public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
+      sequenceId = message.getSequenceId();
       hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
       if (hasPrivilegedRootJointPosition)
          privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition());
@@ -148,5 +153,11 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

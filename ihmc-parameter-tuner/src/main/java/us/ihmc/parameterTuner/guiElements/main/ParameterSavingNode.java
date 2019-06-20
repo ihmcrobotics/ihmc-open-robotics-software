@@ -178,7 +178,7 @@ public class ParameterSavingNode extends HBox
     *
     * @return the most-recently-used file.
     */
-   public File getDefaultFilePath()
+   public static File getDefaultFilePath()
    {
       Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
       String filePath = prefs.get("filePath", null);

@@ -144,9 +144,19 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
 
+   public double getForceInPercentOfWeightThresholdToNotTrustFoot()
+   {
+      return getForceInPercentOfWeightThresholdToTrustFoot();
+   }
+
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
 
    public boolean createFusedIMUSensor()
+   {
+      return false;
+   }
+
+   public boolean createFootWrenchSensorDriftEstimator()
    {
       return false;
    }

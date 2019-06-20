@@ -1,16 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -210,7 +211,7 @@ public class PelvisOrientationManager
    {
       if (command.getSO3Trajectory().useCustomControlFrame())
       {
-         PrintTools.warn("Can not use custom control frame with pelvis orientation.");
+         LogTools.warn("Can not use custom control frame with pelvis orientation.");
          return false;
       }
       enableUserPelvisControlDuringWalking.set(command.isEnableUserPelvisControlDuringWalking());
@@ -256,6 +257,11 @@ public class PelvisOrientationManager
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       walkingManager.setSelectionMatrix(selectionMatrix);
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return userManager.pollStatusToReport();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

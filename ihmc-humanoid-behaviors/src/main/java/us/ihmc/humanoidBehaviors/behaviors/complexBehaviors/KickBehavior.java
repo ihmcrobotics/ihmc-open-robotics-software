@@ -22,8 +22,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +39,7 @@ public class KickBehavior extends AbstractBehavior
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
@@ -47,6 +47,7 @@ public class KickBehavior extends AbstractBehavior
                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       trajectoryTime = new YoDouble("kickTrajectoryTime", registry);

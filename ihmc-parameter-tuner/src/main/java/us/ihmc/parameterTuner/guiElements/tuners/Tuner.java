@@ -16,6 +16,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import us.ihmc.javaFXToolkit.TextFormatterTools;
+import us.ihmc.parameterTuner.JavaFXTitledPaneTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -25,6 +26,11 @@ import us.ihmc.robotics.sliderboard.SliderboardListener;
 public class Tuner extends VBox implements SliderboardListener
 {
    private static final int MAX_DESCRIPTION_CHARACTERS = 255;
+
+   static
+   {
+      JavaFXTitledPaneTools.setTitledPaneAnimationTime(50);
+   }
 
    private final Label name = new Label();
    private final TitledPane descriptionPane = new TitledPane();
@@ -140,5 +146,10 @@ public class Tuner extends VBox implements SliderboardListener
    public double getValuePercent()
    {
       return inputNode.getValuePercent();
+   }
+
+   public GuiParameter getParameter()
+   {
+      return parameter;
    }
 }

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -344,7 +345,7 @@ public class PartialFootholdControlModule
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       // if the icp is in the area that would be cut off exit
-      FrameConvexPolygon2D oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
+      FrameConvexPolygon2DReadOnly oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
       fullSupportAfterShrinking.setIncludingFrame(oppositeFootPolygon);
       fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);

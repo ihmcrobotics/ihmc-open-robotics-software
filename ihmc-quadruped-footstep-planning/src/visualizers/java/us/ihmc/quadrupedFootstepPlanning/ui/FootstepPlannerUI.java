@@ -34,6 +34,7 @@ import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.F
 public class FootstepPlannerUI
 {
    private static final boolean VERBOSE = true;
+   private static final boolean includeProcessView = true;
 
    private final JavaFXMessager messager;
    private final Stage primaryStage;
@@ -61,6 +62,8 @@ public class FootstepPlannerUI
    private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
+   @FXML
+   private PlannerReachParametersUIController plannerReachParametersUIController;
    @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
@@ -103,11 +106,13 @@ public class FootstepPlannerUI
       mainPane = loader.load();
 
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
@@ -116,18 +121,21 @@ public class FootstepPlannerUI
 
       setMainTabTopics();
       footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      plannerReachParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       mainTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsVizController.bindControls();
       footstepPlannerVizController.bindControls();
 
       footstepPlannerParametersUIController.loadFromFile();
+      plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -137,7 +145,7 @@ public class FootstepPlannerUI
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
-                                                                 GoalOrientationTopic, XGaitSettingsTopic);
+                                                                 GoalOrientationTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
                                                                        StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
                                                                        LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);
@@ -154,7 +162,7 @@ public class FootstepPlannerUI
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, ShowBodyPathTopic, ComputePathTopic, BodyPathDataTopic);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
 //      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
-      this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);
+      this.footstepPlannerProcessViewer = includeProcessView ? new FootstepPlannerProcessViewer(messager) : null;
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -164,7 +172,8 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
 //      view3dFactory.addNodeToView(graphRenderer.getRoot());
-      view3dFactory.addNodeToView(footstepPlannerProcessViewer.getRoot());
+      if (includeProcessView)
+         view3dFactory.addNodeToView(footstepPlannerProcessViewer.getRoot());
 
       if(fullQuadrupedRobotModelFactory == null)
       {
@@ -207,7 +216,8 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
 //      graphRenderer.start();
-      footstepPlannerProcessViewer.start();
+      if (footstepPlannerProcessViewer != null)
+         footstepPlannerProcessViewer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -242,7 +252,8 @@ public class FootstepPlannerUI
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      footstepPlannerProcessViewer.stop();
+      if (footstepPlannerProcessViewer != null)
+         footstepPlannerProcessViewer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
@@ -266,7 +277,8 @@ public class FootstepPlannerUI
       mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
                                            FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
                                            FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
-                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic);
+                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic,
+                                           FootstepPlannerMessagerAPI.StartTargetTypeTopic, FootstepPlannerMessagerAPI.StartFeetPositionTopic);
       mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
       mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
       mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);

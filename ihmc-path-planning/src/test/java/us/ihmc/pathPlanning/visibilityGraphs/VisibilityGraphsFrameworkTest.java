@@ -75,7 +75,14 @@ public class VisibilityGraphsFrameworkTest
 
    private static VisibilityGraphsParameters createTestParameters()
    {
-      return new DefaultVisibilityGraphParameters();
+      return new DefaultVisibilityGraphParameters()
+      {
+         @Override
+         public double getNormalZThresholdForAccessibleRegions()
+         {
+            return Math.cos(Math.toRadians(60.0));
+         }
+      };
    }
 
    @BeforeEach
@@ -755,7 +762,7 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_204953_FlatGroundWithWall";
+      String dataSetName = "20190204_155900_CampLejeuneRock4";
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();

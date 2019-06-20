@@ -141,13 +141,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
-    *
-    * @return boolean (true = use ICP Optimization, false = use ICP Proportional Controller)
-    */
-   public abstract boolean useOptimizationBasedICPController();
-
-   /**
     * The desired position of the CMP is computed based on a feedback control law on the ICP. This method returns
     * the gains used in this controller.
     */
@@ -332,16 +325,6 @@ public abstract class WalkingControllerParameters
     */
    public abstract double getDefaultSwingTime();
 
-
-   /**
-    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state
-    * @return
-    */
-   public double getDefaultTouchdownTime()
-   {
-      return 0.0;
-   }
-
    /**
     * This is the default transfer time used in the walking controller to shift the weight back to the center of the feet
     * after executing a footstep plan.
@@ -509,18 +492,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Usually the desired CMP will be projected into the support area to avoid the generation of large amounts of
-    * angular momentum. This method determines whether the desired CMP is allowed to be in area that is larger then
-    * the support. The size of the area is determined by the value {@link #getMaxAllowedDistanceCMPSupport()}
-    *
-    * @return alwaysAllowMomentum
-    */
-   public boolean alwaysAllowMomentum()
-   {
-      return false;
-   }
-
-   /**
     * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
     * the vertical axis during swing only.
     * Useful when the robot has heavy legs and tends to slips during swing.
@@ -637,12 +608,13 @@ public abstract class WalkingControllerParameters
 
    /**
     * Determines whether or not to attempt to directly control the height.
-    * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
-    * If false, the height will be controlled inside the nullspace by trying to achieve the desired
-    * privileged configuration in the legs.
-    * @return boolean (true = control height with momentum, false = do not control height with momentum)
+    * If true, the height will be controlled directly via a command to the controller core. This can be
+    * a linear momentum z command or a feedback control command for the pelvis.
+    * If false, the height will be controlled inside the nullspace of other objectives by trying to achieve
+    * the desired privileged configuration in the legs.
+    * @return boolean (true = control height, false = do not control height but leave it up to the optimization)
     */
-   public boolean controlHeightWithMomentum()
+   public boolean enableHeightFeedbackControl()
    {
       return true;
    }
@@ -699,10 +671,7 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
+   public abstract ICPOptimizationParameters getICPOptimizationParameters();
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.

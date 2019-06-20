@@ -8,7 +8,6 @@ import com.jme3.math.Transform;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
@@ -26,12 +25,16 @@ import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -62,7 +65,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -72,24 +75,19 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    public final static boolean SCALE_ATLAS = false;
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
-
-   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
 
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -148,18 +146,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPointsn)
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
@@ -191,10 +189,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      if (USE_SMOOTH_CMP_PLANNER)
-         capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
-      else
-         capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
+      capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
 
       planarRegionFootstepPlannerParameters = new AtlasPlanarRegionFootstepPlannerParameters();
 
@@ -316,7 +311,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotSensorInformation getSensorInformation()
+   public HumanoidRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
    }
@@ -394,25 +389,33 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
+   public RobotROSClockCalculator getROSClockCalculator()
    {
+      DRCROSPPSTimestampOffsetProvider timestampOffsetProvider = null;
+
       if (target == RobotTarget.REAL_ROBOT)
       {
-         return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
+         timestampOffsetProvider = AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if ((target == RobotTarget.SCS) && AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
+      if (AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
       {
-         return new SimulationRosClockPPSTimestampOffsetProvider();
+         if (target == RobotTarget.SCS)
+         {
+            timestampOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+         }
       }
 
-      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
+      if (timestampOffsetProvider == null)
+         timestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
+
+      return new RobotROSClockCalculatorFromPPSOffset(timestampOffsetProvider);
    }
 
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation,
+      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getROSClockCalculator(), sensorInformation,
                                          getJointMap(), getPhysicalProperties(), target);
    }
 
@@ -429,18 +432,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                         ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         RealtimeRos2Node realtimeRos2Node,
-                                                                         CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
       switch (selectedVersion.getHandModel())
       {
       case ROBOTIQ:
-         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, realtimeRos2Node,
+         return new SimulatedRobotiqHandsController(simulatedRobot, this, realtimeRos2Node,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()),
-                                                    closeableAndDisposableRegistry);
+                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
 
       default:
          return null;
@@ -460,17 +459,17 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public LogSettings getLogSettings()
+   public DataServerSettings getLogSettings()
    {
 
       switch (target)
       {
       case REAL_ROBOT:
-         return LogSettings.ATLAS_IAN;
+         return new DataServerSettings(true, "AtlasGUI");
       case GAZEBO:
       case SCS:
       default:
-         return LogSettings.SIMULATION;
+         return new DataServerSettings(false, "SimulationGUI");
       }
    }
 
@@ -889,7 +888,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   public JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
+                                                                   HumanoidRobotContextData contextData)
    {
       return null;
    }

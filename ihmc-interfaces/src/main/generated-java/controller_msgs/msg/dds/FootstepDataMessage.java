@@ -55,7 +55,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
             * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
             */
-   public double swing_height_;
+   public double swing_height_ = -1.0;
    /**
             * In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
             * can be requested. These proportions encode the xy positions of the swing trajectory's two waypoints. A proportion of 0.0 and 1.0 will
@@ -97,15 +97,22 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             */
    public double transfer_duration_ = -1.0;
    /**
-            * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            * If the default is set to zero, the touchdown state will be disabled.
-            */
-   public double touchdown_duration_ = -1.0;
-   /**
             * The time to delay this command on the controller side before being executed.
             */
    public double execution_delay_time_;
+   /**
+            * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
+            * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
+            * different from the pitch of the foothold pose provided in this message.
+            */
+   public double touchdown_duration_ = -1.0;
+   /**
+            * Time spent in toe or heel support before the step. This duration is part of the transfer duration and must therefore
+            * be shorter then the transfer. Note, that this only has an effect if the swing trajectory is provided, the swing trajectory
+            * has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
+            * foot pitch.
+            */
+   public double liftoff_duration_ = -1.0;
 
    public FootstepDataMessage()
    {
@@ -147,9 +154,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       transfer_duration_ = other.transfer_duration_;
 
+      execution_delay_time_ = other.execution_delay_time_;
+
       touchdown_duration_ = other.touchdown_duration_;
 
-      execution_delay_time_ = other.execution_delay_time_;
+      liftoff_duration_ = other.liftoff_duration_;
 
    }
 
@@ -346,25 +355,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-            * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            * If the default is set to zero, the touchdown state will be disabled.
-            */
-   public void setTouchdownDuration(double touchdown_duration)
-   {
-      touchdown_duration_ = touchdown_duration;
-   }
-   /**
-            * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            * If the default is set to zero, the touchdown state will be disabled.
-            */
-   public double getTouchdownDuration()
-   {
-      return touchdown_duration_;
-   }
-
-   /**
             * The time to delay this command on the controller side before being executed.
             */
    public void setExecutionDelayTime(double execution_delay_time)
@@ -377,6 +367,46 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double getExecutionDelayTime()
    {
       return execution_delay_time_;
+   }
+
+   /**
+            * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
+            * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
+            * different from the pitch of the foothold pose provided in this message.
+            */
+   public void setTouchdownDuration(double touchdown_duration)
+   {
+      touchdown_duration_ = touchdown_duration;
+   }
+   /**
+            * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
+            * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
+            * different from the pitch of the foothold pose provided in this message.
+            */
+   public double getTouchdownDuration()
+   {
+      return touchdown_duration_;
+   }
+
+   /**
+            * Time spent in toe or heel support before the step. This duration is part of the transfer duration and must therefore
+            * be shorter then the transfer. Note, that this only has an effect if the swing trajectory is provided, the swing trajectory
+            * has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
+            * foot pitch.
+            */
+   public void setLiftoffDuration(double liftoff_duration)
+   {
+      liftoff_duration_ = liftoff_duration;
+   }
+   /**
+            * Time spent in toe or heel support before the step. This duration is part of the transfer duration and must therefore
+            * be shorter then the transfer. Note, that this only has an effect if the swing trajectory is provided, the swing trajectory
+            * has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
+            * foot pitch.
+            */
+   public double getLiftoffDuration()
+   {
+      return liftoff_duration_;
    }
 
 
@@ -436,9 +466,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.touchdown_duration_, other.touchdown_duration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.liftoff_duration_, other.liftoff_duration_, epsilon)) return false;
 
 
       return true;
@@ -473,9 +505,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
+      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+
       if(this.touchdown_duration_ != otherMyClass.touchdown_duration_) return false;
 
-      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+      if(this.liftoff_duration_ != otherMyClass.liftoff_duration_) return false;
 
 
       return true;
@@ -513,10 +547,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");
       builder.append(this.transfer_duration_);      builder.append(", ");
+      builder.append("execution_delay_time=");
+      builder.append(this.execution_delay_time_);      builder.append(", ");
       builder.append("touchdown_duration=");
       builder.append(this.touchdown_duration_);      builder.append(", ");
-      builder.append("execution_delay_time=");
-      builder.append(this.execution_delay_time_);
+      builder.append("liftoff_duration=");
+      builder.append(this.liftoff_duration_);
       builder.append("}");
       return builder.toString();
    }

@@ -19,8 +19,8 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
- * Controls the linear Velocity of the body in body z up frame
- * Controls the angular velocity of the body in body frame
+ * Controls the linear Velocity of the body in body z up frame Controls the angular velocity of the
+ * body in body frame
  */
 public class HexapodBodySpatialManager
 {
@@ -47,7 +47,7 @@ public class HexapodBodySpatialManager
    private final Vector3D angularWeight = new Vector3D();
 
    public HexapodBodySpatialManager(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, double controllerDt,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.controllerDt = controllerDt;
       body = fullRobotModel.getRootBody();
@@ -75,13 +75,12 @@ public class HexapodBodySpatialManager
       desiredPosition.setToZero(body.getBodyFixedFrame());
       desiredOrientation.setToZero(body.getBodyFixedFrame());
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
+      spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
       yoDesiredBodyOrientation.set(desiredOrientation);
       yoDesiredBodyPosition.set(desiredPosition);
-      
+
       desiredBodyHeight.set(desiredPosition.getZ());
       filteredBodyHeight.set(desiredBodyHeight.getDoubleValue());
    }
@@ -96,7 +95,7 @@ public class HexapodBodySpatialManager
 
       updateDesiredPositionBasedOnDesiredLinearVelocity();
       updateDesiredOrientationBasedOnDesiredAngularVelocity();
-      
+
       filteredBodyHeight.update();
       yoDesiredBodyPosition.setZ(filteredBodyHeight.getDoubleValue());
 
@@ -105,13 +104,13 @@ public class HexapodBodySpatialManager
       yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
+      spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                feedForwardAngularAcceleration, feedForwardLinearAcceleration);
    }
 
- /**
-    * we're controlling the yaw rate in world so add our desired rate to the yaw orientation to keep things consistent
+   /**
+    * we're controlling the yaw rate in world so add our desired rate to the yaw orientation to keep
+    * things consistent
     */
    private void updateDesiredOrientationBasedOnDesiredAngularVelocity()
    {
@@ -119,11 +118,12 @@ public class HexapodBodySpatialManager
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredAngularVelocity.scale(controllerDt);
       double deltaYaw = desiredAngularVelocity.getZ();
-      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw().getDoubleValue() + deltaYaw);
+      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw() + deltaYaw);
    }
 
    /**
-    * we're controlling the velocity so add our desired velocity to the position to keep things consistent
+    * we're controlling the velocity so add our desired velocity to the position to keep things
+    * consistent
     */
    private void updateDesiredPositionBasedOnDesiredLinearVelocity()
    {

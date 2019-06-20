@@ -1,11 +1,12 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -19,8 +20,6 @@ import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -79,8 +78,7 @@ public class AtlasFinalsWorldStairsTest
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 2, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCWalkingUpStairsTest");
 
@@ -127,8 +125,7 @@ public class AtlasFinalsWorldStairsTest
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DRCFinalsEnvironment environment = new DRCFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCWalkingUpStairsTest");
 

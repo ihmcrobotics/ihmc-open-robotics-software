@@ -12,6 +12,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       implements Command<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>,
       FrameBasedCommand<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
@@ -42,6 +43,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
@@ -50,14 +52,13 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void setFromMessage(HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
-      robotSide = RobotSide.fromByte(message.getRobotSide());
-      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
@@ -72,6 +73,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(HandHybridJointspaceTaskspaceTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
@@ -120,5 +122,11 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    public double getExecutionTime()
    {
       return taskspaceTrajectoryCommand.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

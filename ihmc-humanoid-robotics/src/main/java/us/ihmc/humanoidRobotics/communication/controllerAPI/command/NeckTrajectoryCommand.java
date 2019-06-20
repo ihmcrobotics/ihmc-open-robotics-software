@@ -8,6 +8,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryCommand>
 {
+   private long sequenceId;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public NeckTrajectoryCommand()
@@ -23,18 +24,21 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
    @Override
    public void clear()
    {
+      sequenceId = 0;
       jointspaceTrajectory.clear();
    }
 
    @Override
    public void set(NeckTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.jointspaceTrajectory);
    }
 
    @Override
    public void setFromMessage(NeckTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
@@ -89,5 +93,11 @@ public class NeckTrajectoryCommand implements Command<NeckTrajectoryCommand, Nec
    public double getExecutionTime()
    {
       return jointspaceTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

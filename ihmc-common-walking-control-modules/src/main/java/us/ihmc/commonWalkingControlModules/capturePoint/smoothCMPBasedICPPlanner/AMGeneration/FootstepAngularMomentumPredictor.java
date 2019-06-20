@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -51,8 +51,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private final YoBoolean planSwingAngularMomentum;
    private final YoBoolean planTransferAngularMomentum;
-
-   private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
 
    private final YoDouble gravityZ;
    private final YoDouble swingLegMass;
@@ -110,7 +108,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private TrajectoryDebug activeSwingFootTrajectory;
    private TrajectoryDebug activeSupportFootTrajectory;
 
-
+   private int numberOfStepsToConsider;
 
    public FootstepAngularMomentumPredictor(String namePrefix, YoDouble omega0, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
@@ -283,16 +281,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   @Override
-   public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters, double totalMass, double gravityZ)
    {
-      this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
-      AngularMomentumEstimationParameters angularMomentumParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
+      numberOfStepsToConsider = icpPlannerParameters.getNumberOfFootstepsToConsider();
+      AngularMomentumEstimationParameters angularMomentumParameters = icpPlannerParameters.getAngularMomentumEstimationParameters();
       this.swingLegMass.set(totalMass * angularMomentumParameters.getPercentageSwingLegMass());
       this.supportLegMass.set(totalMass * angularMomentumParameters.getPercentageSupportLegMass());
       this.gravityZ.set(gravityZ);
-      this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
-      this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
+      this.planSwingAngularMomentum.set(icpPlannerParameters.planSwingAngularMomentum());
+      this.planTransferAngularMomentum.set(icpPlannerParameters.planTransferAngularMomentum());
    }
 
    @Override
@@ -450,7 +447,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
       // handle each of the upcoming footsteps
       WalkingTrajectoryType currentWalkingPhase = WalkingTrajectoryType.TRANSFER;
-      int numberOfSteps = Math.min(numberOfRegisteredFootsteps.getIntegerValue(), smoothCMPPlannerParameters.getNumberOfFootstepsToConsider());
+      int numberOfSteps = Math.min(numberOfRegisteredFootsteps.getIntegerValue(), numberOfStepsToConsider);
       setFootTrajectoriesForPhase(footstepIndex, currentWalkingPhase);
       for(int stepIndex = footstepIndex; stepIndex < numberOfSteps; stepIndex++)
       {

@@ -11,6 +11,7 @@ public class QuadrupedBodyHeightCommand
       implements Command<QuadrupedBodyHeightCommand, QuadrupedBodyHeightMessage>, FrameBasedCommand<QuadrupedBodyHeightMessage>,
       EpsilonComparable<QuadrupedBodyHeightCommand>
 {
+   private long sequenceId;
    /**
     * This trajectory is sent to control the body height
     */
@@ -30,6 +31,7 @@ public class QuadrupedBodyHeightCommand
 
    public void clear()
    {
+      sequenceId = 0;
       euclideanTrajectory.clear();
       controlBodyHeight = false;
       isExpressedInAbsoluteTime = false;
@@ -45,6 +47,7 @@ public class QuadrupedBodyHeightCommand
    @Override
    public void set(QuadrupedBodyHeightCommand other)
    {
+      sequenceId = other.sequenceId;
       euclideanTrajectory.set(other.euclideanTrajectory);
       controlBodyHeight = other.controlBodyHeight;
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
@@ -53,14 +56,13 @@ public class QuadrupedBodyHeightCommand
    @Override
    public void setFromMessage(QuadrupedBodyHeightMessage message)
    {
-      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
-      controlBodyHeight = message.getControlBodyHeight();
-      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyHeightMessage message)
    {
+      sequenceId = message.getSequenceId();
       euclideanTrajectory.set(resolver, message.getEuclideanTrajectory());
       controlBodyHeight = message.getControlBodyHeight();
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
@@ -132,5 +134,11 @@ public class QuadrupedBodyHeightCommand
    public double getExecutionTime()
    {
       return euclideanTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -31,6 +29,13 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
    public void testLookingLeftAndRight() throws Exception
    {
       super.testLookingLeftAndRight();
+   }
+
+   @Override
+   @Test
+   public void testSingleTrajectoryPoint() throws Exception
+   {
+      super.testSingleTrajectoryPoint();
    }
 
    @Override
@@ -108,13 +113,6 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
    {
       super.testSettingWeightMatrixUsingSingleTrajectoryPoint();
-   }
-
-   @Override
-   @Test
-   public void testSingleTrajectoryPoint() throws Exception
-   {
-      super.testSingleTrajectoryPoint();
    }
 
    @Override

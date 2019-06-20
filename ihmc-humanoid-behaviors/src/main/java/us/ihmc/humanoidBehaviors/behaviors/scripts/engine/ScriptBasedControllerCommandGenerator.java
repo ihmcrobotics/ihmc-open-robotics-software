@@ -21,19 +21,22 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class ScriptBasedControllerCommandGenerator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
-   private final ReferenceFrame worldFrame;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
 
    public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands, FullHumanoidRobotModel fullRobotModel)
    {
       this.controllerCommands = controllerCommands;
       this.fullRobotModel = fullRobotModel;
-      worldFrame = ReferenceFrame.getWorldFrame();
+      referenceFrameHashCodeResolver.putAllFullRobotModelReferenceFrames(fullRobotModel);
    }
 
    public void loadScriptFile(Path scriptFilePath, ReferenceFrame referenceFrame)
@@ -43,7 +46,7 @@ public class ScriptBasedControllerCommandGenerator
       {
          scriptFileLoader = new ScriptFileLoader(scriptFilePath);
 
-         RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+         RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(worldFrame);
          ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromReferenceFrameToWorldFrame);
          scriptObjects.addAll(scriptObjectsList);
          convertFromScriptObjectsToControllerCommands();
@@ -61,7 +64,7 @@ public class ScriptBasedControllerCommandGenerator
       {
          scriptFileLoader = new ScriptFileLoader(scriptInputStream);
 
-         RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+         RigidBodyTransform transformFromReferenceFrameToWorldFrame = referenceFrame.getTransformToDesiredFrame(worldFrame);
          ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromReferenceFrameToWorldFrame);
          scriptObjects.addAll(scriptObjectsList);
          convertFromScriptObjectsToControllerCommands();
@@ -93,7 +96,7 @@ public class ScriptBasedControllerCommandGenerator
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(worldFrame));
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          FootTrajectoryCommand command = new FootTrajectoryCommand();
-         command.getSE3Trajectory().set(worldFrame, worldFrame, message.getSe3Trajectory());
+         command.getSE3Trajectory().set(referenceFrameHashCodeResolver, message.getSe3Trajectory());
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
@@ -103,7 +106,7 @@ public class ScriptBasedControllerCommandGenerator
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          HandTrajectoryCommand command = new HandTrajectoryCommand();
-         command.getSE3Trajectory().set(worldFrame, chestFrame, message.getSe3Trajectory());
+         command.getSE3Trajectory().set(referenceFrameHashCodeResolver, message.getSe3Trajectory());
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PelvisHeightTrajectoryMessage)

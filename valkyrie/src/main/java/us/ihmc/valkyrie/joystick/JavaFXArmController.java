@@ -21,7 +21,6 @@ import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -246,8 +245,8 @@ public class JavaFXArmController
             Quaternion desiredOrientation = new Quaternion(sideDependentKeyFramePoses.get(robotSide).get(0).getRotationMatrix());
             desiredOrientation.appendYawRotation(appendingYawOrientationValue);
 
-            PrintTools.info("desiredPosition " + desiredPosition);
-            PrintTools.info("desiredOrientation " + desiredOrientation);
+            LogTools.info("desiredPosition " + desiredPosition);
+            LogTools.info("desiredOrientation " + desiredOrientation);
 
             KinematicsToolboxRigidBodyMessage handMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), desiredPosition,
                                                                                                              desiredOrientation);

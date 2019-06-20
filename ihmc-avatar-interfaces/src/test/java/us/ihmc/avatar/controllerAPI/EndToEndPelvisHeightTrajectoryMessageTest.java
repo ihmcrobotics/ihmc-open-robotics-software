@@ -1,33 +1,38 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -62,6 +67,10 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
+
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -89,6 +98,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
                                                                                                                              desiredPosition.getZ());
+      pelvisHeightTrajectoryMessage.setSequenceId(random.nextLong());
 
       drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
 
@@ -103,6 +113,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+
+      assertEquals(2, statusMessages.size());
+      Point3D expectedPosition = new Point3D(Double.NaN, Double.NaN, pelvisHeight);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, "pelvisHeight",
+                                                        statusMessages.remove(0), controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime,
+                                                        expectedPosition, null, "pelvisHeight", statusMessages.remove(0), 1.0e-3, controllerDT);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -143,9 +160,9 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    protected FramePoint3D getRandomPelvisPosition(Random random, RigidBodyBasics pelvis)
    {
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ());
       return desiredRandomPelvisPosition;
    }
 
@@ -242,8 +259,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    }
 
    /**
-    * This test is to reproduce a bug found on Valkyrie where sending a stop all trajectory would cause the
-    * robot to increase its height.
+    * This test is to reproduce a bug found on Valkyrie where sending a stop all trajectory would cause
+    * the robot to increase its height.
     */
    public void testStopAllTrajectory() throws Exception
    {
@@ -258,8 +275,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       double forceMagnitude = fullRobotModel.getTotalMass() * 2.0;
       String pushJointName = fullRobotModel.getPelvis().getParentJoint().getName();
-      PushRobotController pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), pushJointName, new Vector3D(),
-                                                                   1.0 / forceMagnitude);
+      PushRobotController pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), pushJointName, new Vector3D(), 1.0 / forceMagnitude);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphic(pushController.getForceVisualizer());
       pushController.applyForce(new Vector3D(0.0, 0.0, 1.0), forceMagnitude, Double.POSITIVE_INFINITY);
 

@@ -3,6 +3,16 @@
     <registry name="DRCControllerThread">
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
+                <registry name="WalkingControllerState">
+            	    <registry name="LinearMomentumRateControlModule">
+            		    <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    </registry>
+            	</registry>
                 <registry name="HighLevelHumanoidControllerFactory">
                     <registry name="MomentumOptimizationSettings">
                         <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
@@ -43,15 +53,6 @@
                         <parameter name="LoadedFootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                        <parameter name="DefaultLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="DefaultLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="DefaultLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                        <parameter name="DefaultAngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="DefaultAngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="DefaultAngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="HighLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
                     <registry name="JointspaceGains">
                         <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
@@ -199,8 +200,10 @@
                             </registry>
                         </registry>
                         <registry name="BalanceManager">
+                            <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
                             <registry name="PelvisICPBasedTranslationManager">
-<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+								<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                             </registry>
                         </registry>
                     </registry>

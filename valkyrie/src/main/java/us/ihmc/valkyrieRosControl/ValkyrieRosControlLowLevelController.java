@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -31,7 +31,7 @@ public class ValkyrieRosControlLowLevelController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final TimestampProvider timestampProvider;
+   private final TimestampProvider monotonicTimeProvider;
 
    private final List<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
@@ -47,13 +47,13 @@ public class ValkyrieRosControlLowLevelController
 
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
-   public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+   public ValkyrieRosControlLowLevelController(TimestampProvider monotonicTimeProvider, final double updateDT,
                                                ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
                                                YoVariableRegistry parentRegistry)
    {
-      this.timestampProvider = timestampProvider;
+      this.monotonicTimeProvider = monotonicTimeProvider;
 
       wakeUpTime.set(Double.NaN);
 
@@ -95,7 +95,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void doControl()
    {
-      long timestamp = timestampProvider.getTimestamp();
+      long timestamp = monotonicTimeProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())
          wakeUpTime.set(Conversions.nanosecondsToSeconds(timestamp));
@@ -135,7 +135,7 @@ public class ValkyrieRosControlLowLevelController
       if (jointCommandCalculator != null)
          jointCommandCalculator.subtractTorqueOffset(torqueOffset);
       else
-         PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
+         LogTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
    }
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)

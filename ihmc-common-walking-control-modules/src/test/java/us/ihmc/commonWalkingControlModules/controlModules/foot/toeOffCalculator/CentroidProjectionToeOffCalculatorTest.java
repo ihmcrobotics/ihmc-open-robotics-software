@@ -16,8 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -214,12 +212,6 @@ public class CentroidProjectionToeOffCalculatorTest
          public double getMinimumSwingTimeForDisturbanceRecovery()
          {
             return 0;
-         }
-
-         @Override
-         public boolean useOptimizationBasedICPController()
-         {
-            return false;
          }
 
          @Override

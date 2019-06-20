@@ -48,7 +48,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    {
       if (timer.totalElapsed() > sendInterval)
       {
-         publishTextToSpeack("Sending messages.");
+         publishTextToSpeech("Sending messages.");
          sendFootsteps();
          sendChestTrajectory();
          sendArmTrajectory();
@@ -134,7 +134,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("Starting GC behavior.");
+      publishTextToSpeech("Starting GC behavior.");
       timer.reset();
    }
 

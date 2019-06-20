@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.beetle.referenceFrames;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -106,11 +105,5 @@ public class HexapodReferenceFrames implements ReferenceFrames
    public PoseReferenceFrame getCenterOfMassFrameWithBodyZUpOrientation()
    {
       return centerOfMassFrameWithBodyZUpOrientation;
-   }
-
-   @Override
-   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
-   {
-      return null;
    }
 }

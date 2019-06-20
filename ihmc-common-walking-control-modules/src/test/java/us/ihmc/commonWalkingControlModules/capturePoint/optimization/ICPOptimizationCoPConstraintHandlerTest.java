@@ -377,6 +377,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -389,6 +390,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         soleFrames.put(robotSide, soleFrame);
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
@@ -399,7 +401,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;

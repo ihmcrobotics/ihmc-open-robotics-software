@@ -1,21 +1,17 @@
 package us.ihmc.atlas.packets;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -61,7 +57,8 @@ public class AtlasRobotConfigurationDataTest
       ForceSensorDefinition forceSensorDefinitions[] = new ForceSensorDefinition[4];
       for (int i = 0; i < forceSensorDefinitions.length; i++)
       {
-         forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, new RigidBodyTransform());
+         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame("wim", body2, new RigidBodyTransform());
+         forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, sensorFrame);
       }
 
       RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuSensorDefinitions);
@@ -70,11 +67,5 @@ public class AtlasRobotConfigurationDataTest
 
       int length = os.toByteArray().length;
       assertTrue("RobotConfigurationData is to large " + length, length < 1460);
-   }
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
    }
 }

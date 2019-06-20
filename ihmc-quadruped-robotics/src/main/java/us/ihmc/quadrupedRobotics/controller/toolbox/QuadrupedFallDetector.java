@@ -105,7 +105,7 @@ public class QuadrupedFallDetector
       isUsingNextFootsteps.get(robotQuadrant).set(notNull);
 
       if (notNull)
-         timedFootstep.getGoalPosition(nextFootstepPositions.get(robotQuadrant));
+         nextFootstepPositions.get(robotQuadrant).set(timedFootstep.getGoalPosition());
    }
 
    public void setHeightForFallDetection(double desiredHeight, double currentHeight)

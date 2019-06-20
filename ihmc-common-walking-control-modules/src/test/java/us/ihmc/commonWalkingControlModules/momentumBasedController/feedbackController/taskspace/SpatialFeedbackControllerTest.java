@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -9,7 +10,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -19,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -28,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -46,12 +43,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public final class SpatialFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testConvergence() throws Exception
@@ -101,9 +92,7 @@ public final class SpatialFeedbackControllerTest
       gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -206,9 +195,7 @@ public final class SpatialFeedbackControllerTest
       gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 

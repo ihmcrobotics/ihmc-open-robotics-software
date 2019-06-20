@@ -1,15 +1,12 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
-   id("us.ihmc.ihmc-ci") version "4.23"
+   id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
    id("org.hidetake.ssh") version "2.9.0"
    id "application"
 }
-
-applicationName = "IHMCAtlasAPI"
-mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
-applicationDefaultJvmArgs = ["-Xmx4g"]
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -42,13 +39,13 @@ mainDependencies {
    compile "org.boofcv:recognition:0.24.1"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
@@ -71,6 +68,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-clean-room", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-fx-ui", version: "source"
 }
 
 testDependencies {
@@ -85,6 +84,10 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
 }
+
+applicationName = "IHMCAtlasAPI"
+mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
+applicationDefaultJvmArgs = ["-Xmx4g"]
 
 startScripts {
    outputs.upToDateWhen { false }
@@ -124,6 +127,67 @@ startScripts {
    }
 }
 
+task createAllStartScripts() {
+   doLast {
+      // just a placeholder
+   }
+}
+def scripts = ['behavior-module'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorModule'
+]
+scripts.each() { scriptName, className ->
+   def t = tasks.create(name: scriptName, type: CreateStartScripts) {
+      mainClassName = className
+      applicationName = scriptName
+      defaultJvmOpts = ['-Dlog.level.us.ihmc=debug']
+      outputDir = new File(project.buildDir, 'scripts')
+      classpath = jar.outputs.files + project.configurations.runtime
+   }
+   applicationDistribution.into("bin") {
+      from(t)
+      fileMode = 0755
+   }
+   createAllStartScripts.dependsOn(t)
+}
+
 applicationDistribution.from(startScripts.outputDir) {
    into "bin"
+}
+
+remotes {
+   cpu0 {
+      host = "10.7.4.100"
+      user = "shadylady"
+      password = "ShadyLady"
+      knownHosts = allowAnyHosts
+   }
+}
+
+task deploy(dependsOn: installDist) {
+   def directory = "/home/shadylady/atlas-behavior"
+
+   doLast {
+      ssh.run {
+         session(remotes.cpu0) {
+            execute("mkdir -p " + directory)
+
+            execute("rm -rf " + directory + "/bin")
+            execute("rm -rf " + directory + "/lib")
+            execute("mkdir -p " + directory + "/bin")
+            execute("mkdir -p " + directory + "/lib")
+
+            def from = "build/install/IHMCAtlasAPI/bin/"
+            file(from).list().each {
+               put(from: from + it, into: directory + "/bin")
+            }
+            from = "build/install/IHMCAtlasAPI/lib/"
+            file(from).list().each {
+               put(from: from + it, into: directory + "/lib")
+            }
+
+            execute("chmod +x " + directory + "/bin/behavior-module")
+
+            execute("echo " + project.version + " > " + directory + "/version.txt")
+         }
+      }
+   }
 }

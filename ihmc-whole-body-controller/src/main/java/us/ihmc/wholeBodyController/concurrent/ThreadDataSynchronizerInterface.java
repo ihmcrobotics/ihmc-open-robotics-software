@@ -4,11 +4,10 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public interface ThreadDataSynchronizerInterface
@@ -38,10 +37,6 @@ public interface ThreadDataSynchronizerInterface
 
    public abstract CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder();
 
-   public abstract ContactSensorHolder getControllerContactSensorHolder();
-
-   public abstract ContactSensorHolder getEstimatorContactSensorHolder();
-
    public abstract RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder();
 
    public abstract RobotMotionStatusHolder getControllerRobotMotionStatusHolder();
@@ -56,8 +51,8 @@ public interface ThreadDataSynchronizerInterface
 
    public abstract boolean receiveControllerDataForEstimator();
 
-   public abstract JointDesiredOutputList getEstimatorDesiredJointDataHolder();
-   
-   public abstract JointDesiredOutputList getControllerDesiredJointDataHolder();
+   public abstract JointDesiredOutputListBasics getEstimatorDesiredJointDataHolder();
+
+   public abstract JointDesiredOutputListBasics getControllerDesiredJointDataHolder();
 
 }

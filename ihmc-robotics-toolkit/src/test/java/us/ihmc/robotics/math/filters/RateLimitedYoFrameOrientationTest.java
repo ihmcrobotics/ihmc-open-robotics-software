@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -9,8 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -50,33 +50,33 @@ public class RateLimitedYoFrameOrientationTest
          maxRate.setValue(RandomNumbers.nextDouble(random, 0.001, 10.0));
          Quaternion goalQuaternion = EuclidCoreRandomTools.nextQuaternion(random);
 
-         double distanceToGoal = Math.abs(AngleTools.trimAngleMinusPiToPi(rateLimitedOrientation.getFrameOrientation().distance(goalQuaternion)));
+         double distanceToGoal = Math.abs(AngleTools.trimAngleMinusPiToPi(new Quaternion(rateLimitedOrientation).distance(goalQuaternion)));
          if (distanceToGoal / dt < maxRate.doubleValue())
          { // Should converge in one step
             rateLimitedOrientation.update(goalQuaternion);
-            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, rateLimitedOrientation.getFrameOrientation(), EPSILON);
+            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
          }
          else
          {
             double timeToConverge = distanceToGoal / maxRate.doubleValue();
             int numberOfIterations = (int) (timeToConverge / dt);
             double previousDistance = distanceToGoal;
-            angularVelocity.update(rateLimitedOrientation.getFrameOrientation());
+            angularVelocity.update(rateLimitedOrientation);
 
             for (int j = 0; j < numberOfIterations; j++)
             {
                rateLimitedOrientation.update(goalQuaternion);
-               double distance = Math.abs(AngleTools.trimAngleMinusPiToPi(rateLimitedOrientation.getFrameOrientation().distance(goalQuaternion)));
+               double distance = Math.abs(AngleTools.trimAngleMinusPiToPi(new Quaternion(rateLimitedOrientation).distance(goalQuaternion)));
                assertTrue(distance < previousDistance);
-               angularVelocity.update(rateLimitedOrientation.getFrameOrientation());
+               angularVelocity.update(rateLimitedOrientation);
                double rate = angularVelocity.length();
                assertEquals("difference: " + Math.abs(rate - maxRate.doubleValue()), rate, maxRate.doubleValue(), EPSILON);
                previousDistance = distance;
-               assertFalse(rateLimitedOrientation.getFrameOrientation().geometricallyEquals(goalQuaternion, EPSILON));
+               assertFalse(new Quaternion(rateLimitedOrientation).geometricallyEquals(goalQuaternion, EPSILON));
             }
 
             rateLimitedOrientation.update(goalQuaternion);
-            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, rateLimitedOrientation.getFrameOrientation(), EPSILON);
+            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(goalQuaternion, new Quaternion(rateLimitedOrientation), EPSILON);
          }
       }
    }

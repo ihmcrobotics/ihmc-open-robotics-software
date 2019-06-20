@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.Random;

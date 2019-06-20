@@ -131,7 +131,7 @@ public class StatusMessageOutputManager
     * @param statusMessage the status message to report.
     */
    @SuppressWarnings("unchecked")
-   public <S extends Settable<S>> void reportStatusMessage(S statusMessage)
+   public <S extends Settable<S>> void reportStatusMessage(Object statusMessage)
    {
       List<StatusMessageListener<?>> specificStatusMessageListeners = specificStatusMessageListenerMap.get(statusMessage.getClass());
       S statusMessageClone = (S) statusClassToObjectMap.get(statusMessage.getClass());
@@ -148,7 +148,7 @@ public class StatusMessageOutputManager
          for (int i = 0; i < specificStatusMessageListeners.size(); i++)
          {
             StatusMessageListener<S> statusMessageListener = (StatusMessageListener<S>) specificStatusMessageListeners.get(i);
-            statusMessageClone.set(statusMessage);
+            statusMessageClone.set((S) statusMessage);
             statusMessageListener.receivedNewMessageStatus(statusMessageClone);
          }
       }
@@ -156,7 +156,7 @@ public class StatusMessageOutputManager
       for (int i = 0; i < globalStatusMessageListeners.size(); i++)
       {
          GlobalStatusMessageListener globalStatusMessageListener = globalStatusMessageListeners.get(i);
-         statusMessageClone.set(statusMessage);
+         statusMessageClone.set((S) statusMessage);
          globalStatusMessageListener.receivedNewMessageStatus(statusMessageClone);
       }
    }

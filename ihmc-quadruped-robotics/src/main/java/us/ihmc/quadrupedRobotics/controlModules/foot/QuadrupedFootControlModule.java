@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
@@ -18,8 +20,11 @@ import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedFootControlModule
 {
@@ -42,13 +47,15 @@ public class QuadrupedFootControlModule
    private final QuadrupedMoveViaWaypointsState moveViaWaypointsState;
    private final EventTrigger eventTrigger;
    private final StateMachine<QuadrupedFootStates, QuadrupedFootState> footStateMachine;
+   private final DoubleProvider currentTime;
 
    // window after support is triggered by touchdown but before step time is up to make sure swing isn't triggered again
    // TODO find a better solution. could be done by indexing steps
-   private static final double supportToSwingGlitchWindow = 0.15;
+   private final QuadrupedFootControlModuleParameters parameters;
    private final YoBoolean isFirstStep;
 
    private final QuadrupedSwingState swingState;
+   private final QuadrupedSupportState supportState;
 
    public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoGraphicsListRegistry graphicsListRegistry,
                                      YoVariableRegistry parentRegistry)
@@ -58,9 +65,10 @@ public class QuadrupedFootControlModule
       this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
+      parameters = controllerToolbox.getFootControlModuleParameters();
+      currentTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
-      // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
+      supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
       swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
 
@@ -90,6 +98,13 @@ public class QuadrupedFootControlModule
       isFirstStep.set(true);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      supportState.setControllerCoreMode(controllerCoreMode);
+      swingState.setControllerCoreMode(controllerCoreMode);
+      moveViaWaypointsState.setControllerCoreMode(controllerCoreMode);
    }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
@@ -135,6 +150,11 @@ public class QuadrupedFootControlModule
       eventTrigger.fireEvent(QuadrupedFootRequest.REQUEST_MOVE_VIA_WAYPOINTS);
    }
 
+   public QuadrupedFootStates getCurrentState()
+   {
+      return footStateMachine.getCurrentStateKey();
+   }
+
    public void reset()
    {
       stepCommandIsValid.set(false);
@@ -144,7 +164,7 @@ public class QuadrupedFootControlModule
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger())
+      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger(stepCommand))
       {
          this.currentStepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
@@ -152,8 +172,17 @@ public class QuadrupedFootControlModule
       }
    }
 
-   private boolean isValidTrigger()
+   private boolean isValidTrigger(QuadrupedTimedStep desiredStep)
    {
+      if (currentStepCommand.epsilonEquals(desiredStep, 1e-3))
+         return false;
+
+      TimeIntervalReadOnly timeInterval = desiredStep.getTimeInterval();
+      double timeInStep = currentTime.getValue() - timeInterval.getStartTime();
+      double phaseThroughStep = timeInStep / timeInterval.getDuration();
+      if (phaseThroughStep > parameters.getMaximumPhaseThroughStepToAllowStart())
+         return false;
+
       if (isFirstStep.getBooleanValue())
       {
          isFirstStep.set(false);
@@ -161,7 +190,7 @@ public class QuadrupedFootControlModule
       }
       else
       {
-         return footStateMachine.getTimeInCurrentState() > supportToSwingGlitchWindow;
+         return footStateMachine.getTimeInCurrentState() > parameters.getMinimumTimeInSupportState();
       }
    }
 
@@ -197,10 +226,8 @@ public class QuadrupedFootControlModule
    public void compute()
    {
       // Update foot state machine.
-      // Note Sylvain 2018/03/23: the controller is sensitive to the call order on the doAction and doTransitions.
-      // Inverting the ordering will break some tests, such as QuadrupedXGaitFlatGroundTrotTest.testTrottingInAForwardLeftCircle().
-      footStateMachine.doAction();
       footStateMachine.doTransitions();
+      footStateMachine.doAction();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

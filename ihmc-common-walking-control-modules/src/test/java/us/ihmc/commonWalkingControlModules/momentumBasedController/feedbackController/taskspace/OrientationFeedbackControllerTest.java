@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -9,7 +9,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.NormOps;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -20,12 +19,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -42,12 +38,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class OrientationFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testCompareAgainstSpatialController() throws Exception
@@ -111,10 +101,8 @@ public class OrientationFeedbackControllerTest
          FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
 
-         orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-         orientationFeedbackControlCommand.setFeedForwardAction(feedForwardAngularAcceleration);
-         spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-         spatialFeedbackControlCommand.setFeedForwardAngularAction(feedForwardAngularAcceleration);
+         orientationFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          orientationFeedbackController.submitFeedbackControlCommand(orientationFeedbackControlCommand);

@@ -40,6 +40,7 @@ int8 trajectory_type
 # Contains information on how high the robot should swing its foot.
 # This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
 # If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+# Field default value -1.0
 float64 swing_height
 
 # In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
@@ -78,13 +79,20 @@ float64 swing_duration
 # Field default value -1.0
 float64 transfer_duration
 
-# (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-# If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-# If the default is set to zero, the touchdown state will be disabled.
+# The time to delay this command on the controller side before being executed.
+float64 execution_delay_time
+
+# Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
+# effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
+# different from the pitch of the foothold pose provided in this message.
 # Field default value -1.0
 float64 touchdown_duration
 
-# The time to delay this command on the controller side before being executed.
-float64 execution_delay_time
+# Time spent in toe or heel support before the step. This duration is part of the transfer duration and must therefore
+# be shorter then the transfer. Note, that this only has an effect if the swing trajectory is provided, the swing trajectory
+# has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
+# foot pitch.
+# Field default value -1.0
+float64 liftoff_duration
 
 

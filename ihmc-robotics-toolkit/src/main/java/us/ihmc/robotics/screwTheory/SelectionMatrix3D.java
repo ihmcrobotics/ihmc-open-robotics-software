@@ -3,9 +3,9 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -52,7 +52,7 @@ public class SelectionMatrix3D
     * Internal object used only to convert the three booleans into an actual 3-by-3 selection
     * matrix.
     */
-   private final FrameMatrix3D frameMatrix = new FrameMatrix3D();
+   private final transient FrameMatrix3D frameMatrix = new FrameMatrix3D();
 
    /**
     * Creates a new selection matrix. This selection matrix is initialized with all the axes
@@ -329,7 +329,7 @@ public class SelectionMatrix3D
          frameMatrix.setM22(zSelected ? 1.0 : 0.0);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(selectionMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, selectionMatrixToPack);
       }
    }
 
@@ -416,7 +416,7 @@ public class SelectionMatrix3D
          frameMatrix.setM22(zSelected ? 1.0 : 0.0);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(selectionMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, selectionMatrixToPack);
          MatrixTools.removeZeroRows(selectionMatrixToPack, startRow, startRow + 2, 1.0e-7);
       }
    }

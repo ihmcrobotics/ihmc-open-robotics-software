@@ -109,9 +109,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       BehaviorAction searchForValveFar = new BehaviorAction(searchForValveBehavior)
       {
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
-            super.doTransitionOutOfAction();
+            super.onExit();
             //found the valve location, inform the UI of its location
             publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 
@@ -121,9 +121,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       BehaviorAction searchForValveNear = new BehaviorAction(searchForValveBehavior)
       {
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
-            super.doTransitionOutOfAction();
+            super.onExit();
             //found the valve location, inform the UI of its location
             publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 
@@ -158,7 +158,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Finished Turning Valve");
+            publishTextToSpeech("Finished Turning Valve");
          }
       };
 
@@ -167,7 +167,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Did I Turn It Far Enough?");
+            publishTextToSpeech("Did I Turn It Far Enough?");
          }
       };
 

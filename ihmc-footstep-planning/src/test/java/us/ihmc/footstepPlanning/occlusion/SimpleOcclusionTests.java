@@ -26,7 +26,6 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
@@ -38,6 +37,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -202,7 +202,7 @@ public class SimpleOcclusionTests
             pose.setToNaN();
             visiblePolygons.add(polygon);
             visiblePolygonPoses.add(pose);
-            YoGraphicPolygon visualization = new YoGraphicPolygon("Polygon" + i, polygon, pose.getPosition(), pose.getOrientation(), 1.0, 0.02,
+            YoGraphicPolygon visualization = new YoGraphicPolygon("Polygon" + i, polygon, pose.getPosition(), pose.getYawPitchRoll(), 1.0, 0.02,
                                                                   new YoAppearanceRGBColor(Color.BLUE, 0.8));
             polygonVisualizations.add(visualization);
             graphicsListRegistry.registerYoGraphic("viz", visualization);

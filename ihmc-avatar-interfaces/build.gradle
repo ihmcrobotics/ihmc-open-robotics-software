@@ -1,7 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
-   id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -32,11 +33,11 @@ mainDependencies {
    compile group: "org.reflections", name: "reflections", version: "0.9.10"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
@@ -60,6 +61,20 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
+}
+
+behaviorCleanRoomDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.0"
+}
+
+behaviorFxUiDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("behavior-clean-room")
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
 }
 
 testDependencies {

@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -28,6 +29,8 @@ public abstract class AvatarTestYoVariables
    private final YoDouble icpPlannerDesiredCentroidalAngularMomentumZ;
 
    private final SideDependentList<YoFramePoint3D> solePositions = new SideDependentList<>();
+
+   private final YoBoolean controllerIsInDoubleSupport;
 
    public AvatarTestYoVariables(SimulationConstructionSet scs)
    {
@@ -62,6 +65,8 @@ public abstract class AvatarTestYoVariables
       icpPlannerDesiredCentroidalAngularMomentumX = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumX");
       icpPlannerDesiredCentroidalAngularMomentumY = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumY");
       icpPlannerDesiredCentroidalAngularMomentumZ = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumZ");
+
+      controllerIsInDoubleSupport = (YoBoolean) scs.getVariable("controllerIsInDoubleSupport");
    }
 
    public YoDouble getYoTime()
@@ -132,5 +137,10 @@ public abstract class AvatarTestYoVariables
    public YoDouble getIcpPlannerDesiredCentroidalAngularMomentumZ()
    {
       return icpPlannerDesiredCentroidalAngularMomentumZ;
+   }
+
+   public YoBoolean getControllerIsInDoubleSupport()
+   {
+      return controllerIsInDoubleSupport;
    }
 }

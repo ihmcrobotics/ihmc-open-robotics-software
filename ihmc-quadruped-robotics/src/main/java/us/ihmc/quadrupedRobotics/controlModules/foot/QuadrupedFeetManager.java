@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -42,6 +44,12 @@ public class QuadrupedFeetManager
       parentRegistry.addChild(registry);
    }
 
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footControlModules.get(robotQuadrant).setControllerCoreMode(controllerCoreMode);
+   }
+
    public void attachStateChangedListener(StateChangedListener<QuadrupedFootStates> stateChangedListener)
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -72,7 +80,7 @@ public class QuadrupedFeetManager
       footControlModules.get(step.getRobotQuadrant()).triggerStep(step);
    }
 
-   public void triggerSteps(List<YoQuadrupedTimedStep> steps)
+   public void triggerSteps(List<? extends QuadrupedTimedStep> steps)
    {
       for (int i = 0; i < steps.size(); i++)
       {
@@ -91,14 +99,9 @@ public class QuadrupedFeetManager
 
    public void adjustStep(QuadrupedStep step)
    {
-      step.getGoalPosition(tempPoint);
+      tempPoint.setIncludingFrame(step.getReferenceFrame(), step.getGoalPosition());
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       footControlModules.get(step.getRobotQuadrant()).adjustStep(tempPoint);
-   }
-
-   public void adjustStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly adjustedStep)
-   {
-      footControlModules.get(robotQuadrant).adjustStep(adjustedStep);
    }
 
    /**
@@ -155,6 +158,16 @@ public class QuadrupedFeetManager
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footControlModules.get(robotQuadrant).requestSupport();
+   }
+
+   public void requestContact(RobotQuadrant robotQuadrant)
+   {
+      footControlModules.get(robotQuadrant).requestSupport();
+   }
+
+   public QuadrupedFootStates getCurrentState(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getCurrentState();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

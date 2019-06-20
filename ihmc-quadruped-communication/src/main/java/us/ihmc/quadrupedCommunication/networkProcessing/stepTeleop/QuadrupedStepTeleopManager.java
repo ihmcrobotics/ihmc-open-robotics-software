@@ -10,6 +10,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathMultiplexer;
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class QuadrupedStepTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoQuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
 
    private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("teleopDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);

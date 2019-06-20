@@ -3,10 +3,10 @@ package us.ihmc.simulationConstructionSetTools.util.inputdevices;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -14,6 +14,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 @Tag("gui-slow")
+@Disabled
 public class XTouchCompactMidiSliderBoardTest
 {
    @BeforeEach
@@ -45,7 +46,7 @@ public class XTouchCompactMidiSliderBoardTest
             }
          });
       }
-      
+
       // Knobs
       for(int k = 1; k <= 32; k++)
       {
@@ -59,7 +60,7 @@ public class XTouchCompactMidiSliderBoardTest
             }
          });
       }
-      
+
       // Buttons
       for(int b = 1; b <= 78; b++)
       {
@@ -86,14 +87,14 @@ public class XTouchCompactMidiSliderBoardTest
                System.out.println("Knob button changed value: " + v.getValueAsDouble());
             }
          });
-         
+
       }
-      
-      
+
+
       registry.getVariable("slider3").setValueFromDouble(2.0);
       registry.getVariable("knob3").setValueFromDouble(2.0);
       registry.getVariable("button2").setValueFromDouble(1.0);
-      
+
       Thread.currentThread().join();
    }
 

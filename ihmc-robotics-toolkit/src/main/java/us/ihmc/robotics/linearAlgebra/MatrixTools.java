@@ -37,7 +37,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameTuple3D;
 
 public class MatrixTools
 {
@@ -1746,5 +1745,27 @@ public class MatrixTools
             c.data[cIndex] += scalar * total;
          }
       }
+   }
+
+   /**
+    * Checks if two matrices are equal.
+    * <p>
+    * Checks that the dimensions are equal and that all elements are equal.
+    *
+    * @param a first matrix
+    * @param b second matrix
+    */
+   public static boolean equals(DenseMatrix64F a, DenseMatrix64F b)
+   {
+      if (a.numRows != b.numRows)
+         return false;
+      if (a.numCols != b.numCols)
+         return false;
+      for (int i = 0; i < a.getNumElements(); i++)
+      {
+         if (Double.compare(a.get(i), b.get(i)) != 0)
+            return false;
+      }
+      return true;
    }
 }

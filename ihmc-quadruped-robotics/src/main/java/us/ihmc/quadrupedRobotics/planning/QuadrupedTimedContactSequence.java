@@ -1,8 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -46,16 +48,13 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    };
 
    // internal states
-   private final int pastContactPhaseCapacity;
    private final QuadrupedStepTransition[] stepTransition;
-   private final QuadrupedTimedStep[] transitionStep;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<FramePoint3D> solePosition;
 
-   public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
+   public QuadrupedTimedContactSequence(int futureContactPhaseCapacity)
    {
-      super(QuadrupedTimedContactPhase.class, QuadrupedTimedContactPhase::new, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
-      this.pastContactPhaseCapacity = pastContactPhaseCapacity;
+      super(QuadrupedTimedContactPhase.class, QuadrupedTimedContactPhase::new, futureContactPhaseCapacity + 1);
 
       if (capacity() < 1)
       {
@@ -63,7 +62,6 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       }
 
       stepTransition = new QuadrupedStepTransition[capacity()];
-      transitionStep = new QuadrupedTimedStep[capacity()];
       for (int i = 0; i < capacity(); i++)
       {
          stepTransition[i] = new QuadrupedStepTransition();
@@ -92,6 +90,8 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<? extends ReferenceFrame> soleFrames,
                       QuadrantDependentList<YoEnum<ContactState>> currentContactState, double currentTime)
    {
+      super.clear();
+
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -107,6 +107,25 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       }
 
       int numberOfStepTransitions = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (!currentContactState.get(robotQuadrant).getEnumValue().isLoadBearing())
+         {
+            QuadrupedTimedStep firstStepForQuadrant = getFirstStepForQuadrant(robotQuadrant, stepSequence);
+
+            // end the current step if there are no active steps for it.
+            if (firstStepForQuadrant == null || firstStepForQuadrant.getTimeInterval().getStartTime() > currentTime)
+            {
+               stepTransition[numberOfStepTransitions].time = currentTime;
+               stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
+               stepTransition[numberOfStepTransitions].robotQuadrant = robotQuadrant;
+               stepTransition[numberOfStepTransitions].solePosition.set(solePosition.get(robotQuadrant));
+               contactState.set(robotQuadrant, ContactState.IN_CONTACT);
+               numberOfStepTransitions++;
+            }
+         }
+      }
+
       for (int i = 0; i < stepSequence.size(); i++)
       {
          QuadrupedTimedStep step = stepSequence.get(i);
@@ -116,8 +135,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getStartTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.LIFT_OFF;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
-            transitionStep[numberOfStepTransitions] = step;
+            stepTransition[numberOfStepTransitions].solePosition.set(step.getGoalPosition());
             numberOfStepTransitions++;
          }
 
@@ -126,8 +144,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getEndTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
-            transitionStep[numberOfStepTransitions] = step;
+            stepTransition[numberOfStepTransitions].solePosition.set(step.getGoalPosition());
             numberOfStepTransitions++;
          }
       }
@@ -135,35 +152,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       // sort step transitions in ascending order as a function of time
       ArraySorter.sort(stepTransition, compareByTime);
 
-      // retain desired number of past contact phases
-      TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, this);
-      while (super.size() > pastContactPhaseCapacity + 1)
-      {
-         super.remove(0);
-      }
-
-      QuadrupedTimedContactPhase contactPhase;
-      if (super.size() == 0)
-      {
-         contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
-      }
-      else
-      {
-         QuadrupedTimedContactPhase lastContactPhase = super.get(super.size() - 1);
-         if (isEqualContactState(lastContactPhase.getContactState(), currentContactState))
-         {
-            // extend current contact phase
-            contactPhase = lastContactPhase;
-            contactPhase.setSolePosition(solePosition);
-         }
-         else
-         {
-            // end previous contact phase
-            lastContactPhase.getTimeInterval().setEndTime(currentTime);
-            super.remove(0);
-            contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
-         }
-      }
+      QuadrupedTimedContactPhase  contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
 
       // compute transition time and center of pressure for each time interval
       for (int i = 0; i < numberOfStepTransitions; i++)
@@ -216,6 +205,17 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       {
          return null;
       }
+   }
+
+   private QuadrupedTimedStep getFirstStepForQuadrant(RobotQuadrant robotQuadrant, List<? extends QuadrupedTimedStep> stepSequence)
+   {
+      for (int i = 0 ; i < stepSequence.size(); i++)
+      {
+         if (stepSequence.get(i).getRobotQuadrant() == robotQuadrant)
+            return stepSequence.get(i);
+      }
+
+      return null;
    }
 }
 

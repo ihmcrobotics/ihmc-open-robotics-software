@@ -1,5 +1,8 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import java.util.Arrays;
+
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -9,14 +12,13 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 /**
  * Provides a default implementation for PID gains in three dimensions.
  * <p>
- * If this object is created a {@link GainCoupling} can be specified. This gain
- * coupling is used in case these PID gains will be used to create {@link YoPID3DGains}.
- * In that case is it used to determine what YoVariables to create for tuning.
- * Note, that regardless of the specified gain coupling the getters and setters
- * in this implementation are designed for three dimensions.
+ * If this object is created a {@link GainCoupling} can be specified. This gain coupling is used in
+ * case these PID gains will be used to create {@link YoPID3DGains}. In that case is it used to
+ * determine what YoVariables to create for tuning. Note, that regardless of the specified gain
+ * coupling the getters and setters in this implementation are designed for three dimensions.
  * </p>
  */
-public class DefaultPID3DGains implements PID3DGains
+public class DefaultPID3DGains implements PID3DGains, Settable<DefaultPID3DGains>
 {
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
@@ -36,6 +38,12 @@ public class DefaultPID3DGains implements PID3DGains
    public DefaultPID3DGains(PID3DGainsReadOnly other)
    {
       set(other);
+   }
+
+   @Override
+   public void set(DefaultPID3DGains other)
+   {
+      PID3DGains.super.set(other);
    }
 
    @Override
@@ -159,5 +167,34 @@ public class DefaultPID3DGains implements PID3DGains
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError = maxProportionalError;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof DefaultPID3DGains)
+      {
+         DefaultPID3DGains other = (DefaultPID3DGains) object;
+         if (!Arrays.equals(dampingRatios, other.dampingRatios))
+            return false;
+         if (!PID3DGains.super.equals(other))
+            return false;
+         return true;
+      }
+      else if (object instanceof PID3DGainsReadOnly)
+      {
+         return PID3DGains.super.equals((PID3DGainsReadOnly) object);
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": kp: " + Arrays.toString(proportionalGains) + ", kd: " + Arrays.toString(derivativeGains) + ", ki: "
+            + Arrays.toString(integralGains);
    }
 }

@@ -39,7 +39,8 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
       hasFootHitGround = new YoBoolean(name + "HasFootHitGround", registry);
    }
 
-   private void updateMeasurement()
+   @Override
+   public void updateMeasurement()
    {
       wrenchCalculator.calculate();
       yoMeasuredForceWorld.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
@@ -48,7 +49,6 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean hasFootHitGround()
    {
-      updateMeasurement();
       hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
       return hasFootHitGround.getBooleanValue();
    }
@@ -56,7 +56,6 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public double computeFootLoadPercentage()
    {
-      updateMeasurement();
       return Math.abs(yoMeasuredForceWorld.getZ()) / totalRobotWeight;
    }
 
@@ -74,7 +73,6 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      updateMeasurement();
       footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
    }
 
@@ -92,7 +90,6 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean getForceMagnitudePastThreshhold()
    {
-      updateMeasurement();
       hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
       return hasFootHitGround.getBooleanValue();
    }
@@ -103,7 +100,12 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
+   {
+   }
+
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
    {
    }
 }

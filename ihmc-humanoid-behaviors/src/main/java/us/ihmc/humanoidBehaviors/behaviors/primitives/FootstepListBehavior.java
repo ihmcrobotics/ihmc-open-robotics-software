@@ -174,6 +174,9 @@ public class FootstepListBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
       hasLastStepBeenReached.set(false);
       isRobotDoneWalking.set(false);
+      footstepStatusQueue.clear();
+      walkingStatusQueue.clear();
+
 
       isPaused.set(false);
       isStopped.set(false);
@@ -187,16 +190,21 @@ public class FootstepListBehavior extends AbstractBehavior
       if (DEBUG)
          PrintTools.debug(this, "Finalize");
       footstepStatusQueue.clear();
+      walkingStatusQueue.clear();
       outgoingFootstepDataList = null;
       packetHasBeenSent.set(false);
       numberOfFootsteps.set(-1);
+      
 
       isPaused.set(false);
       isStopped.set(false);
       hasBeenInitialized.set(false);
       hasLastStepBeenReached.set(false);
-      isRobotDoneWalking.set(false);
       hasRobotStartedWalking.set(false);
+
+      //upon leaving this behavior just make sure the walking has stopped.
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
+
    }
 
    @Override
@@ -230,7 +238,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      //      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
+     // System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
       boolean ret = isRobotDoneWalking.getBooleanValue() && !isPaused.getBooleanValue();
       if (!isDone.getBooleanValue() && ret)
       {

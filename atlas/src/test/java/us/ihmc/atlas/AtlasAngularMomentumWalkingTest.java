@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
@@ -11,8 +12,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkingTest
@@ -33,12 +32,6 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
       {
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
-            @Override
-            public boolean alwaysAllowMomentum()
-            {
-               return true;
-            }
-
             @Override
             public ICPOptimizationParameters getICPOptimizationParameters()
             {
@@ -74,24 +67,28 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
       super.testForwardWalkWithAngularMomentumReference();
    }
 
+   @Override
    @Test
    public void testForwardWalkWithCorruptedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithCorruptedMomentum();
    }
 
+   @Override
    @Test
    public void testWalkingWithDelayedMomentum() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithDelayedMomentum();
    }
 
+   @Override
    @Test
    public void testForwardWalkZeroMomentumFirstStep() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkZeroMomentumFirstStep();
    }
 
+   @Override
    @Test
    public void testWalkingWithRandomSinusoidalMomentum() throws SimulationExceededMaximumTimeException
    {

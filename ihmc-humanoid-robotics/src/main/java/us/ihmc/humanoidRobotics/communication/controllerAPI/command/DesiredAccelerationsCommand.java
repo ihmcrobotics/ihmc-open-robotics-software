@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 
 public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredAccelerationsCommand, DesiredAccelerationsMessage>
 {
+   private long sequenceId;
    private final TDoubleArrayList desiredJointAccelerations = new TDoubleArrayList(10);
 
    public DesiredAccelerationsCommand()
@@ -15,12 +16,14 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
    @Override
    public void clear()
    {
+      sequenceId = 0;
       desiredJointAccelerations.reset();
    }
 
    @Override
    public void setFromMessage(DesiredAccelerationsMessage message)
    {
+      sequenceId = message.getSequenceId();
       desiredJointAccelerations.reset();
       for (int i = 0; i < message.getDesiredJointAccelerations().size(); i++)
       {
@@ -32,6 +35,7 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
    @Override
    public void set(DesiredAccelerationsCommand other)
    {
+      sequenceId = other.sequenceId;
       desiredJointAccelerations.reset();
       for (int i = 0; i < other.getNumberOfJoints(); i++)
          desiredJointAccelerations.add(other.getDesiredJointAcceleration(i));
@@ -68,5 +72,16 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
    public Class<DesiredAccelerationsMessage> getMessageClass()
    {
       return DesiredAccelerationsMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

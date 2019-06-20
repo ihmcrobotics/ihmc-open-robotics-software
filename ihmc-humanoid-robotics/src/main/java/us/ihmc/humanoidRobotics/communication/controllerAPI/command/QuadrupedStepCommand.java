@@ -10,6 +10,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private long sequenceId;
    private RobotQuadrant robotQuadrant;
    private FramePoint3D goalPosition = new FramePoint3D();
    private double groundClearance = 0.0;
@@ -22,6 +23,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotQuadrant = null;
       groundClearance = 0.0;
       goalPosition.setToNaN();
@@ -30,6 +32,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    @Override
    public void setFromMessage(QuadrupedStepMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
       groundClearance = message.getGroundClearance();
       goalPosition.setIncludingFrame(worldFrame, message.getGoalPosition());
@@ -38,6 +41,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    @Override
    public void set(QuadrupedStepCommand other)
    {
+      sequenceId = other.sequenceId;
       robotQuadrant = other.robotQuadrant;
       groundClearance = other.groundClearance;
       goalPosition.setIncludingFrame(other.goalPosition);
@@ -68,5 +72,11 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    public boolean isCommandValid()
    {
       return robotQuadrant != null;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

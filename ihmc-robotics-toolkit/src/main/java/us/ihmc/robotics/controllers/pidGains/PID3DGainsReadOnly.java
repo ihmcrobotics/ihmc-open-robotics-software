@@ -1,5 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains;
 
+import java.util.Arrays;
+
 import us.ihmc.euclid.matrix.Matrix3D;
 
 /**
@@ -130,6 +132,39 @@ public interface PID3DGainsReadOnly
       if (array == null || array.length != 3)
       {
          throw new RuntimeException("Expected array of length three.");
+      }
+   }
+
+   public default boolean equals(PID3DGainsReadOnly other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
+         return true;
+      }
+      else
+      {
+         if (!Arrays.equals(getProportionalGains(), other.getProportionalGains()))
+            return false;
+         if (!Arrays.equals(getDerivativeGains(), other.getDerivativeGains()))
+            return false;
+         if (!Arrays.equals(getIntegralGains(), other.getIntegralGains()))
+            return false;
+         if (Double.compare(getMaximumIntegralError(), other.getMaximumIntegralError()) != 0)
+            return false;
+         if (Double.compare(getMaximumDerivativeError(), other.getMaximumDerivativeError()) != 0)
+            return false;
+         if (Double.compare(getMaximumProportionalError(), other.getMaximumProportionalError()) != 0)
+            return false;
+         if (Double.compare(getMaximumFeedback(), other.getMaximumFeedback()) != 0)
+            return false;
+         if (Double.compare(getMaximumFeedbackRate(), other.getMaximumFeedbackRate()) != 0)
+            return false;
+
+         return true;
       }
    }
 }

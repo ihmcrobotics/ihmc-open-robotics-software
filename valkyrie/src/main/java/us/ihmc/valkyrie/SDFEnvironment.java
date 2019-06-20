@@ -5,14 +5,12 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.euclid.shape.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.color.MutableColor;
@@ -36,10 +34,6 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
-   private final Random random = new Random(1989L);
-   
-   private static final boolean VISUALIZE_BOUNDING_BOXES = false;
- 
    // private static final double FLOOR_THICKNESS = 0.001;
    
    public void load(String filename)
@@ -66,7 +60,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
 	    		System.out.println("No reseource paths specified in GAZEBO_RESOURCE_PATH!");
 	    	}
 	        SDFWorldLoader loader = new SDFWorldLoader(f, resourceDirectories);
-	        Graphics3DObject sdf=loader.createGraphics3dObject();
+	        loader.createGraphics3dObject();
 	        ExtractPrimitiveModels(loader);
 	        
 	        System.out.println("File loaded successfully.");

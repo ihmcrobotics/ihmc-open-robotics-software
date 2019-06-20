@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3TrajectoryControllerCommand, SO3TrajectoryMessage>
       implements FrameBasedCommand<SO3TrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -40,6 +41,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
 
    public SO3TrajectoryControllerCommand(Random random)
    {
+      sequenceId = random.nextInt();
       int randomNumberOfPoints = random.nextInt(16) + 1;
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
@@ -55,6 +57,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -63,6 +66,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
 
    public void clear(ReferenceFrame referenceFrame)
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear(referenceFrame);
       selectionMatrix.resetSelection();
@@ -80,26 +84,30 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
+   public void setFromMessage(SO3TrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
-
-      clear(dataFrame);
-      setFromMessage(message);
-
-      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrame(selectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrame(weightSelectionFrame);
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(SO3TrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
+
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
       List<SO3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -118,6 +126,14 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
+
+      if (resolver != null)
+      {
+         ReferenceFrame selectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
+         selectionMatrix.setSelectionFrame(selectionFrame);
+         ReferenceFrame weightSelectionFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
+         weightMatrix.setWeightFrame(weightSelectionFrame);
+      }
    }
 
    /**
@@ -128,6 +144,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
     */
    public void setPropertiesOnly(SO3TrajectoryControllerCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
@@ -292,5 +309,16 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    public Class<SO3TrajectoryMessage> getMessageClass()
    {
       return SO3TrajectoryMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

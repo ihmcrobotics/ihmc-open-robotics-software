@@ -40,8 +40,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class TrajectoryPointOptimizer
 {
-   public static final int maxWaypoints = 12;
-   public static final int maxIterations = 20;
+   public static final int maxWaypoints = 200;
+   public static final int maxIterations = 200;
 
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
@@ -211,15 +211,41 @@ public class TrajectoryPointOptimizer
     */
    public void compute(int maxIterations)
    {
+      intervals.set(nWaypoints.getIntegerValue() + 1);
+      intervalTimes.reshape(intervals.getValue(), 1);
+      CommonOps.fill(intervalTimes, 1.0 / intervals.getValue());
+      computeInternal(maxIterations);
+   }
+
+   /**
+    * If the user would like to provide waypoint times and only solve for the waypoint velocities this method can be used.
+    *
+    * @param waypointTimes the times at waypoints. Times must be between 0.0 and 1.0.
+    */
+   public void computeForFixedTime(TDoubleArrayList waypointTimes)
+   {
+       compute(0, waypointTimes);
+   }
+
+   /**
+    * This is a compute method that provides an optional argument for the initial waypoint times. These times will
+    * be used as an initial guess for the gradient descent that optimizes the waypoint times.
+    *
+    * @param waypointTimes the times at waypoints. Times must be between 0.0 and 1.0.
+    */
+   public void compute(int maxIterations, TDoubleArrayList waypointTimes)
+   {
+      intervals.set(nWaypoints.getIntegerValue() + 1);
+      setIntervalTimes(waypointTimes);
+      computeInternal(maxIterations);
+   }
+
+   private void computeInternal(int maxIterations)
+   {
       computeTimer.startMeasurement();
       timeGain.set(initialTimeGain);
 
-      int intervals = nWaypoints.getIntegerValue() + 1;
-      this.intervals.set(intervals);
-      intervalTimes.reshape(intervals, 1);
-      CommonOps.fill(intervalTimes, 1.0 / intervals);
-
-      problemSize.set(dimensions.getIntegerValue() * coefficients * intervals);
+      problemSize.set(dimensions.getIntegerValue() * coefficients * intervals.getValue());
       costs.reset();
       costs.add(solveMinAcceleration());
       iteration.set(0);
@@ -231,6 +257,28 @@ public class TrajectoryPointOptimizer
       }
 
       computeTimer.stopMeasurement();
+   }
+
+   private void setIntervalTimes(TDoubleArrayList waypointTimes)
+   {
+      intervalTimes.reshape(intervals.getValue(), 1);
+
+      if (waypointTimes.size() != nWaypoints.getValue())
+      {
+         throw new RuntimeException("Unexpected number of waypoint times. Need " + nWaypoints.getValue() + ", got " + waypointTimes.size() + ".");
+      }
+
+      for (int i = 0; i < intervals.getValue(); i++)
+      {
+         double previousWaypointTime = i == 0 ? 0.0 : waypointTimes.get(i - 1);
+         double waypointTime = i == nWaypoints.getValue() ? 1.0 : waypointTimes.get(i);
+         double intervalTime = waypointTime - previousWaypointTime;
+         if (intervalTime < 0.0 || intervalTime > 1.0)
+         {
+            throw new RuntimeException("Time in this trajectory is from 0.0 to 1.0. Got invalid waypoint times:\n" + waypointTimes.toString());
+         }
+         intervalTimes.set(i, intervalTime);
+      }
    }
 
    /**

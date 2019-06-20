@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.Map;
 
+import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controlModules.JointspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -19,6 +21,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final RigidBodyJointControlHelper jointControlHelper;
 
+   private final JointspaceTrajectoryStatusMessageHelper statusHelper;
+
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
 
@@ -30,6 +34,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       numberOfJoints = jointsToControl.length;
       jointsHomeConfiguration = new double[numberOfJoints];
+
+      statusHelper = new JointspaceTrajectoryStatusMessageHelper(jointsToControl);
+
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointBasics joint = jointsToControl[jointIdx];
@@ -118,6 +125,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public void doAction(double timeInState)
    {
       double timeInTrajectory = getTimeInTrajectory();
+
+      statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
+
       trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
    }
 
@@ -127,8 +137,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          return false;
       }
-
-      return jointControlHelper.handleTrajectoryCommand(command, initialJointPositions);
+      else if (jointControlHelper.handleTrajectoryCommand(command, initialJointPositions))
+      {
+         statusHelper.registerNewTrajectory(command);
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override
@@ -141,7 +158,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public boolean isEmpty()
    {
       return jointControlHelper.isEmpty();
-   };
+   }
 
    public double getJointDesiredPosition(int jointIdx)
    {
@@ -167,5 +184,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return jointControlHelper.getJointspaceCommand();
+   }
+
+   @Override
+   public JointspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return statusHelper.pollStatusMessage(jointControlHelper.getJointspaceCommand());
    }
 }

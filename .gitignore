@@ -16,9 +16,9 @@
 */src/*/bin
 */src/*/build
 */src/*/out
-*/Configurations
 
 # directories to always ignore
+**/Configurations
 **/classes
 **/build
 **/bin
@@ -91,3 +91,4 @@
 **/.apdisk
 **/rebel.xml
 **/generatedTestSuites/*TestSuite.java
+**/.attach_pid*

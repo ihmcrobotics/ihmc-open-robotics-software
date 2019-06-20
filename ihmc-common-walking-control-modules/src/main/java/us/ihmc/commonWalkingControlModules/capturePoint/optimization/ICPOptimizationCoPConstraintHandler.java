@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -55,7 +56,7 @@ public class ICPOptimizationCoPConstraintHandler
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            FrameConvexPolygon2D supportPolygon;
+            FrameConvexPolygon2DReadOnly supportPolygon;
             if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPoygons)
                supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
             else
@@ -97,11 +98,11 @@ public class ICPOptimizationCoPConstraintHandler
     * </p>
     * @param supportSide support foot side. Not Modified.
     */
-   public FrameConvexPolygon2D updateCoPConstraintForSingleSupport(RobotSide supportSide)
+   public FrameConvexPolygon2DReadOnly updateCoPConstraintForSingleSupport(RobotSide supportSide)
    {
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
-         FrameConvexPolygon2D supportPolygon;
+         FrameConvexPolygon2DReadOnly supportPolygon;
          if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPoygons)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
          else

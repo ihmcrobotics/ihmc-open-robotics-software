@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInitialPositionParameters
 {
-   private final Point3D initialBodyPosition = new Point3D(0.0, 0.0, 0.4);
+   private final Point3D initialBodyPosition = new Point3D(0.0, 0.0, 0.43);
    private final Quaternion intialBodyOrientation = new Quaternion();
 
    @Override
@@ -23,7 +23,7 @@ public class GenericQuadrupedDefaultInitialPosition extends GenericQuadrupedInit
    @Override
    double getHipRollAngle()
    {
-      return 0.3;
+      return 0.15;
    }
 
    @Override

@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTrajectoryControllerCommand, WrenchTrajectoryMessage>
       implements FrameBasedCommand<WrenchTrajectoryMessage>
 {
+   private long sequenceId;
    private ReferenceFrame dataFrame = ReferenceFrame.getWorldFrame();
    private final TDoubleArrayList trajectoryPointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<SpatialVector> trajectoryPointList = new RecyclingArrayList<>(16, SpatialVector.class);
@@ -44,6 +45,8 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
 
    public WrenchTrajectoryControllerCommand(Random random)
    {
+      sequenceId = random.nextInt();
+
       dataFrame = ReferenceFrame.getWorldFrame();
 
       int randomNumberOfPoints = random.nextInt(16) + 1;
@@ -62,6 +65,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       trajectoryPointTimes.reset();
       trajectoryPointList.clear();
       clearQueuableCommandVariables();
@@ -69,6 +73,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
 
    public void clear(ReferenceFrame dataFrame)
    {
+      sequenceId = 0;
       this.dataFrame = dataFrame;
       trajectoryPointTimes.reset();
       trajectoryPointList.clear();
@@ -93,21 +98,29 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, WrenchTrajectoryMessage message)
+   public void setFromMessage(WrenchTrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
-
-      clear(dataFrame);
-      setFromMessage(message);
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(WrenchTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, WrenchTrajectoryMessage message)
    {
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
+
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), dataFrame);
       List<WrenchTrajectoryPointMessage> trajectoryPointMessages = message.getWrenchTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -123,13 +136,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, WrenchTrajectoryMessage message)
-   {
-      this.trajectoryFrame = trajectoryFrame;
-      clear(dataFrame);
-      setFromMessage(message);
-   }
-
    /**
     * Same as {@link #set(WrenchTrajectoryControllerCommand)} but does not change the trajectory
     * points.
@@ -138,6 +144,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
     */
    public void setPropertiesOnly(WrenchTrajectoryControllerCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       trajectoryFrame = other.getTrajectoryFrame();
    }
@@ -236,5 +243,16 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    public Class<WrenchTrajectoryMessage> getMessageClass()
    {
       return WrenchTrajectoryMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

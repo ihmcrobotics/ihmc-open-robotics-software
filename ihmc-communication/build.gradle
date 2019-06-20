@@ -1,7 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
-   id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -14,7 +15,7 @@ ihmc {
 mainDependencies {
    compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
    compile group: "kryonet", name: "kryonet-all", version: "2.21"
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"

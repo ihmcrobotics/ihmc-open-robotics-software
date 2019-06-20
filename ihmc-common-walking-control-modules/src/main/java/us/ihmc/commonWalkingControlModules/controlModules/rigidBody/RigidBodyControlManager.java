@@ -539,4 +539,9 @@ public class RigidBodyControlManager
    {
       return jointsToControl;
    }
+
+   public Object pollStatusToReport()
+   {
+      return stateMachine.getCurrentState().pollStatusToReport();
+   }
 }

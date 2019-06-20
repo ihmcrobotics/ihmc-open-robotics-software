@@ -20,8 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class StartGoalPositionEditor extends AnimationTimer
 {
-   private static final boolean VERBOSE = false;
-
    private final EventHandler<MouseEvent> rayCastInterceptor;
    private boolean isRayCastInterceptorAttached = false;
    private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
@@ -167,11 +165,11 @@ public class StartGoalPositionEditor extends AnimationTimer
 
          if (positionValidated.getAndSet(false))
          {
-            if (VERBOSE)
-               LogTools.info("Start position is validated: " + interception, this);
+            LogTools.debug("Start position is validated: " + interception, this);
             messager.submitMessage(startEditModeEnabledTopic, false);
             if (startOrientationEditModeEnabledTopic != null)
             {
+               LogTools.debug("submitMessage  startOrientationEditModeEnabledTopic");
                messager.submitMessage(startOrientationEditModeEnabledTopic, true);
             }
          }
@@ -192,8 +190,7 @@ public class StartGoalPositionEditor extends AnimationTimer
 
          if (positionValidated.getAndSet(false))
          {
-            if (VERBOSE)
-               LogTools.info("Goal position is validated: " + interception, this);
+            LogTools.debug("Goal position is validated: " + interception, this);
             messager.submitMessage(goalEditModeEnabledTopic, false);
             if (goalOrientationEditModeEnabledTopic != null)
             {
@@ -207,15 +204,13 @@ public class StartGoalPositionEditor extends AnimationTimer
    {
       if (!isRayCastInterceptorAttached)
       {
-         if (VERBOSE)
-            LogTools.info("Attaching ray cast event handler.", this);
+         LogTools.debug("Attaching ray cast event handler.", this);
          sceneNode.addEventHandler(MouseEvent.ANY, rayCastInterceptor);
          isRayCastInterceptorAttached = true;
       }
       if (!isLeftClickInterceptorAttached)
       {
-         if (VERBOSE)
-            LogTools.info("Attaching left click event handler.", this);
+         LogTools.debug("Attaching left click event handler.", this);
          sceneNode.addEventHandler(MouseEvent.ANY, leftClickInterceptor);
          isLeftClickInterceptorAttached = true;
       }

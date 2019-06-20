@@ -311,11 +311,12 @@ public class SwingState extends AbstractFootControlState
 
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry,
-                                                               yoGraphicsListRegistry);
+      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot,
+                                                               defaultSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
 
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
@@ -502,9 +503,7 @@ public class SwingState extends AbstractFootControlState
 
       computeCurrentWeights(nominalAngularWeight, nominalLinearWeight, currentAngularWeight, currentLinearWeight);
 
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
@@ -728,6 +727,10 @@ public class SwingState extends AbstractFootControlState
       fillAndInitializeBlendedTrajectories();
    }
 
+   private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("FootstepFrame", worldFrame);
+   private final PoseReferenceFrame adjustedFootstepFrame = new PoseReferenceFrame("AdjustedFootstepFrame", worldFrame);
+   private final FramePose3D adjustedWaypoint = new FramePose3D();
+
    private void fillAndInitializeBlendedTrajectories()
    {
       double swingDuration = this.swingDuration.getDoubleValue();
@@ -739,10 +742,26 @@ public class SwingState extends AbstractFootControlState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
-         touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
-
-         blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+         // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
+         // any touchdown trajectory when doing step adjustment.
+         if (activeTrajectoryType.getValue() == TrajectoryType.WAYPOINTS && Precision.equals(swingWaypoints.getLast().getTime(), swingDuration))
+         {
+            footstepFrame.setPoseAndUpdate(footstepPose);
+            adjustedFootstepFrame.setPoseAndUpdate(rateLimitedAdjustedPose);
+            swingWaypoints.getLast().getPose(adjustedWaypoint);
+            adjustedWaypoint.changeFrame(footstepFrame);
+            adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
+            adjustedWaypoint.changeFrame(worldFrame);
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, adjustedWaypoint.getPosition(), finalLinearVelocity, touchdownAcceleration);
+            touchdownTrajectory.setOrientation(adjustedWaypoint.getOrientation());
+         }
+         else
+         {
+            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
+            touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
+         }
       }
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();

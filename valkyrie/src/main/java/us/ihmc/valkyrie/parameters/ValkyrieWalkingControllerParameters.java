@@ -712,22 +712,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public boolean useOptimizationBasedICPController()
-   {
-      switch (target)
-      {
-      case SCS:
-      case REAL_ROBOT:
-         return true;
-      case GAZEBO:
-      default:
-         // TODO Need to be re-enabled once tuned on unit A which appears to be more sensitive.
-         return false;
-      }
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;

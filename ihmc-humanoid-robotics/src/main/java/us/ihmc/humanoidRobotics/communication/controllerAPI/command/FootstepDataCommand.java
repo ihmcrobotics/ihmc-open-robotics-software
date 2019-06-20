@@ -2,9 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -14,7 +16,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -23,6 +24,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private long sequenceId;
    private RobotSide robotSide;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    private double swingHeight = 0.0;
@@ -39,6 +41,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingTrajectoryBlendDuration = 0.0;
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
+
+   private double liftoffDuration = Double.NaN;
    private double touchdownDuration = Double.NaN;
 
    private ReferenceFrame trajectoryFrame;
@@ -56,6 +60,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
@@ -66,14 +71,17 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       customPositionWaypoints.clear();
       swingTrajectory.clear();
 
-      touchdownDuration = Double.NaN;
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
+
+      touchdownDuration = Double.NaN;
+      liftoffDuration = Double.NaN;
    }
 
    @Override
    public void setFromMessage(FootstepDataMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
@@ -122,8 +130,10 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       }
 
       swingDuration = message.getSwingDuration();
-      touchdownDuration = message.getTouchdownDuration();
       transferDuration = message.getTransferDuration();
+
+      touchdownDuration = message.getTouchdownDuration();
+      liftoffDuration = message.getLiftoffDuration();
 
       this.executionDelayTime = message.getExecutionDelayTime();
    }
@@ -131,6 +141,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void set(FootstepDataCommand other)
    {
+      sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       trajectoryType = other.trajectoryType;
       swingHeight = other.swingHeight;
@@ -159,8 +170,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
 
       swingDuration = other.swingDuration;
-      touchdownDuration = other.touchdownDuration;
       transferDuration = other.transferDuration;
+      touchdownDuration = other.touchdownDuration;
+      liftoffDuration = other.liftoffDuration;
       this.executionDelayTime = other.executionDelayTime;
    }
 
@@ -273,6 +285,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return touchdownDuration;
    }
 
+   public double getLiftoffDuration()
+   {
+      return liftoffDuration;
+   }
+
    @Override
    public Class<FootstepDataMessage> getMessageClass()
    {
@@ -337,5 +354,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public boolean isDelayedExecutionSupported()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

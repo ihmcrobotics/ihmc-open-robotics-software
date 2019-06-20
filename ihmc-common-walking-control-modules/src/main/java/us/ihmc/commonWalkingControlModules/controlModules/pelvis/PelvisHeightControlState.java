@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -21,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -42,13 +44,19 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   /** We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a point feedback command and set the selection matrix to Z only**/
+   /**
+    * We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a
+    * point feedback command and set the selection matrix to Z only
+    **/
    private final SelectionMatrix3D temp3DSelection = new SelectionMatrix3D();
 
-   /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
+   /**
+    * When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another
+    * PelvisTrajectoryCommand
+    **/
    private final EuclideanTrajectoryControllerCommand euclideanCommand = new EuclideanTrajectoryControllerCommand();
 
-   /** handles the trajectory and the queuing**/
+   /** handles the trajectory and the queuing **/
    private final RigidBodyPositionController positionController;
 
    private final RigidBodyBasics pelvis;
@@ -90,6 +98,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final EuclideanTrajectoryControllerCommand command = new EuclideanTrajectoryControllerCommand();
    private final Vector3D zeroVelocity = new Vector3D();
    private final Point3D trajectoryPoint = new Point3D();
+
+   private final FramePoint3D statusDesiredPosition = new FramePoint3D();
+   private final FramePoint3D statusActualPosition = new FramePoint3D();
+   private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
    public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -237,6 +249,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * set the qp weights for the taskspace linear z command
+    * 
     * @param linearWeight
     */
    public void setWeights(Vector3DReadOnly linearWeight)
@@ -250,19 +263,24 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       // This is to avoid a variable changed listener that would fire when using the SCS playback.
       if (offset.getValue() != previousOffset)
       {
-         double desiredZInworld = positionController.getFeedbackControlCommand().getDesiredPosition().getZ();
+         double desiredZInworld = positionController.getFeedbackControlCommand().getReferencePosition().getZ();
          double currentDesired = desiredZInworld + adjustmentAmount.getValue();
          goToHeight(currentDesired - previousOffset, offsetTrajectoryTime.getValue());
       }
       previousOffset = offset.getValue();
 
       positionController.doAction(Double.NaN);
+      statusHelper.updateWithTimeInTrajectory(positionController.getTimeInTrajectory());
    }
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      if (positionController.handleTrajectoryCommand(command.getEuclideanTrajectory()))
+      EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+
+      if (positionController.handleTrajectoryCommand(euclideanTrajectory))
       {
+         euclideanTrajectory.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(euclideanTrajectory);
          return true;
       }
 
@@ -272,6 +290,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * check that the command is valid and queue the trajectory
+    * 
     * @param command
     * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
@@ -283,7 +302,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       ReferenceFrame selectionFrame = euclideanCommand.getSelectionMatrix().getSelectionFrame();
       if (selectionFrame != null && !selectionFrame.isZupFrame())
       {
-         PrintTools.warn("Pelvis linear selection matrix must be z-up!");
+         LogTools.warn("Pelvis linear selection matrix must be z-up!");
          return false;
       }
       euclideanCommand.getSelectionMatrix().selectXAxis(false);
@@ -293,7 +312,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       ReferenceFrame weightFrame = euclideanCommand.getWeightMatrix().getWeightFrame();
       if (weightFrame != null && !weightFrame.isZupFrame())
       {
-         PrintTools.warn("Pelvis linear weight matrix must be z-up!");
+         LogTools.warn("Pelvis linear weight matrix must be z-up!");
          return false;
       }
       euclideanCommand.getWeightMatrix().setXAxisWeight(0.0);
@@ -302,6 +321,8 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       if (positionController.handleTrajectoryCommand(euclideanCommand))
       {
+         euclideanCommand.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(euclideanCommand);
          return true;
       }
 
@@ -349,10 +370,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
 
       // TODO: for some reason this is needed to avoid robot-blow up. It should be selected out by the selection matrix!
-      feedbackCommand.getFeedForwardActionIncludingFrame(feedForwardLinearAcceleration);
+      feedForwardLinearAcceleration.setIncludingFrame(feedbackCommand.getReferenceLinearAcceleration());
       feedForwardLinearAcceleration.setX(0.0);
       feedForwardLinearAcceleration.setY(0.0);
-      feedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
+      feedbackCommand.getReferenceLinearAcceleration().set(feedForwardLinearAcceleration);
 
       temp3DSelection.clearSelection();
       temp3DSelection.setSelectionFrame(ReferenceFrame.getWorldFrame());
@@ -378,11 +399,24 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       currentPelvisHeightInWorld.set(controlPosition.getZ());
-      desiredPelvisHeightInWorld.set(feedbackCommand.getDesiredPosition().getZ());
+      desiredPelvisHeightInWorld.set(feedbackCommand.getReferencePosition().getZ());
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
-      desiredPelvisVelocityInWorld.set(feedbackCommand.getDesiredLinearVelocity().getZ());
+      desiredPelvisVelocityInWorld.set(feedbackCommand.getReferenceLinearVelocity().getZ());
 
       return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
                                                  currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());
+   }
+
+   @Override
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      statusDesiredPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getReferencePosition());
+      statusDesiredPosition.setX(Double.NaN);
+      statusDesiredPosition.setY(Double.NaN);
+      statusActualPosition.setIncludingFrame(controlPosition);
+      statusActualPosition.setX(Double.NaN);
+      statusActualPosition.setY(Double.NaN);
+
+      return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
    }
 }
