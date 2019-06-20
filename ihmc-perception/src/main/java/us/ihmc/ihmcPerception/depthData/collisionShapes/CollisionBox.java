@@ -1,7 +1,7 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import us.ihmc.euclid.shape.Box3D;
-import us.ihmc.euclid.shape.Shape3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 
@@ -54,7 +54,7 @@ public class CollisionBox extends CollisionShape
    }
 
    @Override
-   public Shape3D<?> getOrCreateShape3D()
+   public Shape3DReadOnly getOrCreateShape3D()
    {
       if (shape3D == null)
       {
