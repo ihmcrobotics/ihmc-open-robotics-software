@@ -52,76 +52,6 @@ public class XGaitCostTest
    private static final double epsilon = 1e-5;
 
    @Test
-   public void testComputeTimeDeltaBetweenStepsPace()
-   {
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(QuadrupedGait.PACE.getEndPhaseShift());
-      xGaitSettings.setQuadrupedSpeed(MEDIUM);
-      xGaitSettings.getPaceMediumTimings().setStepDuration(stepDuration);
-      xGaitSettings.getPaceMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
-
-      FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(),  new ForwardVelocityProvider());
-
-      String errorMessage = "";
-      errorMessage += testTimeDelta(stepDuration + doubleSupportDuration, RobotQuadrant.FRONT_LEFT, xGaitSettings);
-      errorMessage += testTimeDelta(stepDuration + doubleSupportDuration, RobotQuadrant.FRONT_RIGHT, xGaitSettings);
-
-      errorMessage += testTimeDelta(0.0, RobotQuadrant.HIND_RIGHT, xGaitSettings);
-      errorMessage += testTimeDelta(0.0, RobotQuadrant.HIND_LEFT, xGaitSettings);
-
-      assertTrue(errorMessage, errorMessage.isEmpty());
-   }
-
-   @Test
-   public void testComputeTimeDeltaBetweenStepsCrawl()
-   {
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
-      xGaitSettings.setQuadrupedSpeed(MEDIUM);
-      xGaitSettings.getAmbleMediumTimings().setStepDuration(stepDuration);
-      xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
-
-      FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(),  new ForwardVelocityProvider());
-
-      String errorMessage = "";
-      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.FRONT_LEFT, xGaitSettings);
-      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.FRONT_RIGHT, xGaitSettings);
-
-      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.HIND_RIGHT, xGaitSettings);
-      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.HIND_LEFT, xGaitSettings);
-
-      assertTrue(errorMessage, errorMessage.isEmpty());
-   }
-
-   @Test
-   public void testComputeTimeDeltaBetweenStepsTrot()
-   {
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
-      xGaitSettings.setQuadrupedSpeed(MEDIUM);
-      xGaitSettings.getTrotMediumTimings().setStepDuration(stepDuration);
-      xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
-
-      FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(),  new ForwardVelocityProvider());
-
-      String errorMessage = "";
-      errorMessage += testTimeDelta(0.0, RobotQuadrant.FRONT_LEFT, xGaitSettings);
-      errorMessage += testTimeDelta(0.0, RobotQuadrant.FRONT_RIGHT, xGaitSettings);
-
-      errorMessage += testTimeDelta(stepDuration + doubleSupportDuration, RobotQuadrant.HIND_RIGHT, xGaitSettings);
-      errorMessage += testTimeDelta(stepDuration + doubleSupportDuration, RobotQuadrant.HIND_LEFT, xGaitSettings);
-
-      assertTrue(errorMessage, errorMessage.isEmpty());
-   }
-
-
-   @Test
    public void testForwardWithFrontEndCost()
    {
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
@@ -406,16 +336,6 @@ public class XGaitCostTest
       velocityProvider.setGoalNode(goalNode);
 
       assertEquals(0.0, xGaitCost.compute(startNode, endNode), 5e-2);
-   }
-
-   private String testTimeDelta(double expectedDuration, RobotQuadrant robotQuadrant, QuadrupedXGaitSettingsReadOnly xGaitSettings)
-   {
-      String message = "";
-      double actual = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(robotQuadrant, xGaitSettings);
-      if (!MathTools.epsilonEquals(expectedDuration, actual, epsilon))
-         message += "\n" + robotQuadrant + " expected duration " + expectedDuration + ", got " + actual;
-
-      return message;
    }
 
    private class TestSnapper extends FootstepNodeSnapper
