@@ -5,9 +5,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
-import us.ihmc.avatar.networkProcessor.walkingPreview.FootstepListPreviewTask;
-import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingPreviewResetTask;
-import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingPreviewTask;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -329,7 +326,7 @@ public class AvatarKinematicsSimulationController
       walkingController.initialize();
 
       taskExecutor.clear();
-      taskExecutor.submit(new WalkingPreviewResetTask(walkingController, controllerToolbox.getFootContactStates()));
+      taskExecutor.submit(new KinematicsWalkingHaltTask(walkingController, controllerToolbox.getFootContactStates()));
       isInitialized.set(true);
    }
 
@@ -349,13 +346,13 @@ public class AvatarKinematicsSimulationController
       {
          initializeInternal();
          FootstepDataListCommand foostepCommand = kinematicsSimulationInputManager.pollNewestCommand(FootstepDataListCommand.class);
-         taskExecutor.submit(new FootstepListPreviewTask(fullRobotModel.getRootJoint(),
-                                                         foostepCommand,
-                                                         walkingInputManager,
-                                                         walkingOutputManager,
-                                                         controllerToolbox.getFootContactStates(),
-                                                         managerFactory.getOrCreateBalanceManager(),
-                                                         footSwitches));
+         taskExecutor.submit(new KinematicsWalkingFootstepSequenceTask(fullRobotModel.getRootJoint(),
+                                                                       foostepCommand,
+                                                                       walkingInputManager,
+                                                                       walkingOutputManager,
+                                                                       controllerToolbox.getFootContactStates(),
+                                                                       managerFactory.getOrCreateBalanceManager(),
+                                                                       footSwitches));
       }
       else
       {
@@ -382,7 +379,7 @@ public class AvatarKinematicsSimulationController
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
       controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       if (!taskExecutor.isDone())
-         controllerCoreCommand.addInverseDynamicsCommand(((WalkingPreviewTask) taskExecutor.getCurrentTask()).getOutput());
+         controllerCoreCommand.addInverseDynamicsCommand(((KinematicsWalkingTask) taskExecutor.getCurrentTask()).getOutput());
 
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
@@ -402,7 +399,7 @@ public class AvatarKinematicsSimulationController
       integrator.setIntegrationDT(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
-      if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask))
+      if (!(taskExecutor.getCurrentTask() instanceof KinematicsWalkingHaltTask))
          previewFrames.add(MessageTools.createKinematicsToolboxOutputStatus(rootJoint, allOneDoFJointsExcludingHands));
 
       isDone.set(taskExecutor.isDone() || hasControllerFailed.getValue());
@@ -442,7 +439,7 @@ public class AvatarKinematicsSimulationController
 
    public boolean isWalkingControllerResetDone()
    {
-      return isInitialized.getValue() && !(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask);
+      return isInitialized.getValue() && !(taskExecutor.getCurrentTask() instanceof KinematicsWalkingHaltTask);
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
