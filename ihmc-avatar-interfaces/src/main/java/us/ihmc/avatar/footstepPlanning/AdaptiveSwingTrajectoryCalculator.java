@@ -1,23 +1,24 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
+import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.geometry.polytope.ConvexPolytope;
-import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Calculates suggested swing time, swing height and waypoint proportions
@@ -105,31 +106,32 @@ public class AdaptiveSwingTrajectoryCalculator
 
       double zOffset = boxGroundClearance + 0.5 * boxHeight;
       boxCenter.appendTranslation(0.0, 0.0, zOffset);
-      footStubBox.setPose(boxCenter);
+      footStubBox.getPose().set(boxCenter);
 
-      ConvexPolytope bodyBoxPolytope = new ConvexPolytope();
-      Point3D[] vertices = footStubBox.getVertices();
+      ConvexPolytope3D bodyBoxPolytope = new ConvexPolytope3D();
+      Point3DBasics[] vertices = footStubBox.getVertices();
 
       for (int i = 0; i < vertices.length; i++)
       {
          bodyBoxPolytope.addVertex(vertices[i]);
       }
 
-      List<ConvexPolytope> planarRegionPolytopes = createPlanarRegionPolytopeList(planarRegionsList);
+      List<ConvexPolytope3D> planarRegionPolytopes = createPlanarRegionPolytopeList(planarRegionsList);
       GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
       for (int i = 0; i < planarRegionPolytopes.size(); i++)
       {
-         if(collisionDetector.arePolytopesColliding(planarRegionPolytopes.get(i), bodyBoxPolytope, new Point3D(), new Point3D()))
+         EuclidShape3DCollisionResult result = collisionDetector.evaluateCollision(planarRegionPolytopes.get(i), bodyBoxPolytope);
+         if(result.areShapesColliding())
             return true;
       }
 
       return false;
    }
 
-   private List<ConvexPolytope> createPlanarRegionPolytopeList(PlanarRegionsList planarRegions)
+   private List<ConvexPolytope3D> createPlanarRegionPolytopeList(PlanarRegionsList planarRegions)
    {
-      List<ConvexPolytope> planarRegionPolytopes = new ArrayList<>();
+      List<ConvexPolytope3D> planarRegionPolytopes = new ArrayList<>();
       RigidBodyTransform transform = new RigidBodyTransform();
       FramePoint3D framePoint = new FramePoint3D();
 
@@ -137,7 +139,7 @@ public class AdaptiveSwingTrajectoryCalculator
       for (int i = 0; i < planarRegionsList.size(); i++)
       {
          PlanarRegion planarRegion = planarRegionsList.get(i);
-         ConvexPolytope planarRegionPolytope = new ConvexPolytope();
+         ConvexPolytope3D planarRegionPolytope = new ConvexPolytope3D();
 
          List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
          planarRegion.getTransformToWorld(transform);
@@ -146,7 +148,7 @@ public class AdaptiveSwingTrajectoryCalculator
          {
             framePoint.set(point.getX(), point.getY(), 0.0);
             framePoint.applyTransform(transform);
-            planarRegionPolytope.addVertex(framePoint.getX(), framePoint.getY(), framePoint.getZ());
+            planarRegionPolytope.addVertex(framePoint);
          }
 
          planarRegionPolytopes.add(planarRegionPolytope);
