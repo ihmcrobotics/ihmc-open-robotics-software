@@ -35,7 +35,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -91,6 +90,8 @@ public class AvatarKinematicsSimulationController
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
+   private final CommandInputManager kinematicsSimulationInputManager;
+
    // is this for the initial condition?
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
    private final CommandInputManager walkingInputManager
@@ -111,6 +112,7 @@ public class AvatarKinematicsSimulationController
       this.integrationDT = integrationDT;
       this.registry = registry;
 
+      kinematicsSimulationInputManager = new CommandInputManager("ik_simulation", ControllerAPIDefinition.getControllerSupportedCommands());
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       previewTime = new YoDouble("timeInPreview", registry);
@@ -343,11 +345,10 @@ public class AvatarKinematicsSimulationController
          return;
       }
 
-      if (walkingInputManager.isNewCommandAvailable(WalkingControllerPreviewInputCommand.class))
+      if (kinematicsSimulationInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
       {
          initializeInternal();
-         WalkingControllerPreviewInputCommand command = walkingInputManager.pollNewestCommand(WalkingControllerPreviewInputCommand.class);
-         FootstepDataListCommand foostepCommand = command.getFoostepCommand();
+         FootstepDataListCommand foostepCommand = kinematicsSimulationInputManager.pollNewestCommand(FootstepDataListCommand.class);
          taskExecutor.submit(new FootstepListPreviewTask(fullRobotModel.getRootJoint(),
                                                          foostepCommand,
                                                          walkingInputManager,
@@ -419,9 +420,14 @@ public class AvatarKinematicsSimulationController
       updatables.forEach(updatable -> updatable.update(previewTime.getValue()));
    }
 
-   public CommandInputManager getWalkingInputManager()
+   public CommandInputManager getInputManager()
    {
-      return walkingInputManager;
+      return kinematicsSimulationInputManager;
+   }
+
+   public StatusMessageOutputManager getWalkingOutputManager()
+   {
+      return walkingOutputManager;
    }
 
    public void addUpdatable(Updatable updatable)
