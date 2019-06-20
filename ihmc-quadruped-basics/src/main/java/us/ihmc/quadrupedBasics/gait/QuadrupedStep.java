@@ -130,7 +130,7 @@ public class QuadrupedStep
       return getRobotQuadrant() == other.getRobotQuadrant() &&
              getGoalPositionInternal().epsilonEquals(other.getGoalPositionInternal(), epsilon) &&
              MathTools.epsilonEquals(getGroundClearance(), other.getGroundClearance(), epsilon) && 
-             (getTrajectoryType() != null && getTrajectoryType() == other.getTrajectoryType());
+             (getTrajectoryType() == other.getTrajectoryType());
 
    }
 
