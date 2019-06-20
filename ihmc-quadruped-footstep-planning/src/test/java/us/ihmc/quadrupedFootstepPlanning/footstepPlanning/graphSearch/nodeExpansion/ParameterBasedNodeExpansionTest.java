@@ -89,8 +89,8 @@ public class ParameterBasedNodeExpansionTest
                         0.5 * expectedNewQuadrant.getSide().negateIfRightSide(baseNode.getNominalStanceWidth()));
                double lowerXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength());
                double upperXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength());
-               double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMinimumStepWidth() : parameters.getMaximumStepWidth());
-               double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth());
+               double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMaximumStepInward() : parameters.getMaximumStepOutward());
+               double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepOutward() : -parameters.getMaximumStepInward());
                double xFoot = node.getX(robotQuadrant);
                double yFoot = node.getY(robotQuadrant);
                assertTrue(robotQuadrant.getCamelCaseName() + " foot X " + xFoot + " is not within bounds " + lowerXBound + " < x < " + upperXBound, MathTools.intervalContains(xFoot, lowerXBound, upperXBound, FootstepNode.gridSizeXY));
@@ -180,13 +180,13 @@ public class ParameterBasedNodeExpansionTest
          }
 
          @Override
-         public double getMinimumStepWidth()
+         public double getMaximumStepInward()
          {
             return -0.3;
          }
 
          @Override
-         public double getMaximumStepWidth()
+         public double getMaximumStepOutward()
          {
             return 0.35;
          }
@@ -332,16 +332,16 @@ public class ParameterBasedNodeExpansionTest
       QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), baseNode.getStepOrientation());
 
       ConvexPolygon2D frontReachableRegion = new ConvexPolygon2D();
-      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMinimumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMinimumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepWidth());
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepOutward());
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepInward());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepInward());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepOutward());
       frontReachableRegion.update();
       ConvexPolygon2D hindReachableRegion = new ConvexPolygon2D();
-      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMinimumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMinimumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepWidth());
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepOutward());
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepInward());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepInward());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepOutward());
       hindReachableRegion.update();
 
       RobotQuadrant movingQuadrant = baseNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();

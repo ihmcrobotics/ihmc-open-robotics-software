@@ -17,9 +17,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinimumHindStepLength(double minimumStepLength);
 
-   void setMaximumStepWidth(double maximumStepWidth);
+   void setMaximumStepOutward(double maximumStepOutward);
 
-   void setMinimumStepWidth(double minimumStepWidth);
+   void setMaximumStepInward(double maximumStepInward);
 
    void setMaximumFrontStepLengthWhenSteppingUp(double maximumStepLength);
 
@@ -41,9 +41,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setStepZForSteppingDown(double stepZ);
 
-   void setMinimumStepYaw(double minimumStepYaw);
+   void setMaximumStepYawInward(double maximumStepYawInward);
 
-   void setMaximumStepYaw(double maximumStepYaw);
+   void setMaximumStepYawOutward(double maximumStepYawOutward);
 
    void setMaximumStepChangeZ(double maximumStepChangeZ);
 
@@ -117,10 +117,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaximumHindStepLengthWhenSteppingDown(other.getMaximumHindStepLengthWhenSteppingDown());
       setMinimumHindStepLengthWhenSteppingDown(other.getMinimumHindStepLengthWhenSteppingDown());
       setStepZForSteppingDown(other.getStepZForSteppingDown());
-      setMaximumStepWidth(other.getMaximumStepWidth());
-      setMinimumStepWidth(other.getMinimumStepWidth());
-      setMinimumStepYaw(other.getMinimumStepYaw());
-      setMaximumStepYaw(other.getMaximumStepYaw());
+      setMaximumStepOutward(other.getMaximumStepOutward());
+      setMaximumStepInward(other.getMaximumStepInward());
+      setMaximumStepYawInward(other.getMaximumStepYawInward());
+      setMaximumStepYawOutward(other.getMaximumStepYawOutward());
       setMaximumStepChangeZ(other.getMaximumStepChangeZ());
       setBodyGroundClearance(other.getBodyGroundClearance());
       setDistanceWeight(other.getDistanceWeight());
@@ -185,13 +185,13 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (other.getStepZForSteppingDown() != other.NO_VALUE_DOUBLE)
          setStepZForSteppingDown(other.getStepZForSteppingDown());
       if (other.getMaximumStepWidth() != other.NO_VALUE_DOUBLE)
-         setMaximumStepWidth(other.getMaximumStepWidth());
+         setMaximumStepOutward(other.getMaximumStepWidth());
       if (other.getMinimumStepWidth() != other.NO_VALUE_DOUBLE)
-         setMinimumStepWidth(other.getMinimumStepWidth());
+         setMaximumStepInward(other.getMinimumStepWidth());
       if (other.getMinimumStepYaw() != other.NO_VALUE_DOUBLE)
-         setMinimumStepYaw(other.getMinimumStepYaw());
+         setMaximumStepYawInward(other.getMinimumStepYaw());
       if (other.getMaximumStepYaw() != other.NO_VALUE_DOUBLE)
-         setMaximumStepYaw(other.getMaximumStepYaw());
+         setMaximumStepYawOutward(other.getMaximumStepYaw());
       if (other.getMaximumStepChangeZ() != other.NO_VALUE_DOUBLE)
          setMaximumStepChangeZ(other.getMaximumStepChangeZ());
       if (other.getBodyGroundClearance() != other.NO_VALUE_DOUBLE)

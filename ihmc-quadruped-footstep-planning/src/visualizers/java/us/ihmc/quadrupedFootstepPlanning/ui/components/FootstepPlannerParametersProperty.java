@@ -13,10 +13,10 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField maximumHindStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepReach, SettableFootstepPlannerParameters::setMaximumHindStepReach);
    private final DoubleField maximumHindStepLength = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLength, SettableFootstepPlannerParameters::setMaximumHindStepLength);
    private final DoubleField minimumHindStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLength, SettableFootstepPlannerParameters::setMinimumHindStepLength);
-   private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
-   private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, SettableFootstepPlannerParameters::setMinimumStepWidth);
-   private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, SettableFootstepPlannerParameters::setMinimumStepYaw);
-   private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, SettableFootstepPlannerParameters::setMaximumStepYaw);
+   private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepOutward, SettableFootstepPlannerParameters::setMaximumStepOutward);
+   private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepInward, SettableFootstepPlannerParameters::setMaximumStepInward);
+   private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYawInward, SettableFootstepPlannerParameters::setMaximumStepYawInward);
+   private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYawOutward, SettableFootstepPlannerParameters::setMaximumStepYawOutward);
 
    private final DoubleField maximumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumFrontStepLengthWhenSteppingUp);
    private final DoubleField minimumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMinimumFrontStepLengthWhenSteppingUp);

@@ -32,7 +32,8 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecker
 {
    private static final boolean DEBUG = false;
-   private static final boolean checkAllXGaits = false;
+   static boolean checkAllXGaits = false;
+   private final static boolean allowStepInPlace = false;
 
    private final FootstepPlannerParameters parameters;
    private final FootstepNodeSnapper snapper;
@@ -72,17 +73,18 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
       Orientation3DReadOnly previousYawOrientation = previousNode.getStepOrientation();
       previousYawOrientation.transform(offsetVector);
 
-      /*
-      if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
+      if (!allowStepInPlace)
       {
-         if (DEBUG)
+         if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
          {
-            PrintTools.info("The node " + nodeToCheck + " is trying to step in place.");
+            if (DEBUG)
+            {
+               PrintTools.info("The node " + nodeToCheck + " is trying to step in place.");
+            }
+            rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
+            return false;
          }
-         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
-         return false;
       }
-      */
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -105,7 +107,7 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
       }
 
       double yawChange = AngleTools.computeAngleDifferenceMinusPiToPi(currentYaw, previousYaw);
-      if (!MathTools.intervalContains(yawChange, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
+      if (!MathTools.intervalContains(yawChange, parameters.getMaximumStepYawInward(), parameters.getMaximumStepYawOutward()))
       {
          if (DEBUG)
          {
@@ -228,13 +230,13 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
       double maxWidth, minWidth;
       if (movingQuadrant.isQuadrantOnLeftSide())
       {
-         minWidth = parameters.getMinimumStepWidth();
-         maxWidth = parameters.getMaximumStepWidth();
+         minWidth = parameters.getMaximumStepInward();
+         maxWidth = parameters.getMaximumStepOutward();
       }
       else
       {
-         minWidth = -parameters.getMaximumStepWidth();
-         maxWidth = -parameters.getMinimumStepWidth();
+         minWidth = -parameters.getMaximumStepOutward();
+         maxWidth = -parameters.getMaximumStepInward();
       }
 
       if (DEBUG)
@@ -290,14 +292,14 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far outward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_OUTWARD);
+         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
          return false;
       }
       if (newStepPosition.getY() - nominalPreviousStepFromXGait.getY() < minWidth)
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far inward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_INWARD);
+         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
          return false;
       }
 
@@ -357,13 +359,13 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
          double maxWidth, minWidth;
          if (movingQuadrant.isQuadrantOnLeftSide())
          {
-            minWidth = parameters.getMinimumStepWidth();
-            maxWidth = parameters.getMaximumStepWidth();
+            minWidth = parameters.getMaximumStepInward();
+            maxWidth = parameters.getMaximumStepOutward();
          }
          else
          {
-            minWidth = -parameters.getMaximumStepWidth();
-            maxWidth = -parameters.getMinimumStepWidth();
+            minWidth = -parameters.getMaximumStepOutward();
+            maxWidth = -parameters.getMaximumStepInward();
          }
 
          if (DEBUG)
@@ -409,14 +411,14 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far outward.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_OUTWARD);
+            rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
             return false;
          }
          if (newStepPosition.getY() - expectedXGaitPoint.getY() < minWidth)
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far inward.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_INWARD);
+            rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
             return false;
          }
       }

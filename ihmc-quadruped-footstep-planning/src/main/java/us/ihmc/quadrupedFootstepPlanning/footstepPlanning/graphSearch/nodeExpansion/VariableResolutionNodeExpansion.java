@@ -4,7 +4,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CliffDetectionTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -52,8 +51,8 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
 
       double forward = isMovingFront ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
       double backward = isMovingFront ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
-      double left = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
-      double right = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
+      double left = isMovingLeft ? parameters.getMaximumStepOutward() : -parameters.getMaximumStepInward();
+      double right = isMovingLeft ? parameters.getMaximumStepInward() : -parameters.getMaximumStepOutward();
 
       if (CliffDetectionTools.isNearCliff(snapper.getPlanarRegionsList(), footInWorld, node.getStepYaw(), parameters, forward, backward, left, right))
          return FootstepNode.gridSizeXY;

@@ -24,10 +24,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minimumHindStepLengthWhenSteppingDown = new YoDouble("minimumHindStepLengthWhenSteppingDown", registry);
    private final YoDouble stepZForSteppingUp = new YoDouble("stepZForSteppingUp", registry);
    private final YoDouble stepZForSteppingDown = new YoDouble("stepZForSteppingDown", registry);
-   private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
-   private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
-   private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
-   private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
+   private final YoDouble maximumStepOutward = new YoDouble("maximumStepOutward", registry);
+   private final YoDouble maximumStepInward = new YoDouble("maximumStepInward", registry);
+   private final YoDouble maximumStepYawInward = new YoDouble("maximumStepYawInward", registry);
+   private final YoDouble maximumStepYawOutward = new YoDouble("maximumStepYawOutward", registry);
    private final YoDouble maximumStepChangeZ = new YoDouble("maximumStepChangeZ", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
    private final YoDouble distanceWeight = new YoDouble("distanceWeight", registry);
@@ -160,27 +160,27 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMaximumStepWidth(double maximumStepWidth)
+   public void setMaximumStepOutward(double maximumStepOutward)
    {
-      this.maximumStepWidth.set(maximumStepWidth);
+      this.maximumStepOutward.set(maximumStepOutward);
    }
 
    @Override
-   public void setMinimumStepWidth(double minimumStepWidth)
+   public void setMaximumStepInward(double maximumStepInward)
    {
-      this.minimumStepWidth.set(minimumStepWidth);
+      this.maximumStepInward.set(maximumStepInward);
    }
 
    @Override
-   public void setMinimumStepYaw(double minimumStepYaw)
+   public void setMaximumStepYawInward(double maximumStepYawInward)
    {
-      this.minimumStepYaw.set(minimumStepYaw);
+      this.maximumStepYawInward.set(maximumStepYawInward);
    }
 
    @Override
-   public void setMaximumStepYaw(double maximumStepYaw)
+   public void setMaximumStepYawOutward(double maximumStepYawOutward)
    {
-      this.maximumStepYaw.set(maximumStepYaw);
+      this.maximumStepYawOutward.set(maximumStepYawOutward);
    }
 
    @Override
@@ -451,30 +451,30 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
-      return maximumStepWidth.getDoubleValue();
+      return maximumStepOutward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
-      return minimumStepWidth.getDoubleValue();
+      return maximumStepInward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
-      return minimumStepYaw.getDoubleValue();
+      return maximumStepYawInward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return maximumStepYaw.getDoubleValue();
+      return maximumStepYawOutward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
