@@ -17,6 +17,9 @@ public class UnitConversions
    public static final double PSI_TO_PASCALS = 6894.75729;
 
    // Multi-unit
+   /**
+    * @see {@link us.ihmc.commons.Conversions#radiansPerSecondToHertz(double)}
+    */
    public static final double FREQ_TO_RADPERSEC = Math.PI * 2.0;
 
    public static double secondsToHertz(double seconds)
