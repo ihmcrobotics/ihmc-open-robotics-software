@@ -110,13 +110,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
          @Override
          public double getXGaitWeight()
          {
-            return 2.0;
+            return 0.0;
          }
 
          @Override
          public double getDesiredVelocityWeight()
          {
-            return 0.5;
+            return 0.0;
          }
       };
 
