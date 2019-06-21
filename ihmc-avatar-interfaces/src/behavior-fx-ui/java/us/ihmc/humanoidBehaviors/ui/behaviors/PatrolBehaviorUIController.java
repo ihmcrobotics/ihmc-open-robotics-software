@@ -19,6 +19,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
@@ -100,7 +101,10 @@ public class PatrolBehaviorUIController extends Group
          waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
          waypointIndex.setDisable(true);
-         perceiveDuration.setValueFactory(new DoubleSpinnerValueFactory(00.0, 500.0, 20.0, 1.0));
+         perceiveDuration.setValueFactory(new DoubleSpinnerValueFactory(0.0,
+                                                                        500.0,
+                                                                        RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED,
+                                                                        1.0));
          perceiveDuration.getValueFactory().valueProperty().addListener((ChangeListener) -> publishPerceiveDuration());
       });
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
