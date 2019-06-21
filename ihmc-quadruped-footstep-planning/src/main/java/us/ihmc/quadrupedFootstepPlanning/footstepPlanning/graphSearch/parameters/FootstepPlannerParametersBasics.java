@@ -95,6 +95,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setFinalSlowDownProximity(double proximity);
 
+   void setMaximumDeviationFromXGaitDuringExpansion(double deviation);
+
    default void set(FootstepPlannerParameters other)
    {
       setMaximumFrontStepReach(other.getMaximumFrontStepReach());
@@ -142,6 +144,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
       setFinalTurnProximity(other.getFinalTurnProximity());
       setFinalSlowDownProximity(other.getFinalSlowDownProximity());
+      setMaximumDeviationFromXGaitDuringExpansion(other.getMaximumDeviationFromXGaitDuringExpansion());
    }
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
@@ -234,6 +237,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setFinalTurnProximity(other.getFinalTurnProximity());
       if (other.getFinalSlowDownProximity() != other.NO_VALUE_DOUBLE)
          setFinalSlowDownProximity(other.getFinalSlowDownProximity());
+      if (other.getMaximumDeviationFromXGaitDuringExpansion() != other.NO_VALUE_DOUBLE)
+         setMaximumDeviationFromXGaitDuringExpansion(other.getMaximumDeviationFromXGaitDuringExpansion());
 
       setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
    }

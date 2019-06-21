@@ -60,6 +60,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double finalTurnProximity;
    private double finalSlowDownProximity;
 
+   private double maximumDeviationFromXGaitDuringExpansion;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
@@ -369,6 +371,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMaximumXYWiggleDistance(double maximumWiggleDistance)
    {
       this.maximumXYWiggleDistance = maximumWiggleDistance;
+   }
+
+   @Override
+   public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
+   {
+      this.maximumDeviationFromXGaitDuringExpansion = deviationFromXGaitDuringExpansion;
    }
 
    /** {@inheritDoc} */
@@ -682,5 +690,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getFinalSlowDownProximity()
    {
       return finalSlowDownProximity;
+   }
+
+   @Override
+   public double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return maximumDeviationFromXGaitDuringExpansion;
    }
 }

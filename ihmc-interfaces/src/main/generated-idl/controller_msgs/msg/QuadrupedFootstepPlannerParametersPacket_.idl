@@ -110,6 +110,8 @@ module controller_msgs
         double final_turn_proximity;
         @defaultValue(value=-11.1)
         double final_slow_down_proximity;
+        @defaultValue(value=-11.1)
+        double maximum_deviation_from_x_gait_during_expansion;
       };
     };
   };

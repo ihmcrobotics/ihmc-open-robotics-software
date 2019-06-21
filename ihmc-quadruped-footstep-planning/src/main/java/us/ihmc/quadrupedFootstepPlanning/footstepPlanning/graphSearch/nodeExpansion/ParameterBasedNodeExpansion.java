@@ -24,8 +24,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    protected final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   private static final double maxDeviationFromXGait = 0.1;
-
    public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.parameters = parameters;
@@ -67,8 +65,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       double maxLateralDisplacement = xGaitSettings.getMaxHorizontalSpeedFraction() * maxForwardDisplacement;
       double maxYawDisplacement = xGaitSettings.getMaxYawSpeedFraction() * maxForwardDisplacement;
 
-      double maxLength = maxForwardDisplacement + maxDeviationFromXGait;
-      double maxWidth = maxLateralDisplacement + maxDeviationFromXGait;
+      double maxLength = maxForwardDisplacement + parameters.getMaximumDeviationFromXGaitDuringExpansion();
+      double maxWidth = maxLateralDisplacement + parameters.getMaximumDeviationFromXGaitDuringExpansion();
 
       Vector2D nominalFootOffset = new Vector2D(0.5 * nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
                                                 0.5 * nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));

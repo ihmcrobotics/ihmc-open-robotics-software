@@ -61,6 +61,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double minimum_lateral_distance_from_cliff_bottoms_ = -11.1;
    public double final_turn_proximity_ = -11.1;
    public double final_slow_down_proximity_ = -11.1;
+   public double maximum_deviation_from_x_gait_during_expansion_ = -11.1;
 
    public QuadrupedFootstepPlannerParametersPacket()
    {
@@ -165,6 +166,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       final_turn_proximity_ = other.final_turn_proximity_;
 
       final_slow_down_proximity_ = other.final_slow_down_proximity_;
+
+      maximum_deviation_from_x_gait_during_expansion_ = other.maximum_deviation_from_x_gait_during_expansion_;
 
    }
 
@@ -588,6 +591,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return final_slow_down_proximity_;
    }
 
+   public void setMaximumDeviationFromXGaitDuringExpansion(double maximum_deviation_from_x_gait_during_expansion)
+   {
+      maximum_deviation_from_x_gait_during_expansion_ = maximum_deviation_from_x_gait_during_expansion;
+   }
+   public double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return maximum_deviation_from_x_gait_during_expansion_;
+   }
+
 
    public static Supplier<QuadrupedFootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -698,6 +710,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_slow_down_proximity_, other.final_slow_down_proximity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_deviation_from_x_gait_during_expansion_, other.maximum_deviation_from_x_gait_during_expansion_, epsilon)) return false;
+
 
       return true;
    }
@@ -803,6 +817,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.final_slow_down_proximity_ != otherMyClass.final_slow_down_proximity_) return false;
 
+      if(this.maximum_deviation_from_x_gait_during_expansion_ != otherMyClass.maximum_deviation_from_x_gait_during_expansion_) return false;
+
 
       return true;
    }
@@ -904,7 +920,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append("final_turn_proximity=");
       builder.append(this.final_turn_proximity_);      builder.append(", ");
       builder.append("final_slow_down_proximity=");
-      builder.append(this.final_slow_down_proximity_);
+      builder.append(this.final_slow_down_proximity_);      builder.append(", ");
+      builder.append("maximum_deviation_from_x_gait_during_expansion=");
+      builder.append(this.maximum_deviation_from_x_gait_during_expansion_);
       builder.append("}");
       return builder.toString();
    }
