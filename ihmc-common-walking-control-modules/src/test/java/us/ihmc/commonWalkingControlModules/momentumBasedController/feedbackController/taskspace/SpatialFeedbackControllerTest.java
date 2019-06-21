@@ -56,6 +56,7 @@ public final class SpatialFeedbackControllerTest
    public void testBaseFrame()
    {
       double controlDT = 0.004;
+      double simulationTime = 4.0;
       Random random = new Random(562968L);
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
 
@@ -98,7 +99,7 @@ public final class SpatialFeedbackControllerTest
       double damping = 0.001;
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < simulationTime / controlDT; i++)
       {
          // Keep updating the desired since it is converted to world frame inside the command.
          // TODO: This can be removed once we start saving the desired values in their trajectory frames.

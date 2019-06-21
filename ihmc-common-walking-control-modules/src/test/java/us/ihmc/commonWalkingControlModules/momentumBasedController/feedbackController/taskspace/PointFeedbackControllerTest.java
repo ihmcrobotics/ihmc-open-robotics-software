@@ -58,6 +58,8 @@ public final class PointFeedbackControllerTest
    public void testBaseFrame()
    {
       double controlDT = 0.004;
+      double simulationTime = 4.0;
+      int integrationSteps = 100;
       Random random = new Random(562968L);
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
 
@@ -96,9 +98,9 @@ public final class PointFeedbackControllerTest
       QPInput motionQPInput = new QPInput(MultiBodySystemTools.computeDegreesOfFreedom(joints));
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(0, 0);
       double damping = 0.001;
-      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT / integrationSteps);
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < simulationTime / controlDT; i++)
       {
          // Keep updating the desired since it is converted to world frame inside the command.
          // TODO: This can be removed once we start saving the desired values in their trajectory frames.
@@ -109,17 +111,23 @@ public final class PointFeedbackControllerTest
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
-         integrator.integrateJointAccelerations(joints, jointAccelerations);
-         integrator.integrateJointVelocities(joints, integrator.getJointVelocities());
-         MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, integrator.getJointVelocities());
-         MultiBodySystemTools.insertJointsState(joints, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
-         elevator.updateFramesRecursively();
+
+         // Need to do a fine grain integration since the point we care about will be the center of rotation of the body and we need
+         // to maintain that situation.
+         for (int j = 0; j < integrationSteps; j++)
+         {
+            integrator.integrateJointAccelerations(joints, jointAccelerations);
+            integrator.integrateJointVelocities(joints, integrator.getJointVelocities());
+            MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, integrator.getJointVelocities());
+            MultiBodySystemTools.insertJointsState(joints, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
+            elevator.updateFramesRecursively();
+         }
       }
 
       // Assert position is close to desired
       FramePoint3D position = new FramePoint3D(endEffector.getBodyFixedFrame());
       position.changeFrame(desiredPosition.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, position, 1.0E-3);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, position, 1.0E-5);
    }
 
    @Test
