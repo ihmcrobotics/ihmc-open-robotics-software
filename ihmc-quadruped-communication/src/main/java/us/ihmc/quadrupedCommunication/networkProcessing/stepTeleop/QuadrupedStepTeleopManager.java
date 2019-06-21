@@ -65,7 +65,7 @@ public class QuadrupedStepTeleopManager
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay, graphicsListRegistry, registry);
       this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, firstStepDelay, registry);
 
-      desiredVelocityRateLimit.set(10.0);
+      desiredVelocityRateLimit.set(1.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
 
       groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
