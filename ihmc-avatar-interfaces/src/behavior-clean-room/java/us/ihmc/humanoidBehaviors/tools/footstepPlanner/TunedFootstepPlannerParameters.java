@@ -26,6 +26,10 @@ public class TunedFootstepPlannerParameters
    private double maxStepUpX        ;
    private double maxStepDownX      ;
    private double timeout      ;
+   private double transferTimeFlatUp;
+   private double transferTimeDown  ;
+   private double swingTimeFlatUp   ;
+   private double swingTimeDown     ;
 
    public void setFromFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -283,5 +287,45 @@ public class TunedFootstepPlannerParameters
    public void setTimeout(double timeout)
    {
       this.timeout = timeout;
+   }
+
+   public double getTransferTimeFlatUp()
+   {
+      return transferTimeFlatUp;
+   }
+
+   public void setTransferTimeFlatUp(double transferTimeFlatUp)
+   {
+      this.transferTimeFlatUp = transferTimeFlatUp;
+   }
+
+   public double getTransferTimeDown()
+   {
+      return transferTimeDown;
+   }
+
+   public void setTransferTimeDown(double transferTimeDown)
+   {
+      this.transferTimeDown = transferTimeDown;
+   }
+
+   public double getSwingTimeFlatUp()
+   {
+      return swingTimeFlatUp;
+   }
+
+   public void setSwingTimeFlatUp(double swingTimeFlatUp)
+   {
+      this.swingTimeFlatUp = swingTimeFlatUp;
+   }
+
+   public double getSwingTimeDown()
+   {
+      return swingTimeDown;
+   }
+
+   public void setSwingTimeDown(double swingTimeDown)
+   {
+      this.swingTimeDown = swingTimeDown;
    }
 }
