@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -43,6 +44,8 @@ public class ExceptionHandlingThreadScheduler
       this(name, DEFAULT_HANDLER, 0);
    }
 
+   /** TODO: Add constructor with Exception handler that print only the message N-1 times and print the stack trace when it finally crashes */
+
    /**
     * Handle the exceptions yourself and recover. Always resume running.
     *
@@ -66,6 +69,11 @@ public class ExceptionHandlingThreadScheduler
       this.executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
       this.exceptionHandler = exceptionHandler;
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
+   }
+
+   public ScheduledFuture<?> schedule(Runnable runnable, double period)
+   {
+      return schedule(runnable, Conversions.secondsToNanoseconds(period), TimeUnit.NANOSECONDS);
    }
 
    public ScheduledFuture<?> schedule(Runnable runnable, long period, TimeUnit timeunit)
