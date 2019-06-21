@@ -39,7 +39,6 @@ public class QuadrupedStepAdjustmentController
    private final QuadrantDependentList<RateLimitedYoFrameVector> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
 
    private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 5.0);
-   private final DoubleParameter maxStepAdjustmentAcceleration = new DoubleParameter("maxStepAdjustmentAcceleration", registry, 10.0);
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> recursionMultipliers = new QuadrantDependentList<>();
