@@ -90,6 +90,8 @@ public final class SpatialFeedbackControllerTest
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(baseBody, endEffector);
       spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredPose, zero, zero);
+      spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -100,12 +102,7 @@ public final class SpatialFeedbackControllerTest
 
       for (int i = 0; i < 1000; i++)
       {
-         // Keep updating the desired since it is converted to world frame inside the command.
-         // TODO: This can be removed once we start saving the desired values in their trajectory frames.
-         spatialFeedbackControlCommand.setInverseDynamics(desiredPose, zero, zero);
-         spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          spatialFeedbackController.computeInverseDynamics();
-
          SpatialAccelerationCommand spatialAccelerationCommand = spatialFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
