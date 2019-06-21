@@ -32,10 +32,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double maximum_hind_step_length_when_stepping_down_ = -11.1;
    public double minimum_hind_step_length_when_stepping_down_ = -11.1;
    public double step_z_for_stepping_down_ = -11.1;
-   public double maximum_step_width_ = -11.1;
-   public double minimum_step_width_ = -11.1;
-   public double minimum_step_yaw_ = -11.1;
-   public double maximum_step_yaw_ = -11.1;
+   public double maximum_step_outward_ = -11.1;
+   public double maximum_step_inward_ = -11.1;
+   public double maximum_step_yaw_outward_ = -11.1;
+   public double maximum_step_yaw_inward_ = -11.1;
    public double maximum_step_change_z_ = -11.1;
    public double body_ground_clearance_ = -11.1;
    public double distance_weight_ = -11.1;
@@ -49,10 +49,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double min_x_clearance_from_foot_ = -11.1;
    public double min_y_clearance_from_foot_ = -11.1;
    public double max_walking_speed_multiplier_ = -11.1;
-   public boolean project_inside_using_convex_hull_during_expansion_;
-   public boolean project_inside_using_convex_hull_during_post_processing_;
-   public double projection_inside_distance_for_expansion_ = -11.1;
-   public double projection_inside_distance_for_post_processing_ = -11.1;
+   public boolean project_inside_using_convex_hull_;
+   public double projection_inside_distance_ = -11.1;
    public double maximum_xy_wiggle_distance_ = -11.1;
    public double minimum_surface_incline_radians_ = -11.1;
    public double cliff_height_to_avoid_ = -11.1;
@@ -110,13 +108,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       step_z_for_stepping_down_ = other.step_z_for_stepping_down_;
 
-      maximum_step_width_ = other.maximum_step_width_;
+      maximum_step_outward_ = other.maximum_step_outward_;
 
-      minimum_step_width_ = other.minimum_step_width_;
+      maximum_step_inward_ = other.maximum_step_inward_;
 
-      minimum_step_yaw_ = other.minimum_step_yaw_;
+      maximum_step_yaw_outward_ = other.maximum_step_yaw_outward_;
 
-      maximum_step_yaw_ = other.maximum_step_yaw_;
+      maximum_step_yaw_inward_ = other.maximum_step_yaw_inward_;
 
       maximum_step_change_z_ = other.maximum_step_change_z_;
 
@@ -144,13 +142,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       max_walking_speed_multiplier_ = other.max_walking_speed_multiplier_;
 
-      project_inside_using_convex_hull_during_expansion_ = other.project_inside_using_convex_hull_during_expansion_;
+      project_inside_using_convex_hull_ = other.project_inside_using_convex_hull_;
 
-      project_inside_using_convex_hull_during_post_processing_ = other.project_inside_using_convex_hull_during_post_processing_;
-
-      projection_inside_distance_for_expansion_ = other.projection_inside_distance_for_expansion_;
-
-      projection_inside_distance_for_post_processing_ = other.projection_inside_distance_for_post_processing_;
+      projection_inside_distance_ = other.projection_inside_distance_;
 
       maximum_xy_wiggle_distance_ = other.maximum_xy_wiggle_distance_;
 
@@ -333,40 +327,40 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return step_z_for_stepping_down_;
    }
 
-   public void setMaximumStepWidth(double maximum_step_width)
+   public void setMaximumStepOutward(double maximum_step_outward)
    {
-      maximum_step_width_ = maximum_step_width;
+      maximum_step_outward_ = maximum_step_outward;
    }
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
-      return maximum_step_width_;
-   }
-
-   public void setMinimumStepWidth(double minimum_step_width)
-   {
-      minimum_step_width_ = minimum_step_width;
-   }
-   public double getMinimumStepWidth()
-   {
-      return minimum_step_width_;
+      return maximum_step_outward_;
    }
 
-   public void setMinimumStepYaw(double minimum_step_yaw)
+   public void setMaximumStepInward(double maximum_step_inward)
    {
-      minimum_step_yaw_ = minimum_step_yaw;
+      maximum_step_inward_ = maximum_step_inward;
    }
-   public double getMinimumStepYaw()
+   public double getMaximumStepInward()
    {
-      return minimum_step_yaw_;
+      return maximum_step_inward_;
    }
 
-   public void setMaximumStepYaw(double maximum_step_yaw)
+   public void setMaximumStepYawOutward(double maximum_step_yaw_outward)
    {
-      maximum_step_yaw_ = maximum_step_yaw;
+      maximum_step_yaw_outward_ = maximum_step_yaw_outward;
    }
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return maximum_step_yaw_;
+      return maximum_step_yaw_outward_;
+   }
+
+   public void setMaximumStepYawInward(double maximum_step_yaw_inward)
+   {
+      maximum_step_yaw_inward_ = maximum_step_yaw_inward;
+   }
+   public double getMaximumStepYawInward()
+   {
+      return maximum_step_yaw_inward_;
    }
 
    public void setMaximumStepChangeZ(double maximum_step_change_z)
@@ -486,40 +480,22 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return max_walking_speed_multiplier_;
    }
 
-   public void setProjectInsideUsingConvexHullDuringExpansion(boolean project_inside_using_convex_hull_during_expansion)
+   public void setProjectInsideUsingConvexHull(boolean project_inside_using_convex_hull)
    {
-      project_inside_using_convex_hull_during_expansion_ = project_inside_using_convex_hull_during_expansion;
+      project_inside_using_convex_hull_ = project_inside_using_convex_hull;
    }
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   public boolean getProjectInsideUsingConvexHull()
    {
-      return project_inside_using_convex_hull_during_expansion_;
-   }
-
-   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean project_inside_using_convex_hull_during_post_processing)
-   {
-      project_inside_using_convex_hull_during_post_processing_ = project_inside_using_convex_hull_during_post_processing;
-   }
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
-   {
-      return project_inside_using_convex_hull_during_post_processing_;
+      return project_inside_using_convex_hull_;
    }
 
-   public void setProjectionInsideDistanceForExpansion(double projection_inside_distance_for_expansion)
+   public void setProjectionInsideDistance(double projection_inside_distance)
    {
-      projection_inside_distance_for_expansion_ = projection_inside_distance_for_expansion;
+      projection_inside_distance_ = projection_inside_distance;
    }
-   public double getProjectionInsideDistanceForExpansion()
+   public double getProjectionInsideDistance()
    {
-      return projection_inside_distance_for_expansion_;
-   }
-
-   public void setProjectionInsideDistanceForPostProcessing(double projection_inside_distance_for_post_processing)
-   {
-      projection_inside_distance_for_post_processing_ = projection_inside_distance_for_post_processing;
-   }
-   public double getProjectionInsideDistanceForPostProcessing()
-   {
-      return projection_inside_distance_for_post_processing_;
+      return projection_inside_distance_;
    }
 
    public void setMaximumXyWiggleDistance(double maximum_xy_wiggle_distance)
@@ -664,13 +640,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_z_for_stepping_down_, other.step_z_for_stepping_down_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_, other.maximum_step_width_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_outward_, other.maximum_step_outward_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_width_, other.minimum_step_width_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_inward_, other.maximum_step_inward_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_yaw_, other.minimum_step_yaw_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_outward_, other.maximum_step_yaw_outward_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_, other.maximum_step_yaw_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_inward_, other.maximum_step_yaw_inward_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_change_z_, other.maximum_step_change_z_, epsilon)) return false;
 
@@ -698,13 +674,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_walking_speed_multiplier_, other.max_walking_speed_multiplier_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_during_expansion_, other.project_inside_using_convex_hull_during_expansion_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_, other.project_inside_using_convex_hull_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_during_post_processing_, other.project_inside_using_convex_hull_during_post_processing_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_expansion_, other.projection_inside_distance_for_expansion_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_post_processing_, other.projection_inside_distance_for_post_processing_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_, other.projection_inside_distance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_xy_wiggle_distance_, other.maximum_xy_wiggle_distance_, epsilon)) return false;
 
@@ -773,13 +745,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.step_z_for_stepping_down_ != otherMyClass.step_z_for_stepping_down_) return false;
 
-      if(this.maximum_step_width_ != otherMyClass.maximum_step_width_) return false;
+      if(this.maximum_step_outward_ != otherMyClass.maximum_step_outward_) return false;
 
-      if(this.minimum_step_width_ != otherMyClass.minimum_step_width_) return false;
+      if(this.maximum_step_inward_ != otherMyClass.maximum_step_inward_) return false;
 
-      if(this.minimum_step_yaw_ != otherMyClass.minimum_step_yaw_) return false;
+      if(this.maximum_step_yaw_outward_ != otherMyClass.maximum_step_yaw_outward_) return false;
 
-      if(this.maximum_step_yaw_ != otherMyClass.maximum_step_yaw_) return false;
+      if(this.maximum_step_yaw_inward_ != otherMyClass.maximum_step_yaw_inward_) return false;
 
       if(this.maximum_step_change_z_ != otherMyClass.maximum_step_change_z_) return false;
 
@@ -807,13 +779,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.max_walking_speed_multiplier_ != otherMyClass.max_walking_speed_multiplier_) return false;
 
-      if(this.project_inside_using_convex_hull_during_expansion_ != otherMyClass.project_inside_using_convex_hull_during_expansion_) return false;
+      if(this.project_inside_using_convex_hull_ != otherMyClass.project_inside_using_convex_hull_) return false;
 
-      if(this.project_inside_using_convex_hull_during_post_processing_ != otherMyClass.project_inside_using_convex_hull_during_post_processing_) return false;
-
-      if(this.projection_inside_distance_for_expansion_ != otherMyClass.projection_inside_distance_for_expansion_) return false;
-
-      if(this.projection_inside_distance_for_post_processing_ != otherMyClass.projection_inside_distance_for_post_processing_) return false;
+      if(this.projection_inside_distance_ != otherMyClass.projection_inside_distance_) return false;
 
       if(this.maximum_xy_wiggle_distance_ != otherMyClass.maximum_xy_wiggle_distance_) return false;
 
@@ -879,14 +847,14 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.minimum_hind_step_length_when_stepping_down_);      builder.append(", ");
       builder.append("step_z_for_stepping_down=");
       builder.append(this.step_z_for_stepping_down_);      builder.append(", ");
-      builder.append("maximum_step_width=");
-      builder.append(this.maximum_step_width_);      builder.append(", ");
-      builder.append("minimum_step_width=");
-      builder.append(this.minimum_step_width_);      builder.append(", ");
-      builder.append("minimum_step_yaw=");
-      builder.append(this.minimum_step_yaw_);      builder.append(", ");
-      builder.append("maximum_step_yaw=");
-      builder.append(this.maximum_step_yaw_);      builder.append(", ");
+      builder.append("maximum_step_outward=");
+      builder.append(this.maximum_step_outward_);      builder.append(", ");
+      builder.append("maximum_step_inward=");
+      builder.append(this.maximum_step_inward_);      builder.append(", ");
+      builder.append("maximum_step_yaw_outward=");
+      builder.append(this.maximum_step_yaw_outward_);      builder.append(", ");
+      builder.append("maximum_step_yaw_inward=");
+      builder.append(this.maximum_step_yaw_inward_);      builder.append(", ");
       builder.append("maximum_step_change_z=");
       builder.append(this.maximum_step_change_z_);      builder.append(", ");
       builder.append("body_ground_clearance=");
@@ -913,14 +881,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.min_y_clearance_from_foot_);      builder.append(", ");
       builder.append("max_walking_speed_multiplier=");
       builder.append(this.max_walking_speed_multiplier_);      builder.append(", ");
-      builder.append("project_inside_using_convex_hull_during_expansion=");
-      builder.append(this.project_inside_using_convex_hull_during_expansion_);      builder.append(", ");
-      builder.append("project_inside_using_convex_hull_during_post_processing=");
-      builder.append(this.project_inside_using_convex_hull_during_post_processing_);      builder.append(", ");
-      builder.append("projection_inside_distance_for_expansion=");
-      builder.append(this.projection_inside_distance_for_expansion_);      builder.append(", ");
-      builder.append("projection_inside_distance_for_post_processing=");
-      builder.append(this.projection_inside_distance_for_post_processing_);      builder.append(", ");
+      builder.append("project_inside_using_convex_hull=");
+      builder.append(this.project_inside_using_convex_hull_);      builder.append(", ");
+      builder.append("projection_inside_distance=");
+      builder.append(this.projection_inside_distance_);      builder.append(", ");
       builder.append("maximum_xy_wiggle_distance=");
       builder.append(this.maximum_xy_wiggle_distance_);      builder.append(", ");
       builder.append("minimum_surface_incline_radians=");

@@ -110,10 +110,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -254,12 +250,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -333,13 +323,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getStepZForSteppingDown());
 
-      cdr.write_type_6(data.getMaximumStepWidth());
+      cdr.write_type_6(data.getMaximumStepOutward());
 
-      cdr.write_type_6(data.getMinimumStepWidth());
+      cdr.write_type_6(data.getMaximumStepInward());
 
-      cdr.write_type_6(data.getMinimumStepYaw());
+      cdr.write_type_6(data.getMaximumStepYawOutward());
 
-      cdr.write_type_6(data.getMaximumStepYaw());
+      cdr.write_type_6(data.getMaximumStepYawInward());
 
       cdr.write_type_6(data.getMaximumStepChangeZ());
 
@@ -367,13 +357,9 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMaxWalkingSpeedMultiplier());
 
-      cdr.write_type_7(data.getProjectInsideUsingConvexHullDuringExpansion());
+      cdr.write_type_7(data.getProjectInsideUsingConvexHull());
 
-      cdr.write_type_7(data.getProjectInsideUsingConvexHullDuringPostProcessing());
-
-      cdr.write_type_6(data.getProjectionInsideDistanceForExpansion());
-
-      cdr.write_type_6(data.getProjectionInsideDistanceForPostProcessing());
+      cdr.write_type_6(data.getProjectionInsideDistance());
 
       cdr.write_type_6(data.getMaximumXyWiggleDistance());
 
@@ -433,13 +419,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setStepZForSteppingDown(cdr.read_type_6());
       	
-      data.setMaximumStepWidth(cdr.read_type_6());
+      data.setMaximumStepOutward(cdr.read_type_6());
       	
-      data.setMinimumStepWidth(cdr.read_type_6());
+      data.setMaximumStepInward(cdr.read_type_6());
       	
-      data.setMinimumStepYaw(cdr.read_type_6());
+      data.setMaximumStepYawOutward(cdr.read_type_6());
       	
-      data.setMaximumStepYaw(cdr.read_type_6());
+      data.setMaximumStepYawInward(cdr.read_type_6());
       	
       data.setMaximumStepChangeZ(cdr.read_type_6());
       	
@@ -467,13 +453,9 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMaxWalkingSpeedMultiplier(cdr.read_type_6());
       	
-      data.setProjectInsideUsingConvexHullDuringExpansion(cdr.read_type_7());
+      data.setProjectInsideUsingConvexHull(cdr.read_type_7());
       	
-      data.setProjectInsideUsingConvexHullDuringPostProcessing(cdr.read_type_7());
-      	
-      data.setProjectionInsideDistanceForExpansion(cdr.read_type_6());
-      	
-      data.setProjectionInsideDistanceForPostProcessing(cdr.read_type_6());
+      data.setProjectionInsideDistance(cdr.read_type_6());
       	
       data.setMaximumXyWiggleDistance(cdr.read_type_6());
       	
@@ -518,10 +500,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("maximum_hind_step_length_when_stepping_down", data.getMaximumHindStepLengthWhenSteppingDown());
       ser.write_type_6("minimum_hind_step_length_when_stepping_down", data.getMinimumHindStepLengthWhenSteppingDown());
       ser.write_type_6("step_z_for_stepping_down", data.getStepZForSteppingDown());
-      ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
-      ser.write_type_6("minimum_step_width", data.getMinimumStepWidth());
-      ser.write_type_6("minimum_step_yaw", data.getMinimumStepYaw());
-      ser.write_type_6("maximum_step_yaw", data.getMaximumStepYaw());
+      ser.write_type_6("maximum_step_outward", data.getMaximumStepOutward());
+      ser.write_type_6("maximum_step_inward", data.getMaximumStepInward());
+      ser.write_type_6("maximum_step_yaw_outward", data.getMaximumStepYawOutward());
+      ser.write_type_6("maximum_step_yaw_inward", data.getMaximumStepYawInward());
       ser.write_type_6("maximum_step_change_z", data.getMaximumStepChangeZ());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
@@ -535,10 +517,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("min_x_clearance_from_foot", data.getMinXClearanceFromFoot());
       ser.write_type_6("min_y_clearance_from_foot", data.getMinYClearanceFromFoot());
       ser.write_type_6("max_walking_speed_multiplier", data.getMaxWalkingSpeedMultiplier());
-      ser.write_type_7("project_inside_using_convex_hull_during_expansion", data.getProjectInsideUsingConvexHullDuringExpansion());
-      ser.write_type_7("project_inside_using_convex_hull_during_post_processing", data.getProjectInsideUsingConvexHullDuringPostProcessing());
-      ser.write_type_6("projection_inside_distance_for_expansion", data.getProjectionInsideDistanceForExpansion());
-      ser.write_type_6("projection_inside_distance_for_post_processing", data.getProjectionInsideDistanceForPostProcessing());
+      ser.write_type_7("project_inside_using_convex_hull", data.getProjectInsideUsingConvexHull());
+      ser.write_type_6("projection_inside_distance", data.getProjectionInsideDistance());
       ser.write_type_6("maximum_xy_wiggle_distance", data.getMaximumXyWiggleDistance());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
@@ -571,10 +551,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMaximumHindStepLengthWhenSteppingDown(ser.read_type_6("maximum_hind_step_length_when_stepping_down"));
       data.setMinimumHindStepLengthWhenSteppingDown(ser.read_type_6("minimum_hind_step_length_when_stepping_down"));
       data.setStepZForSteppingDown(ser.read_type_6("step_z_for_stepping_down"));
-      data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
-      data.setMinimumStepWidth(ser.read_type_6("minimum_step_width"));
-      data.setMinimumStepYaw(ser.read_type_6("minimum_step_yaw"));
-      data.setMaximumStepYaw(ser.read_type_6("maximum_step_yaw"));
+      data.setMaximumStepOutward(ser.read_type_6("maximum_step_outward"));
+      data.setMaximumStepInward(ser.read_type_6("maximum_step_inward"));
+      data.setMaximumStepYawOutward(ser.read_type_6("maximum_step_yaw_outward"));
+      data.setMaximumStepYawInward(ser.read_type_6("maximum_step_yaw_inward"));
       data.setMaximumStepChangeZ(ser.read_type_6("maximum_step_change_z"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
@@ -588,10 +568,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMinXClearanceFromFoot(ser.read_type_6("min_x_clearance_from_foot"));
       data.setMinYClearanceFromFoot(ser.read_type_6("min_y_clearance_from_foot"));
       data.setMaxWalkingSpeedMultiplier(ser.read_type_6("max_walking_speed_multiplier"));
-      data.setProjectInsideUsingConvexHullDuringExpansion(ser.read_type_7("project_inside_using_convex_hull_during_expansion"));
-      data.setProjectInsideUsingConvexHullDuringPostProcessing(ser.read_type_7("project_inside_using_convex_hull_during_post_processing"));
-      data.setProjectionInsideDistanceForExpansion(ser.read_type_6("projection_inside_distance_for_expansion"));
-      data.setProjectionInsideDistanceForPostProcessing(ser.read_type_6("projection_inside_distance_for_post_processing"));
+      data.setProjectInsideUsingConvexHull(ser.read_type_7("project_inside_using_convex_hull"));
+      data.setProjectionInsideDistance(ser.read_type_6("projection_inside_distance"));
       data.setMaximumXyWiggleDistance(ser.read_type_6("maximum_xy_wiggle_distance"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));

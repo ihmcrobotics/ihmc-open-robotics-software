@@ -54,13 +54,13 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double step_z_for_stepping_down;
         @defaultValue(value=-11.1)
-        double maximum_step_width;
+        double maximum_step_outward;
         @defaultValue(value=-11.1)
-        double minimum_step_width;
+        double maximum_step_inward;
         @defaultValue(value=-11.1)
-        double minimum_step_yaw;
+        double maximum_step_yaw_outward;
         @defaultValue(value=-11.1)
-        double maximum_step_yaw;
+        double maximum_step_yaw_inward;
         @defaultValue(value=-11.1)
         double maximum_step_change_z;
         @defaultValue(value=-11.1)
@@ -87,12 +87,9 @@ module controller_msgs
         double min_y_clearance_from_foot;
         @defaultValue(value=-11.1)
         double max_walking_speed_multiplier;
-        boolean project_inside_using_convex_hull_during_expansion;
-        boolean project_inside_using_convex_hull_during_post_processing;
+        boolean project_inside_using_convex_hull;
         @defaultValue(value=-11.1)
-        double projection_inside_distance_for_expansion;
-        @defaultValue(value=-11.1)
-        double projection_inside_distance_for_post_processing;
+        double projection_inside_distance;
         @defaultValue(value=-11.1)
         double maximum_xy_wiggle_distance;
         @defaultValue(value=-11.1)

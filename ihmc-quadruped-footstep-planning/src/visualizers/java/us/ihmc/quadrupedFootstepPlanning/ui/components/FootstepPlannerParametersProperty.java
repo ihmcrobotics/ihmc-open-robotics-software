@@ -35,8 +35,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private final DoubleField maxWalkingSpeedMultiplier = new DoubleField(SettableFootstepPlannerParameters::getMaxWalkingSpeedMultiplier, SettableFootstepPlannerParameters::setMaxWalkingSpeedMultiplier);
 
-   private final DoubleField projectInsideDistanceForExpansion = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForExpansion, SettableFootstepPlannerParameters::setProjectInsideDistanceForExpansion);
-   private final DoubleField projectInsideDistanceForPostProcessing = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForPostProcessing, SettableFootstepPlannerParameters::setProjectInsideDistanceForPostProcessing);
+   private final DoubleField projectInsideDistance = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistance, SettableFootstepPlannerParameters::setProjectInsideDistance);
    private final DoubleField maximumXYWiggleDistance = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private final DoubleField minFrontEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndForwardDistanceFromCliffBottoms);
@@ -61,8 +60,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField finalTurnProximity = new DoubleField(SettableFootstepPlannerParameters::getFinalTurnProximity, SettableFootstepPlannerParameters::setFinalTurnProximity);
    private final DoubleField finalSlowDownProximity = new DoubleField(SettableFootstepPlannerParameters::getFinalSlowDownProximity, SettableFootstepPlannerParameters::setFinalSlowDownProximity);
 
-   private final BooleanField projectIntoConvexHullExpansion = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringExpansion, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringExpansion);
-   private final BooleanField projectIntoConvexHullPostProcessing = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringPostProcessing, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringPostProcessing);
+   private final BooleanField projectIntoConvexHull = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHull, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHull);
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -175,14 +173,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, cliffHeightToAvoid);
    }
 
-   public void bidirectionalBindProjectInsideDistanceForExpansion(Property<? extends Number> property)
+   public void bidirectionalBindProjectInsideDistance(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForExpansion);
-   }
-
-   public void bidirectionalBindProjectInsideDistanceForPostProcessing(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForPostProcessing);
+      bindFieldBidirectionalToNumberProperty(property, projectInsideDistance);
    }
 
    public void bidirectionalBindMaximumXYWiggleDistance(Property<? extends Number> property)
@@ -295,13 +288,8 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumSurfaceInclineRadians);
    }
 
-   public void bidirectionalBindProjectIntoConvexHullExpansion(Property<Boolean> property)
+   public void bidirectionalBindProjectIntoConvexHull(Property<Boolean> property)
    {
-      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullExpansion);
-   }
-
-   public void bidirectionalBindProjectIntoConvexHullPostProcessing(Property<Boolean> property)
-   {
-      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullPostProcessing);
+      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHull);
    }
 }

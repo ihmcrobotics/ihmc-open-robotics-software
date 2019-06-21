@@ -299,8 +299,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistanceForExpansion();
-      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHullDuringExpansion();
+      highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistance();
+      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
       nodeTransitionChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
       postProcessingSnapper.setPlanarRegions(planarRegionsList);
@@ -670,8 +670,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    public static QuadrupedAStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                              QuadrupedFootstepPlannerListener listener, YoVariableRegistry registry)
    {
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                              parameters::getProjectInsideUsingConvexHull, true);
 //      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
 //                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 //      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,

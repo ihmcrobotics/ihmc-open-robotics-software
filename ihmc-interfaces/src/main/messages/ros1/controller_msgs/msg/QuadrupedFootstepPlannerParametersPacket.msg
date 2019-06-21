@@ -52,16 +52,16 @@ float64 minimum_hind_step_length_when_stepping_down
 float64 step_z_for_stepping_down
 
 # Field default value -11.1
-float64 maximum_step_width
+float64 maximum_step_outward
 
 # Field default value -11.1
-float64 minimum_step_width
+float64 maximum_step_inward
 
 # Field default value -11.1
-float64 minimum_step_yaw
+float64 maximum_step_yaw_outward
 
 # Field default value -11.1
-float64 maximum_step_yaw
+float64 maximum_step_yaw_inward
 
 # Field default value -11.1
 float64 maximum_step_change_z
@@ -102,15 +102,10 @@ float64 min_y_clearance_from_foot
 # Field default value -11.1
 float64 max_walking_speed_multiplier
 
-bool project_inside_using_convex_hull_during_expansion
-
-bool project_inside_using_convex_hull_during_post_processing
+bool project_inside_using_convex_hull
 
 # Field default value -11.1
-float64 projection_inside_distance_for_expansion
-
-# Field default value -11.1
-float64 projection_inside_distance_for_post_processing
+float64 projection_inside_distance
 
 # Field default value -11.1
 float64 maximum_xy_wiggle_distance

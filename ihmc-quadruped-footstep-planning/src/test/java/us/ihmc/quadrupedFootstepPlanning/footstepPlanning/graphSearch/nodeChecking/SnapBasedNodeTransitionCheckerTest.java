@@ -3,23 +3,18 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeCheck
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -45,13 +40,13 @@ public class SnapBasedNodeTransitionCheckerTest
          }
 
          @Override
-         public double getProjectInsideDistanceForExpansion()
+         public double getProjectInsideDistance()
          {
             return 0.0;
          }
       };
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       SnapBasedNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
@@ -190,8 +185,8 @@ public class SnapBasedNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       FootstepPlannerParameters parameters = new TestParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
@@ -297,8 +292,8 @@ public class SnapBasedNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       FootstepPlannerParameters parameters = new TestParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
@@ -406,8 +401,8 @@ public class SnapBasedNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       FootstepPlannerParameters parameters = new TestParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
@@ -516,8 +511,8 @@ public class SnapBasedNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       FootstepPlannerParameters parameters = new TestParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
@@ -694,7 +689,7 @@ public class SnapBasedNodeTransitionCheckerTest
       }
 
       @Override
-      public double getProjectInsideDistanceForExpansion()
+      public double getProjectInsideDistance()
       {
          return 0.0;
       }
