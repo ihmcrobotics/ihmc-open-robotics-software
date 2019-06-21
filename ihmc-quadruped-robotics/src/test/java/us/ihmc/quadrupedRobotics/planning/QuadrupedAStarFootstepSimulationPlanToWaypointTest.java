@@ -103,9 +103,9 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 1.5 * FootstepNode.gridSizeXY));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 1.5 * FootstepNode.gridSizeXY));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 1.5 * FootstepNode.gridSizeYaw));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 0.1));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 0.1));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 0.25));
       conductor.addDurationGoal(variables.getYoTime(), 25.0);
       conductor.simulate();
    }
