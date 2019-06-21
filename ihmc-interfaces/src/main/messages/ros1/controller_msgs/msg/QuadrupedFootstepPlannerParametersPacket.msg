@@ -137,4 +137,7 @@ float64 final_turn_proximity
 # Field default value -11.1
 float64 final_slow_down_proximity
 
+# Field default value -11.1
+float64 maximum_deviation_from_x_gait_during_expansion
+
 

@@ -53,6 +53,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoBoolean projectInsideUsingConvexHull = new YoBoolean("projectInsideUsingConvexHull", registry);
    private final YoDouble finalTurnProximity = new YoDouble("finalTurnProximity", registry);
    private final YoDouble finalSlowDownProximity = new YoDouble("finalSlowDownProximity", registry);
+   private final YoDouble maximumDeviationFromXGaitDuringExpansion = new YoDouble("maximumDeviationFromXGaitDuringExpansion", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -329,6 +330,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setFinalSlowDownProximity(double proximity)
    {
       this.finalSlowDownProximity.set(proximity);
+   }
+
+   @Override
+   public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
+   {
+      this.maximumDeviationFromXGaitDuringExpansion.set(deviationFromXGaitDuringExpansion);
    }
 
    /** {@inheritDoc} */
@@ -633,6 +640,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getFinalSlowDownProximity()
    {
       return finalSlowDownProximity.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return maximumDeviationFromXGaitDuringExpansion.getDoubleValue();
    }
 
 }

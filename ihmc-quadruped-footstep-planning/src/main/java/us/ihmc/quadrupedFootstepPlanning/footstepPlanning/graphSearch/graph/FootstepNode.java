@@ -184,7 +184,6 @@ public class FootstepNode
       return xGaitCenterPoint;
    }
 
-   // TODO test me
    private static Point2D computeXGaitCenterPoint(FootstepNode node)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();

@@ -50,3 +50,4 @@ float64 minimum_hind_end_backward_distance_from_cliff_bottoms -11.1
 float64 minimum_lateral_distance_from_cliff_bottoms -11.1
 float64 final_turn_proximity -11.1
 float64 final_slow_down_proximity -11.1
+float64 maximum_deviation_from_x_gait_during_expansion -11.1
