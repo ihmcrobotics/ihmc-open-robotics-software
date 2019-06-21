@@ -57,8 +57,6 @@ public class HighLevelControlManagerFactory
    private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
    private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
 
-   private final StatusMessageOutputManager statusOutputManager;
-
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
@@ -93,7 +91,16 @@ public class HighLevelControlManagerFactory
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
-      this.statusOutputManager = statusOutputManager;
+      parentRegistry.addChild(registry);
+      parentRegistry.addChild(momentumRegistry);
+      parentRegistry.addChild(jointGainRegistry);
+      parentRegistry.addChild(bodyGainRegistry);
+      parentRegistry.addChild(footGainRegistry);
+      parentRegistry.addChild(comHeightGainRegistry);
+   }
+
+   public HighLevelControlManagerFactory(YoVariableRegistry parentRegistry)
+   {
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);
       parentRegistry.addChild(jointGainRegistry);
