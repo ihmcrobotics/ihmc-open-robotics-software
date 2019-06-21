@@ -135,7 +135,7 @@ public class WalkingControllerTest
 
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
    private final CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
-   private final HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
+   private final HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(registry);
    private final List<ContactablePlaneBody> contactableBodies = new ArrayList<>();
 
    private final SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
