@@ -90,6 +90,8 @@ public final class PointFeedbackControllerTest
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(baseBody, endEffector);
       pointFeedbackControlCommand.setGains(gains);
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
+      pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -100,12 +102,7 @@ public final class PointFeedbackControllerTest
 
       for (int i = 0; i < 1000; i++)
       {
-         // Keep updating the desired since it is converted to world frame inside the command.
-         // TODO: This can be removed once we start saving the desired values in their trajectory frames.
-         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
-         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
          pointFeedbackController.computeInverseDynamics();
-
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
          Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
