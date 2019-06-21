@@ -28,15 +28,16 @@
                         <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
                         <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                         <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     </registry>
                     <registry name="FootGains">
-                        <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
                         <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
                         <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0"/>
                         <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
                         <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
                         <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                        <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
                         <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
                         <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                         <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
@@ -58,7 +59,7 @@
                     <registry name="WalkingJointSettings">
                         <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
                         <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
-                        <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.5"/>
+                        <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0"/>
                         <parameter name="NoLoadhipPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0"/>
                         <parameter name="NoLoadkneePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0"/>
                         <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
@@ -66,11 +67,12 @@
                         <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
                         <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0"/>
                         <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
+                        <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5"/>
                     </registry>
                     <registry name="WholeBodyControllerCore">
                         <registry name="WholeBodyFeedbackController">
                             <registry name="FeedbackControllerToolbox">
-<parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="16.0"/>
+<parameter name="torsoErrorVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="25.0"/>
                             </registry>
                         </registry>
                     </registry>
