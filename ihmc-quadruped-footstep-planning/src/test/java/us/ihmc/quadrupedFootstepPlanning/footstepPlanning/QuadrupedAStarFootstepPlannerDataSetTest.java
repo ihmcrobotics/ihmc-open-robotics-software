@@ -42,13 +42,13 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
          @Override
          public double getXGaitWeight()
          {
-            return 2.0;
+            return 0.0;
          }
 
          @Override
          public double getDesiredVelocityWeight()
          {
-            return 0.5;
+            return 0.0;
          }
       };
       AStarMessagerListener listener;
@@ -72,8 +72,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
-//      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+//      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
+      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
