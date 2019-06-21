@@ -119,17 +119,9 @@ public interface FootstepPlannerParameters
     * Distance which a foothold is projected into planar region during expansion and node checking. Should be a positive value,
     * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
     */
-   double getProjectInsideDistanceForExpansion();
+   double getProjectInsideDistance();
 
-   /**
-    * Distance which a foothold is projected into planar region during post processing. Should be a positive value,
-    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
-    */
-   double getProjectInsideDistanceForPostProcessing();
-
-   boolean getProjectInsideUsingConvexHullDuringExpansion();
-
-   boolean getProjectInsideUsingConvexHullDuringPostProcessing();
+   boolean getProjectInsideUsingConvexHull();
 
    /***
     * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
@@ -231,10 +223,10 @@ public interface FootstepPlannerParameters
       packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
       packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
       packet.setStepZForSteppingDown(getStepZForSteppingDown());
-      packet.setMaximumStepWidth(getMaximumStepOutward());
-      packet.setMinimumStepWidth(getMaximumStepInward());
-      packet.setMinimumStepYaw(getMaximumStepYawInward());
-      packet.setMaximumStepYaw(getMaximumStepYawOutward());
+      packet.setMaximumStepOutward(getMaximumStepOutward());
+      packet.setMaximumStepInward(getMaximumStepInward());
+      packet.setMaximumStepYawInward(getMaximumStepYawInward());
+      packet.setMaximumStepYawOutward(getMaximumStepYawOutward());
       packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
       packet.setBodyGroundClearance(getBodyGroundClearance());
       packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
@@ -248,10 +240,8 @@ public interface FootstepPlannerParameters
       packet.setHeuristicsWeight(getHeuristicsInflationWeight());
       packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
-      packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
-      packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
-      packet.setProjectInsideUsingConvexHullDuringExpansion(getProjectInsideUsingConvexHullDuringExpansion());
-      packet.setProjectInsideUsingConvexHullDuringPostProcessing(getProjectInsideUsingConvexHullDuringPostProcessing());
+      packet.setProjectionInsideDistance(getProjectInsideDistance());
+      packet.setProjectInsideUsingConvexHull(getProjectInsideUsingConvexHull());
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());

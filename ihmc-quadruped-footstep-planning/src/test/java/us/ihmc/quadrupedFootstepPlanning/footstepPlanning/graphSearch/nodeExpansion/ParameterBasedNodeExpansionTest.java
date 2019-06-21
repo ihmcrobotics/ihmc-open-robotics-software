@@ -311,8 +311,8 @@ public class ParameterBasedNodeExpansionTest
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                              parameters::getProjectInsideUsingConvexHull, true);
       SnapBasedNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

@@ -42,8 +42,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                              parameters::getProjectInsideUsingConvexHull, true);
 
       CompositeCostToGoHeuristics costToGoHeuristics = new CompositeCostToGoHeuristics(parameters);
 
@@ -60,8 +60,6 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
 
       FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
-      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -75,7 +73,7 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       planningHorizonLength.set(1.0);
 
       footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics,  expansion, footstepCost,
-                                                          snapper, postProcessingSnapper, null, registry);
+                                                          snapper, snapper, null, registry);
 
       parentRegistry.addChild(registry);
    }

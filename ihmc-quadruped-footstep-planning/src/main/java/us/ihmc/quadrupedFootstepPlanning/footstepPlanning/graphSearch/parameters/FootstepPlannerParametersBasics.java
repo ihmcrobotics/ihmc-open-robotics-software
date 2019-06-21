@@ -71,13 +71,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMaxWalkingSpeedMultiplier(double multiplier);
 
-   void setProjectInsideDistanceForExpansion(double projectionInsideDistanceForExpansion);
+   void setProjectInsideDistance(double projectionInsideDistanceForExpansion);
 
-   void setProjectInsideDistanceForPostProcessing(double projectionInsideDistanceForPostProcessing);
-
-   void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull);
-
-   void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull);
+   void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull);
 
    void setMaximumXYWiggleDistance(double wiggleDistance);
 
@@ -134,10 +130,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
       setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
-      setProjectInsideDistanceForExpansion(other.getProjectInsideDistanceForExpansion());
-      setProjectInsideDistanceForPostProcessing(other.getProjectInsideDistanceForPostProcessing());
-      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
-      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
+      setProjectInsideDistance(other.getProjectInsideDistance());
+      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
       setMaximumXYWiggleDistance(other.getMaximumXYWiggleDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
@@ -184,14 +178,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumHindStepLengthWhenSteppingDown(other.getMinimumHindStepLengthWhenSteppingDown());
       if (other.getStepZForSteppingDown() != other.NO_VALUE_DOUBLE)
          setStepZForSteppingDown(other.getStepZForSteppingDown());
-      if (other.getMaximumStepWidth() != other.NO_VALUE_DOUBLE)
-         setMaximumStepOutward(other.getMaximumStepWidth());
-      if (other.getMinimumStepWidth() != other.NO_VALUE_DOUBLE)
-         setMaximumStepInward(other.getMinimumStepWidth());
-      if (other.getMinimumStepYaw() != other.NO_VALUE_DOUBLE)
-         setMaximumStepYawInward(other.getMinimumStepYaw());
-      if (other.getMaximumStepYaw() != other.NO_VALUE_DOUBLE)
-         setMaximumStepYawOutward(other.getMaximumStepYaw());
+      if (other.getMaximumStepOutward() != other.NO_VALUE_DOUBLE)
+         setMaximumStepOutward(other.getMaximumStepOutward());
+      if (other.getMaximumStepInward() != other.NO_VALUE_DOUBLE)
+         setMaximumStepInward(other.getMaximumStepInward());
+      if (other.getMaximumStepYawInward() != other.NO_VALUE_DOUBLE)
+         setMaximumStepYawInward(other.getMaximumStepYawInward());
+      if (other.getMaximumStepYawOutward() != other.NO_VALUE_DOUBLE)
+         setMaximumStepYawOutward(other.getMaximumStepYawOutward());
       if (other.getMaximumStepChangeZ() != other.NO_VALUE_DOUBLE)
          setMaximumStepChangeZ(other.getMaximumStepChangeZ());
       if (other.getBodyGroundClearance() != other.NO_VALUE_DOUBLE)
@@ -218,10 +212,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       if (other.getMinYClearanceFromFoot() != other.NO_VALUE_DOUBLE)
          setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
-      if (other.getProjectionInsideDistanceForExpansion() != other.NO_VALUE_DOUBLE)
-         setProjectInsideDistanceForExpansion(other.getProjectionInsideDistanceForExpansion());
-      if (other.getProjectionInsideDistanceForPostProcessing() != other.NO_VALUE_DOUBLE)
-         setProjectInsideDistanceForPostProcessing(other.getProjectionInsideDistanceForPostProcessing());
+      if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
+         setProjectInsideDistance(other.getProjectionInsideDistance());
       if (other.getMaximumXyWiggleDistance() != other.NO_VALUE_DOUBLE)
          setMaximumXYWiggleDistance(other.getMaximumXyWiggleDistance());
       if (other.getMinimumSurfaceInclineRadians() != other.NO_VALUE_DOUBLE)
@@ -243,7 +235,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (other.getFinalSlowDownProximity() != other.NO_VALUE_DOUBLE)
          setFinalSlowDownProximity(other.getFinalSlowDownProximity());
 
-      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
-      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
+      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
    }
 }

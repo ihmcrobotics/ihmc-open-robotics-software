@@ -64,8 +64,8 @@ public class NodeCheckerRenderer extends AnimationTimer
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
 
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-                                                          parameters::getProjectInsideUsingConvexHullDuringPostProcessing, true);
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                          parameters::getProjectInsideUsingConvexHull, true);
 
       SnapBasedNodeTransitionChecker snapBasedNodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
       nodeChecker = new FootstepNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));

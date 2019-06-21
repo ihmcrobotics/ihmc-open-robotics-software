@@ -41,8 +41,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minXClearanceFromFoot = new YoDouble("minXClearanceFromFoot", registry);
    private final YoDouble minYClearanceFromFoot = new YoDouble("minYClearanceFromFoot", registry);
    private final YoDouble maxWalkingSpeedMultiplier = new YoDouble("maxWalkingSpeedMultiplier", registry);
-   private final YoDouble projectionInsideDistanceForExpansion = new YoDouble("projectionInsideDistanceForExpansion", registry);
-   private final YoDouble projectionInsideDistanceForPostProcessing = new YoDouble("projectionInsideDistanceForPostProcessing", registry);
+   private final YoDouble projectionInsideDistance = new YoDouble("projectionInsideDistance", registry);
    private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
@@ -51,8 +50,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minimumHindEndForwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndForwardCliffHeightFromBottoms", registry);
    private final YoDouble minimumHindEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndBackwardCliffHeightFromBottoms", registry);
    private final YoDouble minimumLateralDistanceFromCliffBottoms = new YoDouble("minimumLateralCliffHeightFromBottoms", registry);
-   private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
-   private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
+   private final YoBoolean projectInsideUsingConvexHull = new YoBoolean("projectInsideUsingConvexHull", registry);
    private final YoDouble finalTurnProximity = new YoDouble("finalTurnProximity", registry);
    private final YoDouble finalSlowDownProximity = new YoDouble("finalSlowDownProximity", registry);
 
@@ -262,27 +260,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setProjectInsideDistanceForExpansion(double projectionInsideDistance)
+   public void setProjectInsideDistance(double projectionInsideDistance)
    {
-      this.projectionInsideDistanceForExpansion.set(projectionInsideDistance);
+      this.projectionInsideDistance.set(projectionInsideDistance);
    }
 
    @Override
-   public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
+   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
    {
-      this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
-   }
-
-   @Override
-   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringExpansion.set(projectInsideUsingConvexHull);
-   }
-
-   @Override
-   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringPostProcessing.set(projectInsideUsingConvexHull);
+      this.projectInsideUsingConvexHull.set(projectInsideUsingConvexHull);
    }
 
    @Override
@@ -569,29 +555,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForExpansion()
+   public double getProjectInsideDistance()
    {
-      return projectionInsideDistanceForExpansion.getDoubleValue();
+      return projectionInsideDistance.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForPostProcessing()
+   public boolean getProjectInsideUsingConvexHull()
    {
-      return projectionInsideDistanceForPostProcessing.getDoubleValue();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
-   {
-      return projectInsideUsingConvexHullDuringExpansion.getBooleanValue();
-   }
-
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
-   {
-      return projectInsideUsingConvexHullDuringPostProcessing.getBooleanValue();
+      return projectInsideUsingConvexHull.getBooleanValue();
    }
 
    /** {@inheritDoc} */

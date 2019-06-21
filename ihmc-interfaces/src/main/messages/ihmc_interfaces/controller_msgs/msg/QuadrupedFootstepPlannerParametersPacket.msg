@@ -21,10 +21,10 @@ float64 minimum_front_step_length_when_stepping_down -11.1
 float64 maximum_hind_step_length_when_stepping_down -11.1
 float64 minimum_hind_step_length_when_stepping_down -11.1
 float64 step_z_for_stepping_down -11.1
-float64 maximum_step_width -11.1
-float64 minimum_step_width -11.1
-float64 minimum_step_yaw -11.1
-float64 maximum_step_yaw -11.1
+float64 maximum_step_outward -11.1
+float64 maximum_step_inward -11.1
+float64 maximum_step_yaw_outward -11.1
+float64 maximum_step_yaw_inward -11.1
 float64 maximum_step_change_z -11.1
 float64 body_ground_clearance -11.1
 float64 distance_weight -11.1
@@ -38,10 +38,8 @@ float64 heuristics_weight -11.1
 float64 min_x_clearance_from_foot -11.1
 float64 min_y_clearance_from_foot -11.1
 float64 max_walking_speed_multiplier -11.1
-bool project_inside_using_convex_hull_during_expansion
-bool project_inside_using_convex_hull_during_post_processing
-float64 projection_inside_distance_for_expansion -11.1
-float64 projection_inside_distance_for_post_processing -11.1
+bool project_inside_using_convex_hull
+float64 projection_inside_distance -11.1
 float64 maximum_xy_wiggle_distance -11.1
 float64 minimum_surface_incline_radians -11.1
 float64 cliff_height_to_avoid -11.1

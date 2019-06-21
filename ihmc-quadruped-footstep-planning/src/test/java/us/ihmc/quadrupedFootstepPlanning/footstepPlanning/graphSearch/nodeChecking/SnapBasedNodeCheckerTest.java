@@ -40,8 +40,8 @@ public class SnapBasedNodeCheckerTest
 
       TestParameters parameters = new TestParameters();
       parameters.setDistanceInside(0.5 * cinderWidth);
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -171,7 +171,7 @@ public class SnapBasedNodeCheckerTest
    {
       double distance;
       @Override
-      public double getProjectInsideDistanceForExpansion()
+      public double getProjectInsideDistance()
       {
          return distance;
       }

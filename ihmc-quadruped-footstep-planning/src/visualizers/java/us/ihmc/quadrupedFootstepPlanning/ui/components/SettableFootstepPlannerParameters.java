@@ -45,8 +45,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
    private double minimumSurfaceInclineRadians;
-   private double projectInsideDistanceForExpansion;
-   private double projectInsideDistanceForPostProcessing;
+   private double projectInsideDistance;
    private double maximumXYWiggleDistance;
 
    private double cliffHeightToAvoid;
@@ -56,8 +55,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumHindEndBackwardDistanceFromCliffBottoms;
    private double minimumLateralDistanceFromCliffBottoms;
 
-   private boolean projectInsideUsingConvexHullDuringExpansion;
-   private boolean projectInsideUsingConvexHullDuringPostProcessing;
+   private boolean projectInsideUsingConvexHull;
 
    private double finalTurnProximity;
    private double finalSlowDownProximity;
@@ -354,30 +352,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideDistanceForExpansion(double projectInsideDistance)
+   public void setProjectInsideDistance(double projectInsideDistance)
    {
-      this.projectInsideDistanceForExpansion = projectInsideDistance;
+      this.projectInsideDistance = projectInsideDistance;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideDistanceForPostProcessing(double projectInsideDistance)
+   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
    {
-      this.projectInsideDistanceForPostProcessing = projectInsideDistance;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringExpansion = projectInsideUsingConvexHull;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringPostProcessing = projectInsideUsingConvexHull;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
@@ -625,30 +609,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForExpansion()
+   public double getProjectInsideDistance()
    {
-      return projectInsideDistanceForExpansion;
+      return projectInsideDistance;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForPostProcessing()
+   public boolean getProjectInsideUsingConvexHull()
    {
-      return projectInsideDistanceForPostProcessing;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
-   {
-      return projectInsideUsingConvexHullDuringExpansion;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
-   {
-      return projectInsideUsingConvexHullDuringPostProcessing;
+      return projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
