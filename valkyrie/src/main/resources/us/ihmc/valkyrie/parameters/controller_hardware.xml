@@ -65,4 +65,13 @@
             </registry>
         </registry>
     </registry>
+    <registry name="DRCEstimatorThread">
+        <registry name="EstimatorController">
+            <registry name="DRCKinematicsBasedStateEstimator">
+                <registry name="IMUBasedPelvisRotationalStateUpdater">
+                    <parameter name="zeroEstimatedRootYawAtInitialization" type="BooleanParameter" value="true"/>
+                </registry>
+            </registry>
+        </registry>
+    </registry>
 </parameters>
