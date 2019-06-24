@@ -149,6 +149,9 @@ public class PelvisLinearStateUpdater
    private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
    private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 
+   private final BooleanParameter zeroRootXYPositionAtInitialization = new BooleanParameter("zeroRootXYPositionAtInitialization", registry, false);
+   private final BooleanParameter zeroFootHeightAtInitialization = new BooleanParameter("zeroFootHeightAtInitialization", registry, true);
+
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
@@ -250,22 +253,32 @@ public class PelvisLinearStateUpdater
 
    private void initializeRobotState()
    {
-      if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
+      if (!initializeToActual)
       {
-         RigidBodyBasics foot = feet.get(0);
-         // We're interested in the delta-z between the foot and the root joint frame.
-         footPositionInWorld.setToZero(footFrames.get(foot));
-         footPositionInWorld.changeFrame(rootJointFrame);
+         rootJointPosition.setIncludingFrame(worldFrame, rootJoint.getJointPose().getPosition());
 
-         rootJointPosition.set(rootJoint.getJointPose().getPosition());
-         // By setting the root joint to be at -footZ, the foot will be at a height of zero.
-         rootJointPosition.setZ(-footPositionInWorld.getZ());
-         yoRootJointPosition.set(rootJointPosition);
+         if (zeroRootXYPositionAtInitialization.getValue())
+         {
+            rootJointPosition.setX(0.0);
+            rootJointPosition.setY(0.0);
+         }
+
+         if (zeroFootHeightAtInitialization.getValue())
+         {
+            RigidBodyBasics foot = feet.get(0);
+            // We're interested in the delta-z between the foot and the root joint frame.
+            footPositionInWorld.setToZero(footFrames.get(foot));
+            footPositionInWorld.changeFrame(rootJointFrame);
+
+            // By setting the root joint to be at -footZ, the foot will be at a height of zero.
+            rootJointPosition.setZ(-footPositionInWorld.getZ());
+         }
       }
       else
       {
          rootJointPosition.set(initialRootJointPosition);
       }
+
 
       rootJointVelocity.setToZero(worldFrame);
       yoRootJointPosition.set(rootJointPosition);
