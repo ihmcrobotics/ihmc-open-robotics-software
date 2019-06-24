@@ -47,9 +47,9 @@ public class LidarImageFusionProcessorCommunicationModule
       stereoREAModule = new StereoREAModule(reaMessager, messager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
+      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator(),
                                            this::dispatchStereoVisionPointCloudMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, "/ihmc/image", this::dispatchImageMessage);
+      ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, ROS2Tools.getDefaultTopicNameGenerator(), this::dispatchImageMessage);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
