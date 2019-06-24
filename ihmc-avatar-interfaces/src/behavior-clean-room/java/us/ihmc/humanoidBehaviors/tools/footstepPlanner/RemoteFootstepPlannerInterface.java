@@ -30,10 +30,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RemoteFootstepPlannerInterface
 {
-   public static final double DEFAULT_TIMEOUT = 8.0;
+   public static final double STEP_DOWN_DISTANCE_QUALIFIER = 0.05;
+
+   public static final double DEFAULT_TIMEOUT = 12.0;
+   public static final double DEFAULT_PERCEIVE_TIME_REQUIRED = 26.0;
+   public static final double DEFAULT_TRANSFER_TIME_FLAT_UP = 0.8;
+   public static final double DEFAULT_TRANSFER_TIME_DOWN    = 2.0;
+   public static final double DEFAULT_SWING_TIME_FLAT_UP    = 1.2;
+   public static final double DEFAULT_SWING_TIME_DOWN       = 1.2;
 
    private volatile FootstepPlannerParameters footstepPlannerParameters;
-   private volatile double timeout;
+   private volatile double timeout = DEFAULT_TIMEOUT;
+   private volatile double transferTimeFlatUp = DEFAULT_TRANSFER_TIME_FLAT_UP;
+   private volatile double transferTimeDown   = DEFAULT_TRANSFER_TIME_DOWN   ;
+   private volatile double swingTimeFlatUp    = DEFAULT_SWING_TIME_FLAT_UP   ;
+   private volatile double swingTimeDown      = DEFAULT_SWING_TIME_DOWN      ;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -46,7 +57,6 @@ public class RemoteFootstepPlannerInterface
    public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      timeout = DEFAULT_TIMEOUT;
       if (messager != null)
       {
          messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
@@ -55,6 +65,10 @@ public class RemoteFootstepPlannerInterface
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);
             footstepPlannerParameters = settableFootstepPlannerParameters;
             timeout = parameters.getTimeout();
+            transferTimeFlatUp = parameters.getTransferTimeFlatUp();
+            transferTimeDown   = parameters.getTransferTimeDown  ();
+            swingTimeFlatUp    = parameters.getSwingTimeFlatUp   ();
+            swingTimeDown      = parameters.getSwingTimeDown     ();
          }); // updated from UI
       }
 
@@ -82,13 +96,44 @@ public class RemoteFootstepPlannerInterface
    {
       if (resultNotifications.containsKey(footstepPlanningToolboxOutputStatus.getPlanId()))
       {
-         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(new RemoteFootstepPlannerResult(footstepPlanningToolboxOutputStatus));
+         RemoteFootstepPlannerResult result = new RemoteFootstepPlannerResult(footstepPlanningToolboxOutputStatus);
+
+         result.getFootstepDataListMessage().setDefaultSwingDuration(swingTimeFlatUp);
+         result.getFootstepDataListMessage().setDefaultTransferDuration(transferTimeFlatUp);
+
+         if (result.isValidForExecution() && result.getFootstepPlan().getNumberOfSteps() > 1)
+         {
+            boolean containsStepDown = false;
+            int index = 0;
+            double lastStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+            do
+            {
+               ++index;
+               double thisStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+               double difference = thisStepZ - lastStepZ;
+               if (difference <= -STEP_DOWN_DISTANCE_QUALIFIER)
+               {
+                  LogTools.info("Detected downward plan: thisX: {} <= lastZ: {}", thisStepZ, lastStepZ);
+                  containsStepDown = true;
+               }
+               lastStepZ = thisStepZ;
+            }
+            while (!containsStepDown && index < result.getFootstepPlan().getNumberOfSteps() - 1);
+
+            if (containsStepDown)
+            {
+               result.getFootstepDataListMessage().setDefaultSwingDuration(swingTimeDown);
+               result.getFootstepDataListMessage().setDefaultTransferDuration(transferTimeDown);
+            }
+         }
+
+         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(result);
       }
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
-                                                                             FramePose3DReadOnly goal,
-                                                                             PlanarRegionsListMessage planarRegionsListMessage)
+                                                                     FramePose3DReadOnly goal,
+                                                                     PlanarRegionsListMessage planarRegionsListMessage)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
