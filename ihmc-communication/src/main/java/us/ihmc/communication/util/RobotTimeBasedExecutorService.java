@@ -18,6 +18,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.Ros2Node;
 
 /**
  * When scheduling a task with a desired rate that interacts with a robot simulation it needs to consider the real time
@@ -46,9 +47,36 @@ public class RobotTimeBasedExecutorService
     */
    public static void schedulePackageBased(RealtimeRos2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
+      NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+   }
+
+   /**
+    * Schedules the provided runnable to be executed periodically based on the timestamp received in a
+    * {@link RobotConfigurationData} packet via the provided ROS2 node. This works well in simulation but can cause
+    * delay when the ROS2 communication is not local but network based.
+    *
+    * @param ros2Node to attach a {@link RobotConfigurationData} subscriber to.
+    * @param robotName used to create the topic name for the ROS2 node.
+    * @param period at which the runnable should be executed in {@link TimeUnit} provided.
+    * @param timeUnit of the period.
+    * @param runnable will be called at the specified period.
+    */
+   public static void schedulePackageBased(Ros2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
+   {
+      NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+   }
+
+   private static MessageTopicNameGenerator createTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+   }
+
+   private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)
+   {
       long periodInNanos = timeUnit.toNanos(period);
-      MessageTopicNameGenerator topicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
+      NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
          private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
@@ -80,7 +108,8 @@ public class RobotTimeBasedExecutorService
             runnable.run();
             previousExecitionTimestamp = timestamp;
          }
-      });
+      };
+      return robotConfigurationDataListener;
    }
 
    /**
@@ -136,7 +165,7 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      MessageTopicNameGenerator topicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+      MessageTopicNameGenerator topicNameGenerator = createTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
