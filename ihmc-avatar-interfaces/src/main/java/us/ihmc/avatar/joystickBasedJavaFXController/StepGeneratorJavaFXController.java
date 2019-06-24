@@ -126,7 +126,8 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
-      continuousStepGenerator.setFootstepValidityIndicator((solePose, robotSide) -> isStepSnappable(solePose, robotSide) && isSafeDistanceFromObstacle(solePose, robotSide));
+      continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
+      continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
 
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
