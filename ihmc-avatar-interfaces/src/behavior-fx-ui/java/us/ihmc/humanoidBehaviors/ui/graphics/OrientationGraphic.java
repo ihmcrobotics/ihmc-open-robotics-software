@@ -1,25 +1,28 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 
 public class OrientationGraphic
 {
-   private final SnappedPositionGraphic positionGraphic;
-
    private final MeshView arrow;
-
    private final double cylinderLength;
+   private final FramePose3D pose = new FramePose3D();
 
-   public OrientationGraphic(SnappedPositionGraphic positionGraphic)
+   public OrientationGraphic()
    {
-      this.positionGraphic = positionGraphic;
-
       cylinderLength = 0.25;
       double radius = 0.01;
       Color color = Color.GREEN;
@@ -39,27 +42,23 @@ public class OrientationGraphic
       arrow.setVisible(false);
    }
 
-   public MeshView getArrow()
+   public FramePose3DBasics getPose()
+   {
+      return pose;
+   }
+
+   public void update()
+   {
+      JavaFXGraphicTools.setNodeTransformFromPose(arrow, pose);
+   }
+
+   public Node getNode()
    {
       return arrow;
    }
 
-   public void setPosition(Point3D position)
+   public double getYaw()
    {
-      double orientationRadians = Math.toRadians(arrow.getRotate());
-      arrow.setTranslateX(position.getX() + 0.5 * cylinderLength * (Math.cos(orientationRadians) - 1.0));
-      arrow.setTranslateY(position.getY() + 0.5 * cylinderLength * Math.sin(orientationRadians));
-      arrow.setTranslateZ(position.getZ());
-   }
-
-   public void setOrientation(Point3D orientationPoint)
-   {
-      Vector3D difference = new Vector3D();
-      difference.sub(orientationPoint, positionGraphic.getPosition());
-      double startYaw = Math.atan2(difference.getY(), difference.getX());
-      arrow.setTranslateX(positionGraphic.getSphere().getTranslateX() + 0.5 * cylinderLength * (Math.cos(startYaw) - 1.0));
-      arrow.setTranslateY(positionGraphic.getSphere().getTranslateY() + 0.5 * cylinderLength * Math.sin(startYaw));
-      arrow.setTranslateZ(positionGraphic.getSphere().getTranslateZ());
-      arrow.setRotate(Math.toDegrees(startYaw));
+      return pose.getYaw();
    }
 }
