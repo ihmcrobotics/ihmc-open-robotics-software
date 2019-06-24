@@ -18,6 +18,7 @@ import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.affinity.Affinity;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.BarrierSchedulerTools;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -412,21 +413,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       if (!Precision.equals(robotModel.getControllerDT() / robotModel.getEstimatorDT(), controllerDivisor))
          throw new RuntimeException("Controller DT must be multiple of estimator DT.");
       ControllerTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getEstimatorDT(), masterFullRobotModel);
-      controllerTask.addRunnableOnTaskThread(new Runnable()
-      {
-         boolean initialized = false;
-
-         @Override
-         public void run()
-         {
-            if (!controllerThread.getHumanoidRobotContextData().getControllerRan())
-               return;
-            if (!initialized)
-               drcOutputProcessor.initialize();
-            initialized = true;
-            drcOutputProcessor.processAfterController(controllerThread.getHumanoidRobotContextData().getTimestamp());
-         }
-      });
+      controllerTask.addRunnableOnTaskThread(BarrierSchedulerTools.createProcessorUpdater(drcOutputProcessor, controllerThread));
       yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
       controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                            controllerThread.getYoVariableRegistry()));
@@ -446,30 +433,23 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, schedulerFactory);
       jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
 
+      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
+      tasks.add(estimatorTask);
+      tasks.add(controllerTask);
+
       if (isGazebo)
       {
          LogTools.info("Running with blocking synchronous execution between estimator and controller");
-         throw new RuntimeException("Re-implement this possibly using the " + SingleThreadedRobotController.class.getSimpleName() + "!");
-//         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, wallTimeProvider);
-//         coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
-//         robotController = coordinator;
+         robotController = new SingleThreadedRobotController<>(robotName, tasks, masterContext);
       }
       else
       {
          LogTools.info("Running with multi-threaded RT threads for estimator and controller");
-
-         List<HumanoidRobotControlTask> tasks = new ArrayList<>();
-
          PriorityParameters estimatorPriority = ValkyriePriorityParameters.ESTIMATOR_PRIORITY;
          RealtimeThread estimatorRealtimeThread = new RealtimeThread(estimatorPriority, estimatorTask, estimatorTask.getClass().getSimpleName() + "Thread");
-         tasks.add(estimatorTask);
-
          PriorityParameters controllerPriority = ValkyriePriorityParameters.CONTROLLER_PRIORITY;
          RealtimeThread controllerRealtimeThread = new RealtimeThread(controllerPriority, controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
-         tasks.add(controllerTask);
-
          robotController = new BarrierScheduledRobotController(robotName, tasks, masterContext, TaskOverrunBehavior.SKIP_TICK, robotModel.getEstimatorDT());
-         controllerThread.getYoVariableRegistry().addChild(robotController.getYoVariableRegistry());
          if (valkyrieAffinity.setAffinity())
          {
             estimatorRealtimeThread.setAffinity(valkyrieAffinity.getEstimatorThreadProcessor());
@@ -478,6 +458,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          estimatorRealtimeThread.start();
          controllerRealtimeThread.start();
       }
+      controllerThread.getYoVariableRegistry().addChild(robotController.getYoVariableRegistry());
 
       /*
        * Connect all servers
