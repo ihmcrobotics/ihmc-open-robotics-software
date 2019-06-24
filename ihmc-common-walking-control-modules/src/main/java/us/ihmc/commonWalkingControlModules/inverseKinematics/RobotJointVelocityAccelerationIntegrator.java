@@ -69,7 +69,8 @@ public class RobotJointVelocityAccelerationIntegrator
       int jointStartIndex = 0;
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
-      jointConfigurations.reshape(numberOfDoFs + 1, 1);
+      int sixDofJoints = MultiBodySystemTools.filterJoints(joints, SixDoFJoint.class).length;
+      jointConfigurations.reshape(numberOfDoFs + sixDofJoints, 1);
       jointVelocities.reshape(numberOfDoFs, 1);
 
       for (int i = 0; i < joints.length; i++)

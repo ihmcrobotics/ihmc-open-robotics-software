@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -57,8 +56,6 @@ public class HighLevelControlManagerFactory
    private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
    private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
 
-   private final StatusMessageOutputManager statusOutputManager;
-
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private FeetManager feetManager;
@@ -91,9 +88,8 @@ public class HighLevelControlManagerFactory
    private DoubleProvider walkingControllerMaxComHeightVelocity;
    private PIDGainsReadOnly userModeComHeightGains;
 
-   public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public HighLevelControlManagerFactory(YoVariableRegistry parentRegistry)
    {
-      this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);
       parentRegistry.addChild(jointGainRegistry);

@@ -600,7 +600,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
-      controlFrame.getTwistOfFrame(currentTwist); // TODO: should this be wrt. the base frame?
+      controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 
@@ -627,7 +627,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
     */
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
-      controlFrame.getTwistOfFrame(currentTwist); // TODO: should this be wrt. the base frame?
+      controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
 

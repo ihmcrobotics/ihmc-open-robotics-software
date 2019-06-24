@@ -1,14 +1,14 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import us.ihmc.euclid.shape.Shape3D;
-import us.ihmc.euclid.shape.Sphere3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionSphere extends CollisionShape
 {
    private final double radiusSquared;
-   private Shape3D<?> shape3D;
+   private Shape3DReadOnly shape3D;
 
    public CollisionSphere(RigidBodyTransform pose, double radius)
    {
@@ -28,7 +28,7 @@ public class CollisionSphere extends CollisionShape
    }
 
    @Override
-   public Shape3D<?> getOrCreateShape3D()
+   public Shape3DReadOnly getOrCreateShape3D()
    {
       if (shape3D == null)
          shape3D = new Sphere3D(getPose().getTranslationX(), getPose().getTranslationY(), getPose().getTranslationZ(), getRadius());

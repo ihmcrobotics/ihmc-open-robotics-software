@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,12 @@ import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimat
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -95,7 +92,6 @@ public class FootstepAngularMomentumPredictorTest
                                                                                        new FrameVector3D());
    private final List<YoDouble> swingDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> transferDurations = new ArrayList<YoDouble>();
-   private final List<YoDouble> touchdownDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> swingSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> transferSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> swingShiftFractions = new ArrayList<YoDouble>();
@@ -166,9 +162,6 @@ public class FootstepAngularMomentumPredictorTest
          tempYoDouble = new YoDouble(testName + "Step" + i + "TransferDuration", testRegistry);
          tempYoDouble.set(transferTime);
          transferDurations.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "touchdownDuration", testRegistry);
-         tempYoDouble.set(0.0);
-         touchdownDurations.add(tempYoDouble);
          tempYoDouble = new YoDouble(testName + "Step" + i + "SwingSplitFraction", testRegistry);
          tempYoDouble.set(testParameters.getSwingSplitFraction());
          swingSplitFractions.add(tempYoDouble);
@@ -196,9 +189,8 @@ public class FootstepAngularMomentumPredictorTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfFootstepsToConsider(),
                                                                    bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, swingDurations,
-                                                                   transferDurations, touchdownDurations, swingSplitFractions, swingShiftFractions,
-                                                                   transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, soleFrames,
-                                                                   testRegistry);
+                                                                   transferDurations, swingSplitFractions, swingShiftFractions, transferSplitFractions,
+                                                                   numberOfUpcomingFootsteps, upcomingFootstepsData, soleFrames, testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isStanding, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
