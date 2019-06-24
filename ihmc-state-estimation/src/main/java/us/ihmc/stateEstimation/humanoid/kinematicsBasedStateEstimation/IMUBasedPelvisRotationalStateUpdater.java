@@ -15,7 +15,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
@@ -36,6 +38,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
+
+   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
 
@@ -98,9 +103,21 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
          throw new RuntimeException("No sensor set up for the IMU.");
    }
 
+
    @Override
    public void initialize()
    {
+
+      if (zeroYawAtInitialization.getValue())
+      {
+         computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
+         initialYaw.set(rotationFromRootJointFrameToWorld.getYaw());
+      }
+      else
+      {
+         initialYaw.set(0.0);
+      }
+
       updateRootJointOrientationAndAngularVelocity();
    }
 
@@ -113,7 +130,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    private final RotationMatrix rotationFromRootJointFrameToWorld = new RotationMatrix();
-   private final RotationMatrix yawBiasMatrix = new RotationMatrix();
 
    private void updateRootJointRotation()
    {
@@ -122,12 +138,15 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
 
+      if (zeroYawAtInitialization.getValue())
+      {
+         rotationFromRootJointFrameToWorld.prependYawRotation(-initialYaw.getValue());
+      }
+
       if (imuYawDriftEstimator != null)
       {
          imuYawDriftEstimator.update();
-         yawBiasMatrix.setToYawMatrix(imuYawDriftEstimator.getYawBiasInWorldFrame());
-         yawBiasMatrix.transpose();
-         rotationFromRootJointFrameToWorld.preMultiply(yawBiasMatrix);
+         rotationFromRootJointFrameToWorld.prependYawRotation(-imuYawDriftEstimator.getYawBiasInWorldFrame());
       }
 
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
