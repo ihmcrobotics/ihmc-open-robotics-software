@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import com.sun.javafx.collections.ImmutableObservableList;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -18,6 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 
 public class DirectRobotUIController
@@ -26,6 +29,7 @@ public class DirectRobotUIController
    @FXML private Button freeze;
    @FXML private Button standPrep;
    @FXML private Button shutdown;
+   @FXML private ComboBox<Integer> pumpPSI;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
    @FXML private Button clearREA;
@@ -59,6 +63,10 @@ public class DirectRobotUIController
                                                                     ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(),
                                                                                                     ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER,
                                                                                                     ROS2TopicQualifier.INPUT));
+
+      pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
+      pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
+      pumpPSI.getSelectionModel().select(1);
 
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
 
@@ -96,6 +104,11 @@ public class DirectRobotUIController
    public void shutdown()
    {
       robotLowLevelMessenger.sendShutdownRequest();
+   }
+
+   private void sendPumpPSI()
+   {
+      robotLowLevelMessenger.setHydraulicPumpPSI(pumpPSI.getValue());
    }
 
    @FXML
