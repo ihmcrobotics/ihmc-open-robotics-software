@@ -58,6 +58,7 @@ public class StepGeneratorParametersPaneController
 
    private final Image kickImageLayout = new Image(getClass().getResourceAsStream("XBoxOneControllerStepMapping_kick.png"));
    private final Image punchImageLayout = new Image(getClass().getResourceAsStream("XBoxOneControllerStepMapping_punch.png"));
+   private final Image noneImageLayout = new Image(getClass().getResourceAsStream("XBoxOneControllerStepMapping_noSecondaryOption.png"));
 
    private final JoystickStepParameters defaultParameters = new JoystickStepParameters();
    private final JoystickStepParametersProperty stepParametersProperty = new JoystickStepParametersProperty(this, "stepParameters");
@@ -172,6 +173,8 @@ public class StepGeneratorParametersPaneController
       case PUNCH:
          controlLayoutImageView.setImage(punchImageLayout);
          break;
+      case NONE:
+         controlLayoutImageView.setImage(noneImageLayout);
       default:
          LogTools.error("Unhandled option: " + option);
          break;

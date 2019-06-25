@@ -59,7 +59,11 @@ public class BoundingBoxCollisionDetectorTest
          }
       };
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
       collisionChecker.setBoxPose(0.25, 0.5, 0.0, 0.0);
       double distanceFromBox = 1e-3;
 
@@ -157,7 +161,12 @@ public class BoundingBoxCollisionDetectorTest
          }
       };
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       double distanceFromRegionAtZeroYaw = 0.025;
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.75, 0.75, 0.5, 0.0, 0.5 - 2.0 * distanceFromRegionAtZeroYaw);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
@@ -216,7 +225,12 @@ public class BoundingBoxCollisionDetectorTest
          }
       };
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.25, 0.25, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
@@ -287,7 +301,12 @@ public class BoundingBoxCollisionDetectorTest
       generator.addCubeReferencedAtBottomMiddle(cubeDepth, cubeWidth, cubeHeight);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       // test just outside along y
@@ -359,7 +378,12 @@ public class BoundingBoxCollisionDetectorTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       // test just outside along world y

@@ -15,7 +15,8 @@ public class FootstepNodeBodyCollisionDetector
 
    public FootstepNodeBodyCollisionDetector(FootstepPlannerParameters parameters)
    {
-      this.collisionDetector = new BoundingBoxCollisionDetector(parameters);
+      this.collisionDetector = new BoundingBoxCollisionDetector(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight(), 
+                                                                parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize());
       this.parameters = parameters;
    }
 

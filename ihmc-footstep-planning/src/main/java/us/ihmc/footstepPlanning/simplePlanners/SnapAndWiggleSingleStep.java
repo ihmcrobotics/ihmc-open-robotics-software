@@ -73,9 +73,6 @@ public class SnapAndWiggleSingleStep
       }
 
       ConvexPolygon2D foothold = doSnapAndWiggle(solePose, footStepPolygon, footPolygon);
-      checkAndHandleTopOfCliff(solePoseBeforeSnapping, solePose, walkingForward, footStepPolygon, footPolygon);
-      checkAndHandleBottomOfCliff(solePose);
-
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       solePose.get(soleTransform);
       foothold.applyInverseTransform(soleTransform, false);

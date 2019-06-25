@@ -12,13 +12,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-class BoundingBoxCollisionDetector
+public class BoundingBoxCollisionDetector
 {
-   private final FootstepPlannerParameters parameters;
+   private final double boxDepth;
+   private final double boxWidth;
+   private final double boxHeight;
+   private final double xyProximityCheck;
+   
    private PlanarRegionsList planarRegionsList;
    private final List<ConvexPolytope3D> planarRegionPolytopes = new ArrayList<>();
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
@@ -36,9 +39,12 @@ class BoundingBoxCollisionDetector
    private final Point3D tempPoint1 = new Point3D();
    private final Point3D tempPoint2 = new Point3D();
 
-   BoundingBoxCollisionDetector(FootstepPlannerParameters parameters)
+   public BoundingBoxCollisionDetector(double boxDepth, double boxWidth, double boxHeight, double xyProximityCheck)
    {
-      this.parameters = parameters;
+      this.boxDepth = boxDepth;
+      this.boxWidth = boxWidth;
+      this.boxHeight = boxHeight;
+      this.xyProximityCheck = xyProximityCheck;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
@@ -79,12 +85,13 @@ class BoundingBoxCollisionDetector
       checkInputs();
 
       setBoundingBoxPosition();
-      setDimensionsToUpperBound();
       BodyCollisionData collisionData = new BodyCollisionData();
 
       for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
+         setDimensionsToUpperBound();
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+
          if(planarRegion.getBoundingBox3dInWorld().intersectsExclusive(boundingBox))
          {
             ConvexPolytope3D planarRegionPolytope = planarRegionPolytopes.get(i);
@@ -108,8 +115,8 @@ class BoundingBoxCollisionDetector
                   tempTransform.invert();
                   tempTransform.transform(tempPoint1);
 
-                  double dx = Math.abs(tempPoint1.getX()) - 0.5 * parameters.getBodyBoxDepth();
-                  double dy = Math.abs(tempPoint1.getY()) - 0.5 * parameters.getBodyBoxWidth();
+                  double dx = Math.abs(tempPoint1.getX()) - 0.5 * boxDepth;
+                  double dy = Math.abs(tempPoint1.getY()) - 0.5 * boxWidth;
                   collisionData.setDistanceFromBoundingBox(getMinimumPositiveValue(dx, dy, collisionData.getDistanceFromBoundingBox()));
 
                   if(tempPoint1.getX() < 0.0 && dx > 0.0)
@@ -121,8 +128,6 @@ class BoundingBoxCollisionDetector
                      collisionData.setDistanceOfClosestPointInFront(getMinimumPositiveValue(dx, collisionData.getDistanceOfClosestPointInFront()));
                   }
                }
-
-               setDimensionsToUpperBound();
             }
          }
       }
@@ -149,22 +154,21 @@ class BoundingBoxCollisionDetector
    
    private void setBoundingBoxPosition()
    {
-      bodyBox.getPose().setTranslation(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * parameters.getBodyBoxHeight());
+      bodyBox.getPose().setTranslation(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * boxHeight);
       bodyBox.getPose().setRotationYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
    }
 
    private void setDimensionsToLowerBound()
    {
-      bodyBox.setSize(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
+      bodyBox.setSize(boxDepth, boxWidth, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
       updateBodyBoxPolytope();
    }
 
    private void setDimensionsToUpperBound()
    {
-      double planarDimensionIncrease = 2.0 * parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize();
-      bodyBox.setSize(parameters.getBodyBoxDepth() + planarDimensionIncrease, parameters.getBodyBoxWidth() + planarDimensionIncrease,
-                      parameters.getBodyBoxHeight());
+      double planarDimensionIncrease = 2.0 * xyProximityCheck;
+      bodyBox.setSize(boxDepth + planarDimensionIncrease, boxWidth + planarDimensionIncrease, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
       updateBodyBoxPolytope();
    }
