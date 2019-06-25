@@ -357,9 +357,15 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    private void setupStaticTransformsForRos()
    {
       RigidBodyTransform staticTransform = new RigidBodyTransform(transformFromHeadToUpperNeckPitchLink);
-      ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("upperNeckPitchLink", "multisense/head",
-            staticTransform);
-      staticTranformsForRos.add(headToHeadRootStaticTransform);
+      staticTranformsForRos.add(new ImmutableTriple<>("upperNeckPitchLink", "multisense/head", staticTransform));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String footName = robotSide.getCamelCaseName() + "Foot";
+         String soleName = robotSide.getCamelCaseName() + "Sole";
+         RigidBodyTransform transform = new RigidBodyTransform(ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide));
+         staticTranformsForRos.add(new ImmutableTriple<>(footName, soleName, transform));
+      }
    }
 
    public static RigidBodyTransform getTransformFromHeadToUpperNeckPitchLink()
