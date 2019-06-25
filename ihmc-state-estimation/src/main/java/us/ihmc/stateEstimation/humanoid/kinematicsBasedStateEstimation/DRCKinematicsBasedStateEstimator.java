@@ -223,6 +223,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisLinearStateUpdater.initialize();
 
       imuBiasStateEstimator.initialize();
+      imuYawDriftEstimator.initialize();
    }
 
    @Override
