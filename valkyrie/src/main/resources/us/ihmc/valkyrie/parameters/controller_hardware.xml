@@ -71,6 +71,9 @@
                 <registry name="IMUBasedPelvisRotationalStateUpdater">
                     <parameter name="zeroEstimatedRootYawAtInitialization" type="BooleanParameter" value="true"/>
                 </registry>
+                <registry name="PelvisLinearStateUpdater">
+                    <parameter name="zeroRootXYPositionAtInitialization" type="BooleanParameter" value="true"/>
+                </registry>
             </registry>
         </registry>
     </registry>
