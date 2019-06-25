@@ -9,7 +9,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidBehaviors.tools.ActivationReference;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -26,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 import java.util.concurrent.TimeUnit;
@@ -79,9 +79,9 @@ public class StepInPlaceBehavior
 
    private void stepInPlace()
    {
-      if (stepping.pollActivated())
+      if (stepping.poll())
       {
-         if (stepping.activationChanged())
+         if (stepping.hasChanged())
          {
             LogTools.info("Starting to step");
          }
@@ -108,7 +108,7 @@ public class StepInPlaceBehavior
             footstepDataListPublisher.publish(footstepList);
          }
       }
-      else if (stepping.activationChanged())
+      else if (stepping.hasChanged())
       {
          LogTools.info("Stopped stepping");
       }
@@ -117,11 +117,11 @@ public class StepInPlaceBehavior
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("StepInPlace");
-      private static final CategoryTheme BEHAVIOR = apiFactory.createCategoryTheme("Behavior");
+      private static final Category Root = apiFactory.createRootCategory("StepInPlaceBehavior");
+      private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
 
-      public static final Topic<Boolean> Stepping = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Abort"));
+      public static final Topic<Boolean> Stepping = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Stepping"));
+      public static final Topic<Boolean> Abort = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Abort"));
 
       public static final MessagerAPI create()
       {

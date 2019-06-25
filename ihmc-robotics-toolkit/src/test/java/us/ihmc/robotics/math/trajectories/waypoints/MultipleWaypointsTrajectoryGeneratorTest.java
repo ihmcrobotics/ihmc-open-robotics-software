@@ -126,10 +126,15 @@ public class MultipleWaypointsTrajectoryGeneratorTest
 
       trajectory.compute(0.036);
       assertEquals(positionAtWaypoint, trajectory.getValue());
-      assertEquals(velocityAtWaypoint, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
       
       trajectory.compute(0.042);
+      assertEquals(positionAtWaypoint, trajectory.getValue());
+      assertEquals(0.0, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getAcceleration());
+
+      trajectory.compute(timeAtWaypoint);
       assertEquals(positionAtWaypoint, trajectory.getValue());
       assertEquals(velocityAtWaypoint, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());

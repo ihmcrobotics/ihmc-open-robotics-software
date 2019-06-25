@@ -146,7 +146,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerParentRegistry);
+      managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);

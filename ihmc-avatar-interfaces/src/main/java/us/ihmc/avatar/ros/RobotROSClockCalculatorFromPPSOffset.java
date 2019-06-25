@@ -27,7 +27,7 @@ public class RobotROSClockCalculatorFromPPSOffset implements RobotROSClockCalcul
    @Override
    public long computeROSTime(long wallTime, long monotonicTime)
    {
-      return ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(monotonicTime);
+      return ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(monotonicTime);
    }
 
    @Override
