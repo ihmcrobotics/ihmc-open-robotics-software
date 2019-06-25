@@ -59,7 +59,7 @@ task updateDataSetList {
       def className = "DataSetName"
 
       def dataSetDir = new File(resourcesDir)
-      def dataSetList = files { dataSetDir.listFiles() }
+      def dataSetList = files { dataSetDir.listFiles().sort().reverse() }
 
       File classFile = new File(srcDir + "/" + className + ".java")
       println classFile.getAbsolutePath()
