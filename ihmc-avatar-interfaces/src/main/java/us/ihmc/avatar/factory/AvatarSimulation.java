@@ -8,6 +8,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -53,9 +54,10 @@ public class AvatarSimulation
    public void resetRobot()
    {
       simulationConstructionSet.stop();
-      ThreadTools.sleep(1000); // Somehow make sure controller and estimator finish.
+      ThreadTools.sleep(500); // TODO: Somehow make sure controller and estimator finish.
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
+      highLevelHumanoidControllerFactory.getRequestedControlStateEnum().set(HighLevelControllerName.WALKING);
       simulate();
    }
 
