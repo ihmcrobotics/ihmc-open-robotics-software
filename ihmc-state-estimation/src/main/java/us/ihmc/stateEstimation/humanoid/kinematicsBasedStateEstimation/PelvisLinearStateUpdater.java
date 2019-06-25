@@ -34,7 +34,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -48,7 +47,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * PelvisLinearUpdater estimates the pelvis position and linear velocity using leg kinematics and IMU acceleration data.
@@ -74,8 +72,6 @@ public class PelvisLinearStateUpdater
 
    private final YoFramePoint3D yoRootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector3D yoRootJointVelocity = new YoFrameVector3D("estimatedRootJointVelocity", worldFrame, registry);
-
-   private final YoFramePoint3D yoInitialFootPosition = new YoFramePoint3D("initialFootPosition", worldFrame, registry);
 
    private final YoFramePoint3D yoCenterOfMassPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector3D("estimatedCenterOfMassVelocityPelvisAndKin", worldFrame, registry);
@@ -118,7 +114,6 @@ public class PelvisLinearStateUpdater
 
    private final Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies;
 
-   private final YoBoolean reinitialize = new YoBoolean("reinitialize", registry);
    private final BooleanProvider trustImuWhenNoFeetAreInContact;
 
    private enum SlippageCompensatorMode
@@ -154,6 +149,9 @@ public class PelvisLinearStateUpdater
    private final IntegerProvider lowestFootWindowSize = new IntegerParameter("LowestFootWindowSize", registry, 0);
    private final GlitchFilteredYoInteger lowestFootInContactIndex = new GlitchFilteredYoInteger("LowestFootInContact", lowestFootWindowSize, registry);
 
+   private final BooleanParameter zeroRootXYPositionAtInitialization = new BooleanParameter("zeroRootXYPositionAtInitialization", registry, false);
+   private final BooleanParameter zeroFootHeightAtInitialization = new BooleanParameter("zeroFootHeightAtInitialization", registry, true);
+
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
@@ -180,16 +178,6 @@ public class PelvisLinearStateUpdater
 
       robotMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
       setupBunchOfVariables();
-
-      reinitialize.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (reinitialize.getBooleanValue())
-               initialize();
-         }
-      });
 
       kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, feetContactablePlaneBodies, footSwitches,
             centerOfPressureDataHolderFromController, estimatorDT, stateEstimatorParameters, yoGraphicsListRegistry, registry);
@@ -265,23 +253,32 @@ public class PelvisLinearStateUpdater
 
    private void initializeRobotState()
    {
-      reinitialize.set(false);
-
-      if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
+      if (!initializeToActual)
       {
-         RigidBodyBasics foot = feet.get(0);
-         footPositionInWorld.setToZero(footFrames.get(foot));
-         footPositionInWorld.changeFrame(worldFrame);
-         yoInitialFootPosition.set(footPositionInWorld);
+         rootJointPosition.setIncludingFrame(worldFrame, rootJoint.getJointPose().getPosition());
 
-         rootJointPosition.set(rootJoint.getJointPose().getPosition());
-         rootJointPosition.setZ(-footPositionInWorld.getZ());
-         yoRootJointPosition.set(rootJointPosition);
+         if (zeroRootXYPositionAtInitialization.getValue())
+         {
+            rootJointPosition.setX(0.0);
+            rootJointPosition.setY(0.0);
+         }
+
+         if (zeroFootHeightAtInitialization.getValue())
+         {
+            RigidBodyBasics foot = feet.get(0);
+            // We're interested in the delta-z between the foot and the root joint frame.
+            footPositionInWorld.setToZero(footFrames.get(foot));
+            footPositionInWorld.changeFrame(rootJointFrame);
+
+            // By setting the root joint to be at -footZ, the foot will be at a height of zero.
+            rootJointPosition.setZ(-footPositionInWorld.getZ());
+         }
       }
       else
       {
          rootJointPosition.set(initialRootJointPosition);
       }
+
 
       rootJointVelocity.setToZero(worldFrame);
       yoRootJointPosition.set(rootJointPosition);
