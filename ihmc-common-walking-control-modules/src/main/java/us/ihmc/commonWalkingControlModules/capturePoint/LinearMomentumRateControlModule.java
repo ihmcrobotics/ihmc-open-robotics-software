@@ -193,6 +193,11 @@ public class LinearMomentumRateControlModule
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      capturePointVelocity.reset();
+   }
+
    public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
    {
       this.planarRegionsListHandler = planarRegionsListHandler;
