@@ -355,6 +355,9 @@ public class AvatarEstimatorThread
          ekfStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
+
+      humanoidRobotContextData.setControllerRan(false);
+      humanoidRobotContextData.setEstimatorRan(false);
    }
 
    /**

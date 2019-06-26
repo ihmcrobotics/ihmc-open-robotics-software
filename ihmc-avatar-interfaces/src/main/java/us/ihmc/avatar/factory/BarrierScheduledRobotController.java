@@ -30,6 +30,8 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
    @Override
    public void initialize()
    {
+      masterContext.setControllerRan(false);
+      masterContext.setEstimatorRan(false);
    }
 
    @Override
