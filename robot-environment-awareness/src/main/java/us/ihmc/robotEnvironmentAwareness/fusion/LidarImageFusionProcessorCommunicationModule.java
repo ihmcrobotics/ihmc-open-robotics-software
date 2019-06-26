@@ -9,6 +9,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.ImageMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.VideoPacket;
+import org.opencv.video.Video;
+import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -46,10 +49,10 @@ public class LidarImageFusionProcessorCommunicationModule
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       stereoREAModule = new StereoREAModule(reaMessager, messager);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
-                                           this::dispatchStereoVisionPointCloudMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, "/ihmc/image", this::dispatchImageMessage);
+      new ROS2Callback<>(ros2Node, LidarScanMessage.class, this::dispatchLidarScanMessage);
+      new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
+      new ROS2Callback<>(ros2Node, ImageMessage.class, this::dispatchImageMessage);
+//      new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
@@ -73,23 +76,20 @@ public class LidarImageFusionProcessorCommunicationModule
       objectDetectionManager.requestObjectDetection(latestBufferedImage.getAndSet(null), selectedObjecTypes.get());
    }
 
-   private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
+   private void dispatchLidarScanMessage(LidarScanMessage message)
    {
-      LidarScanMessage message = subscriber.takeNextData();
       moduleStateReporter.registerLidarScanMessage(message);
    }
 
-   private void dispatchStereoVisionPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
+   private void dispatchStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
    {
-      StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       objectDetectionManager.updateLatestStereoVisionPointCloudMessage(message);
       stereoREAModule.updateLatestStereoVisionPointCloudMessage(message);
    }
 
-   private void dispatchImageMessage(Subscriber<ImageMessage> subscriber)
+   private void dispatchImageMessage(ImageMessage message)
    {
-      ImageMessage message = subscriber.takeNextData();
       if (messager.isMessagerOpen())
          messager.submitMessage(LidarImageFusionAPI.ImageState, new ImageMessage(message));
 

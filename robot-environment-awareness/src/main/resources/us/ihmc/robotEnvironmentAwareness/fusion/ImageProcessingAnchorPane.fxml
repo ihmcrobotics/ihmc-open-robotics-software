@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="166.0" prefWidth="575.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController">
+<AnchorPane prefHeight="166.0" prefWidth="575.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController">
    <children>
-      <VBox alignment="CENTER" layoutX="20.0" layoutY="19.0" prefHeight="130.0" prefWidth="100.0" spacing="5.0">
+      <VBox alignment="CENTER" layoutX="20.0" layoutY="19.0" prefHeight="130.0" prefWidth="137.0" spacing="5.0">
          <children>
             <ToggleButton fx:id="btnEnableStreaming" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stream" />
             <Button fx:id="btnTaskingSnapshot" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="71.0" text="Take SnapShot" />
