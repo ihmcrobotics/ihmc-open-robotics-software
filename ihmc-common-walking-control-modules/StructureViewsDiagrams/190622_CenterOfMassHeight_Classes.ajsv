@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2019-Jun-22 13:00" licenseGrade="single" licenseeName="AgileJ community member" licenseeOrganization="agilej-community" populationMethod="manual" version="1.9.2.v20190518-1152">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all fields
+hide all methods
+
+</filterScript>
+        <class className="us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule" project="ihmc-common-walking-control-modules" xLocation="620" yLocation="757"/>
+        <class className="us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule" project="ihmc-common-walking-control-modules" xLocation="762" yLocation="556"/>
+        <class className="us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState" project="ihmc-common-walking-control-modules" xLocation="1264" yLocation="326"/>
+        <class className="us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator" modelMemberId="us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator" project="ihmc-common-walking-control-modules" xLocation="145" yLocation="443"/>
+        <class className="us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother" modelMemberId="us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother" project="ihmc-common-walking-control-modules" xLocation="1194" yLocation="450"/>
+        <class className="us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState" project="ihmc-common-walking-control-modules" xLocation="621" yLocation="304"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory" project="ihmc-common-walking-control-modules" xLocation="501" yLocation="128"/>
+        <class className="us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData" modelMemberId="us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData" project="ihmc-common-walking-control-modules" xLocation="1349" yLocation="843"/>
+        <class className="us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager" modelMemberId="us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager" project="ihmc-common-walking-control-modules" xLocation="918" yLocation="200"/>
+        <class className="us.ihmc.robotics.geometry.StringStretcher2d" modelMemberId="us.ihmc.robotics.geometry.StringStretcher2d" project="ihmc-robotics-toolkit" xLocation="153" yLocation="584"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState" modelMemberId="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState" project="ihmc-common-walking-control-modules" xLocation="186" yLocation="48"/>
+        <class className="us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager" modelMemberId="us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager" project="ihmc-common-walking-control-modules" xLocation="778" yLocation="440"/>
+    </diagram>
+</ajsv>
