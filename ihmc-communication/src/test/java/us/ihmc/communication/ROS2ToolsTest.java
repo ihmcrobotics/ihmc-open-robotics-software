@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import com.google.common.base.CaseFormat;
 import std_msgs.msg.dds.Int64;
 import std_msgs.msg.dds.Int8;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -24,12 +26,9 @@ class ROS2ToolsTest
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      ROS2ModuleIdentifier id = new ROS2ModuleIdentifier("ihmc_test", "/test");
+      IHMCROS2Publisher intPublisher = new IHMCROS2Publisher(ros2Node, Int64.class);
 
-      String robotName = "skippy";
-      IHMCROS2Publisher intPublisher = new IHMCROS2Publisher(ros2Node, Int64.class, null, null, null);
-
-      new ROS2Callback<>(ros2Node, Int64.class, null, null, null, this::acceptMessage);
+      new ROS2Callback<>(ros2Node, Int64.class, this::acceptMessage);
 
       new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
       {
@@ -39,14 +38,7 @@ class ROS2ToolsTest
          intPublisher.publish(num);
       }, 1.0);
 
-      try
-      {
-         Thread.currentThread().join();
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }
+      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
    private void acceptMessage(Int64 message)
