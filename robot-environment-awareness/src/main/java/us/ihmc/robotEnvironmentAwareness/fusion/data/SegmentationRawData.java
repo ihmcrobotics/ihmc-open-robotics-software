@@ -129,10 +129,7 @@ public class SegmentationRawData
       pca.compute();
 
       pca.getMean(center);
-      Vector3D x = new Vector3D();
-      Vector3D y = new Vector3D();
-      pca.getPrincipalVectors(x, y, normal);
-      //pca.getThirdVector(normal);
+      pca.getThirdVector(normal);
 
       if (normal.getZ() < 0.0)
          normal.negate();
