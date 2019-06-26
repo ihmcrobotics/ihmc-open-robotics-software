@@ -5,12 +5,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ImageSegmentationParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.PlanarRegionPropagationParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.SegmentationRawDataFilteringParametersProperty;
 
 public class StereoREAAnchorPaneController
 {
@@ -50,6 +52,39 @@ public class StereoREAAnchorPaneController
    private Slider superpixelMinimumElement;
 
    @FXML
+   private Slider minSparse;
+
+   @FXML
+   private Slider sparseRatio;
+
+   @FXML
+   private ToggleButton flyingPoint;
+
+   @FXML
+   private Slider minimumNeighbors;
+
+   @FXML
+   private Slider flyingPointDistance;
+
+   @FXML
+   private ToggleButton centrality;
+
+   @FXML
+   private Slider centralityRadius;
+
+   @FXML
+   private Slider centralityThreshold;
+
+   @FXML
+   private ToggleButton ellipticity;
+
+   @FXML
+   private Slider ellipticityLength;
+
+   @FXML
+   private Slider ellipticityThreshold;
+
+   @FXML
    private Slider sparseLowerThreshold;
 
    @FXML
@@ -78,6 +113,9 @@ public class StereoREAAnchorPaneController
    private final PlanarRegionPropagationParametersProperty planarRegionPropagationParametersProperty = new PlanarRegionPropagationParametersProperty(this,
                                                                                                                                                      "planarRegionPropagationParametersProperty");
 
+   private final SegmentationRawDataFilteringParametersProperty segmentationRawDataFilteringParametersProperty = new SegmentationRawDataFilteringParametersProperty(this,
+                                                                                                                                                                    "segmentationRawDataFilteringParametersProperty");
+
    @FXML
    private Button runSREA;
 
@@ -95,6 +133,15 @@ public class StereoREAAnchorPaneController
       imageSegmentationParametersProperty.bindBidirectionalEnableConnectivity(enableConnectivity.selectedProperty());
       imageSegmentationParametersProperty.bindBidirectionalMinElementSize(superpixelMinimumElement.valueProperty());
       messager.bindBidirectional(LidarImageFusionAPI.ImageSegmentationParameters, imageSegmentationParametersProperty, true);
+
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalSparseThreshold(minSparse.valueProperty(), sparseRatio.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterFlyingPoint(flyingPoint.selectedProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalFlyingPointParameters(flyingPointDistance.valueProperty(), minimumNeighbors.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterCentrality(centrality.selectedProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(), centralityThreshold.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterEllipticity(ellipticity.selectedProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(), ellipticityThreshold.valueProperty());
+      messager.bindBidirectional(LidarImageFusionAPI.SegmentationRawDataFilteringParameters, segmentationRawDataFilteringParametersProperty, true);
 
       planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseLowerThreshold.valueProperty(), sparseUpperThreshold.valueProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalProximityThreshold(proximityThreshold.valueProperty());

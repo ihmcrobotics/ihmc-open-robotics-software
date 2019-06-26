@@ -273,7 +273,7 @@ public abstract class HumanoidControllerWarmup
                                                                               yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerFactoryParent);
+      managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);

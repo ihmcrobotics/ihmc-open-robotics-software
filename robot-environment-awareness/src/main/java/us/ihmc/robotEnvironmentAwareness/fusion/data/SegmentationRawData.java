@@ -34,7 +34,7 @@ public class SegmentationRawData
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 
-   private boolean isSparse;
+   private boolean isSparse = true;
 
    private static final boolean useAdjacentScore = true;
    private static final int numberOfAdjacentPixels = 10;
@@ -76,7 +76,7 @@ public class SegmentationRawData
       points.add(point);
    }
 
-   public void filtering(double threshold, int neighborsThreshold)
+   public void filteringFlyingPoints(double threshold, int neighborsThreshold)
    {
       List<Point3D> filteredPoints = new ArrayList<>();
       for (Point3D point : points)
@@ -129,10 +129,7 @@ public class SegmentationRawData
       pca.compute();
 
       pca.getMean(center);
-      Vector3D x = new Vector3D();
-      Vector3D y = new Vector3D();
-      pca.getPrincipalVectors(x, y, normal);
-      //pca.getThirdVector(normal);
+      pca.getThirdVector(normal);
 
       if (normal.getZ() < 0.0)
          normal.negate();
@@ -143,23 +140,32 @@ public class SegmentationRawData
    public void updateSparsity(double threshold)
    {
       isSparse = standardDeviation.getZ() > threshold;
+   }
 
+   public void filteringCentrality(double radius, double threshold)
+   {
       if (!isSparse)
       {
-         double centerRadius = 0.05;
-         double ratio = 0.4;
          int numberOfInliers = 0;
          for (Point3D point : points)
          {
             double distance = center.distance(point);
-            if (distance < centerRadius)
+            if (distance < radius)
                numberOfInliers++;
          }
 
-         if (numberOfInliers < ratio * getWeight())
+         if (numberOfInliers < threshold * getWeight())
          {
             isSparse = true;
          }
+      }
+   }
+
+   public void filteringEllipticity(double minLength, double threshold)
+   {
+      if (!isSparse)
+      {
+         // TODO: implement ellipticity for standardDeviation.
       }
    }
 
