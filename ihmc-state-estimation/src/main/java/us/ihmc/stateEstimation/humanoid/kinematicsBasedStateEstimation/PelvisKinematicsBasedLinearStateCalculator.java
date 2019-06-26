@@ -220,6 +220,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    public void initialize(FramePoint3D pelvisPosition)
    {
+      for (int i = 0; i < feetRigidBodies.size(); i++)
+      {
+         RigidBodyBasics foot = feetRigidBodies.get(i);
+         footToRootJointPositions.get(foot).reset();
+         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(foot);
+         copFilteredInFootFrame.reset();
+         copFilteredInFootFrame.update(0.0, 0.0);
+         footVelocitiesInWorld.get(foot).setToZero();
+      }
+      setPelvisLinearVelocityToZero();
+
       updateKinematics();
       setPelvisPosition(pelvisPosition);
 
