@@ -127,7 +127,8 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonSliderJoint.setLink(buttonLink);
 
       this.addRootJoint(buttonSliderJoint);
-      cylinderFrame = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), rootJointTransform, buttonThickness, buttonRadius);
+      cylinderFrame = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), buttonThickness, buttonRadius);
+      cylinderFrame.getCylinder3d().applyTransform(rootJointTransform);
 
       // Create the Graphics
       buttonLinkGraphics = new Graphics3DObject();

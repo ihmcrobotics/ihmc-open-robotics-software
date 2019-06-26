@@ -17,6 +17,12 @@ public class AtlasSteppingParameters implements SteppingParameters
    {
       return 0.10 * jointMap.getModelScale();
    }
+
+   @Override
+   public double getDefaultSwingHeightFromStanceFoot()
+   {
+      return getMinSwingHeightFromStanceFoot();
+   }
    
    @Override
    public double getMaxSwingHeightFromStanceFoot()

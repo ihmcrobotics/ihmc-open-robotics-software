@@ -62,7 +62,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
-      URI masterURI = new URI("http://10.6.192.14:11311");
+      URI masterURI = new URI("http://10.7.4.100:11311");
       RosMainNode rosMainNode = new RosMainNode(masterURI, "StereoVisionPublisher", true);
       rosMainNode.attachSubscriber("/multisense/image_points2_color_world", this);
 

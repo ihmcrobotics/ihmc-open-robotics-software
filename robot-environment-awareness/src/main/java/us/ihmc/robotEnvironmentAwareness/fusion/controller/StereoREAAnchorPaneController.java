@@ -141,6 +141,7 @@ public class StereoREAAnchorPaneController
       segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(), centralityThreshold.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterEllipticity(ellipticity.selectedProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(), ellipticityThreshold.valueProperty());
+      messager.bindBidirectional(LidarImageFusionAPI.SegmentationRawDataFilteringParameters, segmentationRawDataFilteringParametersProperty, true);
 
       planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseLowerThreshold.valueProperty(), sparseUpperThreshold.valueProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalProximityThreshold(proximityThreshold.valueProperty());

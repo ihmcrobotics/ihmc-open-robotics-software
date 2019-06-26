@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -21,11 +21,11 @@ public class BoxRobotDescription extends RobotDescription
       FloatingJointDescription bodyJoint = new FloatingJointDescription("bodyJoint", "bodyJointVariableName");
 
       LinkDescription bodyLink = new LinkDescription("bodyLink");
-      bodyLink.setMassAndRadiiOfGyration(mass, bodyBox.getLength(), bodyBox.getWidth(), bodyBox.getHeight());
+      bodyLink.setMassAndRadiiOfGyration(mass, bodyBox.getSizeX(), bodyBox.getSizeY(), bodyBox.getSizeZ());
 
       LinkGraphicsDescription bodyLinkGraphics = new LinkGraphicsDescription();
-      bodyLinkGraphics.translate(0.0, 0.0, -bodyBox.getHeight() / 2.0);
-      bodyLinkGraphics.addCube(bodyBox.getLength(), bodyBox.getWidth(), bodyBox.getHeight(), YoAppearance.AliceBlue());
+      bodyLinkGraphics.translate(0.0, 0.0, -bodyBox.getSizeZ() / 2.0);
+      bodyLinkGraphics.addCube(bodyBox.getSizeX(), bodyBox.getSizeY(), bodyBox.getSizeZ(), YoAppearance.AliceBlue());
       bodyLink.setLinkGraphics(bodyLinkGraphics);
       
       RigidBodyTransform sensorLocation = new RigidBodyTransform();
@@ -38,16 +38,16 @@ public class BoxRobotDescription extends RobotDescription
       if (useGroundContactPoints)
       {
          int idOfGCP = 0;
-         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, 0.5 * bodyBox.getLength(), 0.5 * bodyBox.getWidth(), -0.5 * bodyBox.getHeight());
+         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, 0.5 * bodyBox.getSizeX(), 0.5 * bodyBox.getSizeY(), -0.5 * bodyBox.getSizeZ());
          idOfGCP++;
 
-         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, 0.5 * bodyBox.getLength(), -0.5 * bodyBox.getWidth(), -0.5 * bodyBox.getHeight());
+         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, 0.5 * bodyBox.getSizeX(), -0.5 * bodyBox.getSizeY(), -0.5 * bodyBox.getSizeZ());
          idOfGCP++;
 
-         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, -0.5 * bodyBox.getLength(), 0.5 * bodyBox.getWidth(), -0.5 * bodyBox.getHeight());
+         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, -0.5 * bodyBox.getSizeX(), 0.5 * bodyBox.getSizeY(), -0.5 * bodyBox.getSizeZ());
          idOfGCP++;
 
-         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, -0.5 * bodyBox.getLength(), -0.5 * bodyBox.getWidth(), -0.5 * bodyBox.getHeight());
+         addGroundContactPoint(bodyJoint, name + "_gc" + idOfGCP, -0.5 * bodyBox.getSizeX(), -0.5 * bodyBox.getSizeY(), -0.5 * bodyBox.getSizeZ());
       }
       
       this.addRootJoint(bodyJoint);
