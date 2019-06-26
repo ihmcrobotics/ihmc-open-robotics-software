@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
@@ -14,11 +16,15 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataFactor
 
 public class LidarImageFusionDataBuffer
 {
-   private final IntrinsicParameters intrinsicParameters;
+   //private final IntrinsicParameters intrinsicParameters;
 
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<BufferedImage> latestBufferedImage = new AtomicReference<>(null);
 
+   private final AtomicReference<Point3D> latestCameraPosition;
+   private final AtomicReference<Quaternion> latestCameraOrientation;
+   private final AtomicReference<IntrinsicParameters> latestCameraIntrinsicParameters;
+   
    private final AtomicReference<Integer> bufferSize;
 
    private final AtomicReference<SegmentationRawDataFilteringParameters> latestSegmentationRawDataFilteringParameters;
@@ -27,11 +33,15 @@ public class LidarImageFusionDataBuffer
 
    public LidarImageFusionDataBuffer(Messager messager, IntrinsicParameters intrinsic)
    {
-      intrinsicParameters = intrinsic;
+      //intrinsicParameters = intrinsic;
       bufferSize = messager.createInput(LidarImageFusionAPI.StereoBufferSize, 50000);
       latestImageSegmentationParaeters = messager.createInput(LidarImageFusionAPI.ImageSegmentationParameters, new ImageSegmentationParameters());
       latestSegmentationRawDataFilteringParameters = messager.createInput(LidarImageFusionAPI.SegmentationRawDataFilteringParameters,
                                                                           new SegmentationRawDataFilteringParameters());
+      
+      latestCameraPosition = messager.createInput(LidarImageFusionAPI.CameraPositionState, new Point3D());
+      latestCameraOrientation = messager.createInput(LidarImageFusionAPI.CameraOrientationState, new Quaternion());
+      latestCameraIntrinsicParameters = messager.createInput(LidarImageFusionAPI.CameraIntrinsicParametersState, new IntrinsicParameters());
    }
 
    public LidarImageFusionData pollNewBuffer()
@@ -46,7 +56,8 @@ public class LidarImageFusionDataBuffer
 
       SegmentationRawDataFilteringParameters segmentationRawDataFilteringParameters = latestSegmentationRawDataFilteringParameters.get();
       LidarImageFusionData data = LidarImageFusionDataFactory.createLidarImageFusionData(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage),
-                                                                                         latestBufferedImage.get(), intrinsicParameters, bufferSize.get(),
+                                                                                         latestBufferedImage.get(), latestCameraIntrinsicParameters.get(), bufferSize.get(),
+                                                                                         latestCameraPosition.get(), latestCameraOrientation.get(),
                                                                                          imageSegmentationParameters.getPixelSize(),
                                                                                          imageSegmentationParameters.getPixelRuler(),
                                                                                          true, imageSegmentationParameters.getMinElementSize(),
@@ -54,10 +65,6 @@ public class LidarImageFusionDataBuffer
                                                                                          segmentationRawDataFilteringParameters.isEnableFilterFlyingPoint(),
                                                                                          segmentationRawDataFilteringParameters.getFlyingPointThreshold(),
                                                                                          segmentationRawDataFilteringParameters.getMinimumNumberOfFlyingPointNeighbors());
-
-      //      LidarImageFusionData data = LidarImageFusionDataFactory.createLidarImageFusionData(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage),
-      //                                                                                         latestBufferedImage.get(), intrinsicParameters, bufferSize.get(),
-      //                                                                                         40, 30);
       newBuffer.set(data);
    }
 
