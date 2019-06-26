@@ -423,11 +423,13 @@ public class StepGeneratorJavaFXController
 
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
-      double stanceWidth = 0.1;
-      double heightOffset = 0.3;
+      double halfStanceWidth = 0.5 * steppingParameters.getInPlaceWidth();
+
+      /** Shift box vertically by max step up, regions below this could be steppable */
+      double heightOffset = steppingParameters.getMaxStepUp();
 
       double soleYaw = touchdownPose.getYaw();
-      double lateralOffset = swingSide.negateIfLeftSide(stanceWidth);
+      double lateralOffset = swingSide.negateIfLeftSide(halfStanceWidth);
       double offsetX = -lateralOffset * Math.sin(soleYaw);
       double offsetY = lateralOffset * Math.cos(soleYaw);
       collisionDetector.setBoxPose(touchdownPose.getX() + offsetX, touchdownPose.getY() + offsetY, touchdownPose.getZ() + heightOffset, soleYaw);
