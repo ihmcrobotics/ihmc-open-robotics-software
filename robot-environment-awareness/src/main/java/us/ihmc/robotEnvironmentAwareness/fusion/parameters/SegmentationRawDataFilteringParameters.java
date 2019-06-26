@@ -11,7 +11,7 @@ public class SegmentationRawDataFilteringParameters
 
    private static final boolean DEFAULT_ENABLE_FILTER_CENTRALITY = true;
    private static final double DEFAULT_CENTRALITY_RADIUS = 0.03;
-   private static final double DEFAULT_CENTRALITY_THRESHOLD = 0.5;
+   private static final double DEFAULT_CENTRALITY_THRESHOLD = 0.3;
 
    private static final boolean DEFAULT_ENABLE_FILTER_ELLIPTICITY = true;
    private static final double DEFAULT_ELLIPTICITY_MINIMUM_LENGTH = 0.02;

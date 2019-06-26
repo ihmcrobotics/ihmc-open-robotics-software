@@ -51,10 +51,10 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
    static
    {
-      multisenseOnCartIntrinsicParameters.setFx(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setFy(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setCx(512.0);
-      multisenseOnCartIntrinsicParameters.setCy(272.0);
+      multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
+      multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
+      multisenseOnCartIntrinsicParameters.setCx(505.5);
+      multisenseOnCartIntrinsicParameters.setCy(260.5);
    }
    private static final int offsetU = 12;
    private static final int offsetV = 0;
@@ -62,7 +62,8 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
-      URI masterURI = new URI("http://10.7.4.100:11311");
+      //URI masterURI = new URI("http://10.7.4.100:11311");
+      URI masterURI = new URI("http://10.6.192.14:11311");
       RosMainNode rosMainNode = new RosMainNode(masterURI, "StereoVisionPublisher", true);
       rosMainNode.attachSubscriber("/multisense/image_points2_color_world", this);
 
