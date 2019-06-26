@@ -51,10 +51,16 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
    static
    {
-      multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
-      multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
-      multisenseOnCartIntrinsicParameters.setCx(505.5);
-      multisenseOnCartIntrinsicParameters.setCy(260.5);
+      // cart
+//      multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
+//      multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
+//      multisenseOnCartIntrinsicParameters.setCx(505.5);
+//      multisenseOnCartIntrinsicParameters.setCy(260.5);
+      // atlas
+      multisenseOnCartIntrinsicParameters.setFx(555.999267578125);
+      multisenseOnCartIntrinsicParameters.setFy(555.999267578125);
+      multisenseOnCartIntrinsicParameters.setCx(512.0);
+      multisenseOnCartIntrinsicParameters.setCy(269.5);
    }
    private static final int offsetU = 12;
    private static final int offsetV = 0;
@@ -62,8 +68,8 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
-      //URI masterURI = new URI("http://10.7.4.100:11311");
-      URI masterURI = new URI("http://10.6.192.14:11311");
+      URI masterURI = new URI("http://10.7.4.100:11311");
+      //URI masterURI = new URI("http://10.6.192.14:11311");
       RosMainNode rosMainNode = new RosMainNode(masterURI, "StereoVisionPublisher", true);
       rosMainNode.attachSubscriber("/multisense/image_points2_color_world", this);
 
@@ -134,7 +140,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
          colorsInteger[i] = colors[i].getRGB();
       }
-
+      
       StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
