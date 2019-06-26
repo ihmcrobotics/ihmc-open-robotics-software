@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Torus3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.shape.primitives.Torus3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
 {
@@ -31,9 +32,9 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
       torus3d = getGeometryObject();
    }
 
-   public FrameTorus3d(ReferenceFrame referenceFrame, RigidBodyTransform transform, double radius, double thickness)
+   public FrameTorus3d(ReferenceFrame referenceFrame, Point3DReadOnly position, Vector3DReadOnly axis, double radius, double thickness)
    {
-      super(referenceFrame, new Torus3D(transform, radius, thickness));
+      super(referenceFrame, new Torus3D(position, axis, radius, thickness));
       torus3d = getGeometryObject();
    }
 

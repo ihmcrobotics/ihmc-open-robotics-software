@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.model.interfaces;
 
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 
 public interface OrientationEditable extends FXUIEditableGraphic
 {
-   void setOrientation(Point3D orientationPoint);
+   void setOrientation(Orientation3DReadOnly orientationPoint);
 }

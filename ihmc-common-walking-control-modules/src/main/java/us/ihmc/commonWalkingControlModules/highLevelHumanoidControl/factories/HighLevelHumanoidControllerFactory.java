@@ -134,7 +134,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       }
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-      managerFactory = new HighLevelControlManagerFactory(statusMessageOutputManager, registry);
+      managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }

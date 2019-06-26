@@ -112,11 +112,11 @@
                               </HBox>
                               <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                                  <children>
-                                    <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Threshold" textAlignment="CENTER" />
+                                    <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Threshold (ratio)" textAlignment="CENTER" />
                                     <Slider fx:id="centralityThreshold" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" maxWidth="1.7976931348623157E308" min="0.1" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.5" />
                                  </children>
                               </HBox>
-                              <ToggleButton fx:id="ellipticity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="200.0" selected="true" text="Ellipticity" />
+                              <ToggleButton fx:id="ellipticity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="200.0" selected="false" text="Ellipticity" />
                               <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                                  <children>
                                     <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Min Length" textAlignment="CENTER" />
