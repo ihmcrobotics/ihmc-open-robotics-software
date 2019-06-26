@@ -1,8 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.tools;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 
 public class PointCloudProjectionHelper
 {
@@ -50,6 +53,14 @@ public class PointCloudProjectionHelper
    {
       projectMultisensePointCloudOnImage(point, pixel, param);
       pixel.add(offsetU, offsetV);
+   }
+   
+   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param, Point3DBasics cameraPosition, QuaternionBasics cameraOrientation)
+   {
+      Point3D pointToCamera = new Point3D(point);
+      RigidBodyTransform transformWorldToCamera = new RigidBodyTransform(cameraOrientation, cameraPosition);
+      pointToCamera.applyInverseTransform(transformWorldToCamera);
+      return projectMultisensePointCloudOnImage(pointToCamera, param);
    }
 
    public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param)
