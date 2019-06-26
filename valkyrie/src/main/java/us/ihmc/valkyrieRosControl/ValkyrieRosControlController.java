@@ -365,7 +365,14 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
 
       JointDesiredOutputWriter outputWriter = null;
-      DRCOutputProcessor drcOutputProcessor = USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR ? new DRCOutputProcessorWithStateChangeSmoother(null) : null;
+      DRCOutputProcessor drcOutputProcessor = null;
+
+      if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
+      {
+         DRCOutputProcessorWithStateChangeSmoother outputSmoother = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
+         controllerFactory.attachControllerStateChangedListener(outputSmoother.createControllerStateChangedListener());
+         drcOutputProcessor = outputSmoother;
+      }
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
