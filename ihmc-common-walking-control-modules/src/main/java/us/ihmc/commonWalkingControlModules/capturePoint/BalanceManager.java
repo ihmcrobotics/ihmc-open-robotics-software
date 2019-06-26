@@ -536,7 +536,14 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
+      initializeForSingleSupport = false;
+      initializeForTransfer = false;
+      minimizeAngularMomentumRateZ = false;
+      footstepWasAdjusted = false;
+      usingStepAdjustment = false;
       initializeForStanding = true;
+
+      endTick();
    }
 
    public void prepareForDoubleSupportPushRecovery()

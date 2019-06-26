@@ -196,6 +196,11 @@ public class LinearMomentumRateControlModule
    public void reset()
    {
       capturePointVelocity.reset();
+      icpOptimizationController.clearPlan();
+      yoDesiredCMP.setToNaN();
+      yoAchievedCMP.setToNaN();
+      yoCenterOfMass.setToNaN();
+      yoCapturePoint.setToNaN();
    }
 
    public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)

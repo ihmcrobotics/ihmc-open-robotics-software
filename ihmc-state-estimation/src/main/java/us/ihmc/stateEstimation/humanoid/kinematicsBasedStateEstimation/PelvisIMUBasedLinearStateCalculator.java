@@ -106,6 +106,8 @@ public class PelvisIMUBasedLinearStateCalculator
    public void reset()
    {
       yoMeasurementFrameLinearVelocityInWorld.setToZero();
+      imuLinearVelocityIMUOnly.setToZero();
+      setRootJointPositionImuOnlyToCurrent.set(true);
    }
 
    public boolean isEstimationEnabled()
