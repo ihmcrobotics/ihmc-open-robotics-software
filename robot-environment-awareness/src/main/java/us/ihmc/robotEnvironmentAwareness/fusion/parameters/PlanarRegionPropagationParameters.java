@@ -4,7 +4,7 @@ public class PlanarRegionPropagationParameters
 {
    private static final double DEFAULT_LOWER_SPARSE_THRESHOLD = 0.01;
    private static final double DEFAULT_UPPER_SPARSE_THRESHOLD = 0.03;
-   private static final double DEFAULT_PROXIMITY_THRESHOLD = 0.05;
+   private static final double DEFAULT_PROXIMITY_THRESHOLD = 0.02;
    private static final double DEFAULT_PLANARITY_THRESHOLD = Math.cos(Math.PI / 180 * 30);
 
    private static final boolean DEFAULT_ENABLE_EXTENDING = true;

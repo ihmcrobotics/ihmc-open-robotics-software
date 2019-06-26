@@ -44,6 +44,11 @@ public class ROS2ModuleIdentifier
       return moduleNodeName;
    }
 
+   public String getNodeName(String prefix)
+   {
+      return prefix.trim().toLowerCase() + "_" + moduleNodeName;
+   }
+
    public String getModuleTopicQualifier()
    {
       return moduleTopicQualifier;

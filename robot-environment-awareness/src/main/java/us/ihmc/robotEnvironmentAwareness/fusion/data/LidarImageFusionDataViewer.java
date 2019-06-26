@@ -111,12 +111,14 @@ public class LidarImageFusionDataViewer
          Vector3D normal = data.getNormal();
          Point3D centerEnd = new Point3D(normal);
          centerEnd.scaleAdd(0.1, center);
-         if (!data.isSparse())
+         if (data.isSparse())
          {
-            meshBuilder.addLine(center, centerEnd, lineWidth, regionColor);
-            for (Point3D point : data.getPoints())
-               meshBuilder.addTetrahedron(0.02, point, regionColor);
+            regionColor = Color.rgb(0, 0, 0);
          }
+         
+         meshBuilder.addLine(center, centerEnd, lineWidth, regionColor);
+         for (Point3D point : data.getPoints())
+            meshBuilder.addTetrahedron(0.02, point, regionColor);
       }
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());

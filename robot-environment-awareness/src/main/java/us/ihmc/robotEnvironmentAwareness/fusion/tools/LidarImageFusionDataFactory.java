@@ -27,6 +27,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 
@@ -34,36 +35,28 @@ public class LidarImageFusionDataFactory
 {
    private static final int MAX_NUMBER_OF_POINTS = 200000;
    private static final boolean displaySegmentedContour = false;
-   private static final double FLYING_POINT_THRESHOLD = 0.03;
-   private static final int FLYING_POINT_NEIGHTBORS = 5;
 
    public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
-                                                                 int pointCloudBufferSize, int columnSize, int rowSize)
-   {
-      int[] labels = getNewLabelsInGrid(bufferedImage, columnSize, rowSize);
-
-      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
-                                                                                              pointCloudBufferSize),
-                                                              bufferedImage.getWidth(), bufferedImage.getHeight());
-      return newData;
-   }
-
-   public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
-                                                                 int pointCloudBufferSize, int pixelSize, double ruler, boolean enableConnectivity,
-                                                                 int elementSize, int iterate)
+                                                                 int pointCloudBufferSize, Point3D cameraPosition, Quaternion cameraOrientation,
+                                                                 int pixelSize, double ruler, boolean enableConnectivity,
+                                                                 int elementSize, int iterate, boolean enableFlyingPointFilter, double flyingPointDistance,
+                                                                 int numberOfFlyingPointNeighbors)
    {
       long startLabel = System.nanoTime();
       int[] labels = getNewLabelsSLIC(bufferedImage, pixelSize, ruler, iterate, enableConnectivity, elementSize);
       System.out.println("Labeling time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startLabel));
 
-      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
-                                                                                              pointCloudBufferSize),
+      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, cameraPosition,cameraOrientation, pointCloud, bufferedImage, intrinsicParameters,
+                                                                                              pointCloudBufferSize, enableFlyingPointFilter, flyingPointDistance,
+                                                                                              numberOfFlyingPointNeighbors),
                                                               bufferedImage.getWidth(), bufferedImage.getHeight());
       return newData;
    }
 
-   private static List<SegmentationRawData> createListOfSegmentationRawData(int[] labels, Point3D[] pointCloud, BufferedImage bufferedImage,
-                                                                            IntrinsicParameters intrinsicParameters, int pointCloudBufferSize)
+   private static List<SegmentationRawData> createListOfSegmentationRawData(int[] labels, Point3D cameraPosition, Quaternion cameraOrientation, Point3D[] pointCloud, BufferedImage bufferedImage,
+                                                                            IntrinsicParameters intrinsicParameters, int pointCloudBufferSize,
+                                                                            boolean enableFlyingPointFilter, double flyingPointDistance,
+                                                                            int numberOfFlyingPointNeighbors)
    {
       int imageWidth = bufferedImage.getWidth();
       int imageHeight = bufferedImage.getHeight();
@@ -87,7 +80,8 @@ public class LidarImageFusionDataFactory
       for (int i = 0; i < pointCloudBuffer.length; i++)
       {
          Point3D point = pointCloudBuffer[i];
-         int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters);
+         //int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters);
+         int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters, cameraPosition, cameraOrientation);
 
          if (pixel[0] < 0 || pixel[0] >= bufferedImage.getWidth() || pixel[1] < 0 || pixel[1] >= bufferedImage.getHeight())
             continue;
@@ -125,10 +119,13 @@ public class LidarImageFusionDataFactory
       // update and calculate normal.
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
-         fusionDataSegment.filtering(FLYING_POINT_THRESHOLD, FLYING_POINT_NEIGHTBORS);
+         //TODO: use isEnableFilteringFlyingPoints
+         if (enableFlyingPointFilter)
+            fusionDataSegment.filteringFlyingPoints(flyingPointDistance, numberOfFlyingPointNeighbors);
          fusionDataSegment.update();
       }
-      System.out.println("SegmentationRawData filteringUpdatingStartTime time " + Conversions.nanosecondsToSeconds(System.nanoTime() - filteringUpdatingStartTime));
+      System.out.println("SegmentationRawData filteringUpdatingStartTime time "
+            + Conversions.nanosecondsToSeconds(System.nanoTime() - filteringUpdatingStartTime));
       System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       // set segment center in 2D.

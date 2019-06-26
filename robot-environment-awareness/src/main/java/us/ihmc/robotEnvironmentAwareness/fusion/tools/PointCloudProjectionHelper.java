@@ -1,8 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.tools;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 
 public class PointCloudProjectionHelper
 {
@@ -12,10 +15,16 @@ public class PointCloudProjectionHelper
    public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
    static
    {
-      multisenseOnCartIntrinsicParameters.setFx(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setFy(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setCx(512.0);
-      multisenseOnCartIntrinsicParameters.setCy(272.0);
+      // cart
+//    multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
+//    multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
+//    multisenseOnCartIntrinsicParameters.setCx(505.5);
+//    multisenseOnCartIntrinsicParameters.setCy(260.5);
+    // atlas
+    multisenseOnCartIntrinsicParameters.setFx(555.999267578125);
+    multisenseOnCartIntrinsicParameters.setFy(555.999267578125);
+    multisenseOnCartIntrinsicParameters.setCx(512.0);
+    multisenseOnCartIntrinsicParameters.setCy(269.5);
    }
 
    /**
@@ -44,6 +53,14 @@ public class PointCloudProjectionHelper
    {
       projectMultisensePointCloudOnImage(point, pixel, param);
       pixel.add(offsetU, offsetV);
+   }
+   
+   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param, Point3DBasics cameraPosition, QuaternionBasics cameraOrientation)
+   {
+      Point3D pointToCamera = new Point3D(point);
+      RigidBodyTransform transformWorldToCamera = new RigidBodyTransform(cameraOrientation, cameraPosition);
+      pointToCamera.applyInverseTransform(transformWorldToCamera);
+      return projectMultisensePointCloudOnImage(pointToCamera, param);
    }
 
    public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param)
