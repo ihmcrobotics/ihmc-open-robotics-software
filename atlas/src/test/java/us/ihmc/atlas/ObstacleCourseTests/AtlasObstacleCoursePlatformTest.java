@@ -66,6 +66,13 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @Test
+   public void testWalkingOffOfLargePlatform() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingOffOfLargePlatform();
+   }
+
+   @Override
+   @Test
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoMediumPlatformToesTouching();
