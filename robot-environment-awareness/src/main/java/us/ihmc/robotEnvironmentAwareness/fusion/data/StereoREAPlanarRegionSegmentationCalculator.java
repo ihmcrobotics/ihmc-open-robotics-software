@@ -7,11 +7,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 
 public class StereoREAPlanarRegionSegmentationCalculator
 {
    private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
+   private SegmentationRawDataFilteringParameters segmentationRawDataFilteringParameters = new SegmentationRawDataFilteringParameters();
 
    private static final int NUMBER_OF_ITERATE = 1000;
    private static final int MAXIMUM_NUMBER_OF_TRIALS_TO_FIND_UN_ID_LABEL = 500;
@@ -25,12 +27,15 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    private final Random random = new Random(0612L);
 
-   public void updateFusionData(LidarImageFusionData lidarImageFusionData, PlanarRegionPropagationParameters propagationParameters)
+   public void updateFusionData(LidarImageFusionData lidarImageFusionData, SegmentationRawDataFilteringParameters rawDataFilteringParameters,
+                                PlanarRegionPropagationParameters propagationParameters)
    {
-      lidarImageFusionData.updateSparsity(propagationParameters);
+      lidarImageFusionData.updateSparsity(rawDataFilteringParameters);
+      lidarImageFusionData.filteringSegmentationData(rawDataFilteringParameters);
       data.set(lidarImageFusionData);
       numberOfLabels = lidarImageFusionData.getNumberOfImageSegments();
       planarRegionPropagationParameters.set(propagationParameters);
+      segmentationRawDataFilteringParameters.set(rawDataFilteringParameters);
    }
 
    public void initialize()
@@ -41,8 +46,6 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    public boolean calculate()
    {
-      //      segments.add(createSegmentNodeData(365, 0));
-      //      segments.add(createSegmentNodeData(451, 1));
       for (int i = 0; i < NUMBER_OF_ITERATE; i++)
       {
          if (!iterateSegmenataionPropagation(i))
@@ -124,7 +127,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
       while (isPropagating)
       {
-//         LogTools.info("SegmentationNodeData " + segmentId);
+         //         LogTools.info("SegmentationNodeData " + segmentId);
          isPropagating = false;
          boolean isBigSegment = newSegment.getLabels().size() > MINIMUM_NUMBER_OF_LABELS_FOR_BIG_SEGMENT;
 
@@ -146,13 +149,11 @@ public class StereoREAPlanarRegionSegmentationCalculator
             if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold(), isBigSegment))
                isCoplanar = true;
 
-//            LogTools.info("adjacentLabel ?? " + adjacentLabel + " " + isParallel + " " + isCoplanar);
             if (isParallel && isCoplanar)
             {
                candidate.setId(segmentId);
                newSegment.merge(candidate);
                isPropagating = true;
-//               LogTools.info("adjacentLabel merged " + adjacentLabel);
             }
          }
       }

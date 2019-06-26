@@ -12,10 +12,14 @@ public class PointCloudProjectionHelper
    public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
    static
    {
-      multisenseOnCartIntrinsicParameters.setFx(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setFy(584.234619140625);
-      multisenseOnCartIntrinsicParameters.setCx(512.0);
-      multisenseOnCartIntrinsicParameters.setCy(272.0);
+//      multisenseOnCartIntrinsicParameters.setFx(584.234619140625);
+//      multisenseOnCartIntrinsicParameters.setFy(584.234619140625);
+//      multisenseOnCartIntrinsicParameters.setCx(512.0);
+//      multisenseOnCartIntrinsicParameters.setCy(272.0);
+      multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
+      multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
+      multisenseOnCartIntrinsicParameters.setCx(505.5);
+      multisenseOnCartIntrinsicParameters.setCy(260.5);
    }
 
    /**

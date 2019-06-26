@@ -5,6 +5,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 
 /**
  * This data set is to hold a list of SegmentationRawData.
@@ -42,9 +43,9 @@ public class LidarImageFusionData
          uncompressedAdjacentLabels.addAll(fusionDataSegments.get(label).getAdjacentSegmentLabels());
       }
 
-      for(int label : uncompressedAdjacentLabels.toArray())
+      for (int label : uncompressedAdjacentLabels.toArray())
       {
-         if(!labels.contains(label) && !adjacentLabels.contains(label))
+         if (!labels.contains(label) && !adjacentLabels.contains(label))
             adjacentLabels.add(label);
       }
 
@@ -64,15 +65,34 @@ public class LidarImageFusionData
    /**
     * Scaled threshold is used according to the v value of the segment center.
     */
-   public void updateSparsity(PlanarRegionPropagationParameters propagationParameters)
+   public void updateSparsity(SegmentationRawDataFilteringParameters rawDataFilteringParameters)
    {
-      double sparseUpperThreshold = propagationParameters.getSparseUpperThreshold();
-      double sparseLowerThreshold = propagationParameters.getSparseLowerThreshold();
+      double sparseLowerThreshold = rawDataFilteringParameters.getMinimumSparseThreshold();
+      double sparseUpperThreshold = sparseLowerThreshold * rawDataFilteringParameters.getMaximumSparsePropotionalRatio();
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
          double alpha = 1 - fusionDataSegment.getSegmentCenter().getY() / imageHeight;
          double threshold = alpha * (sparseUpperThreshold - sparseLowerThreshold) + sparseLowerThreshold;
          fusionDataSegment.updateSparsity(threshold);
+      }
+   }
+
+   public void filteringSegmentationData(SegmentationRawDataFilteringParameters rawDataFilteringParameters)
+   {
+      if (rawDataFilteringParameters.isEnableFilterCentrality())
+      {
+         for (SegmentationRawData fusionDataSegment : fusionDataSegments)
+         {
+            fusionDataSegment.filteringCentrality(rawDataFilteringParameters.getCentralityRadius(), rawDataFilteringParameters.getCentralityThreshold());
+         }
+      }
+      if (rawDataFilteringParameters.isEnableFilterEllipticity())
+      {
+         for (SegmentationRawData fusionDataSegment : fusionDataSegments)
+         {
+            fusionDataSegment.filteringEllipticity(rawDataFilteringParameters.getEllipticityMinimumLength(),
+                                                   rawDataFilteringParameters.getEllipticityThreshold());
+         }
       }
    }
 
