@@ -18,11 +18,11 @@ public interface DRCRobotInitialSetup<T extends Robot>
    public abstract void getOffset(Vector3D offsetToPack);
 
    /**
-    * Indicates whether the robot can be reset to its initial configuration with the implementation of this initial
-    * setup. This is deprecated since all initial setups should support this eventually. An example of an initial setup
-    * that can be reused is the Atlas one.
+    * Indicates whether the robot can be reset to its initial sim configuration with the implementation of this
+    * interface setup after the first time. This is deprecated since all initial setups should support this eventually.
+    * An example of an initial setup that can be reused is the Atlas one.
     *
-    * @return whether this initial setup will work exactly once.
+    * @return whether this initial setup will work more then once.
     */
    @Deprecated
    public default boolean supportsReset()
