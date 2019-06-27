@@ -4,6 +4,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.IntrinsicParameters;
@@ -33,7 +37,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private final Ros2Node ros2Node;
    private final REAModuleStateReporter moduleStateReporter;
-   private final StereoREAModule stereoREAModule; // TODO: realize online runner with enable button.
+   private final StereoREAModule stereoREAModule;
 
    private final FusionSensorObjectDetectionManager objectDetectionManager;
 
@@ -42,6 +46,9 @@ public class LidarImageFusionProcessorCommunicationModule
    private final AtomicReference<List<ObjectType>> selectedObjecTypes;
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
+
+   private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+   private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 1500;
 
    private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
@@ -63,9 +70,7 @@ public class LidarImageFusionProcessorCommunicationModule
       selectedObjecTypes = messager.createInput(LidarImageFusionAPI.SelectedObjecTypes, new ArrayList<ObjectType>());
       socketHostIPAddress = messager.createInput(LidarImageFusionAPI.ObjectDetectionModuleAddress);
 
-      //TODO: will be replaced by LidarImageFusionAPI.EnableREA.
-      //messager.registerTopicListener(LidarImageFusionAPI.EnableREA, (content) -> stereoREAModule.enable());
-      messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.run());
+      messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.singleRun());
    }
 
    private void connect()
@@ -107,12 +112,11 @@ public class LidarImageFusionProcessorCommunicationModule
       messager.submitMessage(LidarImageFusionAPI.CameraPositionState, message.getPosition());
       messager.submitMessage(LidarImageFusionAPI.CameraOrientationState, message.getOrientation());
       messager.submitMessage(LidarImageFusionAPI.CameraIntrinsicParametersState, toIntrinsicParameters(message.getIntrinsicParameters()));
-      System.out.println(message.getPosition());
    }
 
    public void start() throws IOException
    {
-
+      ScheduledFuture<?> scheduledFuture = executorService.scheduleAtFixedRate(stereoREAModule, 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    public void stop() throws Exception

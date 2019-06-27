@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -55,7 +54,6 @@ public class LidarImageFusionDataBuffer
    {
       StereoVisionPointCloudMessage pointCloudMessage = latestStereoVisionPointCloudMessage.get();
 
-      long pruningStart = System.nanoTime();
       Point3D[] pointCloudBuffer = MessageTools.unpackScanPoint3ds(pointCloudMessage);
       int[] colorBuffer = pointCloudMessage.getColors().toArray();
       Random random = new Random();
@@ -79,7 +77,6 @@ public class LidarImageFusionDataBuffer
          pointCloud[i] = pointCloudBuffer[i];
          colors[i] = colorBuffer[i];
       }
-      System.out.println("Pruning time " + Conversions.nanosecondsToSeconds(System.nanoTime() - pruningStart));
 
       //      lidarImageFusionDataFactory.setIntrinsicParameters(latestCameraIntrinsicParameters.get());
       lidarImageFusionDataFactory.setImageSegmentationParameters(latestImageSegmentationParaeters.get());
