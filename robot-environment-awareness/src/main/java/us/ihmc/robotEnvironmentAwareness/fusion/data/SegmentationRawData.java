@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 /**
@@ -142,6 +141,12 @@ public class SegmentationRawData
       isSparse = standardDeviation.getZ() > threshold;
    }
 
+   /**
+    * Not to be sparse,
+    * The number of points inside the area within a radius from the center should be over the ratio to all points in segment.
+    * @param radius
+    * @param threshold
+    */
    public void filteringCentrality(double radius, double threshold)
    {
       if (!isSparse)
@@ -161,11 +166,23 @@ public class SegmentationRawData
       }
    }
 
+   /**
+    * Not to be sparse,
+    * Secondary axis should be over the minLength.
+    * Secondary axis should be within threshold * primary axis length.
+    * @param minLength
+    * @param threshold
+    */
    public void filteringEllipticity(double minLength, double threshold)
    {
       if (!isSparse)
       {
-         // TODO: implement ellipticity for standardDeviation.
+         double lengthPrimary = standardDeviation.getX();
+         double lengthSecondary = standardDeviation.getY();
+         if (lengthSecondary < minLength || lengthSecondary > lengthPrimary * threshold)
+         {
+            isSparse = true;
+         }
       }
    }
 

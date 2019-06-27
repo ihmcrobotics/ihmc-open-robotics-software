@@ -16,15 +16,15 @@ public class PointCloudProjectionHelper
    static
    {
       // cart
-//    multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
-//    multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
-//    multisenseOnCartIntrinsicParameters.setCx(505.5);
-//    multisenseOnCartIntrinsicParameters.setCy(260.5);
-    // atlas
-    multisenseOnCartIntrinsicParameters.setFx(555.999267578125);
-    multisenseOnCartIntrinsicParameters.setFy(555.999267578125);
-    multisenseOnCartIntrinsicParameters.setCx(512.0);
-    multisenseOnCartIntrinsicParameters.setCy(269.5);
+          multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
+          multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
+          multisenseOnCartIntrinsicParameters.setCx(505.5);
+          multisenseOnCartIntrinsicParameters.setCy(260.5);
+      // atlas
+//      multisenseOnCartIntrinsicParameters.setFx(555.999267578125);
+//      multisenseOnCartIntrinsicParameters.setFy(555.999267578125);
+//      multisenseOnCartIntrinsicParameters.setCx(512.0);
+//      multisenseOnCartIntrinsicParameters.setCy(269.5);
    }
 
    /**
@@ -54,8 +54,12 @@ public class PointCloudProjectionHelper
       projectMultisensePointCloudOnImage(point, pixel, param);
       pixel.add(offsetU, offsetV);
    }
-   
-   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param, Point3DBasics cameraPosition, QuaternionBasics cameraOrientation)
+
+   /**
+    * Point cloud projection from camera transform which is not same with world frame.
+    */
+   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param, Point3DBasics cameraPosition,
+                                                          QuaternionBasics cameraOrientation)
    {
       Point3D pointToCamera = new Point3D(point);
       RigidBodyTransform transformWorldToCamera = new RigidBodyTransform(cameraOrientation, cameraPosition);
