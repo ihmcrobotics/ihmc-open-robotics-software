@@ -130,6 +130,14 @@ public class DRCFlatGroundWalkingTrack
 
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
+
+      if (robotInitialSetup.supportsReset())
+      {
+         JButton resetButton = new JButton("Reset Robot");
+         resetButton.addActionListener(e -> avatarSimulation.resetRobot());
+         avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
+      }
+
       avatarSimulation.start();
    }
 
@@ -138,9 +146,7 @@ public class DRCFlatGroundWalkingTrack
     */
    public void initialize()
    {
-      JButton resetButton = new JButton("Reset Robot");
-      resetButton.addActionListener(e -> avatarSimulation.resetRobot());
-      avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
+
    }
 
    public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, SideDependentList<String> feetForceSensorNames,
