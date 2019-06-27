@@ -956,6 +956,17 @@ public class PlanarRegion implements SupportingVertexHolder
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
+      if (convexHull.isEmpty())
+      {
+         return false;
+      }
+      else if (convexHull.getNumberOfVertices() == 1)
+      {
+         supportingVertexToPack.set(convexHull.getVertex(0), 0.0);
+         transformFromLocalToWorld(supportingVertexToPack);
+         return true;
+      }
+
       supportingVertexToPack.set(supportDirection);
       fromWorldToLocalTransform.getRotation().transform(supportingVertexToPack);
 
@@ -968,7 +979,11 @@ public class PlanarRegion implements SupportingVertexHolder
             vx * convexHull.getVertex(convexHull.getNumberOfVertices() - 1).getX() + vy * convexHull.getVertex(convexHull.getNumberOfVertices() - 1).getY();
 
       int bestVertexIndex = 0;
-      if(dotProduct0 < Math.max(dotProductCW, dotProductCCW))
+      if (convexHull.getNumberOfVertices() == 2)
+      {
+         bestVertexIndex = dotProduct0 > dotProductCW ? 0 : 1;
+      }
+      else if (dotProduct0 < Math.max(dotProductCW, dotProductCCW))
       {
          boolean iterateClockwise = dotProductCW > dotProductCCW;
          double previousDotProduct = iterateClockwise ? dotProductCW : dotProductCCW;
