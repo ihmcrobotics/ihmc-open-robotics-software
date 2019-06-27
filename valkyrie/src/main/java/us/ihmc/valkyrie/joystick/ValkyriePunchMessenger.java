@@ -32,9 +32,9 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Robo
       {
          double[] jointAngles = new double[7];
          int index = 0;
-         jointAngles[index++] = -1.1; // shoulderPitch
-         jointAngles[index++] = robotSide.negateIfRightSide(-1.4); // shoulderRoll
-         jointAngles[index++] = 0.3; // shoulderYaw
+         jointAngles[index++] = 1.0; // shoulderPitch
+         jointAngles[index++] = robotSide.negateIfRightSide(-1.5); // shoulderRoll
+         jointAngles[index++] = -0.2; // shoulderYaw
          jointAngles[index++] = robotSide.negateIfRightSide(-2.0); // elbowPitch
          jointAngles[index++] = robotSide.negateIfRightSide(0.0); // forearmYaw
          jointAngles[index++] = robotSide.negateIfRightSide(0.0); // wristRoll

@@ -37,7 +37,7 @@ public class FullRobotModelUtils
    {
       if (expectedJointNameHash != actualJointNameHash)
       {
-         throw new RuntimeException("Joint names do not match");
+         throw new RuntimeException(String.format("Joint names do not match. expected: %s actual: %s", expectedJointNameHash, actualJointNameHash));
       }
    }
 }
