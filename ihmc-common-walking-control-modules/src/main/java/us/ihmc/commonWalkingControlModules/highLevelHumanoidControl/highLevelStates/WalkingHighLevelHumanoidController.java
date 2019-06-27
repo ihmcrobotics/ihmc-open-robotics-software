@@ -137,6 +137,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
+   private boolean firstTick = true;
+
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -463,6 +465,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       initializeManagers();
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
+
+      firstTick = true;
    }
 
    private void initializeManagers()
@@ -563,7 +567,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       updateFailureDetection();
 
       // Do transitions will request ICP planner updates.
-      stateMachine.doTransitions();
+      if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
+         stateMachine.doTransitions();
       // This updates the ICP plan continuously.
       balanceManager.update();
       // Do action is relying on the ICP plan being valid.
@@ -593,6 +598,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
       balanceManager.endTick();
+      firstTick = false;
    }
 
    private void handleChangeInContactState()
