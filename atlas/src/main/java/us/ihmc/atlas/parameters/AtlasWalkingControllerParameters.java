@@ -114,12 +114,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public boolean usePelvisHeightControllerOnly()
-   {
-      return false;
-   }
-
-   @Override
    public double getOmega0()
    {
       // TODO probably need to be tuned.
