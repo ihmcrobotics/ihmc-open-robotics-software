@@ -103,7 +103,7 @@ public class PelvisIMUBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void reset()
+   public void initialize()
    {
       yoMeasurementFrameLinearVelocityInWorld.setToZero();
       imuLinearVelocityIMUOnly.setToZero();

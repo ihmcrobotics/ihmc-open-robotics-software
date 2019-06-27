@@ -286,7 +286,7 @@ public class PelvisLinearStateUpdater
 
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
 
-      imuBasedLinearStateCalculator.reset();
+      imuBasedLinearStateCalculator.initialize();
    }
 
    public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
