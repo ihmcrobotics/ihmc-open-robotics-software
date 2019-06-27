@@ -92,6 +92,6 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    @Override
    public boolean useSingularityAvoidanceInSupport()
    {
-      return false;
+      return true;
    }
 }
