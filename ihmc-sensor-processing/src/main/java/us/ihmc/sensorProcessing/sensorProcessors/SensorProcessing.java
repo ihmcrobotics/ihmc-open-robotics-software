@@ -354,6 +354,54 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       startComputation(0, 0, -1);
    }
 
+   @Override
+   public void reset()
+   {
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJointBasics oneDoFJoint = jointSensorDefinitions.get(i);
+
+         resetProcessors(processedJointPositions.get(oneDoFJoint));
+         resetProcessors(processedJointVelocities.get(oneDoFJoint));
+         resetProcessors(processedJointAccelerations.get(oneDoFJoint));
+         resetProcessors(processedJointTaus.get(oneDoFJoint));
+      }
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+
+         inputOrientations.get(imuDefinition).setToZero();
+         inputAngularVelocities.get(imuDefinition).setToZero();
+         inputLinearAccelerations.get(imuDefinition).setToZero();
+
+         resetProcessors(processedOrientations.get(imuDefinition));
+         resetProcessors(processedAngularVelocities.get(imuDefinition));
+         resetProcessors(processedLinearAccelerations.get(imuDefinition));
+
+         IMUSensor outputIMU = outputIMUs.get(i);
+         tempOrientation.set(inputOrientations.get(imuDefinition));
+         outputIMU.setOrientationMeasurement(tempOrientation);
+         outputIMU.setAngularVelocityMeasurement(inputAngularVelocities.get(imuDefinition));
+         outputIMU.setLinearAccelerationMeasurement(inputLinearAccelerations.get(imuDefinition));
+      }
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+
+         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
+         inputForces.get(forceSensorDefinition).setToZero();
+         inputTorques.get(forceSensorDefinition).setToZero();
+
+         resetProcessors(processedForces.get(forceSensorDefinition));
+         resetProcessors(processedTorques.get(forceSensorDefinition));
+
+         tempWrench.setToZero();
+         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
+      }
+   }
+
    /**
     * Triggers a control tick for this sensor processing.
     * <p>
@@ -436,6 +484,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       for (int j = 0; j < processors.size(); j++)
       {
          processors.get(j).update();
+      }
+   }
+
+   private void resetProcessors(List<ProcessingYoVariable> processors)
+   {
+      for (int j = 0; j < processors.size(); j++)
+      {
+         processors.get(j).reset();
       }
    }
 
@@ -1387,6 +1443,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
                private final FrameVector3D virtualAccelerometerMeasurement = new FrameVector3D();
                private final FrameVector3D virtualMagnetometerMeasurement = new FrameVector3D();
                private boolean reinitialize = true;
+
+               @Override
+               public void reset()
+               {
+                  reinitialize = true;
+               }
 
                @Override
                public void update()
