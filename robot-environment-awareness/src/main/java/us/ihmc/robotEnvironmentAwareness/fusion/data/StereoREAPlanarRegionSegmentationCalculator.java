@@ -50,7 +50,6 @@ public class StereoREAPlanarRegionSegmentationCalculator
       {
          if (!iterateSegmenataionPropagation(i))
          {
-            LogTools.info("iterative is terminated " + i);
             break;
          }
       }
@@ -127,7 +126,6 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
       while (isPropagating)
       {
-         //         LogTools.info("SegmentationNodeData " + segmentId);
          isPropagating = false;
          boolean isBigSegment = newSegment.getLabels().size() > MINIMUM_NUMBER_OF_LABELS_FOR_BIG_SEGMENT;
 

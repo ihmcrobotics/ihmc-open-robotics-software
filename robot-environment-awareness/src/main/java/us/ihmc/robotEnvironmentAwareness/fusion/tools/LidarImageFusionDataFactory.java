@@ -14,7 +14,6 @@ import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
@@ -49,13 +48,8 @@ public class LidarImageFusionDataFactory
       segmentedContour = new BufferedImage(imageWidth, imageHeight, bufferedImageType);
       projectedPointCloud = new BufferedImage(imageWidth, imageHeight, bufferedImageType);
 
-      long startLabel = System.nanoTime();
       int[] labels = calculateNewLabelsSLIC(bufferedImage);
-      System.out.println("Labeling time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startLabel));
-
-      long startSegments = System.nanoTime();
       List<SegmentationRawData> fusionDataSegments = createListOfSegmentationRawData(labels, pointCloud, colors);
-      System.out.println("Segmenting time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startSegments));
 
       return new LidarImageFusionData(fusionDataSegments, imageWidth, imageHeight);
    }
@@ -102,7 +96,6 @@ public class LidarImageFusionDataFactory
          fusionDataSegments.add(new SegmentationRawData(i));
 
       // projection.
-      long startConverting = System.nanoTime();
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3D point = pointCloud[i];
@@ -119,10 +112,8 @@ public class LidarImageFusionDataFactory
          if (enableDisplayProjectedPointCloud)
             projectedPointCloud.setRGB(pixel[0], pixel[1], colors[i]);
       }
-      System.out.println("Projection " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConverting));
 
       // register adjacent labels.
-      long startTime = System.nanoTime();
       for (int u = 1; u < imageWidth - 1; u++)
       {
          for (int v = 1; v < imageHeight - 1; v++)
@@ -144,7 +135,6 @@ public class LidarImageFusionDataFactory
             }
          }
       }
-      long filteringUpdatingStartTime = System.nanoTime();
       // update and calculate normal.
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
@@ -153,9 +143,6 @@ public class LidarImageFusionDataFactory
                                                     segmentationRawDataFilteringParameters.get().getMinimumNumberOfFlyingPointNeighbors());
          fusionDataSegment.update();
       }
-      System.out.println("SegmentationRawData filteringUpdatingStartTime time "
-            + Conversions.nanosecondsToSeconds(System.nanoTime() - filteringUpdatingStartTime));
-      System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       // set segment center in 2D.
       int[] totalU = new int[numberOfLabels];

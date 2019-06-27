@@ -23,6 +23,7 @@ public class StereoREAModule implements Runnable
    private final Messager reaMessager;
    private final Messager messager;
 
+   private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> isRunning = new AtomicReference<Boolean>(false);
    private final LidarImageFusionDataBuffer lidarImageFusionDataBuffer;
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
@@ -33,6 +34,8 @@ public class StereoREAModule implements Runnable
       this.reaMessager = reaMessager;
       lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
+
+      enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
    }
 
    public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
@@ -47,6 +50,33 @@ public class StereoREAModule implements Runnable
 
    @Override
    public void run()
+   {
+      if (!enable.get())
+         return;
+
+      isRunning.set(true);
+      long runningStartTime = System.nanoTime();
+
+      lidarImageFusionDataBuffer.updateNewBuffer();
+
+      LidarImageFusionData newBuffer = lidarImageFusionDataBuffer.pollNewBuffer();
+      messager.submitMessage(LidarImageFusionAPI.FusionDataState, newBuffer);
+
+      planarRegionFeatureUpdater.updateLatestLidarImageFusionData(newBuffer);
+
+      if (planarRegionFeatureUpdater.update())
+      {
+         reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
+         reportPlanarRegionState();
+      }
+
+      double runningTime = Conversions.nanosecondsToSeconds(System.nanoTime() - runningStartTime);
+      String computationTime = new DecimalFormat("##.###").format(runningTime) + "(sec)";
+      messager.submitMessage(LidarImageFusionAPI.ComputationTime, computationTime);
+      isRunning.set(false);
+   }
+
+   public void singleRun()
    {
       isRunning.set(true);
       long runningStartTime = System.nanoTime();
@@ -78,6 +108,11 @@ public class StereoREAModule implements Runnable
       String computationTime = new DecimalFormat("##.###").format(runningTime) + "(sec)";
       messager.submitMessage(LidarImageFusionAPI.ComputationTime, computationTime);
       isRunning.set(false);
+   }
+
+   public void enable()
+   {
+      enable.set(true);
    }
 
    private void reportPlanarRegionState()
