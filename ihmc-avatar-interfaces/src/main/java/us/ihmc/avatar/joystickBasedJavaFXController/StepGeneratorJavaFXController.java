@@ -423,6 +423,9 @@ public class StepGeneratorJavaFXController
 
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      if (planarRegionsList.get() == null)
+         return true;
+
       double halfStanceWidth = 0.5 * steppingParameters.getInPlaceWidth();
 
       /** Shift box vertically by max step up, regions below this could be steppable */
@@ -443,6 +446,9 @@ public class StepGeneratorJavaFXController
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      if (planarRegionsList.get() == null)
+         return true;
+
       tempTransform.setTranslation(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
       tempTransform.setRotationYaw(touchdownPose.getYaw());
 
