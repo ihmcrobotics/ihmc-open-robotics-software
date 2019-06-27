@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
@@ -27,6 +29,20 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       super(RobotSide.class);
       this.put(RobotSide.LEFT, leftObject);
       this.put(RobotSide.RIGHT, rightObject);
+   }
+
+   public SideDependentList(Supplier<V> valueSupplier)
+   {
+      super(RobotSide.class);
+      this.put(RobotSide.LEFT, valueSupplier.get());
+      this.put(RobotSide.RIGHT, valueSupplier.get());
+   }
+
+   public SideDependentList(Function<RobotSide, V> valueFunction)
+   {
+      super(RobotSide.class);
+      this.put(RobotSide.LEFT, valueFunction.apply(RobotSide.LEFT));
+      this.put(RobotSide.RIGHT, valueFunction.apply(RobotSide.RIGHT));
    }
 
    /**
