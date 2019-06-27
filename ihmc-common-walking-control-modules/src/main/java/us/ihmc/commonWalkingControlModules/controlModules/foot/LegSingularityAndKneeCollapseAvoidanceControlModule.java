@@ -747,11 +747,28 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(heightAcceleretionCorrectedFilteredForSingularityAvoidance.getDoubleValue());
 
+         // If the filtered desired com height caught up to the input one, then stop doing smooth transition.
          if (Math.abs(desiredCenterOfMassHeightPoint.getZ() - heightCorrectedFilteredForSingularityAvoidance.getDoubleValue()) <= 5e-3)
          {
             alphaSupportSingularityAvoidance.set(0.0);
             isSupportSingularityAvoidanceUsed.set(false);
             doSmoothTransitionOutOfSingularityAvoidance.set(false);
+         }
+
+         // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...            
+         else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && 
+               (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()))
+         {
+            heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
+            heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
+
+            // If leg is bent a lot and singularity avoidance no longer needed, stop smoothing...
+            if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToDisableSingularityAvoidance.getDoubleValue() - 0.05)
+            {
+               alphaSupportSingularityAvoidance.set(0.0);
+               isSupportSingularityAvoidanceUsed.set(false);
+               doSmoothTransitionOutOfSingularityAvoidance.set(false);
+            }
          }
          return;
       }
