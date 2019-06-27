@@ -64,6 +64,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightVelocityAfterSmoothing = new YoDouble("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
+   private final YoDouble zDesired = new YoDouble("zDesired", registry);
+   private final YoDouble zdDesired = new YoDouble("zdDesired", registry);
+   private final YoDouble zddDesired = new YoDouble("zddDesired", registry);
+
    private final PDControllerWithGainSetter centerOfMassHeightController;
 
    private final ReferenceFrame centerOfMassFrame;
@@ -206,8 +210,12 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2D comXYVelocity = new FrameVector2D();
    private final FrameVector2D comXYAcceleration = new FrameVector2D();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData();
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
+   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData("beforeSmoothing", registry);
+   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData("afterSmoothing", registry);
+   private final CoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new CoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
+   private final CoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new CoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
+   private final CoMHeightTimeDerivativesData finalComHeightData = new CoMHeightTimeDerivativesData("finalComHeightData", registry);
+
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();
@@ -287,18 +295,28 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
 
       if (feetManager != null)
-         feetManager.correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing);
+      {
+         comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
+         feetManager.correctCoMHeightForSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+         comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
+         feetManager.correctCoMHeightForUnreachableFootstep(desiredICPVelocity, zCurrent, comHeightDataAfterUnreachableFootstep);
+         
+         finalComHeightData.set(comHeightDataAfterUnreachableFootstep);
+      }
+      else
+      {
+         finalComHeightData.set(comHeightDataAfterSmoothing);
+      }
+
+      finalComHeightData.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityCorrected.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationCorrected.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      desiredCoMHeightVelocityCorrected.set(finalComHeightData.getComHeightVelocity());
+      desiredCoMHeightAccelerationCorrected.set(finalComHeightData.getComHeightAcceleration());
 
       double zDesired = desiredCenterOfMassHeightPoint.getZ();
-      double zdDesired = comHeightDataAfterSmoothing.getComHeightVelocity();
-      double zddFeedForward = comHeightDataAfterSmoothing.getComHeightAcceleration();
+      double zdDesired = finalComHeightData.getComHeightVelocity();
+      double zddFeedForward = finalComHeightData.getComHeightAcceleration();
 
       double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
 
@@ -308,6 +326,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double epsilon = 1e-12;
       zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
+
+      this.zDesired.set(zDesired);
+      this.zdDesired.set(zdDesired);
+      this.zddDesired.set(zddDesired);
+
       return zddDesired;
    }
 
