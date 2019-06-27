@@ -91,7 +91,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * {@link #setHeightMapBasedFootstepAdjustment(HeightMap)}, and
  * {@link #setSupportFootBasedFootstepAdjustment(boolean)}.
  * <li><u>Method for indicating step validity and providing alternative steps for invalid ones:</u><br>
- * See {@link #setFootstepValidityIndicator(FootstepValidityIndicator)} to set method for indicating invalid steps.
+ * See {@link #addFootstepValidityIndicator(FootstepValidityIndicator)}} to set method for indicating invalid steps.
  * By default, no steps are deemed invalid. See {@link #setAlternateStepChooser(AlternateStepChooser)} to set
  * how an alternative step is chosen if a step is invalid. The default is to do a square-up step,
  * see {@link #calculateSquareUpStep}.
@@ -142,7 +142,7 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
    private FootstepAdjustment footstepAdjustment;
-   private FootstepValidityIndicator footstepValidityIndicator;
+   private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
@@ -186,6 +186,7 @@ public class ContinuousStepGenerator implements Updatable
    private final FramePose2D footstepPose2D = new FramePose2D();
    private final FramePose2D nextFootstepPose2D = new FramePose2D();
    private final FramePose3D nextFootstepPose3D = new FramePose3D();
+   private final FramePose3D previousFootstepPose = new FramePose3D();
    private final FramePose3D nextFootstepPose3DViz = new FramePose3D();
 
    private boolean updateFirstFootstep = true;
@@ -247,6 +248,7 @@ public class ContinuousStepGenerator implements Updatable
          footsteps.clear();
          footstepPose2D.set(currentSupportFootPose);
          swingSide = currentSupportSide.getEnumValue().getOppositeSide();
+         previousFootstepPose.set(currentSupportFootPose);
       }
       else
       {
@@ -256,6 +258,8 @@ public class ContinuousStepGenerator implements Updatable
          footstepPose2D.getPosition().set(firstFootstep.getLocation());
          footstepPose2D.getOrientation().set(firstFootstep.getOrientation());
          swingSide = RobotSide.fromByte(firstFootstep.getRobotSide()).getOppositeSide();
+
+         previousFootstepPose.set(firstFootstep.getLocation(), firstFootstep.getOrientation());
       }
 
       for (int i = startIndex; i < numberOfFootstepsToPlan.getValue(); i++)
@@ -287,12 +291,13 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
-         if (footstepValidityIndicator != null && !footstepValidityIndicator.isFootstepValid(nextFootstepPose3D))
+
+         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
             alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
             nextFootstepPose2D.set(nextFootstepPose3D);
          }
-         
+
          int vizualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
 
@@ -303,7 +308,7 @@ public class ContinuousStepGenerator implements Updatable
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
          }
-
+         
          FootstepDataMessage footstep = footsteps.add();
          footstep.setRobotSide(swingSide.toByte());
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
@@ -311,6 +316,7 @@ public class ContinuousStepGenerator implements Updatable
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
+         previousFootstepPose.set(nextFootstepPose3D);
       }
 
       if (updateFirstFootstep)
@@ -563,19 +569,19 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Sets a method of indicating step validity. If a step is not valid, the step generator
-    * replaces it with a square-up step
+    * Adds a method of indicating step validity. If a step is not valid, the step generator
+    * calculates an alternate step using the {@link #alternateStepChooser}
     *
     * @param footstepValidityIndicator method for checking step validity
     */
-   public void setFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
+   public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
-      this.footstepValidityIndicator = footstepValidityIndicator;
+      footstepValidityIndicators.add(footstepValidityIndicator);
    }
 
    /**
-    * Sets a method of calculating a new step pose if {@link #footstepValidityIndicator} indicates
-    * an invalid step. Will not be used if {@link #footstepValidityIndicator} is not set
+    * Sets a method of calculating a new step pose if an element of {@link #footstepValidityIndicators} indicates
+    * an invalid step.
     *
     * @param alternateStepChooser method for calculating alternate step
     */
@@ -762,6 +768,19 @@ public class ContinuousStepGenerator implements Updatable
    public RobotSide getCurrentSupportSide()
    {
       return currentSupportSide.getEnumValue();
+   }
+
+   private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
+   {
+      for (int i = 0; i < footstepValidityIndicators.size(); i++)
+      {
+         if (!footstepValidityIndicators.get(i).isFootstepValid(touchdownPose, stancePose, swingSide))
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    private final FramePose2D alternateStepPose2D = new FramePose2D();
