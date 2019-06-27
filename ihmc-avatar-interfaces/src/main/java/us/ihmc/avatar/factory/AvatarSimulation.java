@@ -52,6 +52,11 @@ public class AvatarSimulation
 
    public void resetRobot()
    {
+      resetRobot(true);
+   }
+
+   public void resetRobot(boolean simulateAfterReset)
+   {
       simulationConstructionSet.stop();
 
       // TODO: instead of sleeping wait for all tasks in the barrier scheduler to finish.
@@ -60,7 +65,9 @@ public class AvatarSimulation
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
-      simulate();
+
+      if (simulateAfterReset)
+         simulate();
    }
 
    public void updateEnvironment(CommonAvatarEnvironmentInterface commonAvatarEnvironment)
