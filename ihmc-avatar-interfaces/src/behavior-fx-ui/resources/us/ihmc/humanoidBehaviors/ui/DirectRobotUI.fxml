@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -27,6 +30,18 @@
 				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 				<Label style="-fx-font-weight: bold" text="REA" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <BorderPane GridPane.rowIndex="5">
+               <left>
+                  <Label text="PSI" BorderPane.alignment="CENTER" />
+               </left>
+               <right>
+                  <ComboBox fx:id="pumpPSI" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets left="5.0" />
+                     </BorderPane.margin>
+                  </ComboBox>
+               </right>
+            </BorderPane>
 			</children>
          <columnConstraints>
             <ColumnConstraints />

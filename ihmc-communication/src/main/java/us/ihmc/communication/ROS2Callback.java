@@ -28,7 +28,24 @@ public class ROS2Callback<T>
            messageCallback);
    }
 
-   public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleTopicQualifier, ROS2TopicQualifier ioTopicQualifier,
+   /**
+    *  For topics that use the default /ihmc/topic_name.
+    */
+   public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, Consumer<T> messageCallback)
+   {
+      this(ros2Node,
+           messageType,
+           null,
+           null,
+           null,
+           messageCallback);
+   }
+
+   public ROS2Callback(Ros2Node ros2Node,
+                       Class<T> messageType,
+                       String robotName,
+                       String moduleTopicQualifier,
+                       ROS2TopicQualifier ioTopicQualifier,
                        Consumer<T> messageCallback)
    {
       this.messageCallback = messageCallback;
