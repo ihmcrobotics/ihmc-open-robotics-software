@@ -20,6 +20,11 @@ public class IHMCROS2Publisher<T>
       this.publisher = ros2Publisher;
    }
 
+   public IHMCROS2Publisher(Ros2Node ros2Node, Class<T> messageType)
+   {
+      this(ros2Node, messageType, null, null, null);
+   }
+
    public IHMCROS2Publisher(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
       this(ros2Node, messageType, robotName, identifier.getModuleTopicQualifier(), identifier.deriveIOTopicQualifierForPublisher(ros2Node.getName()));
