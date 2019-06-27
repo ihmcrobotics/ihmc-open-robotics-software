@@ -322,6 +322,11 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
    @Override
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      if(mainRegistry == null)
+      {
+         throw new RuntimeException("Main registry is not set. Set main registry first");
+      }
+      
       registeredBuffers.add(new RegistrySendBufferBuilder(registry, null, yoGraphicsListRegistry));
    }
 
