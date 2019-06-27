@@ -147,6 +147,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final AlphaFilteredYoVariable heightAcceleretionCorrectedFilteredForSingularityAvoidance;
 
    private final YoDouble yoUnachievedSwingTranslation;
+   private final YoDouble timeToCorrectForUnachievedSwingTranslation;
    private final AlphaFilteredYoVariable unachievedSwingTranslationFiltered;
    private final AlphaFilteredYoVariable unachievedSwingVelocityFiltered;
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
@@ -189,6 +190,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaUnreachableFootstep.set(0.25);
 
       yoUnachievedSwingTranslation = new YoDouble(namePrefix + "UnachievedSwingTranslation", registry);
+      timeToCorrectForUnachievedSwingTranslation = new YoDouble(namePrefix + "TimeToCorrectForUnachievedSwingTranslation", registry);
+      timeToCorrectForUnachievedSwingTranslation.set(0.2);
+
       unachievedSwingTranslationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingTranslationFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingVelocityFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingVelocityFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingAccelerationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingAccelerationFiltered", registry, alphaUnreachableFootstep);
@@ -996,33 +1000,50 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          isUnreachableFootstepCompensated.set(true);
          unachievedSwingTranslationFiltered.update(unachievedSwingTranslation.getZ());
          desiredCenterOfMassHeightPoint.setZ(desiredCenterOfMassHeightPoint.getZ() + unachievedSwingTranslationFiltered.getDoubleValue());
+          
          if (USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION)
+         {
             comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
+
+         unachievedSwingVelocityFiltered.update(unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+         unachievedSwingAccelerationFiltered.update(unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+
+         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+         comHeightDataToCorrect
+         .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+         }
       }
       else
       {
          unachievedSwingTranslationFiltered.set(0.0);
-      }
-
-      if (unachievedSwingVelocity.getZ() < 0.0)
-      {
-         unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
-         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
-      }
-      else
-      {
          unachievedSwingVelocityFiltered.set(0.0);
+         unachievedSwingAccelerationFiltered.set(0.0);
+         return;
       }
 
-      if (unachievedSwingAcceleration.getZ() < 0.0)
-      {
-         unachievedSwingAccelerationFiltered.update(unachievedSwingAcceleration.getZ());
-         comHeightDataToCorrect
-               .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
-      }
-      else
-      {
-         unachievedSwingAccelerationFiltered.set(0.0);
-      }
+      //+++JEP: Dead code here tries to use the unachieved velocity
+      // and acceleration from the trajectory. But that doesn't make much
+      // sense as at this point the velocity is not being achieved anyway.
+      // So instead, just drop (leap of faith...)
+//      if (unachievedSwingVelocity.getZ() < 0.0)
+//      {
+//         unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
+//         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+//      }
+//      else
+//      {
+//         unachievedSwingVelocityFiltered.set(0.0);
+//      }
+//
+//      if (unachievedSwingAcceleration.getZ() < 0.0)
+//      {
+//         unachievedSwingAccelerationFiltered.update(unachievedSwingAcceleration.getZ());
+//         comHeightDataToCorrect
+//               .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+//      }
+//      else
+//      {
+//         unachievedSwingAccelerationFiltered.set(0.0);
+//      }
    }
 }
