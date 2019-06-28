@@ -31,8 +31,8 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -897,6 +897,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public static String getParameterResourceName()
    {
       return "/us/ihmc/atlas/parameters/controller.xml";
+   }
+
+   @Override
+   public String getParameterFileName()
+   {
+      return getParameterResourceName();
    }
 
    @Override
