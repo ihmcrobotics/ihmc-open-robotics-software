@@ -75,7 +75,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
       double pelvisToFoot = computeHeightOffset(robot);
 
-      rootToWorld.setTranslationZ(pelvisToFoot);
+      rootToWorld.setTranslationZ(groundZ + pelvisToFoot);
       rootToWorld.appendTranslation(offset);
       rootToWorld.appendYawRotation(initialYaw);
       rootJoint.setRotationAndTranslation(rootToWorld);
