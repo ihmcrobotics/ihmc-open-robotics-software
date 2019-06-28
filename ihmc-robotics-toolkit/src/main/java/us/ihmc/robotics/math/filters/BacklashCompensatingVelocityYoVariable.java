@@ -65,12 +65,14 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);
       backlashState.set(null);
    }
 
+   @Override
    public void update()
    {
       if (position == null)

@@ -67,4 +67,10 @@ public class VelocityElasticityCompensatorYoVariable extends YoDouble implements
       jointDeflectionPrevious.set(jointDeflection.getDoubleValue());
       set(rawJointVelocity - jointDeflectionDot.getDoubleValue());
    }
+
+   @Override
+   public void reset()
+   {
+      jointDeflectionPrevious.set(0.0);
+   }
 }
