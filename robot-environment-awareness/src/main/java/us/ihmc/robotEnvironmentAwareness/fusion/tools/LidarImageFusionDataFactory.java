@@ -1,66 +1,89 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.tools;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
-import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_ximgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 
 public class LidarImageFusionDataFactory
 {
-   private static final int MAX_NUMBER_OF_POINTS = 200000;
-   private static final boolean displaySegmentedContour = false;
+   private static final boolean enableDisplaySegmentedContour = true;
+   private static final boolean enableDisplayProjectedPointCloud = true;
 
-   public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
-                                                                 int pointCloudBufferSize, Point3D cameraPosition, Quaternion cameraOrientation,
-                                                                 int pixelSize, double ruler, boolean enableConnectivity,
-                                                                 int elementSize, int iterate, boolean enableFlyingPointFilter, double flyingPointDistance,
-                                                                 int numberOfFlyingPointNeighbors)
+   private final int bufferedImageType = BufferedImage.TYPE_INT_RGB;
+   private final int matType = opencv_core.CV_8UC3;
+
+   private int imageWidth;
+   private int imageHeight;
+
+   private BufferedImage segmentedContour;
+   private BufferedImage projectedPointCloud;
+
+   private final AtomicReference<IntrinsicParameters> intrinsicParameters = new AtomicReference<>(PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
+   private final AtomicReference<ImageSegmentationParameters> imageSegmentationParameters = new AtomicReference<>(null);
+   private final AtomicReference<SegmentationRawDataFilteringParameters> segmentationRawDataFilteringParameters = new AtomicReference<>(null);
+   private final AtomicReference<Point3D> cameraPosition = new AtomicReference<>(new Point3D());
+   private final AtomicReference<Quaternion> cameraOrientation = new AtomicReference<>(new Quaternion());
+
+   public LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, int[] colors, BufferedImage bufferedImage)
    {
-      long startLabel = System.nanoTime();
-      int[] labels = getNewLabelsSLIC(bufferedImage, pixelSize, ruler, iterate, enableConnectivity, elementSize);
-      System.out.println("Labeling time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startLabel));
+      imageWidth = bufferedImage.getWidth();
+      imageHeight = bufferedImage.getHeight();
+      segmentedContour = new BufferedImage(imageWidth, imageHeight, bufferedImageType);
+      projectedPointCloud = new BufferedImage(imageWidth, imageHeight, bufferedImageType);
 
-      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, cameraPosition,cameraOrientation, pointCloud, bufferedImage, intrinsicParameters,
-                                                                                              pointCloudBufferSize, enableFlyingPointFilter, flyingPointDistance,
-                                                                                              numberOfFlyingPointNeighbors),
-                                                              bufferedImage.getWidth(), bufferedImage.getHeight());
-      return newData;
+      int[] labels = calculateNewLabelsSLIC(bufferedImage);
+      List<SegmentationRawData> fusionDataSegments = createListOfSegmentationRawData(labels, pointCloud, colors);
+
+      return new LidarImageFusionData(fusionDataSegments, imageWidth, imageHeight);
    }
 
-   private static List<SegmentationRawData> createListOfSegmentationRawData(int[] labels, Point3D cameraPosition, Quaternion cameraOrientation, Point3D[] pointCloud, BufferedImage bufferedImage,
-                                                                            IntrinsicParameters intrinsicParameters, int pointCloudBufferSize,
-                                                                            boolean enableFlyingPointFilter, double flyingPointDistance,
-                                                                            int numberOfFlyingPointNeighbors)
+   private int[] calculateNewLabelsSLIC(BufferedImage bufferedImage)
    {
-      int imageWidth = bufferedImage.getWidth();
-      int imageHeight = bufferedImage.getHeight();
+      int pixelSize = imageSegmentationParameters.get().getPixelSize();
+      double ruler = imageSegmentationParameters.get().getPixelRuler();
+      int iterate = imageSegmentationParameters.get().getIterate();
+      boolean enableConnectivity = true;
+      int elementSize = imageSegmentationParameters.get().getMinElementSize();
 
+      Mat imageMat = convertBufferedImageToMat(bufferedImage);
+      Mat convertedMat = new Mat();
+      opencv_imgproc.cvtColor(imageMat, convertedMat, opencv_imgproc.COLOR_RGB2HSV);
+      SuperpixelSLIC slic = opencv_ximgproc.createSuperpixelSLIC(convertedMat, opencv_ximgproc.SLIC, pixelSize, (float) ruler);
+      slic.iterate(iterate);
+      if (enableConnectivity)
+         slic.enforceLabelConnectivity(elementSize);
+
+      Mat labelMat = new Mat();
+      slic.getLabels(labelMat);
+
+      int[] labels = new int[imageWidth * imageHeight];
+      for (int i = 0; i < labels.length; i++)
+      {
+         labels[i] = labelMat.getIntBuffer().get(i);
+      }
+
+      return labels;
+   }
+
+   private List<SegmentationRawData> createListOfSegmentationRawData(int[] labels, Point3D[] pointCloud, int[] colors)
+   {
       if (labels.length != imageWidth * imageHeight)
          throw new RuntimeException("newLabels length is different with size of image " + labels.length + ", (w)" + imageWidth + ", (h)" + imageHeight);
 
@@ -72,38 +95,35 @@ public class LidarImageFusionDataFactory
       for (int i = 0; i < numberOfLabels; i++)
          fusionDataSegments.add(new SegmentationRawData(i));
 
-      // adjust buffer size.
-      Point3D[] pointCloudBuffer = randomPruningPointCloudData(pointCloud, pointCloudBufferSize);
-
       // projection.
-      long startConverting = System.nanoTime();
-      for (int i = 0; i < pointCloudBuffer.length; i++)
+      for (int i = 0; i < pointCloud.length; i++)
       {
-         Point3D point = pointCloudBuffer[i];
-         //int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters);
-         int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters, cameraPosition, cameraOrientation);
+         Point3D point = pointCloud[i];
+         int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters.get(), cameraPosition.get(),
+                                                                                     cameraOrientation.get());
 
-         if (pixel[0] < 0 || pixel[0] >= bufferedImage.getWidth() || pixel[1] < 0 || pixel[1] >= bufferedImage.getHeight())
+         if (pixel[0] < 0 || pixel[0] >= imageWidth || pixel[1] < 0 || pixel[1] >= imageHeight)
             continue;
 
-         int arrayIndex = getArrayIndex(pixel[0], pixel[1], imageWidth);
+         int arrayIndex = getArrayIndex(pixel[0], pixel[1]);
          int label = labels[arrayIndex];
          fusionDataSegments.get(label).addPoint(new Point3D(point));
+
+         if (enableDisplayProjectedPointCloud)
+            projectedPointCloud.setRGB(pixel[0], pixel[1], colors[i]);
       }
-      System.out.println("Projection " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConverting));
 
       // register adjacent labels.
-      long startTime = System.nanoTime();
       for (int u = 1; u < imageWidth - 1; u++)
       {
          for (int v = 1; v < imageHeight - 1; v++)
          {
-            int curLabel = labels[getArrayIndex(u, v, imageWidth)];
+            int curLabel = labels[getArrayIndex(u, v)];
             int[] labelsOfAdjacentPixels = new int[4];
-            labelsOfAdjacentPixels[0] = labels[getArrayIndex(u, v - 1, imageWidth)]; // N
-            labelsOfAdjacentPixels[1] = labels[getArrayIndex(u, v + 1, imageWidth)]; // S
-            labelsOfAdjacentPixels[2] = labels[getArrayIndex(u - 1, v, imageWidth)]; // W
-            labelsOfAdjacentPixels[3] = labels[getArrayIndex(u + 1, v, imageWidth)]; // E
+            labelsOfAdjacentPixels[0] = labels[getArrayIndex(u, v - 1)]; // N
+            labelsOfAdjacentPixels[1] = labels[getArrayIndex(u, v + 1)]; // S
+            labelsOfAdjacentPixels[2] = labels[getArrayIndex(u - 1, v)]; // W
+            labelsOfAdjacentPixels[3] = labels[getArrayIndex(u + 1, v)]; // E
 
             for (int labelOfAdjacentPixel : labelsOfAdjacentPixels)
             {
@@ -115,18 +135,14 @@ public class LidarImageFusionDataFactory
             }
          }
       }
-      long filteringUpdatingStartTime = System.nanoTime();
       // update and calculate normal.
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
-         //TODO: use isEnableFilteringFlyingPoints
-         if (enableFlyingPointFilter)
-            fusionDataSegment.filteringFlyingPoints(flyingPointDistance, numberOfFlyingPointNeighbors);
+         if (segmentationRawDataFilteringParameters.get().isEnableFilterFlyingPoint())
+            fusionDataSegment.filteringFlyingPoints(segmentationRawDataFilteringParameters.get().getFlyingPointThreshold(),
+                                                    segmentationRawDataFilteringParameters.get().getMinimumNumberOfFlyingPointNeighbors());
          fusionDataSegment.update();
       }
-      System.out.println("SegmentationRawData filteringUpdatingStartTime time "
-            + Conversions.nanosecondsToSeconds(System.nanoTime() - filteringUpdatingStartTime));
-      System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       // set segment center in 2D.
       int[] totalU = new int[numberOfLabels];
@@ -137,7 +153,7 @@ public class LidarImageFusionDataFactory
       {
          for (int j = 0; j < imageHeight; j++)
          {
-            int label = labels[getArrayIndex(i, j, imageWidth)];
+            int label = labels[getArrayIndex(i, j)];
             totalU[label] += i;
             totalV[label] += j;
             numberOfPixels[label]++;
@@ -152,116 +168,12 @@ public class LidarImageFusionDataFactory
       return fusionDataSegments;
    }
 
-   private static int[] getNewLabelsInGrid(BufferedImage bufferedImage, int columnSize, int rowSize)
-   {
-      int imageWidth = bufferedImage.getWidth();
-      int imageHeight = bufferedImage.getHeight();
-      int numberOfColumns = imageWidth / columnSize;
-      int numberOfRows = imageHeight / rowSize;
-
-      int[] labels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
-      int label = 0;
-      for (int j = 0; j < numberOfRows; j++)
-      {
-         for (int i = 0; i < numberOfColumns; i++)
-         {
-            int uLowerBoundary = i * columnSize;
-            int uUpperBoundary = i * columnSize + columnSize;
-            int vLowerBoundary = j * rowSize;
-            int vUpperBoundary = j * rowSize + rowSize;
-            for (int u = uLowerBoundary; u < uUpperBoundary; u++)
-            {
-               for (int v = vLowerBoundary; v < vUpperBoundary; v++)
-               {
-                  int arrayIndex = getArrayIndex(u, v, imageWidth);
-                  if (arrayIndex < labels.length)
-                     labels[arrayIndex] = label;
-               }
-            }
-            label++;
-         }
-      }
-
-      return labels;
-   }
-
-   // TODO: Speed up.
-   private static int[] getNewLabelsSLIC(BufferedImage bufferedImage, int pixelSize, double ruler, int iterate, boolean enableConnectivity, int elementSize)
-   {
-      Mat imageMat = convertBufferedImageToMat(bufferedImage);
-      Mat convertedMat = new Mat();
-      opencv_imgproc.cvtColor(imageMat, convertedMat, opencv_imgproc.COLOR_RGB2HSV);
-      SuperpixelSLIC slic = opencv_ximgproc.createSuperpixelSLIC(convertedMat, opencv_ximgproc.SLIC, pixelSize, (float) ruler);
-      slic.iterate(iterate);
-      if (enableConnectivity)
-         slic.enforceLabelConnectivity(elementSize);
-
-      int numberOfSuperPixels = slic.getNumberOfSuperpixels();
-      Mat labelMat = new Mat();
-      slic.getLabels(labelMat);
-
-      int[] labels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
-      for (int i = 0; i < labels.length; i++)
-      {
-         labels[i] = labelMat.getIntBuffer().get(i);
-      }
-
-      if (displaySegmentedContour)
-      {
-         Mat contourMat = new Mat();
-         slic.getLabelContourMask(contourMat);
-
-         int[] totalU = new int[numberOfSuperPixels];
-         int[] totalV = new int[numberOfSuperPixels];
-         int[] numberOfPixels = new int[numberOfSuperPixels];
-         for (int i = 0; i < bufferedImage.getWidth(); i++)
-         {
-            for (int j = 0; j < bufferedImage.getHeight(); j++)
-            {
-               int label = labels[getArrayIndex(i, j, bufferedImage.getWidth())];
-               totalU[label] += i;
-               totalV[label] += j;
-               numberOfPixels[label]++;
-            }
-         }
-         for (int i = 0; i < numberOfSuperPixels; i++)
-         {
-            int avgU = totalU[i] / numberOfPixels[i];
-            int avgV = totalV[i] / numberOfPixels[i];
-            opencv_imgproc.putText(contourMat, Integer.toString(i), new Point(avgU, avgV), opencv_imgproc.FONT_HERSHEY_COMPLEX_SMALL, 0.5,
-                                   new Scalar(255.0, 255.0, 255.0, 255.0), 1, opencv_imgproc.LINE_4, false);
-         }
-         show(contourMat, bufferedImage.getWidth(), bufferedImage.getHeight());
-
-         BufferedImage contourImage = Java2DFrameUtils.toBufferedImage(contourMat);
-         BufferedImage copyOriginal = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
-         for (int i = 0; i < contourImage.getWidth(); i++)
-         {
-            for (int j = 0; j < contourImage.getHeight(); j++)
-            {
-               if (contourImage.getRGB(i, j) == -1)
-                  copyOriginal.setRGB(i, j, 0xFF0000);
-               else
-                  copyOriginal.setRGB(i, j, bufferedImage.getRGB(i, j));
-            }
-         }
-         show(copyOriginal);
-      }
-
-      return labels;
-   }
-
-   private static int getArrayIndex(int u, int v, int width)
-   {
-      return u + v * width;
-   }
-
    /**
     * The type of the BufferedImage is TYPE_INT_RGB and the type of the Mat is CV_8UC3.
     */
-   private static Mat convertBufferedImageToMat(BufferedImage bufferedImage)
+   private Mat convertBufferedImageToMat(BufferedImage bufferedImage)
    {
-      Mat imageMat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), opencv_core.CV_8UC3);
+      Mat imageMat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), matType);
       int r, g, b;
       UByteRawIndexer indexer = imageMat.createIndexer();
       for (int y = 0; y < bufferedImage.getHeight(); y++)
@@ -284,55 +196,39 @@ public class LidarImageFusionDataFactory
       return imageMat;
    }
 
-   private static Point3D[] randomPruningPointCloudData(Point3D[] buffer, int desiredBufferSize)
+   private int getArrayIndex(int u, int v)
    {
-      int numberOfPoints = desiredBufferSize;
-      if (desiredBufferSize > MAX_NUMBER_OF_POINTS)
-         numberOfPoints = MAX_NUMBER_OF_POINTS;
-
-      Point3D[] newBuffer = new Point3D[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         int randomIndex = new Random().nextInt(buffer.length);
-         newBuffer[i] = buffer[randomIndex];
-      }
-      return newBuffer;
+      return u + v * imageWidth;
    }
 
-   private static void show(Mat mat, int width, int height)
+   public BufferedImage getSegmentedContourBufferedImage()
    {
-      byte[] byteArray = new byte[width * height * 3];
-      opencv_imgcodecs.imencode(".jpg", mat, byteArray);
-      BufferedImage img = null;
-      try
-      {
-         InputStream in = new ByteArrayInputStream(byteArray);
-         img = ImageIO.read(in);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-
-      JFrame frame = new JFrame();
-      ImageIcon icon = new ImageIcon(img);
-      JLabel label = new JLabel(icon);
-
-      frame.add(label);
-      frame.setVisible(true);
-      frame.setSize(width, height);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      return segmentedContour;
    }
 
-   private static void show(BufferedImage image)
+   public BufferedImage getProjectedPointCloudBufferedImage()
    {
-      JFrame frame = new JFrame();
-      ImageIcon icon = new ImageIcon(image);
-      JLabel label = new JLabel(icon);
+      return projectedPointCloud;
+   }
 
-      frame.add(label);
-      frame.setVisible(true);
-      frame.setSize(image.getWidth(), image.getHeight());
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   public void setIntrinsicParameters(IntrinsicParameters intrinsicParameters)
+   {
+      this.intrinsicParameters.set(intrinsicParameters);
+   }
+
+   public void setImageSegmentationParameters(ImageSegmentationParameters imageSegmentationParameters)
+   {
+      this.imageSegmentationParameters.set(imageSegmentationParameters);
+   }
+
+   public void setSegmentationRawDataFilteringParameters(SegmentationRawDataFilteringParameters segmentationRawDataFilteringParameters)
+   {
+      this.segmentationRawDataFilteringParameters.set(segmentationRawDataFilteringParameters);
+   }
+
+   public void setCameraPose(Point3D position, Quaternion orientation)
+   {
+      cameraPosition.set(position);
+      cameraOrientation.set(orientation);
    }
 }
