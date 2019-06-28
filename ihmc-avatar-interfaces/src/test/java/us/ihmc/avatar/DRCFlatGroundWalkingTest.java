@@ -1,13 +1,15 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -16,12 +18,11 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.RobotVisualizer;
+import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -88,6 +89,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Override
    public abstract DRCRobotModel getRobotModel();
 
    public abstract boolean doPelvisWarmup();
@@ -124,6 +126,27 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       createVideo(scs);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
+      drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
+      drcSimulationTestHelper.setUseHeadingAndVelocityScript(useVelocityAndHeadingScript);
+      drcSimulationTestHelper.setCheatWithGroundHeightAtFootstep(cheatWithGroundHeightAtForFootstep);
+      drcSimulationTestHelper.setWalkingScriptParameters(getWalkingScriptParameters());
+      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "Reset");
+
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("walkCSG")).set(true);
+      for (int i = 0; i < 10; i++)
+      {
+         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+         drcSimulationTestHelper.getAvatarSimulation().resetRobot(false);
+      }
    }
 
    private void simulateAndAssertGoodWalking(DRCSimulationTestHelper drcSimulationTestHelper, boolean doPelvisYawWarmup)

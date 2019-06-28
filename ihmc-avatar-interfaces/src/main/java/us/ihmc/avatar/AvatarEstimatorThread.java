@@ -351,10 +351,16 @@ public class AvatarEstimatorThread
 
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
+      sensorReader.getSensorOutputMapReadOnly().reset();
+
       if (ekfStateEstimator != null)
          ekfStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
+
+      firstTick.set(true);
+      humanoidRobotContextData.setControllerRan(false);
+      humanoidRobotContextData.setEstimatorRan(false);
    }
 
    /**

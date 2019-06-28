@@ -80,6 +80,7 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);
