@@ -123,7 +123,7 @@ public class StereoREAAnchorPaneController
    {
       this.messager = messager;
 
-      messager.bindBidirectional(LidarImageFusionAPI.EnableREA, enableREA.selectedProperty(), true);
+      messager.bindBidirectional(LidarImageFusionAPI.EnableREA, enableREA.selectedProperty(), false);
       messager.bindBidirectional(LidarImageFusionAPI.ComputationTime, computationTime.textProperty(), false);
       messager.bindBidirectional(LidarImageFusionAPI.StereoBufferSize, stereoBuffer.valueProperty(), numberToIntegerConverter, true);
 
