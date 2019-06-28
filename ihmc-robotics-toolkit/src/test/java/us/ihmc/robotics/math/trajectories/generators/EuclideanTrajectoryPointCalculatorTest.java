@@ -2,34 +2,23 @@ package us.ihmc.robotics.math.trajectories.generators;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import java.util.Random;
 
-public class EuclideanTrajectoryPointCalculatorTest {
-    @Test
-    public void testChangeReferenceFrame()
-    {
-        EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-        ReferenceFrame referenceFrameNotWorld = new ReferenceFrame("testFrame") {
-            @Override
-            protected void updateTransformToParent(RigidBodyTransform transformToParent)
-            {
+public class EuclideanTrajectoryPointCalculatorTest
+{
+   @Test
+   public void testChangeReferenceFrame()
+   {
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
-            }
-        };
+      Random random = new Random(65444);
+      ReferenceFrame referenceFrameNotWorld = EuclidFrameRandomTools.nextReferenceFrame(random);
 
-        euclideanTrajectoryPointCalculator.changeFrame(referenceFrameNotWorld);
+      euclideanTrajectoryPointCalculator.changeFrame(referenceFrameNotWorld);
 
-        try
-        {
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(0.0, new Point3D(0.0, 0.0, 0.0));
-            assert(true);
-        }
-        catch(ReferenceFrameMismatchException e)
-        {
-            assert(false);
-        }
-    }
+      assertEquals(referenceFrameNotWorld, euclideanTrajectoryPointCalculator.getTrajectoryPoints().getReferenceFrame());
+   }
 }

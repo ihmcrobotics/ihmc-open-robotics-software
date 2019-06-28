@@ -70,9 +70,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         trajectoryPoints.getTrajectoryPoint(i).changeFrame(referenceFrame);
-      trajectoryPoints.setReferenceFrame(referenceFrame);
+      trajectoryPoints.changeFrame(referenceFrame);
    }
 
    public void compute(double trajectoryTime)
