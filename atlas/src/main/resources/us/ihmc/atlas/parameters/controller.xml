@@ -4,15 +4,15 @@
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
                 <registry name="WalkingControllerState">
-            	    <registry name="LinearMomentumRateControlModule">
-            		    <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                    <registry name="LinearMomentumRateControlModule">
+                        <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                         <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     </registry>
-            	</registry>
+                </registry>
                 <registry name="HighLevelHumanoidControllerFactory">
                     <registry name="MomentumOptimizationSettings">
                         <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
@@ -191,20 +191,22 @@
                             </registry>
                             <registry name="leftFootControlModule">
 <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
+<parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
                             </registry>
                             <registry name="rightFootControlModule">
 <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
+<parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
                             </registry>
                             <registry name="ToeOffManager">
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true"/>
                             </registry>
                         </registry>
                         <registry name="BalanceManager">
+                            <registry name="PelvisICPBasedTranslationManager">
+<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                            </registry>
                             <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
-                            <registry name="PelvisICPBasedTranslationManager">
-								<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                            </registry>
                         </registry>
                     </registry>
                 </registry>
