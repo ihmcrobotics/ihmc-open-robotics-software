@@ -1,9 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
@@ -13,13 +9,25 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.Ros2Node;
+
+import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
 
 public class StereoREAModule implements Runnable
 {
+   private final Ros2Node ros2Node;
    private final Messager reaMessager;
    private final Messager messager;
 
@@ -28,14 +36,28 @@ public class StereoREAModule implements Runnable
    private final LidarImageFusionDataBuffer lidarImageFusionDataBuffer;
    private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
-   public StereoREAModule(Messager reaMessager, SharedMemoryJavaFXMessager messager)
+   private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
+
+   public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
+      this.ros2Node = ros2Node;
       this.messager = messager;
       this.reaMessager = reaMessager;
       lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
       planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
+
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
+                                                                             subscriberTopicNameGenerator);
+
+      //TODO : initialize.
+      reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeClear, false);
+      reaMessager.submitMessage(REAModuleAPI.LidarMinRange, Double.NEGATIVE_INFINITY);
+      reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, Double.POSITIVE_INFINITY);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, new BoundingBoxParametersMessage());
    }
 
    public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
@@ -99,7 +121,6 @@ public class StereoREAModule implements Runnable
       {
          reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
          reportPlanarRegionState();
-         LogTools.info("reportPlanarRegionState");
       }
       double calculationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - calculationStartTime);
       System.out.println("LidarImageFusionDataBuffer calculationTime " + calculationTime);
@@ -119,8 +140,14 @@ public class StereoREAModule implements Runnable
    {
       if (planarRegionFeatureUpdater.getPlanarRegionsList() != null)
       {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList());
+         PlanarRegionsList planarRegionsList = planarRegionFeatureUpdater.getPlanarRegionsList();
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
+         LogTools.info("number of planar regions of planarRegionsListMessage " + planarRegionsList.getNumberOfPlanarRegions() + " "
+                       + planarRegionsListMessage.getNumberOfConvexPolygons());
+
+         planarRegionNetworkProvider.update(true);
+         planarRegionNetworkProvider.publishCurrentState();
       }
    }
 }

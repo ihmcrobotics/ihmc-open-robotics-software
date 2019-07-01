@@ -48,6 +48,8 @@ public class ROS2Tools
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
 
+   public static final String SREA_MODULE = "/srea";
+
    public enum ROS2TopicQualifier
    {
       INPUT(INPUT_ROS_TOPIC_PREFIX), OUTPUT(OUTPUT_ROS_TOPIC_PREFIX);

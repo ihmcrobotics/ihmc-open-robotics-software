@@ -56,7 +56,7 @@ public class LidarImageFusionProcessorCommunicationModule
       this.ros2Node = ros2Node;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      stereoREAModule = new StereoREAModule(reaMessager, messager);
+      stereoREAModule = new StereoREAModule(ros2Node, reaMessager, messager);
 
       new ROS2Callback<>(ros2Node, LidarScanMessage.class, this::dispatchLidarScanMessage);
       new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);

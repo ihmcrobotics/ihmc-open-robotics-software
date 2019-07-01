@@ -3,15 +3,15 @@ package us.ihmc.robotEnvironmentAwareness.fusion.parameters;
 public class SegmentationRawDataFilteringParameters
 {
    private static final double DEFAULT_MINIMUM_SPARSE_THRESHOLD = 0.03;
-   private static final double DEFAULT_MAXIMUM_SPARSE_PROPOTIONAL_RATIO = 2.0;
+   private static final double DEFAULT_MAXIMUM_SPARSE_PROPOTIONAL_RATIO = 3.0;
 
    private static final boolean DEFAULT_ENABLE_FILTER_FLYING_POINT = true;
    private static final double DEFAULT_FLYING_POINT_THRESHOLD = 0.03;
-   private static final int DEFAULT_MINIMUM_NUMBER_OF_FLYING_POINT_NEIGHTBORS = 5;
+   private static final int DEFAULT_MINIMUM_NUMBER_OF_FLYING_POINT_NEIGHTBORS = 8;
 
    private static final boolean DEFAULT_ENABLE_FILTER_CENTRALITY = true;
-   private static final double DEFAULT_CENTRALITY_RADIUS = 0.03;
-   private static final double DEFAULT_CENTRALITY_THRESHOLD = 0.3;
+   private static final double DEFAULT_CENTRALITY_RADIUS = 0.045;
+   private static final double DEFAULT_CENTRALITY_THRESHOLD = 0.2;
 
    private static final boolean DEFAULT_ENABLE_FILTER_ELLIPTICITY = true;
    private static final double DEFAULT_ELLIPTICITY_MINIMUM_LENGTH = 0.02;
