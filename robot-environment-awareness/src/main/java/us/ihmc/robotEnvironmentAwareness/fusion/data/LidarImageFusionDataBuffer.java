@@ -78,10 +78,10 @@ public class LidarImageFusionDataBuffer
          colors[i] = colorBuffer[i];
       }
 
-      //      lidarImageFusionDataFactory.setIntrinsicParameters(latestCameraIntrinsicParameters.get());
+      lidarImageFusionDataFactory.setIntrinsicParameters(latestCameraIntrinsicParameters.get());
       lidarImageFusionDataFactory.setImageSegmentationParameters(latestImageSegmentationParaeters.get());
       lidarImageFusionDataFactory.setSegmentationRawDataFilteringParameters(latestSegmentationRawDataFilteringParameters.get());
-      //      lidarImageFusionDataFactory.setCameraPose(latestCameraPosition.get(), latestCameraOrientation.get());
+      lidarImageFusionDataFactory.setCameraPose(latestCameraPosition.get(), latestCameraOrientation.get());
 
       LidarImageFusionData data = lidarImageFusionDataFactory.createLidarImageFusionData(pointCloud, colors, latestBufferedImage.get());
 
