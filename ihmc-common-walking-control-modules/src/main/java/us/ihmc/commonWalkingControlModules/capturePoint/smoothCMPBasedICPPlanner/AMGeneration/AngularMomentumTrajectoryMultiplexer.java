@@ -152,6 +152,12 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
       }
       else
       {
+         // If we are switching from the commanded angular momentum to the prediction reset the commanded trajectory handler.
+         if (usingReferenceAngularMomentum.getValue())
+         {
+            commandedAngularMomentum.reset();
+         }
+
          usingReferenceAngularMomentum.set(false);
          currentAngularMomentumTrajectoryGenerator = predictedAngularMomentum;
       }
