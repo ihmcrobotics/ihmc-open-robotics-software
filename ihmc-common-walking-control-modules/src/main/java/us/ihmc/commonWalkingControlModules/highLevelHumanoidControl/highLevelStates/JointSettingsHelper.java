@@ -40,7 +40,7 @@ public class JointSettingsHelper
    private final JointLoadStatusProvider jointLoadStatusProvider;
 
 
-   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, HighLevelControllerState jointLoadStatusProvider,
+   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider,
                               HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
