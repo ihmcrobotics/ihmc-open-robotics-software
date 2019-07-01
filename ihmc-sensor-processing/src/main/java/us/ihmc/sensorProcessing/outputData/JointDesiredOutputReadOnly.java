@@ -182,11 +182,11 @@ public interface JointDesiredOutputReadOnly
    /**
     * Returns true if a maximum position error was set for this joint.
     *
-    * @see #getMaxPositionError()
+    * @see #getPositionIntegrationMaxError()
     */
-   default boolean hasMaxPositionError()
+   default boolean hasPositionIntegrationMaxError()
    {
-      return !Double.isNaN(getMaxPositionError());
+      return !Double.isNaN(getPositionIntegrationMaxError());
    }
 
    /**
@@ -197,16 +197,16 @@ public interface JointDesiredOutputReadOnly
     *
     * @return the maximum position error for the joint.
     */
-   double getMaxPositionError();
+   double getPositionIntegrationMaxError();
 
    /**
     * Returns true if a maximum velocity error was set for this joint.
     *
-    * @see #getMaxVelocityError()
+    * @see #getVelocityIntegrationMaxError()
     */
-   default boolean hasMaxVelocityError()
+   default boolean hasVelocityIntegrationMaxError()
    {
-      return !Double.isNaN(getMaxVelocityError());
+      return !Double.isNaN(getVelocityIntegrationMaxError());
    }
 
    /**
@@ -217,7 +217,7 @@ public interface JointDesiredOutputReadOnly
     *
     * @return the maximum velocity error for the joint.
     */
-   double getMaxVelocityError();
+   double getVelocityIntegrationMaxError();
 
    default String getRepresentativeString()
    {
@@ -279,9 +279,9 @@ public interface JointDesiredOutputReadOnly
             return false;
          if (Double.compare(getPositionIntegrationBreakFrequency(), other.getPositionIntegrationBreakFrequency()) != 0)
             return false;
-         if (Double.compare(getMaxVelocityError(), other.getMaxVelocityError()) != 0)
+         if (Double.compare(getVelocityIntegrationMaxError(), other.getVelocityIntegrationMaxError()) != 0)
             return false;
-         if (Double.compare(getMaxPositionError(), other.getMaxPositionError()) != 0)
+         if (Double.compare(getPositionIntegrationMaxError(), other.getPositionIntegrationMaxError()) != 0)
             return false;
          return true;
       }

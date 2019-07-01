@@ -544,9 +544,9 @@ public class CrossRobotCommandRandomTools
       if (random.nextBoolean())
          next.setPositionIntegrationBreakFrequency(random.nextDouble());
       if (random.nextBoolean())
-         next.setMaxPositionError(random.nextDouble());
+         next.setPositionIntegrationMaxError(random.nextDouble());
       if (random.nextBoolean())
-         next.setMaxVelocityError(random.nextDouble());
+         next.setVelocityIntegrationMaxError(random.nextDouble());
       return next;
    }
 
