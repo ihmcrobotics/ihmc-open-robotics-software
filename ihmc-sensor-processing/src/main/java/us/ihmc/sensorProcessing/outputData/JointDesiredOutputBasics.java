@@ -18,8 +18,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
       setVelocityScaling(other.getVelocityScaling());
       setVelocityIntegrationBreakFrequency(other.getVelocityIntegrationBreakFrequency());
       setPositionIntegrationBreakFrequency(other.getPositionIntegrationBreakFrequency());
-      setMaxPositionError(other.getMaxPositionError());
-      setMaxVelocityError(other.getMaxVelocityError());
+      setPositionIntegrationMaxError(other.getPositionIntegrationMaxError());
+      setVelocityIntegrationMaxError(other.getVelocityIntegrationMaxError());
    }
 
    /**
@@ -52,10 +52,10 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
          setVelocityIntegrationBreakFrequency(other.getVelocityIntegrationBreakFrequency());
       if (!hasPositionIntegrationBreakFrequency())
          setPositionIntegrationBreakFrequency(other.getPositionIntegrationBreakFrequency());
-      if (!hasMaxPositionError())
-         setMaxPositionError(other.getMaxPositionError());
-      if (!hasMaxVelocityError())
-         setMaxVelocityError(other.getMaxVelocityError());
+      if (!hasPositionIntegrationMaxError())
+         setPositionIntegrationMaxError(other.getPositionIntegrationMaxError());
+      if (!hasVelocityIntegrationMaxError())
+         setVelocityIntegrationMaxError(other.getVelocityIntegrationMaxError());
    }
 
    void setControlMode(JointDesiredControlMode controlMode);
@@ -82,7 +82,7 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
 
    void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency);
 
-   void setMaxPositionError(double maxPositionError);
+   void setPositionIntegrationMaxError(double maxPositionError);
 
-   void setMaxVelocityError(double maxVelocityError);
+   void setVelocityIntegrationMaxError(double maxVelocityError);
 }

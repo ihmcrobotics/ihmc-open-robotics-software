@@ -25,8 +25,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    private final YoDouble velocityScaling;
    private final YoDouble velocityIntegrationBreakFrequency;
    private final YoDouble positionIntegrationBreakFrequency;
-   private final YoDouble maxPositionError;
-   private final YoDouble maxVelocityError;
+   private final YoDouble positionIntegrationMaxError;
+   private final YoDouble velocityIntegrationMaxError;
 
    public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -46,8 +46,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       velocityScaling = new YoDouble(namePrefix + "VelocityScaling" + suffixString, registry);
       velocityIntegrationBreakFrequency = new YoDouble(namePrefix + "VelocityIntegrationBreakFrequency" + suffixString, registry);
       positionIntegrationBreakFrequency = new YoDouble(namePrefix + "PositionIntegrationBreakFrequency" + suffixString, registry);
-      maxPositionError = new YoDouble(namePrefix + "MaxPositionError" + suffixString, registry);
-      maxVelocityError = new YoDouble(namePrefix + "MaxVelocityError" + suffixString, registry);
+      positionIntegrationMaxError = new YoDouble(namePrefix + "PositionIntegrationMaxError" + suffixString, registry);
+      velocityIntegrationMaxError = new YoDouble(namePrefix + "VelocityIntegrationMaxError" + suffixString, registry);
 
       clear();
    }
@@ -66,8 +66,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       velocityScaling.set(Double.NaN);
       velocityIntegrationBreakFrequency.set(Double.NaN);
       positionIntegrationBreakFrequency.set(Double.NaN);
-      maxPositionError.set(Double.NaN);
-      maxVelocityError.set(Double.NaN);
+      positionIntegrationMaxError.set(Double.NaN);
+      velocityIntegrationMaxError.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -224,27 +224,27 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    }
 
    @Override
-   public double getMaxPositionError()
+   public double getPositionIntegrationMaxError()
    {
-      return maxPositionError.getDoubleValue();
+      return positionIntegrationMaxError.getDoubleValue();
    }
 
    @Override
-   public void setMaxPositionError(double maxPositionError)
+   public void setPositionIntegrationMaxError(double maxPositionError)
    {
-      this.maxPositionError.set(maxPositionError);
+      this.positionIntegrationMaxError.set(maxPositionError);
    }
 
    @Override
-   public double getMaxVelocityError()
+   public double getVelocityIntegrationMaxError()
    {
-      return maxVelocityError.getDoubleValue();
+      return velocityIntegrationMaxError.getDoubleValue();
    }
 
    @Override
-   public void setMaxVelocityError(double maxVelocityError)
+   public void setVelocityIntegrationMaxError(double maxVelocityError)
    {
-      this.maxVelocityError.set(maxVelocityError);
+      this.velocityIntegrationMaxError.set(maxVelocityError);
    }
 
    @Override

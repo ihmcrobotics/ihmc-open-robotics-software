@@ -15,10 +15,11 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    private double masterGain = Double.NaN;
 
    private double velocityScaling = Double.NaN;
+
    private double velocityIntegrationBreakFrequency = Double.NaN;
    private double positionIntegrationBreakFrequency = Double.NaN;
-   private double maxPositionError = Double.NaN;
-   private double maxVelocityError = Double.NaN;
+   private double positionIntegrationMaxError = Double.NaN;
+   private double velocityIntegrationMaxError = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -40,10 +41,11 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
       masterGain = Double.NaN;
 
       velocityScaling = Double.NaN;
+
       velocityIntegrationBreakFrequency = Double.NaN;
       positionIntegrationBreakFrequency = Double.NaN;
-      maxPositionError = Double.NaN;
-      maxVelocityError = Double.NaN;
+      positionIntegrationMaxError = Double.NaN;
+      velocityIntegrationMaxError = Double.NaN;
    }
 
    @Override
@@ -200,27 +202,27 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    }
 
    @Override
-   public double getMaxPositionError()
+   public double getPositionIntegrationMaxError()
    {
-      return maxPositionError;
+      return positionIntegrationMaxError;
    }
 
    @Override
-   public void setMaxPositionError(double maxPositionError)
+   public void setPositionIntegrationMaxError(double maxPositionError)
    {
-      this.maxPositionError = maxPositionError;
+      this.positionIntegrationMaxError = maxPositionError;
    }
 
    @Override
-   public double getMaxVelocityError()
+   public double getVelocityIntegrationMaxError()
    {
-      return maxVelocityError;
+      return velocityIntegrationMaxError;
    }
 
    @Override
-   public void setMaxVelocityError(double maxVelocityError)
+   public void setVelocityIntegrationMaxError(double maxVelocityError)
    {
-      this.maxVelocityError = maxVelocityError;
+      this.velocityIntegrationMaxError = maxVelocityError;
    }
 
    public void set(JointDesiredOutput other)
