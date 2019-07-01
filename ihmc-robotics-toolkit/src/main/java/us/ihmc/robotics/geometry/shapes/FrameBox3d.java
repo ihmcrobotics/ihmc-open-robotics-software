@@ -6,7 +6,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -65,8 +65,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 
    public void getCenter(FramePoint3D pointToPack)
    {
-      pointToPack.setToZero(referenceFrame);
-      box3d.getCenter(pointToPack);
+      pointToPack.setIncludingFrame(referenceFrame, box3d.getPosition());
    }
 
    public FramePoint3D getCenterCopy()
@@ -79,7 +78,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 
    public void getTransform(RigidBodyTransform transformToPack)
    {
-      this.box3d.getPose(transformToPack);
+      transformToPack.set(this.box3d.getPose());
    }
 
    public RigidBodyTransform getTransformCopy()
@@ -92,7 +91,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 
    public void getRotation(RotationMatrix rotationMatrixToPack)
    {
-      this.box3d.getOrientation(rotationMatrixToPack);
+      rotationMatrixToPack.set(this.box3d.getOrientation());
    }
 
    public RotationMatrix getRotationCopy()
@@ -105,23 +104,22 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 
    public void setPose(Point3DReadOnly position, QuaternionReadOnly orientation)
    {
-      box3d.setPose(position, orientation);
+      box3d.getPose().set(orientation, position);
    }
    
    public void setPose(Pose3DReadOnly pose)
    {
-      box3d.setPose(pose.getPosition(), pose.getOrientation());
+      box3d.getPose().set(pose.getOrientation(), pose.getPosition());
    }
    
    public void setTransform(RigidBodyTransform transform3D)
    {
-      box3d.setPose(transform3D);
+      box3d.getPose().set(transform3D);
    }
 
    public void getFramePose(FramePose3D framePoseToPack)
    {
-      framePoseToPack.setToZero(referenceFrame);
-      box3d.getPose(framePoseToPack);
+      framePoseToPack.setIncludingFrame(referenceFrame, box3d.getPose());
    }
 
    public void scale(double scale)

@@ -1,6 +1,7 @@
 plugins {
     id("us.ihmc.ihmc-build") version "0.15.7"
-    id("us.ihmc.ihmc-ci") version "4.23"
+    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
     id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -14,6 +15,8 @@ ihmc {
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
     compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
+    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
+
 }
 
 testDependencies {

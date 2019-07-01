@@ -13,13 +13,14 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
-import us.ihmc.euclid.shape.Cylinder3D;
-import us.ihmc.euclid.shape.Sphere3D;
-import us.ihmc.euclid.shape.Torus3D;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.shape.primitives.Torus3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -221,13 +222,13 @@ public class ReachingManifoldTools
 
    public static List<ReachingManifoldMessage> createCylinderManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Cylinder3D cylinder3D)
    {
-      return createCylinderManifoldMessagesForValkyrie(robotSide, hand, cylinder3D.getPosition(), cylinder3D.getOrientation(), cylinder3D.getRadius(),
-                                                       cylinder3D.getHeight());
+      return createCylinderManifoldMessagesForValkyrie(robotSide, hand, cylinder3D.getPosition(), new RotationMatrix(EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinder3D.getAxis())), cylinder3D.getRadius(),
+                                                       cylinder3D.getLength());
    }
 
    public static List<ReachingManifoldMessage> createTorusManifoldMessagesForValkyrie(RobotSide robotSide, RigidBodyBasics hand, Torus3D torus3D)
    {
-      return createTorusManifoldMessagesForValkyrie(robotSide, hand, torus3D.getPosition(), torus3D.getOrientation(), torus3D.getRadius(),
+      return createTorusManifoldMessagesForValkyrie(robotSide, hand, torus3D.getPosition(), new RotationMatrix(EuclidGeometryTools.axisAngleFromZUpToVector3D(torus3D.getAxis())), torus3D.getRadius(),
                                                     torus3D.getTubeRadius());
    }
 

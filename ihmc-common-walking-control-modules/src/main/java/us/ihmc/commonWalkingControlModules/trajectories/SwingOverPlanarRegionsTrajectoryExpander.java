@@ -258,7 +258,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          footCollisionSphere.setToZero(WORLD);
          footCollisionSphere.setRadius(collisionSphereRadius);
-         footCollisionSphere.getSphere3d().setPosition(solePoseReferenceFrame.getPosition());
+         footCollisionSphere.getSphere3d().getPosition().set(solePoseReferenceFrame.getPosition());
 
          footCollisionSphere.changeFrame(WORLD);
 

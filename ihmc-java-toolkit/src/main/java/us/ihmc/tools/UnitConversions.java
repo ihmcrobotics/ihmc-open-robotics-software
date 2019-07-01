@@ -1,6 +1,8 @@
 package us.ihmc.tools;
 
-
+/**
+ * Staging grounds for the ihmc-commons Conversions class.
+ */
 public class UnitConversions
 {
    // Dimensions
@@ -15,5 +17,18 @@ public class UnitConversions
    public static final double PSI_TO_PASCALS = 6894.75729;
 
    // Multi-unit
+   /**
+    * @see {@link us.ihmc.commons.Conversions#radiansPerSecondToHertz(double)}
+    */
    public static final double FREQ_TO_RADPERSEC = Math.PI * 2.0;
+
+   public static double secondsToHertz(double seconds)
+   {
+      return 1.0 / seconds;
+   }
+
+   public static double hertzToSeconds(double hertz)
+   {
+      return 1.0 / hertz;
+   }
 }

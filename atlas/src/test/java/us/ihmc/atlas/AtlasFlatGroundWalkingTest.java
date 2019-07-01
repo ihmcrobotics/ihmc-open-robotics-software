@@ -17,6 +17,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
+   @Override
    public boolean doPelvisWarmup()
    {
       return true;
@@ -28,6 +29,14 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       super.testFlatGroundWalking();
+   }
+
+   @Override
+   @Test
+   public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      super.testReset();
    }
 
    @Disabled

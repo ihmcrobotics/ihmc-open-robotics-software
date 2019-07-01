@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -171,11 +172,11 @@ public abstract class FootstepPlannerDataSetTest
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
-   protected void runAssertionsOnDataset(Function<DataSet, String> datasetTestRunner, String datasetName)
+   public void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, DataSetName dataSetName)
    {
-      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
+      DataSet dataset = DataSetIOTools.loadDataSet(dataSetName);
       resetAllAtomics();
-      String errorMessages = datasetTestRunner.apply(dataset);
+      String errorMessages = dataSetTester.apply(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 

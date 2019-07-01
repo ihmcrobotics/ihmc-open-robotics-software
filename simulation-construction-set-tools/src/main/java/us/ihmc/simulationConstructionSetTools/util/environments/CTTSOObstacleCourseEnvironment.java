@@ -3,12 +3,13 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.Box3D;
-import us.ihmc.euclid.shape.Cylinder3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -358,20 +359,17 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       for (RobotSide robotSide : RobotSide.values)
       {
          double filletRadius = curbHeight * fillet;
-         Cylinder3D sideEdgeFillet = new Cylinder3D(location, gridLength, filletRadius);
-         sideEdgeFillet.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - filletRadius), curbHeight / 2 - filletRadius);
-         sideEdgeFillet.appendPitchRotation(Math.PI / 2);
-         RigidBodyTransform sideEdgeFilletTransform = new RigidBodyTransform();
-         sideEdgeFillet.getPose(sideEdgeFilletTransform);
-         combinedTerrainObject.addTerrainObject(new CylinderTerrainObject(sideEdgeFilletTransform, gridLength, filletRadius, edgeAppearance));
+         Cylinder3D sideEdgeFillet = new Cylinder3D(new Point3D(location.getTranslation()), Axis.X, gridLength, filletRadius);
+         sideEdgeFillet.getPosition().add(0.0, robotSide.negateIfRightSide(gridWidth / 2 - filletRadius), curbHeight / 2 - filletRadius);
+         combinedTerrainObject.addTerrainObject(new CylinderTerrainObject(new Vector3D(sideEdgeFillet.getPosition()), 90.0, 0.0, gridLength, filletRadius, edgeAppearance));
 
          Box3D sideEdge = new Box3D(location, gridLength, curbHeight, curbHeight - filletRadius);
-         sideEdge.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdge.getWidth() / 2), -filletRadius / 2);
+         sideEdge.getPose().appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdge.getSizeY() / 2), -filletRadius / 2);
          combinedTerrainObject.addRotatableBox(sideEdge, edgeAppearance);
 
          Box3D sideEdgeTop = new Box3D(location, gridLength, curbHeight - filletRadius, filletRadius);
-         sideEdgeTop.appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdgeTop.getWidth() / 2 - filletRadius),
-                                       curbHeight / 2 - sideEdgeTop.getHeight() / 2);
+         sideEdgeTop.getPose().appendTranslation(0.0, robotSide.negateIfRightSide(gridWidth / 2 - sideEdgeTop.getSizeY() / 2 - filletRadius),
+                                       curbHeight / 2 - sideEdgeTop.getSizeZ() / 2);
          combinedTerrainObject.addRotatableBox(sideEdgeTop, edgeAppearance);
       }
 

@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -16,27 +15,8 @@ public interface JointDesiredOutputWriter
     * 
     * @param jointDesiredOutputList
     */
-   void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList);
-   
-   /**
-    * Set the holder for the force sensor data holder.
-    * 
-    * The data in this holder come directly from the estimator.
-    * 
-    * @param forceSensorDataHolderForController
-    */
-   void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator);
+   void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList);
 
-   /**
-    * Called the first time the outputwriter runs.
-    * 
-    * This function is called in a realtime context.
-    * The data from the controller is valid and this function gets called before writeBefore() ever gets called.
-    * 
-    */
-   void initialize();
-   
-   
    /**
     * Write function that gets called before the estimator has ran.
     * 

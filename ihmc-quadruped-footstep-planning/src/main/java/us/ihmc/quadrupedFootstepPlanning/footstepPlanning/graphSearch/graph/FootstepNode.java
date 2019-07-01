@@ -15,11 +15,8 @@ import java.util.Random;
 
 public class FootstepNode
 {
-   public static double gridSizeXY = 0.08;
-   public static final double gridSizeYaw = 0.10;
-
-   public static final double PRECISION = 0.05;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
+   public static double gridSizeXY = 0.06;
+   public static final double gridSizeYaw = 0.1;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
@@ -35,7 +32,6 @@ public class FootstepNode
    private Point2D xGaitCenterPoint;
 
    private final int hashCode;
-   private final int planarRegionsHashCode;
 
    private final RobotQuadrant movingQuadrant;
 
@@ -114,7 +110,6 @@ public class FootstepNode
       yawIndex = (int) Math.round(nominalYaw / gridSizeYaw);
 
       hashCode = computeHashCode(this);
-      planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
    public RobotQuadrant getMovingQuadrant()
@@ -204,11 +199,6 @@ public class FootstepNode
       return hashCode;
    }
 
-   public int getPlanarRegionsHashCode()
-   {
-      return planarRegionsHashCode;
-   }
-
    private static int computeHashCode(FootstepNode node)
    {
       final int prime = 31;
@@ -220,36 +210,6 @@ public class FootstepNode
       return result;
    }
 
-   public double getRoundedX(RobotQuadrant robotQuadrant)
-   {
-      return round(getX(robotQuadrant));
-   }
-
-   public double getRoundedY(RobotQuadrant robotQuadrant)
-   {
-      return round(getY(robotQuadrant));
-   }
-
-   public static int computePlanarRegionsHashCode(FootstepNode node)
-   {
-      Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-      return computePlanarRegionsHashCode(round(xGaitCenterPoint.getX()), round(xGaitCenterPoint.getY()));
-   }
-
-   public static int computePlanarRegionsHashCode(double roundedX, double roundedY)
-   {
-      final long prime = 31L;
-      long bits = 1L;
-      bits = prime * bits + Double.doubleToLongBits(roundedX);
-      bits = prime * bits + Double.doubleToLongBits(roundedY);
-
-      return (int) (bits ^ bits >> 32);
-   }
-
-   public static double round(double value)
-   {
-      return Math.round(value * INV_PRECISION) * PRECISION;
-   }
 
    public static int snapToGrid(double location)
    {
@@ -347,5 +307,70 @@ public class FootstepNode
       deltaY += frontRightY - hindRightY;
 
       return Math.atan2(deltaY, deltaX);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode, nominalStanceLength, nominalStanceWidth);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
+                                        previousNode.getNominalStanceLength(), previousNode.getNominalStanceWidth());
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
+                                        nominalStanceLength, nominalStanceWidth);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newXIndex, newYIndex, previousNode, previousNode.getNominalStanceLength(),
+                                        previousNode.getNominalStanceWidth());
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      int xFrontLeft = previousNode.getXIndex(RobotQuadrant.FRONT_LEFT);
+      int yFrontLeft = previousNode.getYIndex(RobotQuadrant.FRONT_LEFT);
+      int xFrontRight = previousNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
+      int yFrontRight = previousNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
+      int xHindLeft = previousNode.getXIndex(RobotQuadrant.HIND_LEFT);
+      int yHindLeft = previousNode.getYIndex(RobotQuadrant.HIND_LEFT);
+      int xHindRight = previousNode.getXIndex(RobotQuadrant.HIND_RIGHT);
+      int yHindRight = previousNode.getYIndex(RobotQuadrant.HIND_RIGHT);
+
+      switch (newMovingQuadrant)
+      {
+      case FRONT_LEFT:
+         xFrontLeft = newXIndex;
+         yFrontLeft = newYIndex;
+         break;
+      case FRONT_RIGHT:
+         xFrontRight = newXIndex;
+         yFrontRight = newYIndex;
+         break;
+      case HIND_LEFT:
+         xHindLeft = newXIndex;
+         yHindLeft = newYIndex;
+         break;
+      case HIND_RIGHT:
+         xHindRight = newXIndex;
+         yHindRight = newYIndex;
+         break;
+      }
+      return new FootstepNode(newMovingQuadrant, xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight,
+                              nominalStanceLength, nominalStanceWidth);
    }
 }

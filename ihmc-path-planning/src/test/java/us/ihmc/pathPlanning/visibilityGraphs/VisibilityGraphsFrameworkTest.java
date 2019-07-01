@@ -9,23 +9,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.controllers.DatasetNavigationAccordionController;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javafx.util.Pair;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.shape.Ellipsoid3D;
+import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -36,10 +31,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
@@ -75,7 +74,14 @@ public class VisibilityGraphsFrameworkTest
 
    private static VisibilityGraphsParameters createTestParameters()
    {
-      return new DefaultVisibilityGraphParameters();
+      return new DefaultVisibilityGraphParameters()
+      {
+         @Override
+         public double getNormalZThresholdForAccessibleRegions()
+         {
+            return Math.cos(Math.toRadians(60.0));
+         }
+      };
    }
 
    @BeforeEach
@@ -502,7 +508,7 @@ public class VisibilityGraphsFrameworkTest
       {
          Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
          walkerBody3D.addZ(walkerOffsetHeight);
-         walkerShape.setPosition(walkerBody3D);
+         walkerShape.getPosition().set(walkerBody3D);
 
          errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions);
 
@@ -539,7 +545,7 @@ public class VisibilityGraphsFrameworkTest
          Plane3D plane = planarRegion.getPlane();
          Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
 
-         if (!walkerShapeWorld.isInsideOrOnSurface(closestPoint))
+         if (!walkerShapeWorld.isPointInside(closestPoint))
             continue; // Not even close to the region plane, let's keep going.
 
          Ellipsoid3D walkerShapeLocal = new Ellipsoid3D(walkerShapeWorld);
@@ -573,7 +579,7 @@ public class VisibilityGraphsFrameworkTest
             }
             closestPoint = new Point3D(closestPoint2D);
 
-            if (walkerShapeLocal.isInsideOrOnSurface(closestPoint))
+            if (walkerShapeLocal.isPointInside(closestPoint))
             {
                Point2DBasics intersectionLocal = closestPoint2D;
                Point3D intersectionWorld = new Point3D(intersectionLocal);
@@ -755,7 +761,7 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+      String dataSetName = "20190204_155900_CampLejeuneRock4";
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();

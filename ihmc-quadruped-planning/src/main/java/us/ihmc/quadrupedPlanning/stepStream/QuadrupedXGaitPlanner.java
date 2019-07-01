@@ -83,8 +83,7 @@ public class QuadrupedXGaitPlanner
          double thisStepStartTime = lastStepStartTime + endTimeShift;
          double thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();
 
-         step.getTimeInterval().setStartTime(thisStepStartTime);
-         step.getTimeInterval().setEndTime(thisStepEndTime);
+         step.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          // compute xGait rectangle pose at end of step
          extrapolatePose(xGaitRectanglePose, thisStepEndTime);

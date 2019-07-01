@@ -3,11 +3,9 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -24,9 +22,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpBallBehaviorState> implements CoactiveDataListenerInterface
 {
-
-   private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
-
+   public enum PickUpBallBehaviorState
+   {
+      STOPPED,
+      SETUP_ROBOT,
+      SEARCHING_FOR_BALL_FAR,
+      WALKING_TO_BALL,
+      SEARCHING_FOR_BALL_NEAR,
+      PICKING_UP_BALL,
+      PUTTING_BALL_IN_BASKET,
+      RESET_ROBOT,
+      WAITING_FOR_USER_CONFIRMATION
+   }
    private final SearchFarForSphereBehavior searchFarForSphereBehavior;
    private final SearchNearForSphereBehavior searchNearForSphereBehavior;
    private final WalkToPickObjectOffGroundLocationBehavior walkToPickUpLocationBehavior;
@@ -47,22 +54,18 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
-      coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSide();
-      coactiveElement.setPickUpBallBehavior(this);
-      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
       // create sub-behaviors:
 
       //NEW
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      searchFarForSphereBehavior = new SearchFarForSphereBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, false, atlasPrimitiveActions);
-      searchNearForSphereBehavior = new SearchNearForSphereBehavior(robotName, yoTime, coactiveElement, referenceFrames, fullRobotModel, ros2Node,
-                                                                    false, atlasPrimitiveActions);
+      searchFarForSphereBehavior = new SearchFarForSphereBehavior(robotName, yoTime, referenceFrames, ros2Node, atlasPrimitiveActions);
+      searchNearForSphereBehavior = new SearchNearForSphereBehavior(robotName, yoTime, referenceFrames, fullRobotModel, ros2Node,
+                                                                    atlasPrimitiveActions);
       walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(robotName, yoTime, referenceFrames, ros2Node,
                                                                                    wholeBodyControllerParameters, fullRobotModel, atlasPrimitiveActions);
-      pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
-      putBallInBucketBehavior = new PutBallInBucketBehavior(robotName, yoTime, coactiveElement, referenceFrames, ros2Node, atlasPrimitiveActions);
+      pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(robotName, yoTime, referenceFrames, ros2Node, atlasPrimitiveActions);
+      putBallInBucketBehavior = new PutBallInBucketBehavior(robotName, yoTime, referenceFrames, ros2Node, atlasPrimitiveActions);
       setupStateMachine();
    }
 
@@ -72,12 +75,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       super.doControl();
    }
 
-   @Override
-   public CoactiveElement getCoactiveElement()
-   {
-      return coactiveElement;
-   }
-
+  
    @Override
    protected PickUpBallBehaviorState configureStateMachineAndReturnInitialKey(StateMachineFactory<PickUpBallBehaviorState, BehaviorAction> factory)
    {
@@ -94,10 +92,10 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             publishTextToSpeech("Walking To The Ball");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
+            /*coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
-            coactiveElement.foundBall.set(true);
+            coactiveElement.foundBall.set(true);*/
             walkToPickUpLocationBehavior.setPickUpLocation(searchFarForSphereBehavior.getBallLocation());
          }
       };
@@ -111,10 +109,10 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             publishTextToSpeech("Looking For The Ball Again");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
+            /*coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.waitingForValidation.set(false);
-            coactiveElement.foundBall.set(false);
+            coactiveElement.foundBall.set(false);*/
          }
       };
 
@@ -126,10 +124,10 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             publishTextToSpeech("Picking Up The Ball");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.PICKING_UP_BALL);
+            /*coactiveElement.currentState.set(PickUpBallBehaviorState.PICKING_UP_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
-            coactiveElement.foundBall.set(true);
+            coactiveElement.foundBall.set(true);*/
             pickObjectOffGroundBehavior.setGrabLocation(searchNearForSphereBehavior.getBallLocation(), searchNearForSphereBehavior.getSphereRadius());
          }
       };
@@ -166,14 +164,14 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    public void onBehaviorExited()
    {
       publishTextToSpeech("YAY IM ALL DONE");
-      coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
+     /* coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);
       coactiveElement.waitingForValidation.set(false);
       coactiveElement.foundBall.set(false);
       coactiveElement.ballX.set(0);
       coactiveElement.ballY.set(0);
-      coactiveElement.ballZ.set(0);
+      coactiveElement.ballZ.set(0);*/
    }
 
    @Override

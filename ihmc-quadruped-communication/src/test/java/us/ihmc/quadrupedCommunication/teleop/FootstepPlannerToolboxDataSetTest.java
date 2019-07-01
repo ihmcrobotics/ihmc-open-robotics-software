@@ -108,19 +108,19 @@ public abstract class FootstepPlannerToolboxDataSetTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumStepReach()
+         public double getMaximumFrontStepReach()
          {
             return 0.7;
          }
 
          @Override
-         public double getMaximumStepLength()
+         public double getMaximumFrontStepLength()
          {
             return 0.6;
          }
 
          @Override
-         public double getMinimumStepLength()
+         public double getMinimumFrontStepLength()
          {
             return -0.3;
          }
@@ -137,6 +137,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
             return 0.35;
          }
       };
+
       footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, parameters, xGaitSettings,
                                                                    new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
 
@@ -160,12 +161,15 @@ public abstract class FootstepPlannerToolboxDataSetTest
          throw new RuntimeException("Failed to start messager.");
       }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
 
       if (VISUALIZE)
       {
          createUI(messager);
       }
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+
 
       ThreadTools.sleep(1000);
    }
@@ -545,6 +549,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
+      errorMessage += checkStepOrder(datasetName, plannedSteps);
+
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
 
@@ -564,5 +570,18 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       return finalSteps;
+   }
+
+   private static String checkStepOrder(String dataseName, FootstepPlan plannedSteps)
+   {
+      String errorMessage = "";
+      RobotQuadrant movingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
+      {
+         if (movingQuadrant.getNextRegularGaitSwingQuadrant() != plannedSteps.getFootstep(i).getRobotQuadrant())
+            errorMessage += dataseName + " step " + i + " in the plan is out of order.\n";
+      }
+
+      return errorMessage;
    }
 }

@@ -15,7 +15,7 @@ import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnecti
  */
 public class YoVariableClient
 {
-   public static final int DEFAULT_TIMEOUT = 2500; //ms
+   public static final int DEFAULT_TIMEOUT = 25000; //ms
    
    private final YoVariableClientImplementation yoVariableClientImplementation;
 
