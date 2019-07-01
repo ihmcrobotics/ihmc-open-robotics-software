@@ -1,6 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
-   id("us.ihmc.ihmc-ci") version "4.23"
+   id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
    id("us.ihmc.scs") version "0.4"
 
@@ -16,12 +17,12 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "commons-net", name: "commons-net", version: "3.3"
    compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
@@ -31,13 +32,13 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
 

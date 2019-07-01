@@ -9,34 +9,22 @@ public class TurnInPlaceTask extends BehaviorAction
    private double desiredYaw;
    private TurnInPlaceBehavior turnInPlaceBehavior;
 
-   private double transferTime;
-   private double swingTime;
-
    public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, YoDouble yoTime)
    {
-      this(desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN);
+      this(desiredYaw, turnInPlaceBehavior);
    }
 
-   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime)
+   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior)
    {
       super(turnInPlaceBehavior);
       this.desiredYaw = desiredYaw;
       this.turnInPlaceBehavior = turnInPlaceBehavior;
-      this.transferTime = transferTime;
-      this.swingTime = swingTime;
+
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      if (!Double.isNaN(swingTime))
-      {
-         turnInPlaceBehavior.setSwingTime(swingTime);
-      }
-      if (!Double.isNaN(transferTime))
-      {
-         turnInPlaceBehavior.setTransferTime(transferTime);
-      }
       turnInPlaceBehavior.setTarget(desiredYaw);
    }
 }

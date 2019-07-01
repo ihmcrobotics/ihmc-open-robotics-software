@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
-import us.ihmc.euclid.shape.Sphere3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -66,7 +66,7 @@ public class ContactableSphereRobot extends ContactableRobot
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return currentSphere3d.isInsideOrOnSurface(pointInWorldToCheck);
+      return currentSphere3d.isPointInside(pointInWorldToCheck);
    }
 
    @Override
@@ -78,7 +78,7 @@ public class ContactableSphereRobot extends ContactableRobot
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      currentSphere3d.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      currentSphere3d.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override

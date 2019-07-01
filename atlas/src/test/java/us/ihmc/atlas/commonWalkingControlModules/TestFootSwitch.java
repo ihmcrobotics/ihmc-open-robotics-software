@@ -100,7 +100,12 @@ public class TestFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
+   {
+   }
+
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
    {
    }
 }

@@ -1,0 +1,37 @@
+#ifndef __controller_msgs__msg__QuadrupedSupportPlanarRegionParametersMessage__idl__
+#define __controller_msgs__msg__QuadrupedSupportPlanarRegionParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message sets the parameters of the BipedalSupportPlanarRegionPublisher
+       * The support planar region is set to be a rectangle at each of the feet.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedSupportPlanarRegionParametersMessage_")
+      struct QuadrupedSupportPlanarRegionParametersMessage
+      {
+        /**
+         * Enables the QuadrupedSupportPlanarRegionPublish module
+         */
+        boolean enable;
+        /**
+         * This value specifies the distance from the foot to the inside portion of the vertices (under the robot).
+         */
+        @defaultValue(value=-1.0)
+        double inside_support_region_size;
+        /**
+         * This value specifies the distance from the foot to the outside portion of the vertices (not under the robot).
+         */
+        @defaultValue(value=-1.0)
+        double outside_support_region_size;
+      };
+    };
+  };
+};
+
+#endif

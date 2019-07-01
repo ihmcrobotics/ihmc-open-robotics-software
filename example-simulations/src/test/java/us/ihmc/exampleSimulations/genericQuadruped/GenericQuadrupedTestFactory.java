@@ -27,6 +27,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.output.SimulatedQuadrupedOutputWriter;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
@@ -104,6 +105,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
+      DCMPlannerParameters dcmPlannerParameters = new GenericQuadrupedDCMPlannerParameters();
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
@@ -121,6 +123,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       OutputWriter outputWriter = new SimulatedQuadrupedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList, CONTROL_DT);
 
       QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold = new QuadrantDependentList<>(20.0, 20.0, -20.0, -20.0);
+      QuadrantDependentList<Double> kneeTorqueTouchdownForSureDetectionThreshold = new QuadrantDependentList<>(75.0, 75.0, -75.0, -75.0);
 
       simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(CONTROL_DT);
@@ -141,6 +144,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialOffset(initialOffset.get());
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setKneeTorqueTouchdownDetectionThreshold(kneeTorqueTouchdownDetectionThreshold);
+      simulationFactory.setKneeTorqueTouchdownForSureDetectionThreshold(kneeTorqueTouchdownForSureDetectionThreshold);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(useNetworking.get());
@@ -154,6 +158,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialForceControlState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
+      simulationFactory.setDCMPlannerParameters(dcmPlannerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
       simulationFactory.setPrivilegedConfigurationParameters(privilegedConfigurationParameters);
       simulationFactory.setFallDetectionParameters(fallDetectionParameters);
@@ -193,7 +198,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          networkModuleParameters.enableStepTeleopModule(true);
 
          graphicsListRegistry = new YoGraphicsListRegistry();
-         networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), new DefaultFootstepPlannerParameters(),
+         networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), physicalProperties.getFeetGroundContactPoints(),
+                                                                 new DefaultFootstepPlannerParameters(),
                                                                  xGaitSettings, new GenericQuadrupedPointFootSnapperParameters(),
                                                                  PubSubImplementation.INTRAPROCESS, networkModuleParameters);
          networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);

@@ -152,7 +152,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.4;
+      double percentWeight = 0.35;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);

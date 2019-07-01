@@ -11,12 +11,12 @@ import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
  * Controls the linear Velocity of the body in body z up frame Controls the angular velocity of the
@@ -75,11 +75,17 @@ public class HexapodBodySpatialManager
       desiredPosition.setToZero(body.getBodyFixedFrame());
       desiredOrientation.setToZero(body.getBodyFixedFrame());
 
+      desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      feedForwardAngularAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+      feedForwardLinearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
       spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
                                                 feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
-      yoDesiredBodyOrientation.set(desiredOrientation);
-      yoDesiredBodyPosition.set(desiredPosition);
+      yoDesiredBodyOrientation.setMatchingFrame(desiredOrientation);
+      yoDesiredBodyPosition.setMatchingFrame(desiredPosition);
 
       desiredBodyHeight.set(desiredPosition.getZ());
       filteredBodyHeight.set(desiredBodyHeight.getDoubleValue());
@@ -104,6 +110,8 @@ public class HexapodBodySpatialManager
       yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
+      desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
                                                 feedForwardAngularAcceleration, feedForwardLinearAcceleration);
    }
@@ -118,7 +126,7 @@ public class HexapodBodySpatialManager
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredAngularVelocity.scale(controllerDt);
       double deltaYaw = desiredAngularVelocity.getZ();
-      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw().getDoubleValue() + deltaYaw);
+      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw() + deltaYaw);
    }
 
    /**

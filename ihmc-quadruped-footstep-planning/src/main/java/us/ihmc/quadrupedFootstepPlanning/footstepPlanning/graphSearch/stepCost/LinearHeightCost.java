@@ -22,39 +22,31 @@ public class LinearHeightCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      double totalCost = 0.0;
 
       RigidBodyTransform startNodeTransform = new RigidBodyTransform();
       RigidBodyTransform endNodeTransform = new RigidBodyTransform();
 
+      RobotQuadrant movingQuadrant = endNode.getMovingQuadrant();
 
+      int endNodeXIndex = endNode.getXIndex(movingQuadrant);
+      int endNodeYIndex = endNode.getYIndex(movingQuadrant);
+      int startNodeXIndex = startNode.getXIndex(movingQuadrant);
+      int startNodeYIndex = startNode.getYIndex(movingQuadrant);
 
+      FootstepNodeSnapData endNodeData = snapper.getSnapData(endNodeXIndex, endNodeYIndex);
+      FootstepNodeSnapData startNodeData = snapper.getSnapData(startNodeXIndex, startNodeYIndex);
 
+      if (startNodeData == null || endNodeData == null)
+         return 0.0;
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         int endNodeXIndex = endNode.getXIndex(robotQuadrant);
-         int endNodeYIndex = endNode.getYIndex(robotQuadrant);
-         int startNodeXIndex = startNode.getXIndex(robotQuadrant);
-         int startNodeYIndex = startNode.getYIndex(robotQuadrant);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
 
-         FootstepNodeSnapData endNodeData = snapper.getSnapData(endNodeXIndex, endNodeYIndex);
-         FootstepNodeSnapData startNodeData = snapper.getSnapData(startNodeXIndex, startNodeYIndex);
+      double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
 
-         if (startNodeData == null || endNodeData == null)
-            return 0.0;
-
-         FootstepNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
-
-         double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
-
-         if (heightChange > 0.0)
-            totalCost += parameters.getStepUpWeight() * heightChange;
-         else
-            totalCost += -parameters.getStepDownWeight() * heightChange;
-      }
-
-      return totalCost;
+      if (heightChange > 0.0)
+         return parameters.getStepUpWeight() * heightChange;
+      else
+         return -parameters.getStepDownWeight() * heightChange;
    }
 }

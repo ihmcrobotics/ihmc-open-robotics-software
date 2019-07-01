@@ -93,8 +93,8 @@ public class ParameterBasedNodeExpansionTest
                Point2D foot = new Point2D(center);
                foot.add(0.5 * expectedNewQuadrant.getEnd().negateIfHindEnd(baseNode.getNominalStanceLength()),
                         0.5 * expectedNewQuadrant.getSide().negateIfRightSide(baseNode.getNominalStanceWidth()));
-               double lowerXBound = foot.getX() + parameters.getMinimumStepLength();
-               double upperXBound = foot.getX() + parameters.getMaximumStepReach();
+               double lowerXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength());
+               double upperXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength());
                double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMinimumStepWidth() : parameters.getMaximumStepWidth());
                double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth());
                double xFoot = node.getX(robotQuadrant);
@@ -166,18 +166,18 @@ public class ParameterBasedNodeExpansionTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumStepReach()
+         public double getMaximumFrontStepReach()
          {
             return 0.7;
          }
 
-         public double getMaximumStepLength()
+         public double getMaximumFrontStepLength()
          {
             return 0.6;
          }
 
          @Override
-         public double getMinimumStepLength()
+         public double getMinimumFrontStepLength()
          {
             return -0.3;
          }
@@ -307,7 +307,8 @@ public class ParameterBasedNodeExpansionTest
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -329,12 +330,19 @@ public class ParameterBasedNodeExpansionTest
 
       // do x gait regions for each guy
       QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), new AxisAngle(baseNode.getNominalYaw(), 0.0, 0.0));
-      ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
-      reachableRegion.addVertex(parameters.getMaximumStepLength(), parameters.getMaximumStepWidth());
-      reachableRegion.addVertex(parameters.getMaximumStepLength(), parameters.getMinimumStepWidth());
-      reachableRegion.addVertex(parameters.getMinimumStepLength(), parameters.getMinimumStepWidth());
-      reachableRegion.addVertex(parameters.getMinimumStepLength(), parameters.getMaximumStepWidth());
-      reachableRegion.update();
+
+      ConvexPolygon2D frontReachableRegion = new ConvexPolygon2D();
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepWidth());
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMinimumStepWidth());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMinimumStepWidth());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepWidth());
+      frontReachableRegion.update();
+      ConvexPolygon2D hindReachableRegion = new ConvexPolygon2D();
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepWidth());
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMinimumStepWidth());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMinimumStepWidth());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepWidth());
+      hindReachableRegion.update();
 
       RobotQuadrant movingQuadrant = baseNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
 
@@ -353,7 +361,7 @@ public class ParameterBasedNodeExpansionTest
          double sideOffset = movingQuadrant.getSide() == robotQuadrant.getSide() ? 0.0 : movingQuadrant.isQuadrantOnLeftSide() ? baseNode.getNominalStanceWidth() : -baseNode.getNominalStanceWidth();
          xGaitFrame.setPositionAndUpdate(new FramePoint3D(footFrames.get(robotQuadrant), forwardOffset, sideOffset, 0.0));
 
-         FrameConvexPolygon2D reachableFootRegion = new FrameConvexPolygon2D(xGaitFrame, reachableRegion);
+         FrameConvexPolygon2D reachableFootRegion = new FrameConvexPolygon2D(xGaitFrame, (robotQuadrant.isQuadrantInFront() ? frontReachableRegion : hindReachableRegion));
          reachableFootRegion.changeFrame(ReferenceFrame.getWorldFrame());
 
          ConvexPolygon2D other = new ConvexPolygon2D(intersectionPolygon);

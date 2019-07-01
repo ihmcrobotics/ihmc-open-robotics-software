@@ -52,6 +52,7 @@ public class AlphaFilteredYoMutableFrameVector3D extends YoMutableFrameVector3D 
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);

@@ -33,6 +33,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
+      settings.getAmbleMediumTimings().setMaxSpeed(1.0);
       return settings;
    }
 
@@ -44,18 +45,18 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumStepReach()
+         public double getMaximumFrontStepReach()
          {
             return 0.7;
          }
 
-         public double getMaximumStepLength()
+         public double getMaximumFrontStepLength()
          {
             return 0.6;
          }
 
          @Override
-         public double getMinimumStepLength()
+         public double getMinimumFrontStepLength()
          {
             return -0.3;
          }
@@ -72,10 +73,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
             return 0.35;
          }
       };
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       AStarMessagerListener listener = new AStarMessagerListener(messager);
 
-      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, expansion, registry);
+      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, registry);
    }
 
    @Override
@@ -90,7 +90,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      String errorMessage = test.runAssertions(DataSetName._20171215_220523_SteppingStones);
+      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);

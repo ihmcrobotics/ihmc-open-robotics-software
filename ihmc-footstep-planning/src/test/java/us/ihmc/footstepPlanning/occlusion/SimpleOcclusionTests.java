@@ -202,7 +202,7 @@ public class SimpleOcclusionTests
             pose.setToNaN();
             visiblePolygons.add(polygon);
             visiblePolygonPoses.add(pose);
-            YoGraphicPolygon visualization = new YoGraphicPolygon("Polygon" + i, polygon, pose.getPosition(), pose.getOrientation(), 1.0, 0.02,
+            YoGraphicPolygon visualization = new YoGraphicPolygon("Polygon" + i, polygon, pose.getPosition(), pose.getYawPitchRoll(), 1.0, 0.02,
                                                                   new YoAppearanceRGBColor(Color.BLUE, 0.8));
             polygonVisualizations.add(visualization);
             graphicsListRegistry.registerYoGraphic("viz", visualization);

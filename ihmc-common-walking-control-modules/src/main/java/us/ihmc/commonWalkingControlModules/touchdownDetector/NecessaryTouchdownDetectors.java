@@ -28,6 +28,18 @@ public class NecessaryTouchdownDetectors implements TouchdownDetector
    }
 
    @Override
+   public boolean hasForSureTouchedDown()
+   {
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+      {
+         if (touchdownDetectors.get(i).hasForSureTouchedDown())
+            return true;
+      }
+
+      return false;
+   }
+
+   @Override
    public void update()
    {
       for (int i = 0; i < touchdownDetectors.size(); i++)

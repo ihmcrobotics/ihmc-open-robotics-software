@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -31,7 +32,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
@@ -67,7 +67,7 @@ public class LidarScanPublisher
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
    private CollisionShapeTester collisionBoxNode = null;
-   private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
+   private RobotROSClockCalculator rosClockCalculator = null;
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanRealtimePublisher;
@@ -191,9 +191,9 @@ public class LidarScanPublisher
       shadowAngleThreshold = angleThreshold;
    }
 
-   public void setPPSTimestampOffsetProvider(PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+   public void setROSClockCalculator(RobotROSClockCalculator rosClockCalculator)
    {
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
    }
 
    private RosPointCloudSubscriber createROSPointCloud2Subscriber()
@@ -256,35 +256,35 @@ public class LidarScanPublisher
    private final Point3D lidarPosition = new Point3D();
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   public void readAndPublish()
+   public LidarScanMessage readAndPublish()
    {
       if (publisherTask != null)
          throw new RuntimeException("The publisher is running using its own thread, cannot manually update it.");
 
-      readAndPublishInternal();      
+      return readAndPublishInternal();      
    }
 
-   private void readAndPublishInternal()
+   private LidarScanMessage readAndPublishInternal()
    {
       ScanData scanData = scanDataToPublish.getAndSet(null);
       if (scanData == null)
-         return;
+         return null;
 
       long robotTimestamp;
 
-      if (ppsTimestampOffsetProvider == null)
+      if (rosClockCalculator == null)
       {
          robotTimestamp = scanData.getTimestamp();
          robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
       }
       else
       {
-         long timestamp = scanData.getTimestamp();
-         robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timestamp);
+         long rosTimestamp = scanData.getTimestamp();
+         robotTimestamp = rosClockCalculator.computeRobotMonotonicTime(rosTimestamp);
          boolean waitForTimestamp = true;
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
          if (!success)
-            return;
+            return null;
       }
 
       if (!scanPointsFrame.isWorldFrame())
@@ -345,6 +345,8 @@ public class LidarScanPublisher
          lidarScanPublisher.publish(message);
       else
          lidarScanRealtimePublisher.publish(message);
+      
+      return message;
    }
 
    public static class ScanData

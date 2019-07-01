@@ -186,6 +186,6 @@ public class PelvisLeapOfFaithModule
 
    public void addAngularOffset(FrameQuaternion orientationToPack)
    {
-      orientationToPack.preMultiply(orientationOffset.getFrameOrientation());
+      orientationToPack.prepend(orientationOffset);
    }
 }

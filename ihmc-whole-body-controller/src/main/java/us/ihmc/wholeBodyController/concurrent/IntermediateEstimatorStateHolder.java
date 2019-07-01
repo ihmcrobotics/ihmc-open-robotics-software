@@ -9,10 +9,8 @@ import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 
 public class IntermediateEstimatorStateHolder
 {
@@ -38,17 +36,13 @@ public class IntermediateEstimatorStateHolder
    private final CenterOfMassDataHolder intermediateCenterOfMassDataHolder;
    private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
 
-   private final ContactSensorHolder estimatorContactSensorHolder;
-   private final ContactSensorHolder intermediateContactSensorHolder;
-   private final ContactSensorHolder controllerContactSensorHolder;
-
-   private final RawJointSensorDataHolderMapCopier rawDataEstimatorToIntermadiateCopier;
-   private final RawJointSensorDataHolderMapCopier rawDataIntermediateToControllerCopier;
+   private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
+   private final RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap;
+   private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
    public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootBody, RigidBodyBasics controllerRootBody,
          ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
-         ContactSensorHolder estimatorContactSensorHolder, ContactSensorHolder controllerContactSensorHolder,
          RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
    {
       FullHumanoidRobotModel intermediateModel = fullRobotModelFactory.createFullRobotModel();
@@ -68,13 +62,9 @@ public class IntermediateEstimatorStateHolder
       this.intermediateCenterOfMassDataHolder = new CenterOfMassDataHolder();
       this.controllerCenterOfMassDataHolder = controllerCenterOfMassDataHolder;
 
-      this.estimatorContactSensorHolder = estimatorContactSensorHolder;
-      this.intermediateContactSensorHolder = new ContactSensorHolder(Arrays.asList(intermediateModel.getContactSensorDefinitions()));
-      this.controllerContactSensorHolder = controllerContactSensorHolder;
-
-      RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(intermediateModel);
-      rawDataEstimatorToIntermadiateCopier = new RawJointSensorDataHolderMapCopier(estimatorRawJointSensorDataHolderMap, intermediateRawJointSensorDataHolderMap);
-      rawDataIntermediateToControllerCopier = new RawJointSensorDataHolderMapCopier(intermediateRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
+      this.estimatorRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
+      this.intermediateRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap();
+      this.controllerRawJointSensorDataHolderMap = controllerRawJointSensorDataHolderMap;
    }
 
    public void setFromEstimatorModel(long timestamp, long estimatorTick, long estimatorClockStartTime)
@@ -85,19 +75,17 @@ public class IntermediateEstimatorStateHolder
 
       checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
-      rawDataEstimatorToIntermadiateCopier.copy();
-      intermediateForceSensorDataHolder.set(estimatorForceSensorDataHolder);
+      intermediateForceSensorDataHolder.setDataOnly(estimatorForceSensorDataHolder);
       intermediateCenterOfMassDataHolder.set(estimatorCenterOfMassDataHolder);
-      intermediateContactSensorHolder.set(estimatorContactSensorHolder);
+      intermediateRawJointSensorDataHolderMap.set(estimatorRawJointSensorDataHolderMap);
    }
 
    public void getIntoControllerModel()
    {
       intermediateToControllerCopier.copy();
-      rawDataIntermediateToControllerCopier.copy();
-      controllerForceSensorDataHolder.set(intermediateForceSensorDataHolder);
+      controllerForceSensorDataHolder.setDataOnly(intermediateForceSensorDataHolder);
       controllerCenterOfMassDataHolder.set(intermediateCenterOfMassDataHolder);
-      controllerContactSensorHolder.set(intermediateContactSensorHolder);
+      controllerRawJointSensorDataHolderMap.set(intermediateRawJointSensorDataHolderMap);
    }
 
    public long getTimestamp()
@@ -154,9 +142,6 @@ public class IntermediateEstimatorStateHolder
       private final CenterOfMassDataHolder estimatorCenterOfMassDataHolder;
       private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
 
-      private final ContactSensorHolder estimatorContactSensorHolder;
-      private final ContactSensorHolder controllerContactSensorHolder;
-
       private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
       private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
@@ -164,7 +149,6 @@ public class IntermediateEstimatorStateHolder
       public Builder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootJoint, RigidBodyBasics controllerRootJoint,
             ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
             CenterOfMassDataHolder estimatorCenterOfMassDataHolder, CenterOfMassDataHolder controllerCenterOfMassDataHolder,
-            ContactSensorHolder estimatorContactSensorHolder, ContactSensorHolder controllerContactSensorHolder,
             RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap, RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap)
       {
          this.fullRobotModelFactory = fullRobotModelFactory;
@@ -174,8 +158,6 @@ public class IntermediateEstimatorStateHolder
          this.controllerForceSensorDataHolder = controllerForceSensorDataHolder;
          this.estimatorCenterOfMassDataHolder = estimatorCenterOfMassDataHolder;
          this.controllerCenterOfMassDataHolder = controllerCenterOfMassDataHolder;
-         this.estimatorContactSensorHolder = estimatorContactSensorHolder;
-         this.controllerContactSensorHolder = controllerContactSensorHolder;
          this.estimatorRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
          this.controllerRawJointSensorDataHolderMap = controllerRawJointSensorDataHolderMap;
       }
@@ -185,7 +167,6 @@ public class IntermediateEstimatorStateHolder
       {
          return new IntermediateEstimatorStateHolder(fullRobotModelFactory, estimatorRootJoint, controllerRootJoint, estimatorForceSensorDataHolder,
                controllerForceSensorDataHolder, estimatorCenterOfMassDataHolder, controllerCenterOfMassDataHolder,
-               estimatorContactSensorHolder, controllerContactSensorHolder,
                estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
       }
 

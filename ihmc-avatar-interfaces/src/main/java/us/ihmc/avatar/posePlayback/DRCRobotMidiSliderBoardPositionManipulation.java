@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -532,13 +531,13 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          double xyRange = 1.0;
          double zRange = 2.0;
 
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), footPosition.getX() - xyRange / 2.0, footPosition.getX() + xyRange / 2.0);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), footPosition.getY() - xyRange / 2.0, footPosition.getY() + xyRange / 2.0);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), footPosition.getZ() - zRange / 2.0, footPosition.getZ() + zRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoX(), footPosition.getX() - xyRange / 2.0, footPosition.getX() + xyRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoY(), footPosition.getY() - xyRange / 2.0, footPosition.getY() + xyRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoZ(), footPosition.getZ() - zRange / 2.0, footPosition.getZ() + zRange / 2.0);
 
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getYaw(), -Math.PI, Math.PI);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getPitch(), -Math.PI, Math.PI);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getRoll(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoYaw(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoPitch(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoRoll(), -Math.PI, Math.PI);
 
          break;
       }
@@ -582,13 +581,13 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
          double xyRange = 1.0;
          double zRange = 1.0;
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoX(), handPosition.getX() - xyRange / 2.0, handPosition.getX() + xyRange / 2.0);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoY(), handPosition.getY() - xyRange / 2.0, handPosition.getY() + xyRange / 2.0);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getPosition().getYoZ(), handPosition.getZ() - zRange / 2.0, handPosition.getZ() + zRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoX(), handPosition.getX() - xyRange / 2.0, handPosition.getX() + xyRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoY(), handPosition.getY() - xyRange / 2.0, handPosition.getY() + xyRange / 2.0);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoZ(), handPosition.getZ() - zRange / 2.0, handPosition.getZ() + zRange / 2.0);
 
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getYaw(), -Math.PI, Math.PI);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getPitch(), -Math.PI, Math.PI);
-         sliderBoard.setSlider(sliderChannel++, yoFramePose.getOrientation().getRoll(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoYaw(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoPitch(), -Math.PI, Math.PI);
+         sliderBoard.setSlider(sliderChannel++, yoFramePose.getYoRoll(), -Math.PI, Math.PI);
 
          break;
       }
@@ -903,17 +902,13 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             for (RobotSide robotSide : RobotSide.values())
             {
                YoFramePoseUsingYawPitchRoll footIK = feetIKs.get(robotSide);
-               FramePoint3D position = new FramePoint3D(footIK.getPosition());
-               FrameQuaternion orientation = footIK.getOrientation().getFrameOrientationCopy();
-               FramePose3D framePose = new FramePose3D(position, orientation);
+               FramePose3D framePose = new FramePose3D(footIK);
                framePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
                framePose.get(desiredTransform);
                legInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);
 
                YoFramePoseUsingYawPitchRoll handIK = handIKs.get(robotSide);
-               position = new FramePoint3D(handIK.getPosition());
-               orientation = handIK.getOrientation().getFrameOrientationCopy();
-               framePose = new FramePose3D(position, orientation);
+               framePose = new FramePose3D(handIK);
                framePose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
                framePose.get(desiredTransform);
                armInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);

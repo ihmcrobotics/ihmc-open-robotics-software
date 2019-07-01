@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -60,7 +61,7 @@ public class FiducialDetectorFromCameraImagesTest
       RigidBodyTransform transformFromReportedToFiducialFrame = new RigidBodyTransform();
       transformFromReportedToFiducialFrame.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI / 2.0);
 
-      final FiducialDetectorFromCameraImages detector = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      final FiducialDetectorFromCameraImages detector = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoVariableRegistry(), yoGraphicsListRegistry,"test");
       detector.setTargetIDToLocate(50L);
 
       detector.setFieldOfView(fieldOfView, fieldOfView);
@@ -114,7 +115,21 @@ public class FiducialDetectorFromCameraImagesTest
             //            System.out.println("intrinsicParameters.radial[0] = " + intrinsicParameters.radial[0]);
             //            System.out.println("intrinsicParameters.radial[1] = " + intrinsicParameters.radial[1]);
 
-            detector.detect(bufferedImage, cameraPositionInWorld, cameraOrientationInWorldXForward);
+            int height = bufferedImage.getHeight();
+            int width = bufferedImage.getWidth();
+
+            double fx = (width / 2.0) / Math.tan(Math.toRadians(80.0)/ 2.0);
+            double fy = (height / 2.0) / Math.tan(Math.toRadians(45.0) / 2.0);
+
+            intrinsicParameters.width = width;
+            intrinsicParameters.height = height;
+            intrinsicParameters.cx = width / 2.0;
+            intrinsicParameters.cy = height / 2.0;
+            intrinsicParameters.fx = fx;
+            intrinsicParameters.fy = fy;
+
+           
+            detector.detect(bufferedImage, cameraPositionInWorld, cameraOrientationInWorldXForward,intrinsicParameters);
          }
 
          @Override

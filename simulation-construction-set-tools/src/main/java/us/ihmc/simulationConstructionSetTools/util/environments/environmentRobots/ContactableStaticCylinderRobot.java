@@ -55,7 +55,8 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    public ContactableStaticCylinderRobot(String name, RigidBodyTransform cylinderTransform, double cylinderHeight, double cylinderRadius, AppearanceDefinition appearance)
    {
       super(name);
-      cylinder = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), cylinderTransform, cylinderHeight, cylinderRadius);
+      cylinder = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), cylinderHeight, cylinderRadius);
+      cylinder.getCylinder3d().applyTransform(cylinderTransform);
       
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
@@ -93,7 +94,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    
    private void createCylinderGraphics(FrameCylinder3d cylinder, AppearanceDefinition appearance)
    {
-      cylinderGraphic = linkGraphics.addCylinder(cylinder.getHeight(), cylinder.getRadius(), appearance);
+      cylinderGraphic = linkGraphics.addCylinder(cylinder.getLength(), cylinder.getRadius(), appearance);
    }
 
    public Link getCylinderLink()
@@ -136,7 +137,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return cylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
+      return cylinder.getCylinder3d().isPointInside(pointInWorldToCheck);
    }
    
    @Override
@@ -148,7 +149,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      cylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      cylinder.getCylinder3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 
