@@ -51,9 +51,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
       double reachSquared = MathTools.square(parameters.getMaximumStepReach());
-      for (double x = parameters.getMinimumStepLength(); x < parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
+      for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
       {
-         for (double y = parameters.getMinimumStepWidth(); y < parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
+         for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
             if (MathTools.square(x) + MathTools.square(y) > reachSquared)
                continue;
@@ -63,7 +63,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                continue;
             }
 
-            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
+            for (double yaw = parameters.getMinimumStepYaw(); yaw <= parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);
