@@ -20,6 +20,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
       setPositionIntegrationBreakFrequency(other.getPositionIntegrationBreakFrequency());
       setPositionIntegrationMaxError(other.getPositionIntegrationMaxError());
       setVelocityIntegrationMaxError(other.getVelocityIntegrationMaxError());
+      setPositionFeedbackMaxError(other.getPositionFeedbackMaxError());
+      setVelocityFeedbackMaxError(other.getVelocityFeedbackMaxError());
    }
 
    /**
@@ -56,6 +58,10 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
          setPositionIntegrationMaxError(other.getPositionIntegrationMaxError());
       if (!hasVelocityIntegrationMaxError())
          setVelocityIntegrationMaxError(other.getVelocityIntegrationMaxError());
+      if (!hasPositionFeedbackMaxError())
+         setPositionFeedbackMaxError(other.getPositionFeedbackMaxError());
+      if (!hasVelocityFeedbackMaxError())
+         setVelocityFeedbackMaxError(other.getVelocityFeedbackMaxError());
    }
 
    void setControlMode(JointDesiredControlMode controlMode);
@@ -85,4 +91,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
    void setPositionIntegrationMaxError(double maxPositionError);
 
    void setVelocityIntegrationMaxError(double maxVelocityError);
+
+   void setPositionFeedbackMaxError(double positionFeedbackMaxError);
+
+   void setVelocityFeedbackMaxError(double velocityFeedbackMaxError);
 }
