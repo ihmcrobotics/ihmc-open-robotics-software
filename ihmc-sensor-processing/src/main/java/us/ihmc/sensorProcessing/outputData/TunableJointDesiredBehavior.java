@@ -38,8 +38,8 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
       damping = new DoubleParameter(namePrefix + "Damping", registry, other.getDamping(), 0.0, 10.0);
       masterGain = new DoubleParameter(namePrefix + "MasterGain", registry, other.getMasterGain(), 0.0, 1.0);
       velocityScaling = new DoubleParameter(namePrefix + "VelocityScaling", registry, other.getVelocityScaling(), 0.0, 1.0);
-      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, other.getMaxPositionError(), 0.0, Double.POSITIVE_INFINITY);
-      maxVelocityError = new DoubleParameter(namePrefix + "MaxVelocityError", registry, other.getMaxVelocityError(), 0.0, Double.POSITIVE_INFINITY);
+      maxPositionError = new DoubleParameter(namePrefix + "PositionFeedbackMaxError", registry, other.getMaxPositionError(), 0.0, Double.POSITIVE_INFINITY);
+      maxVelocityError = new DoubleParameter(namePrefix + "VelocityFeedbackMaxError", registry, other.getMaxVelocityError(), 0.0, Double.POSITIVE_INFINITY);
    }
 
    @Override
