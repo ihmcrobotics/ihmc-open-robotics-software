@@ -181,6 +181,8 @@ public class JointSettingsHelper
             jointDesiredOutput.setDamping(desiredBehaviorLoaded.getDamping());
             jointDesiredOutput.setMasterGain(desiredBehaviorLoaded.getMasterGain());
             jointDesiredOutput.setVelocityScaling(desiredBehaviorLoaded.getVelocityScaling());
+            jointDesiredOutput.setPositionFeedbackMaxError(desiredBehaviorLoaded.getMaxPositionError());
+            jointDesiredOutput.setVelocityFeedbackMaxError(desiredBehaviorLoaded.getMaxVelocityError());
          }
          else
          { // The joint is not loaded or we do not have parameters for the loaded joint.
@@ -189,6 +191,8 @@ public class JointSettingsHelper
             jointDesiredOutput.setDamping(desiredBehaviorNoLoad.getDamping());
             jointDesiredOutput.setMasterGain(desiredBehaviorNoLoad.getMasterGain());
             jointDesiredOutput.setVelocityScaling(desiredBehaviorNoLoad.getVelocityScaling());
+            jointDesiredOutput.setPositionFeedbackMaxError(desiredBehaviorNoLoad.getMaxPositionError());
+            jointDesiredOutput.setVelocityFeedbackMaxError(desiredBehaviorNoLoad.getMaxVelocityError());
          }
       }
    }
