@@ -12,6 +12,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
 {
+   private static final double SUGGESTED_MAXIMUM_POSITION_ERROR = 2.0 * Math.PI;
+   private static final double SUGGESTED_MAXIMUM_VELOCITY = SUGGESTED_MAXIMUM_POSITION_ERROR / 0.1;
+
    private final EnumParameter<JointDesiredControlMode> controlMode;
    private final DoubleParameter stiffness;
    private final DoubleParameter damping;
@@ -27,8 +30,8 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
       damping = new DoubleParameter(namePrefix + "Damping", registry, 0.0, 10.0);
       masterGain = new DoubleParameter(namePrefix + "MasterGain", registry, 0.0, 1.0);
       velocityScaling = new DoubleParameter(namePrefix + "VelocityScaling", registry, 0.0, 1.0);
-      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, Double.POSITIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
-      maxVelocityError = new DoubleParameter(namePrefix + "MaxVelocityError", registry, Double.POSITIVE_INFINITY, 0.0, Double.POSITIVE_INFINITY);
+      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, SUGGESTED_MAXIMUM_POSITION_ERROR, 0.0, Double.POSITIVE_INFINITY);
+      maxVelocityError = new DoubleParameter(namePrefix + "MaxVelocityError", registry, SUGGESTED_MAXIMUM_VELOCITY, 0.0, Double.POSITIVE_INFINITY);
    }
 
    public TunableJointDesiredBehavior(String namePrefix, JointDesiredBehaviorReadOnly other, YoVariableRegistry registry)
