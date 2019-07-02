@@ -36,8 +36,8 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    {
       positionBreakFrequency = new DoubleParameter(namePrefix + "PositionBreakFrequency", registry, JointAccelerationIntegrationCalculator.DEFAULT_POSITION_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
       velocityBreakFrequency = new DoubleParameter(namePrefix + "VelocityBreakFrequency", registry, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
-      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_POSITION_ERROR, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
-      maxVelocity = new DoubleParameter(namePrefix + "MaxVelocity", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
+      maxPositionError = new DoubleParameter(namePrefix + "PositionIntegrationMaxError", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_POSITION_ERROR, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
+      maxVelocity = new DoubleParameter(namePrefix + "VelocityIntegrationMaxMagnitude", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
    }
 
    /**
