@@ -28,6 +28,9 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    private final YoDouble positionIntegrationMaxError;
    private final YoDouble velocityIntegrationMaxError;
 
+   private final YoDouble positionFeedbackMaxError;
+   private final YoDouble velocityFeedbackMaxError;
+
    public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
       namePrefix += "LowLevel";
@@ -49,6 +52,9 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       positionIntegrationMaxError = new YoDouble(namePrefix + "PositionIntegrationMaxError" + suffixString, registry);
       velocityIntegrationMaxError = new YoDouble(namePrefix + "VelocityIntegrationMaxError" + suffixString, registry);
 
+      positionFeedbackMaxError = new YoDouble(namePrefix + "PositionFeedbackMaxError" + suffixString, registry);
+      velocityFeedbackMaxError = new YoDouble(namePrefix + "VelocityFeedbackMaxError" + suffixString, registry);
+
       clear();
    }
 
@@ -68,6 +74,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       positionIntegrationBreakFrequency.set(Double.NaN);
       positionIntegrationMaxError.set(Double.NaN);
       velocityIntegrationMaxError.set(Double.NaN);
+      positionFeedbackMaxError.set(Double.NaN);
+      velocityFeedbackMaxError.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -245,6 +253,30 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    public void setVelocityIntegrationMaxError(double maxVelocityError)
    {
       this.velocityIntegrationMaxError.set(maxVelocityError);
+   }
+
+   @Override
+   public double getPositionFeedbackMaxError()
+   {
+      return positionFeedbackMaxError.getValue();
+   }
+
+   @Override
+   public void setPositionFeedbackMaxError(double positionFeedbackMaxError)
+   {
+      this.positionFeedbackMaxError.set(positionFeedbackMaxError);
+   }
+
+   @Override
+   public double getVelocityFeedbackMaxError()
+   {
+      return velocityFeedbackMaxError.getValue();
+   }
+
+   @Override
+   public void setVelocityFeedbackMaxError(double velocityFeedbackMaxError)
+   {
+      this.velocityFeedbackMaxError.set(velocityFeedbackMaxError);
    }
 
    @Override

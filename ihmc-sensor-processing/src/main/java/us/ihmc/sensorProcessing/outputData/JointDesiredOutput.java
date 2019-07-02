@@ -21,6 +21,9 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    private double positionIntegrationMaxError = Double.NaN;
    private double velocityIntegrationMaxError = Double.NaN;
 
+   private double positionFeedbackMaxError = Double.NaN;
+   private double velocityFeedbackMaxError = Double.NaN;
+
    public JointDesiredOutput()
    {
       clear();
@@ -46,6 +49,9 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
       positionIntegrationBreakFrequency = Double.NaN;
       positionIntegrationMaxError = Double.NaN;
       velocityIntegrationMaxError = Double.NaN;
+
+      positionFeedbackMaxError = Double.NaN;
+      velocityFeedbackMaxError = Double.NaN;
    }
 
    @Override
@@ -223,6 +229,30 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    public void setVelocityIntegrationMaxError(double maxVelocityError)
    {
       this.velocityIntegrationMaxError = maxVelocityError;
+   }
+
+   @Override
+   public double getPositionFeedbackMaxError()
+   {
+      return positionFeedbackMaxError;
+   }
+
+   @Override
+   public double getVelocityFeedbackMaxError()
+   {
+      return velocityFeedbackMaxError;
+   }
+
+   @Override
+   public void setPositionFeedbackMaxError(double positionFeedbackMaxError)
+   {
+      this.positionFeedbackMaxError = positionFeedbackMaxError;
+   }
+
+   @Override
+   public void setVelocityFeedbackMaxError(double velocityFeedbackMaxError)
+   {
+      this.velocityFeedbackMaxError = velocityFeedbackMaxError;
    }
 
    public void set(JointDesiredOutput other)
