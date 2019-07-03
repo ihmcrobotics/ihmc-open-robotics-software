@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.SteppingStonesEnvironment;
@@ -62,7 +61,6 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setInitialOffset(initialOffset);
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
 
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
       conductor = quadrupedTestFactory.createTestConductor();
