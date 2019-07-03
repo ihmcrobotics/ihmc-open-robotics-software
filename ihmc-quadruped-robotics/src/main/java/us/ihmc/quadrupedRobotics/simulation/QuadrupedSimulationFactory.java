@@ -107,7 +107,6 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
    private final RequiredFactoryField<QuadrupedInitialOffsetAndYaw> initialOffset = new RequiredFactoryField<>("initialOffset");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
-   private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
    private final RequiredFactoryField<SensorTimestampHolder> timestampProvider = new RequiredFactoryField<>("timestampProvider");
    private final RequiredFactoryField<Boolean> useStateEstimator = new RequiredFactoryField<>("useStateEstimator");
    private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
@@ -315,11 +314,8 @@ public class QuadrupedSimulationFactory
 
    private void createRealtimeRos2Node()
    {
-      if (useNetworking.get())
-      {
-         PubSubImplementation pubSubImplementation = useLocalCommunicator.get() ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
-         realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_quadruped_simulation");
-      }
+      PubSubImplementation pubSubImplementation = useLocalCommunicator.get() ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_quadruped_simulation");
    }
 
    public void createControllerManager()
@@ -339,24 +335,21 @@ public class QuadrupedSimulationFactory
 
    private void createPoseCommunicator()
    {
-      if (useNetworking.get())
-      {
-         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
-         MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName());
-         poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(), jointConfigurationGathererAndProducer, publisherTopicNameGenerator, realtimeRos2Node,
-                                                    timestampProvider.get(), sensorReader.getSensorRawOutputMapReadOnly(),
-                                                    controllerManager.getMotionStatusHolder(), null);
-      }
-      else
-      {
-         poseCommunicator = null;
-      }
+      JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
+      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName());
+      poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(),
+                                                 jointConfigurationGathererAndProducer,
+                                                 publisherTopicNameGenerator,
+                                                 realtimeRos2Node,
+                                                 timestampProvider.get(),
+                                                 sensorReader.getSensorRawOutputMapReadOnly(),
+                                                 controllerManager.getMotionStatusHolder(),
+                                                 null);
    }
 
    private void createControllerNetworkSubscriber()
    {
-      if (useNetworking.get())
-         controllerManager.createControllerNetworkSubscriber(sdfRobot.get().getName(), realtimeRos2Node); // TODO Verify that it is the right name to use.
+      controllerManager.createControllerNetworkSubscriber(sdfRobot.get().getName(), realtimeRos2Node); // TODO Verify that it is the right name to use.
    }
 
    private void createGroundContactModel()
@@ -524,8 +517,7 @@ public class QuadrupedSimulationFactory
       setupJointFriction();
       setupCameras();
 
-      if (useNetworking.get())
-         realtimeRos2Node.spin();
+      realtimeRos2Node.spin();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
 
@@ -725,11 +717,6 @@ public class QuadrupedSimulationFactory
    public void setControllerCoreOptimizationSettings(ControllerCoreOptimizationSettings controllerCoreOptimizationSettings)
    {
       this.controllerCoreOptimizationSettings.set(controllerCoreOptimizationSettings);
-   }
-
-   public void setUseNetworking(boolean useNetworking)
-   {
-      this.useNetworking.set(useNetworking);
    }
 
    public void setTimestampHolder(SensorTimestampHolder timestampProvider)

@@ -19,7 +19,6 @@ public class GenericQuadrupedCircleWalkingDemo
    {
          GenericQuadrupedTestFactory quadrupedTestFactory = new GenericQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUseNetworking(true);
          GoalOrientedTestConductor conductor = quadrupedTestFactory.createTestConductor();
          QuadrupedTestYoVariables variables = new QuadrupedTestYoVariables(conductor.getScs());
          RemoteQuadrupedTeleopManager stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();

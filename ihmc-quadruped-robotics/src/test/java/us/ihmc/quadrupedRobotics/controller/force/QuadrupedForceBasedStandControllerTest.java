@@ -40,7 +40,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
    }
 
    @AfterEach

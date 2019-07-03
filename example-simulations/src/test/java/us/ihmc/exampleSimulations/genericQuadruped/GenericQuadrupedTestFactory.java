@@ -65,7 +65,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
    private final OptionalFactoryField<QuadrupedInitialOffsetAndYaw> initialOffset = new OptionalFactoryField<>("initialOffset");
-   private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
    private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private FullQuadrupedRobotModel fullRobotModel;
@@ -87,7 +86,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       initialPosition.setDefaultValue(new GenericQuadrupedDefaultInitialPosition());
       initialOffset.setDefaultValue(new QuadrupedInitialOffsetAndYaw());
       usePushRobotController.setDefaultValue(false);
-      useNetworking.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -142,7 +140,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setKneeTorqueTouchdownForSureDetectionThreshold(kneeTorqueTouchdownForSureDetectionThreshold);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setUseNetworking(useNetworking.get());
       simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(useStateEstimator.get());
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
@@ -150,7 +147,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setInitialForceControlState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
-      simulationFactory.setUseLocalCommunicator(useNetworking.get());
+      simulationFactory.setUseLocalCommunicator(true);
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
       simulationFactory.setDCMPlannerParameters(dcmPlannerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
@@ -173,47 +170,39 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
 
-      if(useNetworking.get())
-      {
-         YoVariableRegistry teleopRegistry = new YoVariableRegistry("TeleopRegistry");
-         sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
+      YoVariableRegistry teleopRegistry = new YoVariableRegistry("TeleopRegistry");
+      sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
 
-         Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
-         QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
+      QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
 
-         // disable xbox
-         networkModuleParameters.enableXBoxModule(false);
+      // disable xbox
+      networkModuleParameters.enableXBoxModule(false);
 
-         // enable teleop modules
-         networkModuleParameters.enableFootstepPlanningModule(true);
-         networkModuleParameters.enableBodyHeightTeleopModule(true);
-         networkModuleParameters.enableBodyTeleopModule(true);
-         networkModuleParameters.enableStepTeleopModule(true);
+      // enable teleop modules
+      networkModuleParameters.enableFootstepPlanningModule(true);
+      networkModuleParameters.enableBodyHeightTeleopModule(true);
+      networkModuleParameters.enableBodyTeleopModule(true);
+      networkModuleParameters.enableStepTeleopModule(true);
 
-         graphicsListRegistry = new YoGraphicsListRegistry();
-         networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), physicalProperties.getFeetGroundContactPoints(),
-                                                                 new DefaultFootstepPlannerParameters(),
-                                                                 xGaitSettings, new GenericQuadrupedPointFootSnapperParameters(),
-                                                                 PubSubImplementation.INTRAPROCESS, networkModuleParameters);
-         networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
-         stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
+      graphicsListRegistry = new YoGraphicsListRegistry();
+      networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
+                                                              physicalProperties.getNominalBodyHeight(),
+                                                              physicalProperties.getFeetGroundContactPoints(),
+                                                              new DefaultFootstepPlannerParameters(),
+                                                              xGaitSettings,
+                                                              new GenericQuadrupedPointFootSnapperParameters(),
+                                                              PubSubImplementation.INTRAPROCESS,
+                                                              networkModuleParameters);
+      networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
+      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
-         new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
-      }
-      else
-      {
-         stepTeleopManager = null;
-      }
+      new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
 
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
-
-      if(useNetworking.get())
-      {
-//         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, TEST_INPUT_UPDATE_FREQUENCY, sdfRobot.getRobotsYoVariableRegistry()));
-         goalOrientedTestConductor.getScs().addYoGraphicsListRegistry(graphicsListRegistry);
-      }
+      goalOrientedTestConductor.getScs().addYoGraphicsListRegistry(graphicsListRegistry);
 
       FactoryTools.disposeFactory(this);
 
@@ -254,12 +243,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition)
    {
       this.initialPosition.set(initialPosition);
-   }
-
-   @Override
-   public void setUseNetworking(boolean useNetworking)
-   {
-      this.useNetworking.set(useNetworking);
    }
 
    @Override
