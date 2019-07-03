@@ -5,17 +5,18 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootholdAreaCost implements FootstepCost
 {
-   private static final double weight = 1.0;
-
+   private final FootstepPlannerParametersReadOnly parameters;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   public FootholdAreaCost(SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons, FootstepNodeSnapperReadOnly snapper)
+   public FootholdAreaCost(FootstepPlannerParametersReadOnly parameters, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons, FootstepNodeSnapperReadOnly snapper)
    {
+      this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
    }
@@ -32,6 +33,6 @@ public class FootholdAreaCost implements FootstepCost
          return 0.0;
 
       double percentAreaUnoccupied = 1.0 - area / footArea;
-      return percentAreaUnoccupied * weight;
+      return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
    }
 }

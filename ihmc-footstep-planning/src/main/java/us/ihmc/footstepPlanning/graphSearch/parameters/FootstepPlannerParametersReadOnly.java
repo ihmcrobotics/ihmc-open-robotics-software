@@ -662,6 +662,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+    */
+   default double getFootholdAreaWeight()
+   {
+      return get(footholdAreaWeight);
+   }
+
+   /**
     * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
     */
    default AdaptiveSwingParameters getAdaptiveSwingParameters()
