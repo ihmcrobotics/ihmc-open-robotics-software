@@ -25,7 +25,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
@@ -34,7 +34,7 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       commandList.clear();
 
@@ -48,12 +48,12 @@ public class WalkingPreviewResetTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return count >= numberOfTicksBeforeDone;
    }

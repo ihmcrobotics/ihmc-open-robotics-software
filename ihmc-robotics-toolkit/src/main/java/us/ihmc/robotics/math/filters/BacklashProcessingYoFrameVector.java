@@ -50,6 +50,7 @@ public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements 
       zDot.update();
    }
 
+   @Override
    public void reset()
    {
       xDot.reset();

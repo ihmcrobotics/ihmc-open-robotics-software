@@ -45,6 +45,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider minSwingTimeForDisturbanceRecovery = new DoubleParameter("minSwingTimeForDisturbanceRecovery", finalRegistry, 0.2);
    private final DoubleProvider minRequiredSpeedUpFactor = new DoubleParameter("minRequiredSpeedUpFactor", finalRegistry, 1.05);
 
+   private final DoubleProvider flatWaypointProportion = new DoubleParameter("swingFlatWaypointProportion", finalRegistry, 0.5);
    private final DoubleProvider waypointProportion0 = new DoubleParameter("swingWaypointProportion0", finalRegistry, 0.33);
    private final DoubleProvider waypointProportion1 = new DoubleParameter("swingWaypointProportion1", finalRegistry, 0.66);
    private final DoubleProvider obstacleClearanceWaypointProportion0 = new DoubleParameter("swingObstacleClearanceWaypointProportion0", finalRegistry, 0.25);
@@ -58,6 +59,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleParameter footFullyLoadedThreshold = new DoubleParameter("footFullyLoadedThreshold", finalRegistry, 0.15);
 
    private final DoubleProvider minimumTimeInSupportState = new DoubleParameter("minimumTimeInSupportState", finalRegistry, 0.05);
+   private final DoubleProvider maximumPhaseThroughStepToAllowStart = new DoubleParameter("maximumPhaseThroughStepToAllowStart", finalRegistry, 0.5);
 
    private final DoubleProvider footVelocityThresholdForSlipping = new DoubleParameter("footVelocityThresholdForSlipping", finalRegistry, 0.25);
    private final DoubleProvider footVelocityThresholdForNotSlipping = new DoubleParameter("footVelocityThresholdForNotSlipping", finalRegistry, 0.1);
@@ -148,6 +150,11 @@ public class QuadrupedFootControlModuleParameters
       return minRequiredSpeedUpFactor.getValue();
    }
 
+   public double getFlatSwingWaypointProportion()
+   {
+      return flatWaypointProportion.getValue();
+   }
+
    public double getSwingWaypointProportion0()
    {
       return waypointProportion0.getValue();
@@ -213,9 +220,14 @@ public class QuadrupedFootControlModuleParameters
       return coefficientOfFrictionWhenNotSlipping.getValue();
    }
 
-   public DoubleProvider getMinimumTimeInSupportState()
+   public double getMinimumTimeInSupportState()
    {
-      return minimumTimeInSupportState;
+      return minimumTimeInSupportState.getValue();
+   }
+
+   public double getMaximumPhaseThroughStepToAllowStart()
+   {
+      return maximumPhaseThroughStepToAllowStart.getValue();
    }
 
    public FrameVector3DReadOnly getTouchdownVelocity()

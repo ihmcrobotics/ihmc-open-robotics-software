@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 
 public abstract class QuadrupedToolboxController
 {
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final OutputManager outputManager;

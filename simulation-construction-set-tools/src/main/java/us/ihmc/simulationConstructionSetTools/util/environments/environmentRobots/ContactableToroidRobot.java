@@ -67,7 +67,8 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    {
       super(name);
       pinJointTransformToWorld = pinJointTransform;
-      wheelTorus = new FrameTorus3d(ReferenceFrame.getWorldFrame(), pinJointTransform, steeringWheelRadius, steeringWheelThickness);
+      wheelTorus = new FrameTorus3d(ReferenceFrame.getWorldFrame(), steeringWheelRadius, steeringWheelThickness);
+      wheelTorus.applyTransform(pinJointTransform);
       
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
@@ -148,7 +149,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return wheelTorus.getTorus3d().isInsideOrOnSurface(pointInWorldToCheck);
+      return wheelTorus.getTorus3d().isPointInside(pointInWorldToCheck);
    }
    
    @Override
@@ -160,7 +161,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      wheelTorus.getTorus3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      wheelTorus.getTorus3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 

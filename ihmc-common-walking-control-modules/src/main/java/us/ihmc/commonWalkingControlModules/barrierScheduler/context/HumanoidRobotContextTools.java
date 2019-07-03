@@ -2,25 +2,23 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public class HumanoidRobotContextTools
 {
-   public static void updateContext(FullHumanoidRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
+   public static void updateContext(FullRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
    {
+      contextData.clear();
       for (int jointIndex = 0; jointIndex < fullRobotModel.getOneDoFJoints().length; jointIndex++)
       {
          OneDoFJointBasics joint = fullRobotModel.getOneDoFJoints()[jointIndex];
-         contextData.setJointQForIndex(jointIndex, joint.getQ());
-         contextData.setJointQdForIndex(jointIndex, joint.getQd());
-         contextData.setJointQddForIndex(jointIndex, joint.getQdd());
-         contextData.setJointTauForIndex(jointIndex, joint.getTau());
+         contextData.addJoint(joint.getQ(), joint.getQd(), joint.getQdd(), joint.getTau());
       }
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       contextData.setRootJointData(rootJoint.getJointPose(), rootJoint.getJointTwist(), rootJoint.getJointAcceleration());
    }
 
-   public static void updateRobot(FullHumanoidRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
+   public static void updateRobot(FullRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
    {
       for (int jointIndex = 0; jointIndex < fullRobotModel.getOneDoFJoints().length; jointIndex++)
       {

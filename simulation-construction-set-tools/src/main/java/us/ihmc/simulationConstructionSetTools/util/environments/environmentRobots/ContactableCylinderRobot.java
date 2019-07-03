@@ -71,7 +71,7 @@ public class ContactableCylinderRobot extends ContactableRobot
 
       linkGraphics = new Graphics3DObject();
       //linkGraphics.addCoordinateSystem(0.2);
-      linkGraphics.addCylinder(frameCylinder.getHeight(), frameCylinder.getRadius(), YoAppearance.Transparent());
+      linkGraphics.addCylinder(frameCylinder.getLength(), frameCylinder.getRadius(), YoAppearance.Transparent());
       if(modelName!=null)
          linkGraphics.addModelFile(modelName);
       link.setLinkGraphics(linkGraphics);
@@ -112,7 +112,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);
-      boolean insideOrOnSurface = frameCylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
+      boolean insideOrOnSurface = frameCylinder.getCylinder3d().isPointInside(pointInWorldToCheck);
       frameCylinder.changeFrame(afterRootJointFrame);
       return insideOrOnSurface;
    }
@@ -128,7 +128,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);
-      frameCylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      frameCylinder.getCylinder3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
       frameCylinder.changeFrame(afterRootJointFrame);
    }
 

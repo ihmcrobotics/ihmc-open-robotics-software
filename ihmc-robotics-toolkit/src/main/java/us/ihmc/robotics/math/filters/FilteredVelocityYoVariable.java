@@ -98,6 +98,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);

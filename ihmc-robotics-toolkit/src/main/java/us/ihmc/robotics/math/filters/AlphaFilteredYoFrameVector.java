@@ -99,6 +99,7 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements Proce
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);

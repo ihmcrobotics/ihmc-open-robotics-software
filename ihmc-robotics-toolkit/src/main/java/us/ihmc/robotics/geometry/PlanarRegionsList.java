@@ -28,6 +28,11 @@ public class PlanarRegionsList
       regions = planarRegions;
    }
 
+   public PlanarRegionsList(PlanarRegionsList other)
+   {
+      this(other.getPlanarRegionsAsList());
+   }
+
    /**
     * Adds a planar region to this list of planar regions.
     *
@@ -219,6 +224,29 @@ public class PlanarRegionsList
       {
          PlanarRegion candidateRegion = regions.get(i);
          if (candidateRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
+   public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(Point2DReadOnly point)
+   {
+      return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
+   }
+
+   public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(double x, double y)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isPointInsideByVerticalLineIntersection(x, y))
          {
             if (containers == null)
                containers = new ArrayList<>();
