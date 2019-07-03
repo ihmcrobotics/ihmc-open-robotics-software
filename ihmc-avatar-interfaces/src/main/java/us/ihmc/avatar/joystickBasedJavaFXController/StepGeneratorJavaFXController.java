@@ -43,6 +43,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -109,6 +110,7 @@ public class StepGeneratorJavaFXController
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
    private final DoubleProvider stepTime;
    private final BoundingBoxCollisionDetector collisionDetector;
+   private final SteppingParameters steppingParameters;
 
    public enum SecondaryControlOption
    {
@@ -148,10 +150,13 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
+      continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
 
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
+
+      steppingParameters = walkingControllerParameters.getSteppingParameters();
 
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
@@ -410,13 +415,24 @@ public class StepGeneratorJavaFXController
       return meshView;
    }
 
+   private boolean isSafeStepHeight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
+   {
+      double heightChange = touchdownPose.getZ() - stancePose.getZ();
+      return heightChange < steppingParameters.getMaxStepUp() && heightChange > - steppingParameters.getMaxStepDown();
+   }
+
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
-      double stanceWidth = 0.1;
-      double heightOffset = 0.3;
+      if (planarRegionsList.get() == null)
+         return true;
+
+      double halfStanceWidth = 0.5 * steppingParameters.getInPlaceWidth();
+
+      /** Shift box vertically by max step up, regions below this could be steppable */
+      double heightOffset = steppingParameters.getMaxStepUp();
 
       double soleYaw = touchdownPose.getYaw();
-      double lateralOffset = swingSide.negateIfLeftSide(stanceWidth);
+      double lateralOffset = swingSide.negateIfLeftSide(halfStanceWidth);
       double offsetX = -lateralOffset * Math.sin(soleYaw);
       double offsetY = lateralOffset * Math.cos(soleYaw);
       collisionDetector.setBoxPose(touchdownPose.getX() + offsetX, touchdownPose.getY() + offsetY, touchdownPose.getZ() + heightOffset, soleYaw);
@@ -430,6 +446,9 @@ public class StepGeneratorJavaFXController
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      if (planarRegionsList.get() == null)
+         return true;
+
       tempTransform.setTranslation(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
       tempTransform.setRotationYaw(touchdownPose.getYaw());
 
