@@ -264,6 +264,12 @@ float64 step_up_weight -1.0
 # weighted.
 float64 step_down_weight -1.0
 
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+float64 long_step_weight -1.0
+
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+float64 foothold_area_weight -1.0
+
 # When using a cost based planning approach this value defines the cost that is added for each step
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -1.0

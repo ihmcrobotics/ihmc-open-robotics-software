@@ -288,6 +288,14 @@ float64 step_up_weight
 # Field default value -1.0
 float64 step_down_weight
 
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+# Field default value -1.0
+float64 long_step_weight
+
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+# Field default value -1.0
+float64 foothold_area_weight
+
 # When using a cost based planning approach this value defines the cost that is added for each step
 # taken. Setting this value to a high number will favor plans with less steps.
 # Field default value -1.0
