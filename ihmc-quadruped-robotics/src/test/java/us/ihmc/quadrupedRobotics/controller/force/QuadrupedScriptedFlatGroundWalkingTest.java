@@ -43,7 +43,6 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
