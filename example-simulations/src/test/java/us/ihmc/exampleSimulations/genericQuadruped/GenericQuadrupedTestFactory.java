@@ -44,7 +44,6 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
-import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -58,7 +57,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean USE_STATE_ESTIMATOR = true;
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
-   private static final int TEST_INPUT_UPDATE_FREQUENCY = (int) (0.05 / SIMULATION_DT);
 
    private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
