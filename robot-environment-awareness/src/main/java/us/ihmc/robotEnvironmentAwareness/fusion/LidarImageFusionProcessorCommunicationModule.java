@@ -14,12 +14,14 @@ import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.ImageMessage;
 import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
@@ -62,6 +64,7 @@ public class LidarImageFusionProcessorCommunicationModule
       new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
       new ROS2Callback<>(ros2Node, ImageMessage.class, this::dispatchImageMessage);
       new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, this::dispatchCustomPlanarRegion);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
@@ -81,6 +84,12 @@ public class LidarImageFusionProcessorCommunicationModule
    private void request()
    {
       objectDetectionManager.requestObjectDetection(latestBufferedImage.getAndSet(null), selectedObjecTypes.get());
+   }
+
+   private void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
+   {
+      stereoREAModule.dispatchCustomPlanarRegion(message);
+      LogTools.info("dispatchCustomPlanarRegion " + message.getNumberOfConvexPolygons());
    }
 
    private void dispatchLidarScanMessage(LidarScanMessage message)

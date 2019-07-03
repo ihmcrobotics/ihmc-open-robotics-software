@@ -1,5 +1,12 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+
+import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
@@ -17,13 +24,6 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
-
-import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
 
 public class StereoREAModule implements Runnable
 {
@@ -58,6 +58,12 @@ public class StereoREAModule implements Runnable
       reaMessager.submitMessage(REAModuleAPI.LidarMinRange, Double.NEGATIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, Double.POSITIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, new BoundingBoxParametersMessage());
+   }
+
+   public void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
+   {
+      PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
+      customPlanarRegions.getPlanarRegionsAsList().forEach(planarRegionFeatureUpdater::registerCustomPlanarRegion);
    }
 
    public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
@@ -144,7 +150,7 @@ public class StereoREAModule implements Runnable
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
          LogTools.info("number of planar regions of planarRegionsListMessage " + planarRegionsList.getNumberOfPlanarRegions() + " "
-                       + planarRegionsListMessage.getNumberOfConvexPolygons());
+               + planarRegionsListMessage.getNumberOfConvexPolygons());
 
          planarRegionNetworkProvider.update(true);
          planarRegionNetworkProvider.publishCurrentState();
