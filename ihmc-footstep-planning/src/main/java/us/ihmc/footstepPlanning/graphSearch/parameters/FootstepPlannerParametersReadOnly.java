@@ -36,7 +36,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Returns the ideal step width for walking on flat ground.
-    * This is ONLY used when assumed to be walking on flat ground.
     */
    default double getIdealFootstepWidth()
    {
@@ -45,7 +44,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Returns the ideal step length for walking on flat ground.
-    * This is ONLY used when assumed to be walking on flat ground.
     */
    default double getIdealFootstepLength()
    {
@@ -667,6 +665,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getFootholdAreaWeight()
    {
       return get(footholdAreaWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines the weight of the step distance of a step longer than {@link FootstepPlannerParameters#getIdealFootstepLength()} .
+    */
+   default double getLongStepWeight()
+   {
+      return get(longStepWeight);
    }
 
    /**
