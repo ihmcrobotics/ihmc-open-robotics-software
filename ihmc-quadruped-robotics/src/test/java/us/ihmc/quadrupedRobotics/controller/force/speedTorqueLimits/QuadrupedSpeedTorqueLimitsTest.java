@@ -15,7 +15,6 @@ import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -37,7 +36,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       try
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseStateEstimator(false);
          quadrupedTestFactory.setUseNetworking(true);

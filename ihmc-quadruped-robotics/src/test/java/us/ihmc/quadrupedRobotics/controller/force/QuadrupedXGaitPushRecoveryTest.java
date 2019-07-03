@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -41,7 +40,6 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       try
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
-         quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUsePushRobotController(true);
          quadrupedTestFactory.setUseNetworking(true);

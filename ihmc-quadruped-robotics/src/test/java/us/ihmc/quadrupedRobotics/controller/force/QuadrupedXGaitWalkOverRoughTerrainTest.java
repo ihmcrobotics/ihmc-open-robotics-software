@@ -7,7 +7,6 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.*;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.*;
@@ -113,7 +112,6 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
          quadrupedTestFactory.setInitialOffset(offsetAndYaw);
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseNetworking(true);
 
 

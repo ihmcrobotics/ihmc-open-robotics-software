@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -39,7 +38,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
       quadrupedTestFactory.setUseNetworking(true);

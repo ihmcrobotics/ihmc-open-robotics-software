@@ -15,7 +15,6 @@ import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -68,7 +67,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException
    {
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
@@ -125,7 +123,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       quadrupedTestFactory.setInitialPosition(initialPosition);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseStateEstimator(false);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();

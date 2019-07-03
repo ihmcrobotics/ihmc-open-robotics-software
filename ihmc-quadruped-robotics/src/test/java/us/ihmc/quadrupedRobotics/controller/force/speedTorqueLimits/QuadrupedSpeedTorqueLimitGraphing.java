@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.*;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -23,7 +22,6 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    public SimulationConstructionSet createSimulation() throws IOException
    {
       QuadrupedTestFactory testFactory = createQuadrupedTestFactory();
-      testFactory.setControlMode(QuadrupedControlMode.FORCE);
       testFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       testFactory.setUsePushRobotController(true);
       testFactory.setUseStateEstimator(true);
