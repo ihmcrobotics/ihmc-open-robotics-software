@@ -22,6 +22,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -58,6 +59,11 @@ public class StereoREAModule implements Runnable
       reaMessager.submitMessage(REAModuleAPI.LidarMinRange, Double.NEGATIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, Double.POSITIVE_INFINITY);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, new BoundingBoxParametersMessage());
+   }
+
+   public void registerCustomPlanarRegion(PlanarRegion planarRegion)
+   {
+      planarRegionFeatureUpdater.registerCustomPlanarRegion(planarRegion);
    }
 
    public void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
@@ -149,8 +155,6 @@ public class StereoREAModule implements Runnable
          PlanarRegionsList planarRegionsList = planarRegionFeatureUpdater.getPlanarRegionsList();
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
-         LogTools.info("number of planar regions of planarRegionsListMessage " + planarRegionsList.getNumberOfPlanarRegions() + " "
-               + planarRegionsListMessage.getNumberOfConvexPolygons());
 
          planarRegionNetworkProvider.update(true);
          planarRegionNetworkProvider.publishCurrentState();
