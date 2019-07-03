@@ -18,11 +18,14 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -31,7 +34,10 @@ import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObje
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
 
 public class LidarImageFusionProcessorCommunicationModule
 {
@@ -66,6 +72,9 @@ public class LidarImageFusionProcessorCommunicationModule
       new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, this::dispatchCustomPlanarRegion);
 
+      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
+                                           this::dispatchCustomPlanarRegion);
+
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
       messager.registerTopicListener(LidarImageFusionAPI.RequestSocketConnection, (content) -> connect());
@@ -84,6 +93,13 @@ public class LidarImageFusionProcessorCommunicationModule
    private void request()
    {
       objectDetectionManager.requestObjectDetection(latestBufferedImage.getAndSet(null), selectedObjecTypes.get());
+   }
+
+   private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
+   {
+      PlanarRegionsListMessage message = subscriber.takeNextData();
+      PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
+      customPlanarRegions.getPlanarRegionsAsList().forEach(stereoREAModule::registerCustomPlanarRegion);
    }
 
    private void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)

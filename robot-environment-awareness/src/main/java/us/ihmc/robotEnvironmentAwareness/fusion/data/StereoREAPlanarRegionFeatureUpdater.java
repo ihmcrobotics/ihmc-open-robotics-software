@@ -78,9 +78,9 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       {
          List<PlanarRegionSegmentationRawData> rawData = planarRegionSegmentationCalculator.getSegmentationRawData();
          updateIntersections(rawData);
+         mergeCustomPlanarRegions(rawData);
          updatePolygons(rawData);
          mergeIntoCurrentPlanarRegions();
-         mergeCustomPlanarRegions(rawData);
 
          return true;
       }
@@ -90,7 +90,7 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
 
    private void mergeCustomPlanarRegions(List<PlanarRegionSegmentationRawData> rawData)
    {
-      List<PlanarRegion> unmergedCustomPlanarRegions;
+      List<PlanarRegion> unmergedCustomPlanarRegions = Collections.emptyList();
       if (clearCustomRegions.getAndSet(false))
       {
          customPlanarRegions.clear();
@@ -98,6 +98,7 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       }
       else if (enableCustomRegions.get())
       {
+         LogTools.info("trying to merge "+customPlanarRegions.values().length);
          unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(), rawData,
                                                                                                       customRegionMergingParameters.get());
       }
@@ -106,6 +107,7 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
          unmergedCustomPlanarRegions = Collections.emptyList();
       }
 
+      LogTools.info("unmergedCustomPlanarRegions "+unmergedCustomPlanarRegions.size());
       if (planarRegionsList != null)
          unmergedCustomPlanarRegions.forEach(planarRegionsList::addPlanarRegion);
    }
@@ -139,11 +141,9 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       else if (planarRegion.isEmpty())
       {
          customPlanarRegions.remove(planarRegion.getRegionId());
-         LogTools.info("customPlanarRegions is empty");
       }
       else
       {
-         LogTools.info("customPlanarRegions has something " + planarRegion.getNumberOfConvexPolygons());
          CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
          customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
       }
