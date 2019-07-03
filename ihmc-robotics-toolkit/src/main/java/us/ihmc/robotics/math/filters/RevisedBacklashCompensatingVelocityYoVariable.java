@@ -81,6 +81,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends YoDouble impl
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);

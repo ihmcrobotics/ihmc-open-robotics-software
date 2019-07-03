@@ -537,6 +537,8 @@ public class BalanceManager
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
       initializeForStanding = true;
+
+      endTick();
    }
 
    public void prepareForDoubleSupportPushRecovery()

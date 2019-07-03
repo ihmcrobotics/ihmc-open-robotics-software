@@ -2,9 +2,12 @@ package us.ihmc.avatar.factory;
 
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -23,6 +26,8 @@ public class AvatarSimulation
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
+   private DRCRobotModel robotModel;
 
    public void start()
    {
@@ -43,6 +48,26 @@ public class AvatarSimulation
    {
       robotController.dispose();
       robotController = null;
+   }
+
+   public void resetRobot()
+   {
+      resetRobot(true);
+   }
+
+   public void resetRobot(boolean simulateAfterReset)
+   {
+      simulationConstructionSet.stop();
+
+      // TODO: instead of sleeping wait for all tasks in the barrier scheduler to finish.
+      ThreadTools.sleep(100);
+
+      robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
+      AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
+      controllerThread.initialize();
+
+      if (simulateAfterReset)
+         simulate();
    }
 
    public void updateEnvironment(CommonAvatarEnvironmentInterface commonAvatarEnvironment)
@@ -144,5 +169,15 @@ public class AvatarSimulation
    public void addRobotControllerOnEstimatorThread(RobotController controller)
    {
       stateEstimationThread.addRobotController(controller);
+   }
+
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   {
+      this.robotInitialSetup = robotInitialSetup;
+   }
+
+   public void setRobotModel(DRCRobotModel robotModel)
+   {
+      this.robotModel = robotModel;
    }
 }
