@@ -9,8 +9,6 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.teleop.QuadrupedTeleopManager;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 
@@ -41,24 +39,6 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables)
-   {
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.DO_NOTHING));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-      conductor.simulate();
-
-      variables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.STAND_READY));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
-      conductor.simulate();
-
-      variables.getUserTrigger().set(QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.CRAWL));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
-      conductor.simulate();
-   }
-
    public static void sitDown(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
    {
       variables.getUserTrigger().set(HighLevelControllerName.STAND_READY);
@@ -69,15 +49,6 @@ public class QuadrupedTestBehaviors
       variables.getUserTrigger().set(QuadrupedControllerManager.sitDownStateName);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.FREEZE_STATE));
       conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getTimeToMoveSittingDown());
-      conductor.simulate();
-   }
-
-   public static void enterXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager)
-   {
-      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
-      stepTeleopManager.requestXGait();
-      conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
 
