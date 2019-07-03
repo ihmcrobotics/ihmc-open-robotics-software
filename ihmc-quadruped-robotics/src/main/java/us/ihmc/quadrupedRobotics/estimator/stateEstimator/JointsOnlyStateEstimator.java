@@ -60,7 +60,7 @@ public class JointsOnlyStateEstimator implements StateEstimatorController
 
    public double getCurrentTime()
    {
-      return Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp());
+      return Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getWallTime());
    }
 
    @Override

@@ -22,6 +22,12 @@ module controller_msgs
       const octet ROBOT_QUADRANT_HIND_RIGHT =
       3;
 
+      const octet FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET =
+      0;
+
+      const octet FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS =
+      1;
+
       const long NO_PLAN_ID =
       -1;
 
@@ -47,8 +53,13 @@ module controller_msgs
         unsigned long sequence_id;
         @defaultValue(value=255)
         octet initial_step_robot_quadrant;
+        octet start_target_type;
         geometry_msgs::msg::dds::Point body_position_in_world;
         geometry_msgs::msg::dds::Quaternion body_orientation_in_world;
+        geometry_msgs::msg::dds::Point front_left_position_in_world;
+        geometry_msgs::msg::dds::Point front_right_position_in_world;
+        geometry_msgs::msg::dds::Point hind_left_position_in_world;
+        geometry_msgs::msg::dds::Point hind_right_position_in_world;
         geometry_msgs::msg::dds::Point goal_position_in_world;
         geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
         @defaultValue(value=-1)

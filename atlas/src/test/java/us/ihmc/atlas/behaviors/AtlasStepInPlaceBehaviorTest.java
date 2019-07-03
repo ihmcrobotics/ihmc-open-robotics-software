@@ -7,9 +7,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.humanoidBehaviors.BehaviorBackpack;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -31,40 +33,25 @@ public class AtlasStepInPlaceBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorBackpack.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");
-      BehaviorBackpack.createForTest(robotModel, messager);
+      BehaviorModule.createForTest(robotModel, messager);
 
-      LogTools.info("Creating behavior teleop");
-      BehaviorTeleop behaviorTeleop = BehaviorTeleop.createForTest(robotModel, messager);
+      LogTools.info("Creating behavior messager");
 
       LogTools.info("Set stepping true");
-      behaviorTeleop.setStepping(true);
+      messager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
 
-      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
-      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
-//      int steps = footMessage.getFootstepDataList().size();
+      AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
 
-      LogTools.info("Awaiting touchdowns");
-      double timeLimit = 6.0;
-      LogTools.info("Waiting for touchdown 1");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 2");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 3");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 4");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-
-      behaviorTeleop.setStepping(false);
-      behaviorTeleop.abort();
+      messager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
+      messager.submitMessage(StepInPlaceBehavior.API.Abort, true);
 
       AtlasTestScripts.wait(conductor, variables, 3.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, timeLimit);
+      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
    }
 
    @AfterEach

@@ -1,13 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchFarForSphereBehavior.SearchFarState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -23,24 +20,18 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    }
 
    private final SphereDetectionBehavior initialSphereDetectionBehavior;
-   private final WaitForUserValidationBehavior waitForUserValidationBehavior;
-   private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
-   private final boolean requireUserValidation;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public SearchFarForSphereBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
+   public SearchFarForSphereBehavior(String robotName, YoDouble yoTime,  
                                      HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node,
-                                     boolean requireUserValidation, AtlasPrimitiveActions atlasPrimitiveActions)
+                                      AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "SearchForSpehereFar", SearchFarState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      this.coactiveElement = coactiveElement;
-      this.requireUserValidation = requireUserValidation;
 
       initialSphereDetectionBehavior = new SphereDetectionBehavior(robotName, ros2Node, referenceFrames);
 
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node,
-                                                                        coactiveElement.validClicked, coactiveElement.validAcknowledged);
+      
       setupStateMachine();
    }
 
@@ -81,11 +72,11 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
          protected void setBehaviorInput()
          {
             publishTextToSpeech("LOOKING FOR BALL");
-            coactiveElement.searchingForBall.set(true);
+           /* coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
             coactiveElement.ballY.set(0);
-            coactiveElement.ballZ.set(0);
+            coactiveElement.ballZ.set(0);*/
          }
       };
 
@@ -93,37 +84,15 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       // Confirm from the user that this is the correct ball *******************************************
 
-      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.searchingForBall.set(false);
-            coactiveElement.waitingForValidation.set(true);
-            coactiveElement.validAcknowledged.set(false);
-            coactiveElement.foundBall.set(false);
-            coactiveElement.currentState.set(PickUpBallBehaviorState.WAITING_FOR_USER_CONFIRMATION);
-            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().getX());
-            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().getY());
-            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().getZ());
-            coactiveElement.ballRadius.set(initialSphereDetectionBehavior.getSpehereRadius());
-
-         }
-      };
+     
 
       factory.addStateAndDoneTransition(SearchFarState.ENABLE_LIDAR, enableLidarTask, SearchFarState.SETUP_LIDAR);
       factory.addStateAndDoneTransition(SearchFarState.SETUP_LIDAR, setLidarMediumRangeTask, SearchFarState.CLEAR_LIDAR);
       factory.addStateAndDoneTransition(SearchFarState.CLEAR_LIDAR, clearLidarTask, SearchFarState.SEARCHING_FOR_SPHERE);
 
-      if (requireUserValidation)
-      {
-         factory.addStateAndDoneTransition(SearchFarState.SEARCHING_FOR_SPHERE, findBallTask, SearchFarState.VALIDATING);
-         factory.addState(SearchFarState.VALIDATING, validateBallTask);
-      }
-      else
-      {
+      
          factory.addState(SearchFarState.SEARCHING_FOR_SPHERE, findBallTask);
-      }
+      
 
       return SearchFarState.ENABLE_LIDAR;
    }

@@ -1,9 +1,10 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import us.ihmc.euclid.shape.Cylinder3D;
-import us.ihmc.euclid.shape.Shape3D;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class CollisionCylinder extends CollisionShape
 {
@@ -37,10 +38,10 @@ public class CollisionCylinder extends CollisionShape
    }
 
    @Override
-   public Shape3D<?> getOrCreateShape3D()
+   public Shape3DReadOnly getOrCreateShape3D()
    {
       if (shape3D == null)
-         shape3D = new Cylinder3D(getPose(), 2.0 * halfLength, Math.sqrt(radiusSquared));
+         shape3D = new Cylinder3D(new Point3D(getPose().getTranslation()), new Vector3D(getPose().getM02(), getPose().getM12(), getPose().getM22()), 2.0 * halfLength, Math.sqrt(radiusSquared));
       return shape3D;
    }
 }

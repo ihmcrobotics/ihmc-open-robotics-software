@@ -4,14 +4,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 {
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
       return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepLength()
+   public double getMaximumFrontStepLength()
    {
       return 0.45;
    }
@@ -25,7 +25,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepLength()
+   public double getMinimumFrontStepLength()
    {
       return -0.2;
    }
@@ -41,14 +41,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.5;
+      return 0.25;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinimumStepYaw()
    {
-      return -0.5;
+      return -0.25;
    }
 
    /** {@inheritDoc} */
@@ -68,7 +68,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getDistanceHeuristicWeight()
    {
-      return 0.2;
+      return 1.0;
    }
 
    @Override
@@ -80,7 +80,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getYawWeight()
    {
-      return 0.1;
+      return 1.0;
    }
 
    @Override
@@ -104,14 +104,40 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getHeuristicsInflationWeight()
    {
-      return 2.0;
+      return 1.75;
+   }
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForExpansion()
+   {
+      return 0.02;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistance()
+   public double getProjectInsideDistanceForPostProcessing()
    {
       return 0.04;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 0.03;
    }
 
    @Override

@@ -156,10 +156,10 @@ public class FeetManager
       return false;
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, double touchdownTime)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
    {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime, touchdownTime);
+      footControlModule.setFootstep(footstep, swingTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 
@@ -219,11 +219,6 @@ public class FeetManager
       {
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
-   }
-
-   public void initializeContactStatesForTouchdown(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).requestTouchdown();
    }
 
    public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
@@ -530,11 +525,6 @@ public class FeetManager
       return footControlModules.get(robotSideToCheck).isFootToeingOffSlipping();
    }
 
-   public boolean isInTouchdown(RobotSide swingFoot)
-   {
-      return footControlModules.get(swingFoot).isInTouchdown();
-   }
-
    public void unload(RobotSide sideToUnload, double percentInUnloading, double rhoMin)
    {
       footControlModules.get(sideToUnload).unload(percentInUnloading, rhoMin);
@@ -548,5 +538,18 @@ public class FeetManager
    public Object pollStatusToReport(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).pollStatusToReport();
+   }
+
+   public void liftOff(RobotSide side, double pitch, double duration)
+   {
+      footControlModules.get(side).liftOff(pitch, duration);
+   }
+
+   public void touchDown(RobotSide side, double pitch, double duration)
+   {
+      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
+      footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
+      footControlModules.get(side).touchDown(pitch, duration);
+      reset();
    }
 }

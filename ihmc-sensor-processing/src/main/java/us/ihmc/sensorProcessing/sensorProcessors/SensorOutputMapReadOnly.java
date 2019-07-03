@@ -21,4 +21,8 @@ public interface SensorOutputMapReadOnly extends SensorTimestampHolder
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs();
 
    public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs();
+
+   public default void reset()
+   {
+   }
 }
