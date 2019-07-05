@@ -6,12 +6,16 @@ import javafx.animation.AnimationTimer;
 import net.java.games.input.Event;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -49,6 +53,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final AtomicBoolean joystickPollFlag = new AtomicBoolean();
+   private final QuadrupedReferenceFrames referenceFrames;
 
    private final AtomicReference<Boolean> joystickEnabled;
    private final AtomicReference<Boolean> stepTeleopEnabled;
@@ -58,11 +63,12 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private final AtomicBoolean resetBodyPose = new AtomicBoolean(false);
    private final AtomicReference<QuadrupedSteppingStateEnum> currentSteppingState;
 
-   public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, Joystick joystick)
+   public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, FullQuadrupedRobotModel robotModel, double nominalBodyHeight, Joystick joystick)
    {
       this.messager = messager;
       this.xGaitSettings = new QuadrupedXGaitSettings(defaultXGaitSettings);
       this.nominalBodyHeight = nominalBodyHeight;
+      this.referenceFrames = new QuadrupedReferenceFrames(robotModel);
 
       joystick.addJoystickEventListener(this);
       joystick.setPollInterval(pollRateMillis);
@@ -115,6 +121,8 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       {
          return;
       }
+
+      referenceFrames.updateFrames();
 
       if (resetBodyPose.getAndSet(false))
       {
@@ -198,7 +206,12 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       }
 
       bodyHeightOffset.setValue(MathTools.clamp(bodyHeightOffset.getValue(), maximumBodyHeightOffset));
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, nominalBodyHeight + bodyHeightOffset.getValue());
+
+      ReferenceFrame bodyHeightFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      FramePoint3D bodyHeight = new FramePoint3D(bodyHeightFrame, 0.0, 0.0, nominalBodyHeight + bodyHeightOffset.getValue());
+      bodyHeight.changeFrame(ReferenceFrame.getWorldFrame());
+
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, bodyHeight.getZ());
    }
 
    private void processStateChangeRequests(Event event)
