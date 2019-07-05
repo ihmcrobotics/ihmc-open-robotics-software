@@ -42,7 +42,6 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
       networkModuleParameters.enableStepTeleopModule(true);
       networkModuleParameters.enableBodyTeleopModule(true);
       networkModuleParameters.enableBodyHeightTeleopModule(true);
-      networkModuleParameters.enableXBoxModule(true);
 
       new GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation.INTRAPROCESS, networkModuleParameters);
    }

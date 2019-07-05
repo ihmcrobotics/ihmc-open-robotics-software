@@ -177,9 +177,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
 
-      // disable xbox
-      networkModuleParameters.enableXBoxModule(false);
-
       // enable teleop modules
       networkModuleParameters.enableFootstepPlanningModule(true);
       networkModuleParameters.enableBodyHeightTeleopModule(true);

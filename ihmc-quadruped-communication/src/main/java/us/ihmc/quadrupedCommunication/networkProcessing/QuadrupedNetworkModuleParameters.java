@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
-import java.net.URI;
-
 public class QuadrupedNetworkModuleParameters
 {
    private boolean useNetworkProcessor = true;
@@ -19,12 +17,8 @@ public class QuadrupedNetworkModuleParameters
    private boolean useBodyTeleopModule;
    private boolean visualizeBodyTeleopModule;
    private boolean logBodyTeleopModule;
-   private boolean useXBoxModule;
    private boolean useRemoteObjectDetectionFeedback;
-   private boolean visualizeXBoxModule;
    private boolean useAutoREAStateUpdater;
-
-   private URI rosUri;
 
    public void enableRobotEnvironmentAwarenessModule(boolean enable)
    {
@@ -156,16 +150,6 @@ public class QuadrupedNetworkModuleParameters
       return visualizeBodyTeleopModule;
    }
 
-   public void setVisualizeXBoxModule(boolean visualize)
-   {
-      this.visualizeXBoxModule = visualize;
-   }
-
-   public boolean visualizeXBoxModule()
-   {
-      return visualizeXBoxModule;
-   }
-
    public void setLogBodyTeleopModule(boolean log)
    {
       logBodyTeleopModule = log;
@@ -184,16 +168,6 @@ public class QuadrupedNetworkModuleParameters
    public boolean isBodyTeleopModuleEnabled()
    {
       return useBodyTeleopModule;
-   }
-
-   public void enableXBoxModule(boolean enable)
-   {
-      this.useXBoxModule = enable;
-   }
-
-   public boolean isXBoxModuleEnabled()
-   {
-      return useXBoxModule;
    }
 
    public void enableNetworkProcessor(boolean useNetworkProcessor)
