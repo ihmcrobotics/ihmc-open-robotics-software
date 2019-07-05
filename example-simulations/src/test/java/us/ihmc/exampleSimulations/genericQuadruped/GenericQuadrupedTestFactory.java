@@ -193,7 +193,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
                                                               PubSubImplementation.INTRAPROCESS,
                                                               networkModuleParameters);
       networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
-      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
+      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, modelFactory.createFullRobotModel(),  xGaitSettings, teleopRegistry);
 
       new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
 
