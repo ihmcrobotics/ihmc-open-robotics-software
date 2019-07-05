@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -29,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -238,7 +238,7 @@ public class PlanarRegion
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
-   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DBasics convexPolygon2DBasics,
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DReadOnly convexPolygon2DBasics,
                                                               ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
@@ -461,6 +461,45 @@ public class PlanarRegion
       fromWorldToLocalTransform.transform(localPoint);
 
       return isPointInside(localPoint.getX(), localPoint.getY());
+   }
+
+   public boolean isPointInsideByVerticalLineIntersection(double x, double y)
+   {
+      Line3D verticalLine = new Line3D(x, y, 0.0, 0.0, 0.0, 1.0);
+      return intersectWithLine(verticalLine) != null;
+   }
+
+   /**
+    * Will return the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return null.
+    */
+   public Point3D intersectWithLine(Line3D projectionLineInWorld)
+   {
+      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Point3DReadOnly pointOnPlane = new Point3D(getConvexPolygon(0).getVertex(0));
+
+      Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
+      Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
+
+      transformFromWorldToLocal(pointOnLineInLocal);
+      transformFromWorldToLocal(directionOfLineInLocal);
+
+      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
+                                                                                                     planeNormal,
+                                                                                                     pointOnLineInLocal,
+                                                                                                     directionOfLineInLocal);
+      if (intersectionWithPlaneInLocal == null) // line was parallel to plane
+      {
+         return null;
+      }
+
+      if (isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
+      {
+         transformFromLocalToWorld(intersectionWithPlaneInLocal);
+         return intersectionWithPlaneInLocal;
+      }
+
+      return null; // line does not intersect
    }
 
    /**
@@ -870,6 +909,16 @@ public class PlanarRegion
    }
 
    /**
+    * Get the transform from world coordinates to local coordinates.
+    *
+    * @param transformToPack used to store the transform.
+    */
+   public void getTransformToLocal(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(fromWorldToLocalTransform);
+   }
+
+   /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
     * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
@@ -1204,7 +1253,7 @@ public class PlanarRegion
       buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
 
       int maxNumberOfPolygonsToPrint = 5;
-      for (int i = 0; i < maxNumberOfPolygonsToPrint; i++)
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
       {
          buffer.append(convexPolygons.get(i) + "\n");
       }

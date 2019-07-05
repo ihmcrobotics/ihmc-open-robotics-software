@@ -15,6 +15,8 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    public static final byte ROBOT_QUADRANT_FRONT_RIGHT = (byte) 1;
    public static final byte ROBOT_QUADRANT_HIND_LEFT = (byte) 2;
    public static final byte ROBOT_QUADRANT_HIND_RIGHT = (byte) 3;
+   public static final byte FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET = (byte) 0;
+   public static final byte FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS = (byte) 1;
    public static final int NO_PLAN_ID = -1;
    public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN = (byte) 0;
    public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN = (byte) 1;
@@ -24,8 +26,13 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
             */
    public long sequence_id_;
    public byte initial_step_robot_quadrant_ = (byte) 255;
+   public byte start_target_type_;
    public us.ihmc.euclid.tuple3D.Point3D body_position_in_world_;
    public us.ihmc.euclid.tuple4D.Quaternion body_orientation_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D front_left_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D front_right_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D hind_left_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D hind_right_position_in_world_;
    public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public int planner_request_id_ = -1;
@@ -39,6 +46,10 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    {
       body_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       body_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      front_left_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      front_right_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      hind_left_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      hind_right_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
@@ -56,8 +67,14 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
 
       initial_step_robot_quadrant_ = other.initial_step_robot_quadrant_;
 
+      start_target_type_ = other.start_target_type_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.body_position_in_world_, body_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.body_orientation_in_world_, body_orientation_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.front_left_position_in_world_, front_left_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.front_right_position_in_world_, front_right_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.hind_left_position_in_world_, hind_left_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.hind_right_position_in_world_, hind_right_position_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_position_in_world_, goal_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       planner_request_id_ = other.planner_request_id_;
@@ -97,6 +114,15 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       return initial_step_robot_quadrant_;
    }
 
+   public void setStartTargetType(byte start_target_type)
+   {
+      start_target_type_ = start_target_type;
+   }
+   public byte getStartTargetType()
+   {
+      return start_target_type_;
+   }
+
 
    public us.ihmc.euclid.tuple3D.Point3D getBodyPositionInWorld()
    {
@@ -107,6 +133,30 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    public us.ihmc.euclid.tuple4D.Quaternion getBodyOrientationInWorld()
    {
       return body_orientation_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getFrontLeftPositionInWorld()
+   {
+      return front_left_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getFrontRightPositionInWorld()
+   {
+      return front_right_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getHindLeftPositionInWorld()
+   {
+      return hind_left_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getHindRightPositionInWorld()
+   {
+      return hind_right_position_in_world_;
    }
 
 
@@ -194,8 +244,14 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_step_robot_quadrant_, other.initial_step_robot_quadrant_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_target_type_, other.start_target_type_, epsilon)) return false;
+
       if (!this.body_position_in_world_.epsilonEquals(other.body_position_in_world_, epsilon)) return false;
       if (!this.body_orientation_in_world_.epsilonEquals(other.body_orientation_in_world_, epsilon)) return false;
+      if (!this.front_left_position_in_world_.epsilonEquals(other.front_left_position_in_world_, epsilon)) return false;
+      if (!this.front_right_position_in_world_.epsilonEquals(other.front_right_position_in_world_, epsilon)) return false;
+      if (!this.hind_left_position_in_world_.epsilonEquals(other.hind_left_position_in_world_, epsilon)) return false;
+      if (!this.hind_right_position_in_world_.epsilonEquals(other.hind_right_position_in_world_, epsilon)) return false;
       if (!this.goal_position_in_world_.epsilonEquals(other.goal_position_in_world_, epsilon)) return false;
       if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
@@ -226,8 +282,14 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
 
       if(this.initial_step_robot_quadrant_ != otherMyClass.initial_step_robot_quadrant_) return false;
 
+      if(this.start_target_type_ != otherMyClass.start_target_type_) return false;
+
       if (!this.body_position_in_world_.equals(otherMyClass.body_position_in_world_)) return false;
       if (!this.body_orientation_in_world_.equals(otherMyClass.body_orientation_in_world_)) return false;
+      if (!this.front_left_position_in_world_.equals(otherMyClass.front_left_position_in_world_)) return false;
+      if (!this.front_right_position_in_world_.equals(otherMyClass.front_right_position_in_world_)) return false;
+      if (!this.hind_left_position_in_world_.equals(otherMyClass.hind_left_position_in_world_)) return false;
+      if (!this.hind_right_position_in_world_.equals(otherMyClass.hind_right_position_in_world_)) return false;
       if (!this.goal_position_in_world_.equals(otherMyClass.goal_position_in_world_)) return false;
       if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
@@ -255,10 +317,20 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("initial_step_robot_quadrant=");
       builder.append(this.initial_step_robot_quadrant_);      builder.append(", ");
+      builder.append("start_target_type=");
+      builder.append(this.start_target_type_);      builder.append(", ");
       builder.append("body_position_in_world=");
       builder.append(this.body_position_in_world_);      builder.append(", ");
       builder.append("body_orientation_in_world=");
       builder.append(this.body_orientation_in_world_);      builder.append(", ");
+      builder.append("front_left_position_in_world=");
+      builder.append(this.front_left_position_in_world_);      builder.append(", ");
+      builder.append("front_right_position_in_world=");
+      builder.append(this.front_right_position_in_world_);      builder.append(", ");
+      builder.append("hind_left_position_in_world=");
+      builder.append(this.hind_left_position_in_world_);      builder.append(", ");
+      builder.append("hind_right_position_in_world=");
+      builder.append(this.hind_right_position_in_world_);      builder.append(", ");
       builder.append("goal_position_in_world=");
       builder.append(this.goal_position_in_world_);      builder.append(", ");
       builder.append("goal_orientation_in_world=");

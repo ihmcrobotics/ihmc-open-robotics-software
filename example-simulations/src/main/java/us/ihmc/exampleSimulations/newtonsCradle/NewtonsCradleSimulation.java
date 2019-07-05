@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.collidingArms.SingleBallRobotDescription;
@@ -183,8 +183,8 @@ public class NewtonsCradleSimulation
 
       CombinedTerrainObject3D boxTerrain = new CombinedTerrainObject3D("BoxTerrain");
       Box3D box = new Box3D(2.0, 1.0, 0.1);
-      box.setPosition(new Point3D(0.0, 1.0, 0.0));
-      box.setOrientationYawPitchRoll(0.0, groundAngle, 0.0);
+      box.getPosition().set(new Point3D(0.0, 1.0, 0.0));
+      box.getOrientation().setYawPitchRoll(0.0, groundAngle, 0.0);
       boxTerrain.addRotatableBox(box, YoAppearance.Blue());
 
       LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(boxRobot, boxRobot.getRobotsYoVariableRegistry());

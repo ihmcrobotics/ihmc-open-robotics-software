@@ -1,13 +1,11 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
@@ -109,5 +107,36 @@ public class MultipleWaypointsTrajectoryGeneratorTest
          assertEquals(positions[i], multipleWaypointsTrajectory.getValue(), EPSILON );
          assertEquals(velocities[i], multipleWaypointsTrajectory.getVelocity(), EPSILON );
       }
+   }
+
+   @Test
+   public void testOneWaypoint()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+      int maxNumberOfWaypoints = 5;
+      MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);
+      trajectory.clear();
+
+      double timeAtWaypoint = 0.0406;
+      double positionAtWaypoint = 0.47;
+      double velocityAtWaypoint = 0.10;
+      trajectory.appendWaypoint(timeAtWaypoint, positionAtWaypoint, velocityAtWaypoint);
+      trajectory.initialize();
+
+      trajectory.compute(0.036);
+      assertEquals(positionAtWaypoint, trajectory.getValue());
+      assertEquals(0.0, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getAcceleration());
+      
+      trajectory.compute(0.042);
+      assertEquals(positionAtWaypoint, trajectory.getValue());
+      assertEquals(0.0, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getAcceleration());
+
+      trajectory.compute(timeAtWaypoint);
+      assertEquals(positionAtWaypoint, trajectory.getValue());
+      assertEquals(velocityAtWaypoint, trajectory.getVelocity());
+      assertEquals(0.0, trajectory.getAcceleration());
    }
 }

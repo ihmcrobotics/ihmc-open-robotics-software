@@ -57,7 +57,9 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    public FootstepPlannerProcessViewer(Messager messager)
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+                                                                                                true);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
@@ -65,7 +67,6 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludePitchAndRollCost(true);
 
       costCalculator = costBuilder.buildCost();
 

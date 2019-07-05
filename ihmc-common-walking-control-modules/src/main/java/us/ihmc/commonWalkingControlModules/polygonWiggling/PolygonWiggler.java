@@ -28,6 +28,8 @@ public class PolygonWiggler
    /** Weight associated with moving the polygon. */
    private static final double moveWeight = 1.0;
 
+   private static int[] emptyArray = new int[0];
+
    /**
     * Returns a transform that will move the given polygon into the convex hull of a planar region.
     *
@@ -54,7 +56,7 @@ public class PolygonWiggler
    {
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2D bestMatch = null;
-      double overlap = 0.0;
+      double overlap = Double.NEGATIVE_INFINITY;
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
@@ -83,10 +85,25 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
+   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters)
+   {
+      return wigglePolygon(polygonToWiggle, planeToWiggleInto, parameters, emptyArray);
+   }
+
+   /**
+    * This method moves a convex polygon into a given convex region. It will return the new polygon without modifying the given one.
+    * The algorithm assumes a small rotation angle (it will linearize sin and cos around 0.0). For that reason it is possible to
+    * specify a maximum and a minimum rotation.
+    *
+    * @param polygonToWiggle
+    * @param planeToWiggleInto
+    * @param wiggleParameters
+    * @return
+    */
+   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters, int[] indicesToExclude)
    {
       ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D(polygonToWiggle);
-      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
+      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, indicesToExclude);
       if (wiggleTransform == null)
          return null;
       wiggledPolygon.applyTransform(wiggleTransform, false);
@@ -96,13 +113,18 @@ public class PolygonWiggler
    /**
     * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
     * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
-    *
-    * @param polygonToWiggle
-    * @param planeToWiggleInto
-    * @param wiggleParameters
-    * @return
     */
-   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters)
+   {
+      return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, emptyArray);
+   }
+
+   /**
+    * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
+    * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
+    */
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters,
+                                                        int[] startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
       Point2DReadOnly pointToRotateAbout = polygonToWiggle.getCentroid();
@@ -110,7 +132,7 @@ public class PolygonWiggler
       // This creates inequality constraints for points to lie inside the desired polygon.
       DenseMatrix64F A = new DenseMatrix64F(0);
       DenseMatrix64F b = new DenseMatrix64F(0);
-      convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside);
+      convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside, startingVerticesToIgnore);
 
       int constraintsPerPoint = A.getNumRows();
 
@@ -241,17 +263,22 @@ public class PolygonWiggler
 
    /**
     * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
-    *
-    * @param polygon
-    * @param A
-    * @param b
     */
    public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      convertToInequalityConstraints(polygon, A, b, deltaInside, emptyArray);
+   }
+
+   /**
+    * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
+    */
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside,
+                                                     int[] startingVerticesToIgnore)
    {
       int constraints = polygon.getNumberOfVertices();
 
       if (constraints > 2)
-         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside);
+         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside, startingVerticesToIgnore);
       else if (constraints > 1)
          convertToInequalityConstraintsLine(polygon, A, b, deltaInside);
       else
@@ -306,7 +333,7 @@ public class PolygonWiggler
       b.set(1, -b.get(0));
 
 
-      // set first point boundary line // // TODO: 5/2/17 add in deltaInside 
+      // set first point boundary line // // TODO: 5/2/17 add in deltaInside
       A.set(2, 0, -tempVector.getX());
       A.set(2, 1, -tempVector.getY());
       b.set(2, -deltaInside - firstPoint.getX() * tempVector.getX() - firstPoint.getY() * tempVector.getY());
@@ -318,6 +345,12 @@ public class PolygonWiggler
    }
 
    public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside, emptyArray);
+   }
+
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside,
+                                                            int[] startingVerticesToIgnore)
    {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
@@ -334,14 +367,31 @@ public class PolygonWiggler
          x = x / norm;
          y = y / norm;
 
+         double desiredDistanceInside;
+         if (isAllowed(i, startingVerticesToIgnore))
+            desiredDistanceInside = deltaInside;
+         else
+            desiredDistanceInside = 0.0;
+
          A.set(i, 0, -y);
          A.set(i, 1, x);
-         b.set(i, -deltaInside + firstPoint.getY() * x - firstPoint.getX() * y);
+         b.set(i, -desiredDistanceInside + firstPoint.getY() * x - firstPoint.getX() * y);
 
          //         A.set(i, 0, firstPoint.y - secondPoint.y);
          //         A.set(i, 1, -firstPoint.x + secondPoint.x);
          //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
       }
+   }
+
+   private static boolean isAllowed(int index, int... indicesToIgnore)
+   {
+      for (int i = 0; i < indicesToIgnore.length; i++)
+      {
+         if (index == indicesToIgnore[i])
+            return false;
+      }
+
+      return true;
    }
 
    public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)

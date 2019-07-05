@@ -16,7 +16,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -28,7 +27,8 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
 import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
@@ -58,11 +58,12 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
    private final JointNameMap jointMap;
    private final int jointNameHash;
 
+   private boolean publishForceSensorInformation = false;
    private final SideDependentList<Integer> feetForceSensorIndexes = new SideDependentList<Integer>();
    private final SideDependentList<Integer> handForceSensorIndexes = new SideDependentList<Integer>();
    private final SideDependentList<RosWrenchPublisher> footForceSensorPublishers = new SideDependentList<RosWrenchPublisher>();
@@ -73,15 +74,15 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
    public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
-                                             final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-                                             DRCRobotSensorInformation sensorInformation, JointNameMap jointMap, String rosNameSpace,
-                                             RosTfPublisher tfPublisher)
+                                             final RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
+                                             AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation,
+                                             JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       this.imuDefinitions = fullRobotModel.getIMUDefinitions();
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
       this.tfPublisher = tfPublisher;
       this.jointMap = jointMap;
       this.staticTransforms = sensorInformation.getStaticTransformsForRos();
@@ -104,17 +105,21 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
       }
 
-      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> handForceSensorNames = sensorInformation.getWristForceSensorNames();
-
-      for (RobotSide robotSide : RobotSide.values())
+      if (forceSensorInformation != null)
       {
-         footForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
-         feetForceSensorIndexes.put(robotSide, getForceSensorIndex(feetForceSensorNames.get(robotSide), forceSensorDefinitions));
-         if (handForceSensorNames != null && !handForceSensorNames.isEmpty())
+         publishForceSensorInformation = true;
+         SideDependentList<String> feetForceSensorNames = forceSensorInformation.getFeetForceSensorNames();
+         SideDependentList<String> handForceSensorNames = forceSensorInformation.getWristForceSensorNames();
+
+         for (RobotSide robotSide : RobotSide.values())
          {
-            handForceSensorIndexes.put(robotSide, getForceSensorIndex(handForceSensorNames.get(robotSide), forceSensorDefinitions));
-            wristForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
+            footForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
+            feetForceSensorIndexes.put(robotSide, getForceSensorIndex(feetForceSensorNames.get(robotSide), forceSensorDefinitions));
+            if (handForceSensorNames != null && !handForceSensorNames.isEmpty())
+            {
+               handForceSensorIndexes.put(robotSide, getForceSensorIndex(handForceSensorNames.get(robotSide), forceSensorDefinitions));
+               wristForceSensorPublishers.put(robotSide, new RosWrenchPublisher(latched));
+            }
          }
       }
 
@@ -130,14 +135,17 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_pose", pelvisOdometryPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_motion_status", robotMotionStatusPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
-      rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
-      rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/last_robot_config_received", lastReceivedMessagePublisher);
 
-      if (!wristForceSensorPublishers.isEmpty())
+      if (publishForceSensorInformation)
       {
-         rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
-         rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
+         rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
+         rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
+         if (!wristForceSensorPublishers.isEmpty())
+         {
+            rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
+            rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/right", wristForceSensorPublishers.get(RobotSide.RIGHT));
+         }
       }
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.takeNextData()));
@@ -205,7 +213,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
             float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
-            long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
+            long timeStamp = rosClockCalculator.computeROSTime(robotConfigurationData.getWallTime(), robotConfigurationData.getMonotonicTime());
             Time t = Time.fromNano(timeStamp);
 
             if (robotConfigurationData.getJointNameHash() != jointNameHash)
@@ -225,21 +233,24 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
             jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
 
-            for (RobotSide robotSide : RobotSide.values())
+            if (publishForceSensorInformation)
             {
-               float[] arrayToPublish = new float[6];
-               robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
-               robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
-               footForceSensorWrenches.put(robotSide, arrayToPublish);
-               footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
-
-               if (!handForceSensorIndexes.isEmpty())
+               for (RobotSide robotSide : RobotSide.values())
                {
-                  arrayToPublish = new float[6];
-                  robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
-                  robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
-                  wristForceSensorWrenches.put(robotSide, arrayToPublish);
-                  wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
+                  float[] arrayToPublish = new float[6];
+                  robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
+                  robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
+                  footForceSensorWrenches.put(robotSide, arrayToPublish);
+                  footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
+
+                  if (!handForceSensorIndexes.isEmpty())
+                  {
+                     arrayToPublish = new float[6];
+                     robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
+                     robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
+                     wristForceSensorWrenches.put(robotSide, arrayToPublish);
+                     wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
+                  }
                }
             }
 
@@ -284,7 +295,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   if (messageType != null)
                   {
                      lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(),
-                                                          robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                                                          timeStamp, robotConfigurationData.getLastReceivedPacketRobotTimestamp());
                   }
                }
             }

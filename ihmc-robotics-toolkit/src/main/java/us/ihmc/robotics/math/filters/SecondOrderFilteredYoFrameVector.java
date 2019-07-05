@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class SecondOrderFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
@@ -57,6 +57,7 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector3D implements
       return new SecondOrderFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
    }
 
+   @Override
    public void update()
    {
       x.update();
@@ -86,6 +87,7 @@ public class SecondOrderFilteredYoFrameVector extends YoFrameVector3D implements
       z.update(vectorUnfiltered.getZ());
    }
 
+   @Override
    public void reset()
    {
       x.reset();

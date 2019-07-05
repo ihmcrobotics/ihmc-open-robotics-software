@@ -62,7 +62,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -85,7 +85,7 @@ public class IHMCHumanoidBehaviorManager
 
    public IHMCHumanoidBehaviorManager(String robotName, WholeBodyControllerParameters wholeBodyControllerParameters,
                                       FullHumanoidRobotModelFactory robotModelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                      DRCRobotSensorInformation sensorInfo)
+                                      HumanoidRobotSensorInformation sensorInfo)
          throws IOException
    {
       this(robotName, wholeBodyControllerParameters, robotModelFactory, modelProvider, startYoVariableServer, sensorInfo, false);
@@ -98,7 +98,7 @@ public class IHMCHumanoidBehaviorManager
 
    private IHMCHumanoidBehaviorManager(String robotName, WholeBodyControllerParameters wholeBodyControllerParameters,
                                        FullHumanoidRobotModelFactory robotModelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                       DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic)
+                                       HumanoidRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic)
          throws IOException
    {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
@@ -275,7 +275,7 @@ public class IHMCHumanoidBehaviorManager
                              new TestSmoothICPPlannerBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                               wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      DRCRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
       dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK,
                              new CollaborativeBehavior(robotName, ros2Node, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters,
                                                        yoGraphicsListRegistry));
@@ -351,7 +351,7 @@ public class IHMCHumanoidBehaviorManager
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
                                                                                         LogModelProvider modelProvider, boolean startYoVariableServer,
-                                                                                        DRCRobotSensorInformation sensorInfo, double timeToWait)
+                                                                                        HumanoidRobotSensorInformation sensorInfo, double timeToWait)
          throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);

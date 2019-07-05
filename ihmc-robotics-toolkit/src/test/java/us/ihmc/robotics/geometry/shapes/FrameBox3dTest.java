@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -9,15 +11,13 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -151,7 +151,7 @@ public class FrameBox3dTest
          ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
 
          expectedBoxPose.changeFrame(newFrame);
-         expectedBox.setPose(expectedBoxPose);
+         expectedBox.getPose().set(expectedBoxPose);
          frameBox.changeFrame(newFrame);
          frameBox.getFramePose(actualBoxPose);
 

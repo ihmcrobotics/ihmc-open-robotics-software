@@ -3,10 +3,11 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -14,7 +15,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
@@ -35,6 +38,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
+
+   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
 
@@ -97,9 +103,21 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
          throw new RuntimeException("No sensor set up for the IMU.");
    }
 
+
    @Override
    public void initialize()
    {
+
+      if (zeroYawAtInitialization.getValue())
+      {
+         computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
+         initialYaw.set(rotationFromRootJointFrameToWorld.getYaw());
+      }
+      else
+      {
+         initialYaw.set(0.0);
+      }
+
       updateRootJointOrientationAndAngularVelocity();
    }
 
@@ -111,43 +129,50 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       updateViz();
    }
 
-   private final RigidBodyTransform transformFromMeasurementFrameToWorld = new RigidBodyTransform();
-
-   private final RigidBodyTransform transformFromRootJointFrameToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform transformFromRootJointFrameToMeasurementFrame = new RigidBodyTransform();
-
    private final RotationMatrix rotationFromRootJointFrameToWorld = new RotationMatrix();
-   private final RotationMatrix orientationMeasurement = new RotationMatrix();
-
-   private final RotationMatrix yawBiasMatrix = new RotationMatrix();
 
    private void updateRootJointRotation()
    {
-      // R_{measurementFrame}^{world}
-      orientationMeasurement.set(imuProcessedOutput.getOrientationMeasurement());
-      transformFromMeasurementFrameToWorld.setRotationAndZeroTranslation(orientationMeasurement);
-
-      // R_{root}^{measurementFrame}
-      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
-
-      // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
-      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
+      computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
 
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
+
+      if (zeroYawAtInitialization.getValue())
+      {
+         rotationFromRootJointFrameToWorld.prependYawRotation(-initialYaw.getValue());
+      }
 
       if (imuYawDriftEstimator != null)
       {
          imuYawDriftEstimator.update();
-         yawBiasMatrix.setToYawMatrix(imuYawDriftEstimator.getYawBiasInWorldFrame());
-         yawBiasMatrix.transpose();
-         rotationFromRootJointFrameToWorld.preMultiply(yawBiasMatrix);
+         rotationFromRootJointFrameToWorld.prependYawRotation(-imuYawDriftEstimator.getYawBiasInWorldFrame());
       }
 
       rootJoint.setJointOrientation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
+   }
+
+   /**
+    * Computes the orientation of {@code estimateFrame} given the orientation at {@code measurementFrame}.
+    * <p>
+    * This method assumes that {@code estimateFrame} and {@code measurementFrame} are connected and that the relative transform between the two frames is known.
+    * </p>
+    * 
+    * @param measurementFrame reference frame in which the measurement was taken.
+    * @param orientationMeasurement the measurement of the {@code measurementFrame} orientation. Not modified.
+    * @param estimateFrame the reference frame for which the orientation is to be computed.
+    * @param orientationEstimateToPack result: the orientation of {@code estimateFrame}. 
+    */
+   public static void computeOrientationAtEstimateFrame(ReferenceFrame measurementFrame, Orientation3DReadOnly orientationMeasurement,
+                                                        ReferenceFrame estimateFrame, Orientation3DBasics orientationEstimateToPack)
+   {
+      orientationEstimateToPack.setToZero();
+      // R_{estimateFrame}^{measurementFrame}
+      estimateFrame.transformFromThisToDesiredFrame(measurementFrame, orientationEstimateToPack);
+
+      // R_{estimateFrame}^{world} = R_{measurementFrame}^{world} * R_{estimateFrame}^{measurementFrame}
+      orientationEstimateToPack.prepend(orientationMeasurement);
    }
 
    private final Vector3D angularVelocityMeasurement = new Vector3D();

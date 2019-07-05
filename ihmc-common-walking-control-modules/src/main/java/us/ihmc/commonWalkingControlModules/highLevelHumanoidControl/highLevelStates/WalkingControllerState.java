@@ -163,6 +163,7 @@ public class WalkingControllerState extends HighLevelControllerState
    {
       controllerCore.initialize();
       walkingController.initialize();
+      linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
    }
 

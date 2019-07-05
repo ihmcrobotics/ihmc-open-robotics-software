@@ -1,16 +1,27 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -18,10 +29,6 @@ import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class QuadrupedScriptedFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -85,6 +92,60 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.concludeTesting();
    }
 
+   public void testScriptedFlatGroundWalkingWithHeightOffset(double stepHeightOffset) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestWalkingState();
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      Point3D initialPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().addZ(stepHeightOffset));
+
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      // check robot is still upright and walked forward
+      Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+
+      conductor.simulate();
+
+      // Re-execute the same footsteps but shifted to the new robot location
+      Point3D currentPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+      Vector3D offset = new Vector3D();
+      offset.sub(currentPosition, initialPosition);
+      offset.setZ(0.0);
+      steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().add(offset));
+      message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      // check robot is still upright and walked forward
+      expectedFinalPlanarPosition.add(offset);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+
+      conductor.simulate();
+
+      conductor.concludeTesting();
+   }
+
    @Test
    public void testScriptedTroublingSteps()
    {
@@ -125,6 +186,113 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
 
+      conductor.simulate();
+
+      conductor.concludeTesting();
+   }
+
+   @Test
+   public void testPauseWalking()
+   {
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestWalkingState();
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      double halfwayTime = steps.get(steps.size() / 2).getTimeInterval().getStartTime();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, halfwayTime));
+      conductor.simulate();
+
+      stepTeleopManager.requestPauseWalking(true);
+
+      // give the robot time to finish step
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+      Assertions.assertTrue(variables.getSteppingState().getEnumValue() == QuadrupedSteppingStateEnum.STAND);
+
+      double robotBodyX = variables.getRobotBodyX().getDoubleValue();
+      double robotBodyY = variables.getRobotBodyY().getDoubleValue();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
+      conductor.simulate();
+
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(robotBodyX, variables.getRobotBodyX().getDoubleValue(), 1e-2));
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(robotBodyY, variables.getRobotBodyY().getDoubleValue(), 1e-2));
+
+      stepTeleopManager.requestPauseWalking(false);
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
+      conductor.simulate();
+      Assertions.assertTrue(variables.getSteppingState().getEnumValue() == QuadrupedSteppingStateEnum.STEP);
+
+      // check that steps are preserved when walking is resumed
+      Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.simulate();
+
+      conductor.concludeTesting();
+   }
+
+   @Test
+   public void testAbortWalking()
+   {
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestWalkingState();
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      double halfwayTime = steps.get(steps.size() / 2).getTimeInterval().getStartTime();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, halfwayTime));
+      conductor.simulate();
+
+      stepTeleopManager.requestAbortWalking();
+
+      // give the robot time to finish step
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+      Assertions.assertTrue(variables.getSteppingState().getEnumValue() == QuadrupedSteppingStateEnum.STAND);
+
+      double robotBodyX = variables.getRobotBodyX().getDoubleValue();
+      double robotBodyY = variables.getRobotBodyY().getDoubleValue();
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
+      conductor.simulate();
+
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(robotBodyX, variables.getRobotBodyX().getDoubleValue(), 1e-2));
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(robotBodyY, variables.getRobotBodyY().getDoubleValue(), 1e-2));
+
+      // send the second half of the step list, check that the robot resumes walking when new steps are received
+      int initialSize = steps.size();
+      while (steps.size() > initialSize / 2)
+      {
+         steps.remove(0);
+      }
+      message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.simulate();
 
       conductor.concludeTesting();
