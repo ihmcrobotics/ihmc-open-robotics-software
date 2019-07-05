@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -28,7 +26,6 @@ import java.util.List;
 
 public class QuadrupedNetworkProcessor
 {
-   private final boolean DEBUG = false;
    private QuadrupedStepTeleopModule stepTeleopModule;
 
    public static final int bodyHeightPort = 8006;
@@ -171,26 +168,6 @@ public class QuadrupedNetworkProcessor
    {
       if (params.isAutoREAStateUpdaterEnabled())
          new QuadrupedREAStateUpdater(robotName, PubSubImplementation.FAST_RTPS);
-   }  
-
-   protected void connect(PacketCommunicator communicator)
-   {
-      try
-      {
-         communicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
-   private void printModuleConnectedDebugStatement(PacketDestination destination, String methodName)
-   {
-      if (DEBUG)
-      {
-         PrintTools.debug(this, methodName + ": " + destination);
-      }
    }
 
    private void tryToStartModule(ModuleStarter runnable)
