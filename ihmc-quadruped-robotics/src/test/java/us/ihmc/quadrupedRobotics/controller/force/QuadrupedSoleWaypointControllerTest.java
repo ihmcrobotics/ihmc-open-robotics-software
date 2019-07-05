@@ -30,7 +30,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private GoalOrientedTestConductor conductor;
-   private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
    private IHMCROS2Publisher<SoleTrajectoryMessage> soleTrajectoryPublisher;
@@ -64,7 +64,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
    public void testStandingUpAndMovingFoot() throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
@@ -99,7 +99,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
    public void testFootLoadBearingMessage() throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());

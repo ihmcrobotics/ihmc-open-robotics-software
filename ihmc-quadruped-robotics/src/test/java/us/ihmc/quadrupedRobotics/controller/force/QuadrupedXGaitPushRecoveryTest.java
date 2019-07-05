@@ -27,7 +27,7 @@ import java.util.List;
 public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTestYoVariables variables;
    private PushRobotTestConductor pusher;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
@@ -44,7 +44,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
          quadrupedTestFactory.setUsePushRobotController(true);
          quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
-         variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         variables = new QuadrupedTestYoVariables(conductor.getScs());
          pusher = new PushRobotTestConductor(conductor.getScs(), "body");
          stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }

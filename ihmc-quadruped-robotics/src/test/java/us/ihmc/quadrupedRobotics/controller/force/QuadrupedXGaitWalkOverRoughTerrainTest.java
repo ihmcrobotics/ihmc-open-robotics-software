@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
-   protected QuadrupedForceTestYoVariables variables;
+   protected QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -116,7 +116,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
 
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       stepTeleopManager.submitPlanarRegionsList(environment.getPlanarRegionsList());
       if(!Double.isNaN(desiredBodyHeight))
