@@ -6,7 +6,6 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysica
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
@@ -34,7 +33,6 @@ import java.io.IOException;
 
 public class GenericQuadrupedSimulationFactory
 {
-   private static final QuadrupedControlMode CONTROL_MODE = QuadrupedControlMode.FORCE;
    private final QuadrupedGroundContactModelType groundContactModelType = QuadrupedGroundContactModelType.FLAT;
    private static final double CONTROL_DT = 0.001;
    private static final double SIMULATION_DT = 1e-4;
@@ -94,7 +92,6 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setControlMode(CONTROL_MODE);
       simulationFactory.setUseNetworking(USE_NETWORKING);
       simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
