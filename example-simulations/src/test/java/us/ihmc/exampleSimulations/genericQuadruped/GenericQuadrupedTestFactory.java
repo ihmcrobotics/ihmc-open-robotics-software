@@ -147,7 +147,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setInitialForceControlState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
-      simulationFactory.setUseLocalCommunicator(true);
+      simulationFactory.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
       simulationFactory.setDCMPlannerParameters(dcmPlannerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);

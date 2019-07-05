@@ -117,8 +117,8 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
    private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
    private final RequiredFactoryField<QuadrupedFallDetectionParameters> fallDetectionParameters = new RequiredFactoryField<>("fallDetectionParameters");
+   private final RequiredFactoryField<PubSubImplementation> pubSubImplementation = new RequiredFactoryField<>("pubSubImplementation");
 
-   private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<CoulombViscousStribeckFrictionParameters> simulatedFrictionParameters = new OptionalFactoryField<>("jointFrictionParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
@@ -129,7 +129,6 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownForSureDetectionThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownForSureDetectionThreshold");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<HighLevelControllerName> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
-   private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
 
 
@@ -305,8 +304,7 @@ public class QuadrupedSimulationFactory
 
    private void createRealtimeRos2Node()
    {
-      PubSubImplementation pubSubImplementation = useLocalCommunicator.get() ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_quadruped_simulation");
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation.get(), "ihmc_quadruped_simulation");
    }
 
    public void createControllerManager()
@@ -479,11 +477,9 @@ public class QuadrupedSimulationFactory
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
-      useLocalCommunicator.setDefaultValue(false);
       kneeTorqueTouchdownDetectionThreshold.setDefaultValue(new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0));
       kneeTorqueTouchdownForSureDetectionThreshold.setDefaultValue(new QuadrantDependentList<>(75.0, 75.0, 75.0, 75.0));
       createYoVariableServer.setDefaultValue(false);
-
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -504,7 +500,6 @@ public class QuadrupedSimulationFactory
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
-      setupJointElasticity();
       setupJointFriction();
       setupCameras();
 
@@ -568,17 +563,6 @@ public class QuadrupedSimulationFactory
    }
 
    // OPTIONS
-
-   private void setupJointElasticity()
-   {
-      if (simulatedElasticityParameters.hasValue())
-      {
-         FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
-         SpringJointOutputWriter springJointOutputWriter = new SpringJointOutputWriter(floatingRootJointRobot, simulatedElasticityParameters.get(),
-                                                                                       simulationDT.get());
-         floatingRootJointRobot.setController(springJointOutputWriter, 1);
-      }
-   }
 
    private void setupJointFriction()
    {
@@ -663,11 +647,6 @@ public class QuadrupedSimulationFactory
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
    {
       this.groundContactModelType.set(groundContactModelType);
-   }
-
-   public void setSimulatedElasticityParameters(SimulatedElasticityParameters simulatedElasticityParameters)
-   {
-      this.simulatedElasticityParameters.set(simulatedElasticityParameters);
    }
 
    public void setSimulatedFrictionParameters(CoulombViscousStribeckFrictionParameters simulatedFrictionParameters)
@@ -780,9 +759,9 @@ public class QuadrupedSimulationFactory
       this.initialForceControlState.set(initialForceControlState);
    }
 
-   public void setUseLocalCommunicator(boolean useLocalCommunicator)
+   public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
    {
-      this.useLocalCommunicator.set(useLocalCommunicator);
+      this.pubSubImplementation.set(pubSubImplementation);
    }
 
    public void setSensorReaderWrapper(QuadrupedSensorReaderWrapper sensorReaderWrapper)
