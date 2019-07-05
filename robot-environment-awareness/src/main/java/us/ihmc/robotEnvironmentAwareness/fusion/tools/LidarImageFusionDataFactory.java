@@ -99,6 +99,8 @@ public class LidarImageFusionDataFactory
       for (int i = 0; i < pointCloud.length; i++)
       {
          Point3D point = pointCloud[i];
+         if (point == null)
+            break;
          int[] pixel = PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, intrinsicParameters.get(), cameraPosition.get(),
                                                                                      cameraOrientation.get());
 
