@@ -1,5 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +25,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -36,8 +37,6 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
 
 public class LidarImageFusionProcessorCommunicationModule
 {
@@ -105,7 +104,6 @@ public class LidarImageFusionProcessorCommunicationModule
    private void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
    {
       stereoREAModule.dispatchCustomPlanarRegion(message);
-      LogTools.info("dispatchCustomPlanarRegion " + message.getNumberOfConvexPolygons());
    }
 
    private void dispatchLidarScanMessage(LidarScanMessage message)
