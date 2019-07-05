@@ -15,7 +15,7 @@ import java.io.IOException;
 public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
 
@@ -27,7 +27,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       testFactory.setUseStateEstimator(true);
       testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = testFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 

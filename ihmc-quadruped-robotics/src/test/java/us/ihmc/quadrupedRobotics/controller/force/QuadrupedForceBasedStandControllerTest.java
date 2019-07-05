@@ -25,7 +25,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 public abstract class QuadrupedForceBasedStandControllerTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
-   private QuadrupedForceTestYoVariables variables;
+   private QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
@@ -92,7 +92,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
 
@@ -151,7 +151,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public void testStandingAndResistingHumanPowerKickToFace() throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "head_roll");
 
@@ -172,7 +172,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
@@ -218,7 +218,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       double orientationShift = getOrientationShift();
       double orientationDelta = getOrientationDelta();
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -252,7 +252,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       double translationDelta = getTranslationDelta();
       quadrupedTestFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw(1.0));
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
