@@ -80,7 +80,6 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
          updateIntersections(rawData);
          mergeCustomPlanarRegions(rawData);
          updatePolygons(rawData);
-         mergeIntoCurrentPlanarRegions();
 
          return true;
       }
@@ -98,7 +97,7 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       }
       else if (enableCustomRegions.get())
       {
-         LogTools.info("trying to merge "+customPlanarRegions.values().length);
+         LogTools.info("trying to merge " + customPlanarRegions.values().length);
          unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(), rawData,
                                                                                                       customRegionMergingParameters.get());
       }
@@ -107,16 +106,9 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
          unmergedCustomPlanarRegions = Collections.emptyList();
       }
 
-      LogTools.info("unmergedCustomPlanarRegions "+unmergedCustomPlanarRegions.size());
+      LogTools.info("unmergedCustomPlanarRegions " + unmergedCustomPlanarRegions.size());
       if (planarRegionsList != null)
          unmergedCustomPlanarRegions.forEach(planarRegionsList::addPlanarRegion);
-   }
-
-   // TODO: for the online.
-   private void mergeIntoCurrentPlanarRegions()
-   {
-      // handle current planar regions comparing getLatestSegmentationNodeData(List of SegmentationNodeData)
-      // add new planar regions.
    }
 
    private void updatePolygons(List<PlanarRegionSegmentationRawData> rawData)

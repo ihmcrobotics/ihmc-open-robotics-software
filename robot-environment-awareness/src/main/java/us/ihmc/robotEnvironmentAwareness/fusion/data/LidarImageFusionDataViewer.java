@@ -10,26 +10,16 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
-import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class LidarImageFusionDataViewer
 {
-   private final Messager messager;
-
    private final AtomicReference<LidarImageFusionData> lidarImageFusionDataToRender;
 
    protected final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -39,18 +29,13 @@ public class LidarImageFusionDataViewer
    protected final ObservableList<Node> children = root.getChildren();
    private final AtomicReference<Boolean> clear = new AtomicReference<>(false);
 
-   // TODO: just for debugging.
-   private final AtomicReference<PlanarRegionPropagationParameters> planarRegionPropagationParameters;
-
    public LidarImageFusionDataViewer(SharedMemoryJavaFXMessager messager)
    {
-      this.messager = messager;
       lidarImageFusionDataToRender = messager.createInput(LidarImageFusionAPI.FusionDataState, null);
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
 
       messager.registerTopicListener(LidarImageFusionAPI.ShowFusionData, (content) -> unpackFusionData());
-      planarRegionPropagationParameters = messager.createInput(LidarImageFusionAPI.PlanarRegionPropagationParameters, new PlanarRegionPropagationParameters());
    }
 
    private void unpackFusionData()
@@ -64,7 +49,6 @@ public class LidarImageFusionDataViewer
          return;
 
       int numberOfSegment = lidarImageFusionData.getNumberOfImageSegments();
-      System.out.println("LidarImageFusionDataViewer numberOfSegment " + numberOfSegment);
 
       List<PlanarRegionSegmentationRawData> planarRegionSegmentationRawDataList = new ArrayList<>();
 
@@ -80,28 +64,6 @@ public class LidarImageFusionDataViewer
          planarRegionSegmentationRawDataList.add(planarRegionSegmentationRawData);
       }
 
-      ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-
-      PlanarRegionsList planarRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(planarRegionSegmentationRawDataList, concaveHullFactoryParameters,
-                                                                                            polygonizerParameters);
-
-      System.out.println("LidarImageFusionDataViewer planarRegionsList " + planarRegionsList.getNumberOfPlanarRegions());
-
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         int randomID = new Random().nextInt();
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         planarRegion.getTransformToWorld(transformToWorld);
-
-         Color regionColor = getRegionColor(randomID);
-         
-         //         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), lineWidth, regionColor, true);
-         //         meshBuilder.addTetrahedron(0.02, transformToWorld.getTranslationVector(), regionColor);
-      }
-
       for (int i = 0; i < numberOfSegment; i++)
       {
          int randomID = new Random().nextInt();
@@ -115,7 +77,7 @@ public class LidarImageFusionDataViewer
          {
             regionColor = Color.rgb(0, 0, 0);
          }
-         
+
          meshBuilder.addLine(center, centerEnd, lineWidth, regionColor);
          for (Point3D point : data.getPoints())
             meshBuilder.addTetrahedron(0.02, point, regionColor);

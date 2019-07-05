@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -28,7 +27,6 @@ import us.ihmc.ros2.Ros2Node;
 
 public class StereoREAModule implements Runnable
 {
-   private final Ros2Node ros2Node;
    private final Messager reaMessager;
    private final Messager messager;
 
@@ -41,7 +39,6 @@ public class StereoREAModule implements Runnable
 
    public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
-      this.ros2Node = ros2Node;
       this.messager = messager;
       this.reaMessager = reaMessager;
       lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
@@ -52,7 +49,11 @@ public class StereoREAModule implements Runnable
       planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
                                                                              subscriberTopicNameGenerator);
 
-      //TODO : initialize.
+      initializeREAPlanarRegionPublicNetworkProvider();
+   }
+
+   private void initializeREAPlanarRegionPublicNetworkProvider()
+   {
       reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.OcTreeClear, false);
@@ -88,26 +89,7 @@ public class StereoREAModule implements Runnable
       if (!enable.get())
          return;
 
-      isRunning.set(true);
-      long runningStartTime = System.nanoTime();
-
-      lidarImageFusionDataBuffer.updateNewBuffer();
-
-      LidarImageFusionData newBuffer = lidarImageFusionDataBuffer.pollNewBuffer();
-      messager.submitMessage(LidarImageFusionAPI.FusionDataState, newBuffer);
-
-      planarRegionFeatureUpdater.updateLatestLidarImageFusionData(newBuffer);
-
-      if (planarRegionFeatureUpdater.update())
-      {
-         reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
-         reportPlanarRegionState();
-      }
-
-      double runningTime = Conversions.nanosecondsToSeconds(System.nanoTime() - runningStartTime);
-      String computationTime = new DecimalFormat("##.###").format(runningTime) + "(sec)";
-      messager.submitMessage(LidarImageFusionAPI.ComputationTime, computationTime);
-      isRunning.set(false);
+      singleRun();
    }
 
    public void singleRun()
@@ -115,27 +97,18 @@ public class StereoREAModule implements Runnable
       isRunning.set(true);
       long runningStartTime = System.nanoTime();
 
-      long updateStartTime = System.nanoTime();
       lidarImageFusionDataBuffer.updateNewBuffer();
-      double updatingTime = Conversions.nanosecondsToSeconds(System.nanoTime() - updateStartTime);
-      System.out.println("LidarImageFusionDataBuffer updatingTime " + updatingTime);
 
-      long submitStartTime = System.nanoTime();
       LidarImageFusionData newBuffer = lidarImageFusionDataBuffer.pollNewBuffer();
       messager.submitMessage(LidarImageFusionAPI.FusionDataState, newBuffer);
-      double submittingTime = Conversions.nanosecondsToSeconds(System.nanoTime() - submitStartTime);
-      System.out.println("LidarImageFusionDataBuffer submittingTime " + submittingTime);
 
       planarRegionFeatureUpdater.updateLatestLidarImageFusionData(newBuffer);
 
-      long calculationStartTime = System.nanoTime();
       if (planarRegionFeatureUpdater.update())
       {
          reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
          reportPlanarRegionState();
       }
-      double calculationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - calculationStartTime);
-      System.out.println("LidarImageFusionDataBuffer calculationTime " + calculationTime);
 
       double runningTime = Conversions.nanosecondsToSeconds(System.nanoTime() - runningStartTime);
       String computationTime = new DecimalFormat("##.###").format(runningTime) + "(sec)";
