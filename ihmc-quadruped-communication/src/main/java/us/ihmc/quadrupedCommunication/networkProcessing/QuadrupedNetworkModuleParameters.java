@@ -4,9 +4,6 @@ public class QuadrupedNetworkModuleParameters
 {
    private boolean useNetworkProcessor = true;
    private boolean useRobotEnvironmentAwarenessModule;
-   private boolean useBodyHeightTeleopModule;
-   private boolean visualizeBodyHeightTeleopModule;
-   private boolean logBodyHeightTeleopModule;
    private boolean useStepTeleopModule;
    private boolean visualizeStepTeleopModule;
    private boolean logStepTeleopModule;
@@ -40,16 +37,6 @@ public class QuadrupedNetworkModuleParameters
       return useRobotEnvironmentAwarenessModule;
    }
 
-   public void enableBodyHeightTeleopModule(boolean enable)
-   {
-      this.useBodyHeightTeleopModule = enable;
-   }
-
-   public boolean isBodyHeightTeleopModuleEnabled()
-   {
-      return useBodyHeightTeleopModule;
-   }
-
    public void enableFootstepPlanningModule(boolean enable)
    {
       this.useFootstepPlanningModule = enable;
@@ -78,26 +65,6 @@ public class QuadrupedNetworkModuleParameters
    public boolean isStepTeleopModuleEnabled()
    {
       return useStepTeleopModule;
-   }
-
-   public void setVisualizeBodyHeightTeleopModule(boolean visualize)
-   {
-      visualizeBodyHeightTeleopModule = visualize;
-   }
-
-   public boolean visualizeBodyHeightTeleopModuleEnabled()
-   {
-      return visualizeBodyHeightTeleopModule;
-   }
-
-   public void setLogBodyHeightTeleopModule(boolean log)
-   {
-      logBodyHeightTeleopModule = log;
-   }
-
-   public boolean logBodyHeightTeleopModuleEnabled()
-   {
-      return logBodyHeightTeleopModule;
    }
 
    public void setVisualizeStepTeleopModule(boolean visualize)
