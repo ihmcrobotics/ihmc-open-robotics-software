@@ -31,7 +31,7 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
-   private static final int MAX_NUMBER_OF_POINTS = 50000;
+   private static final int MAX_NUMBER_OF_POINTS = 200000;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
