@@ -82,7 +82,6 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
       parentRegistry.addChild(registry);
    }
 
-
    private void setupVisualization(String prefix, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(prefix + "VisGraph");
@@ -97,6 +96,18 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
       }
 
       graphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+   }
+
+   @Override
+   public WaypointsForQuadrupedFootstepPlanner getWaypointPathPlanner()
+   {
+      return waypointPathPlanner;
+   }
+
+   @Override
+   public QuadrupedFootstepPlanner getFootstepPlanner()
+   {
+      return footstepPlanner;
    }
 
    @Override

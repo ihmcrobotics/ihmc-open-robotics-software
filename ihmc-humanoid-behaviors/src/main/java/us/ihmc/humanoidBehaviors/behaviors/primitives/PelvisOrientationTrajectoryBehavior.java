@@ -69,21 +69,16 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
 
       isPaused.set(false);
       isAborted.set(false);
-
+      startTime.set(Double.NaN);
+      trajectoryTime.set(Double.NaN);
       hasBeenInitialized.set(true);
    }
 
    @Override
    public void onBehaviorExited()
    {
-      hasPacketBeenSent.set(false);
-      outgoingPelvisOrientationTrajectoryMessage = null;
-
-      isPaused.set(false);
-      isAborted.set(false);
-
-      startTime.set(Double.NaN);
-      trajectoryTime.set(Double.NaN);
+      
+      
    }
 
    @Override //TODO: Not currently implemented for this behavior
@@ -94,14 +89,19 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone() 
    {
+      if(hasPacketBeenSent.getBooleanValue())
+      {
       if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
          trajectoryTimeElapsed.set(false);
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      }
+      else
+         return false;
    }
 
    public boolean hasInputBeenSet()

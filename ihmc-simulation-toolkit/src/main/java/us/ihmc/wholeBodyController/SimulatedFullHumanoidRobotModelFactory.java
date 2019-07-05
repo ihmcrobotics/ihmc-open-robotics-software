@@ -5,9 +5,9 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 
 public interface SimulatedFullHumanoidRobotModelFactory extends FullHumanoidRobotModelFactory
 {
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping);
+   HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping);
 
-   default public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   default HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
       return createHumanoidFloatingRootJointRobot(createCollisionMeshes, true);
    }

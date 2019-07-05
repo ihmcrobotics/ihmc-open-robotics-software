@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExceptionHandlingThreadScheduler
 {
-   private static final ExceptionHandler DEFAULT_HANDLER = t ->
+   public static final ExceptionHandler DEFAULT_HANDLER = t ->
    {
       LogTools.error(t.getMessage());
       t.printStackTrace();
@@ -42,6 +43,8 @@ public class ExceptionHandlingThreadScheduler
    {
       this(name, DEFAULT_HANDLER, 0);
    }
+
+   /** TODO: Add constructor with Exception handler that print only the message N-1 times and print the stack trace when it finally crashes */
 
    /**
     * Handle the exceptions yourself and recover. Always resume running.
@@ -68,6 +71,11 @@ public class ExceptionHandlingThreadScheduler
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
    }
 
+   public ScheduledFuture<?> schedule(Runnable runnable, double period)
+   {
+      return schedule(runnable, Conversions.secondsToNanoseconds(period), TimeUnit.NANOSECONDS);
+   }
+
    public ScheduledFuture<?> schedule(Runnable runnable, long period, TimeUnit timeunit)
    {
       if (!running)
@@ -80,6 +88,15 @@ public class ExceptionHandlingThreadScheduler
       {
          LogTools.warn("Thread has already been scheduled");
       }
+
+      return scheduledFuture;
+   }
+
+   public ScheduledFuture<?> scheduleOnce(Runnable runnable)
+   {
+      this.runnable = runnable;
+      scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS);
+      running = true;
 
       return scheduledFuture;
    }

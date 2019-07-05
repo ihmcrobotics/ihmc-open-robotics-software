@@ -1,16 +1,16 @@
 package us.ihmc.avatar.sensors.multisense;
 
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -20,25 +20,25 @@ public class MultiSenseSensorManager
 
    private CameraDataReceiver cameraReceiver;
 
-   private final FullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final FullRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
 
-   private final DRCRobotCameraParameters cameraParameters;
+   private final AvatarRobotCameraParameters cameraParameters;
 
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
-   public MultiSenseSensorManager(FullHumanoidRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-                                  RosMainNode rosMainNode, Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-                                  DRCRobotCameraParameters cameraParameters, DRCRobotLidarParameters lidarParameters,
-                                  DRCRobotPointCloudParameters stereoParameters, boolean setROSParameters)
+   public MultiSenseSensorManager(FullRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+                                  RosMainNode rosMainNode, Ros2Node ros2Node, RobotROSClockCalculator rosClockCalculator,
+                                  AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
+                                  AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraParameters = cameraParameters;
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
 
       boolean rosOnline = false;
 
@@ -82,7 +82,7 @@ public class MultiSenseSensorManager
    {
       CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
       cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer,
-                                              new VideoPacketHandler(ros2Node), ppsTimestampOffsetProvider);
+                                              new VideoPacketHandler(ros2Node), rosClockCalculator::computeRobotMonotonicTime);
 
       new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 

@@ -138,10 +138,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
 
-            super.doTransitionIntoAction();
+            super.onEntry();
          }
       };
 
@@ -150,16 +150,16 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       {
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
             publishTextToSpeech("Searching For The Door");
-            super.doTransitionIntoAction();
+            super.onEntry();
          }
 
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
-            super.doTransitionOutOfAction();
+            super.onExit();
             //found the door location, inform the UI of its location
 
          }
@@ -168,19 +168,19 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       BehaviorAction searchForDoorNear = new BehaviorAction(searchForDoorBehavior)
       {
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
-            super.doTransitionOutOfAction();
+            super.onExit();
             //found the door location, inform the UI of its location
 
          }
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
             publishTextToSpeech("Confirm door location before walking through");
 
-            super.doTransitionIntoAction();
+            super.onEntry();
          }
       };
 

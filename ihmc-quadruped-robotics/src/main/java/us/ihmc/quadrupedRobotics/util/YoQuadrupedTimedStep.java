@@ -47,7 +47,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    }
 
    @Override
-   public Point3DBasics getGoalPositionInternal()
+   protected Point3DBasics getGoalPositionInternal()
    {
       return goalPosition;
    }

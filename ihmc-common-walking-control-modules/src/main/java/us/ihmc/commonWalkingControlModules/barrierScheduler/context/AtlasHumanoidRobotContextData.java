@@ -1,26 +1,51 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
+@SuppressWarnings("serial")
 public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
 {
+   /**
+    * Raw joint measurements for the controller.
+    * Set by the estimator.
+    */
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
-   private final List<String> jointNames;
 
-   protected AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
-                                           CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                           JointDesiredOutputList jointDesiredOutputList, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public AtlasHumanoidRobotContextData()
    {
-      super(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList);
+      super();
+      rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap();
+   }
+
+   public AtlasHumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel)
+   {
+      super(fullRobotModel);
+      rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
+   }
+
+   public AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
+                                        LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, SensorDataContext sensorDataContext,
+                                        RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   {
+      super(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
-      jointNames = new ArrayList<>(rawJointSensorDataHolderMap.keySet());
+   }
+
+   public void set(AtlasHumanoidRobotContextData other)
+   {
+      copyFrom(other);
+   }
+
+   public RawJointSensorDataHolderMap getRawJointSensorDataHolderMap()
+   {
+      return rawJointSensorDataHolderMap;
    }
 
    @Override
@@ -29,10 +54,26 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
       super.copyFrom(src);
 
       AtlasHumanoidRobotContextData atlasSrc = (AtlasHumanoidRobotContextData) src;
-      for (int i = 0; i < jointNames.size(); i++)
+      rawJointSensorDataHolderMap.set(atlasSrc.rawJointSensorDataHolderMap);
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
       {
-         String jointName = jointNames.get(i);
-         rawJointSensorDataHolderMap.get(jointName).set(atlasSrc.rawJointSensorDataHolderMap.get(jointName));
+         return true;
+      }
+      else if (obj instanceof AtlasHumanoidRobotContextData)
+      {
+         AtlasHumanoidRobotContextData other = (AtlasHumanoidRobotContextData) obj;
+         if (!rawJointSensorDataHolderMap.equals(other.rawJointSensorDataHolderMap))
+            return false;
+         return super.equals(other);
+      }
+      else
+      {
+         return false;
       }
    }
 }

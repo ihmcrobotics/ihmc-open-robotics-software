@@ -103,6 +103,13 @@ public class PelvisIMUBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
+   public void initialize()
+   {
+      yoMeasurementFrameLinearVelocityInWorld.setToZero();
+      imuLinearVelocityIMUOnly.setToZero();
+      setRootJointPositionImuOnlyToCurrent.set(true);
+   }
+
    public boolean isEstimationEnabled()
    {
       return useAccelerometerForEstimation.getValue() && imuProcessedOutput != null;

@@ -336,18 +336,6 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    {
       icpPlanner.setSwingDuration(stepNumber, duration);
    }
-   
-   @Override
-   public void setTouchdownDuration(int stepNumber, double duration)
-   {
-      icpPlanner.setTouchdownDuration(stepNumber, duration);
-   }
-
-   @Override
-   public double getTouchdownDuration(int stepNumber)
-   {
-      return icpPlanner.getTouchdownDuration(stepNumber);
-   }
 
    /** {@inheritDoc} */
    @Override

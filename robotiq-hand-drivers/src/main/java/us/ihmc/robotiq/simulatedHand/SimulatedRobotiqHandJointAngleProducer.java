@@ -11,7 +11,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class SimulatedRobotiqHandJointAngleProducer
 {
@@ -21,12 +20,11 @@ public class SimulatedRobotiqHandJointAngleProducer
 
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
 
-   public SimulatedRobotiqHandJointAngleProducer(IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher, FloatingRootJointRobot simulatedRobot,
-                                                 CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedRobotiqHandJointAngleProducer(IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher, FloatingRootJointRobot simulatedRobot)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, jointAnglePublisher, closeableAndDisposableRegistry));
+         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, jointAnglePublisher));
 
          for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
          {
@@ -74,6 +72,14 @@ public class SimulatedRobotiqHandJointAngleProducer
             });
             jointAngleCommunicators.get(robotSide).write();
          }
+      }
+   }
+
+   public void cleanup()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointAngleCommunicators.get(robotSide).cleanup();
       }
    }
 }

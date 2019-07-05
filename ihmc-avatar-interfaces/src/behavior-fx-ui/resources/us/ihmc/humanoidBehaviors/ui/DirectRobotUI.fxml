@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController">
+	<children>
+		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefWidth="410.0" vgap="5.0">
+			<children>
+				<Label style="-fx-font-weight: bold" text="Robot control" />
+				<Button fx:id="homeAll" onAction="#homeAll" text="Home All" GridPane.rowIndex="4" />
+				<Button fx:id="freeze" onAction="#freeze" text="Freeze" GridPane.rowIndex="1" />
+				<Button fx:id="standPrep" onAction="#standPrep" text="Stand Prep" GridPane.rowIndex="3" />
+				<Button fx:id="shutdown" onAction="#shutdown" text="Shutdown" GridPane.rowIndex="2" />
+
+				<Label style="-fx-font-weight: bold" text="Support regions" GridPane.columnIndex="1" />
+				<Label prefHeight="17.0" prefWidth="135.0" text="Enable support regions" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<Label text="Support regions scale" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+				<Label style="-fx-font-weight: bold" text="REA" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <BorderPane GridPane.rowIndex="5">
+               <left>
+                  <Label text="PSI" BorderPane.alignment="CENTER" />
+               </left>
+               <right>
+                  <ComboBox fx:id="pumpPSI" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets left="5.0" />
+                     </BorderPane.margin>
+                  </ComboBox>
+               </right>
+            </BorderPane>
+			</children>
+         <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints maxWidth="149.0" minWidth="135.0" prefWidth="139.0" />
+            <ColumnConstraints maxWidth="120.0" minWidth="106.0" prefWidth="112.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints maxHeight="32.0" minHeight="16.0" prefHeight="27.0" />
+            <RowConstraints />
+         </rowConstraints>
+		</GridPane>
+	</children>
+</AnchorPane>

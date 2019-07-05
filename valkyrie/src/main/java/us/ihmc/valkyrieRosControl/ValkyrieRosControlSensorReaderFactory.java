@@ -19,7 +19,7 @@ import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -51,15 +51,19 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    private final HashMap<String, IMUHandle> imuHandles;
    private final HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles;
 
-   private final TimestampProvider timestampProvider;
+   private final TimestampProvider wallTimeProvider, monotonicTimeProvider;
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
 
-   public ValkyrieRosControlSensorReaderFactory(TimestampProvider timestampProvider, SensorProcessingConfiguration sensorProcessingConfiguration,
-         HashMap<String, EffortJointHandle> effortJointHandles, HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, JointStateHandle> jointStateHandles,
-         HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles, ValkyrieJointMap jointMap, ValkyrieSensorInformation sensorInformation)
+   public ValkyrieRosControlSensorReaderFactory(TimestampProvider wallTimeProvider, TimestampProvider monotonicTimeProvider,
+                                                SensorProcessingConfiguration sensorProcessingConfiguration,
+                                                HashMap<String, EffortJointHandle> effortJointHandles,
+                                                HashMap<String, PositionJointHandle> positionJointHandles, HashMap<String, JointStateHandle> jointStateHandles,
+                                                HashMap<String, IMUHandle> imuHandles, HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles,
+                                                ValkyrieJointMap jointMap, ValkyrieSensorInformation sensorInformation)
    {
-      this.timestampProvider = timestampProvider;
+      this.wallTimeProvider = wallTimeProvider;
+      this.monotonicTimeProvider = monotonicTimeProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
 
       this.effortJointHandles = effortJointHandles;
@@ -74,7 +78,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
    @Override
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("ValkyrieRosControlSensorReader");
 
@@ -187,7 +191,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
          }
       }
 
-      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, timestampProvider,
+      sensorReader = new ValkyrieRosControlSensorReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, wallTimeProvider, monotonicTimeProvider,
             yoEffortJointHandleHolders, yoPositionJointHandleHolders, yoJointStateHandleHolders, yoIMUHandleHolders, yoForceTorqueSensorHandles, jointMap, sensorReaderRegistry);
 
       parentRegistry.addChild(sensorReaderRegistry);

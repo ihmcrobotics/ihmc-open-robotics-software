@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -17,29 +18,18 @@ public class AccelerationLimitedYoVariable extends YoDouble
    private final YoDouble positionGain;
    private final YoDouble velocityGain;
 
-   private YoDouble maximumRate;
-   private YoDouble maximumAcceleration;
+   private DoubleProvider maximumRate;
+   private DoubleProvider maximumAcceleration;
 
-   private final YoDouble inputVariable;
+   private final DoubleProvider inputVariable;
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double maxAcceleration, YoDouble inputVariable, double dt)
-   {
-      this(name, registry, null, null, inputVariable, dt);
-
-      maximumRate = new YoDouble(name + "MaxRate", registry);
-      maximumAcceleration = new YoDouble(name + "MaxAcceleration", registry);
-
-      maximumRate.set(maxRate);
-      maximumAcceleration.set(maxAcceleration);
-   }
-
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRate, YoDouble maxAcceleration, double dt)
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration, double dt)
    {
       this(name, registry, maxRate, maxAcceleration, null, dt);
    }
 
-   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxRate, YoDouble maxAcceleration,
-         YoDouble inputVariable, double dt)
+   public AccelerationLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRate, DoubleProvider maxAcceleration,
+                                        DoubleProvider inputVariable, double dt)
    {
       super(name, registry);
 
@@ -68,15 +58,6 @@ public class AccelerationLimitedYoVariable extends YoDouble
       this.inputVariable = inputVariable;
    }
 
-   public void setMaximumAcceleration(double maximumAcceleration)
-   {
-      this.maximumAcceleration.set(maximumAcceleration);
-   }
-
-   public void setMaximumRate(double maximumRate)
-   {
-      this.maximumRate.set(maximumRate);
-   }
 
    public void setGainsByPolePlacement(double w0, double zeta)
    {
@@ -96,7 +77,7 @@ public class AccelerationLimitedYoVariable extends YoDouble
 
    public void update()
    {
-      update(inputVariable.getDoubleValue());
+      update(inputVariable.getValue());
    }
 
    public void update(double input)
@@ -106,11 +87,11 @@ public class AccelerationLimitedYoVariable extends YoDouble
 
       double positionError = input - this.getDoubleValue();
       double acceleration = -velocityGain.getDoubleValue() * smoothedRate.getDoubleValue() + positionGain.getDoubleValue() * positionError;
-      acceleration = MathTools.clamp(acceleration, -maximumAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue());
+      acceleration = MathTools.clamp(acceleration, -maximumAcceleration.getValue(), maximumAcceleration.getValue());
 
       smoothedAcceleration.set(acceleration);
       smoothedRate.add(smoothedAcceleration.getDoubleValue() * dt);
-      smoothedRate.set(MathTools.clamp(smoothedRate.getDoubleValue(), maximumRate.getDoubleValue()));
+      smoothedRate.set(MathTools.clamp(smoothedRate.getDoubleValue(), maximumRate.getValue()));
       this.add(smoothedRate.getDoubleValue() * dt);
    }
 
@@ -147,11 +128,11 @@ public class AccelerationLimitedYoVariable extends YoDouble
    
    public double getMaximumRate()
    {
-      return maximumRate.getDoubleValue();
+      return maximumRate.getValue();
    }
    
    public double getMaximumAcceleration()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumAcceleration.getValue();
    }
 }

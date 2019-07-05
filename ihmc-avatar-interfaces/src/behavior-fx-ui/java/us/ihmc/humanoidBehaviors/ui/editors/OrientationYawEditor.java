@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
 import com.sun.javafx.scene.CameraHelper;
+import javafx.event.EventHandler;
 import javafx.scene.Camera;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
@@ -8,134 +9,136 @@ import javafx.scene.input.MouseEvent;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
-import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
-import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
-import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
+import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
+import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
+import us.ihmc.tools.thread.TypedNotification;
 
-public class OrientationYawEditor extends FXUIEditor
+import java.util.function.Consumer;
+
+public class OrientationYawEditor
 {
-   private final TypedNotification<Point3D> mouseMovedOrientation = new TypedNotification<>();
-   private final TypedNotification<Point3D> mouseClickedOrientation = new TypedNotification<>();
+   private final SubScene sceneNode;
+   private final PrivateAnimationTimer orientationAnimationTimer;
+
+   // these are necessary to keep a consistent reference
+   private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+
+   private final TypedNotification<Orientation3DReadOnly> mouseMovedOrientation = new TypedNotification<>();
+   private final TypedNotification<Orientation3DReadOnly> mouseClickedOrientation = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
 
-   private final FXUIStateMachine orientationEditorStateMachine;
-   private final OverTypedReference<OrientationEditable> selectedGraphicReference;
+   private PoseEditable selectedGraphic;
+   private Consumer<FXUITrigger> onExit;
 
-   public OrientationYawEditor(Messager messager, SubScene sceneNode)
+   public OrientationYawEditor(SubScene sceneNode)
    {
-      super(messager, sceneNode);
+      this.sceneNode = sceneNode;
 
-      orientationEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-      });
-      orientationEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
-      {
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
-      });
-
-      selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
+      orientationAnimationTimer = new PrivateAnimationTimer(this::handleOrientation);
    }
 
-   public void activate()
+   public void edit(PoseEditable selectedGraphic, Consumer<FXUITrigger> onExit)
    {
-      messager.submitMessage(BehaviorUI.API.ActiveStateMachine, orientationEditorStateMachine);
-      orientationEditorStateMachine.start();
+      this.selectedGraphic = selectedGraphic;
+      this.onExit = onExit;
+
+      BehaviorUI.claimEditing(this);
+
+      sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      this.selectedGraphic.setMouseTransparent(true);
+
+      orientationAnimationTimer.start();
    }
 
-   @Override
-   public void handle(long now)
+   private void handleOrientation(long now)
    {
-      if (activeEditor.pollActivated())
+      mouseMovedOrientation.poll();
+      mouseClickedOrientation.poll();
+
+      if (mouseClickedOrientation.hasNext())  // use the clicked position if clicked
       {
-         if (activeEditor.activationChanged())
-         {
-            LogTools.debug("Orientation editor activated");
-            subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-            subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-            selectedGraphicReference.get().setMouseTransparent(true);
-         }
+         selectedGraphic.setOrientation(mouseClickedOrientation.peek());
+      }
+      else if (mouseMovedOrientation.hasNext())  // just for selection preview
+      {
+         selectedGraphic.setOrientation(mouseMovedOrientation.peek());
+      }
 
-         mouseMovedOrientation.poll();
-         mouseClickedOrientation.poll();
+      if (mouseClickedOrientation.hasNext())
+      {
+         LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.peek());
+         deactivate(FXUITrigger.ORIENTATION_LEFT_CLICK);
+      }
 
-         if (mouseClickedOrientation.hasNext())  // use the clicked position if clicked
-         {
-            selectedGraphicReference.get().setOrientation(mouseClickedOrientation.read());
-         }
-         else if (mouseMovedOrientation.hasNext())  // just for selection preview
-         {
-            selectedGraphicReference.get().setOrientation(mouseMovedOrientation.read());
-         }
-
-         if (mouseClickedOrientation.hasNext())
-         {
-            LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
-            deactivate();
-            activeStateMachine.get().transition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK);
-         }
-
-         if (mouseRightClicked.poll())
-         {
-            deactivate();
-            activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
-         }
+      if (mouseRightClicked.poll())
+      {
+         deactivate(FXUITrigger.RIGHT_CLICK);
       }
    }
 
-   private void deactivate()
+   private void deactivate(FXUITrigger exitType)
    {
+      orientationAnimationTimer.stop();
+
       LogTools.debug("Orientation editor deactivated.");
-      subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-      subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-      selectedGraphicReference.get().setMouseTransparent(false);
+      sceneNode.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      selectedGraphic.setMouseTransparent(false);
+
+      BehaviorUI.ACTIVE_EDITOR = null; // do this before exit because it probably switches to new editor
+
+      onExit.accept(exitType);
    }
 
-   @Override
-   protected void mouseMoved(MouseEvent event)
+   private void mouseMoved(MouseEvent event)
    {
-      Point3D point3D = intersectRayWithPlane(event);
-      mouseMovedOrientation.add(point3D);
+      Orientation3DReadOnly rotationVector = intersectRayWithPlane(event);
+      mouseMovedOrientation.add(rotationVector);
    }
 
-   @Override
-   protected void mouseClicked(MouseEvent event)
+   private void mouseClicked(MouseEvent event)
    {
-      if (event.isStillSincePress())
+      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == this)
       {
-         LogTools.debug("{} mouseClicked", getClass().getSimpleName());
-         if (activeEditor.peekActivated())
+         LogTools.debug("consume mouseClicked");
+         event.consume();
+         if (event.getButton() == MouseButton.PRIMARY)
          {
-            if (event.getButton() == MouseButton.PRIMARY)
-            {
-               Point3D point3D = intersectRayWithPlane(event);
-               mouseClickedOrientation.add(point3D);
-            }
-            else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
-            {
-               mouseRightClicked.set();
-            }
+            Orientation3DReadOnly orientation = intersectRayWithPlane(event);
+            mouseClickedOrientation.add(orientation);
+         }
+         else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
+         {
+            mouseRightClicked.set();
          }
       }
    }
 
-   private Point3D intersectRayWithPlane(MouseEvent event)
+   private Orientation3DReadOnly intersectRayWithPlane(MouseEvent event)
    {
-      Line3D line = getPickRay(subScene.getCamera(), event);
+      Line3D line = getPickRay(sceneNode.getCamera(), event);
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);  // TODO link to planar region normal
-      Point3D pointOnPlane = new Point3D();    // using 0.0 as ground for now
+      Point3DReadOnly pickPoint = selectedGraphic.getPosition();
 
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
+      Point3D pickDirection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, planeNormal, line.getPoint(), line.getDirection());
+
+      Vector3D rotationVector = new Vector3D(pickDirection);
+      rotationVector.sub(pickPoint);
+
+      double yaw = Math.atan2(rotationVector.getY(), rotationVector.getX()); // TODO Allow 3D when linking planar region normal
+
+      return new YawPitchRoll(yaw, 0.0, 0.0);
    }
 
    private Line3D getPickRay(Camera camera, MouseEvent event)

@@ -265,7 +265,7 @@ class CrossRobotCommandResolverTest
          }
 
          chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chain", rootBodyA, numberOfJoints);
-         rootBodyB = MultiBodySystemFactories.cloneMultiBodySystem(rootBodyA, rootFrameB, "Cloned");
+         rootBodyB = MultiBodySystemFactories.cloneMultiBodySystem(rootBodyA, rootFrameB, "");
          chainB = SubtreeStreams.fromChildren(OneDoFJoint.class, rootBodyB).collect(Collectors.toList());
 
          bodyResolverForB.put(rootBodyB, rootBodyA.hashCode());
