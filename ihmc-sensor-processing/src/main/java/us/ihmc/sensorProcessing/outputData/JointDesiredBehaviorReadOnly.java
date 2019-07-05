@@ -18,4 +18,8 @@ public interface JointDesiredBehaviorReadOnly
    public double getMasterGain();
 
    public double getVelocityScaling();
+
+   public double getMaxPositionError();
+
+   public double getMaxVelocityError();
 }
