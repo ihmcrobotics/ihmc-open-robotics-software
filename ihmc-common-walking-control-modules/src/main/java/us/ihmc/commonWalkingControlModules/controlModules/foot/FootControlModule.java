@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -33,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -61,7 +63,8 @@ public class FootControlModule
       }
    }
 
-   private static final double coefficientOfFriction = 0.8;
+   private static final double defaultCoefficientOfFriction = 0.8;
+   private final DoubleParameter coefficientOfFriction;
 
    private final StateMachine<ConstraintType, AbstractFootControlState> stateMachine;
    private final YoEnum<ConstraintType> requestedState;
@@ -103,7 +106,6 @@ public class FootControlModule
                             YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
-      controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
 
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
@@ -177,6 +179,11 @@ public class FootControlModule
       }
 
       numberOfBasisVectors = walkingControllerParameters.getMomentumOptimizationSettings().getNumberOfBasisVectorsPerContactPoint();
+
+      String targetRegistryName = FeetManager.class.getSimpleName();
+      String parameterRegistryName = FootControlModule.class.getSimpleName() + "Parameters";
+      coefficientOfFriction = ParameterProvider.getOrCreateParameter(targetRegistryName, parameterRegistryName, "CoefficientOfFriction", registry,
+                                                                     defaultCoefficientOfFriction);
    }
 
    private void setupWrenchCommand(ContactWrenchCommand command)
@@ -279,6 +286,8 @@ public class FootControlModule
 
    public void doControl()
    {
+      controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction.getValue());
+
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
