@@ -25,8 +25,8 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
 {
-   private static final String multisenseCartAddress = "http://10.7.4.100:11311";
-   //private static final String multisenseCartAddress = "http://10.6.192.14:11311";
+   private static final String multisenseCartAddress = "http://10.7.4.100:11311";      // Atlas
+   //private static final String multisenseCartAddress = "http://10.6.192.14:11311";   // cart
    private static final String imageROSTopicName = "/multisense/left/image_rect_color";
    private static final String cameraInfoROSTopicName = "/multisense/left/camera_info";
 
