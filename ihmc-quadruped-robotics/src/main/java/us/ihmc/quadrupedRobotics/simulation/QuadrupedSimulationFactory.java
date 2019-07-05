@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -154,14 +153,6 @@ public class QuadrupedSimulationFactory
    private QuadrupedSimulationController simulationController;
    private List<CameraConfiguration> cameraConfigurations = new ArrayList<>();
    private YoVariableServer yoVariableServer;
-
-   /**
-    * The PacketCommunicator used as input of the controller is either equal to the output
-    * PacketCommunicator of the network processor or the behavior module if any. It is bidirectional
-    * meaning that it carries commands to be executed by the controller and that the controller is
-    * able to send feedback the other way to whoever is listening to the PacketCommunicator.
-    */
-   private PacketCommunicator controllerPacketCommunicator;
 
    // CREATION
 
