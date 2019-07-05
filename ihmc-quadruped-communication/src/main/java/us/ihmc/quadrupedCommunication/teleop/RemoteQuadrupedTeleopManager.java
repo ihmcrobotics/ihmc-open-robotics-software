@@ -55,12 +55,10 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
-   private final IHMCROS2Publisher<QuadrupedTeleopDesiredHeight> desiredHeightPublisher;
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredPose> desiredPosePublisher;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> stepTeleopStatePublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> bodyTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> heightTeleopStatePublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> footstepPlannerStatePublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
@@ -93,8 +91,6 @@ public class RemoteQuadrupedTeleopManager
       MessageTopicNameGenerator stepTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator footstepPlannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                                     ROS2Tools.ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator heightTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_TELEOP_TOOLBOX,
-                                                                                 ROS2Tools.ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator bodyTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.BODY_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
@@ -109,10 +105,8 @@ public class RemoteQuadrupedTeleopManager
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
       desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
-      desiredHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopSubGenerator);
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
-      heightTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopSubGenerator);
       bodyTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopSubGenerator);
       footstepPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
@@ -159,7 +153,6 @@ public class RemoteQuadrupedTeleopManager
 
    public void initialize()
    {
-      heightTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
       bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
    }
 
@@ -202,7 +195,6 @@ public class RemoteQuadrupedTeleopManager
 
    public void requestBodyTeleop()
    {
-      heightTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
       bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
    }
 

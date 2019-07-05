@@ -149,14 +149,6 @@ public class QuadrupedMessageTools
       return message;
    }
 
-   public static QuadrupedTeleopDesiredHeight createQuadrupedTeleopDesiredHeight(double desiredHeight)
-   {
-      QuadrupedTeleopDesiredHeight message = new QuadrupedTeleopDesiredHeight();
-      message.setDesiredHeight(desiredHeight);
-
-      return message;
-   }
-
    public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double yaw, double pitch, double roll, double time)
    {
       QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();

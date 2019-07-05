@@ -179,13 +179,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       // enable teleop modules
       networkModuleParameters.enableFootstepPlanningModule(true);
-      networkModuleParameters.enableBodyHeightTeleopModule(true);
       networkModuleParameters.enableBodyTeleopModule(true);
       networkModuleParameters.enableStepTeleopModule(true);
 
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
-                                                              physicalProperties.getNominalBodyHeight(),
                                                               physicalProperties.getFeetGroundContactPoints(),
                                                               new DefaultFootstepPlannerParameters(),
                                                               xGaitSettings,
