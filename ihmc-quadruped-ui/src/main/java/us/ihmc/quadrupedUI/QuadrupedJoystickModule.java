@@ -21,8 +21,7 @@ import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
-import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,8 +38,6 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private static final double maxBodyRoll = 0.15;
    private static final double maxBodyPitch = 0.15;
    private static final double bodyOrientationShiftTime = 0.1;
-   private static final double maxTranslationX = 0.25;
-   private static final double maxTranslationY = 0.15;
    private static final double maxYSpeedFraction = 0.5;
    private static final double maxYawSpeedFraction = 0.75;
 
@@ -50,20 +47,20 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
    private final Messager messager;
    private final double nominalBodyHeight;
-   private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
+   private final Map<XBoxOneMapping, ChannelData> channelDataMap = new HashMap<>();
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
-   private final AtomicBoolean joystickPollFlag = new AtomicBoolean();
    private final QuadrupedReferenceFrames referenceFrames;
 
+   private final AtomicReference<QuadrupedSteppingStateEnum> currentSteppingState;
    private final AtomicReference<Boolean> joystickEnabled;
    private final AtomicReference<Boolean> stepTeleopEnabled;
    private final AtomicReference<Boolean> heightTeleopEnabled;
    private final AtomicReference<Boolean> bodyPoseTeleopEnabled;
 
-   private final AtomicBoolean resetBodyPose = new AtomicBoolean(false);
-   private final AtomicReference<QuadrupedSteppingStateEnum> currentSteppingState;
+   private final AtomicBoolean resetBodyPose = new AtomicBoolean();
 
-   public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, FullQuadrupedRobotModel robotModel, double nominalBodyHeight, Joystick joystick)
+   public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, FullQuadrupedRobotModel robotModel,
+                                  double nominalBodyHeight, Joystick joystick)
    {
       this.messager = messager;
       this.xGaitSettings = new QuadrupedXGaitSettings(defaultXGaitSettings);
@@ -76,10 +73,11 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
       for (XBoxOneMapping channel : XBoxOneMapping.values)
       {
-         channels.put(channel, 0.0);
+         channelDataMap.put(channel, new ChannelData());
       }
-      channels.put(XBoxOneMapping.LEFT_TRIGGER, -1.0);
-      channels.put(XBoxOneMapping.RIGHT_TRIGGER, -1.0);
+
+      channelDataMap.get(XBoxOneMapping.LEFT_TRIGGER).initialize(-1.0);
+      channelDataMap.get(XBoxOneMapping.RIGHT_TRIGGER).initialize(-1.0);
 
       joystickEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
       stepTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
@@ -102,14 +100,10 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    {
       device.setCustomizationFilter(new JoystickCustomizationFilter(xVelocityMapping, xVelocityInvert, 0.1, 1));
       device.setCustomizationFilter(new JoystickCustomizationFilter(yVelocityMapping, yVelocityInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawRateMapping, negativeYawRateInvert, 0.05, 1, 1.0));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawRateMapping, positiveYawRateInvert, 0.05, 1, 1.0));
-
-      device.setCustomizationFilter(new JoystickCustomizationFilter(xTranslationMapping, xTranslationInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(yTranslationMapping, yTranslationInvert, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(leftTurnMapping, false, 0.05, 1, 1.0));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(rightTurnMapping, false, 0.05, 1, 1.0));
       device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawMapping, negativeYawInvert, 0.05, 1, 1.0));
       device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawMapping, positiveYawInvert, 0.05, 1, 1.0));
-
       device.setCustomizationFilter(new JoystickCustomizationFilter(rollMapping, rollInvert, 0.1, 1));
       device.setCustomizationFilter(new JoystickCustomizationFilter(pitchMapping, pitchInvert, 0.1, 1));
    }
@@ -117,10 +111,15 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    @Override
    public void handle(long now)
    {
-      if (!joystickPollFlag.getAndSet(false))
+      processEnableCommand();
+
+      if (!joystickEnabled.get())
       {
          return;
       }
+
+      processResetBodyCommand();
+      processPauseWalkingCommand();
 
       referenceFrames.updateFrames();
 
@@ -129,70 +128,112 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
          sendResetCommands();
       }
 
-      if (!joystickEnabled.get())
+      processBodyHeightCommands();
+      processBodyOrientationCommands();
+
+      processXGaitSettingCommands();
+      processStepCommands();
+   }
+
+   private void processEnableCommand()
+   {
+      ChannelData enableChannel = channelDataMap.get(XBoxOneMapping.START);
+      if (enableChannel.hasNewData() && enableChannel.getValue() > 0.5)
       {
-         return;
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, !joystickEnabled.get());
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
       }
+   }
 
-      messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+   private void processResetBodyCommand()
+   {
+      ChannelData resetChannel = channelDataMap.get(XBoxOneMapping.SELECT);
+      if (resetChannel.hasNewData() && resetChannel.getValue() > 0.5)
+      {
+         resetBodyPose.set(true);
+      }
+   }
 
-      processJoystickStepCommands();
-      processJoystickBodyCommands();
-      processJoystickHeightCommands();
+   private void processPauseWalkingCommand()
+   {
+      ChannelData pauseWalkingChannel = channelDataMap.get(XBoxOneMapping.SELECT);
+      if (pauseWalkingChannel.hasNewData() && pauseWalkingChannel.getValue() > 0.5)
+      {
+         boolean walking = currentSteppingState.get() != null && currentSteppingState.get() == QuadrupedSteppingStateEnum.STEP;
+         messager.submitMessage(QuadrupedUIMessagerAPI.PauseWalkingTopic, walking);
+      }
    }
 
    private void sendResetCommands()
    {
       bodyHeightOffset.setValue(0.0);
+      sendBodyHeightSetpoint();
 
-      QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
-      bodyTrajectoryMessage.setIsExpressedInAbsoluteTime(false);
-      SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
-      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-      se3Trajectory.getAngularSelectionMatrix().setXSelected(true);
-      se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
-      se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
-      se3Trajectory.getLinearSelectionMatrix().setXSelected(false);
-      se3Trajectory.getLinearSelectionMatrix().setYSelected(false);
-      se3Trajectory.getLinearSelectionMatrix().setZSelected(false);
-      SE3TrajectoryPointMessage trajectoryPointMessage = se3Trajectory.getTaskspaceTrajectoryPoints().add();
-      trajectoryPointMessage.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-      trajectoryPointMessage.setTime(bodyOrientationShiftTime);
-
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, bodyTrajectoryMessage);
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, nominalBodyHeight);
+      sendOrientationSetpoint(0.0, 0.0, 0.0);
    }
 
-   private void processJoystickStepCommands()
+   private void processBodyHeightCommands()
    {
-      maxVelocityY.setValue(maxYSpeedFraction * xGaitSettings.getMaxSpeed());
-      maxVelocityYaw.setValue(maxYawSpeedFraction * xGaitSettings.getMaxSpeed());
+      ChannelData enableHeightChannel = channelDataMap.get(enableHeightTeleop);
+      if (enableHeightChannel.hasNewData() && enableHeightChannel.getValue() > 0.5)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, !heightTeleopEnabled.get());
+      }
 
-      double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
-      double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
+      if (!heightTeleopEnabled.get())
+      {
+         return;
+      }
 
-      // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
-      double bodyYawLeft = 0.5 * (channels.get(negativeYawRateMapping) + 1.0);
-      double bodyYawRight = 0.5 * (channels.get(positiveYawRateMapping) + 1.0);
-      double yawRate = (bodyYawLeft - bodyYawRight) * maxVelocityYaw.getValue();
-
-      QuadrupedTeleopDesiredVelocity desiredVelocity = new QuadrupedTeleopDesiredVelocity();
-      desiredVelocity.setDesiredXVelocity(xVelocity);
-      desiredVelocity.setDesiredYVelocity(yVelocity);
-      desiredVelocity.setDesiredYawVelocity(yawRate);
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, desiredVelocity);
+      ChannelData heightChannel = channelDataMap.get(heightMapping);
+      boolean hasNewData = heightChannel.hasNewData();
+      double value = heightChannel.getValue();
+      if (hasNewData && (value == 0.25 || value == 0.75))
+      {
+         double heightAdjustment = value == 0.25 ? bodyHeightDeltaPerClick : -bodyHeightDeltaPerClick;
+         bodyHeightOffset.add(heightAdjustment);
+         bodyHeightOffset.setValue(MathTools.clamp(bodyHeightOffset.getValue(), maximumBodyHeightOffset));
+         sendBodyHeightSetpoint();
+      }
    }
 
-   private void processJoystickBodyCommands()
+   private void sendBodyHeightSetpoint()
    {
-      double bodyRoll = channels.get(rollMapping) * maxBodyRoll;
-      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch;
+      ReferenceFrame bodyHeightFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      FramePoint3D bodyHeight = new FramePoint3D(bodyHeightFrame, 0.0, 0.0, nominalBodyHeight + bodyHeightOffset.getValue());
+      bodyHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, bodyHeight.getZ());
+   }
 
-      // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
-      double bodyYawLeft = 0.5 * (channels.get(negativeYawMapping) + 1.0);
-      double bodyYawRight = 0.5 * (channels.get(positiveYawMapping) + 1.0);
-      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw;
+   private void processBodyOrientationCommands()
+   {
+      ChannelData enableOrientationChannel = channelDataMap.get(enableOrientationTeleop);
+      if (enableOrientationChannel.hasNewData() && enableOrientationChannel.getValue() > 0.5)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, !bodyPoseTeleopEnabled.get());
+      }
 
+      if (!bodyPoseTeleopEnabled.get())
+      {
+         return;
+      }
+
+      ChannelData negativeYawChannel = channelDataMap.get(negativeYawMapping);
+      ChannelData positiveYawChannel = channelDataMap.get(positiveYawMapping);
+      ChannelData rollChannel = channelDataMap.get(rollMapping);
+      ChannelData pitchChannel = channelDataMap.get(pitchMapping);
+
+      if (negativeYawChannel.hasNewData() || positiveYawChannel.hasNewData() || rollChannel.hasNewData() || pitchChannel.hasNewData())
+      {
+         double bodyYaw = 0.5 * (positiveYawChannel.getValue() - negativeYawChannel.getValue()) * maxBodyYaw;
+         double bodyRoll = rollChannel.getValue() * maxBodyRoll;
+         double bodyPitch = pitchChannel.getValue() * maxBodyPitch;
+         sendOrientationSetpoint(bodyYaw, bodyRoll, bodyPitch);
+      }
+   }
+
+   private void sendOrientationSetpoint(double bodyYaw, double bodyRoll, double bodyPitch)
+   {
       QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
       bodyTrajectoryMessage.setIsExpressedInAbsoluteTime(false);
       SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
@@ -210,75 +251,97 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, bodyTrajectoryMessage);
    }
 
-   private void processJoystickHeightCommands()
+   private void processXGaitSettingCommands()
    {
-      if (channels.get(XBoxOneMapping.DPAD) == 0.25)
-      {
-         bodyHeightOffset.add(bodyHeightDeltaPerClick);
-      }
-      else if (channels.get(XBoxOneMapping.DPAD) == 0.75)
-      {
-         bodyHeightOffset.add(- bodyHeightDeltaPerClick);
-      }
+      ChannelData increaseEndPhaseShiftChannel = channelDataMap.get(endPhaseShiftUp);
+      ChannelData decreaseEndPhaseShiftChannel = channelDataMap.get(endPhaseShiftDown);
 
-      bodyHeightOffset.setValue(MathTools.clamp(bodyHeightOffset.getValue(), maximumBodyHeightOffset));
-
-      ReferenceFrame bodyHeightFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      FramePoint3D bodyHeight = new FramePoint3D(bodyHeightFrame, 0.0, 0.0, nominalBodyHeight + bodyHeightOffset.getValue());
-      bodyHeight.changeFrame(ReferenceFrame.getWorldFrame());
-
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, bodyHeight.getZ());
-   }
-
-   private void processStateChangeRequests(Event event)
-   {
-      if (event.getValue() < 0.5 || xGaitSettings == null)
-         return;
-
-      XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
-
-      if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
-      {
-         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - endPhaseDeltaPerClick);
-      }
-      else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
+      if (increaseEndPhaseShiftChannel.hasNewData() && increaseEndPhaseShiftChannel.getValue() > 0.5)
       {
          xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + endPhaseDeltaPerClick);
+         messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       }
-      else if (mapping == XBoxOneMapping.START)
+      else if (decreaseEndPhaseShiftChannel.hasNewData() && decreaseEndPhaseShiftChannel.getValue() > 0.5)
       {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, !joystickEnabled.get());
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
+         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - endPhaseDeltaPerClick);
+         messager.submitMessage(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       }
-      else if (mapping == XBoxOneMapping.SELECT)
-      {
-         resetBodyPose.set(true);
-      }
-      else if (mapping == XBoxOneMapping.XBOX_BUTTON)
-      {
-         boolean walking = currentSteppingState.get() != null && currentSteppingState.get() == QuadrupedSteppingStateEnum.STEP;
-         messager.submitMessage(QuadrupedUIMessagerAPI.PauseWalkingTopic, walking);
-      }
+   }
 
-      else if (mapping == XBoxOneMapping.A)
-      {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, !heightTeleopEnabled.get());
-      }
-      else if (mapping == XBoxOneMapping.B)
-      {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, !bodyPoseTeleopEnabled.get());
-      }
-      else if (mapping == XBoxOneMapping.Y)
+   private void processStepCommands()
+   {
+      ChannelData enableSteppingChannel = channelDataMap.get(enableWalkingTeleop);
+      if (enableSteppingChannel.hasNewData() && enableSteppingChannel.getValue() > 0.5)
       {
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, !stepTeleopEnabled.get());
+      }
+
+      if (!stepTeleopEnabled.get())
+      {
+         return;
+      }
+
+      ChannelData xVelocityChannel = channelDataMap.get(xVelocityMapping);
+      ChannelData yVelocityChannel = channelDataMap.get(yVelocityMapping);
+      ChannelData leftTurnChannel = channelDataMap.get(leftTurnMapping);
+      ChannelData rightTurnChannel = channelDataMap.get(rightTurnMapping);
+
+      if (xVelocityChannel.hasNewData() || yVelocityChannel.hasNewData() || leftTurnChannel.hasNewData() || rightTurnChannel.hasNewData())
+      {
+         maxVelocityY.setValue(maxYSpeedFraction * xGaitSettings.getMaxSpeed());
+         maxVelocityYaw.setValue(maxYawSpeedFraction * xGaitSettings.getMaxSpeed());
+
+         double xVelocity = xVelocityChannel.getValue() * xGaitSettings.getMaxSpeed();
+         double yVelocity = yVelocityChannel.getValue() * maxVelocityY.getValue();
+
+         // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
+         double yawRate = 0.5 * (leftTurnChannel.getValue() - rightTurnChannel.getValue()) * maxVelocityYaw.getValue();
+
+         QuadrupedTeleopDesiredVelocity desiredVelocity = new QuadrupedTeleopDesiredVelocity();
+         desiredVelocity.setDesiredXVelocity(xVelocity);
+         desiredVelocity.setDesiredYVelocity(yVelocity);
+         desiredVelocity.setDesiredYawVelocity(yawRate);
+         messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, desiredVelocity);
       }
    }
 
    @Override
    public void processEvent(Event event)
    {
-      joystickPollFlag.set(true);
-      processStateChangeRequests(event);
-      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
+      channelDataMap.get(XBoxOneMapping.getMapping(event)).update((double) event.getValue());
+   }
+
+   private class ChannelData
+   {
+      // flag is true when new data is available
+      private boolean updateFlag = false;
+
+      private double value = 0.0;
+      private double previousValue = 0.0;
+
+      synchronized void update(double value)
+      {
+         this.updateFlag = true;
+         this.previousValue = this.value;
+         this.value = value;
+      }
+
+      void initialize(double value)
+      {
+         this.updateFlag = false;
+         this.value = value;
+         this.previousValue = value;
+      }
+
+      synchronized double getValue()
+      {
+         updateFlag = false;
+         return value;
+      }
+
+      synchronized boolean hasNewData()
+      {
+         return updateFlag && (value != previousValue);
+      }
    }
 }
