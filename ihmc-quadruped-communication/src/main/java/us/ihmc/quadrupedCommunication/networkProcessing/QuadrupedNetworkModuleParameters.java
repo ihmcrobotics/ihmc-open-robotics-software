@@ -11,9 +11,6 @@ public class QuadrupedNetworkModuleParameters
    private boolean useFootstepPlanningModule;
    private boolean visualizeFootstepPlanningModule;
    private boolean logFootstepPlanningModule;
-   private boolean useBodyTeleopModule;
-   private boolean visualizeBodyTeleopModule;
-   private boolean logBodyTeleopModule;
    private boolean useRemoteObjectDetectionFeedback;
    private boolean useAutoREAStateUpdater;
 
@@ -105,36 +102,6 @@ public class QuadrupedNetworkModuleParameters
    public boolean logFootstepPlanningModuleEnabled()
    {
       return logFootstepPlanningModule;
-   }
-
-   public void setVisualizeBodyTeleopModule(boolean visualize)
-   {
-      visualizeBodyTeleopModule = visualize;
-   }
-
-   public boolean visualizeBodyTeleopModuleEnabled()
-   {
-      return visualizeBodyTeleopModule;
-   }
-
-   public void setLogBodyTeleopModule(boolean log)
-   {
-      logBodyTeleopModule = log;
-   }
-
-   public boolean logBodyTeleopModuleEnabled()
-   {
-      return logBodyTeleopModule;
-   }
-
-   public void enableBodyTeleopModule(boolean enable)
-   {
-      this.useBodyTeleopModule = enable;
-   }
-
-   public boolean isBodyTeleopModuleEnabled()
-   {
-      return useBodyTeleopModule;
    }
 
    public void enableNetworkProcessor(boolean useNetworkProcessor)

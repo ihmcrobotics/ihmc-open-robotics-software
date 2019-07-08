@@ -149,40 +149,6 @@ public class QuadrupedMessageTools
       return message;
    }
 
-   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double yaw, double pitch, double roll, double time)
-   {
-      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
-
-      message.getPose().getPosition().setToNaN();
-      message.getPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
-      message.setPoseShiftTime(time);
-
-      return message;
-   }
-
-   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double x, double y, double time)
-   {
-      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
-
-      message.getPose().getPosition().set(x, y, 0.0);
-      message.getPose().getOrientation().setToNaN();
-      message.setPoseShiftTime(time);
-
-      return message;
-   }
-
-   public static QuadrupedTeleopDesiredPose createQuadrupedTeleopDesiredPose(double x, double y, double yaw, double pitch, double roll, double time)
-   {
-      QuadrupedTeleopDesiredPose message = new QuadrupedTeleopDesiredPose();
-      message.getPose().getPosition().setX(x);
-      message.getPose().getPosition().setY(y);
-
-      message.getPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
-      message.setPoseShiftTime(time);
-
-      return message;
-   }
-
    public static QuadrupedFootLoadBearingMessage createLoadBearingMessage(RobotQuadrant robotQuadrant)
    {
       QuadrupedFootLoadBearingMessage message = new QuadrupedFootLoadBearingMessage();
