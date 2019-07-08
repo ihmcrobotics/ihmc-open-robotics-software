@@ -299,7 +299,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private void runMovingCoM(double bodyHeight, double bodyX, double bodyY, double heightDelta, double translationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-      stepTeleopManager.setDesiredBodyTranslation(bodyX, bodyY, comShiftDuration);
 
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(quadrupedTestFactory.getFullRobotModel());
       referenceFrames.updateFrames();

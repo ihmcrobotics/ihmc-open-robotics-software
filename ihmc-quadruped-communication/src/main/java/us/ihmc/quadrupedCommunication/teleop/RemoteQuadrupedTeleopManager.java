@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -9,7 +10,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
@@ -26,10 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
-import javax.tools.Tool;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
@@ -53,9 +50,9 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingMessagePublisher;
    private final IHMCROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingMessagePublisher;
    private final IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
+   private final IHMCROS2Publisher<QuadrupedBodyTrajectoryMessage> bodyPosePublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
-   private final IHMCROS2Publisher<QuadrupedTeleopDesiredPose> desiredPosePublisher;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> stepTeleopStatePublisher;
    private final IHMCROS2Publisher<ToolboxStateMessage> bodyTeleopStatePublisher;
@@ -68,6 +65,7 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
    private final IHMCROS2Publisher<QuadrupedFootstepPlanningRequestPacket> planningRequestPublisher;
 
+   private final AtomicDouble timestamp = new AtomicDouble();
    private final QuadrupedRobotDataReceiver robotDataReceiver;
    private final QuadrupedNetworkProcessor networkProcessor;
    private final String robotName;
@@ -102,9 +100,9 @@ public class RemoteQuadrupedTeleopManager
       abortWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
       loadBearingMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
+      bodyPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
-      desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
       bodyTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopSubGenerator);
@@ -224,20 +222,24 @@ public class RemoteQuadrupedTeleopManager
       bodyHeightPublisher.publish(bodyHeightMessage);
    }
 
-   public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
+   public void setDesiredBodyOrientation(double desiredYaw, double desiredPitch, double desiredRoll, double time)
    {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(yaw, pitch, roll, time));
-   }
+      updateRobotModel();
 
-   public void setDesiredBodyTranslation(double x, double y, double time)
-   {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, time));
-   }
+      QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
+      SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      se3Trajectory.getAngularSelectionMatrix().setXSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
+      se3Trajectory.getLinearSelectionMatrix().setXSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setYSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setZSelected(false);
+      SE3TrajectoryPointMessage trajectoryPointMessage = se3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPointMessage.getOrientation().setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
+      trajectoryPointMessage.setTime(time + timestamp.get());
 
-
-   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
-   {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, yaw, pitch, roll, time));
+      bodyPosePublisher.publish(bodyTrajectoryMessage);
    }
 
    public void submitPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -387,6 +389,7 @@ public class RemoteQuadrupedTeleopManager
       {
          robotDataReceiver.receivedPacket(robotConfigurationData);
          robotDataReceiver.updateRobotModel();
+         timestamp.set(1e-9 * robotConfigurationData.getMonotonicTime());
       }
    }
 
