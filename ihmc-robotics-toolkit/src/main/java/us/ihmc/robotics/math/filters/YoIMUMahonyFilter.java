@@ -278,6 +278,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          estimatedAngularVelocity.add(inputAngularVelocity, integralTerm);
    }
 
+   @Override
+   public void reset()
+   {
+      hasBeenInitialized.set(false);
+   }
+
    private void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
    {
       boolean success = computeOrientationError(estimatedOrientation, acceleration, magneticVector, quaternionUpdate);

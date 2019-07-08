@@ -10,6 +10,7 @@ import us.ihmc.robotDataLogger.handshake.IDLYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.interfaces.DataConsumer;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
+import us.ihmc.robotDataLogger.util.DaemonThreadFactory;
 import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.client.WebsocketDataConsumer;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
@@ -30,7 +31,7 @@ public class YoVariableClientImplementation implements YoVariableClientInterface
    private final VariableChangedProducer variableChangedProducer;
 
    // Command executor
-   private final Executor commandExecutor = Executors.newSingleThreadExecutor();
+   private final Executor commandExecutor = Executors.newSingleThreadExecutor(DaemonThreadFactory.getNamedDaemonThreadFactory(getClass().getSimpleName()));
    
    // Callback
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;

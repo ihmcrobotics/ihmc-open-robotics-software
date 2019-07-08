@@ -360,16 +360,21 @@ public class AvatarSimulationFactory
          Point3D initialCoMPosition = new Point3D();
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
-         RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-
-         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-         for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
-         {
-            jointPositions.put(joint.getName(), joint.getQ());
-         }
-
-         estimatorThread.initializeEstimator(rootJointTransform, jointPositions);
+         initializeEstimator(humanoidFloatingRootJointRobot, estimatorThread);
       }
+   }
+
+   public static void initializeEstimator(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot, AvatarEstimatorThread estimatorThread)
+   {
+      RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
+
+      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+      for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
+      {
+         jointPositions.put(joint.getName(), joint.getQ());
+      }
+
+      estimatorThread.initializeEstimator(rootJointTransform, jointPositions);
    }
 
    private void setupThreadedRobotController()
@@ -521,6 +526,8 @@ public class AvatarSimulationFactory
       initializeSimulationConstructionSet();
 
       AvatarSimulation avatarSimulation = new AvatarSimulation();
+      avatarSimulation.setRobotInitialSetup(robotInitialSetup.get());
+      avatarSimulation.setRobotModel(robotModel.get());
       avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);

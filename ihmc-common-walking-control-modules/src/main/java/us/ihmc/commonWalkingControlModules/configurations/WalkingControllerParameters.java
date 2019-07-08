@@ -502,6 +502,11 @@ public abstract class WalkingControllerParameters
       return false;
    }
 
+   public boolean minimizeAngularMomentumRateZDuringTransfer()
+   {
+      return false;
+   }
+
    /**
     * Determines whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the
     * controller (new feature to be tested with Atlas)
