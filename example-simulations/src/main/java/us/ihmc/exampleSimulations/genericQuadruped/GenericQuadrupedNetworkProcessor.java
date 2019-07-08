@@ -50,7 +50,6 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 
       networkModuleParameters.enableFootstepPlanningModule(true);
       networkModuleParameters.enableStepTeleopModule(true);
-      networkModuleParameters.enableBodyTeleopModule(true);
 
       new GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation.INTRAPROCESS, networkModuleParameters);
    }

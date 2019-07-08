@@ -10,7 +10,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
-import us.ihmc.quadrupedCommunication.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.reaUpdater.QuadrupedREAStateUpdater;
 import us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
@@ -28,7 +27,6 @@ public class QuadrupedNetworkProcessor
    private QuadrupedStepTeleopModule stepTeleopModule;
 
    public static final int footstepPlanningPort = 8007;
-   public static final int bodyTeleopPort = 8009;
 
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
    private QuadrupedSupportPlanarRegionPublisher supportPublisher = null;
@@ -58,7 +56,6 @@ public class QuadrupedNetworkProcessor
       tryToStartModule(() -> setupFootstepPlanningModule(robotModel, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
                                                          params, pubSubImplementation));
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, logModelProvider, params, pubSubImplementation));
-      tryToStartModule(() -> setupBodyTeleopModule(robotModel, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params, pubSubImplementation));
       tryToStartModule(() -> setupREAStateUpdater(robotModel.getRobotDescription().getName(), params));
 
@@ -124,15 +121,6 @@ public class QuadrupedNetworkProcessor
       }
    }
 
-   private void setupBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
-                                      DomainFactory.PubSubImplementation pubSubImplementation)
-   {
-      if (!params.isBodyTeleopModuleEnabled())
-         return;
-      modules.add(new QuadrupedBodyTeleopModule(modelFactory, logModelProvider, params.visualizeBodyTeleopModuleEnabled(),
-                                                params.logBodyTeleopModuleEnabled(), pubSubImplementation));
-   }
-
    private void setupRobotEnvironmentAwarenessModule(QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (params.isRobotEnvironmentAwarenessModuleEnabled())
@@ -152,6 +140,7 @@ public class QuadrupedNetworkProcessor
          }
       }
    }
+
    private void setupREAStateUpdater(String robotName, QuadrupedNetworkModuleParameters params)
    {
       if (params.isAutoREAStateUpdaterEnabled())
