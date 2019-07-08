@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Header;
@@ -29,7 +29,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
-   private final IHMCROS2Publisher<ImageMessage> imagePublisher;
+   private final IHMCROS2Publisher<Image32> imagePublisher;
 
    private final MultisenseCameraInfoReceiver cameraInfoReceiver;
 
@@ -50,8 +50,8 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       rosMainNode.attachSubscriber(MultisenseInformation.getImageTopicName(), this);
       rosMainNode.execute();
 
-      imagePublisher = ROS2Tools.createPublisher(ros2Node, ImageMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
-      System.out.println(ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(ImageMessage.class));
+      imagePublisher = ROS2Tools.createPublisher(ros2Node, Image32.class, ROS2Tools.getDefaultTopicNameGenerator());
+      System.out.println(ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(Image32.class));
 
       cameraInfoReceiver = new MultisenseCameraInfoReceiver();
 
@@ -87,7 +87,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       int width = image.getWidth();
       int height = image.getHeight();
 
-      ImageMessage message = new ImageMessage();
+      Image32 message = new Image32();
       BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
       message.setHeight(height);

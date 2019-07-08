@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__ImageMessage__idl__
-#define __controller_msgs__msg__ImageMessage__idl__
+#ifndef __controller_msgs__msg__Image32__idl__
+#define __controller_msgs__msg__Image32__idl__
 
 module controller_msgs
 {
@@ -8,8 +8,8 @@ module controller_msgs
     module dds
     {
 
-      @TypeCode(type="controller_msgs::msg::dds_::ImageMessage_")
-      struct ImageMessage
+      @TypeCode(type="controller_msgs::msg::dds_::Image32_")
+      struct Image32
       {
         /**
          * This message can be used as a general image.
