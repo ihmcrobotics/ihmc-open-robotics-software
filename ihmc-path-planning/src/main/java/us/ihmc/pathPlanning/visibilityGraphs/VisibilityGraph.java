@@ -122,7 +122,7 @@ public class VisibilityGraph
 
       if (nodeToAttachToIfInSameRegion != null)
       {
-         if (sourceNode.getRegionId() == nodeToAttachToIfInSameRegion.getRegionId())
+         if ((sourceNode.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion) && (nodeToAttachToIfInSameRegion.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion))
          {
             visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion);
          }
