@@ -23,7 +23,7 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
+public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
@@ -31,7 +31,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
 
    private final IHMCROS2Publisher<Image32> imagePublisher;
 
-   private final MultisenseCameraInfoReceiver cameraInfoReceiver;
+   private final MultisenseCameraInfoROS1Bridge cameraInfoBridge;
 
    private final Scanner commandScanner;
    private static final String commandToSaveImage = "s";
@@ -41,7 +41,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
    private AtomicReference<Boolean> saveImage = new AtomicReference<Boolean>(false);
    private AtomicReference<Boolean> showCameraInfo = new AtomicReference<Boolean>(false);
 
-   public MultisenseImageReceiver() throws URISyntaxException, IOException
+   public MultisenseImageROS1Bridge() throws URISyntaxException, IOException
    {
       super(Image._TYPE);
       commandScanner = new Scanner(System.in);
@@ -53,7 +53,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       imagePublisher = ROS2Tools.createPublisher(ros2Node, Image32.class, ROS2Tools.getDefaultTopicNameGenerator());
       System.out.println(ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(Image32.class));
 
-      cameraInfoReceiver = new MultisenseCameraInfoReceiver();
+      cameraInfoBridge = new MultisenseCameraInfoROS1Bridge();
 
       Runnable inputReader = new Runnable()
       {
@@ -138,12 +138,12 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
 
    public static void main(String[] args) throws URISyntaxException, IOException
    {
-      new MultisenseImageReceiver();
+      new MultisenseImageROS1Bridge();
    }
 
-   private class MultisenseCameraInfoReceiver extends AbstractRosTopicSubscriber<CameraInfo>
+   private class MultisenseCameraInfoROS1Bridge extends AbstractRosTopicSubscriber<CameraInfo>
    {
-      public MultisenseCameraInfoReceiver() throws URISyntaxException, IOException
+      public MultisenseCameraInfoROS1Bridge() throws URISyntaxException, IOException
       {
          super(CameraInfo._TYPE);
          URI masterURI = new URI(multisense.getAddress());
