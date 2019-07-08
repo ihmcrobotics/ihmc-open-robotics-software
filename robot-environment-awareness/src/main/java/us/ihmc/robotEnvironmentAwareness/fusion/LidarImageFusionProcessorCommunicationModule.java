@@ -25,6 +25,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -37,6 +38,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 public class LidarImageFusionProcessorCommunicationModule
 {
@@ -54,7 +56,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
-   private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+   private final ExceptionHandlingThreadScheduler scheduler;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 1500;
 
    private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
@@ -82,6 +84,12 @@ public class LidarImageFusionProcessorCommunicationModule
       socketHostIPAddress = messager.createInput(LidarImageFusionAPI.ObjectDetectionModuleAddress);
 
       messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.singleRun());
+
+      scheduler = new ExceptionHandlingThreadScheduler(this.getClass().getSimpleName(), t -> {
+         LogTools.error(t.getMessage());
+         t.printStackTrace();
+         LogTools.error("{} is crashing due to an exception.", Thread.currentThread().getName());
+      });
    }
 
    private void connect()
@@ -139,7 +147,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
    public void start() throws IOException
    {
-      ScheduledFuture<?> scheduledFuture = executorService.scheduleAtFixedRate(stereoREAModule, 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      scheduler.schedule(stereoREAModule, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    public void stop() throws Exception
@@ -147,6 +155,7 @@ public class LidarImageFusionProcessorCommunicationModule
       messager.closeMessager();
       ros2Node.destroy();
       objectDetectionManager.close();
+      scheduler.shutdown();
    }
 
    public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)

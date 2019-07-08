@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -97,7 +96,6 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
       }
       else if (enableCustomRegions.get())
       {
-         LogTools.info("trying to merge " + customPlanarRegions.values().length);
          unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(), rawData,
                                                                                                       customRegionMergingParameters.get());
       }
@@ -106,7 +104,6 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
          unmergedCustomPlanarRegions = Collections.emptyList();
       }
 
-      LogTools.info("unmergedCustomPlanarRegions " + unmergedCustomPlanarRegions.size());
       if (planarRegionsList != null)
          unmergedCustomPlanarRegions.forEach(planarRegionsList::addPlanarRegion);
    }
