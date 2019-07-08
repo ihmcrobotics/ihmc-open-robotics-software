@@ -466,9 +466,10 @@ public class MainTabController
    private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
    {
       double min = 0.0;
-      double max = 1000.0;
-      double amountToStepBy = 0.25;
-      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+      double max = 100.0;
+      double defaultValue = 10.0;
+      double amountToStepBy = 0.5;
+      return new DoubleSpinnerValueFactory(min, max, defaultValue, amountToStepBy);
    }
 
    private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()
