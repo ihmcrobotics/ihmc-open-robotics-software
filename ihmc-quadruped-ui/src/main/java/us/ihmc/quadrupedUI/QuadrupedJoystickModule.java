@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.QuadrupedTeleopDesiredPose;
-import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import net.java.games.input.Event;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -145,12 +145,21 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    {
       bodyHeightOffset.setValue(0.0);
 
-      QuadrupedTeleopDesiredPose desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(0.0, 0.0, nominalBodyHeight);
-      desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime);
+      QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
+      bodyTrajectoryMessage.setIsExpressedInAbsoluteTime(false);
+      SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      se3Trajectory.getAngularSelectionMatrix().setXSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
+      se3Trajectory.getLinearSelectionMatrix().setXSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setYSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setZSelected(false);
+      SE3TrajectoryPointMessage trajectoryPointMessage = se3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPointMessage.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+      trajectoryPointMessage.setTime(bodyOrientationShiftTime);
 
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, desiredPoseMessage);
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, bodyTrajectoryMessage);
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, nominalBodyHeight);
    }
 
@@ -179,19 +188,26 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       double bodyRoll = channels.get(rollMapping) * maxBodyRoll;
       double bodyPitch = channels.get(pitchMapping) * maxBodyPitch;
 
-      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX;
-      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY;
-
       // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
       double bodyYawLeft = 0.5 * (channels.get(negativeYawMapping) + 1.0);
       double bodyYawRight = 0.5 * (channels.get(positiveYawMapping) + 1.0);
       double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw;
 
-      QuadrupedTeleopDesiredPose desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, nominalBodyHeight + bodyHeightOffset.getValue());
-      desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
-      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime);
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, desiredPoseMessage);
+      QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
+      bodyTrajectoryMessage.setIsExpressedInAbsoluteTime(false);
+      SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      se3Trajectory.getAngularSelectionMatrix().setXSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
+      se3Trajectory.getLinearSelectionMatrix().setXSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setYSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setZSelected(false);
+      SE3TrajectoryPointMessage trajectoryPointMessage = se3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPointMessage.getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
+      trajectoryPointMessage.setTime(bodyOrientationShiftTime);
+
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, bodyTrajectoryMessage);
    }
 
    private void processJoystickHeightCommands()
