@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -31,6 +30,8 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
+   private static final MultisenseInformation multisense = MultisenseInformation.CART;
+
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
@@ -48,30 +49,12 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    private AtomicReference<Boolean> saveStereoVisionPointCloud = new AtomicReference<Boolean>(false);
    private AtomicReference<Boolean> saveProjectedData = new AtomicReference<Boolean>(false);
 
-   public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
-   static
-   {
-      // cart
-//      multisenseOnCartIntrinsicParameters.setFx(566.8350830078125);
-//      multisenseOnCartIntrinsicParameters.setFy(566.8350830078125);
-//      multisenseOnCartIntrinsicParameters.setCx(505.5);
-//      multisenseOnCartIntrinsicParameters.setCy(260.5);
-      // atlas
-      multisenseOnCartIntrinsicParameters.setFx(555.999267578125);
-      multisenseOnCartIntrinsicParameters.setFy(555.999267578125);
-      multisenseOnCartIntrinsicParameters.setCx(512.0);
-      multisenseOnCartIntrinsicParameters.setCy(269.5);
-   }
-   private static final int offsetU = 12;
-   private static final int offsetV = 0;
-
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
-      //URI masterURI = new URI("http://10.7.4.100:11311");
-      URI masterURI = new URI("http://10.6.192.14:11311");
+      URI masterURI = new URI(multisense.getAddress());
       RosMainNode rosMainNode = new RosMainNode(masterURI, "StereoVisionPublisher", true);
-      rosMainNode.attachSubscriber("/multisense/image_points2_color_world", this);
+      rosMainNode.attachSubscriber(MultisenseInformation.getStereoVisionPointCloudTopicName(), this);
 
       rosMainNode.execute();
 
@@ -140,7 +123,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
          colorsInteger[i] = colors[i].getRGB();
       }
-      
+
       StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
@@ -177,8 +160,9 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
          {
             Point3D scanPoint = pointCloud[i];
             Point2D projectedPixel = new Point2D();
+            int[] offset = multisense.getProjectionOffset();
 
-            PointCloudProjectionHelper.projectMultisensePointCloudOnImage(scanPoint, projectedPixel, multisenseOnCartIntrinsicParameters, offsetU, offsetV);
+            PointCloudProjectionHelper.projectMultisensePointCloudOnImage(scanPoint, projectedPixel, multisense.getIntrinsicParameters(), offset[0], offset[1]);
 
             boolean inImage = false;
             if (projectedPixel.getX() >= 0 && projectedPixel.getX() < projectionWidth)
