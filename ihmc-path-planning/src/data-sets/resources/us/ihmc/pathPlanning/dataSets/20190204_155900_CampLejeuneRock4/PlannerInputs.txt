@@ -1,3 +1,3 @@
 start_position -8.67 -1.41 -2.54
 goal_position 3.78 -1.05 4.56
-vis_graph_status test
+vis_graph_status dev
