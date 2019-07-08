@@ -21,6 +21,8 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSubscriber<PointCloud2WithSource>
 {
+   private static final MultisenseInformation multisense = MultisenseInformation.CART;
+   
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
@@ -28,9 +30,9 @@ public class MultisensePointCloud2WithSourceReceiver extends AbstractRosTopicSub
    public MultisensePointCloud2WithSourceReceiver() throws URISyntaxException, IOException
    {
       super(PointCloud2WithSource._TYPE);
-      URI masterURI = new URI("http://10.6.192.14:11311");
+      URI masterURI = new URI(multisense.getAddress());
       RosMainNode rosMainNode = new RosMainNode(masterURI, "LidarScanPublisher", true);
-      rosMainNode.attachSubscriber("/singleScanAsCloudWithSource", this);
+      rosMainNode.attachSubscriber(MultisenseInformation.getLidarScanTopicName(), this);
       rosMainNode.execute();
 
       lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
