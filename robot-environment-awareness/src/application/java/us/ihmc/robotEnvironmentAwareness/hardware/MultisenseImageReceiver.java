@@ -25,10 +25,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
 {
-   private static final String multisenseCartAddress = "http://10.7.4.100:11311";      // Atlas
-   //private static final String multisenseCartAddress = "http://10.6.192.14:11311";   // cart
-   private static final String imageROSTopicName = "/multisense/left/image_rect_color";
-   private static final String cameraInfoROSTopicName = "/multisense/left/camera_info";
+   private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
@@ -48,9 +45,9 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
    {
       super(Image._TYPE);
       commandScanner = new Scanner(System.in);
-      URI masterURI = new URI(multisenseCartAddress);
+      URI masterURI = new URI(multisense.getAddress());
       RosMainNode rosMainNode = new RosMainNode(masterURI, "ImagePublisher", true);
-      rosMainNode.attachSubscriber(imageROSTopicName, this);
+      rosMainNode.attachSubscriber(MultisenseInformation.getImageTopicName(), this);
       rosMainNode.execute();
 
       imagePublisher = ROS2Tools.createPublisher(ros2Node, ImageMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
@@ -63,7 +60,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
          @Override
          public void run()
          {
-            while(true)
+            while (true)
             {
                String command = commandScanner.next();
 
@@ -149,9 +146,9 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       public MultisenseCameraInfoReceiver() throws URISyntaxException, IOException
       {
          super(CameraInfo._TYPE);
-         URI masterURI = new URI(multisenseCartAddress);
+         URI masterURI = new URI(multisense.getAddress());
          RosMainNode rosMainNode = new RosMainNode(masterURI, "CameraInfoPublisher", true);
-         rosMainNode.attachSubscriber(cameraInfoROSTopicName, this);
+         rosMainNode.attachSubscriber(MultisenseInformation.getCameraInfoTopicName(), this);
          rosMainNode.execute();
       }
 
