@@ -267,7 +267,7 @@ public class MainTabController
 
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
-      plannerType.setValue(FootstepPlannerType.A_STAR);
+      plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
