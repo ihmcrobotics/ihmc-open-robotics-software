@@ -1,15 +1,29 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.BodyPathAndFootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
@@ -18,12 +32,17 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
 import us.ihmc.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,8 +51,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import java.util.*;
 
 public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 {
@@ -120,7 +137,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       if (side == null)
       {
          if (debug)
-            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+            LogTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
 
          side = defaultStartNodeSide;
       }
@@ -196,9 +213,14 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       }
 
       if (debug)
-         PrintTools.info("A* planner has initialized");
+      {
+         LogTools.info("A* planner has initialized");
+         LogTools.info("Planning. startNode = " + startNode, this);
+         LogTools.info("endNode = " + endNode, this);
+      }
 
-      if (!planInternal())
+      boolean success = planInternal();
+      if (!success)
          return FootstepPlanningResult.PLANNER_FAILED;
 
       FootstepPlanningResult result = checkResult();
@@ -208,7 +230,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       if (debug)
       {
-         PrintTools.info("A* Footstep planning statistics for " + result);
+         LogTools.info("A* Footstep planning statistics for " + result);
          System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
          System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
          System.out.println("   Planning took a total of " + itarationCount.getLongValue() + " iterations.");
@@ -269,6 +291,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    private boolean initialize()
    {
+      if (debug)
+      {
+         LogTools.info("Initializing AStarFootstepPlanner. startNodes = " + startNode + ", goalNodes = " + goalNodes);
+      }
       if (startNode == null)
          throw new NullPointerException("Need to set initial conditions before planning.");
       if (goalNodes == null)
@@ -284,10 +310,19 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       for (RobotSide robotSide : RobotSide.values)
       {
          boolean validGoalNode = nodeChecker.isNodeValid(goalNodes.get(robotSide), null);
+
+         if (!validGoalNode)
+         {
+            if (debug)
+            {
+               LogTools.info("GoalNode is not valid: " + goalNodes.get(robotSide));
+            }
+         }
+
          if (!validGoalNode && !parameters.getReturnBestEffortPlan())
          {
             if (debug)
-               PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+               LogTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
 
             return false;
          }
@@ -312,7 +347,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    public void cancelPlanning()
    {
       if (debug)
-         PrintTools.info("Cancel has been requested.");
+         LogTools.info("Cancel has been requested.");
       abortPlanning.set(true);
    }
 
@@ -382,7 +417,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue() || abortPlanning.getBooleanValue())
          {
             if (abortPlanning.getBooleanValue())
-               PrintTools.info("Abort planning requested.");
+               LogTools.info("Abort planning requested.");
             abortPlanning.set(false);
             break;
          }
