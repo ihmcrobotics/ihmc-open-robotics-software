@@ -350,6 +350,9 @@ public class MainTabController
 
    private void setStartFromRobot()
    {
+      if (humanoidReferenceFrames == null)
+         return;
+
       humanoidReferenceFrames.updateFrames();
       FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
