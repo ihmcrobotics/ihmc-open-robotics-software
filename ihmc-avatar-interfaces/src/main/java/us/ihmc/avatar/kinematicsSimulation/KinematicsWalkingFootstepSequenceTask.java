@@ -8,14 +8,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,15 +35,14 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
 
    private int numberOfFootstepsRemaining;
    private final AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>(null);
-   private StatusMessageListener<FootstepStatusMessage> footstepStatusMessageListener = this::processFootstepStatus;
-   private StatusMessageListener<WalkingStatusMessage> walkingStatusMessageListener = this::processWalkingStatus;
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final SideDependentList<KinematicsWalkingContactStateHolder> contactStateHolders = new SideDependentList<>();
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
    private final SideDependentList<SettableFootSwitch> footSwitches;
-   private final Notification walkingCompletedNotification;
+   private final IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher;
+   private final IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher;
    private RobotSide currentSwingSide = null;
 
    private final BalanceManager balanceManager;
@@ -69,7 +69,8 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
                                                 SideDependentList<YoPlaneContactState> footContactStates,
                                                 BalanceManager balanceManager,
                                                 SideDependentList<SettableFootSwitch> footSwitchesToUpdate,
-                                                Notification walkingCompletedNotification)
+                                                IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher,
+                                                IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher)
    {
       this.rootJoint = rootJoint;
       this.footstepList = footstepList;
@@ -78,7 +79,8 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
       this.footContactStates = footContactStates;
       this.balanceManager = balanceManager;
       this.footSwitches = footSwitchesToUpdate;
-      this.walkingCompletedNotification = walkingCompletedNotification;
+      this.walkingStatusPublisher = walkingStatusPublisher;
+      this.footstepStatusPublisher = footstepStatusPublisher;
    }
 
    @Override
@@ -89,15 +91,16 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
 
       walkingInputManager.submitCommand(footstepList);
       numberOfFootstepsRemaining = footstepList.getNumberOfFootsteps();
-      walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, footstepStatusMessageListener);
-      walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, walkingStatusMessageListener);
+      walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
+      walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
    }
 
    private void processFootstepStatus(FootstepStatusMessage statusMessage)
    {
       RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
       FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
-      FramePose3D desiredFootstep = new FramePose3D(worldFrame, statusMessage.getDesiredFootPositionInWorld(),
+      FramePose3D desiredFootstep = new FramePose3D(worldFrame,
+                                                    statusMessage.getDesiredFootPositionInWorld(),
                                                     statusMessage.getDesiredFootOrientationInWorld());
 
       switch (status)
@@ -115,11 +118,14 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
       default:
          throw new RuntimeException("Unexpected status: " + status);
       }
+
+      footstepStatusPublisher.publish(statusMessage);
    }
 
    private void processWalkingStatus(WalkingStatusMessage status)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
+      walkingStatusPublisher.publish(status);
    }
 
    @Override
@@ -146,9 +152,6 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
    @Override
    public void onExit()
    {
-      destroyListeners();
-
-      walkingCompletedNotification.set();
    }
 
    @Override
@@ -171,21 +174,5 @@ public class KinematicsWalkingFootstepSequenceTask implements KinematicsWalkingT
    protected void finalize() throws Throwable
    {
       super.finalize();
-
-      destroyListeners(); // In case the doTransitionOutOfAction() was not called somehow.
-   }
-
-   private void destroyListeners()
-   {
-      if (footstepStatusMessageListener != null)
-      {
-         walkingOutputManager.detachStatusMessageListener(FootstepStatusMessage.class, footstepStatusMessageListener);
-         footstepStatusMessageListener = null;
-      }
-      if (walkingStatusMessageListener != null)
-      {
-         walkingOutputManager.detachStatusMessageListener(WalkingStatusMessage.class, walkingStatusMessageListener);
-         walkingStatusMessageListener = null;
-      }
    }
 }

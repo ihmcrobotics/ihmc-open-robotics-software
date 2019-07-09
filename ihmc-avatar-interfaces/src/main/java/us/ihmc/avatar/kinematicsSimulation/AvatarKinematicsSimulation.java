@@ -1,6 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -48,6 +49,7 @@ public class AvatarKinematicsSimulation
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher;
+   private final IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
@@ -84,6 +86,10 @@ public class AvatarKinematicsSimulation
                                                        WalkingStatusMessage.class,
                                                        robotModel.getSimpleRobotName(),
                                                        HighLevelHumanoidControllerFactory.ROS2_ID);
+      footstepStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                        FootstepStatusMessage.class,
+                                                        robotModel.getSimpleRobotName(),
+                                                        HighLevelHumanoidControllerFactory.ROS2_ID);
 
       new ROS2Callback<>(ros2Node,
                          FootstepDataListMessage.class,
@@ -98,7 +104,9 @@ public class AvatarKinematicsSimulation
                                                                                       robotInitialSetup.getInitialJointAngles(),
                                                                                       DT,
                                                                                       yoGraphicsListRegistry,
-                                                                                      registry);
+                                                                                      registry,
+                                                                                      walkingStatusPublisher,
+                                                                                      footstepStatusPublisher);
 
       FunctionalTools.runIfTrue(createYoVariableServer, this::createYoVariableServer);
 
@@ -112,11 +120,6 @@ public class AvatarKinematicsSimulation
       avatarKinematicsSimulationController.doControl();
 
       robotConfigurationDataPublisher.publish(extractRobotConfigurationData(avatarKinematicsSimulationController.getFullRobotModel()));
-
-      if (avatarKinematicsSimulationController.getWalkingCompletedNotification().poll())
-      {
-         walkingStatusPublisher.publish(WalkingStatus.COMPLETED.createMessage());
-      }
    }
 
    private void acceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
