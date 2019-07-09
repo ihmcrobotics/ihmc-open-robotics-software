@@ -10,20 +10,20 @@ public class StepInPlaceBehaviorUIController
    @FXML private Button startStepping;
    @FXML private Button pauseStepping;
 
-   private Messager teleop;
+   private Messager behaviorMessager;
 
    public void init(Messager behaviorMessager)
    {
-      this.teleop = behaviorMessager;
+      this.behaviorMessager = behaviorMessager;
    }
 
    @FXML public void startStepping()
    {
-      teleop.submitMessage(StepInPlaceBehavior.API.Stepping, true);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
    }
 
    @FXML public void pauseStepping()
    {
-      teleop.submitMessage(StepInPlaceBehavior.API.Stepping, false);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
    }
 }
