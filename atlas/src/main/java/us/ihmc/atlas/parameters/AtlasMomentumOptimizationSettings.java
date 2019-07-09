@@ -28,8 +28,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final int nContactPointsPerContactableBody = AtlasContactPointParameters.USE_SIX_CONTACT_POINTS ? 6 : 4;
    private final int nContactableBodies;
 
-   private final double jointAccelerationWeight = 0.005;
-   private final double jointJerkWeight = 1.6E-6;
+   private final double jointAccelerationWeight = 0.01;
+   private final double jointJerkWeight = 0.0;
    private final double jointTorqueWeight = 0.005;
    private final Vector2D copWeight = new Vector2D(0.001, 0.002);
    private final Vector2D copRateDefaultWeight = new Vector2D(0.00000032, 0.00000032);
