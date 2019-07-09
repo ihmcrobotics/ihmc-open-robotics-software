@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -19,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -150,6 +152,26 @@ public class KinematicsToolboxHelper
          desiredRootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+
+         desiredRootJoint.getPredecessor().updateFramesRecursively();
+      }
+   }
+
+   public static void setRobotStateFromRawData(Pose3DReadOnly pelvisPose,
+                                               List<Double> jointAngles,
+                                               FloatingJointBasics desiredRootJoint,
+                                               OneDoFJointBasics[] oneDoFJoints)
+   {
+      for (int i = 0; i < jointAngles.size(); i++)
+      {
+         oneDoFJoints[i].setQ(jointAngles.get(i));
+         oneDoFJoints[i].setQd(0.0);
+      }
+
+      if (desiredRootJoint != null)
+      {
+         desiredRootJoint.getJointPose().set(pelvisPose);
          desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
 
          desiredRootJoint.getPredecessor().updateFramesRecursively();

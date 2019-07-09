@@ -6,14 +6,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -69,7 +66,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
       new ROS2Callback<>(ros2Node, LidarScanMessage.class, this::dispatchLidarScanMessage);
       new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
-      new ROS2Callback<>(ros2Node, ImageMessage.class, this::dispatchImageMessage);
+      new ROS2Callback<>(ros2Node, Image32.class, this::dispatchImage32);
       new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, this::dispatchCustomPlanarRegion);
 
@@ -126,10 +123,10 @@ public class LidarImageFusionProcessorCommunicationModule
       stereoREAModule.updateLatestStereoVisionPointCloudMessage(message);
    }
 
-   private void dispatchImageMessage(ImageMessage message)
+   private void dispatchImage32(Image32 message)
    {
       if (messager.isMessagerOpen())
-         messager.submitMessage(LidarImageFusionAPI.ImageState, new ImageMessage(message));
+         messager.submitMessage(LidarImageFusionAPI.ImageState, new Image32(message));
 
       latestBufferedImage.set(ImageVisualizationHelper.convertImageMessageToBufferedImage(message));
       stereoREAModule.updateLatestBufferedImage(latestBufferedImage.get());

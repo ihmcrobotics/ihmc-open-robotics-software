@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -67,7 +67,7 @@ public class LidarImageFusionAPI
    public static final Topic<Boolean> ClearSnapShot = UICategory.child(Image).topic(Clear);
    public static final Topic<Boolean> ClearObjects = UICategory.child(Object).topic(Clear);
 
-   public static final Topic<ImageMessage> ImageState = ModuleCategory.child(Image).topic(Data);
+   public static final Topic<Image32> ImageState = ModuleCategory.child(Image).topic(Data);
    public static final Topic<BufferedImage> ImageResultState = ModuleCategory.child(Image).child(Result).topic(Data);
    public static final Topic<LidarImageFusionData> FusionDataState = ModuleCategory.child(StereoREA).child(FusionData).topic(Data);
    

@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class ImageMessage extends Packet<ImageMessage> implements Settable<ImageMessage>, EpsilonComparable<ImageMessage>
+public class Image32 extends Packet<Image32> implements Settable<Image32>, EpsilonComparable<Image32>
 {
    /**
             * This message can be used as a general image.
@@ -18,19 +18,19 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    public int height_;
    public us.ihmc.idl.IDLSequence.Integer  rgbdata_;
 
-   public ImageMessage()
+   public Image32()
    {
       rgbdata_ = new us.ihmc.idl.IDLSequence.Integer (4000000, "type_2");
 
    }
 
-   public ImageMessage(ImageMessage other)
+   public Image32(Image32 other)
    {
       this();
       set(other);
    }
 
-   public void set(ImageMessage other)
+   public void set(Image32 other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -85,19 +85,19 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
 
-   public static Supplier<ImageMessagePubSubType> getPubSubType()
+   public static Supplier<Image32PubSubType> getPubSubType()
    {
-      return ImageMessagePubSubType::new;
+      return Image32PubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return ImageMessagePubSubType::new;
+      return Image32PubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(ImageMessage other, double epsilon)
+   public boolean epsilonEquals(Image32 other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -119,9 +119,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof ImageMessage)) return false;
+      if(!(other instanceof Image32)) return false;
 
-      ImageMessage otherMyClass = (ImageMessage) other;
+      Image32 otherMyClass = (Image32) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -139,7 +139,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("ImageMessage {");
+      builder.append("Image32 {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("width=");

@@ -9,14 +9,14 @@ public class DefaultVisibilityGraphParameters implements VisibilityGraphsParamet
    @Override
    public double getMaxInterRegionConnectionLength()
    {
-      return 0.55;
+      return 0.45;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getNormalZThresholdForAccessibleRegions()
    {
-      return Math.cos(Math.toRadians(45.0));
+      return Math.cos(Math.toRadians(30.0));
    }
 
    /** {@inheritDoc} */
