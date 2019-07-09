@@ -34,7 +34,7 @@ mainDependencies {
    compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
    compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
    compile group: "org.ros.rosjava_messages", name: "multisense_ros", version: "3.4.2"
-   compile group: "us.ihmc.thirdparty.org.opencv", name: "opencv", version: "3.2.0-170503"
+   compile group: "org.bytedeco", name: "javacv-platform", version: "1.5"
    compile "org.ros.rosjava_messages:geometry_msgs:1.11.9"
    compile "org.boofcv:recognition:0.24.1"
 
