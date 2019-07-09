@@ -28,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
@@ -66,6 +67,7 @@ import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXControll
 public class StepGeneratorJavaFXController
 {
    private static final double maximumStepZ = 0.2;
+   private static final double maximumStepIncline = Math.toRadians(45.0);
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("FootstepPublisher"));
    private final SideDependentList<Color> footColors = new SideDependentList<Color>(Color.CRIMSON, Color.YELLOWGREEN);
 
@@ -132,6 +134,7 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepHeightSafe);
+      continuousStepGenerator.addFootstepValidityIndicator(this::isStepInclineSafe);
 
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
@@ -412,9 +415,18 @@ public class StepGeneratorJavaFXController
       return Math.abs(touchdownPose.getZ() - stancePose.getZ()) < maximumStepZ;
    }
 
+   private boolean isStepInclineSafe(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
+   {
+      touchdownPose.get(tempTransform);
+      tempVector.set(0.0, 0.0, 1.0);
+      tempTransform.getRotationMatrix().transform(tempVector);
+      return Math.acos(tempVector.getZ()) < maximumStepIncline;
+   }
+
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final PlanarRegion tempRegion = new PlanarRegion();
+   private final Vector3D tempVector = new Vector3D();
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
