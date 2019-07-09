@@ -267,7 +267,7 @@ public class MainTabController
 
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
-      plannerType.setValue(FootstepPlannerType.A_STAR);
+      plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
@@ -350,6 +350,9 @@ public class MainTabController
 
    private void setStartFromRobot()
    {
+      if (humanoidReferenceFrames == null)
+         return;
+
       humanoidReferenceFrames.updateFrames();
       FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -463,9 +466,10 @@ public class MainTabController
    private SpinnerValueFactory.DoubleSpinnerValueFactory createHorizonValueFactory()
    {
       double min = 0.0;
-      double max = 1000.0;
-      double amountToStepBy = 0.25;
-      return new DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
+      double max = 100.0;
+      double defaultValue = 10.0;
+      double amountToStepBy = 0.5;
+      return new DoubleSpinnerValueFactory(min, max, defaultValue, amountToStepBy);
    }
 
    private final PropertyToMessageTypeConverter<Double, Double> doubleToDoubleConverter = new PropertyToMessageTypeConverter<Double, Double>()

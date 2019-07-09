@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
@@ -79,7 +80,7 @@ public class VisibilityGraphsFrameworkTest
          @Override
          public double getNormalZThresholdForAccessibleRegions()
          {
-            return Math.cos(Math.toRadians(60.0));
+            return Math.cos(Math.toRadians(30.0));
          }
       };
    }
@@ -148,13 +149,14 @@ public class VisibilityGraphsFrameworkTest
 
    private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester)
    {
-      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSet ->
-                                                             {
-                                                                if(!dataSet.hasPlannerInput())
-                                                                   return false;
-                                                                else
-                                                                   return dataSet.getPlannerInput().getVisGraphIsTestable();
-                                                             });
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else
+            return dataSet.getPlannerInput().getVisGraphIsTestable();
+      };
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
 
       if (DEBUG)
       {

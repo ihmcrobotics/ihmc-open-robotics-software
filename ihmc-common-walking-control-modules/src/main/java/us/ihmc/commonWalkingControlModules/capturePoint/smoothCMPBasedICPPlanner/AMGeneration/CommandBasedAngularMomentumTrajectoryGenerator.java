@@ -325,4 +325,10 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    {
       return !momentumTrajectoryHandler.isEmpty() && momentumTrajectoryHandler.isWithinInterval(time.getDoubleValue());
    }
+
+   public void reset()
+   {
+      // This is so the next time a trajectory arrives during a standing state the at a stop check will trigger the packing of the trajectory.
+      atAStop.set(true);
+   }
 }

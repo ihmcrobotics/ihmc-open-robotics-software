@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import javafx.animation.AnimationTimer;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
@@ -21,7 +21,7 @@ public class FusionSensorImageViewer
    private final VBox imageViewPane = new VBox();
    private final ImageView streamingView = new ImageView();
 
-   private final AtomicReference<ImageMessage> newImageMessageToStream;
+   private final AtomicReference<Image32> newImageMessageToStream;
    private final AtomicReference<BufferedImage> recentBufferedImageToStream;
    private final AtomicReference<BufferedImage> newBufferedImageToView;
 
@@ -58,7 +58,7 @@ public class FusionSensorImageViewer
       };
    }
 
-   private void unpackImage(ImageMessage imageMessage)
+   private void unpackImage(Image32 imageMessage)
    {
       if (imageMessage == null)
          return;
