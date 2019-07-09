@@ -7,6 +7,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.kinematicsSimulation.AvatarKinematicsSimulation;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
@@ -36,6 +37,7 @@ public class AtlasBehaviorUIDemo extends Application
    private static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean USE_FLAT_GROUND = false;
+   private static final boolean USE_KINEMATIC_SIMULATION = true;
 
    private BehaviorUI ui;
 
@@ -57,14 +59,17 @@ public class AtlasBehaviorUIDemo extends Application
 
       new Thread(() -> {
          LogTools.info("Creating simulation");
-         AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
-                                                     USE_FLAT_GROUND ?
-                                                     new FlatGroundEnvironment() :
-                                                     new PlanarRegionsListDefinedEnvironment(createPlanarRegions(),
-                                                                                             0.02,
-                                                                                             false)
-         )
-                                .simulate();
+         if (USE_KINEMATIC_SIMULATION)
+         {
+            AvatarKinematicsSimulation.createForManualTest(createRobotModel(), true);
+         }
+         else
+         {
+            AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
+                                                        USE_FLAT_GROUND ?
+                                                              new FlatGroundEnvironment() :
+                                                              new PlanarRegionsListDefinedEnvironment(createPlanarRegions(), 0.02, false)).simulate();
+         }
       }
       ).start();
 

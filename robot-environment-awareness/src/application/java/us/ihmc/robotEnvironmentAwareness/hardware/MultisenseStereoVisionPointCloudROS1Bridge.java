@@ -28,7 +28,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
-public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
+public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopicSubscriber<PointCloud2>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
@@ -49,7 +49,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    private AtomicReference<Boolean> saveStereoVisionPointCloud = new AtomicReference<Boolean>(false);
    private AtomicReference<Boolean> saveProjectedData = new AtomicReference<Boolean>(false);
 
-   public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
+   public MultisenseStereoVisionPointCloudROS1Bridge() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
       URI masterURI = new URI(multisense.getAddress());
@@ -189,6 +189,6 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new MultisenseStereoVisionPointCloudReceiver();
+      new MultisenseStereoVisionPointCloudROS1Bridge();
    }
 }
