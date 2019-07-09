@@ -33,7 +33,7 @@ public class SnapAndWiggleSingleStepParameters
    /**
     * Minimum planar region area for a foothold
     */
-   private double minPlanarRegionArea = 0.1;
+   private double minPlanarRegionArea = 0.05;
 
    /**
     * Needed to calculate shift values on and away from cliffs.

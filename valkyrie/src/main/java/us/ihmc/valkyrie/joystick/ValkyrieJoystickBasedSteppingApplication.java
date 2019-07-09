@@ -57,7 +57,7 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
                                            kickAndPunchMessenger,
                                            kickAndPunchMessenger,
                                            footPolygons);
-      ui.setActiveSecondaryControlOption(SecondaryControlOption.PUNCH);
+      ui.setActiveSecondaryControlOption(SecondaryControlOption.NONE);
    }
 
    @Override

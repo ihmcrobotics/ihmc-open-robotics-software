@@ -1,6 +1,7 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import net.java.games.input.Event;
+import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -35,6 +36,11 @@ public class XBoxOneJavaFXController
    private static final CategoryTheme RightTrigger = apiFactory.createCategoryTheme("RightTrigger");
    private static final CategoryTheme LeftStick = apiFactory.createCategoryTheme("LeftStick");
    private static final CategoryTheme RightStick = apiFactory.createCategoryTheme("RightStick");
+   private static final CategoryTheme DirectionalPad = apiFactory.createCategoryTheme("DirectionalPad");
+   private static final CategoryTheme Up = apiFactory.createCategoryTheme("Up");
+   private static final CategoryTheme Down = apiFactory.createCategoryTheme("Down");
+   private static final CategoryTheme Left = apiFactory.createCategoryTheme("Left");
+   private static final CategoryTheme Right = apiFactory.createCategoryTheme("Right");
 
    private static final TypedTopicTheme<ButtonState> State = apiFactory.createTypedTopicTheme("State");
    private static final TypedTopicTheme<Double> Axis = apiFactory.createTypedTopicTheme("Axis");
@@ -51,6 +57,10 @@ public class XBoxOneJavaFXController
    public static final Topic<ButtonState> ButtonXBoxState = Root.child(Button).child(XBox).topic(State);
    public static final Topic<ButtonState> ButtonLeftStickState = Root.child(Button).child(LeftStick).topic(State);
    public static final Topic<ButtonState> ButtonRightStickState = Root.child(Button).child(RightStick).topic(State);
+   public static final Topic<ButtonState> DPadUpState = Root.child(Button).child(DirectionalPad).child(Up).topic(State);
+   public static final Topic<ButtonState> DPadDownState = Root.child(Button).child(DirectionalPad).child(Down).topic(State);
+   public static final Topic<ButtonState> DPadLeftState = Root.child(Button).child(DirectionalPad).child(Left).topic(State);
+   public static final Topic<ButtonState> DPadRightState = Root.child(Button).child(DirectionalPad).child(Right).topic(State);
 
    public static final Topic<Double> LeftStickXAxis = Root.child(LeftStick).child(X).topic(Axis);
    public static final Topic<Double> LeftStickYAxis = Root.child(LeftStick).child(Y).topic(Axis);
@@ -65,6 +75,7 @@ public class XBoxOneJavaFXController
 
    private final Messager messager;
    private Joystick joystick;
+   private Topic<ButtonState> lastDPadPressed = null;
 
    public XBoxOneJavaFXController(Messager messager) throws JoystickNotFoundException
    {
@@ -162,7 +173,40 @@ public class XBoxOneJavaFXController
       case RIGHT_TRIGGER:
          messager.submitMessage(RightTriggerAxis, (double) event.getValue());
          break;
+      case DPAD:
+         if (MathTools.epsilonEquals(0.00, event.getValue(), 1.0e-6))
+         {
+            if (lastDPadPressed != null)
+               messager.submitMessage(lastDPadPressed, ButtonState.RELEASED);
+         }
+         else
+         {
+            Topic<ButtonState> stateTopic = null;
+            if (MathTools.epsilonEquals(0.25, event.getValue(), 1.0e-6))
+               stateTopic = DPadUpState;
+            else if (MathTools.epsilonEquals(0.50, event.getValue(), 1.0e-6))
+               stateTopic = DPadRightState;
+            else if (MathTools.epsilonEquals(0.75, event.getValue(), 1.0e-6))
+               stateTopic = DPadDownState;
+            else if (MathTools.epsilonEquals(1.00, event.getValue(), 1.0e-6))
+               stateTopic = DPadLeftState;
 
+            if (stateTopic != null)
+               messager.submitMessage(stateTopic, ButtonState.PRESSED);
+         }
+         break;
+      case DPAD_UP:
+         messager.submitMessage(DPadUpState, toState(event));
+         break;
+      case DPAD_DOWN:
+         messager.submitMessage(DPadDownState, toState(event));
+         break;
+      case DPAD_LEFT:
+         messager.submitMessage(DPadLeftState, toState(event));
+         break;
+      case DPAD_RIGHT:
+         messager.submitMessage(DPadRightState, toState(event));
+         break;
       default:
          break;
       }
