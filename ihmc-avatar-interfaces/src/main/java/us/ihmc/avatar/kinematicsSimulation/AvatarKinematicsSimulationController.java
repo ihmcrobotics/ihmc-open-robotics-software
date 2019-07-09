@@ -1,5 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
@@ -21,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -68,6 +71,8 @@ public class AvatarKinematicsSimulationController
    private final FloatingJointBasics rootJoint;
    private final FullHumanoidRobotModel fullRobotModel;
    private final YoVariableRegistry registry;
+   private final IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher;
+   private final IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
 
@@ -87,17 +92,19 @@ public class AvatarKinematicsSimulationController
    private final StateExecutor taskExecutor = new StateExecutor(StateMachineClock.dummyClock()); // should be dummy?
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
-   private Notification walkingCompletedNotification = new Notification();
-
    public AvatarKinematicsSimulationController(DRCRobotModel robotModel,
                                                Pose3DReadOnly initialPelvisPose,
                                                List<Double> initialJointAngles,
                                                double integrationDT,
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoVariableRegistry registry)
+                                               YoVariableRegistry registry,
+                                               IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher,
+                                               IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher)
    {
       this.integrationDT = integrationDT;
       this.registry = registry;
+      this.walkingStatusPublisher = walkingStatusPublisher;
+      this.footstepStatusPublisher = footstepStatusPublisher;
 
       kinematicsSimulationInputManager = new CommandInputManager("ik_simulation", ControllerAPIDefinition.getControllerSupportedCommands());
       fullRobotModel = robotModel.createFullRobotModel();
@@ -308,7 +315,8 @@ public class AvatarKinematicsSimulationController
                                                                        controllerToolbox.getFootContactStates(),
                                                                        managerFactory.getOrCreateBalanceManager(),
                                                                        footSwitches,
-                                                                       walkingCompletedNotification));
+                                                                       walkingStatusPublisher,
+                                                                       footstepStatusPublisher));
       }
       else
       {
@@ -366,11 +374,6 @@ public class AvatarKinematicsSimulationController
          joint.setJointAccelerationToZero();
          joint.setJointTwistToZero();
       }
-   }
-
-   public Notification getWalkingCompletedNotification()
-   {
-      return walkingCompletedNotification;
    }
 
    public CommandInputManager getInputManager()
