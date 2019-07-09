@@ -1,16 +1,17 @@
 package us.ihmc.humanoidBehaviors;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -23,57 +24,46 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StepInPlaceBehavior
 {
-   private final RemoteSyncedRobotModel remoteSyncedRobotModel;
-   private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
+   private final BehaviorHelper behaviorHelper;
+
    private final ActivationReference<Boolean> stepping;
-   private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
-   private final SideDependentList<FootstepStatusMessage> footstepStatus = new SideDependentList<>();
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
 
    public StepInPlaceBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       LogTools.debug("Initializing step in place behavior");
 
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      behaviorHelper = new BehaviorHelper(messager, robotModel, ros2Node);
 
-      remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      behaviorHelper.createFootstepStatusCallback(this::consumeFootstepStatus);
+      stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
+      messager.registerTopicListener(API.Abort, this::doOnAbort);
+      
+      behaviorHelper.startScheduledThread(getClass().getSimpleName(), this::stepInPlace, 1, TimeUnit.SECONDS);
+   }
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           FootstepStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
-                                           s -> consumeFootstepStatus(s.takeNextData()));
-
-      stepping = new ActivationReference<>(messager.createInput(API.Stepping, false), true);
-
-      PeriodicNonRealtimeThreadScheduler threadScheduler = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      threadScheduler.schedule(this::stepInPlace, 1, TimeUnit.SECONDS);
-
-      messager.registerTopicListener(API.Abort, abort -> {
-         if (abort)
-         {
-            threadScheduler.shutdown();
-         }
-      });
+   private void doOnAbort(boolean abort)
+   {
+      if (abort)
+      {
+         LogTools.info("Abort received. Shutting down threadScheduler.");
+         behaviorHelper.shutdownScheduledThread();
+      }
    }
 
    private void consumeFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
+      LogTools.info("consumeFootstepStatus: " + footstepStatusMessage);
+
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
-         footstepsTaken.incrementAndGet();
+         int footstepsTakenSoFar = footstepsTaken.incrementAndGet();
+         LogTools.info("Have taken " + footstepsTakenSoFar + " footsteps.");
       }
    }
 
@@ -90,28 +80,35 @@ public class StepInPlaceBehavior
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = remoteSyncedRobotModel.pollFullRobotModel();
-
-            FootstepDataListMessage footstepList = new FootstepDataListMessage();
-
-            for (RobotSide side : RobotSide.values)
-            {
-               MovingReferenceFrame stepFrame = fullRobotModel.getSoleFrame(side);
-               FramePoint3D footLocation = new FramePoint3D(stepFrame);
-               FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
-               footLocation.changeFrame(ReferenceFrame.getWorldFrame());
-               footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-               footstepList.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation));
-               footstepList.setAreFootstepsAdjustable(true);
-            }
-
-            footstepDataListPublisher.publish(footstepList);
+            FullHumanoidRobotModel fullRobotModel = behaviorHelper.pollFullRobotModel();
+            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
+            behaviorHelper.publishFootstepList(footstepList);
          }
       }
       else if (stepping.hasChanged())
       {
          LogTools.info("Stopped stepping");
       }
+   }
+
+   private FootstepDataListMessage createTwoStepInPlaceSteps(FullHumanoidRobotModel fullRobotModel)
+   {
+      FootstepDataListMessage footstepList = new FootstepDataListMessage();
+      RecyclingArrayList<FootstepDataMessage> footstepDataMessages = footstepList.getFootstepDataList();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         MovingReferenceFrame stepFrame = fullRobotModel.getSoleFrame(side);
+         FramePoint3D footLocation = new FramePoint3D(stepFrame);
+         FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
+         footLocation.changeFrame(ReferenceFrame.getWorldFrame());
+         footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation);
+         footstepDataMessages.add().set(footstepDataMessage);
+      }
+      footstepList.setAreFootstepsAdjustable(true);
+      return footstepList;
    }
 
    public static class API

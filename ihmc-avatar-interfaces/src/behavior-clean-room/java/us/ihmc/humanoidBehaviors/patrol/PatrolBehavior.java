@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
@@ -71,6 +72,8 @@ public class PatrolBehavior
       REPLAN, WALK
    }
 
+   private final BehaviorHelper behaviorHelper;
+
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
@@ -99,30 +102,33 @@ public class PatrolBehavior
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
+      behaviorHelper = new BehaviorHelper(messager, robotModel, ros2Node);
+
       this.messager = messager;
 
       LogTools.debug("Initializing patrol behavior");
 
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
-      factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
-      factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
+      factory.setOnEntry(STOP, this::onStopStateEntry);
+      factory.setDoAction(STOP, this::doStopStateAction);
       factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
-      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
-      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
+      factory.setOnEntry(NAVIGATE, this::onNavigateStateEntry);
+      factory.setDoAction(NAVIGATE, this::doNavigateStateAction);
       factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, NAVIGATE, STOP), this::transitionFromNavigate);
-      factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
-      factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
+      factory.setOnEntry(PLAN, this::onPlanStateEntry);
+      factory.setDoAction(PLAN, this::doPlanStateAction);
       factory.addTransition(PLAN, Lists.newArrayList(REVIEW, NAVIGATE, STOP), this::transitionFromPlan);
-      factory.getStateMap().get(REVIEW).setOnEntry(this::onReviewStateEntry);
-      factory.getStateMap().get(REVIEW).setDoAction(this::onReviewStateAction);
+      factory.setOnEntry(REVIEW, this::onReviewStateEntry);
+      factory.setDoAction(REVIEW, this::onReviewStateAction);
       factory.addTransition(REVIEW, Lists.newArrayList(WALK, PLAN, STOP), this::transitionFromReview);
-      factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
-      factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
-      factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
+      factory.setOnEntry(WALK, this::onWalkStateEntry);
+      factory.setDoAction(WALK, this::doWalkStateAction);
+      factory.setOnExit(WALK, this::onWalkStateExit);
       factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, NAVIGATE, STOP), this::transitionFromWalk);
-      factory.getStateMap().get(PERCEIVE).setOnEntry(this::onPerceiveStateEntry);
-      factory.getStateMap().get(PERCEIVE).setDoAction(this::doPerceiveStateAction);
+      factory.setOnEntry(PERCEIVE, this::onPerceiveStateEntry);
+      factory.setDoAction(PERCEIVE, this::doPerceiveStateAction);
       factory.addTransition(PERCEIVE, Lists.newArrayList(NAVIGATE, STOP), this::transitionFromPerceive);
+
       factory.getFactory().addStateChangedListener((from, to) ->
       {
          messager.submitMessage(CurrentState, to);
@@ -246,10 +252,12 @@ public class PatrolBehavior
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
+      PlanarRegionsListMessage latestPlanarRegionList = planarRegionsList.getLatest();
+
       footstepPlanResultNotification
             = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
                                                          new FramePose3D(waypointManager.peekNextPose()),
-                                                         planarRegionsList.getLatest());
+                                                         latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
