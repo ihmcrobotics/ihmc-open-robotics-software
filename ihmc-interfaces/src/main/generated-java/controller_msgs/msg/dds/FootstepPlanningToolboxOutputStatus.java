@@ -25,10 +25,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
-   public double time_taken_ = -1.0;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
+   public controller_msgs.msg.dds.FootstepPlanningStatistics footstep_planning_statistics_;
 
    public FootstepPlanningToolboxOutputStatus()
    {
@@ -36,6 +36,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
+      footstep_planning_statistics_ = new controller_msgs.msg.dds.FootstepPlanningStatistics();
 
    }
 
@@ -54,11 +55,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       plan_id_ = other.plan_id_;
 
-      time_taken_ = other.time_taken_;
-
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
       body_path_.set(other.body_path_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
+      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.staticCopy(other.footstep_planning_statistics_, footstep_planning_statistics_);
    }
 
    /**
@@ -100,15 +100,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       return plan_id_;
    }
 
-   public void setTimeTaken(double time_taken)
-   {
-      time_taken_ = time_taken;
-   }
-   public double getTimeTaken()
-   {
-      return time_taken_;
-   }
-
 
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
    {
@@ -125,6 +116,12 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public us.ihmc.euclid.geometry.Pose3D getLowLevelPlannerGoal()
    {
       return low_level_planner_goal_;
+   }
+
+
+   public controller_msgs.msg.dds.FootstepPlanningStatistics getFootstepPlanningStatistics()
+   {
+      return footstep_planning_statistics_;
    }
 
 
@@ -152,8 +149,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_taken_, other.time_taken_, epsilon)) return false;
-
       if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon)) return false;
       if (this.body_path_.size() != other.body_path_.size()) { return false; }
       else
@@ -163,6 +158,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       }
 
       if (!this.low_level_planner_goal_.epsilonEquals(other.low_level_planner_goal_, epsilon)) return false;
+      if (!this.footstep_planning_statistics_.epsilonEquals(other.footstep_planning_statistics_, epsilon)) return false;
 
       return true;
    }
@@ -183,11 +179,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
-      if(this.time_taken_ != otherMyClass.time_taken_) return false;
-
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
       if (!this.low_level_planner_goal_.equals(otherMyClass.low_level_planner_goal_)) return false;
+      if (!this.footstep_planning_statistics_.equals(otherMyClass.footstep_planning_statistics_)) return false;
 
       return true;
    }
@@ -206,14 +201,14 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append(this.footstep_planning_result_);      builder.append(", ");
       builder.append("plan_id=");
       builder.append(this.plan_id_);      builder.append(", ");
-      builder.append("time_taken=");
-      builder.append(this.time_taken_);      builder.append(", ");
       builder.append("planar_regions_list=");
       builder.append(this.planar_regions_list_);      builder.append(", ");
       builder.append("body_path=");
       builder.append(this.body_path_);      builder.append(", ");
       builder.append("low_level_planner_goal=");
-      builder.append(this.low_level_planner_goal_);
+      builder.append(this.low_level_planner_goal_);      builder.append(", ");
+      builder.append("footstep_planning_statistics=");
+      builder.append(this.footstep_planning_statistics_);
       builder.append("}");
       return builder.toString();
    }
