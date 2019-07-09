@@ -77,11 +77,14 @@ public class StereoREAAnchorPaneController
 
       segmentationRawDataFilteringParametersProperty.bindBidirectionalSparseThreshold(minSparse.valueProperty(), sparseRatio.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterFlyingPoint(flyingPoint.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalFlyingPointParameters(flyingPointDistance.valueProperty(), minimumNeighbors.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalFlyingPointParameters(flyingPointDistance.valueProperty(),
+                                                                                            minimumNeighbors.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterCentrality(centrality.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(), centralityThreshold.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(),
+                                                                                           centralityThreshold.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterEllipticity(ellipticity.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(), ellipticityThreshold.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(),
+                                                                                            ellipticityThreshold.valueProperty());
       messager.bindBidirectional(LidarImageFusionAPI.SegmentationRawDataFilteringParameters, segmentationRawDataFilteringParametersProperty, true);
 
       planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseLowerThreshold.valueProperty(), sparseUpperThreshold.valueProperty());
