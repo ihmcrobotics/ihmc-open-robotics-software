@@ -4,7 +4,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
@@ -19,6 +18,8 @@ import java.util.Collection;
 
 public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
 {
+   private static final String parameterFileName = "/parameters/simulation_force_controller.xml";
+
    private final GenericQuadrupedSDFParameters sdfParameters = new GenericQuadrupedSDFParameters();
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
 
@@ -97,21 +98,15 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public String getParameterResourceName(QuadrupedControlMode controlMode)
+   public String getParameterResourceName()
    {
-      switch(controlMode)
-      {
-      case FORCE:
-         return "/parameters/simulation_force_controller.xml";
-      default:
-         throw new RuntimeException("No parameter file exists for control mode: " + controlMode);
-      }
+      return parameterFileName;
    }
 
    @Override
-   public InputStream getParameterInputStream(QuadrupedControlMode controlMode)
+   public InputStream getParameterInputStream()
    {
-      return getClass().getResourceAsStream(getParameterResourceName(controlMode));
+      return getClass().getResourceAsStream(getParameterResourceName());
    }
 
 }

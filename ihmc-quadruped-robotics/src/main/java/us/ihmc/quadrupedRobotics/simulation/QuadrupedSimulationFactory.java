@@ -23,7 +23,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchFactory;
@@ -95,7 +94,6 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<ControllerCoreOptimizationSettings> controllerCoreOptimizationSettings = new RequiredFactoryField<>("controllerCoreOptimizationSettings");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
-   private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
    private final RequiredFactoryField<Double> simulationDT = new RequiredFactoryField<>("simulationDT");
    private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
@@ -336,11 +334,6 @@ public class QuadrupedSimulationFactory
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
                                                                                        fallDetectionParameters.get(), robotMotionStatusFromController);
 
-      if(controlMode.get() == QuadrupedControlMode.POSITION)
-      {
-         throw new RuntimeException("Position Control Mode currently not supported");
-      }
-
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get(), null);
    }
 
@@ -577,7 +570,7 @@ public class QuadrupedSimulationFactory
          scs.setupViewport(viewportConfiguration);
       }
 
-      InputStream parameterFile = modelFactory.get().getParameterInputStream(controlMode.get());
+      InputStream parameterFile = modelFactory.get().getParameterInputStream();
       ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
       scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
 
@@ -722,11 +715,6 @@ public class QuadrupedSimulationFactory
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
    {
       this.physicalProperties.set(physicalProperties);
-   }
-
-   public void setControlMode(QuadrupedControlMode controlMode)
-   {
-      this.controlMode.set(controlMode);
    }
 
    public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)

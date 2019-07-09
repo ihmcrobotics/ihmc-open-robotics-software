@@ -2,21 +2,21 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "ImageMessage" defined in "ImageMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "Image32" defined in "Image32_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from ImageMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ImageMessage_.idl instead.
+* This file was automatically generated from Image32_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit Image32_.idl instead.
 *
 */
-public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ImageMessage>
+public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.Image32>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::ImageMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::Image32_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ImageMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.Image32 data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ImageMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.Image32 data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,12 +52,12 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ImageMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.Image32 data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ImageMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.Image32 data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -78,7 +78,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -92,7 +92,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
 
    }
 
-   public static void read(controller_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -105,7 +105,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.ImageMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("width", data.getWidth());
@@ -114,7 +114,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ImageMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.Image32 data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setWidth(ser.read_type_2("width"));
@@ -122,15 +122,15 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
       ser.read_type_e("rgbdata", data.getRgbdata());
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.ImageMessage src, controller_msgs.msg.dds.ImageMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.Image32 src, controller_msgs.msg.dds.Image32 dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.ImageMessage createData()
+   public controller_msgs.msg.dds.Image32 createData()
    {
-      return new controller_msgs.msg.dds.ImageMessage();
+      return new controller_msgs.msg.dds.Image32();
    }
    @Override
    public int getTypeSize()
@@ -144,24 +144,24 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.ImageMessage src, controller_msgs.msg.dds.ImageMessage dest)
+   public void copy(controller_msgs.msg.dds.Image32 src, controller_msgs.msg.dds.Image32 dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public ImageMessagePubSubType newInstance()
+   public Image32PubSubType newInstance()
    {
-      return new ImageMessagePubSubType();
+      return new Image32PubSubType();
    }
 }
