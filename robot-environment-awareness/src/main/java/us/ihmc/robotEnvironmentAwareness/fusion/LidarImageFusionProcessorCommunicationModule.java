@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
@@ -47,7 +47,7 @@ public class LidarImageFusionProcessorCommunicationModule
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
                                            this::dispatchStereoVisionPointCloudMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, "/ihmc/image", this::dispatchImageMessage);
+      ROS2Tools.createCallbackSubscription(ros2Node, Image32.class, "/ihmc/image", this::dispatchImage32);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
@@ -80,11 +80,11 @@ public class LidarImageFusionProcessorCommunicationModule
       objectDetectionManager.updateLatestStereoVisionPointCloudMessage(message);
    }
 
-   private void dispatchImageMessage(Subscriber<ImageMessage> subscriber)
+   private void dispatchImage32(Subscriber<Image32> subscriber)
    {
-      ImageMessage message = subscriber.takeNextData();
+      Image32 message = subscriber.takeNextData();
       if (messager.isMessagerOpen())
-         messager.submitMessage(LidarImageFusionAPI.ImageState, new ImageMessage(message));
+         messager.submitMessage(LidarImageFusionAPI.ImageState, new Image32(message));
 
       latestBufferedImage.set(ImageVisualizationHelper.convertImageMessageToBufferedImage(message));
    }
