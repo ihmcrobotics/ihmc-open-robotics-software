@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import controller_msgs.msg.dds.ImageMessage;
+import controller_msgs.msg.dds.Image32;
 import sensor_msgs.msg.dds.RegionOfInterest;
 
 public class ImageVisualizationHelper
@@ -12,7 +12,7 @@ public class ImageVisualizationHelper
    private static final float fontSize = 30f;
    private static final int defaultThickness = 5;
 
-   public static BufferedImage convertImageMessageToBufferedImage(ImageMessage imageMessage)
+   public static BufferedImage convertImageMessageToBufferedImage(Image32 imageMessage)
    {
       int width = imageMessage.getWidth();
       int height = imageMessage.getHeight();
