@@ -79,6 +79,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<GoHomeMessage> GoHomeMessage = apiFactory.createTypedTopicTheme("GoHomeMessage");
    private static final TypedTopicTheme<Boolean> IgnorePartialFootholds = apiFactory.createTypedTopicTheme("IgnorePartialFootholds");
    private static final TypedTopicTheme<Boolean> RenderShiftedWaypoints = apiFactory.createTypedTopicTheme("RenderShiftedWaypoints");
+   private static final TypedTopicTheme<FootstepPlanningStatistics> PlannerStatistics = apiFactory.createTypedTopicTheme("PlannerStatistics");
 
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
@@ -179,6 +180,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowNodeDataTopic = Root.child(PlannerData).topic(Show);
    public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = Root.child(OccupancyMap).topic(OccupancyMapData);
    public static final Topic<Boolean> ShowOccupancyMap = Root.child(OccupancyMap).topic(Show);
+   public static final Topic<FootstepPlanningStatistics> PlannerStatisticsTopic = Root.topic(PlannerStatistics);
 
    public static final Topic<Boolean> RenderShiftedWaypointsTopic = Root.topic(RenderShiftedWaypoints);
 
