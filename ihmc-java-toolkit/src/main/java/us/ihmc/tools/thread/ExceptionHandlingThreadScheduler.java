@@ -87,6 +87,7 @@ public class ExceptionHandlingThreadScheduler
       else
       {
          LogTools.warn("Thread has already been scheduled");
+         new Throwable().printStackTrace();
       }
 
       return scheduledFuture;
