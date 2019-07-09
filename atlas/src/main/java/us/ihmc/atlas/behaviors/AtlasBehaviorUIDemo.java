@@ -16,16 +16,14 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.parameterTuner.remote.ParameterTuner;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
-import us.ihmc.tools.processManagement.JavaProcessSpawner;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -38,6 +36,7 @@ public class AtlasBehaviorUIDemo extends Application
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean USE_FLAT_GROUND = false;
    private static final boolean USE_KINEMATIC_SIMULATION = true;
+   private static final int RECORD_TICKS_PER_CONTROL_TICKS = 10;
 
    private BehaviorUI ui;
 
@@ -65,13 +64,13 @@ public class AtlasBehaviorUIDemo extends Application
          }
          else
          {
-            AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
-                                                        USE_FLAT_GROUND ?
-                                                              new FlatGroundEnvironment() :
-                                                              new PlanarRegionsListDefinedEnvironment(createPlanarRegions(), 0.02, false)).simulate();
+            CommonAvatarEnvironmentInterface environment = USE_FLAT_GROUND ? new FlatGroundEnvironment()
+                  : new PlanarRegionsListDefinedEnvironment(createPlanarRegions(), 0.02, false);
+            SimulationConstructionSet scs = AtlasBehaviorSimulation.createForManualTest(createRobotModel(), environment, RECORD_TICKS_PER_CONTROL_TICKS);
+
+            scs.simulate();
          }
-      }
-      ).start();
+      }).start();
 
       new Thread(() -> {
          LogTools.info("Creating footstep toolbox");
@@ -83,10 +82,10 @@ public class AtlasBehaviorUIDemo extends Application
          BehaviorModule.createForBackpack(createRobotModel());
       }).start();
 
-//      new Thread(() -> {
-//         LogTools.info("Spawning parameter tuner");
-//         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
-//      }).start();
+      //      new Thread(() -> {
+      //         LogTools.info("Spawning parameter tuner");
+      //         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
+      //      }).start();
 
       LogTools.info("Creating behavior user interface");
       AtlasRobotModel robotModel = createRobotModel();
@@ -97,19 +96,15 @@ public class AtlasBehaviorUIDemo extends Application
 
    private AtlasRobotModel createRobotModel()
    {
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values,
-                                                                                                     8,
-                                                                                                     3,
-                                                                                                     true,
-                                                                                                     true);
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
 
    }
 
    private PlanarRegionsList createPlanarRegions()
    {
-//      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
-//      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
+      //      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
+      //      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
       return PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter();
    }
 
