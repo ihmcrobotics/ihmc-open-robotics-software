@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__FootstepPlanningToolboxOutputStatus__idl__
 
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
+#include "controller_msgs/msg/./FootstepPlanningStatistics_.idl"
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
@@ -48,11 +49,10 @@ module controller_msgs
         octet footstep_planning_result;
         @defaultValue(value=-1)
         long plan_id;
-        @defaultValue(value=-1.0)
-        double time_taken;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
         sequence<geometry_msgs::msg::dds::Point> body_path;
         geometry_msgs::msg::dds::Pose low_level_planner_goal;
+        controller_msgs::msg::dds::FootstepPlanningStatistics footstep_planning_statistics;
       };
     };
   };
