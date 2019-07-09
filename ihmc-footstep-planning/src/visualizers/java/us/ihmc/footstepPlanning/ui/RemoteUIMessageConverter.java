@@ -305,6 +305,8 @@ public class RemoteUIMessageConverter
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
       }
 
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatisticsTopic, packet.getFootstepPlanningStatistics());
+
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");
    }
