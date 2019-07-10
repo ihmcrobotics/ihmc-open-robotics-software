@@ -9,11 +9,14 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
@@ -131,53 +134,42 @@
 
                 <Region prefHeight="5" />
 
-                <GridPane layoutX="23.0" layoutY="29.0">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="146.0" minWidth="10.0" prefWidth="150.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="50.0" prefWidth="125.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                    <children>
-                        <TextField fx:id="sentRequestId" GridPane.columnIndex="1" />
-                        <Label text="Sent Request ID" GridPane.halignment="RIGHT" />
-                        <Label layoutX="34.0" layoutY="17.0" text="Received Request ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <TextField fx:id="receivedRequestId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label layoutX="50.0" layoutY="17.0" text="Time Taken" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
-                        <Label layoutX="262.0" layoutY="17.0" text="Planning Result" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <TextField fx:id="timeTaken" GridPane.columnIndex="3" />
-                        <TextField fx:id="planningResult" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <Label layoutX="20.0" layoutY="47.0" text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <TextField fx:id="plannerStatus" layoutX="156.0" layoutY="42.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                    </children>
-                </GridPane>
+                <HBox alignment="TOP_CENTER">
+                    <GridPane alignment="TOP_CENTER">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="150.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="50.0" prefWidth="125.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        </rowConstraints>
+                        <children>
+                            <Label text="Sent Request ID" GridPane.halignment="RIGHT" />
+                            <Label text="Received Request ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label text="Planning Result" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Time Taken" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Label text="Rejection %" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
 
-                <Separator prefHeight="20" />
+                            <TextField fx:id="sentRequestId" GridPane.columnIndex="1" />
+                            <TextField fx:id="receivedRequestId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <TextField fx:id="plannerStatus" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <TextField fx:id="planningResult" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                            <TextField fx:id="timeTaken" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                            <TextField fx:id="rejectionPercentage" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        </children>
+                    </GridPane>
 
-                <GridPane layoutX="23.0" layoutY="29.0">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="146.0" minWidth="10.0" prefWidth="150.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="125.0" prefWidth="125.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="125.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                    <children>
-                        <Label text="Sent Request ID" GridPane.halignment="RIGHT" />
-                        <Label layoutX="34.0" layoutY="17.0" text="Total steps considered" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <Label layoutX="50.0" layoutY="17.0" text="Percentage rejected steps" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
-                    </children>
-                </GridPane>
+                    <Separator orientation="VERTICAL" prefWidth="20" />
 
+                    <TableView fx:id="rejectionTable" prefWidth="400"/>
+                </HBox>
             </children>
         </VBox>
 
@@ -198,7 +190,7 @@
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="146.0" prefWidth="150.0" />
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" prefWidth="125.0" />
-                  <ColumnConstraints />
+                        <ColumnConstraints />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -233,11 +225,11 @@
                 <Region prefHeight="5" />
 
                 <GridPane alignment="TOP_CENTER" layoutX="23.0" layoutY="29.0">
-                    <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" GridPane.columnSpan="6" prefHeight="38.0"/>
+                    <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" GridPane.columnSpan="6" />
 
-                    <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                    <Region prefWidth="150" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                    <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                    <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Region prefWidth="150" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                    <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3" GridPane.rowIndex="1">
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
@@ -247,7 +239,7 @@
                         </graphic>
                     </Button>
 
-                    <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.rowIndex="1" GridPane.columnIndex="4">
+                    <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4" GridPane.rowIndex="1">
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
@@ -257,7 +249,7 @@
                         </graphic>
                     </Button>
 
-                    <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.rowIndex="1" GridPane.columnIndex="5">
+                    <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5" GridPane.rowIndex="1">
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
@@ -276,6 +268,7 @@
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints />
+                  <RowConstraints />
                     </rowConstraints>
                 </GridPane>
             </children>
