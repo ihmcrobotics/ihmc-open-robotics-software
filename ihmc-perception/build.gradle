@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc.thirdparty.org.opencv", name: "opencv", version: "3.2.0-170503"
+   compile group: "org.bytedeco", name: "javacv-platform", version: "1.5"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
    compile group: "org.georegression", name: "georegression", version: "0.11"
