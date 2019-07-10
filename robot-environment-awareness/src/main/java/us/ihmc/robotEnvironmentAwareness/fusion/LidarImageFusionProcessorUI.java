@@ -19,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 import us.ihmc.ros2.Ros2Node;
 
@@ -45,6 +46,9 @@ public class LidarImageFusionProcessorUI
 
    @FXML
    private ObjectDetectionAnchorPaneController objectDetectionAnchorPaneController;
+   
+   @FXML
+   private StereoREAAnchorPaneController stereoREAAnchorPaneController;
 
    private LidarImageFusionProcessorUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
    {
@@ -59,7 +63,7 @@ public class LidarImageFusionProcessorUI
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
-      view3dFactory.addWorldCoordinateSystem(0.3);
+      view3dFactory.addWorldCoordinateSystem(0.05);
 
       VBox imageViewPane = new VBox();
       mainPane.setRight(imageViewPane);
@@ -128,5 +132,6 @@ public class LidarImageFusionProcessorUI
 
       imageProcessingAnchorPaneController.initialize(messager);
       objectDetectionAnchorPaneController.initialize(messager);
+      stereoREAAnchorPaneController.initialize(messager);
    }
 }

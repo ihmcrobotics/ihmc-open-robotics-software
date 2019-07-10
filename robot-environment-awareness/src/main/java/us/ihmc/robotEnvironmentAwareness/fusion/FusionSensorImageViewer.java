@@ -46,7 +46,7 @@ public class FusionSensorImageViewer
 
       newImageMessageToStream = messager.createInput(LidarImageFusionAPI.ImageState);
       recentBufferedImageToStream = new AtomicReference<BufferedImage>(null);
-      newBufferedImageToView = messager.createInput(LidarImageFusionAPI.ImageResultState);
+      newBufferedImageToView = messager.createInput(LidarImageFusionAPI.ImageResultState, null);
 
       imageStreamer = new AnimationTimer()
       {
