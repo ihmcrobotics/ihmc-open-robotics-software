@@ -1,9 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,10 +15,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
+public class MultiStagePlannerListener
 {
-   private final StatusMessageOutputManager statusMessageOutputManager;
-
    private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
    private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
 
@@ -30,9 +25,8 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
 
    private final List<StagePlannerListener> listeners = new ArrayList<>();
 
-   public MultiStagePlannerListener(StatusMessageOutputManager statusMessageOutputManager, long occupancyMapBroadcastDt)
+   public MultiStagePlannerListener(long occupancyMapBroadcastDt)
    {
-      this.statusMessageOutputManager = statusMessageOutputManager;
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
    }
 
@@ -46,22 +40,6 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       listeners.add(listener);
    }
 
-   @Override
-   public void addNode(FootstepNode node, FootstepNode previousNode)
-   {
-   }
-
-   @Override
-   public void reportLowestCostNodeList(List<FootstepNode> plan)
-   {
-   }
-
-   @Override
-   public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
-   {
-   }
-
-   @Override
    public void tickAndUpdate()
    {
       long currentTime = System.currentTimeMillis();
@@ -112,7 +90,6 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
       lastBroadcastTime = currentTime;
    }
 
-   @Override
    public void plannerFinished(List<FootstepNode> plan)
    {
       FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
@@ -126,6 +103,45 @@ public class MultiStagePlannerListener implements BipedalFootstepPlannerListener
          }
       }
       broadcastOccupancyMap(occupancyMapMessage);
+   }
+
+   public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
+   {
+      int numberOfStepsConsidered = 0;
+      for (int i = 0; i < listeners.size(); i++)
+      {
+         numberOfStepsConsidered += listeners.get(i).getTotalNodeCount();
+      }
+      planningStatistics.setNumberOfStepsConsidered(numberOfStepsConsidered);
+
+      int totalRejectionCount = 0;
+      int[] rejectionCountArray = new int[BipedalFootstepPlannerNodeRejectionReason.values.length];
+      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      {
+         for (int i = 0; i < listeners.size(); i++)
+         {
+            int rejectionCount = listeners.get(i).getRejectionReasonCount(rejectionReason);
+            rejectionCountArray[rejectionReason.ordinal()] += rejectionCount;
+            totalRejectionCount += rejectionCount;
+         }
+      }
+
+      planningStatistics.setPercentageOfRejectedSteps(((double) totalRejectionCount) / numberOfStepsConsidered);
+
+      planningStatistics.getRejectionPercentages().clear();
+      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      {
+         double rejectionPercentage = ((double) rejectionCountArray[rejectionReason.ordinal()]) / totalRejectionCount;
+         planningStatistics.getRejectionPercentages().add(rejectionPercentage);
+      }
+   }
+
+   public void reset()
+   {
+      for (int i = 0; i < listeners.size(); i++)
+      {
+         listeners.get(i).reset();
+      }
    }
 
    private void broadcastNodeData(FootstepNodeDataListMessage message)
