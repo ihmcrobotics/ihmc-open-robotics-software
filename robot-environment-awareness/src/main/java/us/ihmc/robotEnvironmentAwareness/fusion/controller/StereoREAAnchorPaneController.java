@@ -18,95 +18,36 @@ public class StereoREAAnchorPaneController
 {
    private JavaFXMessager messager;
 
-   @FXML
-   private Label computationTime;
-
-   @FXML
-   private ToggleButton enableREA;
-
-   @FXML
-   private Button clearREA;
-
-   @FXML
-   private Slider stereoBuffer;
-
-   @FXML
-   private Button showSegmentationRawData;
-
-   @FXML
-   private Button showProjection;
-
-   @FXML
-   private Slider superpixelSize;
-
-   @FXML
-   private Slider superpixelRuler;
-
-   @FXML
-   private Slider superpixelIterate;
-
-   @FXML
-   private ToggleButton enableConnectivity;
-
-   @FXML
-   private Slider superpixelMinimumElement;
-
-   @FXML
-   private Slider minSparse;
-
-   @FXML
-   private Slider sparseRatio;
-
-   @FXML
-   private ToggleButton flyingPoint;
-
-   @FXML
-   private Slider minimumNeighbors;
-
-   @FXML
-   private Slider flyingPointDistance;
-
-   @FXML
-   private ToggleButton centrality;
-
-   @FXML
-   private Slider centralityRadius;
-
-   @FXML
-   private Slider centralityThreshold;
-
-   @FXML
-   private ToggleButton ellipticity;
-
-   @FXML
-   private Slider ellipticityLength;
-
-   @FXML
-   private Slider ellipticityThreshold;
-
-   @FXML
-   private Slider sparseLowerThreshold;
-
-   @FXML
-   private Slider sparseUpperThreshold;
-
-   @FXML
-   private Slider proximityThreshold;
-
-   @FXML
-   private Slider planarityThreshold;
-
-   @FXML
-   private CheckBox enableExtending;
-
-   @FXML
-   private CheckBox updateExtendedData;
-
-   @FXML
-   private Slider extendingDistanceThreshold;
-
-   @FXML
-   private Slider ExtendingRadius;
+   @FXML private Label computationTime;
+   @FXML private ToggleButton enableREA;
+   @FXML private Button clearREA;
+   @FXML private Slider stereoBuffer;
+   @FXML private Button showSegmentationRawData;
+   @FXML private Button showProjection;
+   @FXML private Slider superpixelSize;
+   @FXML private Slider superpixelRuler;
+   @FXML private Slider superpixelIterate;
+   @FXML private ToggleButton enableConnectivity;
+   @FXML private Slider superpixelMinimumElement;
+   @FXML private Slider minSparse;
+   @FXML private Slider sparseRatio;
+   @FXML private ToggleButton flyingPoint;
+   @FXML private Slider minimumNeighbors;
+   @FXML private Slider flyingPointDistance;
+   @FXML private ToggleButton centrality;
+   @FXML private Slider centralityRadius;
+   @FXML private Slider centralityThreshold;
+   @FXML private ToggleButton ellipticity;
+   @FXML private Slider ellipticityLength;
+   @FXML private Slider ellipticityThreshold;
+   @FXML private Slider sparseLowerThreshold;
+   @FXML private Slider sparseUpperThreshold;
+   @FXML private Slider proximityThreshold;
+   @FXML private Slider planarityThreshold;
+   @FXML private CheckBox enableExtending;
+   @FXML private CheckBox updateExtendedData;
+   @FXML private Slider extendingDistanceThreshold;
+   @FXML private Slider ExtendingRadius;
 
    private final ImageSegmentationParametersProperty imageSegmentationParametersProperty = new ImageSegmentationParametersProperty(this,
                                                                                                                                    "imageSegmentationParametersProperty");
