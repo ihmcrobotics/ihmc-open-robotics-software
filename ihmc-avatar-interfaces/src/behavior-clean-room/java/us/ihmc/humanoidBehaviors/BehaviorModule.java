@@ -5,6 +5,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
@@ -40,12 +41,13 @@ public class BehaviorModule
       this.messager = messager;
 
       LogTools.info("Starting behavior backpack");
-      
+
       PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
       new StepInPlaceBehavior(messager, ros2Node, robotModel);  // TODO don't start threads on construction, but right now not hurting anything
       new PatrolBehavior(messager, ros2Node, robotModel);
+      new FancyPosesBehavior(messager, ros2Node, robotModel);
    }
 
    public static MessagerAPI getBehaviorAPI()
@@ -55,6 +57,7 @@ public class BehaviorModule
 
       apiFactory.includeMessagerAPIs(StepInPlaceBehavior.API.create());
       apiFactory.includeMessagerAPIs(PatrolBehaviorAPI.create());
+      apiFactory.includeMessagerAPIs(FancyPosesBehavior.API.create());
 
       return apiFactory.getAPIAndCloseFactory();
    }
