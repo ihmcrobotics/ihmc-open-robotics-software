@@ -44,6 +44,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
+
+      for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      {
+         rejectionCount.put(rejectionReason, new MutableInteger(0));
+      }
    }
 
    @Override

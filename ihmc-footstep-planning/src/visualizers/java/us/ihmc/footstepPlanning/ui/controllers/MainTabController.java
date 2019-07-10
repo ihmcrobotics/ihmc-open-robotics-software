@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.cell.PropertyValueFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
@@ -27,6 +29,7 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
@@ -39,6 +42,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,6 +55,8 @@ public class MainTabController
 {
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
+   private final ObservableList<RejectionPercentageProperty> rejectionTableItems = FXCollections.observableArrayList();
+   private final HashMap<BipedalFootstepPlannerNodeRejectionReason, RejectionPercentageProperty> rejectionPercentageMap = new HashMap<>();
 
    // control
    @FXML
@@ -71,6 +77,10 @@ public class MainTabController
    private TextField sentRequestId;
    @FXML
    private TextField receivedRequestId;
+   @FXML
+   private TableView rejectionTable;
+   @FXML
+   private TextField rejectionPercentage;
 
    @FXML
    private TextField timeTaken;
@@ -332,6 +342,8 @@ public class MainTabController
       previewSlider.valueProperty()
                    .addListener((ChangeListener<Number>) (observable, oldValue,
                                                           newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+
+      setupRejectionTable();
    }
 
    @FXML
@@ -504,6 +516,40 @@ public class MainTabController
       }
    }
 
+   private void setupRejectionTable()
+   {
+      TableColumn<String, RejectionPercentageProperty> column1 = new TableColumn<>("Reason");
+      column1.setCellValueFactory(new PropertyValueFactory<>("reason"));
+
+      TableColumn<String, RejectionPercentageProperty> column2 = new TableColumn<>("Percentage");
+      column2.setCellValueFactory(new PropertyValueFactory<>("percentage"));
+
+      rejectionTable.getColumns().add(column1);
+      rejectionTable.getColumns().add(column2);
+
+      rejectionTableItems.clear();
+      for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      {
+         RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), Double.toString(0.0));
+         rejectionTableItems.add(rejectionPercentageProperty);
+         rejectionPercentageMap.put(rejectionReason, rejectionPercentageProperty);
+      }
+
+      rejectionTable.setItems(rejectionTableItems);
+
+      messager.registerTopicListener(PlannerStatisticsTopic, statisticsMessage ->
+      {
+         String percentageRejectionSteps = Double.toString(statisticsMessage.getPercentageOfRejectedSteps());
+         rejectionPercentage.setText(percentageRejectionSteps);
+
+         for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+         {
+            double percent = statisticsMessage.getRejectionPercentages().get(rejectionReason.ordinal());
+            rejectionPercentageMap.get(rejectionReason).percentage = Double.toString(percent);
+         }
+      });
+   }
+
    private class WalkingPreviewPlaybackManager extends AnimationTimer
    {
       final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
@@ -636,6 +682,33 @@ public class MainTabController
 
          previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
          previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      }
+   }
+
+   public class RejectionPercentageProperty
+   {
+      private String reason;
+      private String percentage;
+
+      public RejectionPercentageProperty(String reason, String percentage) {
+         this.reason = reason;
+         this.percentage = percentage;
+      }
+
+      public String getReason() {
+         return reason;
+      }
+
+      public void setReason(String reason) {
+         this.reason = reason;
+      }
+
+      public String getPercentage() {
+         return percentage;
+      }
+
+      public void setPercentage(String percentage) {
+         this.percentage = percentage;
       }
    }
 }
