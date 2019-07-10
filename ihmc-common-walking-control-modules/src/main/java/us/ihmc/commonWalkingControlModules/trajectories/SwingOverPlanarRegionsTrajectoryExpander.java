@@ -85,7 +85,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final RigidBodyTransform planarRegionTransform;
 
    // Visualization
-   private Optional<Updatable> visualizer;
+   private Optional<Runnable> visualizer;
 
    public enum SwingOverPlanarRegionsTrajectoryCollisionType
    {
@@ -361,11 +361,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    {
       if (visualizer.isPresent())
       {
-         visualizer.get().update(0.0);
+         visualizer.get().run();
       }
    }
 
-   public void attachVisualizer(Updatable visualizer)
+   public void attachVisualizer(Runnable visualizer)
    {
       this.visualizer = Optional.of(visualizer);
    }
