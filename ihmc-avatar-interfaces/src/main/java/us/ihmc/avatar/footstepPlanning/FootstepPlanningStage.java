@@ -136,12 +136,12 @@ public class FootstepPlanningStage implements FootstepPlanner
       StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
       multiStageListener.addStagePlannerListener(plannerListener);
       return new BodyPathBasedAStarPlanner("visGraph_",
-                                                                          bodyPathPlanner,
-                                                                          footstepPlannerParameters,
-                                                                          contactPointsInSoleFrame,
-                                                                          footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(),
-                                                                          registry,
-                                                                          plannerListener);
+                                           bodyPathPlanner,
+                                           footstepPlannerParameters,
+                                           contactPointsInSoleFrame,
+                                           footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(),
+                                           registry,
+                                           plannerListener);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
