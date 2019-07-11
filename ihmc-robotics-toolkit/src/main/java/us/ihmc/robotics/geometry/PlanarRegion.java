@@ -181,7 +181,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * Returns all of the intersections when the convexPolygon is projected vertically onto this
     * PlanarRegion.
     *
-    * @param convexPolygonInWorld Polygon to project vertically.
+    * @param lineSegmentInWorld Line segment to project vertically.
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
@@ -265,7 +265,6 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
     *           same surface normal as this region.
-    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
    public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2D convexPolygon2d, RigidBodyTransform snappingTransform)
@@ -280,7 +279,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
     *           same surface normal as this region.
-    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @param intersectionPolygonToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
    public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2D convexPolygon2d, RigidBodyTransform snappingTransform,
@@ -1154,6 +1153,27 @@ public class PlanarRegion implements SupportingVertexHolder
    }
 
    /**
+    * Intersect this region's plane with 3D plane resulting in a Line3D in world.
+    *
+    * @param plane
+    * @return line3D in world
+    */
+   public Line3D intersectionWith(Plane3D plane)
+   {
+      Plane3D thisPlane = getPlane();
+
+      Point3D intersectionPoint = new Point3D();
+      Vector3D intersectionDirection = new Vector3D();
+      EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(thisPlane.getPoint(),
+                                                         thisPlane.getNormal(),
+                                                         plane.getPoint(),
+                                                         plane.getNormal(),
+                                                         intersectionPoint,
+                                                         intersectionDirection);
+      return new Line3D(intersectionPoint, intersectionDirection);
+   }
+
+   /**
     * Returns the intersection between this region and the provided region. Since a planar region
     * is not always convex the result is a list of line segments.
     */
@@ -1165,14 +1185,7 @@ public class PlanarRegion implements SupportingVertexHolder
          return ret;
       }
 
-      Plane3D thisPlane = getPlane();
-      Plane3D otherPlane = other.getPlane();
-      Point3D intersectionPoint = new Point3D();
-      Vector3D intersectionDirection = new Vector3D();
-
-      EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(thisPlane.getPoint(), thisPlane.getNormal(), otherPlane.getPoint(), otherPlane.getNormal(),
-                                                         intersectionPoint, intersectionDirection);
-      Line3D fullIntersectionLine = new Line3D(intersectionPoint, intersectionDirection);
+      Line3D fullIntersectionLine = intersectionWith(other.getPlane());
 
       List<LineSegment3D> intersectionsWithThis = projectAndIntersect(fullIntersectionLine);
       List<LineSegment3D> intersectionsWithOther = other.projectAndIntersect(fullIntersectionLine);
