@@ -6,15 +6,19 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="102.0" prefWidth="167.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController">
+<AnchorPane prefHeight="102.0" prefWidth="167.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController">
     <children>
         <GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" vgap="5.0">
             <children>
-                <Button fx:id="startStepping" onAction="#startStepping" prefWidth="130.0" text="Start Stepping" GridPane.rowIndex="1" />
-                <Button fx:id="pauseStepping" onAction="#pauseStepping" prefWidth="130.0" text="Pause Stepping" GridPane.rowIndex="2" />
+                <Button fx:id="pose0Button" onAction="#requestPose0" text="Pose0" />
+            <Button fx:id="pose1Button" onAction="#requestPose1" text="Pose1" GridPane.rowIndex="1" />
+                <Button fx:id="pose2Button" onAction="#requestPose2" text="Pose2" GridPane.rowIndex="2" />
+            <Button fx:id="pose3Button" onAction="#requestPose3" text="Pose3" GridPane.columnIndex="1" />
+            <Button fx:id="pose4Button" onAction="#requestPose4" text="Pose4" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             </children>
          <columnConstraints>
             <ColumnConstraints />
+            <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints />

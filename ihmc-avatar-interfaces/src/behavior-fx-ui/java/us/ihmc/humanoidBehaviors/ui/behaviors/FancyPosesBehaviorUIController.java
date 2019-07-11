@@ -7,8 +7,11 @@ import us.ihmc.messager.Messager;
 
 public class FancyPosesBehaviorUIController
 {
-   @FXML private Button startStepping;
-   @FXML private Button pauseStepping;
+   @FXML private Button pose0Button;
+   @FXML private Button pose1Button;
+   @FXML private Button pose2Button;
+   @FXML private Button pose3Button;
+   @FXML private Button pose4Button;
 
    private Messager behaviorMessager;
 
@@ -17,12 +20,27 @@ public class FancyPosesBehaviorUIController
       this.behaviorMessager = behaviorMessager;
    }
 
-   @FXML public void startStepping()
+   @FXML public void requestPose0()
    {
       behaviorMessager.submitMessage(FancyPosesBehavior.API.Stepping, true);
    }
 
-   @FXML public void pauseStepping()
+   @FXML public void requestPose1()
+   {
+      behaviorMessager.submitMessage(FancyPosesBehavior.API.Stepping, false);
+   }
+   
+   @FXML public void requestPose2()
+   {
+      behaviorMessager.submitMessage(FancyPosesBehavior.API.Stepping, false);
+   }
+   
+   @FXML public void requestPose3()
+   {
+      behaviorMessager.submitMessage(FancyPosesBehavior.API.Stepping, false);
+   }
+   
+   @FXML public void requestPose4()
    {
       behaviorMessager.submitMessage(FancyPosesBehavior.API.Stepping, false);
    }
