@@ -539,13 +539,13 @@ public class MainTabController
 
       messager.registerTopicListener(PlannerStatisticsTopic, statisticsMessage ->
       {
-         String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getPercentageOfRejectedSteps());
+         String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getFractionOfRejectedSteps());
          rejectionPercentage.setText(percentageRejectionSteps);
 
          rejectionTableItems.clear();
          for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
          {
-            double percent = 100 * statisticsMessage.getRejectionPercentages().get(rejectionReason.ordinal());
+            double percent = 100 * statisticsMessage.getRejectionFractions().get(rejectionReason.ordinal());
             RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(percent));
             rejectionTableItems.add(rejectionPercentageProperty);
          }

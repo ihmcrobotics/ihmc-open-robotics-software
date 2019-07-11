@@ -75,11 +75,11 @@ module controller_msgs
         /**
          * Array holding the percentage of rejected steps corresponding to each rejection reason
          */
-        sequence<double> rejection_percentages;
+        sequence<double> rejection_fractions;
         /**
-         * Percentage of total considered steps that were rejected
+         * Fraction of total considered steps that were rejected
          */
-        double percentage_of_rejected_steps;
+        double fraction_of_rejected_steps;
       };
     };
   };

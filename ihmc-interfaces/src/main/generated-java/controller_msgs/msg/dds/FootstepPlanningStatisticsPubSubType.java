@@ -68,7 +68,7 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getRejectionPercentages().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getRejectionFractions().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -84,11 +84,11 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_2(data.getNumberOfStepsConsidered());
 
-      if(data.getRejectionPercentages().size() <= 100)
-      cdr.write_type_e(data.getRejectionPercentages());else
-          throw new RuntimeException("rejection_percentages field exceeds the maximum length");
+      if(data.getRejectionFractions().size() <= 100)
+      cdr.write_type_e(data.getRejectionFractions());else
+          throw new RuntimeException("rejection_fractions field exceeds the maximum length");
 
-      cdr.write_type_6(data.getPercentageOfRejectedSteps());
+      cdr.write_type_6(data.getFractionOfRejectedSteps());
 
    }
 
@@ -98,8 +98,8 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
       	
       data.setNumberOfStepsConsidered(cdr.read_type_2());
       	
-      cdr.read_type_e(data.getRejectionPercentages());	
-      data.setPercentageOfRejectedSteps(cdr.read_type_6());
+      cdr.read_type_e(data.getRejectionFractions());	
+      data.setFractionOfRejectedSteps(cdr.read_type_6());
       	
 
    }
@@ -109,8 +109,8 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_6("time_taken", data.getTimeTaken());
       ser.write_type_2("number_of_steps_considered", data.getNumberOfStepsConsidered());
-      ser.write_type_e("rejection_percentages", data.getRejectionPercentages());
-      ser.write_type_6("percentage_of_rejected_steps", data.getPercentageOfRejectedSteps());
+      ser.write_type_e("rejection_fractions", data.getRejectionFractions());
+      ser.write_type_6("fraction_of_rejected_steps", data.getFractionOfRejectedSteps());
    }
 
    @Override
@@ -118,8 +118,8 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
    {
       data.setTimeTaken(ser.read_type_6("time_taken"));
       data.setNumberOfStepsConsidered(ser.read_type_2("number_of_steps_considered"));
-      ser.read_type_e("rejection_percentages", data.getRejectionPercentages());
-      data.setPercentageOfRejectedSteps(ser.read_type_6("percentage_of_rejected_steps"));
+      ser.read_type_e("rejection_fractions", data.getRejectionFractions());
+      data.setFractionOfRejectedSteps(ser.read_type_6("fraction_of_rejected_steps"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlanningStatistics src, controller_msgs.msg.dds.FootstepPlanningStatistics dest)

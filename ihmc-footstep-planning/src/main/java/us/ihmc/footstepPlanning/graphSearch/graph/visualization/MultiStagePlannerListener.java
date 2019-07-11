@@ -118,15 +118,15 @@ public class MultiStagePlannerListener
          }
       }
 
-      planningStatistics.setPercentageOfRejectedSteps(((double) totalRejectionCount) / numberOfStepsConsidered);
-      planningStatistics.getRejectionPercentages().fill(0, BipedalFootstepPlannerNodeRejectionReason.values.length, 0.0);
+      planningStatistics.setFractionOfRejectedSteps(((double) totalRejectionCount) / numberOfStepsConsidered);
+      planningStatistics.getRejectionFractions().fill(0, BipedalFootstepPlannerNodeRejectionReason.values.length, 0.0);
 
       if(totalRejectionCount > 0)
       {
          for (int i = 0; i < BipedalFootstepPlannerNodeRejectionReason.values.length; i++)
          {
             double rejectionPercentage = ((double) rejectionCountArray[i]) / totalRejectionCount;
-            planningStatistics.getRejectionPercentages().set(i, rejectionPercentage);
+            planningStatistics.getRejectionFractions().set(i, rejectionPercentage);
          }
       }
    }
