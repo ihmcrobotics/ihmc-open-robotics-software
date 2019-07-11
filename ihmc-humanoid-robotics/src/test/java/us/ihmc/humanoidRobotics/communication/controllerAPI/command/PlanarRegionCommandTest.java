@@ -141,11 +141,7 @@ public class PlanarRegionCommandTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator mutationTestFacilitator = new MutationTestFacilitator();
-      mutationTestFacilitator.addClassesToMutate(new Class[] {PlanarRegionCommand.class, ConvexPolygon2D.class});
-      mutationTestFacilitator.addTestClassesToRun(PlanarRegionCommandTest.class);
-      mutationTestFacilitator.doMutationTest();
-      mutationTestFacilitator.openResultInBrowser();
+      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionCommand.class, PlanarRegionCommandTest.class);
    }
 
 }
