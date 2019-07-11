@@ -70,16 +70,12 @@ public class QuadrupedUIMessageConverter
    private final AtomicReference<Boolean> assumeFlatGround;
 
    private IHMCRealtimeROS2Publisher<HighLevelStateMessage> desiredHighLevelStatePublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedTeleopDesiredHeight> bodyHeightPublisher;
+   private IHMCRealtimeROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredTeleopVelocityPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedTeleopDesiredPose> desiredTeleopBodyPosePublisher;
+   private IHMCRealtimeROS2Publisher<QuadrupedBodyTrajectoryMessage> desiredBodyPosePublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableStepTeleopPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableBodyTeleopPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableHeightTeleopPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableJoystickPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableFootstepPlanningPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> stepTeleopXGaitSettingsPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> xboxXGaitSettingsPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> footstepPlanningXGaitSettingsPublisher;
 
    private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
@@ -185,10 +181,7 @@ public class QuadrupedUIMessageConverter
       /* publishers */
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      MessageTopicNameGenerator bodyTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.BODY_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator heightTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator xBoxTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.XBOX_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
@@ -196,20 +189,16 @@ public class QuadrupedUIMessageConverter
       pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
       abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
       loadBearingRequestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
+      bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
+      desiredBodyPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
 
-      enableBodyTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopInputTopicGenerator);
       enableStepTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopInputTopicGenerator);
-      enableHeightTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopInputTopicGenerator);
-      enableJoystickPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, xBoxTeleopInputTopicGenerator);
       enableFootstepPlanningPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerInputTopicGenerator);
 
       stepTeleopXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopInputTopicGenerator);
-      xboxXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, xBoxTeleopInputTopicGenerator);
       footstepPlanningXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, footstepPlannerInputTopicGenerator);
 
       desiredTeleopVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopInputTopicGenerator);
-      desiredTeleopBodyPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopInputTopicGenerator);
-      bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopInputTopicGenerator);
 
       footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepPlannerParametersPacket.class, footstepPlannerInputTopicGenerator);
       visibilityGraphsParametersPublisher = ROS2Tools.createPublisher(ros2Node, VisibilityGraphsParametersPacket.class, footstepPlannerInputTopicGenerator);
@@ -225,9 +214,6 @@ public class QuadrupedUIMessageConverter
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::publishEnableStepTeleop);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::publishEnableBodyTeleop);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, this::publishEnableHeightTeleop);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableJoystickTopic, this::publishEnableJoystick);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, this::publishQuadrupedXGaitSettings);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, this::publishStepListMessage);
@@ -238,7 +224,7 @@ public class QuadrupedUIMessageConverter
       messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, this::publishDesiredVelocity);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, this::publishDesiredBodyPose);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyTrajectoryTopic, desiredBodyPosePublisher::publish);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortWalkingTopic, m -> abortWalkingPublisher.publish(new AbortWalkingMessage()));
       messager.registerTopicListener(QuadrupedUIMessagerAPI.PauseWalkingTopic, request ->
       {
@@ -406,14 +392,11 @@ public class QuadrupedUIMessageConverter
 
    public void publishDesiredBodyHeight(double desiredBodyHeight)
    {
-      QuadrupedTeleopDesiredHeight bodyHeightMessage = new QuadrupedTeleopDesiredHeight();
-      bodyHeightMessage.setDesiredHeight(desiredBodyHeight);
-      bodyHeightPublisher.publish(bodyHeightMessage);
-   }
+      QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, desiredBodyHeight);
+      bodyHeightMessage.setControlBodyHeight(true);
+      bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
 
-   public void publishDesiredBodyPose(QuadrupedTeleopDesiredPose desiredBodyPose)
-   {
-      desiredTeleopBodyPosePublisher.publish(desiredBodyPose);
+      bodyHeightPublisher.publish(bodyHeightMessage);
    }
 
    public void publishDesiredVelocity(QuadrupedTeleopDesiredVelocity desiredVelocity)
@@ -429,36 +412,11 @@ public class QuadrupedUIMessageConverter
          enableStepTeleopPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
-   public void publishEnableBodyTeleop(boolean enable)
-   {
-      if (enable)
-         enableBodyTeleopPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      else
-         enableBodyTeleopPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
-   public void publishEnableHeightTeleop(boolean enable)
-   {
-      if (enable)
-         enableHeightTeleopPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      else
-         enableHeightTeleopPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
-   public void publishEnableJoystick(boolean enable)
-   {
-      if (enable)
-         enableJoystickPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      else
-         enableJoystickPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
    public void publishQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       QuadrupedXGaitSettingsPacket packet = xGaitSettings.getAsPacket();
 
       stepTeleopXGaitSettingsPublisher.publish(packet);
-      xboxXGaitSettingsPublisher.publish(packet);
       footstepPlanningXGaitSettingsPublisher.publish(packet);
    }
 
