@@ -35,8 +35,10 @@ public class AtlasBehaviorUIDemo extends Application
    private static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean USE_FLAT_GROUND = false;
-   private static final boolean USE_KINEMATIC_SIMULATION = true;
-   private static final int RECORD_TICKS_PER_CONTROL_TICKS = 10;
+   private static final boolean USE_KINEMATIC_SIMULATION = false;
+
+   // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
+   private final int recordFrequencySpeedup = 10;
 
    private BehaviorUI ui;
 
@@ -66,7 +68,7 @@ public class AtlasBehaviorUIDemo extends Application
          {
             CommonAvatarEnvironmentInterface environment = USE_FLAT_GROUND ? new FlatGroundEnvironment()
                   : new PlanarRegionsListDefinedEnvironment(createPlanarRegions(), 0.02, false);
-            SimulationConstructionSet scs = AtlasBehaviorSimulation.createForManualTest(createRobotModel(), environment, RECORD_TICKS_PER_CONTROL_TICKS);
+            SimulationConstructionSet scs = AtlasBehaviorSimulation.createForManualTest(createRobotModel(), environment, recordFrequencySpeedup);
 
             scs.simulate();
          }
