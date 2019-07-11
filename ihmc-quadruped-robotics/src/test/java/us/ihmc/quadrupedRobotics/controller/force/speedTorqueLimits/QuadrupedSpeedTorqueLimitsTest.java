@@ -38,7 +38,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseStateEstimator(false);
-         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();

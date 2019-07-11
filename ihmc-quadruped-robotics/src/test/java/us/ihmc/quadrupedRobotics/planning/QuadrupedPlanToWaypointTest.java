@@ -43,7 +43,6 @@ public abstract class QuadrupedPlanToWaypointTest implements QuadrupedMultiRobot
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUseNetworking(true);
          if(terrainObject3D != null)
          {
             quadrupedTestFactory.setTerrainObject3D(terrainObject3D);
