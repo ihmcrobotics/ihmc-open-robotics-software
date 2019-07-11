@@ -207,10 +207,13 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       nodeDataMessage.setYIndex(node.getYIndex());
       nodeDataMessage.setYawIndex(node.getYawIndex());
 
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
-      Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-      Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-      snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+      if(snapper != null)
+      {
+         FootstepNodeSnapData snapData = snapper.getSnapData(node);
+         Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
+         Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
+         snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+      }
    }
 
    public int getTotalNodeCount()

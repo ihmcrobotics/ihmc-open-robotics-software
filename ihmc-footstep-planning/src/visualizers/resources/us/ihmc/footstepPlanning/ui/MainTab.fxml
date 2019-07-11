@@ -9,7 +9,6 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -22,7 +21,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.4, 0.8" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
+<SplitPane dividerPositions="0.4, 0.85" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
     <items>
         <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
             <children>
@@ -56,7 +55,7 @@
                         <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
                         <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                         <Button onAction="#clearFlat" prefWidth="130.0" text="Clear Flat" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-                        <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                        <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
                         <CheckBox fx:id="ignorePartialFootholds" text="Ignore partial footholds" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                         <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
@@ -162,7 +161,7 @@
                             <TextField fx:id="plannerStatus" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                             <TextField fx:id="planningResult" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                             <TextField fx:id="timeTaken" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                            <TextField fx:id="rejectionPercentage" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                            <TextField fx:id="rejectionPercentage" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                         </children>
                     </GridPane>
 

@@ -29,7 +29,6 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
@@ -41,8 +40,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,7 +57,7 @@ public class MainTabController
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
    private final ObservableList<RejectionPercentageProperty> rejectionTableItems = FXCollections.observableArrayList();
-   private final HashMap<BipedalFootstepPlannerNodeRejectionReason, RejectionPercentageProperty> rejectionPercentageMap = new HashMap<>();
+   private static final DecimalFormat percentageFormat = new DecimalFormat("#0.00");
 
    // control
    @FXML
@@ -162,7 +163,7 @@ public class MainTabController
       if (footstepDataListMessage == null)
          return;
 
-      if(overrideTiming.isSelected())
+      if (overrideTiming.isSelected())
       {
          Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
          for (int i = 0; i < footstepDataList.size(); i++)
@@ -173,7 +174,7 @@ public class MainTabController
          }
       }
 
-      if(overrideSwingHeight.isSelected())
+      if (overrideSwingHeight.isSelected())
       {
          Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
          for (int i = 0; i < footstepDataList.size(); i++)
@@ -182,14 +183,14 @@ public class MainTabController
             footstepDataMessage.setSwingHeight(swingHeightSpinner.getValue());
          }
       }
-      
+
       us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstepSequence = footstepDataListMessage.getFootstepDataList();
-      for(int i = 1; i < footstepSequence.size(); i++)
+      for (int i = 1; i < footstepSequence.size(); i++)
       {
          Point3D previousLocation = footstepSequence.get(i - 1).getLocation();
          Point3D location = footstepSequence.get(i).getLocation();
-         
-         if(previousLocation.distance(location) >= safetyRadiusToDiscardSteps)
+
+         if (previousLocation.distance(location) >= safetyRadiusToDiscardSteps)
          {
             footstepSequence.remove(i);
             i--;
@@ -339,9 +340,7 @@ public class MainTabController
       messager.registerTopicListener(GlobalResetTopic, reset -> clearStartGoalTextFields());
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
-      previewSlider.valueProperty()
-                   .addListener((ChangeListener<Number>) (observable, oldValue,
-                                                          newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+      previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
       setupRejectionTable();
    }
@@ -381,7 +380,7 @@ public class MainTabController
       FootstepDataListMessage footstepDataListMessage = footstepPlanReference.get();
       if (footstepDataListMessage == null)
          return;
-      
+
       requestMessage.getFootsteps().set(footstepDataListMessage);
       requestMessage.getFootsteps().setOffsetFootstepsWithExecutionError(false);
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
@@ -423,11 +422,10 @@ public class MainTabController
 
    public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
    {
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<Point3D> contactPoints = new ArrayList<>(
-               contactPointParameters.getControllerFootGroundContactPoints().get(robotSide).stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0))
-                                     .collect(Collectors.toList()));
+         ArrayList<Point3D> contactPoints = new ArrayList<>(contactPointParameters.getControllerFootGroundContactPoints().get(robotSide).stream()
+                                                                                  .map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList()));
          defaultContactPoints.put(robotSide, contactPoints);
       }
    }
@@ -524,29 +522,36 @@ public class MainTabController
       TableColumn<String, RejectionPercentageProperty> column2 = new TableColumn<>("Percentage");
       column2.setCellValueFactory(new PropertyValueFactory<>("percentage"));
 
+      column1.setSortable(false);
+      column2.setSortable(false);
+
       rejectionTable.getColumns().add(column1);
       rejectionTable.getColumns().add(column2);
 
       rejectionTableItems.clear();
-      for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
       {
-         RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), Double.toString(0.0));
+         RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(0.0));
          rejectionTableItems.add(rejectionPercentageProperty);
-         rejectionPercentageMap.put(rejectionReason, rejectionPercentageProperty);
       }
 
       rejectionTable.setItems(rejectionTableItems);
 
       messager.registerTopicListener(PlannerStatisticsTopic, statisticsMessage ->
       {
-         String percentageRejectionSteps = Double.toString(statisticsMessage.getPercentageOfRejectedSteps());
+         String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getPercentageOfRejectedSteps());
          rejectionPercentage.setText(percentageRejectionSteps);
 
-         for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+         rejectionTableItems.clear();
+         for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
          {
-            double percent = statisticsMessage.getRejectionPercentages().get(rejectionReason.ordinal());
-            rejectionPercentageMap.get(rejectionReason).percentage = Double.toString(percent);
+            double percent = 100 * statisticsMessage.getRejectionPercentages().get(rejectionReason.ordinal());
+            RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(percent));
+            rejectionTableItems.add(rejectionPercentageProperty);
          }
+
+         rejectionTableItems.sort(Collections.reverseOrder(Comparator.comparingDouble(p -> Double.parseDouble(p.percentage))));
+         rejectionTable.setItems(rejectionTableItems);
       });
    }
 
@@ -625,7 +630,7 @@ public class MainTabController
 
       void requestSpecificPercentageInPreview(double alpha)
       {
-         if(playbackModeActive.get())
+         if (playbackModeActive.get())
             return;
 
          alpha = MathTools.clamp(alpha, 0.0, 1.0);
@@ -690,24 +695,29 @@ public class MainTabController
       private String reason;
       private String percentage;
 
-      public RejectionPercentageProperty(String reason, String percentage) {
+      public RejectionPercentageProperty(String reason, String percentage)
+      {
          this.reason = reason;
          this.percentage = percentage;
       }
 
-      public String getReason() {
+      public String getReason()
+      {
          return reason;
       }
 
-      public void setReason(String reason) {
+      public void setReason(String reason)
+      {
          this.reason = reason;
       }
 
-      public String getPercentage() {
+      public String getPercentage()
+      {
          return percentage;
       }
 
-      public void setPercentage(String percentage) {
+      public void setPercentage(String percentage)
+      {
          this.percentage = percentage;
       }
    }

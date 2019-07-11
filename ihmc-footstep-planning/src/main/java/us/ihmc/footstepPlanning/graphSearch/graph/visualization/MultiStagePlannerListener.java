@@ -1,18 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class MultiStagePlannerListener
@@ -127,12 +119,15 @@ public class MultiStagePlannerListener
       }
 
       planningStatistics.setPercentageOfRejectedSteps(((double) totalRejectionCount) / numberOfStepsConsidered);
+      planningStatistics.getRejectionPercentages().fill(0, BipedalFootstepPlannerNodeRejectionReason.values.length, 0.0);
 
-      planningStatistics.getRejectionPercentages().clear();
-      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      if(totalRejectionCount > 0)
       {
-         double rejectionPercentage = ((double) rejectionCountArray[rejectionReason.ordinal()]) / totalRejectionCount;
-         planningStatistics.getRejectionPercentages().add(rejectionPercentage);
+         for (int i = 0; i < BipedalFootstepPlannerNodeRejectionReason.values.length; i++)
+         {
+            double rejectionPercentage = ((double) rejectionCountArray[i]) / totalRejectionCount;
+            planningStatistics.getRejectionPercentages().set(i, rejectionPercentage);
+         }
       }
    }
 
