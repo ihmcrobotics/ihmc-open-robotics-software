@@ -1,11 +1,18 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -16,23 +23,33 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop shopping location
@@ -53,6 +70,7 @@ public class BehaviorHelper
 {
    private final Messager messager;
    private final DRCRobotModel robotModel;
+   private final DRCRobotJointMap drcRobotJointMap;
    private final Ros2Node ros2Node;
 
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
@@ -74,6 +92,8 @@ public class BehaviorHelper
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
 
+      drcRobotJointMap = robotModel.getJointMap();
+      
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
@@ -123,6 +143,64 @@ public class BehaviorHelper
       remoteRobotControllerInterface.pauseWalking();
    }
 
+   public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, Point3D position, Quaternion orientation)
+   {
+      FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
+      footTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestFootTrajectory(footTrajectoryMessage);      
+   }
+
+   public void requestArmTrajectory(RobotSide robotSide, double trajectoryTime, double[] jointAngles)
+   {
+      ArmTrajectoryMessage armTrajectoryMessage = createArmTrajectoryMessage(robotSide, trajectoryTime, jointAngles);
+      armTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestArmTrajectory(armTrajectoryMessage);          
+   }
+
+   private final ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide side, double trajectoryTime, double[] jointAngles)
+   {
+      int numberOfArmJoints = drcRobotJointMap.getArmJointNames().length;
+      double[] jointAnglesAdjusted = Arrays.copyOfRange(jointAngles, 0, numberOfArmJoints);
+      return HumanoidMessageTools.createArmTrajectoryMessage(side, trajectoryTime, jointAnglesAdjusted);
+   }
+
+   public void requestChestGoHome(double trajectoryTime)
+   {
+      GoHomeMessage chestGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime);
+      chestGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestGoHome(chestGoHomeMessage);            
+   }
+
+   public void requestPelvisGoHome(double trajectoryTime)
+   {
+      GoHomeMessage pelvisGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
+      pelvisGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestGoHome(pelvisGoHomeMessage);            
+   }
+
+   public void requestChestOrientationTrajectory(double trajectoryTime, FrameQuaternion chestOrientation, ReferenceFrame dataFrame,
+                                                ReferenceFrame trajectoryFrame)
+   {
+      ChestTrajectoryMessage chestOrientationMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, chestOrientation, dataFrame, trajectoryFrame);
+      chestOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestChestOrientationTrajectory(chestOrientationMessage);            
+   }
+
+   public void requestPelvisOrientationTrajectory(double trajectoryTime, FrameQuaternion pelvisOrientation)
+   {
+      
+      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
+      pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);            
+   }
+
+   public void requestPelvisTrajectory(double trajectoryTime, FramePoint3DReadOnly pelvisPosition, FrameQuaternionReadOnly pelvisOrientation)
+   {
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPosition, pelvisOrientation);
+      pelvisTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestPelvisTrajectory(pelvisTrajectoryMessage);                  
+   }
+   
    // Robot Action Callback and Polling Methods:
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
