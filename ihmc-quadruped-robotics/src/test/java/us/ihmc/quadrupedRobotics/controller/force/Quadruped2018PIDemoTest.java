@@ -45,7 +45,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUseNetworking(true);
          quadrupedTestFactory.setUsePushRobotController(true);
 
          conductor = quadrupedTestFactory.createTestConductor();
@@ -329,7 +328,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(staircaseEnvironment.getTerrainObject3D());
-      quadrupedTestFactory.setUseNetworking(true);
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
@@ -386,7 +384,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
       quadrupedTestFactory.setInitialOffset(initialOffsetAndYaw);
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(staircaseEnvironment.getTerrainObject3D());
-      quadrupedTestFactory.setUseNetworking(true);
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
@@ -435,7 +432,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
-      quadrupedTestFactory.setUseNetworking(true);
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
@@ -470,7 +466,6 @@ public abstract class Quadruped2018PIDemoTest implements QuadrupedMultiRobotTest
 
       quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();

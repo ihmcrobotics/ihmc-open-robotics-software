@@ -30,8 +30,6 @@ public interface QuadrupedTestFactory
 
    public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition);
 
-   public void setUseNetworking(boolean useNetworking);
-
    void setScsParameters(SimulationConstructionSetParameters scsParameters);
 
    void setInitialOffset(QuadrupedInitialOffsetAndYaw initialOffset);

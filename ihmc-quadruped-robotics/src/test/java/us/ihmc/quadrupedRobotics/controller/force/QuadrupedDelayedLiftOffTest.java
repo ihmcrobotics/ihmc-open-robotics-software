@@ -40,7 +40,6 @@ public abstract class QuadrupedDelayedLiftOffTest implements QuadrupedMultiRobot
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUsePushRobotController(true);
-         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedTestYoVariables(conductor.getScs());
          pusher = new PushRobotTestConductor(conductor.getScs(), "body");

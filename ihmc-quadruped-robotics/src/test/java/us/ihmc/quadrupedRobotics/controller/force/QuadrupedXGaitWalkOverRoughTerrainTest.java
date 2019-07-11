@@ -112,8 +112,6 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
          quadrupedTestFactory.setInitialOffset(offsetAndYaw);
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(environment.getTerrainObject3D());
-      quadrupedTestFactory.setUseNetworking(true);
-
 
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
