@@ -38,9 +38,9 @@ float64 time_taken
 int32 number_of_steps_considered
 
 # Array holding the percentage of rejected steps corresponding to each rejection reason
-float64[] rejection_percentages
+float64[] rejection_fractions
 
-# Percentage of total considered steps that were rejected
-float64 percentage_of_rejected_steps
+# Fraction of total considered steps that were rejected
+float64 fraction_of_rejected_steps
 
 

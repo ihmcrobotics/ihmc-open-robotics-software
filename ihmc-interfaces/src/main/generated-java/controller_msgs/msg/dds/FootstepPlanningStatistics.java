@@ -39,15 +39,15 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
    /**
             * Array holding the percentage of rejected steps corresponding to each rejection reason
             */
-   public us.ihmc.idl.IDLSequence.Double  rejection_percentages_;
+   public us.ihmc.idl.IDLSequence.Double  rejection_fractions_;
    /**
-            * Percentage of total considered steps that were rejected
+            * Fraction of total considered steps that were rejected
             */
-   public double percentage_of_rejected_steps_;
+   public double fraction_of_rejected_steps_;
 
    public FootstepPlanningStatistics()
    {
-      rejection_percentages_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
+      rejection_fractions_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
    }
 
@@ -63,8 +63,8 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
 
       number_of_steps_considered_ = other.number_of_steps_considered_;
 
-      rejection_percentages_.set(other.rejection_percentages_);
-      percentage_of_rejected_steps_ = other.percentage_of_rejected_steps_;
+      rejection_fractions_.set(other.rejection_fractions_);
+      fraction_of_rejected_steps_ = other.fraction_of_rejected_steps_;
 
    }
 
@@ -102,24 +102,24 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
    /**
             * Array holding the percentage of rejected steps corresponding to each rejection reason
             */
-   public us.ihmc.idl.IDLSequence.Double  getRejectionPercentages()
+   public us.ihmc.idl.IDLSequence.Double  getRejectionFractions()
    {
-      return rejection_percentages_;
+      return rejection_fractions_;
    }
 
    /**
-            * Percentage of total considered steps that were rejected
+            * Fraction of total considered steps that were rejected
             */
-   public void setPercentageOfRejectedSteps(double percentage_of_rejected_steps)
+   public void setFractionOfRejectedSteps(double fraction_of_rejected_steps)
    {
-      percentage_of_rejected_steps_ = percentage_of_rejected_steps;
+      fraction_of_rejected_steps_ = fraction_of_rejected_steps;
    }
    /**
-            * Percentage of total considered steps that were rejected
+            * Fraction of total considered steps that were rejected
             */
-   public double getPercentageOfRejectedSteps()
+   public double getFractionOfRejectedSteps()
    {
-      return percentage_of_rejected_steps_;
+      return fraction_of_rejected_steps_;
    }
 
 
@@ -144,9 +144,9 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_steps_considered_, other.number_of_steps_considered_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.rejection_percentages_, other.rejection_percentages_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.rejection_fractions_, other.rejection_fractions_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_of_rejected_steps_, other.percentage_of_rejected_steps_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_of_rejected_steps_, other.fraction_of_rejected_steps_, epsilon)) return false;
 
 
       return true;
@@ -165,8 +165,8 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
 
       if(this.number_of_steps_considered_ != otherMyClass.number_of_steps_considered_) return false;
 
-      if (!this.rejection_percentages_.equals(otherMyClass.rejection_percentages_)) return false;
-      if(this.percentage_of_rejected_steps_ != otherMyClass.percentage_of_rejected_steps_) return false;
+      if (!this.rejection_fractions_.equals(otherMyClass.rejection_fractions_)) return false;
+      if(this.fraction_of_rejected_steps_ != otherMyClass.fraction_of_rejected_steps_) return false;
 
 
       return true;
@@ -182,10 +182,10 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
       builder.append(this.time_taken_);      builder.append(", ");
       builder.append("number_of_steps_considered=");
       builder.append(this.number_of_steps_considered_);      builder.append(", ");
-      builder.append("rejection_percentages=");
-      builder.append(this.rejection_percentages_);      builder.append(", ");
-      builder.append("percentage_of_rejected_steps=");
-      builder.append(this.percentage_of_rejected_steps_);
+      builder.append("rejection_fractions=");
+      builder.append(this.rejection_fractions_);      builder.append(", ");
+      builder.append("fraction_of_rejected_steps=");
+      builder.append(this.fraction_of_rejected_steps_);
       builder.append("}");
       return builder.toString();
    }
