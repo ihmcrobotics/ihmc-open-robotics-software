@@ -34,11 +34,11 @@ public class StepInPlaceBehavior
    private final ActivationReference<Boolean> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
 
-   public StepInPlaceBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
+   public StepInPlaceBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
       LogTools.debug("Initializing step in place behavior");
 
-      behaviorHelper = new BehaviorHelper(messager, robotModel, ros2Node);
+      this.behaviorHelper = behaviorHelper;
 
       behaviorHelper.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
