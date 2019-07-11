@@ -47,7 +47,7 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
 
    public FootstepPlanningStatistics()
    {
-      rejection_fractions_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
+      rejection_fractions_ = new us.ihmc.idl.IDLSequence.Double (16, "type_6");
 
    }
 
