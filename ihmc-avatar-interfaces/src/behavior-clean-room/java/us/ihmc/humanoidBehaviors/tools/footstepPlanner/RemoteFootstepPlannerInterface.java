@@ -186,7 +186,7 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
-   public PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
+   public static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
       return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
