@@ -77,10 +77,8 @@ public class PatrolBehavior
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
-   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
-   private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
    private final UpDownExplorer upDownExplorer;
 
@@ -137,10 +135,8 @@ public class PatrolBehavior
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 
-      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
       waypointManager = WaypointManager.createForModule(messager,
@@ -164,7 +160,7 @@ public class PatrolBehavior
       perceiveDuration = messager.createInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, planarRegionsList);
+      upDownExplorer = new UpDownExplorer(messager, behaviorHelper);
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -206,7 +202,7 @@ public class PatrolBehavior
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
+         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidReferenceFrames());
       }
    }
 
@@ -245,14 +241,14 @@ public class PatrolBehavior
 
       remoteFootstepPlannerInterface.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      FramePose3DReadOnly midFeetZUpPose = behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
       {
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
-      PlanarRegionsListMessage latestPlanarRegionList = planarRegionsList.getLatest();
+      PlanarRegionsListMessage latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionListMessage();
 
       footstepPlanResultNotification
             = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
@@ -334,7 +330,7 @@ public class PatrolBehavior
    private void onWalkStateEntry()
    {
       walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.peek().getFootstepDataListMessage(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
+                                                                    behaviorHelper.pollHumanoidReferenceFrames(),
                                                                     swingOvers.get(),
                                                                     footstepPlanResultNotification.peek().getPlanarRegionsList());
    }
@@ -363,7 +359,7 @@ public class PatrolBehavior
             // next waypoint is far, gather more data to increase robustness
             if (upDownExplorationEnabled.get() // perceive everytime when updownenabled
              || remoteFootstepPlannerInterface.decidePlanType(
-                   remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
+                   behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
                    waypointManager.peekAfterNextPose())
                 == PlanTravelDistance.FAR)
             {
@@ -397,7 +393,7 @@ public class PatrolBehavior
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      upDownExplorer.setMidFeetZUpPose(behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
