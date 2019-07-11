@@ -44,7 +44,7 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (16 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -84,7 +84,7 @@ public class FootstepPlanningStatisticsPubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_2(data.getNumberOfStepsConsidered());
 
-      if(data.getRejectionFractions().size() <= 100)
+      if(data.getRejectionFractions().size() <= 16)
       cdr.write_type_e(data.getRejectionFractions());else
           throw new RuntimeException("rejection_fractions field exceeds the maximum length");
 

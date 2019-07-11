@@ -24,6 +24,6 @@ byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY = 14
 byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM = 15
 
 # Array holding the percentage of rejected steps corresponding to each rejection reason
-float64[] rejection_fractions
+float64[<=16] rejection_fractions
 # Fraction of total considered steps that were rejected
 float64 fraction_of_rejected_steps
