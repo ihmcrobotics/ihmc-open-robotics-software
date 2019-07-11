@@ -25,7 +25,6 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
       testFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       testFactory.setUsePushRobotController(true);
       testFactory.setUseStateEstimator(true);
-      testFactory.setUseNetworking(true);
       conductor = testFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = testFactory.getRemoteStepTeleopManager();

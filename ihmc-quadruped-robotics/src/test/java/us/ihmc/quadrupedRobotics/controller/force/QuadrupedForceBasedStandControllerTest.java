@@ -40,7 +40,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
    }
 
    @AfterEach
@@ -224,14 +223,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.requestBodyTeleop();
-
-
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
       conductor.simulate();
-
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
       runMovingBody(initialBodyHeight - heightShift , orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
@@ -240,7 +235,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       runMovingBody(initialBodyHeight - heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
       runMovingBody(initialBodyHeight, 0.0, 0.0, 0.0, heightDelta, orientationDelta);
    }
-
 
    @Disabled
    @Test
@@ -300,7 +294,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private void runMovingCoM(double bodyHeight, double bodyX, double bodyY, double heightDelta, double translationDelta)
    {
       stepTeleopManager.setDesiredBodyHeight(bodyHeight);
-      stepTeleopManager.setDesiredBodyTranslation(bodyX, bodyY, comShiftDuration);
 
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(quadrupedTestFactory.getFullRobotModel());
       referenceFrames.updateFrames();
