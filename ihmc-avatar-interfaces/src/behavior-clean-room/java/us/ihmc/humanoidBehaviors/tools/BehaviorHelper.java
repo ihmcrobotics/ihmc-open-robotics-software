@@ -52,19 +52,18 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
- * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop shopping location
- * for everything one might want to do when creating a robot behavior. It should hide all of the network traffic. 
- * The methods should be a useful reminder to a behavior developer all of the things that one can do with the robots.
- * 
- * This class will likely get too large eventually and need to be refactored into several classes. But until that time 
- * comes it should contain everything for interacting with: the robot actions (taking steps and achieving poses), robot sensing (reference frames, etc.),
- * REA (getting planar regions), footstep planning, etc.
- *
- * At first we'll make this so that all of the things are created, even if you don't need them. But later, we'll make it so that
- * they are created as needed.
- * 
- * The main goal is to simplify and make clean the Behaviors themselves. The public interface of this class should be a joy to work with.
- * The internals and all the things it relies on might be a nightmare, but the public API should not be.
+ * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
+ * shopping location for everything one might want to do when creating a robot behavior. It should
+ * hide all of the network traffic. The methods should be a useful reminder to a behavior developer
+ * all of the things that one can do with the robots. This class will likely get too large
+ * eventually and need to be refactored into several classes. But until that time comes it should
+ * contain everything for interacting with: the robot actions (taking steps and achieving poses),
+ * robot sensing (reference frames, etc.), REA (getting planar regions), footstep planning, etc. At
+ * first we'll make this so that all of the things are created, even if you don't need them. But
+ * later, we'll make it so that they are created as needed. The main goal is to simplify and make
+ * clean the Behaviors themselves. The public interface of this class should be a joy to work with.
+ * The internals and all the things it relies on might be a nightmare, but the public API should not
+ * be.
  */
 public class BehaviorHelper
 {
@@ -93,14 +92,15 @@ public class BehaviorHelper
       this.ros2Node = ros2Node;
 
       drcRobotJointMap = robotModel.getJointMap();
-      
+
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
       remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
 
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
@@ -147,14 +147,14 @@ public class BehaviorHelper
    {
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
       footTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestFootTrajectory(footTrajectoryMessage);      
+      remoteRobotControllerInterface.requestFootTrajectory(footTrajectoryMessage);
    }
 
    public void requestArmTrajectory(RobotSide robotSide, double trajectoryTime, double[] jointAngles)
    {
       ArmTrajectoryMessage armTrajectoryMessage = createArmTrajectoryMessage(robotSide, trajectoryTime, jointAngles);
       armTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestArmTrajectory(armTrajectoryMessage);          
+      remoteRobotControllerInterface.requestArmTrajectory(armTrajectoryMessage);
    }
 
    private final ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide side, double trajectoryTime, double[] jointAngles)
@@ -168,39 +168,43 @@ public class BehaviorHelper
    {
       GoHomeMessage chestGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime);
       chestGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestGoHome(chestGoHomeMessage);            
+      remoteRobotControllerInterface.requestGoHome(chestGoHomeMessage);
    }
 
    public void requestPelvisGoHome(double trajectoryTime)
    {
       GoHomeMessage pelvisGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
       pelvisGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestGoHome(pelvisGoHomeMessage);            
+      remoteRobotControllerInterface.requestGoHome(pelvisGoHomeMessage);
    }
 
    public void requestChestOrientationTrajectory(double trajectoryTime, FrameQuaternion chestOrientation, ReferenceFrame dataFrame,
-                                                ReferenceFrame trajectoryFrame)
+                                                 ReferenceFrame trajectoryFrame)
    {
-      ChestTrajectoryMessage chestOrientationMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, chestOrientation, dataFrame, trajectoryFrame);
+      ChestTrajectoryMessage chestOrientationMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                         chestOrientation,
+                                                                                                         dataFrame,
+                                                                                                         trajectoryFrame);
       chestOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestChestOrientationTrajectory(chestOrientationMessage);            
+      remoteRobotControllerInterface.requestChestOrientationTrajectory(chestOrientationMessage);
    }
 
    public void requestPelvisOrientationTrajectory(double trajectoryTime, FrameQuaternion pelvisOrientation)
    {
-      
-      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
+
+      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime,
+                                                                                                                                            pelvisOrientation);
       pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);            
+      remoteRobotControllerInterface.requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);
    }
 
    public void requestPelvisTrajectory(double trajectoryTime, FramePoint3DReadOnly pelvisPosition, FrameQuaternionReadOnly pelvisOrientation)
    {
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPosition, pelvisOrientation);
       pelvisTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestPelvisTrajectory(pelvisTrajectoryMessage);                  
+      remoteRobotControllerInterface.requestPelvisTrajectory(pelvisTrajectoryMessage);
    }
-   
+
    // Robot Action Callback and Polling Methods:
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
