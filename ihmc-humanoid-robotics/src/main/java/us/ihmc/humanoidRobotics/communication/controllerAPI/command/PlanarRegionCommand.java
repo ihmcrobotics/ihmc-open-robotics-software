@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.PlanarRegionMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarRegionMessage>
 {
@@ -33,14 +33,32 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       clear();
    }
 
+   private static void clearPointList(RecyclingArrayList<Point2D> pointList)
+   {
+      for (int i = 0; i < pointList.size(); i++)
+      {
+         pointList.get(i).setToZero();
+      }
+      pointList.clear();
+   }
+
+   private static void clearPolygonList(RecyclingArrayList<ConvexPolygon2D> polygonList)
+   {
+      for (int i = 0; i < polygonList.size(); i++)
+      {
+         polygonList.get(i).clear();
+      }
+      polygonList.clear();
+   }
+
    @Override
    public void clear()
    {
       sequenceId = 0;
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
-      concaveHullsVertices.clear();
-      convexPolygons.clear();
+      clearPointList(concaveHullsVertices);
+      clearPolygonList(convexPolygons);
    }
 
    @Override
@@ -49,14 +67,16 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       sequenceId = message.getSequenceId();
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 
-      concaveHullsVertices.clear();
+      clearPointList(concaveHullsVertices);
+
       int vertexIndex = 0;
       int upperBound = message.getConcaveHullSize();
 
       for (; vertexIndex < upperBound; vertexIndex++)
          addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
 
-      convexPolygons.clear();
+      clearPolygonList(convexPolygons);
+
       for (int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = convexPolygons.add();
