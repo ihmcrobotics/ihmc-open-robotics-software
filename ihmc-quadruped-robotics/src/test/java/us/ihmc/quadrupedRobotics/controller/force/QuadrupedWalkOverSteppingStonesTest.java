@@ -35,7 +35,6 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       quadrupedTestFactory = createQuadrupedTestFactory();
-      quadrupedTestFactory.setUseNetworking(true);
    }
 
    @AfterEach

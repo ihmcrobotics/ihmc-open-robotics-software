@@ -39,7 +39,6 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUseNetworking(true);
          if(terrainObject3D != null)
          {
             quadrupedTestFactory.setTerrainObject3D(terrainObject3D);

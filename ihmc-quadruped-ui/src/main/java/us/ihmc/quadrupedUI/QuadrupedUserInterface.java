@@ -220,7 +220,7 @@ public class QuadrupedUserInterface
       if (Joystick.isAJoystickConnectedToSystem())
       {
          joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-         joystickModule = new QuadrupedJoystickModule(messager, xGaitSettings, nominalBodyHeight, joystick);
+         joystickModule = new QuadrupedJoystickModule(messager, xGaitSettings, robotVisualizer.getFullRobotModel(), nominalBodyHeight, joystick);
          joystickModule.start();
       }
       else

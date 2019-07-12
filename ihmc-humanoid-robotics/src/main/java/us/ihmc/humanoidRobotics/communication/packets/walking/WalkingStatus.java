@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
 public enum WalkingStatus
@@ -20,6 +21,13 @@ public enum WalkingStatus
    public byte toByte()
    {
       return (byte) ordinal();
+   }
+
+   public WalkingStatusMessage createMessage()
+   {
+      WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
+      walkingStatusMessage.setWalkingStatus(toByte());
+      return walkingStatusMessage;
    }
 
    public static WalkingStatus fromByte(byte enumAsByte)
