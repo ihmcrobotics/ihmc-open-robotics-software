@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,9 +40,6 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.tools.thread.TypedNotification;
-
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
 /**
  * Walk through a list of waypoints in order, looping forever.
@@ -414,8 +414,9 @@ public class PatrolBehavior
    private void pollInterrupts()
    {
       HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
-      if (!stateMachine.getCurrentStateKey().equals(STOP)
-            && controllerState != HighLevelControllerName.WALKING) // STOP if robot falls
+      boolean isWalking = behaviorHelper.isRobotWalking();
+      
+      if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {
          LogTools.debug("Stopping from robot state: {}", controllerState.name());
          stopNotification.set();
