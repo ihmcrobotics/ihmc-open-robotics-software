@@ -8,8 +8,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.messager.Messager;
@@ -24,7 +22,7 @@ public class AtlasBehaviorUIAndModule extends Application
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
 
-      Messager behaviorMessager = RemoteBehaviorInterface.createForUI(NetworkParameters.getHost(NetworkParameterKeys.networkManager));
+      Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
 
       ui = new BehaviorUI(primaryStage,
                           behaviorMessager,
