@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import controller_msgs.msg.dds.*;
-import sun.java2d.xr.MutableInteger;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,6 +13,8 @@ import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
@@ -37,7 +38,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final long occupancyMapUpdateDt;
    private long lastUpdateTime = -1;
-   private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInteger> rejectionCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
+   private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
    private int totalNodeCount = 0;
 
    public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapUpdateDt)
@@ -47,7 +48,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
       for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
       {
-         rejectionCount.put(rejectionReason, new MutableInteger(0));
+         rejectionCount.put(rejectionReason, new MutableInt(0));
       }
    }
 
@@ -89,7 +90,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       rejectionReasons.put(rejectedNode, reason);
 
-      MutableInteger rejectionCount = this.rejectionCount.get(reason);
+      MutableInt rejectionCount = this.rejectionCount.get(reason);
       rejectionCount.setValue(rejectionCount.getValue() + 1);
    }
 
