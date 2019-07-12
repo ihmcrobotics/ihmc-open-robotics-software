@@ -2,20 +2,14 @@ package us.ihmc.humanoidBehaviors.fancyPoses;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -25,7 +19,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -42,6 +35,7 @@ import us.ihmc.tools.thread.ActivationReference;
 public class FancyPosesBehavior
 {
    private final BehaviorHelper behaviorHelper;
+   private final AtomicReference<Boolean> enable;
 
    private final ActivationReference<Boolean> stepping;
    private final Notification goToSingleSupportNotification = new Notification();
@@ -66,6 +60,8 @@ public class FancyPosesBehavior
 
       behaviorHelper.createFootstepStatusCallback(this::acceptFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
+
+      enable = messager.createInput(API.Enable, false);
 
       messager.registerTopicListener(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
       messager.registerTopicListener(API.GoToRunningMan, object -> goToRunningManNotification.set());
@@ -279,6 +275,11 @@ public class FancyPosesBehavior
 
    private void doBehavior()
    {
+      if (!enable.get())
+      {
+         return;
+      }
+
       if (stepping.poll())
       {
          if (stepping.hasChanged())
@@ -376,6 +377,7 @@ public class FancyPosesBehavior
 
       public static final Topic<Boolean> Stepping = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Stepping"));
       public static final Topic<Boolean> Abort = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Abort"));
+      public static final Topic<Boolean> Enable = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Enable"));
       public static final Topic<Boolean> GoToSingleSupport = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
       public static final Topic<Boolean> GoToRunningMan = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
       public static final Topic<Boolean> GoToKarateKid1 = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));

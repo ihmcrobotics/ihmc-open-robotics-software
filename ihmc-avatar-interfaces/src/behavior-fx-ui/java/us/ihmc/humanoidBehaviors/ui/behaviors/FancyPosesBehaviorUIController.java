@@ -2,27 +2,39 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.messager.Messager;
 
 public class FancyPosesBehaviorUIController
 {
    @FXML
-   private Button pose0Button;
+   private CheckBox enableCheckBox;
+
    @FXML
-   private Button pose1Button;
+   private Button singleSupportButton;
    @FXML
-   private Button pose2Button;
+   private Button runningManButton;
    @FXML
-   private Button pose3Button;
+   private Button karateKid1Button;
    @FXML
-   private Button pose4Button;
+   private Button karateKid2Button;
+   @FXML
+   private Button karateKid3Button;
+   @FXML
+   private Button shutdownPoseButton;
 
    private Messager behaviorMessager;
 
    public void init(Messager behaviorMessager)
    {
       this.behaviorMessager = behaviorMessager;
+   }
+
+   @FXML
+   public void enable()
+   {
+      behaviorMessager.submitMessage(FancyPosesBehavior.API.Enable, enableCheckBox.isSelected());
    }
 
    @FXML
