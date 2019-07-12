@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.simulation;
+package us.ihmc.humanoidBehaviors.ui.slam;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
