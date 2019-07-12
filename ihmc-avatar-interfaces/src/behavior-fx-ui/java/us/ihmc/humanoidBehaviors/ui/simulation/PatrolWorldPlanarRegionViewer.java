@@ -5,7 +5,7 @@ import javafx.stage.Stage;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 
-public class PlanarRegionVisualizer extends Application
+public class PatrolWorldPlanarRegionViewer extends Application
 {
    @Override
    public void start(Stage primaryStage) throws Exception
