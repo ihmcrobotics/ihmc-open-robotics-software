@@ -87,9 +87,12 @@ public class FancyPosesBehavior
 
    private void acceptFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
+<<<<<<< Upstream, based on branch 'feature/playing-with-behaviors' of https://stash.ihmc.us/scm/libs/ihmc-open-robotics-software.git
       if (!enable.get())
          return;
 
+=======
+>>>>>>> b4365c0 Change to "accept" instead of "consume".
       LogTools.info("acceptFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
