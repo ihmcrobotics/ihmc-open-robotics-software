@@ -4,28 +4,25 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
-import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
@@ -33,12 +30,11 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.tools.thread.TypedNotification;
 
@@ -71,14 +67,11 @@ public class PatrolBehavior
       REPLAN, WALK
    }
 
+   private final BehaviorHelper behaviorHelper;
+
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
-   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
-   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
-   private final RemoteRobotControllerInterface remoteRobotControllerInterface;
-   private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
-   private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
    private final UpDownExplorer upDownExplorer;
 
    private final Notification stopNotification = new Notification();
@@ -97,32 +90,35 @@ public class PatrolBehavior
    private final AtomicReference<Boolean> upDownExplorationEnabled;
    private final AtomicReference<Double> perceiveDuration;
 
-   public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
+   public PatrolBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
+      this.behaviorHelper = behaviorHelper;
+
       this.messager = messager;
 
       LogTools.debug("Initializing patrol behavior");
 
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
-      factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
-      factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
+      factory.setOnEntry(STOP, this::onStopStateEntry);
+      factory.setDoAction(STOP, this::doStopStateAction);
       factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
-      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
-      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
+      factory.setOnEntry(NAVIGATE, this::onNavigateStateEntry);
+      factory.setDoAction(NAVIGATE, this::doNavigateStateAction);
       factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, NAVIGATE, STOP), this::transitionFromNavigate);
-      factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
-      factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
+      factory.setOnEntry(PLAN, this::onPlanStateEntry);
+      factory.setDoAction(PLAN, this::doPlanStateAction);
       factory.addTransition(PLAN, Lists.newArrayList(REVIEW, NAVIGATE, STOP), this::transitionFromPlan);
-      factory.getStateMap().get(REVIEW).setOnEntry(this::onReviewStateEntry);
-      factory.getStateMap().get(REVIEW).setDoAction(this::onReviewStateAction);
+      factory.setOnEntry(REVIEW, this::onReviewStateEntry);
+      factory.setDoAction(REVIEW, this::onReviewStateAction);
       factory.addTransition(REVIEW, Lists.newArrayList(WALK, PLAN, STOP), this::transitionFromReview);
-      factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
-      factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
-      factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
+      factory.setOnEntry(WALK, this::onWalkStateEntry);
+      factory.setDoAction(WALK, this::doWalkStateAction);
+      factory.setOnExit(WALK, this::onWalkStateExit);
       factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, NAVIGATE, STOP), this::transitionFromWalk);
-      factory.getStateMap().get(PERCEIVE).setOnEntry(this::onPerceiveStateEntry);
-      factory.getStateMap().get(PERCEIVE).setDoAction(this::doPerceiveStateAction);
+      factory.setOnEntry(PERCEIVE, this::onPerceiveStateEntry);
+      factory.setDoAction(PERCEIVE, this::doPerceiveStateAction);
       factory.addTransition(PERCEIVE, Lists.newArrayList(NAVIGATE, STOP), this::transitionFromPerceive);
+
       factory.getFactory().addStateChangedListener((from, to) ->
       {
          messager.submitMessage(CurrentState, to);
@@ -130,12 +126,6 @@ public class PatrolBehavior
       });
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
-
-      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
-      remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
       waypointManager = WaypointManager.createForModule(messager,
                                                         WaypointsToModule,
@@ -158,7 +148,7 @@ public class PatrolBehavior
       perceiveDuration = messager.createInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, planarRegionsList);
+      upDownExplorer = new UpDownExplorer(messager, behaviorHelper);
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -178,7 +168,7 @@ public class PatrolBehavior
 
    private void onStopStateEntry()
    {
-      remoteRobotControllerInterface.pauseWalking();
+      behaviorHelper.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -200,7 +190,7 @@ public class PatrolBehavior
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
+         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidReferenceFrames());
       }
    }
 
@@ -237,19 +227,21 @@ public class PatrolBehavior
       // update waypoints if UI modified them
       waypointManager.updateToMostRecentData();
 
-      remoteFootstepPlannerInterface.abortPlanning();
+      behaviorHelper.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      FramePose3DReadOnly midFeetZUpPose = behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
       {
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
+      PlanarRegionsListMessage latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionListMessage();
+
       footstepPlanResultNotification
-            = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
+            = behaviorHelper.requestPlan(midFeetZUpPose,
                                                          new FramePose3D(waypointManager.peekNextPose()),
-                                                         planarRegionsList.getLatest());
+                                                         latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
@@ -325,10 +317,16 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
-      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.peek().getFootstepDataListMessage(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
-                                                                    swingOvers.get(),
-                                                                    footstepPlanResultNotification.peek().getPlanarRegionsList());
+      PlanarRegionsList planarRegionsList = footstepPlanResultNotification.peek().getPlanarRegionsList();
+      FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
+      Boolean swingOverPlanarRegions = swingOvers.get();
+
+      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage,
+                                                                    humanoidReferenceFrames,
+                                                                    swingOverPlanarRegions,
+                                                                    planarRegionsList);
    }
 
    private void doWalkStateAction(double timeInState)
@@ -353,11 +351,12 @@ public class PatrolBehavior
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            if (upDownExplorationEnabled.get() // perceive everytime when updownenabled
-             || remoteFootstepPlannerInterface.decidePlanType(
-                   remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
-                   waypointManager.peekAfterNextPose())
-                == PlanTravelDistance.FAR)
+            FramePose3DReadOnly midFeetZUpPose = behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+
+            PlanTravelDistance planType = RemoteFootstepPlannerInterface.decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
+
+         // perceive everytime when updownenabled
+            if (upDownExplorationEnabled.get() || (planType == PlanTravelDistance.FAR))
             {
                return PERCEIVE;
             }
@@ -381,15 +380,13 @@ public class PatrolBehavior
 
    private void onPerceiveStateEntry()
    {
-      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-      clearMessage.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearMessage);
+      behaviorHelper.clearREA();
    }
 
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      upDownExplorer.setMidFeetZUpPose(behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
@@ -416,7 +413,7 @@ public class PatrolBehavior
 
    private void pollInterrupts()
    {
-      HighLevelControllerName controllerState = remoteRobotControllerInterface.latestControllerState();
+      HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
       if (!stateMachine.getCurrentStateKey().equals(STOP)
             && controllerState != HighLevelControllerName.WALKING) // STOP if robot falls
       {

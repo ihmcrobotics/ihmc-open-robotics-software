@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedCommunication.teleop.QuadrupedTeleopManager;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -15,13 +14,6 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 public class QuadrupedTestBehaviors
 {
    private static double stateCompletionSafetyFactory = 1.3;
-
-   public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager)
-   {
-      standUp(conductor, variables);
-      startBalancing(conductor, variables, stepTeleopManager);
-      squareUp(conductor, variables, stepTeleopManager);
-   }
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables)
    {
@@ -50,41 +42,6 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.FREEZE_STATE));
       conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getTimeToMoveSittingDown());
       conductor.simulate();
-   }
-
-   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables, QuadrupedTeleopManager teleopManager)
-   {
-      teleopManager.requestWalkingState();
-      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.WALKING));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
-      conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getToWalkingTransitionDuration());
-      conductor.simulate();
-   }
-
-   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables, QuadrupedTeleopManager stepTeleopManager)
-   {
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
-      conductor.simulate();
-
-      double initialEndPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
-
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
-      stepTeleopManager.requestXGait();
-      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
-      conductor.simulate();
-
-      stepTeleopManager.requestStanding();
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-      conductor.simulate();
-
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
    }
 
    public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedTestYoVariables variables, RemoteQuadrupedTeleopManager stepTeleopManager)

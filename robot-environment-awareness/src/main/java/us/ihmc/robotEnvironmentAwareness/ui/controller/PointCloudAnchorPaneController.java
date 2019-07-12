@@ -20,8 +20,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private Spinner<Integer> sizeOfPointCloudSpinner;
 
    private static final int maximumSizeOfPointCloud = 200000;
-   private static final int minimumSizeOfPointCloud = 10000;
-   public static final int initialSizeOfPointCloud = 50000;
+   private static final int minimumSizeOfPointCloud = 1000;
+   public static final int initialSizeOfPointCloud = 5000;
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
    {

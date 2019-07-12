@@ -463,7 +463,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setPlanId(planId);
          outputPacket.setSequenceId(sequenceId);
          outputPacket.setFootstepPlanningResult(result.toByte());
-         outputPacket.setTimeTaken(timeTaken);
+         outputPacket.getFootstepPlanningStatistics().setTimeTaken(timeTaken);
          for (int i = 0; i < bodyPath.size(); i++)
             outputPacket.getBodyPath().add().set(bodyPath.get(i));
          outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);

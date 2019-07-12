@@ -42,9 +42,6 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      quadrupedTestFactory.setUseNetworking(true);
-
-
    }
 
    @AfterEach

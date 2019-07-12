@@ -39,14 +39,13 @@ public class ROS2Tools
    public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
 
    public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
-   public static final String HEIGHT_TELEOP_TOOLBOX = "/toolbox/teleop/height_teleop";
-   public static final String BODY_TELEOP_TOOLBOX = "/toolbox/teleop/body_teleop";
-   public static final String XBOX_TELEOP_TOOLBOX = "/toolbox/teleop/xbox_teleop";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER = "/quadruped_support_region_publisher";
 
    public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
+
+   public static final String SREA_MODULE = "/srea";
 
    public enum ROS2TopicQualifier
    {

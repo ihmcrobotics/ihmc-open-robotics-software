@@ -118,7 +118,7 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteFootstepPlannerResult result = resultNotification.blockingPoll();
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(result.getMessage().getFootstepPlanningResult()));
-      LogTools.info("Received footstep plan took: {} s", result.getMessage().getTimeTaken());
+      LogTools.info("Received footstep plan took: {} s", result.getMessage().getFootstepPlanningStatistics().getTimeTaken());
       LogTools.info("Received footstep planning status: {}", result);
 
       assertTrue(result.isValidForExecution(), "Solution failed");

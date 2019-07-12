@@ -115,7 +115,6 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(simulationEnvironment);
       quadrupedTestFactory.setInitialOffset(offset);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();

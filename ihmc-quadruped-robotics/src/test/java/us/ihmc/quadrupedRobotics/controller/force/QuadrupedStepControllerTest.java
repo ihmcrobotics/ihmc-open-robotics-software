@@ -33,7 +33,6 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       {
          quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
-         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedTestYoVariables(conductor.getScs());
          stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
