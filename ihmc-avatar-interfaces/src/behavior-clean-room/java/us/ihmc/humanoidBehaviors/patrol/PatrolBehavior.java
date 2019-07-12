@@ -84,6 +84,8 @@ public class PatrolBehavior
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final WaypointManager waypointManager;
+   private final AtomicReference<Boolean> enable;
+
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReviewEnabled;
@@ -141,6 +143,7 @@ public class PatrolBehavior
       });
       messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
 
+      enable = messager.createInput(Enable, false);
       loop = messager.createInput(Loop, false);
       swingOvers = messager.createInput(SwingOvers, false);
       planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
@@ -163,7 +166,8 @@ public class PatrolBehavior
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
-      stateMachine.doActionAndTransition();
+      if (enable.get())
+         stateMachine.doActionAndTransition();
    }
 
    private void onStopStateEntry()
@@ -415,7 +419,7 @@ public class PatrolBehavior
    {
       HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
       boolean isWalking = behaviorHelper.isRobotWalking();
-      
+
       if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {
          LogTools.debug("Stopping from robot state: {}", controllerState.name());

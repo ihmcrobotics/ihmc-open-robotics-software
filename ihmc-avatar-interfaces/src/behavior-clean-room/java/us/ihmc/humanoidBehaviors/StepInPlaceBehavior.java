@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -30,6 +31,7 @@ import us.ihmc.tools.thread.ActivationReference;
 public class StepInPlaceBehavior
 {
    private final BehaviorHelper behaviorHelper;
+   private final AtomicReference<Boolean> enable;
 
    private final ActivationReference<Boolean> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
@@ -41,6 +43,7 @@ public class StepInPlaceBehavior
       LogTools.debug("Initializing step in place behavior");
 
       this.behaviorHelper = behaviorHelper;
+      enable = messager.createInput(API.Enable, false);
 
       behaviorHelper.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
@@ -72,6 +75,11 @@ public class StepInPlaceBehavior
 
    private void stepInPlace()
    {
+      if (!enable.get())
+      {
+         return;
+      }
+
       if (stepping.poll())
       {
          if (stepping.hasChanged())
@@ -122,6 +130,7 @@ public class StepInPlaceBehavior
       private static final Category Root = apiFactory.createRootCategory("StepInPlaceBehavior");
       private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
 
+      public static final Topic<Boolean> Enable = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Enable"));
       public static final Topic<Boolean> Stepping = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Stepping"));
       public static final Topic<Boolean> Abort = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Abort"));
 
