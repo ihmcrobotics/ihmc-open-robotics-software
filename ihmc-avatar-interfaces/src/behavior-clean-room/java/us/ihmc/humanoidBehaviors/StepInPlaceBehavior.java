@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -24,7 +25,6 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 
 public class StepInPlaceBehavior
@@ -33,6 +33,8 @@ public class StepInPlaceBehavior
 
    private final ActivationReference<Boolean> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
+   private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
+   private final AtomicLong footstepID = new AtomicLong();
 
    public StepInPlaceBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
@@ -63,7 +65,8 @@ public class StepInPlaceBehavior
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
          int footstepsTakenSoFar = footstepsTaken.incrementAndGet();
-         LogTools.info("Have taken " + footstepsTakenSoFar + " footsteps.");
+         lastFootstepTakenID.set(footstepStatusMessage.getSequenceId());
+         LogTools.info("Have taken " + footstepsTakenSoFar + " footsteps. Last one had id: " + lastFootstepTakenID.get());
       }
    }
 
@@ -76,6 +79,7 @@ public class StepInPlaceBehavior
             LogTools.info("Starting to step");
          }
 
+//         if (!behaviorHelper.isRobotWalking())
          if (footstepsTaken.compareAndSet(2, 0))
          {
             LogTools.info("Sending steps");
@@ -105,6 +109,7 @@ public class StepInPlaceBehavior
          footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
          FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation);
+         footstepDataMessage.setSequenceId(footstepID.incrementAndGet());
          footstepDataMessages.add().set(footstepDataMessage);
       }
       footstepList.setAreFootstepsAdjustable(true);
