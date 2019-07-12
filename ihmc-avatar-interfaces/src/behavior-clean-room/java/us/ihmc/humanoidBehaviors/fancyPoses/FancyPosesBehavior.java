@@ -64,7 +64,7 @@ public class FancyPosesBehavior
 
       this.behaviorHelper = behaviorHelper;
 
-      behaviorHelper.createFootstepStatusCallback(this::consumeFootstepStatus);
+      behaviorHelper.createFootstepStatusCallback(this::acceptFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
 
       messager.registerTopicListener(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
@@ -89,9 +89,9 @@ public class FancyPosesBehavior
       }
    }
 
-   private void consumeFootstepStatus(FootstepStatusMessage footstepStatusMessage)
+   private void acceptFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
-      LogTools.info("consumeFootstepStatus: " + footstepStatusMessage);
+      LogTools.info("acceptFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
