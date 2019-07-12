@@ -275,7 +275,7 @@ public class BehaviorHelper
    public boolean isRobotWalking()
    {
       HighLevelControllerName controllerState = getLatestControllerState();
-      return (controllerState != HighLevelControllerName.WALKING);
+      return (controllerState == HighLevelControllerName.WALKING);
    }
 
 }
