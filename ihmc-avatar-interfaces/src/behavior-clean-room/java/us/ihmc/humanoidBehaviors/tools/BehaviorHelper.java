@@ -291,8 +291,13 @@ public class BehaviorHelper
    public boolean isRobotWalking()
    {
       HighLevelControllerName controllerState = getLatestControllerState();
+<<<<<<< Upstream, based on branch 'feature/playing-with-behaviors' of https://stash.ihmc.us/scm/libs/ihmc-open-robotics-software.git
       return (controllerState == HighLevelControllerName.WALKING);
    }
 
+=======
+      return (controllerState != HighLevelControllerName.WALKING);
+   }
+>>>>>>> 0a075d9 isRobotWalking method.
 
 }

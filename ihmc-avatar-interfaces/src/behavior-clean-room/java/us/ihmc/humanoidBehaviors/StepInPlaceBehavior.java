@@ -3,7 +3,10 @@ package us.ihmc.humanoidBehaviors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+<<<<<<< Upstream, based on branch 'feature/playing-with-behaviors' of https://stash.ihmc.us/scm/libs/ihmc-open-robotics-software.git
 import java.util.concurrent.atomic.AtomicReference;
+=======
+>>>>>>> 0a075d9 isRobotWalking method.
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
