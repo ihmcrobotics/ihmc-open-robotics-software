@@ -33,32 +33,14 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       clear();
    }
 
-   private static void clearPointList(RecyclingArrayList<Point2D> pointList)
-   {
-      for (int i = 0; i < pointList.size(); i++)
-      {
-         pointList.get(i).setToZero();
-      }
-      pointList.clear();
-   }
-
-   private static void clearPolygonList(RecyclingArrayList<ConvexPolygon2D> polygonList)
-   {
-      for (int i = 0; i < polygonList.size(); i++)
-      {
-         polygonList.get(i).clear();
-      }
-      polygonList.clear();
-   }
-
    @Override
    public void clear()
    {
       sequenceId = 0;
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
-      clearPointList(concaveHullsVertices);
-      clearPolygonList(convexPolygons);
+      concaveHullsVertices.clear();
+      convexPolygons.clear();
    }
 
    @Override
@@ -67,7 +49,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       sequenceId = message.getSequenceId();
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 
-      clearPointList(concaveHullsVertices);
+      concaveHullsVertices.clear();
 
       int vertexIndex = 0;
       int upperBound = message.getConcaveHullSize();
@@ -75,11 +57,12 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       for (; vertexIndex < upperBound; vertexIndex++)
          addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
 
-      clearPolygonList(convexPolygons);
+      convexPolygons.clear();
 
       for (int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = convexPolygons.add();
+         convexPolygon.clear();
          upperBound += message.getConvexPolygonsSize().get(polygonIndex);
 
          for (; vertexIndex < upperBound; vertexIndex++)
