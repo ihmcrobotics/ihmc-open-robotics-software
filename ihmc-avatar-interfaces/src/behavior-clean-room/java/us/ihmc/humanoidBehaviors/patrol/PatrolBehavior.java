@@ -103,7 +103,7 @@ public class PatrolBehavior
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.setOnEntry(STOP, this::onStopStateEntry);
       factory.setDoAction(STOP, this::doStopStateAction);
-      factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
+      factory.addTransition(STOP, NAVIGATE, this::transitionFromStop);
       factory.setOnEntry(NAVIGATE, this::onNavigateStateEntry);
       factory.setDoAction(NAVIGATE, this::doNavigateStateAction);
       factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, NAVIGATE, STOP), this::transitionFromNavigate);
