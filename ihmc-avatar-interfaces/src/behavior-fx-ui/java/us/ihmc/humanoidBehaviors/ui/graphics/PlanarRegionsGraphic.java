@@ -1,9 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
@@ -18,8 +20,13 @@ import java.util.List;
 public class PlanarRegionsGraphic extends Group
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
+   private static final boolean SHOW_AREA = false;
 
-   private volatile List<MeshView> regionMeshViews;
+   private volatile List<Node> regionNodes;
+   private List<Node> lastNodes = null; // optimization
+
+   private Object regionMeshAddSync = new Object(); // for parallel mesh builder
+   private volatile List<Node> updateRegionMeshViews; // for parallel mesh builder
 
    public PlanarRegionsGraphic()
    {
@@ -35,40 +42,59 @@ public class PlanarRegionsGraphic extends Group
       generateMeshes(planarRegionsList);
    }
 
-   public void generateMeshes(PlanarRegionsList planarRegionsList)
+   public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
    {
-      List<MeshView> updateRegionMeshViews = new ArrayList<>();
+      updateRegionMeshViews = new ArrayList<>();
 
-      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
+      planarRegionsList.getPlanarRegionsAsList().parallelStream().forEach(this::parallelMeshBuilder);
+
+      regionNodes = updateRegionMeshViews; // volatile set
+   }
+
+   private void parallelMeshBuilder(PlanarRegion planarRegion)
+   {
+      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
+
+      double totalArea = 0.0;
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
-         JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+         meshBuilder.addPolygon(transformToWorld, convexPolygon);
 
-         int regionId = planarRegion.getRegionId();
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         planarRegion.getTransformToWorld(transformToWorld);
-
-         meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
-
-         for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
-         {
-            ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
-            meshBuilder.addPolygon(transformToWorld, convexPolygon2d);
-         }
-
-         MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
-         updateRegionMeshViews.add(regionMeshView);
+         totalArea += convexPolygon.getArea();
       }
 
-      regionMeshViews = updateRegionMeshViews; // volatile set
+      LabelGraphic sizeLabel;
+      if (SHOW_AREA)
+      {
+         sizeLabel = new LabelGraphic(FormattingTools.getFormattedToSignificantFigures(totalArea, 3));
+         sizeLabel.getPose().appendTransform(transformToWorld);
+         sizeLabel.update();
+      }
+
+      MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
+      regionMeshView.setMaterial(new PhongMaterial(getRegionColor(planarRegion.getRegionId())));
+
+      synchronized (regionMeshAddSync)
+      {
+         if (SHOW_AREA) updateRegionMeshViews.add(sizeLabel.getNode());
+         updateRegionMeshViews.add(regionMeshView);
+      }
    }
 
    public void update()
    {
-      List<MeshView> meshViews = regionMeshViews;  // volatile get
-      getChildren().clear();
-      getChildren().addAll(meshViews);
+      List<Node> meshViews = regionNodes;  // volatile get
+      if (lastNodes != meshViews) // optimization
+      {
+         getChildren().clear();
+         getChildren().addAll(meshViews);
+         lastNodes = meshViews;
+      }
    }
 
    public static Color getRegionColor(int regionId)
