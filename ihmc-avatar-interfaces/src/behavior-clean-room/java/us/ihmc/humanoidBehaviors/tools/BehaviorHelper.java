@@ -25,6 +25,7 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -141,6 +142,14 @@ public class BehaviorHelper
    public void pauseWalking()
    {
       remoteRobotControllerInterface.pauseWalking();
+   }
+
+   public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, FramePose3D footPose)
+   {
+      Point3D position = new Point3D();
+      Quaternion orientation = new Quaternion();
+      footPose.get(position, orientation);
+      requestFootTrajectory(robotSide, trajectoryTime, position, orientation);
    }
 
    public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, Point3D position, Quaternion orientation)
@@ -277,5 +286,6 @@ public class BehaviorHelper
       HighLevelControllerName controllerState = getLatestControllerState();
       return (controllerState == HighLevelControllerName.WALKING);
    }
+
 
 }
