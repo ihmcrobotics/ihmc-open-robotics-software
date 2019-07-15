@@ -108,7 +108,7 @@ public class FancyPosesBehavior
       Quaternion orientation = new Quaternion();
       anklePose.get(position, orientation);
 
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
       behaviorHelper.requestChestGoHome(trajectoryTime);
       behaviorHelper.requestPelvisGoHome(trajectoryTime);
 
@@ -125,10 +125,7 @@ public class FancyPosesBehavior
       footPose.setPosition(-0.40, supportSide.negateIfLeftSide(0.25), 0.40);
       footPose.setOrientationYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
-      Point3D position = new Point3D();
-      Quaternion orientation = new Quaternion();
-      footPose.get(position, orientation);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(20.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
@@ -153,10 +150,7 @@ public class FancyPosesBehavior
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.setPosition(0.10, supportSide.negateIfLeftSide(0.25), 0.20);
       footPose.changeFrame(worldFrame);
-      Point3D position = new Point3D();
-      Quaternion orientation = new Quaternion();
-      footPose.get(position, orientation);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       behaviorHelper.requestChestGoHome(trajectoryTime);
       behaviorHelper.requestPelvisGoHome(trajectoryTime);
@@ -177,10 +171,7 @@ public class FancyPosesBehavior
       footPose.setPosition(0.6, supportSide.negateIfLeftSide(0.25), 0.25);
       footPose.setOrientationYawPitchRoll(0.0, -Math.PI / 4.0, 0.0);
       footPose.changeFrame(worldFrame);
-      Point3D position = new Point3D();
-      Quaternion orientation = new Quaternion();
-      footPose.get(position, orientation);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(-5.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
@@ -206,10 +197,7 @@ public class FancyPosesBehavior
       footPose.setPosition(0.00, supportSide.negateIfLeftSide(0.65), 0.2);
       footPose.setOrientationYawPitchRoll(0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(40.0)));
       footPose.changeFrame(worldFrame);
-      Point3D position = new Point3D();
-      Quaternion orientation = new Quaternion();
-      footPose.get(position, orientation);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(30.0)));
       chestOrientation.changeFrame(worldFrame);
@@ -372,19 +360,20 @@ public class FancyPosesBehavior
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("FancyPosesBehavior");
+      private static final Category RootCategory = apiFactory.createRootCategory("FancyPosesBehavior");
       private static final CategoryTheme FancyPoses = apiFactory.createCategoryTheme("FancyPoses");
+      private static final Category FancyPosesCategory = RootCategory.child(FancyPoses);
 
-      public static final Topic<Boolean> Stepping = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Abort"));
-      public static final Topic<Boolean> Enable = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("Enable"));
-      public static final Topic<Boolean> GoToSingleSupport = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
-      public static final Topic<Boolean> GoToRunningMan = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
-      public static final Topic<Boolean> GoToKarateKid1 = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));
-      public static final Topic<Boolean> GoToKarateKid2 = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToKarateKid2"));
-      public static final Topic<Boolean> GoToKarateKid3 = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToKarateKid3"));
-      public static final Topic<Boolean> GoToPresent = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToPresent"));
-      public static final Topic<Boolean> GoToShutdownPose = Root.child(FancyPoses).topic(apiFactory.createTypedTopicTheme("GoToShutdownPose"));
+      public static final Topic<Boolean> Stepping = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Stepping"));
+      public static final Topic<Boolean> Abort = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Abort"));
+      public static final Topic<Boolean> Enable = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Enable"));
+      public static final Topic<Boolean> GoToSingleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
+      public static final Topic<Boolean> GoToRunningMan = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
+      public static final Topic<Boolean> GoToKarateKid1 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));
+      public static final Topic<Boolean> GoToKarateKid2 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid2"));
+      public static final Topic<Boolean> GoToKarateKid3 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid3"));
+      public static final Topic<Boolean> GoToPresent = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToPresent"));
+      public static final Topic<Boolean> GoToShutdownPose = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToShutdownPose"));
 
       public static final MessagerAPI create()
       {
