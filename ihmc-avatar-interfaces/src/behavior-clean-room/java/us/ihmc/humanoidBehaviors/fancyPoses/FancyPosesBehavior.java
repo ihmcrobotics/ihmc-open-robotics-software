@@ -87,6 +87,9 @@ public class FancyPosesBehavior
 
    private void acceptFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
+      if (!enable.get())
+         return;
+
       LogTools.info("acceptFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())

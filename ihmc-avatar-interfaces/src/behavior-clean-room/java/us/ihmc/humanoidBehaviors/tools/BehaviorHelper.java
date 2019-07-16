@@ -248,6 +248,13 @@ public class BehaviorHelper
    // Planning Methods:
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
+                                                                     PlanarRegionsList planarRegionsList)
+   {
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+      return requestPlan(start, goal, planarRegionsListMessage);
+   }
+
+   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
                                                                      PlanarRegionsListMessage planarRegionsListMessage)
    {
       return remoteFootstepPlannerInterface.requestPlan(start, goal, planarRegionsListMessage);

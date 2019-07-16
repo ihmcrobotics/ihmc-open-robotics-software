@@ -63,6 +63,9 @@ public class StepInPlaceBehavior
 
    private void consumeFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
+      if (!enable.get())
+         return;
+
       LogTools.info("consumeFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
