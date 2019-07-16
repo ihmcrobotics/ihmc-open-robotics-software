@@ -8,11 +8,14 @@ import javafx.scene.SubScene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.ros2.Ros2Node;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +28,8 @@ public class PlanarRegionSLAMUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "behavior_ui");
+
       LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
       LabelGraphic.initializeYoVariables(parameterServer.getRegistry());
       parameterServer.start();
@@ -42,7 +47,7 @@ public class PlanarRegionSLAMUI extends Application
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-      planarRegionSLAMUITabController.init();
+      planarRegionSLAMUITabController.init(primaryStage, ros2Node);
 
       view3dFactory.addNodeToView(planarRegionSLAMUITabController);
 
