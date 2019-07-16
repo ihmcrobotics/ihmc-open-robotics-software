@@ -5,11 +5,16 @@ import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
+import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.Ros2Node;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,28 +43,29 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private List<RadioButton> datasetSelectionRadioButtons = new ArrayList<>();
 
-   private volatile PlanarRegionsList datasetToPublish = EMPTY_REGIONS_LIST;
-
    private PlanarRegionsGraphic regionsGraphicOne = new PlanarRegionsGraphic();
    private PlanarRegionsGraphic regionsGraphicTwo = new PlanarRegionsGraphic();
    private PlanarRegionsGraphic regionsGraphicThree = new PlanarRegionsGraphic();
 
    private PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::fxUpdate);
 
-   public void init()
+   private Window window;
+   private LivePlanarRegionsGraphic incomingRegionsList;
+   private FakeREAModule fakeREAModule;
+
+   public void init(Window window, Ros2Node ros2Node)
    {
+      this.window = window;
+
       datasetSelectionRadioButtons.add(dataset1RadioButton);
       datasetSelectionRadioButtons.add(dataset2RadioButton);
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      getChildren().add(regionsGraphicOne);
-      getChildren().add(regionsGraphicTwo);
-      getChildren().add(regionsGraphicThree);
+      incomingRegionsList = new LivePlanarRegionsGraphic(ros2Node);
+      getChildren().add(incomingRegionsList);
 
-      generateOnAThread(regionsGraphicOne, loadDataSet(DATASET_1));
-      generateOnAThread(regionsGraphicTwo, loadDataSet(DATASET_2));
-      generateOnAThread(regionsGraphicThree, loadDataSet(DATASET_3));
+      fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
 
       animationTimer.start();
    }
@@ -116,51 +122,37 @@ public class PlanarRegionSLAMUITabController extends Group
 
    @FXML private void fakeREAPublisherCheckbox()
    {
-
+      if (fakeREAPublisherCheckbox.isSelected())
+      {
+         fakeREAModule.start();
+      }
+      else
+      {
+         fakeREAModule.stop();
+      }
    }
 
    @FXML private void dataset1RadioButton()
    {
       setRadioButtonSelection(dataset1RadioButton);
-//      if (regionSet1.isSelected())
-//      {
-//         generateOnAThread(regionsGraphicOne, loadDataSet(DATASET_1));
-//      }
-//      else
-//      {
-//         generateOnAThread(regionsGraphicOne, EMPTY_REGIONS_LIST);
-//      }
+      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_1));
    }
 
    @FXML private void dataset2RadioButton()
    {
       setRadioButtonSelection(dataset2RadioButton);
-//      if (regionSet2.isSelected())
-//      {
-//         generateOnAThread(regionsGraphicTwo, loadDataSet(DATASET_2));
-//      }
-//      else
-//      {
-//         generateOnAThread(regionsGraphicTwo, EMPTY_REGIONS_LIST);
-//      }
+      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_2));
    }
 
    @FXML private void dataset3RadioButton()
    {
       setRadioButtonSelection(dataset3RadioButton);
-//      if (regionSet3.isSelected())
-//      {
-//         generateOnAThread(regionsGraphicThree, loadDataSet(DATASET_3));
-//      }
-//      else
-//      {
-//         generateOnAThread(regionsGraphicThree, EMPTY_REGIONS_LIST);
-//      }
+      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_3));
    }
 
    @FXML private void loadFromFileRadioButton()
    {
       setRadioButtonSelection(loadFromFileRadioButton);
-
+      fakeREAModule.setRegionsToPublish(PlanarRegionDataImporter.importUsingFileChooser(window));
    }
 }
