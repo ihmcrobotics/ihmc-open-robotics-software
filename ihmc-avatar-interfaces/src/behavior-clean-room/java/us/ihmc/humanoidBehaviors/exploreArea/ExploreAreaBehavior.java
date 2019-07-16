@@ -85,8 +85,8 @@ public class ExploreAreaBehavior
 
    private final NavigableRegionsManager navigableRegionsManager;
 
-   private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -10.0, 0.0, 10.0);
-   
+   private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -8.0, 0.0, 8.0);
+
    private double minimumDistanceBetweenObservationPoints = 2.0;
    private double minDistanceToWalkIfPossible = 3.0;
 
@@ -209,6 +209,8 @@ public class ExploreAreaBehavior
       FramePoint3D midFeetLocation = new FramePoint3D(midFeetZUpFrame);
       midFeetLocation.changeFrame(worldFrame);
 
+      messager.submitMessage(ExploreAreaBehaviorAPI.ObservationPosition, new Point3D(midFeetLocation));
+
       this.pointsObservedFrom.add(new Point3D(midFeetLocation));
    }
 
@@ -321,7 +323,7 @@ public class ExploreAreaBehavior
       double minimumY = Math.max(maximumExplorationArea.getMinY(), concatenatedMapBoundingBox.getMinY());
       double maximumX = Math.min(maximumExplorationArea.getMaxX(), concatenatedMapBoundingBox.getMaxX());
       double maximumY = Math.min(maximumExplorationArea.getMaxY(), concatenatedMapBoundingBox.getMaxY());
-      
+
       for (double x = minimumX + xSteps / 2.0; x <= maximumX; x = x + xSteps)
       {
          for (double y = minimumY + ySteps / 2.0; y <= maximumY; y = y + ySteps)
@@ -329,29 +331,24 @@ public class ExploreAreaBehavior
             Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
             if (projectedPoint == null)
                continue;
-            
-            for (Point3D observationPoint : pointsObservedFrom)
-            {
-               if (projectedPoint.distanceXY(observationPoint) < minimumDistanceBetweenObservationPoints)
-               {
-                  continue;
-               }
-            }
+
+            if (pointIsTooCloseToPreviousObservationPoint(projectedPoint))
+               continue;
 
             potentialPoints.add(projectedPoint);
          }
       }
 
       LogTools.info("Found " + potentialPoints.size() + " potential Points on the grid.");
-      
+
       // Compute distances to each.
-      
+
       HashMap<Point3DReadOnly, Double> distancesFromStart = new HashMap<>();
       for (Point3DReadOnly testGoal : potentialPoints)
       {
          distancesFromStart.put(testGoal, midFeetPosition.distanceXY(testGoal));
       }
-      
+
       sortBasedOnBestDistances(potentialPoints, distancesFromStart, minDistanceToWalkIfPossible);
 
       LogTools.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
@@ -362,7 +359,7 @@ public class ExploreAreaBehavior
       HashMap<Point3DReadOnly, List<Point3DReadOnly>> potentialBodyPaths = new HashMap<>();
 
       navigableRegionsManager.setPlanarRegions(concatenatedMap.getPlanarRegionsAsList());
-      
+
       int maxNumberOfFeasiblePointsToLookFor = 30;
       int numberConsidered = 0;
 
@@ -374,23 +371,24 @@ public class ExploreAreaBehavior
 
          if (bodyPath != null)
          {
-//            LogTools.info("Found body path to " + testGoal);
+            //            LogTools.info("Found body path to " + testGoal);
 
             feasibleGoalPoints.add(testGoal);
             potentialBodyPaths.put(testGoal, bodyPath);
             distancesFromStart.put(testGoal, midFeetPosition.distanceXY(testGoal));
-            
+
             if (feasibleGoalPoints.size() >= maxNumberOfFeasiblePointsToLookFor)
                break;
          }
       }
-      
+
       long endTime = System.nanoTime();
       long duration = (endTime - startTime);
       double durationSeconds = ((double) duration) / 1.0e9;
-      double durationPer = durationSeconds/ ((double) numberConsidered);
+      double durationPer = durationSeconds / ((double) numberConsidered);
 
-      LogTools.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
+      LogTools.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
+            + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
 
       Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
       double bestDistance = distancesFromStart.get(bestGoalPoint);
@@ -411,7 +409,6 @@ public class ExploreAreaBehavior
          desiredFramePoses.add(desiredFramePose);
          return;
       }
-      
 
       LogTools.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 
@@ -427,6 +424,18 @@ public class ExploreAreaBehavior
          desiredFramePoses.add(desiredFramePose);
       }
 
+   }
+
+   private boolean pointIsTooCloseToPreviousObservationPoint(Point3DReadOnly pointToCheck)
+   {
+      for (Point3D observationPoint : pointsObservedFrom)
+      {
+         if (pointToCheck.distanceXY(observationPoint) < minimumDistanceBetweenObservationPoints)
+         {
+            return true;
+         }
+      }
+      return false;
    }
 
    private void sortBasedOnBestDistances(ArrayList<Point3DReadOnly> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart,
@@ -591,12 +600,12 @@ public class ExploreAreaBehavior
 
       behaviorHelper.requestPelvisGoHome(trajectoryTime);
    }
-   
+
    //TODO: Hijacking PatrolBehavior Viz here. Should not be doing that. Should have some common vizzes for things like this that are shared.
    private void reduceAndSendFootstepsForVisualization(FootstepPlan footstepPlan)
    {
       ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++) // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
          footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
@@ -614,6 +623,7 @@ public class ExploreAreaBehavior
 
       public static final Topic<Boolean> ExploreArea = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ExploreArea"));
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ConcatenatedMap"));
+      public static final Topic<Point3D> ObservationPosition = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ObservationPosition"));
 
       public static final MessagerAPI create()
       {

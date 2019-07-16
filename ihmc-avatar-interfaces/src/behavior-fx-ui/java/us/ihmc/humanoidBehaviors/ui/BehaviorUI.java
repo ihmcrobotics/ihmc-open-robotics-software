@@ -70,12 +70,13 @@ public class BehaviorUI
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       fancyPosesBehaviorUIController.init(behaviorMessager);
-      exploreAreaBehaviorUIController.init(behaviorMessager);
+      exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       plannerParametersUIController.init(behaviorMessager, robotModel);
       directRobotUIController.init(ros2Node, robotModel);
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);
+      view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
       view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
       view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
