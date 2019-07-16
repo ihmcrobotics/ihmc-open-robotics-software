@@ -26,7 +26,8 @@ public class ExceptionHandlingThreadScheduler
       LogTools.error("{} is terminating due to an exception.", Thread.currentThread().getName());
    };
 
-   private final ScheduledExecutorService executorService;
+   private volatile ScheduledExecutorService executorService;
+   private final String name;
    private final ExceptionHandler exceptionHandler;
    private final Long crashesBeforeGivingUp;
    private long crashCount = 0;
@@ -66,7 +67,8 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String name, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
    {
-      this.executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+      executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+      this.name = name;
       this.exceptionHandler = exceptionHandler;
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
    }
@@ -81,7 +83,8 @@ public class ExceptionHandlingThreadScheduler
       if (!running)
       {
          this.runnable = runnable;
-         scheduledFuture = executorService.scheduleAtFixedRate(this::printingRunnableWrapper, 0, period, timeunit);
+         ExceptionTools.handle(() -> scheduledFuture = executorService.scheduleAtFixedRate(this::printingRunnableWrapper, 0, period, timeunit),
+                               exception -> LogTools.error(exception.getMessage()));
          running = true;
       }
       else
@@ -96,7 +99,8 @@ public class ExceptionHandlingThreadScheduler
    public ScheduledFuture<?> scheduleOnce(Runnable runnable)
    {
       this.runnable = runnable;
-      scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS);
+      ExceptionTools.handle(() -> scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS),
+                            exception -> LogTools.error(exception.getMessage()));
       running = true;
 
       return scheduledFuture;
@@ -125,16 +129,18 @@ public class ExceptionHandlingThreadScheduler
    {
       executorService.shutdown();
 
-      new Thread(() ->  // start a thread to wait for termination to set running to false to prevent double starting
-                 {
-                    ExceptionTools.handle(() -> awaitTermination(10, TimeUnit.SECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
-                    running = false;
-                 }).start();
+      ThreadTools.startAThread(() ->  // start a thread to wait for termination to set running to false to prevent double starting
+      {
+         ExceptionTools.handle(() -> awaitTermination(10, TimeUnit.SECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
+         running = false;
+      }, "ShutdownThread");
    }
 
    public void awaitTermination(long timeout, TimeUnit timeUnit) throws InterruptedException
    {
       executorService.awaitTermination(timeout, timeUnit);
       running = false;
+
+      executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name)); // allow to be reused
    }
 }
