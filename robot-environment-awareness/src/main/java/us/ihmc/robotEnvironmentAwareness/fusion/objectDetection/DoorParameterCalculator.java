@@ -26,7 +26,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
    private final List<Point3DBasics> pointsInlier = new ArrayList<>();
    private final List<Point3DBasics> tempOutlierPoints = new ArrayList<>();
 
-   private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+   private final PrincipalComponentAnalysis3D principalComponentAnalysis = new PrincipalComponentAnalysis3D();
 
    private static final int numberOfSearchingRectangle = 20;
 
@@ -144,17 +144,17 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
 
    private void findPrincipalComponent()
    {
-      pca.clear();
-      pca.addAllDataPoints(pointsInlier);
-      pca.compute();
+      principalComponentAnalysis.clear();
+      principalComponentAnalysis.addAllDataPoints(pointsInlier);
+      principalComponentAnalysis.compute();
    }
 
    private void findRectangle()
    {
       Point3D centerPosition = new Point3D();
-      pca.getMean(centerPosition);
+      principalComponentAnalysis.getMean(centerPosition);
       Vector3D normal = new Vector3D();
-      pca.getThirdVector(normal);
+      principalComponentAnalysis.getThirdVector(normal);
       PlaneEquation clusteredPlane = new PlaneEquation(normal, centerPosition);
 
       LogTools.info("assumed center is " + centerPosition);
@@ -163,7 +163,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
 
       RotationMatrix bestPCARotationMatrix = new RotationMatrix();
       RotationMatrix searchingPCARotationMatrix = new RotationMatrix();
-      pca.getPrincipalFrameRotationMatrix(searchingPCARotationMatrix);
+      principalComponentAnalysis.getPrincipalFrameRotationMatrix(searchingPCARotationMatrix);
       double minimumArea = Double.POSITIVE_INFINITY;
       for (int i = 0; i < numberOfSearchingRectangle; i++)
       {
