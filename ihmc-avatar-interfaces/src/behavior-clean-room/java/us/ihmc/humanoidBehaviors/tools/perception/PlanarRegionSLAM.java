@@ -17,15 +17,20 @@ public class PlanarRegionSLAM
     * @param newData
     * @return detected drift
     */
-   public static RigidBodyTransform slam(PlanarRegionsList map, PlanarRegionsList newData)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newData)
    {
-      newData.getPlanarRegionsAsList().forEach(region -> map.addPlanarRegion(region));
+      PlanarRegionsList mergedMap = new PlanarRegionsList();
+      map.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
+      newData.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
 
-      return new RigidBodyTransform();
+      RigidBodyTransform transformFromIncomingToMap = new RigidBodyTransform();
 
-//      RigidBodyTransform detectedDrift = findDrift(map, newData);
-//      mergeNewDataIntoMap(map, newData);
-//      return detectedDrift;
+      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(transformFromIncomingToMap, mergedMap);
+      return result;
+
+      //      RigidBodyTransform detectedDrift = findDrift(map, newData);
+      //      mergeNewDataIntoMap(map, newData);
+      //      return detectedDrift;
    }
 
    private static RigidBodyTransform findDrift(PlanarRegionsList map, PlanarRegionsList newData)
@@ -75,6 +80,13 @@ public class PlanarRegionSLAM
       return drift;
    }
 
+   
+   /**
+    * Looks through two PlanarRegionsLists and finds PlanarRegion pairs that are good potential matches.
+    * @param map The map that you are building.
+    * @param newData The newData that you are adding to the map.
+    * @return List of Pairs of PlanarRegions that are good potential matches.
+    */
    public static List<Pair<PlanarRegion, PlanarRegion>> findHighConfidencePairs(PlanarRegionsList map, PlanarRegionsList newData)
    {
       ArrayList<Pair<PlanarRegion, PlanarRegion>> pairs = new ArrayList<>();
