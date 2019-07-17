@@ -48,15 +48,7 @@ public class JavaFXGraphicTools
 
    public static void drawBoxEdges(JavaFXMeshBuilder meshBuilder, BoundingBox3DReadOnly boundingBox, double lineWidth)
    {
-      Point3DReadOnly minPoint = boundingBox.getMinPoint();
-      Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
-
-      Point3D boxCenter = GeometryTools.midpoint(minPoint, maxPoint);
-      Vector3D size = GeometryTools.vector(minPoint, maxPoint);
-
-      Box3D box = new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
-
-      drawBoxEdges(meshBuilder, box, lineWidth);
+      drawBoxEdges(meshBuilder, GeometryTools.convertBoundingBoxToBox(boundingBox), lineWidth);
    }
 
    public static void drawBoxEdges(JavaFXMeshBuilder meshBuilder, Box3DReadOnly box, double lineWidth)
