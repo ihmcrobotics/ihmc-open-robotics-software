@@ -20,6 +20,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,7 +58,7 @@ import us.ihmc.tools.thread.TypedNotification;
 public class ExploreAreaBehavior
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final List<Double> chestYawsForLookingAround = Arrays.asList(0.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
+   private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
    private final List<Point3D> pointsObservedFrom = new ArrayList<Point3D>();
 
    private final double turnChestTrajectoryDuration = 3.0;
@@ -233,6 +234,8 @@ public class ExploreAreaBehavior
 
    private void addNewPlanarRegionsToTheMap(PlanarRegionsList latestPlanarRegionsList)
    {
+      messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
+      
       if (concatenatedMap == null)
       {
          concatenatedMap = latestPlanarRegionsList;
@@ -252,6 +255,25 @@ public class ExploreAreaBehavior
       LogTools.info("concatenatedMap has " + concatenatedMap.getNumberOfPlanarRegions() + " planar Regions");
       LogTools.info("boundingBox = " + concatenatedMapBoundingBox);
 
+      
+      List<PlanarRegion> planarRegionsAsList = concatenatedMap.getPlanarRegionsAsList();
+      
+      int index = 0;
+      for (PlanarRegion planarRegion : planarRegionsAsList)
+      {
+         messager.submitMessage(ExploreAreaBehaviorAPI.AddPlanarRegionToMap, TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
+         
+         List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+         for (ConvexPolygon2D polygon : convexPolygons)
+         {
+            messager.submitMessage(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion, TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
+         }
+         
+         index++;
+      }
+      
+      messager.submitMessage(ExploreAreaBehaviorAPI.DrawMap, true);
+      
       // Send it to the GUI for a viz...
       //         PlanarRegionsListMessage concatenatedMapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(concatenatedMap);
       //         messager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ConcatenatedMap, concatenatedMapMessage);
@@ -297,6 +319,8 @@ public class ExploreAreaBehavior
 
    private void onDetermineNextLocationsStateEntry()
    {
+      behaviorHelper.requestChestGoHome(turnChestTrajectoryDuration);
+
       desiredFramePoses = null;
       determinedNextLocations = false;
 
@@ -624,6 +648,10 @@ public class ExploreAreaBehavior
       public static final Topic<Boolean> ExploreArea = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ExploreArea"));
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ConcatenatedMap"));
       public static final Topic<Point3D> ObservationPosition = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ObservationPosition"));
+      public static final Topic<Boolean> DrawMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("DrawMap"));
+      public static final Topic<Boolean> ClearPlanarRegions = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ClearPlanarRegions"));
+      public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("AddPlanarRegionToMap"));
+      public static final Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("AddPolygonToPlanarRegion"));
 
       public static final MessagerAPI create()
       {
