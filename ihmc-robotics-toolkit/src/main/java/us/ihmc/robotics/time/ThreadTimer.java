@@ -1,23 +1,27 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class ThreadTimer
 {
+   private static final int REALTIME_RATE_SAMPLES = 100;
+
    private final long expectedDTNanos;
-   private final double alpha;
 
    private final YoLong tick;
    private final YoDouble dt;
    private final YoDouble timer;
    private final YoLong jitter;
    private final YoDouble realtimeRate;
+   private final YoDouble elapsedSystemTime;
 
    private long lastStartTime;
+
+   private long realtimeRateCounter;
+   private long systemInitialTime;
 
    /**
     * Creates a periodic thread timer including Jitter estimation.
@@ -29,16 +33,15 @@ public class ThreadTimer
    public ThreadTimer(String name, double expectedDt, YoVariableRegistry registry)
    {
       expectedDTNanos = Conversions.secondsToNanoseconds(expectedDt);
-      alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, Conversions.nanosecondsToSeconds(expectedDTNanos));
 
       tick = new YoLong(name + "Tick", registry);
       dt = new YoDouble(name + "DT", registry);
       timer = new YoDouble(name + "Timer", registry);
       jitter = new YoLong(name + "JitterInNanos", registry);
       realtimeRate = new YoDouble(name + "RealtimeRate", registry);
+      elapsedSystemTime = new YoDouble(name + "ElapsedSystemTime", registry);
 
       tick.set(-1);
-      realtimeRate.set(1.0);
    }
 
    /**
@@ -50,9 +53,9 @@ public class ThreadTimer
    public ThreadTimer(String name, YoVariableRegistry registry)
    {
       expectedDTNanos = 0;
-      alpha = 0.0;
       jitter = null;
       realtimeRate = null;
+      elapsedSystemTime = null;
 
       tick = new YoLong(name + "Tick", registry);
       dt = new YoDouble(name + "DT", registry);
@@ -64,24 +67,30 @@ public class ThreadTimer
    public void start()
    {
       long startTime = System.nanoTime();
+      computeClockBasedRealtimeRate(startTime);
       if (lastStartTime != 0)
       {
          computeJitter(startTime);
          double dtInNanos = startTime - lastStartTime;
          dt.set(Conversions.nanosecondsToMilliseconds(dtInNanos));
-         computeRealtimeRate(dtInNanos);
       }
       lastStartTime = startTime;
       tick.increment();
    }
 
-   private void computeRealtimeRate(double dtInNanos)
+   private void computeClockBasedRealtimeRate(long startTime)
    {
-      if (realtimeRate == null)
-         return;
-
-      double newRate = expectedDTNanos / dtInNanos;
-      realtimeRate.set(alpha * realtimeRate.getValue() + (1.0 - alpha) * newRate);
+      if (realtimeRateCounter == 0)
+      {
+         if (systemInitialTime != 0 && elapsedSystemTime != null)
+         {
+            elapsedSystemTime.set(Conversions.nanosecondsToSeconds(startTime - systemInitialTime));
+            realtimeRate.set(Conversions.nanosecondsToSeconds(REALTIME_RATE_SAMPLES * expectedDTNanos) / elapsedSystemTime.getValue());
+         }
+         realtimeRateCounter = REALTIME_RATE_SAMPLES;
+         systemInitialTime = startTime;
+      }
+      realtimeRateCounter--;
    }
 
    private void computeJitter(long startTime)

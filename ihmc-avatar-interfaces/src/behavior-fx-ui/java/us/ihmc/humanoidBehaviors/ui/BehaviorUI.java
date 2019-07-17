@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
@@ -29,6 +30,8 @@ import us.ihmc.ros2.Ros2Node;
  */
 public class BehaviorUI
 {
+   private static boolean showLivePlanarRegionsGraphic = true;
+
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -37,6 +40,7 @@ public class BehaviorUI
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
+   @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
    @FXML private PlannerParametersUIController plannerParametersUIController;
    @FXML private DirectRobotUIController directRobotUIController;
 
@@ -68,12 +72,19 @@ public class BehaviorUI
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       fancyPosesBehaviorUIController.init(behaviorMessager);
+      exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       plannerParametersUIController.init(behaviorMessager, robotModel);
       directRobotUIController.init(ros2Node, robotModel);
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);
-      view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+      view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
+      
+      if (showLivePlanarRegionsGraphic)
+      {
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+      }
+
       view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
       mainPane.setCenter(subSceneWrappedInsidePane);
