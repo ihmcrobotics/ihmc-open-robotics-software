@@ -8,9 +8,11 @@ import javafx.scene.control.RadioButton;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,15 +45,14 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private List<RadioButton> datasetSelectionRadioButtons = new ArrayList<>();
 
-   private PlanarRegionsGraphic regionsGraphicOne = new PlanarRegionsGraphic();
-   private PlanarRegionsGraphic regionsGraphicTwo = new PlanarRegionsGraphic();
-   private PlanarRegionsGraphic regionsGraphicThree = new PlanarRegionsGraphic();
-
    private PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::fxUpdate);
 
    private Window window;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private FakeREAModule fakeREAModule;
+
+   private PlanarRegionsList map = new PlanarRegionsList();
+   private PlanarRegionsGraphic mapGraphic;
 
    public void init(Window window, Ros2Node ros2Node)
    {
@@ -62,8 +63,12 @@ public class PlanarRegionSLAMUITabController extends Group
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node);
+      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
       getChildren().add(livePlanarRegionsGraphic);
+
+      mapGraphic = new PlanarRegionsGraphic(false);
+      generateOnAThread(mapGraphic, map);
+      getChildren().add(mapGraphic);
 
       fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
 
@@ -72,9 +77,7 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private void fxUpdate(long now)
    {
-      regionsGraphicOne.update();
-      regionsGraphicTwo.update();
-      regionsGraphicThree.update();
+      mapGraphic.update();
    }
 
    private void generateOnAThread(PlanarRegionsGraphic regionsGraphicOne, PlanarRegionsList planarRegionsList)
@@ -95,6 +98,12 @@ public class PlanarRegionSLAMUITabController extends Group
       selection.setSelected(true);
    }
 
+   private void slam()
+   {
+      PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
+      generateOnAThread(mapGraphic, map);
+   }
+
    @FXML private void acceptNewRegionListsCheckbox()
    {
       livePlanarRegionsGraphic.setAcceptNewRegions(acceptNewRegionListsCheckbox.isSelected());
@@ -102,22 +111,23 @@ public class PlanarRegionSLAMUITabController extends Group
 
    @FXML private void slamButton()
    {
-
+      ThreadTools.startAThread(this::slam, "SLAM");
    }
 
    @FXML private void exportMapButton()
    {
-
+      PlanarRegionDataExporter.exportUsingFileChooser(window, map);
    }
 
    @FXML private void clearMapButton()
    {
-
+      map.clear();
+      generateOnAThread(mapGraphic, map);
    }
 
    @FXML private void exportIncomingButton()
    {
-
+      PlanarRegionDataExporter.exportUsingFileChooser(window, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
    }
 
    @FXML private void fakeREAPublisherCheckbox()

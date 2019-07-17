@@ -21,10 +21,17 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private boolean acceptNewRegions = true;
-   private volatile PlanarRegionsList latestPlanarRegionsList;
+   private volatile PlanarRegionsList latestPlanarRegionsList = new PlanarRegionsList(); // prevent NPEs
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node)
    {
+      super(true);
+   }
+
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
+   {
+      super(initializeToFlatGround);
+
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID, this::acceptPlanarRegions);
       animationTimer.start();
    }

@@ -55,7 +55,7 @@
             <Insets left="5.0" />
          </padding>
          <children>
-            <CheckBox fx:id="acceptNewRegionListsCheckbox" mnemonicParsing="false" onAction="#acceptNewRegionListsCheckbox" text="Accept new region lists" />
+            <CheckBox fx:id="acceptNewRegionListsCheckbox" mnemonicParsing="false" onAction="#acceptNewRegionListsCheckbox" selected="true" text="Accept new region lists" />
             <Button fx:id="slamButton" mnemonicParsing="false" onAction="#slamButton" text="SLAM" GridPane.rowIndex="1" />
             <Button fx:id="exportIncomingButton" mnemonicParsing="false" onAction="#exportIncomingButton" text="Export incoming..." GridPane.rowIndex="3" />
             <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
