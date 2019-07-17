@@ -50,7 +50,7 @@ public class PlanarRegionSLAMUITabController extends Group
    private PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::fxUpdate);
 
    private Window window;
-   private LivePlanarRegionsGraphic incomingRegionsList;
+   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private FakeREAModule fakeREAModule;
 
    public void init(Window window, Ros2Node ros2Node)
@@ -62,8 +62,8 @@ public class PlanarRegionSLAMUITabController extends Group
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      incomingRegionsList = new LivePlanarRegionsGraphic(ros2Node);
-      getChildren().add(incomingRegionsList);
+      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node);
+      getChildren().add(livePlanarRegionsGraphic);
 
       fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
 
@@ -97,7 +97,7 @@ public class PlanarRegionSLAMUITabController extends Group
 
    @FXML private void acceptNewRegionListsCheckbox()
    {
-
+      livePlanarRegionsGraphic.setAcceptNewRegions(acceptNewRegionListsCheckbox.isSelected());
    }
 
    @FXML private void slamButton()
