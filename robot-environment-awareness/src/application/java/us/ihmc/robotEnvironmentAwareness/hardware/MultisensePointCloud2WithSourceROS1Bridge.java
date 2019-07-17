@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
