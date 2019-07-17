@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -24,21 +26,24 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 
 public class StepInPlaceBehavior
 {
    private final BehaviorHelper behaviorHelper;
+   private final AtomicReference<Boolean> enable;
 
    private final ActivationReference<Boolean> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
+   private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
+   private final AtomicLong footstepID = new AtomicLong();
 
    public StepInPlaceBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
       LogTools.debug("Initializing step in place behavior");
 
       this.behaviorHelper = behaviorHelper;
+      enable = messager.createInput(API.Enable, false);
 
       behaviorHelper.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
@@ -58,17 +63,26 @@ public class StepInPlaceBehavior
 
    private void consumeFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
+      if (!enable.get())
+         return;
+
       LogTools.info("consumeFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
          int footstepsTakenSoFar = footstepsTaken.incrementAndGet();
-         LogTools.info("Have taken " + footstepsTakenSoFar + " footsteps.");
+         lastFootstepTakenID.set(footstepStatusMessage.getSequenceId());
+         LogTools.info("Have taken " + footstepsTakenSoFar + " footsteps. Last one had id: " + lastFootstepTakenID.get());
       }
    }
 
    private void stepInPlace()
    {
+      if (!enable.get())
+      {
+         return;
+      }
+
       if (stepping.poll())
       {
          if (stepping.hasChanged())
@@ -76,6 +90,7 @@ public class StepInPlaceBehavior
             LogTools.info("Starting to step");
          }
 
+//         if (!behaviorHelper.isRobotWalking())
          if (footstepsTaken.compareAndSet(2, 0))
          {
             LogTools.info("Sending steps");
@@ -105,6 +120,7 @@ public class StepInPlaceBehavior
          footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
          FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, footLocation, footOrientation);
+         footstepDataMessage.setSequenceId(footstepID.incrementAndGet());
          footstepDataMessages.add().set(footstepDataMessage);
       }
       footstepList.setAreFootstepsAdjustable(true);
@@ -117,6 +133,7 @@ public class StepInPlaceBehavior
       private static final Category Root = apiFactory.createRootCategory("StepInPlaceBehavior");
       private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
 
+      public static final Topic<Boolean> Enable = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Enable"));
       public static final Topic<Boolean> Stepping = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Stepping"));
       public static final Topic<Boolean> Abort = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Abort"));
 

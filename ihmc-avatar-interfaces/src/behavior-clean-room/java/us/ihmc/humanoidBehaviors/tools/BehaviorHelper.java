@@ -25,6 +25,7 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -143,6 +144,14 @@ public class BehaviorHelper
       remoteRobotControllerInterface.pauseWalking();
    }
 
+   public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, FramePose3D footPose)
+   {
+      Point3D position = new Point3D();
+      Quaternion orientation = new Quaternion();
+      footPose.get(position, orientation);
+      requestFootTrajectory(robotSide, trajectoryTime, position, orientation);
+   }
+
    public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, Point3D position, Quaternion orientation)
    {
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
@@ -239,6 +248,13 @@ public class BehaviorHelper
    // Planning Methods:
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
+                                                                     PlanarRegionsList planarRegionsList)
+   {
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+      return requestPlan(start, goal, planarRegionsListMessage);
+   }
+
+   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
                                                                      PlanarRegionsListMessage planarRegionsListMessage)
    {
       return remoteFootstepPlannerInterface.requestPlan(start, goal, planarRegionsListMessage);
@@ -271,5 +287,12 @@ public class BehaviorHelper
          threadScheduler.shutdown();
       }
    }
+
+   public boolean isRobotWalking()
+   {
+      HighLevelControllerName controllerState = getLatestControllerState();
+      return (controllerState == HighLevelControllerName.WALKING);
+   }
+
 
 }
