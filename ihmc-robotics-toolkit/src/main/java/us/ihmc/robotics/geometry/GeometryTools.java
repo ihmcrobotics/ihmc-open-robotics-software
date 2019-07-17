@@ -996,4 +996,18 @@ public class GeometryTools
    
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
    }
+
+   public static Point3D midpoint(Point3DReadOnly a, Point3DReadOnly b)
+   {
+      Point3D midpoint = new Point3D(a);
+      midpoint.interpolate(a, b, 0.5);
+      return midpoint;
+   }
+
+   public static Vector3D vector(Point3DReadOnly from, Point3DReadOnly to)
+   {
+      Vector3D vector = new Vector3D(to);
+      vector.sub(from);
+      return vector;
+   }
 }

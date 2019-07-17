@@ -74,6 +74,9 @@ public class PlanarRegionSLAMUITabController extends Group
       fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
 
       animationTimer.start();
+
+      livePlanarRegionsGraphic.setShowBoundingBox(true);
+      mapGraphic.setShowBoundingBox(true);
    }
 
    private void fxUpdate(long now)
