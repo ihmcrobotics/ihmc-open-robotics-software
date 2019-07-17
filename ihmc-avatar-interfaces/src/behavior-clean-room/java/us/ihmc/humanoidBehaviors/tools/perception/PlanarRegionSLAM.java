@@ -19,9 +19,13 @@ public class PlanarRegionSLAM
     */
    public static RigidBodyTransform slam(PlanarRegionsList map, PlanarRegionsList newData)
    {
-      RigidBodyTransform detectedDrift = findDrift(map, newData);
-      mergeNewDataIntoMap(map, newData);
-      return detectedDrift;
+      newData.getPlanarRegionsAsList().forEach(region -> map.addPlanarRegion(region));
+
+      return new RigidBodyTransform();
+
+//      RigidBodyTransform detectedDrift = findDrift(map, newData);
+//      mergeNewDataIntoMap(map, newData);
+//      return detectedDrift;
    }
 
    private static RigidBodyTransform findDrift(PlanarRegionsList map, PlanarRegionsList newData)

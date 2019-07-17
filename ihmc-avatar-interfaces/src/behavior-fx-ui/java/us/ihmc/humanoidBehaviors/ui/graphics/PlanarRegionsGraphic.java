@@ -30,14 +30,27 @@ public class PlanarRegionsGraphic extends Group
 
    public PlanarRegionsGraphic()
    {
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region
-      convexPolygon.addVertex(10.0, 10.0);
-      convexPolygon.addVertex(-10.0, 10.0);
-      convexPolygon.addVertex(-10.0, -10.0);
-      convexPolygon.addVertex(10.0, -10.0);
-      convexPolygon.update();
-      PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), convexPolygon);
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList(groundPlane);
+      this(true);
+   }
+
+   public PlanarRegionsGraphic(boolean initializeToFlatGround)
+   {
+      PlanarRegionsList planarRegionsList;
+      if (initializeToFlatGround)
+      {
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region
+         convexPolygon.addVertex(10.0, 10.0);
+         convexPolygon.addVertex(-10.0, 10.0);
+         convexPolygon.addVertex(-10.0, -10.0);
+         convexPolygon.addVertex(10.0, -10.0);
+         convexPolygon.update();
+         PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), convexPolygon);
+         planarRegionsList = new PlanarRegionsList(groundPlane);
+      }
+      else
+      {
+         planarRegionsList = new PlanarRegionsList();
+      }
 
       generateMeshes(planarRegionsList);
    }
