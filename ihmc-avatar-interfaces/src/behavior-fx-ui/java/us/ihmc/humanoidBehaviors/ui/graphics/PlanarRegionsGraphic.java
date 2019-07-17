@@ -6,10 +6,19 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -20,13 +29,16 @@ import java.util.List;
 public class PlanarRegionsGraphic extends Group
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
-   private static final boolean SHOW_AREA = false;
 
    private volatile List<Node> regionNodes;
    private List<Node> lastNodes = null; // optimization
 
    private Object regionMeshAddSync = new Object(); // for parallel mesh builder
    private volatile List<Node> updateRegionMeshViews; // for parallel mesh builder
+
+   // visualization options
+   private boolean showAreaText = false;
+   private boolean showBoundingBox = false;
 
    public PlanarRegionsGraphic()
    {
@@ -81,12 +93,17 @@ public class PlanarRegionsGraphic extends Group
          totalArea += convexPolygon.getArea();
       }
 
-      LabelGraphic sizeLabel;
-      if (SHOW_AREA)
+      LabelGraphic sizeLabel = null;
+      if (showAreaText)
       {
          sizeLabel = new LabelGraphic(FormattingTools.getFormattedToSignificantFigures(totalArea, 3));
          sizeLabel.getPose().appendTransform(transformToWorld);
          sizeLabel.update();
+      }
+
+      if (showBoundingBox)
+      {
+         JavaFXGraphicTools.drawBoxEdges(meshBuilder,planarRegion.getBoundingBox3dInWorld(), 0.005);
       }
 
       MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
@@ -94,7 +111,7 @@ public class PlanarRegionsGraphic extends Group
 
       synchronized (regionMeshAddSync)
       {
-         if (SHOW_AREA) updateRegionMeshViews.add(sizeLabel.getNode());
+         if (showAreaText) updateRegionMeshViews.add(sizeLabel.getNode());
          updateRegionMeshViews.add(regionMeshView);
       }
    }
@@ -108,6 +125,16 @@ public class PlanarRegionsGraphic extends Group
          getChildren().addAll(meshViews);
          lastNodes = meshViews;
       }
+   }
+
+   public void setShowAreaText(boolean showAreaText)
+   {
+      this.showAreaText = showAreaText;
+   }
+
+   public void setShowBoundingBox(boolean showBoundingBox)
+   {
+      this.showBoundingBox = showBoundingBox;
    }
 
    public static Color getRegionColor(int regionId)
