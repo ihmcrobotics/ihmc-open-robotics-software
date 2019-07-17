@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.ExecutorService;
@@ -19,22 +20,41 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
+   private boolean acceptNewRegions = true;
+   private volatile PlanarRegionsList latestPlanarRegionsList;
+
    public LivePlanarRegionsGraphic(Ros2Node ros2Node)
    {
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID, this::acceptPlanarRegions);
-
       animationTimer.start();
    }
 
    private void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
    {
-      executorService.submit(() -> { // important not to execute this in either ROS2 or JavaFX threads
-         super.generateMeshes(PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData));
-      });
+      if (acceptNewRegions)
+      {
+         executorService.submit(() -> convertAndGenerateMesh(incomingData));
+      }
+   }
+
+   private void convertAndGenerateMesh(PlanarRegionsListMessage incomingData)
+   {
+      latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
+      super.generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
    }
 
    private void handle(long now)
    {
       super.update();
+   }
+
+   public void setAcceptNewRegions(boolean acceptNewRegions)
+   {
+      this.acceptNewRegions = acceptNewRegions;
+   }
+
+   public PlanarRegionsList getLatestPlanarRegionsList()
+   {
+      return latestPlanarRegionsList;
    }
 }
