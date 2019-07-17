@@ -30,6 +30,8 @@ import us.ihmc.ros2.Ros2Node;
  */
 public class BehaviorUI
 {
+   private static boolean showLivePlanarRegionsGraphic = true;
+
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -77,7 +79,12 @@ public class BehaviorUI
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);
       view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
-      view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+      
+      if (showLivePlanarRegionsGraphic)
+      {
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+      }
+
       view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
       mainPane.setCenter(subSceneWrappedInsidePane);
