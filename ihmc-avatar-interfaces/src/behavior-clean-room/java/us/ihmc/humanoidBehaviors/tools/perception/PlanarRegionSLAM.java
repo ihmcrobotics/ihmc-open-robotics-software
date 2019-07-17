@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
-import javafx.util.Pair;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.lists.PairList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class PlanarRegionSLAM
       // store regions in data structure by pose and size (shape similarity?)
 
       // find high confidence region matches (includes only: surfaces fully visible in both lists, i.e. excludes ground)
-      List<Pair<PlanarRegion, PlanarRegion>> highConfidencePairs = findHighConfidencePairs(map, newData);
+      PairList<PlanarRegion, PlanarRegion> highConfidencePairs = findHighConfidencePairs(map, newData);
 
       // correct drift based on high confidence region pairs; hopefully there are many varied normals
       RigidBodyTransform snappedPairsCorrection = findDriftCorrectionTransform(highConfidencePairs);
@@ -87,16 +87,16 @@ public class PlanarRegionSLAM
     * @param newData The newData that you are adding to the map.
     * @return List of Pairs of PlanarRegions that are good potential matches.
     */
-   public static List<Pair<PlanarRegion, PlanarRegion>> findHighConfidencePairs(PlanarRegionsList map, PlanarRegionsList newData)
+   public static PairList<PlanarRegion, PlanarRegion> findHighConfidencePairs(PlanarRegionsList map, PlanarRegionsList newData)
    {
-      ArrayList<Pair<PlanarRegion, PlanarRegion>> pairs = new ArrayList<>();
+      PairList<PlanarRegion, PlanarRegion> pairs = new PairList<>();
 
       // probably n squared search for now?
 
       return pairs;
    }
 
-   public static RigidBodyTransform findDriftCorrectionTransform(List<Pair<PlanarRegion, PlanarRegion>> highConfidencePairs)
+   public static RigidBodyTransform findDriftCorrectionTransform(PairList<PlanarRegion, PlanarRegion> highConfidencePairs)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
 
