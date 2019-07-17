@@ -73,6 +73,24 @@ class PlanarRegionSLAMTest
       squareTwo = createASingleTranslatedAndYawedSquare(translationTwo, -Math.PI / 3.0, 0.5, 0.5);
       assertHighConfidencePairingBothWays(squareOne, squareTwo);
 
+      // Two pitched squares
+      double yaw = 0.0;
+      double pitch = Math.PI;
+      double roll = 0.0;
+
+      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
+      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
+      assertHighConfidencePairingBothWays(squareOne, squareTwo);
+
+      // Two randomly oriented squares
+      yaw = Math.PI * 0.5;
+      pitch = Math.PI * 0.3;
+      roll = -Math.PI * 0.7;
+
+      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 0.5, 0.5);
+      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
+      assertHighConfidencePairingBothWays(squareOne, squareTwo);
+
    }
 
    private void assertHighConfidencePairingBothWays(PlanarRegion regionOne, PlanarRegion regionTwo)
@@ -133,6 +151,14 @@ class PlanarRegionSLAMTest
       Point2D maximumPoint = new Point2D(xSize / 2.0, ySize / 2.0);
 
       return createASingleSquare(new Vector3D(), 0.0, 0.0, 0.0, minimumPoint, maximumPoint);
+   }
+
+   private PlanarRegion createASingleSquare(Vector3D translation, double yaw, double pitch, double roll, double xSize, double ySize)
+   {
+      Point2D minimumPoint = new Point2D(-xSize / 2.0, -ySize / 2.0);
+      Point2D maximumPoint = new Point2D(xSize / 2.0, ySize / 2.0);
+
+      return createASingleSquare(translation, yaw, pitch, roll, minimumPoint, maximumPoint);
    }
 
    private PlanarRegion createASingleSquare(Vector3D translation, double yaw, double pitch, double roll, Point2D minimumPoint, Point2D maximumPoint)
