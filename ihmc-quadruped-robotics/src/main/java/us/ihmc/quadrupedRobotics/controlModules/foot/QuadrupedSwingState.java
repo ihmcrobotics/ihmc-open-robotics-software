@@ -399,8 +399,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
          }
          else if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
          {
-            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());            
-            waypointCalculator.setSwingHeight(obstacleClearanceSwingHeight);
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+            double swingHeight = Math.max(obstacleClearanceSwingHeight, currentStepCommand.getGroundClearance());
+            waypointCalculator.setSwingHeight(swingHeight);
          }
          else
          {
