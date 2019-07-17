@@ -5,6 +5,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
@@ -56,7 +57,6 @@
          </padding>
          <children>
             <CheckBox fx:id="acceptNewRegionListsCheckbox" mnemonicParsing="false" onAction="#acceptNewRegionListsCheckbox" selected="true" text="Accept new region lists" />
-            <Button fx:id="slamButton" mnemonicParsing="false" onAction="#slamButton" text="SLAM" GridPane.rowIndex="1" />
             <Button fx:id="exportIncomingButton" mnemonicParsing="false" onAction="#exportIncomingButton" text="Export incoming..." GridPane.rowIndex="3" />
             <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
                <children>
@@ -66,6 +66,20 @@
                         <Insets left="10.0" />
                      </FlowPane.margin>
                   </Button>
+               </children>
+            </FlowPane>
+            <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+               <children>
+                  <Button fx:id="slamButton" mnemonicParsing="false" onAction="#slamButton" text="SLAM" />
+                  <Button fx:id="slamStepButton" disable="true" mnemonicParsing="false" onAction="#slamStepButton" text="Step">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <FlowPane.margin>
+                        <Insets />
+                     </FlowPane.margin>
+                  </Button>
+                  <TextField fx:id="slamStepStatus" editable="false" prefHeight="26.0" prefWidth="123.0" />
                </children>
             </FlowPane>
          </children>

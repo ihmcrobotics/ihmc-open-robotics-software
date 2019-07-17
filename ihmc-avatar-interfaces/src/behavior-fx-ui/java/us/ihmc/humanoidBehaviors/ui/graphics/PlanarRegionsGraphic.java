@@ -6,19 +6,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -65,6 +58,11 @@ public class PlanarRegionsGraphic extends Group
       }
 
       generateMeshes(planarRegionsList);
+   }
+
+   public void generateMeshesAsync(PlanarRegionsList planarRegionsList)
+   {
+      ThreadTools.startAThread(() -> generateMeshes(planarRegionsList), "MeshGeneration");
    }
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)

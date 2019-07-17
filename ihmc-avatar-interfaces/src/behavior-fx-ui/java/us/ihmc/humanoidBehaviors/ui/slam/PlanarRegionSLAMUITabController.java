@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
@@ -12,7 +13,9 @@ import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -24,6 +27,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState.Hidden;
+
 public class PlanarRegionSLAMUITabController extends Group
 {
    public static final PlanarRegionsList EMPTY_REGIONS_LIST = new PlanarRegionsList();
@@ -34,9 +39,8 @@ public class PlanarRegionSLAMUITabController extends Group
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
    @FXML private Button slamButton;
-   @FXML private Button exportMapButton;
-   @FXML private Button clearMapButton;
-   @FXML private Button exportIncomingButton;
+   @FXML private Button slamStepButton;
+   @FXML private TextField slamStepStatus;
 
    @FXML private CheckBox fakeREAPublisherCheckbox;
    @FXML private RadioButton dataset1RadioButton;
@@ -55,6 +59,8 @@ public class PlanarRegionSLAMUITabController extends Group
    private PlanarRegionsList map = new PlanarRegionsList();
    private PlanarRegionsGraphic mapGraphic;
 
+   private PlanarRegionSLAMGraphic visualizer;
+
    public void init(Window window, Ros2Node ros2Node)
    {
       this.window = window;
@@ -68,25 +74,20 @@ public class PlanarRegionSLAMUITabController extends Group
       getChildren().add(livePlanarRegionsGraphic);
 
       mapGraphic = new PlanarRegionsGraphic(false);
-      generateOnAThread(mapGraphic, map);
+      mapGraphic.generateMeshesAsync(map);
       getChildren().add(mapGraphic);
+
+      visualizer = new PlanarRegionSLAMGraphic();
+      visualizer.setStateListener(this::onVisualizerStateChange);
 
       fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
 
       animationTimer.start();
-
-      livePlanarRegionsGraphic.setShowBoundingBox(true);
-      mapGraphic.setShowBoundingBox(true);
    }
 
    private void fxUpdate(long now)
    {
       mapGraphic.update();
-   }
-
-   private void generateOnAThread(PlanarRegionsGraphic regionsGraphicOne, PlanarRegionsList planarRegionsList)
-   {
-      ThreadTools.startAThread(() -> regionsGraphicOne.generateMeshes(planarRegionsList), "MeshGeneration");
    }
 
    private PlanarRegionsList loadDataSet(String dataSetName)
@@ -106,7 +107,25 @@ public class PlanarRegionSLAMUITabController extends Group
    {
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
       map = slamResult.getMergedMap();
-      generateOnAThread(mapGraphic, map);
+      mapGraphic.generateMeshesAsync(map);
+
+      slamStepButton.setDisable(false);  // map must exist before step enabled
+   }
+
+   private void onVisualizerStateChange(SLAMVisualizationState state)
+   {
+      slamStepStatus.setText(state.name());
+
+      if (state == Hidden)
+      {
+         slamButton.setDisable(false);
+         livePlanarRegionsGraphic.setAcceptNewRegions(acceptNewRegionListsCheckbox.isSelected());
+         acceptNewRegionListsCheckbox.setDisable(false);
+
+         getChildren().add(mapGraphic);
+         getChildren().add(livePlanarRegionsGraphic);
+         getChildren().remove(visualizer);
+      }
    }
 
    @FXML private void acceptNewRegionListsCheckbox()
@@ -119,6 +138,25 @@ public class PlanarRegionSLAMUITabController extends Group
       ThreadTools.startAThread(this::slam, "SLAM");
    }
 
+   @FXML private void slamStepButton()
+   {
+      LogTools.info("slamStepButton() visualizer: {}", visualizer.getState().name());
+      if (visualizer.getState() == Hidden)
+      {
+         slamButton.setDisable(true);
+         livePlanarRegionsGraphic.setAcceptNewRegions(false);
+         acceptNewRegionListsCheckbox.setDisable(true);
+
+         visualizer.copyDataIn(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
+
+         getChildren().remove(mapGraphic);
+         getChildren().remove(livePlanarRegionsGraphic);
+         getChildren().add(visualizer);
+      }
+
+      visualizer.step();
+   }
+
    @FXML private void exportMapButton()
    {
       PlanarRegionDataExporter.exportUsingFileChooser(window, map);
@@ -127,7 +165,7 @@ public class PlanarRegionSLAMUITabController extends Group
    @FXML private void clearMapButton()
    {
       map.clear();
-      generateOnAThread(mapGraphic, map);
+      mapGraphic.generateMeshesAsync(map);
    }
 
    @FXML private void exportIncomingButton()
