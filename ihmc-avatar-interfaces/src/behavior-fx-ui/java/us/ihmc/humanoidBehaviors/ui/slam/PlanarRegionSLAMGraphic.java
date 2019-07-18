@@ -52,8 +52,10 @@ public class PlanarRegionSLAMGraphic extends Group
       stateMachine = factory.getFactory().build(Hidden);
       stateMachine.doTransitions(); // enter initial state to prevent NPE
 
-      mapGraphic.setShowBoundingBox(true);
-      listToMergeGraphic.setShowBoundingBox(true);
+      mapGraphic.setDrawBoundingBox(true);
+      mapGraphic.setDrawNormal(true);
+      listToMergeGraphic.setDrawBoundingBox(true);
+      listToMergeGraphic.setDrawNormal(true);
 
       getChildren().add(mapGraphic);
       getChildren().add(listToMergeGraphic);
