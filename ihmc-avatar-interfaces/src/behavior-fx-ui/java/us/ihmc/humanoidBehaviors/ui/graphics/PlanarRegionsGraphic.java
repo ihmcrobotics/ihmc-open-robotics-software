@@ -7,10 +7,17 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -30,8 +37,9 @@ public class PlanarRegionsGraphic extends Group
    private volatile List<Node> updateRegionMeshViews; // for parallel mesh builder
 
    // visualization options
-   private boolean showAreaText = false;
-   private boolean showBoundingBox = false;
+   private boolean drawAreaText = false;
+   private boolean drawBoundingBox = false;
+   private boolean drawNormal;
 
    public PlanarRegionsGraphic()
    {
@@ -78,8 +86,7 @@ public class PlanarRegionsGraphic extends Group
    {
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
 
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
+      RigidBodyTransform transformToWorld = PlanarRegionTools.getTransformToWorld(planarRegion);
 
       meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 
@@ -92,16 +99,36 @@ public class PlanarRegionsGraphic extends Group
       }
 
       LabelGraphic sizeLabel = null;
-      if (showAreaText)
+      if (drawAreaText)
       {
          sizeLabel = new LabelGraphic(FormattingTools.getFormattedToSignificantFigures(totalArea, 3));
          sizeLabel.getPose().appendTransform(transformToWorld);
          sizeLabel.update();
       }
 
-      if (showBoundingBox)
+      if (drawBoundingBox)
       {
-         JavaFXGraphicTools.drawBoxEdges(meshBuilder,planarRegion.getBoundingBox3dInWorld(), 0.005);
+         JavaFXGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005);
+      }
+
+      if (drawNormal)
+      {
+         Vector3D normal = planarRegion.getNormal();
+         normal.normalize();
+
+         Point3D centroid = PlanarRegionTools.getAverageCentroid3DInWorld(planarRegion);
+
+         double length = 0.07;
+         double radius = 0.004;
+         double cylinderToConeLengthRatio = 0.8;
+         double coneDiameterMultiplier = 1.8;
+         JavaFXGraphicTools.drawArrow(meshBuilder,
+                                      centroid,
+                                      transformToWorld.getRotation(),
+                                      length,
+                                      radius,
+                                      cylinderToConeLengthRatio,
+                                      coneDiameterMultiplier);
       }
 
       MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
@@ -109,7 +136,7 @@ public class PlanarRegionsGraphic extends Group
 
       synchronized (regionMeshAddSync)
       {
-         if (showAreaText) updateRegionMeshViews.add(sizeLabel.getNode());
+         if (drawAreaText) updateRegionMeshViews.add(sizeLabel.getNode());
          updateRegionMeshViews.add(regionMeshView);
       }
    }
@@ -125,14 +152,19 @@ public class PlanarRegionsGraphic extends Group
       }
    }
 
-   public void setShowAreaText(boolean showAreaText)
+   public void setDrawAreaText(boolean drawAreaText)
    {
-      this.showAreaText = showAreaText;
+      this.drawAreaText = drawAreaText;
    }
 
-   public void setShowBoundingBox(boolean showBoundingBox)
+   public void setDrawBoundingBox(boolean drawBoundingBox)
    {
-      this.showBoundingBox = showBoundingBox;
+      this.drawBoundingBox = drawBoundingBox;
+   }
+
+   public void setDrawNormal(boolean drawNormal)
+   {
+      this.drawNormal = drawNormal;
    }
 
    public static Color getRegionColor(int regionId)

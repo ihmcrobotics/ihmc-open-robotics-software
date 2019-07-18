@@ -2,17 +2,25 @@ package us.ihmc.javaFXVisualizers;
 
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class JavaFXGraphicTools
 {
@@ -40,6 +48,44 @@ public class JavaFXGraphicTools
       node.setTranslateX(position.getX());
       node.setTranslateY(position.getY());
       node.setTranslateZ(position.getZ());
+   }
+
+   public static void drawPlanarRegion(JavaFXMeshBuilder meshBuilder, PlanarRegion planarRegion, double lineWidth)
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), lineWidth, true);
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         meshBuilder.addPolygon(transformToWorld, convexPolygon);
+      }
+   }
+
+   public static void drawArrow(JavaFXMeshBuilder meshBuilder,
+                                Tuple3DReadOnly position,
+                                Orientation3DReadOnly orientation,
+                                double length,
+                                double radius,
+                                double cylinderToConeLengthRatio,
+                                double coneDiameterMultiplier)
+   {
+      double cylinderLength = cylinderToConeLengthRatio * length;
+      double coneLength = (1.0 - cylinderToConeLengthRatio) * length;
+      double coneRadius = coneDiameterMultiplier * radius;
+
+      AxisAngle axisAngle = new AxisAngle(orientation);
+      meshBuilder.addCylinder(cylinderLength, radius, position, axisAngle);
+
+      Vector3D coneBaseTranslation = new Vector3D(0.0, 0.0, 1.0);
+      orientation.transform(coneBaseTranslation);
+      coneBaseTranslation.scale(length);
+      coneBaseTranslation.scale(cylinderToConeLengthRatio);
+      Point3D coneBase = new Point3D(position);
+      coneBase.add(coneBaseTranslation);
+
+      meshBuilder.addCone(coneLength, coneRadius, coneBase, axisAngle);
    }
 
    public static void drawBoxEdges(JavaFXMeshBuilder meshBuilder, BoundingBox3DReadOnly boundingBox, double lineWidth)
