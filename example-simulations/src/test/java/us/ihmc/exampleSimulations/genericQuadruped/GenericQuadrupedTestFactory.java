@@ -184,29 +184,18 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
                                                               physicalProperties.getFeetGroundContactPoints(),
-                                                              new DefaultFootstepPlannerParameters(),
+                                                              new GenericQuadrupedFootstepPlannerParameters(),
                                                               xGaitSettings,
                                                               new GenericQuadrupedPointFootSnapperParameters(),
                                                               PubSubImplementation.INTRAPROCESS,
                                                               networkModuleParameters);
-      networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
       stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName,
                                                            ros2Node,
                                                            networkProcessor,
                                                            modelFactory.createFullRobotModel(),
                                                            xGaitSettings,
                                                            teleopRegistry);
-
-      graphicsListRegistry = new YoGraphicsListRegistry();
-      networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
-                                                              physicalProperties.getFeetGroundContactPoints(),
-                                                              new GenericQuadrupedFootstepPlannerParameters(),
-                                                              xGaitSettings,
-                                                              new GenericQuadrupedPointFootSnapperParameters(),
-                                                              PubSubImplementation.INTRAPROCESS,
-                                                              networkModuleParameters);
       networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
-      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, fullRobotModel, xGaitSettings, teleopRegistry);
 
       new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
 
