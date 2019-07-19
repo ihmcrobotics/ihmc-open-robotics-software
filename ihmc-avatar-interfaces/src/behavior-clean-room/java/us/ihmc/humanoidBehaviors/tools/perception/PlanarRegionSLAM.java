@@ -1,12 +1,15 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class PlanarRegionSLAM
 {
@@ -19,18 +22,23 @@ public class PlanarRegionSLAM
     */
    public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newData)
    {
+      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData);
+      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
+
+      Map<PlanarRegion, PairList<PlanarRegion, Point3D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(
+            normalSimilarityFiltered);
+
+      RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
+
+      PlanarRegionsList transformedNewData = new PlanarRegionsList(newData);
+      transformedNewData.transform(driftCorrectionTransform);
+
       PlanarRegionsList mergedMap = new PlanarRegionsList();
       map.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
-      newData.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
+      transformedNewData.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
 
-      RigidBodyTransform transformFromIncomingToMap = new RigidBodyTransform();
-
-      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(transformFromIncomingToMap, mergedMap);
+      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(driftCorrectionTransform, mergedMap);
       return result;
-
-      //      RigidBodyTransform detectedDrift = findDrift(map, newData);
-      //      mergeNewDataIntoMap(map, newData);
-      //      return detectedDrift;
    }
 
    private static RigidBodyTransform findDrift(PlanarRegionsList map, PlanarRegionsList newData)
