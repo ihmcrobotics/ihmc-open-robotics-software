@@ -1,18 +1,18 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.lists.PairList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAM
 {
@@ -25,19 +25,7 @@ public class PlanarRegionSLAM
     */
    public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newData)
    {
-      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData);
-
-      LogTools.info("boundboxCollisions.keys: {}", boundingBox3DCollisions.size());
-      LogTools.info("boundboxCollisions.values: {}", boundingBox3DCollisions.values().size());
-
-
-      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
-
-      LogTools.info("normalSimilarityFiltered.keys: {}", normalSimilarityFiltered.size());
-      LogTools.info("normalSimilarityFiltered.values: {}", normalSimilarityFiltered.values().size());
-
-      Map<PlanarRegion, PairList<PlanarRegion, Point3D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(
-            normalSimilarityFiltered);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map, newData);
 
       LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
       LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
@@ -57,6 +45,30 @@ public class PlanarRegionSLAM
       return result;
    }
 
+   /**
+    * Looks through two PlanarRegionsLists and finds PlanarRegion pairs that are good potential matches.
+    * @param map The map that you are building.
+    * @param newData The newData that you are adding to the map.
+    * @return A Map from PlanarRegions in the map to matching regions in the new data, and matching reference points in the new Data.
+    */
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> findHighConfidenceRegionMatchesAndReferencePoints(PlanarRegionsList map, PlanarRegionsList newData)
+   {
+      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData);
+
+      LogTools.info("boundboxCollisions.keys: {}", boundingBox3DCollisions.size());
+      LogTools.info("boundboxCollisions.values: {}", boundingBox3DCollisions.values().size());
+
+
+      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
+
+      LogTools.info("normalSimilarityFiltered.keys: {}", normalSimilarityFiltered.size());
+      LogTools.info("normalSimilarityFiltered.values: {}", normalSimilarityFiltered.values().size());
+
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(
+            normalSimilarityFiltered);
+      return matchesWithReferencePoints;
+   }
+
    public static PlanarRegionSLAMResult intentionallyDrift(PlanarRegionsList newData)
    {
       AxisAngle smallRotation = new AxisAngle(0.1, 0.1, 0.1);
@@ -67,26 +79,6 @@ public class PlanarRegionSLAM
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
-   }
-
-   private static RigidBodyTransform findDrift(PlanarRegionsList map, PlanarRegionsList newData)
-   {
-      RigidBodyTransform detectedDrift = new RigidBodyTransform();
-
-      // could do an obvious ground correction at very beginning
-      RigidBodyTransform groundPlaneCorrection = snapToObviousGroundPlane(map, newData);
-      detectedDrift.transform(groundPlaneCorrection); // this is probably wrong
-
-      // store regions in data structure by pose and size (shape similarity?)
-
-      // find high confidence region matches (includes only: surfaces fully visible in both lists, i.e. excludes ground)
-      PairList<PlanarRegion, PlanarRegion> highConfidencePairs = findHighConfidencePairs(map, newData);
-
-      // correct drift based on high confidence region pairs; hopefully there are many varied normals
-      RigidBodyTransform snappedPairsCorrection = findDriftCorrectionTransform(highConfidencePairs);
-      newData.transform(snappedPairsCorrection); // this is probably wrong
-      detectedDrift.transform(snappedPairsCorrection); // this is probably wrong
-      return detectedDrift;
    }
 
    private static void mergeNewDataIntoMap(PlanarRegionsList map, PlanarRegionsList newData)
@@ -114,22 +106,6 @@ public class PlanarRegionSLAM
 
       RigidBodyTransform drift = new RigidBodyTransform();
       return drift;
-   }
-
-   
-   /**
-    * Looks through two PlanarRegionsLists and finds PlanarRegion pairs that are good potential matches.
-    * @param map The map that you are building.
-    * @param newData The newData that you are adding to the map.
-    * @return List of Pairs of PlanarRegions that are good potential matches.
-    */
-   public static PairList<PlanarRegion, PlanarRegion> findHighConfidencePairs(PlanarRegionsList map, PlanarRegionsList newData)
-   {
-      PairList<PlanarRegion, PlanarRegion> pairs = new PairList<>();
-
-      // probably n squared search for now?
-
-      return pairs;
    }
 
    public static RigidBodyTransform findDriftCorrectionTransform(PairList<PlanarRegion, PlanarRegion> highConfidencePairs)

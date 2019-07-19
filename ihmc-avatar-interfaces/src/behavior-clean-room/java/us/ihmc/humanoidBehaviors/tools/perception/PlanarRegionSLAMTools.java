@@ -1,9 +1,15 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -23,23 +29,18 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class PlanarRegionSLAMTools
 {
    // FITTING
 
-   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point3D>> matchesWithReferencePoints)
+   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
       SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
 
       int numberOfMatches = 0;
-      for (PairList<PlanarRegion, Point3D> newDataRegionWithReferencePoints : matchesWithReferencePoints.values())
+      for (PairList<PlanarRegion, Point2D> newDataRegionWithReferencePoints : matchesWithReferencePoints.values())
       {
          numberOfMatches += newDataRegionWithReferencePoints.size();
       }
@@ -54,7 +55,7 @@ public class PlanarRegionSLAMTools
          Vector3DReadOnly normal = planarRegionPlane3D.getNormal();
          Point3DReadOnly mapPoint = planarRegionPlane3D.getPoint();
 
-         for (ImmutablePair<PlanarRegion, Point3D> newDataRegionWithReferencePoint : matchesWithReferencePoints.get(mapRegion))
+         for (ImmutablePair<PlanarRegion, Point2D> newDataRegionWithReferencePoint : matchesWithReferencePoints.get(mapRegion))
          {
             Vector3D cross = new Vector3D(mapPoint);
             cross.cross(normal);
@@ -66,7 +67,13 @@ public class PlanarRegionSLAMTools
             A.set(i, 4, normal.getY());
             A.set(i, 5, normal.getZ());
 
-            b.set(i, 0, -planarRegionPlane3D.distance(newDataRegionWithReferencePoint.getRight()));
+            PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
+            Point3D referencePointInWorld = new Point3D(newDataRegionWithReferencePoint.getRight());
+            RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
+            newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
+            transformFromNewDataToWorld.transform(referencePointInWorld);
+
+            b.set(i, 0, -planarRegionPlane3D.distance(referencePointInWorld));
 
             ++i;
          }
@@ -135,44 +142,64 @@ public class PlanarRegionSLAMTools
       return normalFilteredMap;
    }
 
-   public static Map<PlanarRegion, PairList<PlanarRegion, Point3D>> filterMatchesBasedOn2DBoundingBoxShadow(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
    {
-      HashMap<PlanarRegion, PairList<PlanarRegion, Point3D>> normalFilteredMap = new HashMap<>();
+      HashMap<PlanarRegion, PairList<PlanarRegion, Point2D>> normalFilteredMap = new HashMap<>();
       for (PlanarRegion mapRegion : matchesSoFar.keySet())
       {
-         PairList<PlanarRegion, Point3D> shadowMatches = new PairList<>();
+         PairList<PlanarRegion, Point2D> shadowMatches = new PairList<>();
 
          for (PlanarRegion newDataRegion : matchesSoFar.get(mapRegion))
          {
+            RigidBodyTransform transformFromWorldToMap = PlanarRegionTools.getTransformToLocal(mapRegion);
+            RigidBodyTransform transformFromNewDataToWorld = PlanarRegionTools.getTransformToWorld(newDataRegion);
 
-            RigidBodyTransform mapTransformToWorld = PlanarRegionTools.getTransformToWorld(mapRegion);
-            RigidBodyTransform worldToNewData = PlanarRegionTools.getTransformToWorld(newDataRegion);
-            worldToNewData.invert();
+            BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getBoundingBox2DInLocal(newDataRegion);
+            Point3D newDataBoundingBoxMinPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMinPoint());
+            Point3D newDataBoundingBoxMaxPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMaxPoint());
 
-            RigidBodyTransform transformFromNewDataToMapOrViceVersa = new RigidBodyTransform(); // TODO: fix this transform
-            transformFromNewDataToMapOrViceVersa.set(mapTransformToWorld);
-            transformFromNewDataToMapOrViceVersa.multiply(worldToNewData);
+            transformFromNewDataToWorld.transform(newDataBoundingBoxMinPoint);
+            transformFromNewDataToWorld.transform(newDataBoundingBoxMaxPoint);
 
-            PlanarRegion transformedToMapRegion = new PlanarRegion();
-            transformedToMapRegion.set(newDataRegion);
-            transformedToMapRegion.transform(transformFromNewDataToMapOrViceVersa);
+            transformFromWorldToMap.transform(newDataBoundingBoxMinPoint);
+            transformFromWorldToMap.transform(newDataBoundingBoxMaxPoint);
 
-            BoundingBox2D mapBoundingBox = PlanarRegionTools.getBoundingBox2DInLocal(mapRegion);
-            BoundingBox2D projectedNewDataBoundingBox = PlanarRegionTools.getBoundingBox2DInLocal(transformedToMapRegion);
+            // If the planes are perfectly aligned, then the z coordinates will be zero.
+            double minX = Math.min(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
+            double minY = Math.min(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
+            double maxX = Math.max(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
+            double maxY = Math.max(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
+            
+            Point2D newDataBoundingBoxMinPoint2D = new Point2D(minX, minY);
+            Point2D newDataBoundingBoxMaxPoint2D = new Point2D(maxX, maxY);
 
-            boolean boundingBoxShadowsMapRegion = mapBoundingBox.intersectsEpsilon(projectedNewDataBoundingBox, 0.0);
+            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = new BoundingBox2D(newDataBoundingBoxMinPoint2D, newDataBoundingBoxMaxPoint2D);
+            BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getBoundingBox2DInLocal(mapRegion);
+
+            //TODO: Parameterize the epsilon...
+            boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -0.001);
             if (boundingBoxShadowsMapRegion)
             {
-
-               BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBox, projectedNewDataBoundingBox);
+               BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+               
+               if (intersection == null)
+               {
+                  LogTools.error("Woops. Should never get here!!");
+                  LogTools.error("mapBoundingBoxInMapLocal = " + mapBoundingBoxInMapLocal);
+                  LogTools.error("newDataRegionBoundingBoxProjectedToMapLocal = " + newDataRegionBoundingBoxProjectedToMapLocal);
+                  continue;
+               }
+               
                Point2D intersectionCentroid = new Point2D();
                intersection.getCenterPoint(intersectionCentroid);
 
                Point3D newDataReferencePoint = new Point3D(intersectionCentroid);
-               newDataReferencePoint.applyTransform(mapTransformToWorld);  // TODO: check
-               newDataReferencePoint.applyTransform(transformFromNewDataToMapOrViceVersa);  // TODO: check
+               newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
+               newDataReferencePoint.applyInverseTransform(transformFromNewDataToWorld);
 
-               shadowMatches.add(newDataRegion, newDataReferencePoint);
+               Point2D newDataReferencePointInNewDataLocal = new Point2D(newDataReferencePoint.getX(), newDataReferencePoint.getY());
+
+               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
             }
          }
 

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -14,6 +15,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -34,7 +36,7 @@ class PlanarRegionSLAMTest
 
    @Test
    public void testSLAMWithThreeNiceWalls()
-   {      
+   {
       // No transform. Exactly the same walls.
       PlanarRegionsList map = createSomeRightAngledWalls(new RigidBodyTransform(), true, true, true);
       PlanarRegionsList newData = createSomeRightAngledWalls(new RigidBodyTransform(), true, true, true);
@@ -306,7 +308,7 @@ class PlanarRegionSLAMTest
 
       if (includeWallOne)
       {
-         PlanarRegion wallOne = createASingleSquare(new Vector3D(), 0.0, -Math.PI/2.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
+         PlanarRegion wallOne = createASingleSquare(new Vector3D(), 0.0, -Math.PI / 2.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
          wallOne.transform(transform);
          wallOne.setRegionId(2);
          planarRegionsList.addPlanarRegion(wallOne);
@@ -314,7 +316,7 @@ class PlanarRegionSLAMTest
 
       if (includeWallTwo)
       {
-         PlanarRegion wallTwo = createASingleSquare(new Vector3D(), 0.0, 0.0, Math.PI/2.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
+         PlanarRegion wallTwo = createASingleSquare(new Vector3D(), 0.0, 0.0, Math.PI / 2.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
          wallTwo.transform(transform);
          wallTwo.setRegionId(3);
          planarRegionsList.addPlanarRegion(wallTwo);
@@ -363,6 +365,8 @@ class PlanarRegionSLAMTest
       squareTwo = createASingleTranslatedSquare(translationTwo, 0.5, 0.5);
       assertHighConfidencePairingBothWays(squareOne, squareTwo);
 
+//    ++++++++++  visualizePlanarRegions(squareOne);
+      
       translationTwo = new Vector3D(translationOne);
       translationTwo.sub(smallZOffset);
       translationTwo.sub(overlappingHorizontalOffset);
@@ -382,7 +386,7 @@ class PlanarRegionSLAMTest
       double roll = 0.0;
 
       squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
-      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
+      squareTwo = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
       assertHighConfidencePairingBothWays(squareOne, squareTwo);
 
       // Two randomly oriented squares
@@ -391,7 +395,7 @@ class PlanarRegionSLAMTest
       roll = -Math.PI * 0.7;
 
       squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 0.5, 0.5);
-      squareOne = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
+      squareTwo = createASingleSquare(translationOne, yaw, pitch, roll, 1.0, 1.0);
       assertHighConfidencePairingBothWays(squareOne, squareTwo);
 
       // Two squares with different surface normals should not have high confidence
@@ -421,21 +425,28 @@ class PlanarRegionSLAMTest
       assertHighConfidencePairing(regionTwo, regionOne);
    }
 
-   private void assertHighConfidencePairing(PlanarRegion regionOne, PlanarRegion regionTwo)
+   private void assertHighConfidencePairing(PlanarRegion mapRegion, PlanarRegion newDataRegion)
    {
       PlanarRegionsList map = new PlanarRegionsList();
       PlanarRegionsList newData = new PlanarRegionsList();
 
-      map.addPlanarRegion(regionOne);
-      newData.addPlanarRegion(regionTwo);
+      map.addPlanarRegion(mapRegion);
+      newData.addPlanarRegion(newDataRegion);
 
-      PairList<PlanarRegion, PlanarRegion> highConfidencePairs = PlanarRegionSLAM.findHighConfidencePairs(map, newData);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> highConfidenceMatches = PlanarRegionSLAM.findHighConfidenceRegionMatchesAndReferencePoints(map,
+                                                                                                                                                    newData);
 
-      assertEquals(1, highConfidencePairs.size());
-      ImmutablePair<PlanarRegion, PlanarRegion> pair = highConfidencePairs.get(0);
+      assertEquals(1, highConfidenceMatches.size());
+      PairList<PlanarRegion, Point2D> pairList = highConfidenceMatches.get(mapRegion);
+      assertEquals(1, pairList.size());
 
-      assertTrue(regionOne == pair.getLeft());
-      assertTrue(regionTwo == pair.getRight());
+      ImmutablePair<PlanarRegion, Point2D> regionAndReferencePoint = pairList.get(0);
+
+      assertTrue(newDataRegion == regionAndReferencePoint.getLeft());
+      Point2D referencePoint2D = regionAndReferencePoint.getRight();
+
+      // Make sure the reference point is on and inside the new data region.
+      assertTrue(newDataRegion.isPointInside(referencePoint2D));
    }
 
    private void assertNotAHighConfidencePairing(PlanarRegion regionOne, PlanarRegion regionTwo)
@@ -446,9 +457,10 @@ class PlanarRegionSLAMTest
       map.addPlanarRegion(regionOne);
       newData.addPlanarRegion(regionTwo);
 
-      PairList<PlanarRegion, PlanarRegion> highConfidencePairs = PlanarRegionSLAM.findHighConfidencePairs(map, newData);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> highConfidenceMatches = PlanarRegionSLAM.findHighConfidenceRegionMatchesAndReferencePoints(map,
+                                                                                                                                                    newData);
 
-      assertTrue(highConfidencePairs.isEmpty());
+      assertTrue(highConfidenceMatches.isEmpty());
    }
 
    private PlanarRegion createASingleTranslatedAndYawedSquare(Vector3D translation, double yaw, double xSize, double ySize)
@@ -515,8 +527,8 @@ class PlanarRegionSLAMTest
          @Override
          public void run()
          {
-//            double preferredWidth = 1000.0;
-//            double preferredHeight = 1000.0;
+            //            double preferredWidth = 1000.0;
+            //            double preferredHeight = 1000.0;
 
             View3DFactory view3dFactory = new View3DFactory(1200, 800);
             view3dFactory.addCameraController(0.05, 2000.0, true);
