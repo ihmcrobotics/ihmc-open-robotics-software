@@ -7,7 +7,6 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -1015,16 +1014,6 @@ public class GeometryTools
       return vector;
    }
 
-   public static BoundingBox2D projectBoundingBox3D(BoundingBox3DReadOnly boundingBox3D)
-   {
-      BoundingBox2D boundingBox2D = new BoundingBox2D();
-      boundingBox2D.set(boundingBox3D.getMinX(),
-                        boundingBox3D.getMinY(),
-                        boundingBox3D.getMaxX(),
-                        boundingBox3D.getMaxY());
-      return boundingBox2D;
-   }
-
    public static Box3D convertBoundingBoxToBox(BoundingBox3DReadOnly boundingBox)
    {
       Point3DReadOnly minPoint = boundingBox.getMinPoint();
@@ -1036,41 +1025,17 @@ public class GeometryTools
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
    }
 
-   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: check
+   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: Check, Unit test, JavaDoc, move where BoundingBox union is, and implement for BoundingBox3D.
    {
-      BoundingBox2D intersection = new BoundingBox2D();
       double maxX = Math.min(a.getMaxX(), b.getMaxX());
       double maxY = Math.min(a.getMaxY(), b.getMaxY());
       double minX = Math.max(a.getMinX(), b.getMinX());
       double minY = Math.max(a.getMinY(), b.getMinY());
 
-      sortBoundsIntoBox(intersection, maxX, maxY, minX, minY);
-      return  intersection;
-   }
+      if ((maxX <= minX) || (maxY <= minY))
+         return null;
 
-   private static void sortBoundsIntoBox(BoundingBox2D intersection, double x1, double y1, double x2, double y2)
-   {
-      if (x1 > x2)
-      {
-         if (y1 > y2)
-         {
-            intersection.set(x2, y2, x1, y1);
-         }
-         else
-         {
-            intersection.set(x2, y1, x1, y2);
-         }
-      }
-      else
-      {
-         if (y1 > y2)
-         {
-            intersection.set(x1, y2, x2, y1);
-         }
-         else
-         {
-            intersection.set(x1, y1, x2, y2);
-         }
-      }
+      BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
+      return  intersection;
    }
 }
