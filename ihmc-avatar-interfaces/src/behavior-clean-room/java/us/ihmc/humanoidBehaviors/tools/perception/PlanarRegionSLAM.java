@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,12 +26,25 @@ public class PlanarRegionSLAM
    public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newData)
    {
       Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData);
+
+      LogTools.info("boundboxCollisions.keys: {}", boundingBox3DCollisions.size());
+      LogTools.info("boundboxCollisions.values: {}", boundingBox3DCollisions.values().size());
+
+
       Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
+
+      LogTools.info("normalSimilarityFiltered.keys: {}", normalSimilarityFiltered.size());
+      LogTools.info("normalSimilarityFiltered.values: {}", normalSimilarityFiltered.values().size());
 
       Map<PlanarRegion, PairList<PlanarRegion, Point3D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(
             normalSimilarityFiltered);
 
+      LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
+      LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
+
       RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
+
+      LogTools.info(driftCorrectionTransform.toString());
 
       PlanarRegionsList transformedNewData = new PlanarRegionsList(newData);
       transformedNewData.transform(driftCorrectionTransform);
@@ -38,6 +54,18 @@ public class PlanarRegionSLAM
       transformedNewData.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(driftCorrectionTransform, mergedMap);
+      return result;
+   }
+
+   public static PlanarRegionSLAMResult intentionallyDrift(PlanarRegionsList newData)
+   {
+      AxisAngle smallRotation = new AxisAngle(0.1, 0.1, 0.1);
+      Vector3D smallTranslation = new Vector3D(0.05, -0.05, 0.05);
+      RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
+      PlanarRegionsList transformedNewData = new PlanarRegionsList(newData);
+      transformedNewData.transform(smallTransform);
+
+      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
    }
 

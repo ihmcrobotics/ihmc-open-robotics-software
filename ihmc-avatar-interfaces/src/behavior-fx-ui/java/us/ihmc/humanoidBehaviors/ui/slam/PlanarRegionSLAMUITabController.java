@@ -34,12 +34,13 @@ public class PlanarRegionSLAMUITabController extends Group
    public static final PlanarRegionsList EMPTY_REGIONS_LIST = new PlanarRegionsList();
 
    private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-   private static final String DATASET_2 = "20190710_174208_PlanarRegion";
+   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
    @FXML private Button slamButton;
    @FXML private Button slamStepButton;
+   @FXML private Button clearIncomingButton;
    @FXML private TextField slamStepStatus;
 
    @FXML private CheckBox fakeREAPublisherCheckbox;
@@ -65,6 +66,9 @@ public class PlanarRegionSLAMUITabController extends Group
    {
       this.window = window;
 
+      dataset1RadioButton.setText(DATASET_1);
+      dataset2RadioButton.setText(DATASET_2);
+      dataset3RadioButton.setText(DATASET_3);
       datasetSelectionRadioButtons.add(dataset1RadioButton);
       datasetSelectionRadioButtons.add(dataset2RadioButton);
       datasetSelectionRadioButtons.add(dataset3RadioButton);
@@ -106,6 +110,7 @@ public class PlanarRegionSLAMUITabController extends Group
    private void slam()
    {
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
+//      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
       map = slamResult.getMergedMap();
       mapGraphic.generateMeshesAsync(map);
 
@@ -166,6 +171,11 @@ public class PlanarRegionSLAMUITabController extends Group
    {
       map.clear();
       mapGraphic.generateMeshesAsync(map);
+   }
+
+   @FXML private void clearIncomingButton()
+   {
+      livePlanarRegionsGraphic.clear();
    }
 
    @FXML private void exportIncomingButton()
