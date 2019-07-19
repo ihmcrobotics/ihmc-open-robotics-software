@@ -27,9 +27,9 @@
         </rowConstraints>
          <children>
             <CheckBox fx:id="fakeREAPublisherCheckbox" mnemonicParsing="false" onAction="#fakeREAPublisherCheckbox" text="Fake REA Publisher" />
-            <RadioButton fx:id="dataset1RadioButton" mnemonicParsing="false" onAction="#dataset1RadioButton" selected="true" text="20190710_174025_PlanarRegion" GridPane.rowIndex="1" />
-            <RadioButton fx:id="dataset2RadioButton" mnemonicParsing="false" onAction="#dataset2RadioButton" text="20190710_174208_PlanarRegion" GridPane.rowIndex="2" />
-            <RadioButton fx:id="dataset3RadioButton" mnemonicParsing="false" onAction="#dataset3RadioButton" text="20190710_174422_PlanarRegion" GridPane.rowIndex="3" />
+            <RadioButton fx:id="dataset1RadioButton" mnemonicParsing="false" onAction="#dataset1RadioButton" selected="true" text="DATASET_1" GridPane.rowIndex="1" />
+            <RadioButton fx:id="dataset2RadioButton" mnemonicParsing="false" onAction="#dataset2RadioButton" text="DATASET_2" GridPane.rowIndex="2" />
+            <RadioButton fx:id="dataset3RadioButton" mnemonicParsing="false" onAction="#dataset3RadioButton" text="DATASET_3" GridPane.rowIndex="3" />
             <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
                <children>
                   <RadioButton fx:id="loadFromFileRadioButton" mnemonicParsing="false" onAction="#loadFromFileRadioButton" text="Load from file..." />
@@ -57,13 +57,12 @@
          </padding>
          <children>
             <CheckBox fx:id="acceptNewRegionListsCheckbox" mnemonicParsing="false" onAction="#acceptNewRegionListsCheckbox" selected="true" text="Accept new region lists" />
-            <Button fx:id="exportIncomingButton" mnemonicParsing="false" onAction="#exportIncomingButton" text="Export incoming..." GridPane.rowIndex="3" />
-            <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+            <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
                <children>
                   <Button fx:id="exportMapButton" mnemonicParsing="false" onAction="#exportMapButton" text="Export map..." />
                   <Button fx:id="clearMapButton" mnemonicParsing="false" onAction="#clearMapButton" text="Clear map">
                      <FlowPane.margin>
-                        <Insets left="10.0" />
+                        <Insets />
                      </FlowPane.margin>
                   </Button>
                </children>
@@ -80,6 +79,12 @@
                      </FlowPane.margin>
                   </Button>
                   <TextField fx:id="slamStepStatus" editable="false" prefHeight="26.0" prefWidth="123.0" />
+               </children>
+            </FlowPane>
+            <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+               <children>
+                  <Button fx:id="exportIncomingButton" mnemonicParsing="false" onAction="#exportIncomingButton" text="Export incoming..." />
+                  <Button fx:id="clearIncomingButton" mnemonicParsing="false" onAction="#clearIncomingButton" text="Clear incoming" />
                </children>
             </FlowPane>
          </children>

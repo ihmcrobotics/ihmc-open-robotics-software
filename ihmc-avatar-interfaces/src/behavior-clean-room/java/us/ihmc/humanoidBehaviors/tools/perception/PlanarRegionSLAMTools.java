@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -70,6 +71,9 @@ public class PlanarRegionSLAMTools
             ++i;
          }
       }
+      LogTools.info("numberReferencePoints: {}", i);
+      LogTools.info("A: {}", A);
+      LogTools.info("b: {}", b);
 
       DenseMatrix64F x = new DenseMatrix64F(6, 1);
 
@@ -79,11 +83,15 @@ public class PlanarRegionSLAMTools
       DenseMatrix64F ATransposeTimesA = new DenseMatrix64F(6, 6);
       CommonOps.mult(ATranspose, A, ATransposeTimesA);
 
+      LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
+
       DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
+      LogTools.info("ATransposeB: {}", ATransposeTimesA);
       CommonOps.mult(ATranspose, b, ATransposeB);
 
       solver.setA(ATransposeTimesA);
       solver.solve(ATransposeB, x);
+      LogTools.info("x: {}", x);
 
       double rx = x.get(0, 0);
       double ry = x.get(1, 0);
@@ -162,6 +170,7 @@ public class PlanarRegionSLAMTools
 
                Point3D newDataReferencePoint = new Point3D(intersectionCentroid);
                newDataReferencePoint.applyTransform(mapTransformToWorld);  // TODO: check
+               newDataReferencePoint.applyTransform(transformFromNewDataToMapOrViceVersa);  // TODO: check
 
                shadowMatches.add(newDataRegion, newDataReferencePoint);
             }
@@ -181,7 +190,6 @@ public class PlanarRegionSLAMTools
       for (PlanarRegion planarRegion : map.getPlanarRegionsAsList())
       {
          ArrayList<PlanarRegion> localCollisions = new ArrayList<>();
-         newDataCollisions.put(planarRegion, localCollisions);
 
          for (PlanarRegion newRegion : newData.getPlanarRegionsAsList())
          {
@@ -189,6 +197,11 @@ public class PlanarRegionSLAMTools
             {
                localCollisions.add(newRegion);
             }
+         }
+
+         if (!localCollisions.isEmpty())
+         {
+            newDataCollisions.put(planarRegion, localCollisions);
          }
       }
       return newDataCollisions;

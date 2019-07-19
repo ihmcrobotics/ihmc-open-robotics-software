@@ -40,19 +40,31 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    {
       if (acceptNewRegions)
       {
-         executorService.submit(() -> convertAndGenerateMesh(incomingData));
+         synchronized (this) // just here for clear method
+         {
+            executorService.submit(() -> convertAndGenerateMesh(incomingData));
+         }
       }
    }
 
    private void convertAndGenerateMesh(PlanarRegionsListMessage incomingData)
    {
       latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
-      super.generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
+      generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
    }
 
    private void handle(long now)
    {
       super.update();
+   }
+
+   public void clear()
+   {
+      latestPlanarRegionsList.clear();
+      synchronized (this) // to avoid collision with ROS 2 thread
+      {
+         executorService.submit(() -> generateMeshes(latestPlanarRegionsList));
+      }
    }
 
    public void setAcceptNewRegions(boolean acceptNewRegions)
