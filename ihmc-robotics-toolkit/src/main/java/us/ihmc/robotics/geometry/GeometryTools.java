@@ -1025,15 +1025,17 @@ public class GeometryTools
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
    }
 
-   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: check
+   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: Check, Unit test, JavaDoc, move where BoundingBox union is, and implement for BoundingBox3D.
    {
-      BoundingBox2D intersection = new BoundingBox2D();
       double maxX = Math.min(a.getMaxX(), b.getMaxX());
       double maxY = Math.min(a.getMaxY(), b.getMaxY());
       double minX = Math.max(a.getMinX(), b.getMinX());
       double minY = Math.max(a.getMinY(), b.getMinY());
-      intersection.setMax(maxX, maxY);
-      intersection.setMin(minX, minY);
+
+      if ((maxX <= minX) || (maxY <= minY))
+         return null;
+
+      BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
       return  intersection;
    }
 }
