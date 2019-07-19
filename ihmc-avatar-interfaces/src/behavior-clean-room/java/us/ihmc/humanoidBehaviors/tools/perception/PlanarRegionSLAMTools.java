@@ -33,6 +33,14 @@ public class PlanarRegionSLAMTools
 {
    // FITTING
 
+   /**
+    * Uses the algorithm on the slides at
+    * http://resources.mpi-inf.mpg.de/deformableShapeMatching/EG2011_Tutorial/slides/2.1%20Rigid%20ICP.pdf
+    * pages 12-14
+    * 
+    * @param matchesWithReferencePoints
+    * @return
+    */
    public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
@@ -57,7 +65,15 @@ public class PlanarRegionSLAMTools
 
          for (ImmutablePair<PlanarRegion, Point2D> newDataRegionWithReferencePoint : matchesWithReferencePoints.get(mapRegion))
          {
-            Vector3D cross = new Vector3D(mapPoint);
+            PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
+            Point2D referencePointInNewDataLocal = newDataRegionWithReferencePoint.getRight();
+
+            Point3D referencePointInWorld = new Point3D(referencePointInNewDataLocal);
+            RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
+            newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
+            transformFromNewDataToWorld.transform(referencePointInWorld);
+
+            Vector3D cross = new Vector3D(referencePointInWorld);
             cross.cross(normal);
 
             A.set(i, 0, cross.getX());
@@ -66,12 +82,6 @@ public class PlanarRegionSLAMTools
             A.set(i, 3, normal.getX());
             A.set(i, 4, normal.getY());
             A.set(i, 5, normal.getZ());
-
-            PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
-            Point3D referencePointInWorld = new Point3D(newDataRegionWithReferencePoint.getRight());
-            RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
-            newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
-            transformFromNewDataToWorld.transform(referencePointInWorld);
 
             b.set(i, 0, -planarRegionPlane3D.distance(referencePointInWorld));
 
@@ -169,7 +179,7 @@ public class PlanarRegionSLAMTools
             double minY = Math.min(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
             double maxX = Math.max(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
             double maxY = Math.max(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
-            
+
             Point2D newDataBoundingBoxMinPoint2D = new Point2D(minX, minY);
             Point2D newDataBoundingBoxMaxPoint2D = new Point2D(maxX, maxY);
 
@@ -181,7 +191,7 @@ public class PlanarRegionSLAMTools
             if (boundingBoxShadowsMapRegion)
             {
                BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
-               
+
                if (intersection == null)
                {
                   LogTools.error("Woops. Should never get here!!");
@@ -189,7 +199,7 @@ public class PlanarRegionSLAMTools
                   LogTools.error("newDataRegionBoundingBoxProjectedToMapLocal = " + newDataRegionBoundingBoxProjectedToMapLocal);
                   continue;
                }
-               
+
                Point2D intersectionCentroid = new Point2D();
                intersection.getCenterPoint(intersectionCentroid);
 
