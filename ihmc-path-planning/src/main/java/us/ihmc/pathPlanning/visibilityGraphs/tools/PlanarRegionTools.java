@@ -944,6 +944,13 @@ public class PlanarRegionTools
       return transformToWorld;
    }
 
+   public static RigidBodyTransform getTransformToLocal(PlanarRegion planarRegion)
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      planarRegion.getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
    public static Box3D getLocalBoundingBox3DInWorld(PlanarRegion planarRegion, double height)
    {
       BoundingBox3D boundingBox3DInLocal = getBoundingBox3DInLocal(planarRegion);
