@@ -922,6 +922,21 @@ public class PlanarRegionTools
       return boundingBox3DInLocal;
    }
 
+   public static BoundingBox2D getBoundingBox2DInLocal(PlanarRegion planarRegion)
+   {
+      BoundingBox2D boundingBox2DInLocal = new BoundingBox2D();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            boundingBox2DInLocal.updateToIncludePoint(convexPolygon.getVertex(j).getX(), convexPolygon.getVertex(j).getY());
+         }
+      }
+
+      return boundingBox2DInLocal;
+   }
+
    public static RigidBodyTransform getTransformToWorld(PlanarRegion planarRegion)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();

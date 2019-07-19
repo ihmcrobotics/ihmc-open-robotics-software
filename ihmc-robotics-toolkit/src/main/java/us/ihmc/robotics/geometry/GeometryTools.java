@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -1022,5 +1023,17 @@ public class GeometryTools
       Vector3D size = GeometryTools.vector(minPoint, maxPoint);
 
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
+   }
+
+   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: check
+   {
+      BoundingBox2D intersection = new BoundingBox2D();
+      double maxX = Math.min(a.getMaxX(), b.getMaxX());
+      double maxY = Math.min(a.getMaxY(), b.getMaxY());
+      double minX = Math.max(a.getMinX(), b.getMinX());
+      double minY = Math.max(a.getMinY(), b.getMinY());
+      intersection.setMax(maxX, maxY);
+      intersection.setMin(minX, minY);
+      return  intersection;
    }
 }
