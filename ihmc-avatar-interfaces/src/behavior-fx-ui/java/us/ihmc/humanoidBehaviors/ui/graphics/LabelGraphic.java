@@ -18,23 +18,44 @@ import java.util.function.DoubleConsumer;
 
 public class LabelGraphic
 {
-   public static DoubleParameter textMeshHeight;
-   public static DoubleParameter textMeshScale;
-   public static DoubleParameter textOffsetX;
-   public static DoubleParameter textOffsetY;
-   public static DoubleParameter textOffsetYaw;
-   public static DoubleParameter textOffsetPitch;
-   public static DoubleParameter textOffsetRoll;
+   public static boolean TUNING_MODE = false;
+
+   public static TunedDouble textMeshHeight = new TunedDouble(0.0005);
+   public static TunedDouble textMeshScale = new TunedDouble(0.03);
+   public static TunedDouble textOffsetX = new TunedDouble(0.06);
+   public static TunedDouble textOffsetY = new TunedDouble(0.0);
+   public static TunedDouble textOffsetYaw = new TunedDouble(3 * Math.PI / 2);
+   public static TunedDouble textOffsetPitch = new TunedDouble(0.0);
+   public static TunedDouble textOffsetRoll = new TunedDouble(Math.PI);
+
+   private static class TunedDouble
+   {
+      final double primitive;
+      DoubleParameter parameter;
+
+      public TunedDouble(double initialValue)
+      {
+         primitive = initialValue;
+      }
+
+      double getValue()
+      {
+         return TUNING_MODE ? parameter.getValue() : primitive;
+      }
+   }
 
    public static void initializeYoVariables(YoVariableRegistry registry)
    {
-      textMeshHeight = new DoubleParameter("textMeshHeight", registry, 0.01);
-      textMeshScale = new DoubleParameter("textMeshScale", registry, 0.03);
-      textOffsetX = new DoubleParameter("textOffsetX", registry, 0.06);
-      textOffsetY = new DoubleParameter("textOffsetY", registry, 0.0);
-      textOffsetYaw = new DoubleParameter("textOffsetYaw", registry, 3 * Math.PI / 2);
-      textOffsetPitch = new DoubleParameter("textOffsetPitch", registry, 0.0);
-      textOffsetRoll = new DoubleParameter("textOffsetRoll", registry, Math.PI);
+      if (TUNING_MODE)
+      {
+         textMeshHeight  .parameter = new DoubleParameter("textMeshHeight",  registry, textMeshHeight  .primitive);
+         textMeshScale   .parameter = new DoubleParameter("textMeshScale",   registry, textMeshScale   .primitive);
+         textOffsetX     .parameter = new DoubleParameter("textOffsetX",     registry, textOffsetX     .primitive);
+         textOffsetY     .parameter = new DoubleParameter("textOffsetY",     registry, textOffsetY     .primitive);
+         textOffsetYaw   .parameter = new DoubleParameter("textOffsetYaw",   registry, textOffsetYaw   .primitive);
+         textOffsetPitch .parameter = new DoubleParameter("textOffsetPitch", registry, textOffsetPitch .primitive);
+         textOffsetRoll  .parameter = new DoubleParameter("textOffsetRoll",  registry, textOffsetRoll  .primitive);
+      }
    }
    
    private final Text3DMesh textMesh;
@@ -60,17 +81,20 @@ public class LabelGraphic
       currentScale = textMeshScale.getValue();
       currentPositionOffset = new Point3D(textOffsetX.getValue(), textOffsetY.getValue(), -textMeshHeight.getValue());
       currentOrientationOffset = new YawPitchRoll(textOffsetYaw.getValue(), textOffsetPitch.getValue(), textOffsetRoll.getValue());
-      addParameterListener(textMeshHeight, value ->
+      if (TUNING_MODE)
       {
-         currentHeight = value;
-         currentPositionOffset.setZ(-value);
-      });
-      addParameterListener(textMeshScale, value -> currentScale = value);
-      addParameterListener(textOffsetX, value -> currentPositionOffset.setX(value));
-      addParameterListener(textOffsetY, value -> currentPositionOffset.setY(value));
-      addParameterListener(textOffsetYaw, value -> currentOrientationOffset.setYaw(value));
-      addParameterListener(textOffsetPitch, value -> currentOrientationOffset.setPitch(value));
-      addParameterListener(textOffsetRoll, value -> currentOrientationOffset.setRoll(value));
+         addParameterListener(textMeshHeight.parameter, value ->
+         {
+            currentHeight = value;
+            currentPositionOffset.setZ(-value);
+         });
+         addParameterListener(textMeshScale.parameter, value -> currentScale = value);
+         addParameterListener(textOffsetX.parameter, value -> currentPositionOffset.setX(value));
+         addParameterListener(textOffsetY.parameter, value -> currentPositionOffset.setY(value));
+         addParameterListener(textOffsetYaw.parameter, value -> currentOrientationOffset.setYaw(value));
+         addParameterListener(textOffsetPitch.parameter, value -> currentOrientationOffset.setPitch(value));
+         addParameterListener(textOffsetRoll.parameter, value -> currentOrientationOffset.setRoll(value));
+      }
 
       update();
    }
