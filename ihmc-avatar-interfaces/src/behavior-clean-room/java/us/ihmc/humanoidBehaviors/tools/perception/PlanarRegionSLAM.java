@@ -7,7 +7,6 @@ import java.util.Map;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -16,6 +15,11 @@ import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAM
 {
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn)
+   {
+      return slam(map, newDataIn, 1);
+   }
+   
    /**
     * Updates the map with new data and returns the detected drift.
     *
@@ -23,25 +27,33 @@ public class PlanarRegionSLAM
     * @param newData
     * @return detected drift
     */
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newData)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, int iterations)
    {
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map, newData);
+      PlanarRegionsList transformedNewData = newDataIn;
+      RigidBodyTransform totalDriftCorrectionTransform = new RigidBodyTransform();
+      
+      for (int i=0; i<iterations; i++)
+      {
+         Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData);
 
-      LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
-      LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
+         LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
+         LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
 
-      RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
+         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
+         //TODO: Multiply or post multiply???
+         totalDriftCorrectionTransform.preMultiply(driftCorrectionTransform);
 
-      LogTools.info(driftCorrectionTransform.toString());
-
-      PlanarRegionsList transformedNewData = new PlanarRegionsList(newData);
-      transformedNewData.transform(driftCorrectionTransform);
+         transformedNewData = transformedNewData.copy();
+         transformedNewData.transformByPreMultiply(driftCorrectionTransform);
+         
+         LogTools.info(driftCorrectionTransform.toString());
+      }
 
       PlanarRegionsList mergedMap = new PlanarRegionsList();
       map.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
       transformedNewData.getPlanarRegionsAsList().forEach(region -> mergedMap.addPlanarRegion(region));
 
-      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(driftCorrectionTransform, mergedMap);
+      PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(totalDriftCorrectionTransform, mergedMap);
       return result;
    }
 
@@ -74,7 +86,7 @@ public class PlanarRegionSLAM
       AxisAngle smallRotation = new AxisAngle(0.1, 0.1, 0.1);
       Vector3D smallTranslation = new Vector3D(0.05, -0.05, 0.05);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
-      PlanarRegionsList transformedNewData = new PlanarRegionsList(newData);
+      PlanarRegionsList transformedNewData = newData.copy();
       transformedNewData.transform(smallTransform);
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
