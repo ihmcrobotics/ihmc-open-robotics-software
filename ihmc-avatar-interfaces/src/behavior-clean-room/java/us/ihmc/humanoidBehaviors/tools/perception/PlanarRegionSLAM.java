@@ -15,11 +15,13 @@ import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAM
 {
+   private static boolean verbose = false;
+
    public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn)
    {
-      return slam(map, newDataIn, 1);
+      return slam(map, newDataIn, new PlanarRegionSLAMParameters());
    }
-   
+
    /**
     * Updates the map with new data and returns the detected drift.
     *
@@ -27,17 +29,24 @@ public class PlanarRegionSLAM
     * @param newData
     * @return detected drift
     */
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, int iterations)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters)
    {
       PlanarRegionsList transformedNewData = newDataIn;
       RigidBodyTransform totalDriftCorrectionTransform = new RigidBodyTransform();
-      
-      for (int i=0; i<iterations; i++)
-      {
-         Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData);
 
-         LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
-         LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
+      //TODO: Put in a parameter file somewhere.
+
+      for (int i = 0; i < parameters.getIterations(); i++)
+      {
+         Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
+                                                                                                                                           transformedNewData,
+                                                                                                                                           parameters);
+
+         if (verbose)
+         {
+            LogTools.info("matchesWithReferencePoints.keys: {}", matchesWithReferencePoints.size());
+            LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
+         }
 
          RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
          //TODO: Multiply or post multiply???
@@ -45,8 +54,11 @@ public class PlanarRegionSLAM
 
          transformedNewData = transformedNewData.copy();
          transformedNewData.transformByPreMultiply(driftCorrectionTransform);
-         
-         LogTools.info(driftCorrectionTransform.toString());
+
+         if (verbose)
+         {
+            LogTools.info(driftCorrectionTransform.toString());
+         }
       }
 
       PlanarRegionsList mergedMap = new PlanarRegionsList();
@@ -63,21 +75,29 @@ public class PlanarRegionSLAM
     * @param newData The newData that you are adding to the map.
     * @return A Map from PlanarRegions in the map to matching regions in the new data, and matching reference points in the new Data.
     */
-   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> findHighConfidenceRegionMatchesAndReferencePoints(PlanarRegionsList map, PlanarRegionsList newData)
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> findHighConfidenceRegionMatchesAndReferencePoints(PlanarRegionsList map,
+                                                                                                                      PlanarRegionsList newData,
+                                                                                                                      PlanarRegionSLAMParameters parameters)
    {
-      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData);
+      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData,
+                                                                                                                               parameters.getBoundingBoxHeight());
 
-      LogTools.info("boundboxCollisions.keys: {}", boundingBox3DCollisions.size());
-      LogTools.info("boundboxCollisions.values: {}", boundingBox3DCollisions.values().size());
+      if (verbose)
+      {
+         LogTools.info("boundboxCollisions.keys: {}", boundingBox3DCollisions.size());
+         LogTools.info("boundboxCollisions.values: {}", boundingBox3DCollisions.values().size());
+      }
 
+      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions,
+                                                                                                                                  parameters.getMinimumNormalDotProduct());
 
-      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
+      if (verbose)
+      {
+         LogTools.info("normalSimilarityFiltered.keys: {}", normalSimilarityFiltered.size());
+         LogTools.info("normalSimilarityFiltered.values: {}", normalSimilarityFiltered.values().size());
+      }
 
-      LogTools.info("normalSimilarityFiltered.keys: {}", normalSimilarityFiltered.size());
-      LogTools.info("normalSimilarityFiltered.values: {}", normalSimilarityFiltered.values().size());
-
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(
-            normalSimilarityFiltered);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(normalSimilarityFiltered);
       return matchesWithReferencePoints;
    }
 
