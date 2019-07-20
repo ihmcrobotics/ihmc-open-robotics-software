@@ -35,7 +35,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       animationTimer.start();
    }
 
-   private void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
+   private synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
    {
       if (acceptNewRegions)
       {
@@ -46,15 +46,10 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       }
    }
 
-   private void convertAndGenerateMesh(PlanarRegionsListMessage incomingData)
+   private synchronized void convertAndGenerateMesh(PlanarRegionsListMessage incomingData)
    {
       PlanarRegionsList latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
-
-      synchronized(this)
-      {
-         this.latestPlanarRegionsList = latestPlanarRegionsList;
-      }
-
+      this.latestPlanarRegionsList = latestPlanarRegionsList;
       generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
    }
 
@@ -63,16 +58,16 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       super.update();
    }
 
-   public void clear()
+   public synchronized void clear()
    {
-      latestPlanarRegionsList.clear();
       synchronized (this) // to avoid collision with ROS 2 thread
       {
+         latestPlanarRegionsList.clear();
          executorService.submit(() -> generateMeshes(latestPlanarRegionsList));
       }
    }
 
-   public void setAcceptNewRegions(boolean acceptNewRegions)
+   public synchronized void setAcceptNewRegions(boolean acceptNewRegions)
    {
       this.acceptNewRegions = acceptNewRegions;
    }
