@@ -153,6 +153,8 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       ArraySorter.sort(stepTransition, compareByTime);
 
       QuadrupedTimedContactPhase  contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
+      if (!hasLoadBearingQuadrant(contactState))
+         throw new RuntimeException("hm");
 
       // compute transition time and center of pressure for each time interval
       for (int i = 0; i < numberOfStepTransitions; i++)
@@ -168,7 +170,9 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             solePosition.get(stepTransition[i].robotQuadrant).set(stepTransition[i].solePosition);
             break;
          }
-         if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
+
+
+         if ((i + 1 == numberOfStepTransitions) || (!MathTools.epsilonEquals(stepTransition[i].time, stepTransition[i + 1].time, 1e-5)))
          {
             contactPhase.getTimeInterval().setEndTime(stepTransition[i].time);
             contactPhase = createNewContactPhase(stepTransition[i].time, contactState, solePosition);
@@ -216,6 +220,17 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       }
 
       return null;
+   }
+
+   private boolean hasLoadBearingQuadrant(QuadrantDependentList<ContactState> contactStates)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactStates.get(robotQuadrant).isLoadBearing())
+            return true;
+      }
+
+      return false;
    }
 }
 
