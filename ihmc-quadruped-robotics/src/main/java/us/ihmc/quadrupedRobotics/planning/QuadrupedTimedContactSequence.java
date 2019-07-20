@@ -103,7 +103,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       // initialize step transitions
       for (int i = 0; i < stepTransition.length; i++)
       {
-         stepTransition[i].time = Double.MAX_VALUE;
+         stepTransition[i].time = Double.POSITIVE_INFINITY;
       }
 
       int numberOfStepTransitions = 0;
@@ -153,8 +153,6 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       ArraySorter.sort(stepTransition, compareByTime);
 
       QuadrupedTimedContactPhase  contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
-      if (!hasLoadBearingQuadrant(contactState))
-         throw new RuntimeException("hm");
 
       // compute transition time and center of pressure for each time interval
       for (int i = 0; i < numberOfStepTransitions; i++)
