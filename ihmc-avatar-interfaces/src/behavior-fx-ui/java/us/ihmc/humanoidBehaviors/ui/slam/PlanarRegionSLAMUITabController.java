@@ -8,6 +8,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
@@ -115,8 +116,13 @@ public class PlanarRegionSLAMUITabController extends Group
       parameters.setIterations(3);
       parameters.setBoundingBoxHeight(0.05);
 
-      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList(), parameters);
+      PlanarRegionsList newData = livePlanarRegionsGraphic.getLatestPlanarRegionsList();
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
+            
+      RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
+      LogTools.info("\nSlam result: transformFromIncomingToMap = \n" + transformFromIncomingToMap);
+
       map = slamResult.getMergedMap();
       mapGraphic.generateMeshesAsync(map);
 

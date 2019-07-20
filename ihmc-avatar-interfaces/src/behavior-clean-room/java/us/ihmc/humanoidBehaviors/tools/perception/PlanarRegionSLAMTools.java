@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -42,7 +43,7 @@ public class PlanarRegionSLAMTools
     * @param matchesWithReferencePoints
     * @return
     */
-   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints)
+   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints, PlanarRegionSLAMParameters parameters)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
@@ -84,7 +85,7 @@ public class PlanarRegionSLAMTools
             A.set(i, 5, normal.getZ());
 
             double signedDistanceFromPointToPlane = planarRegionPlane3D.signedDistance(referencePointInWorld);
-            
+
             //TODO: Reject outliers that have a large distance to the plane.
             if (verbose && Math.abs(signedDistanceFromPointToPlane) > 0.05)
             {
@@ -120,7 +121,19 @@ public class PlanarRegionSLAMTools
       DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
       CommonOps.mult(ATranspose, b, ATransposeB);
 
-      solver.setA(ATransposeTimesA);
+      // Use damped least squares (also called regularized least squares) to prevent blow up when data is sparse.
+      // See https://www2.math.uconn.edu/~leykekhman/courses/MARN_5898/Lectures/Linear_least_squares_reg.pdf
+      DenseMatrix64F lambdaI = CommonOps.identity(6);
+      CommonOps.scale(parameters.getDampedLeastSquaresLambda(), lambdaI);
+
+      DenseMatrix64F ATransposeTimesAPlusLambdaI = new DenseMatrix64F(ATransposeTimesA);
+      CommonOps.add(ATransposeTimesAPlusLambdaI, lambdaI, ATransposeTimesAPlusLambdaI);
+      
+      solver.setA(ATransposeTimesAPlusLambdaI);
+      SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
+      double[] singularValues = decomposition.getSingularValues();
+      LogTools.info("singularValues = " + doubleArrayToString(singularValues));
+
       solver.solve(ATransposeB, x);
 
       if (verbose)
@@ -143,6 +156,23 @@ public class PlanarRegionSLAMTools
       bigT.set(rotationMatrix, translation);
 
       return bigT;
+   }
+
+   private static String doubleArrayToString(double[] singularValues)
+   {
+      String returnString = "(";
+
+      for (int i = 0; i < singularValues.length; i++)
+      {
+         returnString += singularValues[i];
+         if (i != singularValues.length-1)
+         {
+            returnString = returnString + ", ";
+         }
+      }
+
+      returnString += ")";
+      return returnString;
    }
 
    // MERGING
@@ -315,5 +345,23 @@ public class PlanarRegionSLAMTools
       EuclidShape3DCollisionResult collisionResult = gjkCollisionDetector.evaluateCollision(boxA, boxB);
 
       return collisionResult.areShapesColliding();
+   }
+   
+   public static void main(String[] args)
+   {
+      SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
+
+      DenseMatrix64F matrix = CommonOps.identity(6);
+      CommonOps.scale(0.1, matrix);
+      solver.setA(matrix);
+      
+      SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
+      double[] singularValues = decomposition.getSingularValues();
+      
+      DenseMatrix64F W = new DenseMatrix64F(6,6);
+      decomposition.getW(W);
+      
+      LogTools.info("singularValues = " + doubleArrayToString(singularValues));
+      LogTools.info("W = " + W);
    }
 }
