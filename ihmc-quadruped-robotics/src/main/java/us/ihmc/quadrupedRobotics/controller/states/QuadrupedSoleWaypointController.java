@@ -93,7 +93,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
             QuadrupedTimedStep spoofStep = spoofStepPool.get(robotQuadrant);
             spoofStep.setRobotQuadrant(robotQuadrant);
             spoofStep.setGoalPosition(footPosition);
-            spoofStep.getTimeInterval().setInterval(currentTime.getDoubleValue() + transferToSoleWaypointDuration.getValue(), Double.POSITIVE_INFINITY);
+            spoofStep.getTimeInterval().setInterval(currentTime.getDoubleValue() + transferToSoleWaypointDuration.getValue(), Double.MAX_VALUE);
 
             spoofSteps.add(spoofStep);
          }
