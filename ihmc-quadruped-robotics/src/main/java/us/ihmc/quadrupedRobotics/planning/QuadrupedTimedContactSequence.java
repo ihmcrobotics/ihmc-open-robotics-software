@@ -152,7 +152,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       // sort step transitions in ascending order as a function of time
       ArraySorter.sort(stepTransition, compareByTime);
 
-      QuadrupedTimedContactPhase  contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
+      QuadrupedTimedContactPhase contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
 
       // compute transition time and center of pressure for each time interval
       for (int i = 0; i < numberOfStepTransitions; i++)
@@ -170,7 +170,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
          }
 
 
-         if ((i + 1 == numberOfStepTransitions) || (!MathTools.epsilonEquals(stepTransition[i].time, stepTransition[i + 1].time, 1e-5)))
+         if ((i + 1 == numberOfStepTransitions) || (!MathTools.epsilonEquals(stepTransition[i].time, stepTransition[i + 1].time, 1e-2)))
          {
             contactPhase.getTimeInterval().setEndTime(stepTransition[i].time);
             contactPhase = createNewContactPhase(stepTransition[i].time, contactState, solePosition);
