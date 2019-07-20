@@ -1,7 +1,9 @@
 package us.ihmc.humanoidBehaviors.ui.graphics.live;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -10,9 +12,6 @@ import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 {
@@ -49,7 +48,13 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    private void convertAndGenerateMesh(PlanarRegionsListMessage incomingData)
    {
-      latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
+      PlanarRegionsList latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
+
+      synchronized(this)
+      {
+         this.latestPlanarRegionsList = latestPlanarRegionsList;
+      }
+
       generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
    }
 
@@ -72,8 +77,8 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       this.acceptNewRegions = acceptNewRegions;
    }
 
-   public PlanarRegionsList getLatestPlanarRegionsList()
+   public synchronized PlanarRegionsList getLatestPlanarRegionsList()
    {
-      return latestPlanarRegionsList;
+      return latestPlanarRegionsList.copy();
    }
 }
