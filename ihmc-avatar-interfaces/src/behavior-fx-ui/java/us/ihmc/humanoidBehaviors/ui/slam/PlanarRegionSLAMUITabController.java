@@ -10,6 +10,7 @@ import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -109,7 +110,12 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private void slam()
    {
-      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList());
+      // TODO: Put these parameters on the GUI
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setIterations(3);
+      parameters.setBoundingBoxHeight(0.05);
+
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, livePlanarRegionsGraphic.getLatestPlanarRegionsList(), parameters);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
       map = slamResult.getMergedMap();
       mapGraphic.generateMeshesAsync(map);

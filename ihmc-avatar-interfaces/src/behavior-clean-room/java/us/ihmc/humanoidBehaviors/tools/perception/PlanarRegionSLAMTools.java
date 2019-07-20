@@ -32,7 +32,7 @@ import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAMTools
 {
-   // FITTING
+   private static boolean verbose = false;
 
    /**
     * Uses the algorithm on the slides at
@@ -67,7 +67,7 @@ public class PlanarRegionSLAMTools
          {
             PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
             Point2D referencePointInNewDataLocal = newDataRegionWithReferencePoint.getRight();
-                        
+
             Point3D referencePointInWorld = new Point3D(referencePointInNewDataLocal);
             RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
             newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
@@ -82,15 +82,32 @@ public class PlanarRegionSLAMTools
             A.set(i, 3, normal.getX());
             A.set(i, 4, normal.getY());
             A.set(i, 5, normal.getZ());
+
+            double signedDistanceFromPointToPlane = planarRegionPlane3D.signedDistance(referencePointInWorld);
             
-            b.set(i, 0, -planarRegionPlane3D.signedDistance(referencePointInWorld));
+            //TODO: Reject outliers that have a large distance to the plane.
+            if (verbose && Math.abs(signedDistanceFromPointToPlane) > 0.05)
+            {
+               System.err.println("\n\n*******************\nsignedDistanceFromPointToPlane = " + signedDistanceFromPointToPlane);
+               System.err.println("referencePointInWorld = " + referencePointInWorld);
+               System.err.println("planarRegionPlane3D = " + planarRegionPlane3D);
+               System.err.println("mapRegion = " + mapRegion);
+               System.err.println("newPlanarRegion = " + newPlanarRegion);
+               System.err.println("normal = " + normal);
+               System.err.println("normalOfNewPlanarRegion = " + newPlanarRegion.getNormal());
+            }
+
+            b.set(i, 0, -signedDistanceFromPointToPlane);
 
             ++i;
          }
       }
-      LogTools.info("numberReferencePoints: {}", i);
-      LogTools.info("A: {}", A);
-      LogTools.info("b: {}", b);
+      if (verbose)
+      {
+         LogTools.info("numberReferencePoints: {}", i);
+         LogTools.info("A: {}", A);
+         LogTools.info("b: {}", b);
+      }
 
       DenseMatrix64F x = new DenseMatrix64F(6, 1);
 
@@ -100,15 +117,18 @@ public class PlanarRegionSLAMTools
       DenseMatrix64F ATransposeTimesA = new DenseMatrix64F(6, 6);
       CommonOps.mult(ATranspose, A, ATransposeTimesA);
 
-      LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
-
       DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
-      LogTools.info("ATransposeB: {}", ATransposeTimesA);
       CommonOps.mult(ATranspose, b, ATransposeB);
 
       solver.setA(ATransposeTimesA);
       solver.solve(ATransposeB, x);
-      LogTools.info("x: {}", x);
+
+      if (verbose)
+      {
+         LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
+         LogTools.info("ATransposeB: {}", ATransposeTimesA);
+         LogTools.info("x: {}", x);
+      }
 
       double rx = x.get(0, 0);
       double ry = x.get(1, 0);
@@ -203,26 +223,29 @@ public class PlanarRegionSLAMTools
                Point2DBasics centerPoint = new Point2D();
                Point2DBasics minPoint = new Point2D();
                Point2DBasics maxPoint = new Point2D();
-               
+
                intersection.getCenterPoint(centerPoint);
                intersection.getMinPoint(minPoint);
                intersection.getMaxPoint(maxPoint);
 
-               Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+               Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint, transformFromWorldToMap,
+                                                                                                       transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-               
+
                newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-               
+
                newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-               
+
                Point2D otherCorner = new Point2D(minPoint.getX(), maxPoint.getY());
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap, transformFromNewDataToWorld);
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap,
+                                                                                               transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-               
+
                otherCorner = new Point2D(maxPoint.getX(), minPoint.getY());
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap, transformFromNewDataToWorld);
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap,
+                                                                                               transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
             }
          }
@@ -234,8 +257,9 @@ public class PlanarRegionSLAMTools
       }
       return normalFilteredMap;
    }
-   
-   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransform transformFromWorldToMap, RigidBodyTransform transformFromNewDataToWorld)
+
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransform transformFromWorldToMap,
+                                                                    RigidBodyTransform transformFromNewDataToWorld)
    {
       Point3D newDataReferencePoint = new Point3D(pointInMapLocal);
       newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
@@ -245,7 +269,8 @@ public class PlanarRegionSLAMTools
       return newDataReferencePointInNewDataLocal;
    }
 
-   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData)
+   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData,
+                                                                                          double boundingBoxHeight)
    {
       HashMap<PlanarRegion, List<PlanarRegion>> newDataCollisions = new HashMap<>();
       for (PlanarRegion planarRegion : map.getPlanarRegionsAsList())
@@ -254,7 +279,7 @@ public class PlanarRegionSLAMTools
 
          for (PlanarRegion newRegion : newData.getPlanarRegionsAsList())
          {
-            if (boxesIn3DIntersect(planarRegion, newRegion, 0.1))
+            if (boxesIn3DIntersect(planarRegion, newRegion, boundingBoxHeight))
             {
                localCollisions.add(newRegion);
             }
