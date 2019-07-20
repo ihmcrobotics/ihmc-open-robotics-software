@@ -18,9 +18,10 @@ import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -61,13 +62,12 @@ public class PlanarRegionSLAMTools
       {
          Plane3D planarRegionPlane3D = mapRegion.getPlane();
          Vector3DReadOnly normal = planarRegionPlane3D.getNormal();
-         Point3DReadOnly mapPoint = planarRegionPlane3D.getPoint();
 
          for (ImmutablePair<PlanarRegion, Point2D> newDataRegionWithReferencePoint : matchesWithReferencePoints.get(mapRegion))
          {
             PlanarRegion newPlanarRegion = newDataRegionWithReferencePoint.getLeft();
             Point2D referencePointInNewDataLocal = newDataRegionWithReferencePoint.getRight();
-
+                        
             Point3D referencePointInWorld = new Point3D(referencePointInNewDataLocal);
             RigidBodyTransform transformFromNewDataToWorld = new RigidBodyTransform();
             newPlanarRegion.getTransformToWorld(transformFromNewDataToWorld);
@@ -82,8 +82,8 @@ public class PlanarRegionSLAMTools
             A.set(i, 3, normal.getX());
             A.set(i, 4, normal.getY());
             A.set(i, 5, normal.getZ());
-
-            b.set(i, 0, -planarRegionPlane3D.distance(referencePointInWorld));
+            
+            b.set(i, 0, -planarRegionPlane3D.signedDistance(referencePointInWorld));
 
             ++i;
          }
@@ -200,15 +200,29 @@ public class PlanarRegionSLAMTools
                   continue;
                }
 
-               Point2D intersectionCentroid = new Point2D();
-               intersection.getCenterPoint(intersectionCentroid);
+               Point2DBasics centerPoint = new Point2D();
+               Point2DBasics minPoint = new Point2D();
+               Point2DBasics maxPoint = new Point2D();
+               
+               intersection.getCenterPoint(centerPoint);
+               intersection.getMinPoint(minPoint);
+               intersection.getMaxPoint(maxPoint);
 
-               Point3D newDataReferencePoint = new Point3D(intersectionCentroid);
-               newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
-               newDataReferencePoint.applyInverseTransform(transformFromNewDataToWorld);
-
-               Point2D newDataReferencePointInNewDataLocal = new Point2D(newDataReferencePoint.getX(), newDataReferencePoint.getY());
-
+               Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+               
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+               
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+               
+               Point2D otherCorner = new Point2D(minPoint.getX(), maxPoint.getY());
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap, transformFromNewDataToWorld);
+               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+               
+               otherCorner = new Point2D(maxPoint.getX(), minPoint.getY());
+               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap, transformFromNewDataToWorld);
                shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
             }
          }
@@ -219,6 +233,16 @@ public class PlanarRegionSLAMTools
          }
       }
       return normalFilteredMap;
+   }
+   
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransform transformFromWorldToMap, RigidBodyTransform transformFromNewDataToWorld)
+   {
+      Point3D newDataReferencePoint = new Point3D(pointInMapLocal);
+      newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
+      newDataReferencePoint.applyInverseTransform(transformFromNewDataToWorld);
+
+      Point2D newDataReferencePointInNewDataLocal = new Point2D(newDataReferencePoint.getX(), newDataReferencePoint.getY());
+      return newDataReferencePointInNewDataLocal;
    }
 
    public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData)
