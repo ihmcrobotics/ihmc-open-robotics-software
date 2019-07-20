@@ -48,7 +48,7 @@ public class PlanarRegionSLAM
             LogTools.info("matchesWithReferencePoints.values: {}", matchesWithReferencePoints.values().size());
          }
 
-         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints);
+         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints, parameters);
          //TODO: Multiply or post multiply???
          totalDriftCorrectionTransform.preMultiply(driftCorrectionTransform);
 

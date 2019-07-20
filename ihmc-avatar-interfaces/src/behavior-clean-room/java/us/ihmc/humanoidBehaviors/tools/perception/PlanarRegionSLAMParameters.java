@@ -5,10 +5,11 @@ public class PlanarRegionSLAMParameters
    private int iterations = 3;
    private double boundingBoxHeight = 0.1;
    private double minimumNormalDotProduct = 0.9;
- 
+   private double dampedLeastSquaresLambda = 0.5;
+
    public PlanarRegionSLAMParameters()
    {
-      
+
    }
 
    public double getBoundingBoxHeight()
@@ -40,4 +41,15 @@ public class PlanarRegionSLAMParameters
    {
       this.minimumNormalDotProduct = minimumNormalDotProduct;
    }
+
+   public double getDampedLeastSquaresLambda()
+   {
+      return dampedLeastSquaresLambda;
+   }
+
+   public void setDampedLeastSquaresLambda(double dampedLeastSquaresLambda)
+   {
+      this.dampedLeastSquaresLambda = dampedLeastSquaresLambda;
+   }
+
 }
