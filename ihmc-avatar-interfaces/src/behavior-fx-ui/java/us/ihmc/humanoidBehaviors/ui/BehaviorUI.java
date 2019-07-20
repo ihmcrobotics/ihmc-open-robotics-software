@@ -53,9 +53,12 @@ public class BehaviorUI
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
-      LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
-      LabelGraphic.initializeYoVariables(parameterServer.getRegistry());
-      parameterServer.start();
+      if (LabelGraphic.TUNING_MODE)
+      {
+         LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
+         LabelGraphic.initializeYoVariables(parameterServer.getRegistry());
+         parameterServer.start();
+      }
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
