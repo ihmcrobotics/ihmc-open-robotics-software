@@ -65,6 +65,7 @@ public class ConcaveHullMerger
       mergedConcaveHull.toArray(mergedConcaveHullArray);
 
       PlanarRegion planarRegion = new PlanarRegion(transformOneToWorld, mergedConcaveHullArray, newPolygonsFromConcaveHull);
+      planarRegion.setRegionId(regionOne.getRegionId());
       return planarRegion;
    }
 

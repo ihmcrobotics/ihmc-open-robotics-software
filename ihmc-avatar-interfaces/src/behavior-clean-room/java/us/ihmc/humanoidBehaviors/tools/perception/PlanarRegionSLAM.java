@@ -64,7 +64,8 @@ public class PlanarRegionSLAM
          }
       }
 
-      PlanarRegionsList mergedMap = generateMergedMapByJustAddingAllPlanarRegions(map, transformedNewData);
+//      PlanarRegionsList mergedMap = generateMergedMapByJustAddingAllPlanarRegions(map, transformedNewData);
+      PlanarRegionsList mergedMap = generateMergedMapByMergingAllPlanarRegionsMatches(map, transformedNewData, parameters);
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(totalDriftCorrectionTransform, mergedMap);
       return result;
    }
