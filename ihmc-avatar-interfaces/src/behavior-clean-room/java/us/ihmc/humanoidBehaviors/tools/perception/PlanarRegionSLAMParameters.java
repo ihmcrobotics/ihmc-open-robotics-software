@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 public class PlanarRegionSLAMParameters
 {
    private int iterations = 3;
-   private double boundingBoxHeight = 0.1;
-   private double minimumNormalDotProduct = 0.9;
+   private double boundingBoxHeight = 0.05;
+   private double minimumNormalDotProduct = 0.98; //Math.cos(Math.toRadians(5.0));
    private double dampedLeastSquaresLambda = 0.5;
 
    public PlanarRegionSLAMParameters()
