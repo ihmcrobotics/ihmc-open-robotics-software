@@ -10,6 +10,7 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -106,7 +107,7 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 0.1));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 0.1));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 0.25));
-      conductor.addDurationGoal(variables.getYoTime(), 25.0);
+      conductor.addDurationGoal(variables.getYoTime(), 10.0);
       conductor.simulate();
    }
 
