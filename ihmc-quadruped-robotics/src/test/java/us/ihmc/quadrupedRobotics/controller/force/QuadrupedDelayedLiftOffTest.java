@@ -68,11 +68,13 @@ public abstract class QuadrupedDelayedLiftOffTest implements QuadrupedMultiRobot
    @Test
    public void testWalkingForwardWithPush()
    {
+      YoBoolean swingSpeedUpEnabled = (YoBoolean) conductor.getScs().getRootRegistry().getVariable("isSwingSpeedUpEnabled");
+      YoBoolean delayFootIfItsHelpingButNotNeeded = (YoBoolean) conductor.getScs().getRootRegistry().getVariable("delayFootIfItsHelpingButNotNeeded");
+      swingSpeedUpEnabled.set(false);
+      delayFootIfItsHelpingButNotNeeded.set(true);
+
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
-
-      YoBoolean swingSpeedUpEnabled = (YoBoolean) conductor.getScs().getRootRegistry().getVariable("isSwingSpeedUpEnabled");
-      swingSpeedUpEnabled.set(false);
 
       QuadrupedTimedStep step1 = new QuadrupedTimedStep();
       QuadrupedTimedStep step2 = new QuadrupedTimedStep();
@@ -114,7 +116,7 @@ public abstract class QuadrupedDelayedLiftOffTest implements QuadrupedMultiRobot
       conductor.addTerminalGoal(timeGoal);
       conductor.simulate();
 
-      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 100.0, 1.5);
+      pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 100.0, 0.1);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 5.0));

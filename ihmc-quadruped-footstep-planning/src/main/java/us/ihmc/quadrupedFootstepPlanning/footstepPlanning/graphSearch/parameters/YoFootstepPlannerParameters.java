@@ -24,15 +24,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minimumHindStepLengthWhenSteppingDown = new YoDouble("minimumHindStepLengthWhenSteppingDown", registry);
    private final YoDouble stepZForSteppingUp = new YoDouble("stepZForSteppingUp", registry);
    private final YoDouble stepZForSteppingDown = new YoDouble("stepZForSteppingDown", registry);
-   private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
-   private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
-   private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
-   private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
+   private final YoDouble maximumStepOutward = new YoDouble("maximumStepOutward", registry);
+   private final YoDouble maximumStepInward = new YoDouble("maximumStepInward", registry);
+   private final YoDouble maximumStepYawInward = new YoDouble("maximumStepYawInward", registry);
+   private final YoDouble maximumStepYawOutward = new YoDouble("maximumStepYawOutward", registry);
    private final YoDouble maximumStepChangeZ = new YoDouble("maximumStepChangeZ", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
-   private final YoDouble distanceHeuristicWeight = new YoDouble("distanceHeuristicWeight", registry);
+   private final YoDouble distanceWeight = new YoDouble("distanceWeight", registry);
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble xGaitWeight = new YoDouble("xGaitWeight", registry);
+   private final YoDouble desiredVelocityWeight = new YoDouble("desiredVelocityWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble stepUpWeight = new YoDouble("stepUpWeight", registry);
    private final YoDouble stepDownWeight = new YoDouble("stepDownWeight", registry);
@@ -40,8 +41,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minXClearanceFromFoot = new YoDouble("minXClearanceFromFoot", registry);
    private final YoDouble minYClearanceFromFoot = new YoDouble("minYClearanceFromFoot", registry);
    private final YoDouble maxWalkingSpeedMultiplier = new YoDouble("maxWalkingSpeedMultiplier", registry);
-   private final YoDouble projectionInsideDistanceForExpansion = new YoDouble("projectionInsideDistanceForExpansion", registry);
-   private final YoDouble projectionInsideDistanceForPostProcessing = new YoDouble("projectionInsideDistanceForPostProcessing", registry);
+   private final YoDouble projectionInsideDistance = new YoDouble("projectionInsideDistance", registry);
    private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
@@ -50,8 +50,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minimumHindEndForwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndForwardCliffHeightFromBottoms", registry);
    private final YoDouble minimumHindEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndBackwardCliffHeightFromBottoms", registry);
    private final YoDouble minimumLateralDistanceFromCliffBottoms = new YoDouble("minimumLateralCliffHeightFromBottoms", registry);
-   private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
-   private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
+   private final YoBoolean projectInsideUsingConvexHull = new YoBoolean("projectInsideUsingConvexHull", registry);
+   private final YoDouble finalTurnProximity = new YoDouble("finalTurnProximity", registry);
+   private final YoDouble finalSlowDownProximity = new YoDouble("finalSlowDownProximity", registry);
+   private final YoDouble maximumDeviationFromXGaitDuringExpansion = new YoDouble("maximumDeviationFromXGaitDuringExpansion", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -157,27 +159,27 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMaximumStepWidth(double maximumStepWidth)
+   public void setMaximumStepOutward(double maximumStepOutward)
    {
-      this.maximumStepWidth.set(maximumStepWidth);
+      this.maximumStepOutward.set(maximumStepOutward);
    }
 
    @Override
-   public void setMinimumStepWidth(double minimumStepWidth)
+   public void setMaximumStepInward(double maximumStepInward)
    {
-      this.minimumStepWidth.set(minimumStepWidth);
+      this.maximumStepInward.set(maximumStepInward);
    }
 
    @Override
-   public void setMinimumStepYaw(double minimumStepYaw)
+   public void setMaximumStepYawInward(double maximumStepYawInward)
    {
-      this.minimumStepYaw.set(minimumStepYaw);
+      this.maximumStepYawInward.set(maximumStepYawInward);
    }
 
    @Override
-   public void setMaximumStepYaw(double maximumStepYaw)
+   public void setMaximumStepYawOutward(double maximumStepYawOutward)
    {
-      this.maximumStepYaw.set(maximumStepYaw);
+      this.maximumStepYawOutward.set(maximumStepYawOutward);
    }
 
    @Override
@@ -199,9 +201,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setDistanceHeuristicWeight(double distanceHeuristicWeight)
+   public void setDistanceWeight(double distanceWeight)
    {
-      this.distanceHeuristicWeight.set(distanceHeuristicWeight);
+      this.distanceWeight.set(distanceWeight);
    }
 
    @Override
@@ -214,6 +216,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setXGaitWeight(double xGaitWeight)
    {
       this.xGaitWeight.set(xGaitWeight);
+   }
+
+   @Override
+   public void setDesiredVelocityWeight(double desiredVelocityWeight)
+   {
+      this.desiredVelocityWeight.set(desiredVelocityWeight);
    }
 
    @Override
@@ -253,27 +261,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setProjectInsideDistanceForExpansion(double projectionInsideDistance)
+   public void setProjectInsideDistance(double projectionInsideDistance)
    {
-      this.projectionInsideDistanceForExpansion.set(projectionInsideDistance);
+      this.projectionInsideDistance.set(projectionInsideDistance);
    }
 
    @Override
-   public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
+   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
    {
-      this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
-   }
-
-   @Override
-   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringExpansion.set(projectInsideUsingConvexHull);
-   }
-
-   @Override
-   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringPostProcessing.set(projectInsideUsingConvexHull);
+      this.projectInsideUsingConvexHull.set(projectInsideUsingConvexHull);
    }
 
    @Override
@@ -322,6 +318,24 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setMinimumLateralDistanceFromCliffBottoms(double distance)
    {
       minimumLateralDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setFinalTurnProximity(double proximity)
+   {
+      this.finalTurnProximity.set(proximity);
+   }
+
+   @Override
+   public void setFinalSlowDownProximity(double proximity)
+   {
+      this.finalSlowDownProximity.set(proximity);
+   }
+
+   @Override
+   public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
+   {
+      this.maximumDeviationFromXGaitDuringExpansion.set(deviationFromXGaitDuringExpansion);
    }
 
    /** {@inheritDoc} */
@@ -430,30 +444,30 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
-      return maximumStepWidth.getDoubleValue();
+      return maximumStepOutward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
-      return minimumStepWidth.getDoubleValue();
+      return maximumStepInward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
-      return minimumStepYaw.getDoubleValue();
+      return maximumStepYawInward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return maximumStepYaw.getDoubleValue();
+      return maximumStepYawOutward.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -479,9 +493,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
-      return distanceHeuristicWeight.getDoubleValue();
+      return distanceWeight.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -496,6 +510,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getXGaitWeight()
    {
       return xGaitWeight.getDoubleValue();
+   }
+
+   @Override
+   public double getDesiredVelocityWeight()
+   {
+      return desiredVelocityWeight.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -542,29 +562,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForExpansion()
+   public double getProjectInsideDistance()
    {
-      return projectionInsideDistanceForExpansion.getDoubleValue();
+      return projectionInsideDistance.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForPostProcessing()
+   public boolean getProjectInsideUsingConvexHull()
    {
-      return projectionInsideDistanceForPostProcessing.getDoubleValue();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
-   {
-      return projectInsideUsingConvexHullDuringExpansion.getBooleanValue();
-   }
-
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
-   {
-      return projectInsideUsingConvexHullDuringPostProcessing.getBooleanValue();
+      return projectInsideUsingConvexHull.getBooleanValue();
    }
 
    /** {@inheritDoc} */
@@ -621,6 +628,24 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getMinimumLateralDistanceFromCliffBottoms()
    {
       return minimumLateralDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   @Override
+   public double getFinalTurnProximity()
+   {
+      return finalTurnProximity.getDoubleValue();
+   }
+
+   @Override
+   public double getFinalSlowDownProximity()
+   {
+      return finalSlowDownProximity.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return maximumDeviationFromXGaitDuringExpansion.getDoubleValue();
    }
 
 }

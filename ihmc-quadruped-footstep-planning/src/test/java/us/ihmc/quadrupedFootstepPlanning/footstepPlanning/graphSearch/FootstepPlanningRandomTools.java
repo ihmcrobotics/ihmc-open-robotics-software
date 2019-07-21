@@ -24,7 +24,7 @@ public class FootstepPlanningRandomTools
       return new FootstepNode(RobotQuadrant.generateRandomRobotQuadrant(random),
                               new QuadrantDependentList<>(EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY),
                                                           EuclidCoreRandomTools.nextPoint2D(random, minMaxXY), EuclidCoreRandomTools.nextPoint2D(random, minMaxXY)),
-                              1.0, 0.5);
+                                                          RandomNumbers.nextDouble(random, Math.PI), 1.0, 0.5);
    }
 
    public static FootstepNode createRandomFootstepNode(Random random, double length, double width)
@@ -44,6 +44,9 @@ public class FootstepPlanningRandomTools
       hindLeft.add(-offsetFromCenter.getX(), offsetFromCenter.getY());
       hindRight.add(-offsetFromCenter.getX(), -offsetFromCenter.getY());
 
-      return new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, length, width);
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      return new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, length, width);
    }
 }
