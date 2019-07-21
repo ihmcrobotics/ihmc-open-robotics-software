@@ -96,8 +96,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters(false, CONTROL_DT);
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
-      GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
-            modelFactory.getJointMap());
+      GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(modelFactory
+                                                                                                                                            .getJointMap());
       DCMPlannerParameters dcmPlannerParameters = new GenericQuadrupedDCMPlannerParameters();
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
@@ -105,8 +105,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDescription());
-      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
-            fullRobotModel.getTotalMass());
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(fullRobotModel
+                                                                                                                                           .getTotalMass());
       robotName = sdfRobot.getName();
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
@@ -184,13 +184,18 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
                                                               physicalProperties.getFeetGroundContactPoints(),
-                                                              new DefaultFootstepPlannerParameters(),
+                                                              new GenericQuadrupedFootstepPlannerParameters(),
                                                               xGaitSettings,
                                                               new GenericQuadrupedPointFootSnapperParameters(),
                                                               PubSubImplementation.INTRAPROCESS,
                                                               networkModuleParameters);
+      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName,
+                                                           ros2Node,
+                                                           networkProcessor,
+                                                           modelFactory.createFullRobotModel(),
+                                                           xGaitSettings,
+                                                           teleopRegistry);
       networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
-      stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, modelFactory.createFullRobotModel(),  xGaitSettings, teleopRegistry);
 
       new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
 
