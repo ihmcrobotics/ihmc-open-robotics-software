@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.lists.ArraySorter;
@@ -39,6 +37,8 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       }
    }
 
+   private boolean resetStartingFootPositions = true;
+
    private Comparator<QuadrupedStepTransition> compareByTime = new Comparator<QuadrupedStepTransition>()
    {
       @Override public int compare(QuadrupedStepTransition a, QuadrupedStepTransition b)
@@ -51,6 +51,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrantDependentList<FramePoint3D> solePosition;
+   private final QuadrantDependentList<FramePoint3D> startingSolePosition;
 
    public QuadrupedTimedContactSequence(int futureContactPhaseCapacity)
    {
@@ -68,16 +69,20 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       }
       contactState = new QuadrantDependentList<>();
       solePosition = new QuadrantDependentList<>();
+      startingSolePosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
          solePosition.set(robotQuadrant, new FramePoint3D());
+         startingSolePosition.set(robotQuadrant, new FramePoint3D());
       }
    }
 
    public void initialize()
    {
       super.clear();
+
+      resetStartingFootPositions = true;
    }
 
    /**
@@ -95,10 +100,18 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
-         solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         if (resetStartingFootPositions || currentContactState.get(robotQuadrant).getEnumValue().isLoadBearing())
+         {
+            startingSolePosition.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
+            startingSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         }
          contactState.set(robotQuadrant, currentContactState.get(robotQuadrant).getEnumValue());
       }
+
+      resetStartingFootPositions = false;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         solePosition.get(robotQuadrant).set(startingSolePosition.get(robotQuadrant));
 
       // initialize step transitions
       for (int i = 0; i < stepTransition.length; i++)
