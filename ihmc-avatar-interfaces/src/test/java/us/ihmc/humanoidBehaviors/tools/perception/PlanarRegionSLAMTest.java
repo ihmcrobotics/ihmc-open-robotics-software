@@ -51,13 +51,23 @@ class PlanarRegionSLAMTest
       map = createSomeRightAngledWalls(false, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(false, new RigidBodyTransform(), true, true, true);
 
-      slamResult = PlanarRegionSLAM.slam(map, newData);
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setBoundingBoxHeight(0.1);
+      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setIterations(1);
+
+      slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
       //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
 
+      
+//      visualizePlanarRegions(map);
+//      visualizePlanarRegions(mergedMap);
+//      ThreadTools.sleepForever();
+      
       // Small translation transform with all six walls.
       RigidBodyTransform smallTranslationTransform = new RigidBodyTransform();
       double delta = 0.05;
@@ -65,9 +75,6 @@ class PlanarRegionSLAMTest
 
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(true, smallTranslationTransform, true, true, true);
-
-      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      parameters.setBoundingBoxHeight(0.1);
 
       Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesAndReferencePoints = PlanarRegionSLAM.findHighConfidenceRegionMatchesAndReferencePoints(map,
                                                                                                                                                         newData,
@@ -128,7 +135,7 @@ class PlanarRegionSLAMTest
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), false, true, true);
       newData = createSomeRightAngledWalls(true, smallTranslationTransform, false, true, true);
 
-      slamResult = PlanarRegionSLAM.slam(map, newData);
+      slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
       transformResult = slamResult.getTransformFromIncomingToMap();
 
@@ -145,7 +152,7 @@ class PlanarRegionSLAMTest
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, true, false);
       newData = createSomeRightAngledWalls(true, smallTranslationTransform, true, false, true);
 
-      slamResult = PlanarRegionSLAM.slam(map, newData);
+      slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
       transformResult = slamResult.getTransformFromIncomingToMap();
 
@@ -161,7 +168,7 @@ class PlanarRegionSLAMTest
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, false, false);
       newData = createSomeRightAngledWalls(true, smallYawTransform, true, false, false);
 
-      slamResult = PlanarRegionSLAM.slam(map, newData);
+      slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
       transformResult = slamResult.getTransformFromIncomingToMap();
 
@@ -272,6 +279,7 @@ class PlanarRegionSLAMTest
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
       parameters.setIterations(3);
       parameters.setBoundingBoxHeight(0.1);
+      parameters.setDampedLeastSquaresLambda(0.0);
 
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
@@ -296,7 +304,7 @@ class PlanarRegionSLAMTest
 
       double epsilon = 0.003;
 
-      assertTrue(boundingBoxOne.epsilonEquals(boundingBoxTwo, epsilon));
+      assertTrue(boundingBoxOne.epsilonEquals(boundingBoxTwo, epsilon), "boundingBoxOne = " + boundingBoxOne + "boundingBoxTwo = " + boundingBoxTwo);
 
       int numberOfPointsToTest = 1000;
 

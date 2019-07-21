@@ -43,7 +43,8 @@ public class PlanarRegionSLAMTools
     * @param matchesWithReferencePoints
     * @return
     */
-   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints, PlanarRegionSLAMParameters parameters)
+   public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints,
+                                                                 PlanarRegionSLAMParameters parameters)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
@@ -128,16 +129,16 @@ public class PlanarRegionSLAMTools
 
       DenseMatrix64F ATransposeTimesAPlusLambdaI = new DenseMatrix64F(ATransposeTimesA);
       CommonOps.add(ATransposeTimesAPlusLambdaI, lambdaI, ATransposeTimesAPlusLambdaI);
-      
+
       solver.setA(ATransposeTimesAPlusLambdaI);
       SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
-      double[] singularValues = decomposition.getSingularValues();
-      LogTools.info("singularValues = " + doubleArrayToString(singularValues));
 
       solver.solve(ATransposeB, x);
 
       if (verbose)
       {
+         double[] singularValues = decomposition.getSingularValues();
+         LogTools.info("singularValues = " + doubleArrayToString(singularValues));
          LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
          LogTools.info("ATransposeB: {}", ATransposeTimesA);
          LogTools.info("x: {}", x);
@@ -165,7 +166,7 @@ public class PlanarRegionSLAMTools
       for (int i = 0; i < singularValues.length; i++)
       {
          returnString += singularValues[i];
-         if (i != singularValues.length-1)
+         if (i != singularValues.length - 1)
          {
             returnString = returnString + ", ";
          }
@@ -346,22 +347,5 @@ public class PlanarRegionSLAMTools
 
       return collisionResult.areShapesColliding();
    }
-   
-   public static void main(String[] args)
-   {
-      SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
 
-      DenseMatrix64F matrix = CommonOps.identity(6);
-      CommonOps.scale(0.1, matrix);
-      solver.setA(matrix);
-      
-      SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
-      double[] singularValues = decomposition.getSingularValues();
-      
-      DenseMatrix64F W = new DenseMatrix64F(6,6);
-      decomposition.getW(W);
-      
-      LogTools.info("singularValues = " + doubleArrayToString(singularValues));
-      LogTools.info("W = " + W);
-   }
 }
