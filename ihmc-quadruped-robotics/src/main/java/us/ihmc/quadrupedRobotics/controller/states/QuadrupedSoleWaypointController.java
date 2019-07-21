@@ -73,6 +73,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
    {
       boolean done = doneMoving && !isDoneMoving.get(robotQuadrant).getBooleanValue();
       isDoneMoving.get(robotQuadrant).set(done);
+      balanceManager.setHoldCurrentDesiredPosition(false);
    }
 
    @Override
@@ -117,6 +118,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
       {
          doneWithInitialTransfer.set(true);
          balanceManager.initializeForStepping();
+         balanceManager.setHoldCurrentDesiredPosition(true);
       }
 
       if (doneWithInitialTransfer.getBooleanValue())
