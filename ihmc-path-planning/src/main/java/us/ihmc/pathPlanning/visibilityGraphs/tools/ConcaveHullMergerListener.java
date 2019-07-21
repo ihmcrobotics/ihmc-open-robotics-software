@@ -15,7 +15,6 @@ public class ConcaveHullMergerListener
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FrameGeometry2dPlotter plotter;
-   private final double[][] hullOne, hullTwo;
    private final Color colorOne = Color.red;
    private final Color colorTwo = Color.green;
    private final Color startingVertexColorOne = Color.pink;
@@ -23,28 +22,44 @@ public class ConcaveHullMergerListener
    private final Color intersectionVertexColorOne = Color.black;
    private final Color intersectionVertexColorTwo = Color.orange;
 
+   private double xMin = -1.0;
+   private double xMax = 1.0;
+   private double yMin = -1.0;
+   private double yMax = 1.0;
+
    public ConcaveHullMergerListener(double[][] hullOne, double[][] hullTwo)
    {
-      this.hullOne = hullOne;
-      this.hullTwo = hullTwo;
-      
-      double xMin = -1.0;
-      double xMax = 1.0;
-      double yMin = -1.0;
-      double yMax = 1.0;
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       plotter = testFrame.getFrameGeometry2dPlotter();
       plotter.setPointPixels(16);
-      
+
       for (double[] point : hullOne)
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorOne);
       }
-      
+
       for (double[] point : hullTwo)
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorTwo);
-      }         
+      }
+   }
+
+   public ConcaveHullMergerListener(Point2D[] hullOne, Point2D[] hullTwo)
+   {
+
+      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
+      plotter = testFrame.getFrameGeometry2dPlotter();
+      plotter.setPointPixels(16);
+
+      for (Point2D point : hullOne)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorOne);
+      }
+
+      for (Point2D point : hullTwo)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorTwo);
+      }
    }
 
    public void foundStartingVertexAndWorkingHull(Point2D startingVertex, Point2D[] workingHull, boolean workingHullIsOne)
@@ -57,17 +72,18 @@ public class ConcaveHullMergerListener
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, startingVertex), startingVertexColorTwo);
       }
-      
+
    }
 
    public void consideringWorkingEdge(LineSegment2D workingEdge, boolean workingHullIsOne)
    {
       plotter.addFrameLineSegment2d(new FrameLineSegment2D(worldFrame, workingEdge), getColor(workingHullIsOne));
    }
-   
+
    private Color getColor(boolean workingHullIsOne)
    {
-      if (workingHullIsOne) return colorOne;
+      if (workingHullIsOne)
+         return colorOne;
       return colorTwo;
    }
 
@@ -81,7 +97,7 @@ public class ConcaveHullMergerListener
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, intersectionPoint), intersectionVertexColorTwo);
       }
-      
+
    }
 
 }

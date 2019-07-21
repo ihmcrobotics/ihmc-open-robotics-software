@@ -70,6 +70,7 @@ public class ConcaveHullMerger
 
    /**
     * Merges two ConcaveHulls. ConcaveHulls are assumed to be in clockwise order. Will fill holes.
+    * Assumes that the two ConcaveHulls do intersect by some non-infinitesimal amount.
     * @param hullOne One hull to merge.
     * @param hullTwo The other hull to merge.
     * @return Merged hull.
