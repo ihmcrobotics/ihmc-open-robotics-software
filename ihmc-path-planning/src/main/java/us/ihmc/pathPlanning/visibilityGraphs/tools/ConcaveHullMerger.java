@@ -1,28 +1,33 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-/** Class for merging two convex hulls. 
+/** Class for merging two convex hulls. Goes around the outside, adding a point at a time.
+ * Keeps track of what is the outside working hull and the inside resting hull.
+ * Does a pre-filter to move the points slightly if there are duplicates between the two
+ * hulls or points of the second are on the edge of the first.
  * 
- *
+ * Fills in holes that are formed when two hulls are merged.
  */
 public class ConcaveHullMerger
 {
+   private static final double minimumDistanceSquared = 0.001 * 0.001;
+   private static final double amountToMove = 0.0015;
+
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
    //TODO: Clockwise or counterclockwise order?
 
@@ -77,8 +82,15 @@ public class ConcaveHullMerger
     */
    public static ArrayList<Point2D> mergeConcaveHulls(Point2D[] hullOne, Point2D[] hullTwo, ConcaveHullMergerListener listener)
    {
-//      printHull("hullOne", hullOne);
-//      printHull("hullTwo", hullTwo);
+      hullTwo = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullOne, hullTwo);
+
+      if (listener != null)
+      {
+         listener.preprocessedHull(hullOne, hullTwo);
+      }
+
+      //      printHull("hullOne", hullOne);
+      //      printHull("hullTwo", hullTwo);
 
       // Find a point that is guaranteed to be on the outside by finding one with the lowest x. 
       // In case of ties, first one should be fine
@@ -123,10 +135,10 @@ public class ConcaveHullMerger
 
       int nextIndex = (workingHullIndex + 1) % workingHull.length;
 
-//      LogTools.info("startingVertex = " + startingVertex);
-//
-//      LogTools.info("STARTING!! workingHullIndex = " + workingHullIndex);
-//      LogTools.info("nextIndex = " + nextIndex);
+      //      LogTools.info("startingVertex = " + startingVertex);
+      //
+      //      LogTools.info("STARTING!! workingHullIndex = " + workingHullIndex);
+      //      LogTools.info("nextIndex = " + nextIndex);
 
       int edgeStartIndexToSkip = -1;
       int count = 0;
@@ -148,13 +160,13 @@ public class ConcaveHullMerger
          {
             workingVertex = nextVertex;
 
-//            LogTools.info("workingVertex = " + workingVertex);
+            //            LogTools.info("workingVertex = " + workingVertex);
 
             if (workingVertex == startingVertex)
                break;
 
             nextIndex = (nextIndex + 1) % workingHull.length;
-//            LogTools.info("nextIndex = " + nextIndex);
+            //            LogTools.info("nextIndex = " + nextIndex);
 
             edgeStartIndexToSkip = -1;
          }
@@ -182,7 +194,7 @@ public class ConcaveHullMerger
             nextIndex = intersection.getLeft();
             workingVertex = intersectionPoint;
 
-//            LogTools.info("Swap. edgeStartIndexToSkip = " + edgeStartIndexToSkip + ", nextIndex = " + nextIndex);
+            //            LogTools.info("Swap. edgeStartIndexToSkip = " + edgeStartIndexToSkip + ", nextIndex = " + nextIndex);
          }
 
       }
@@ -193,6 +205,85 @@ public class ConcaveHullMerger
       }
 
       return mergedVertices;
+   }
+
+   /**
+    * Goes through hullTwo and moves any points that are either duplicates of those on hullOne or on the edges of hullOne.
+    * @param hullOne 
+    * @param hullTwo Hull to be processed.
+    * @return Processed hull. Will be deep copy of hullTwo if there are no duplicates or points on the edges.
+    */
+   private static Point2D[] preprocessHullTwoToMoveDuplicatesOrOnEdges(Point2D[] hullOne, Point2D[] hullTwo)
+   {
+      Point2D[] newHull = new Point2D[hullTwo.length];
+
+      for (int i = 0; i < hullTwo.length; i++)
+      {
+         newHull[i] = preprocessHullPoint(hullOne, hullTwo[i]);
+      }
+
+      return newHull;
+   }
+
+   /**
+    * Returns a moved version of the hullPoint if it is a copy of a vertex on the given hull or close to the edge.
+    * @param hullOne Hull to check for closeness to.
+    * @param hullPoint Point to move if necessary
+    * @return Moved hull point.
+    */
+   private static Point2D preprocessHullPoint(Point2D[] hullOne, Point2D hullPoint)
+   {
+      for (int i = 0; i < hullOne.length; i++)
+      {
+         Point2D startVertex = hullOne[i];
+         Point2D nextVertex = hullOne[(i + 1) % hullOne.length];
+
+         if (hullPoint.distanceSquared(startVertex) < minimumDistanceSquared)
+         {
+            Point2D previousVertex = hullOne[(i - 1 + hullOne.length) % hullOne.length];
+
+            Vector2D toPrevious = new Vector2D(previousVertex);
+            toPrevious.sub(startVertex);
+            toPrevious.normalize();
+            toPrevious.set(-toPrevious.getY(), toPrevious.getX());
+            toPrevious.scale(amountToMove);
+
+            Vector2D toNext = new Vector2D(nextVertex);
+            toNext.sub(startVertex);
+            toNext.normalize();
+            toNext.set(toNext.getY(), -toNext.getX());
+            toNext.scale(amountToMove);
+
+            Vector2D adjustment = new Vector2D(toPrevious);
+            adjustment.add(toNext);
+
+            Point2D adjustedPoint = new Point2D(hullPoint);
+            adjustedPoint.add(adjustment);
+            return adjustedPoint;
+         }
+      }
+
+      for (int i = 0; i < hullOne.length; i++)
+      {
+         Point2D startVertex = hullOne[i];
+         Point2D nextVertex = hullOne[(i + 1) % hullOne.length];
+
+         LineSegment2D edge = new LineSegment2D(startVertex, nextVertex);
+         if (edge.distanceSquared(hullPoint) < minimumDistanceSquared)
+         {
+            Vector2D adjustment = new Vector2D(nextVertex);
+            adjustment.add(startVertex);
+            adjustment.normalize();
+            adjustment.set(-adjustment.getY(), adjustment.getX());
+            adjustment.scale(amountToMove);
+
+            Point2D adjustedPoint = new Point2D(hullPoint);
+            adjustedPoint.add(adjustment);
+            return adjustedPoint;
+         }
+      }
+
+      return new Point2D(hullPoint);
    }
 
    private static void printHull(String name, Point2D[] hullPoints)
@@ -238,7 +329,7 @@ public class ConcaveHullMerger
 
             if (intersection != null)
             {
-//               System.out.println("Found edge. IndexToSkip = " + edgeStartIndexToSkip);
+               //               System.out.println("Found edge. IndexToSkip = " + edgeStartIndexToSkip);
                //               if (edge.getFirstEndpoint().distanceSquared(intersection) > 1e-10)
 
                double distanceSquared = edge.getFirstEndpoint().distanceSquared(intersection);

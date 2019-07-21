@@ -27,30 +27,15 @@ public class ConcaveHullMergerListener
    private double yMin = -1.0;
    private double yMax = 1.0;
 
-   public ConcaveHullMergerListener(double[][] hullOne, double[][] hullTwo)
+   public ConcaveHullMergerListener()
    {
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       plotter = testFrame.getFrameGeometry2dPlotter();
       plotter.setPointPixels(16);
-
-      for (double[] point : hullOne)
-      {
-         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorOne);
-      }
-
-      for (double[] point : hullTwo)
-      {
-         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorTwo);
-      }
    }
 
-   public ConcaveHullMergerListener(Point2D[] hullOne, Point2D[] hullTwo)
+   public void preprocessedHull(Point2D[] hullOne, Point2D[] hullTwo)
    {
-
-      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
-      plotter = testFrame.getFrameGeometry2dPlotter();
-      plotter.setPointPixels(16);
-
       for (Point2D point : hullOne)
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorOne);
@@ -97,7 +82,6 @@ public class ConcaveHullMergerListener
       {
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, intersectionPoint), intersectionVertexColorTwo);
       }
-
    }
 
 }
