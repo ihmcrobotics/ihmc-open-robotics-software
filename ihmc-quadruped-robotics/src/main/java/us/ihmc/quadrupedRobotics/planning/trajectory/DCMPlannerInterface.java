@@ -21,6 +21,8 @@ public interface DCMPlannerInterface
 
    void completedStep();
 
+   void setHoldCurrentDesiredPosition(boolean holdPosition);
+
    void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                             FixedFrameVector3DBasics desiredDCMVelocityToPack);
 

@@ -319,6 +319,11 @@ public class QuadrupedBalanceManager
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
+   public void setHoldCurrentDesiredPosition(boolean holdPosition)
+   {
+      dcmPlanner.setHoldCurrentDesiredPosition(holdPosition);
+   }
+
    public void compute()
    {
       centerOfMassHeightManager.update();
