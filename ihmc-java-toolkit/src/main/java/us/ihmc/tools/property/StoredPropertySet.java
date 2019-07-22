@@ -101,32 +101,50 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
-         properties.load(accessStreamForLoading());
+         InputStream streamForLoading = accessStreamForLoading();
 
-         for (StoredPropertyKey<?> key : keys.keys())
+         if (streamForLoading == null)
          {
-            if (!properties.containsKey(key.getCamelCasedName()))
-            {
-               throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
-            }
+            LogTools.warn("Parameter file {} could not be found. Values will be null.", saveFileName);
+         }
+         else
+         {
+            LogTools.info("Loading parameters from {}", saveFileName);
+            properties.load(streamForLoading);
 
-            String stringValue = (String) properties.get(key.getCamelCasedName());
+            for (StoredPropertyKey<?> key : keys.keys())
+            {
+               if (!properties.containsKey(key.getCamelCasedName()))
+               {
+                  throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
+               }
 
-            if (key.getType().equals(Double.class))
-            {
-               values[key.getIndex()] = Double.valueOf(stringValue);
-            }
-            else if (key.getType().equals(Integer.class))
-            {
-               values[key.getIndex()] = Integer.valueOf(stringValue);
-            }
-            else if (key.getType().equals(Boolean.class))
-            {
-               values[key.getIndex()] = Boolean.valueOf(stringValue);
-            }
-            else
-            {
-               throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+               String stringValue = (String) properties.get(key.getCamelCasedName());
+
+               if (stringValue.equals("null"))
+               {
+                  LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileName);
+               }
+               else
+               {
+                  if (key.getType().equals(Double.class))
+                  {
+                     values[key.getIndex()] = Double.valueOf(stringValue);
+                  }
+                  else if (key.getType().equals(Integer.class))
+                  {
+                     values[key.getIndex()] = Integer.valueOf(stringValue);
+                  }
+                  else if (key.getType().equals(Boolean.class))
+                  {
+                     values[key.getIndex()] = Boolean.valueOf(stringValue);
+                  }
+                  else
+                  {
+                     throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+                  }
+               }
+
             }
          }
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -224,9 +242,9 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       }
 
       String s = classForLoading.getPackage().toString();
-      LogTools.info(s);
+      LogTools.debug(s);
       String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
-      LogTools.info(packagePath);
+      LogTools.debug(packagePath);
 
       Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
 
