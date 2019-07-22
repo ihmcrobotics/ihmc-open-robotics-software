@@ -3,12 +3,14 @@ package us.ihmc.tools.property;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -48,45 +50,45 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    }
 
    @Override
-   public double getValue(DoubleStoredPropertyKey key)
+   public double get(DoubleStoredPropertyKey key)
    {
       return (Double) values[key.getIndex()];
    }
 
    @Override
-   public int getValue(IntegerStoredPropertyKey key)
+   public int get(IntegerStoredPropertyKey key)
    {
       return (Integer) values[key.getIndex()];
    }
 
    @Override
-   public boolean getValue(BooleanStoredPropertyKey key)
+   public boolean get(BooleanStoredPropertyKey key)
    {
       return (Boolean) values[key.getIndex()];
    }
 
-   public void setValue(DoubleStoredPropertyKey key, double value)
+   public void set(DoubleStoredPropertyKey key, double value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(IntegerStoredPropertyKey key, int value)
+   public void set(IntegerStoredPropertyKey key, int value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(BooleanStoredPropertyKey key, boolean value)
+   public void set(BooleanStoredPropertyKey key, boolean value)
    {
       values[key.getIndex()] = value;
    }
 
    @Override
-   public List<Object> getAllValues()
+   public List<Object> getAll()
    {
       return Arrays.asList(values);
    }
 
-   public void setAllValues(List<Object> newValues)
+   public void setAll(List<Object> newValues)
    {
       for (int i = 0; i < values.length; i++)
       {
@@ -138,7 +140,14 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
+            if (values[key.getIndex()] == null)
+            {
+               properties.setProperty(key.getCamelCasedName(), "null");
+            }
+            else
+            {
+               properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
+            }
          }
 
          Path fileForSaving = findFileForSaving();
@@ -186,24 +195,31 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
 
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
 
-      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize();
-      boolean openRoboticsFound = false;
+      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
+      boolean directoryFound = false;
       for (Path path : absoluteWorkingDirectory)
       {
          reworkedPath = reworkedPath.resolve(path); // building up the path
 
          if (path.toString().equals(directoryNameToAssumePresent))
          {
-            openRoboticsFound = true;
+            directoryFound = true;
             break;
          }
       }
 
-      if (!openRoboticsFound)
+      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
       {
-         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}",
+         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
+         directoryFound = true;
+      }
+
+      if (!directoryFound)
+      {
+         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
                        directoryNameToAssumePresent,
-                       absoluteWorkingDirectory);
+                       absoluteWorkingDirectory,
+                       reworkedPath);
          return absoluteWorkingDirectory;
       }
 
@@ -215,6 +231,8 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
 
       Path finalPath = reworkedPath.resolve(subPath);
+
+      FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       return finalPath;
    }

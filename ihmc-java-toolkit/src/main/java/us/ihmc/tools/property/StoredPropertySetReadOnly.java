@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface StoredPropertySetReadOnly
 {
-   double getValue(DoubleStoredPropertyKey key);
+   double get(DoubleStoredPropertyKey key);
 
-   int getValue(IntegerStoredPropertyKey key);
+   int get(IntegerStoredPropertyKey key);
 
-   boolean getValue(BooleanStoredPropertyKey key);
+   boolean get(BooleanStoredPropertyKey key);
 
-   List<Object> getAllValues();
+   List<Object> getAll();
 }
