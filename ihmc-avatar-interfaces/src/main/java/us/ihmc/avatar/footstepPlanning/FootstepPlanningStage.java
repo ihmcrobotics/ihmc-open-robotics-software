@@ -88,7 +88,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener plannerListener,
+                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener multiStageListener,
                                 IntegerProvider planId, long tickDurationMs)
 
    {
@@ -115,16 +115,33 @@ public class FootstepPlanningStage implements FootstepPlanner
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(footstepPlannerParameters), contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner("simple_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
-                                                                                         footstepPlannerParameters.getCostParameters()
-                                                                                                                  .getBodyPathBasedHeuristicsWeight(),
-                                                                                         registry));
+      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, multiStageListener));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH,
+                     new BodyPathBasedAStarPlanner("simple_",
+                                                   bodyPathPlanner,
+                                                   footstepPlannerParameters,
+                                                   contactPointsInSoleFrame,
+                                                   footstepPlannerParameters.getCostParameters().getBodyPathBasedHeuristicsWeight(),
+                                                   registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new BodyPathBasedAStarPlanner("visGraph_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
-                                                   footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(), registry));
+                     createBodyPathBasedAStarPlanner(footstepPlannerParameters, bodyPathPlanner, multiStageListener, contactPointsInSoleFrame));
 
       initialize.set(true);
+   }
+
+   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParameters footstepPlannerParameters, BodyPathPlanner bodyPathPlanner,
+                                                                     MultiStagePlannerListener multiStageListener,
+                                                                     SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
+   {
+      StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
+      multiStageListener.addStagePlannerListener(plannerListener);
+      return new BodyPathBasedAStarPlanner("visGraph_",
+                                           bodyPathPlanner,
+                                           footstepPlannerParameters,
+                                           contactPointsInSoleFrame,
+                                           footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(),
+                                           registry,
+                                           plannerListener);
    }
 
    public YoVariableRegistry getYoVariableRegistry()

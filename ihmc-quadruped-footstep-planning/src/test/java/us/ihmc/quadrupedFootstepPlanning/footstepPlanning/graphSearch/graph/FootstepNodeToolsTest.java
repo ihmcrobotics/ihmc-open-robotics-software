@@ -64,9 +64,15 @@ public class FootstepNodeToolsTest
    {
       double length = frontLeftX + frontLeftXOffset - hindRightX - hindRightXOffset;
       double width = frontLeftY + frontLeftYOffset - hindRightY - hindRightYOffset;
+
+
+      double yaw = FootstepNode.computeNominalYaw(frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
+                                                  frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
+                                                  hindRightX + hindRightXOffset, hindRightY + hindRightYOffset);
+
       FootstepNode node = new FootstepNode(quadrant, frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
                                            frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
-                                           hindRightX + hindRightXOffset, hindRightY + hindRightYOffset, length, width);
+                                           hindRightX + hindRightXOffset, hindRightY + hindRightYOffset, yaw, length, width);
 
       RigidBodyTransform frontLeftNodeTransform = new RigidBodyTransform();
       RigidBodyTransform frontRightNodeTransform = new RigidBodyTransform();
@@ -131,8 +137,11 @@ public class FootstepNodeToolsTest
          double length = frontLeftX - hindRightX;
          double width = frontLeftY - hindRightY;
 
+
+         double yaw = FootstepNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
+
          FootstepNode node = new FootstepNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
-                                              length, width);
+                                              yaw, length, width);
 
          RigidBodyTransform frontLeftSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform frontRightSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);

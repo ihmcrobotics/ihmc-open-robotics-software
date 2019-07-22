@@ -297,13 +297,15 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getFootstepPlanningStatistics().getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
       }
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatisticsTopic, packet.getFootstepPlanningStatistics());
 
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");

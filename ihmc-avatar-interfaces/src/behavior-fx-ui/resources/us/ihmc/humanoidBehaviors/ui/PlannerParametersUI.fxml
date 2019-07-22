@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController">
+   <children>
+      <GridPane hgap="5.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="120.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="166.0" minWidth="120.0" prefWidth="120.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="120.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="cliffClearance" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <Label text="cliffHeight" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+            <Label text="maxStepLength" GridPane.columnIndex="2" />
+            <Label text="maxStepWidth" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label text="maxStepYaw" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <Label text="maxStepZ" GridPane.rowIndex="5" />
+            <Label text="maxXYWiggle" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <Label text="maxYawWiggle" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <Label text="minFootholdPercent" GridPane.columnIndex="4" />
+            <Label text="minStepLength" />
+            <Label text="minStepWidth" GridPane.rowIndex="1" />
+            <Label text="minStepYaw" GridPane.rowIndex="2" />
+            <Label text="minSurfaceIncline" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+            <Label text="minXClearance" GridPane.rowIndex="3" />
+            <Label text="minYClearance" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <Label text="wiggleInsideDelta" GridPane.rowIndex="4" />
+            <Spinner fx:id="cliffClearance" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+            <Spinner fx:id="cliffHeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+            <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="3" />
+            <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Spinner fx:id="maxXYWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <Spinner fx:id="maxYawWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+            <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="5" />
+            <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="1" />
+            <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+            <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Spinner fx:id="minYClearance" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Spinner fx:id="wiggleInsideDelta" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Button fx:id="cancelPlanning" mnemonicParsing="false" onAction="#cancelPlanning" text="Cancel Planning" GridPane.columnIndex="4" GridPane.rowIndex="6" />
+            <Label text="stepUpHeight" GridPane.rowIndex="6" />
+            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Label text="maxStepUpX" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+            <Label text="maxStepDownX" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+            <Label text="stepDownHeight" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+            <Spinner fx:id="stepDownHeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+            <Spinner fx:id="maxStepUpX" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+            <Spinner fx:id="maxStepDownX" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+            <Label text="timeout" GridPane.columnIndex="6" />
+            <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="7" />
+            <Label text="Flat and Step Ups" GridPane.columnIndex="6" GridPane.rowIndex="1">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Transfer time" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+            <Label text="Swing time" GridPane.columnIndex="6" GridPane.rowIndex="3" />
+            <Label text="Step Downs" GridPane.columnIndex="6" GridPane.rowIndex="4">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Label text="Transfer time" GridPane.columnIndex="6" GridPane.rowIndex="5" />
+            <Label text="Swing time" GridPane.columnIndex="6" GridPane.rowIndex="6" />
+            <Spinner fx:id="transferTimeFlatUp" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+            <Spinner fx:id="swingTimeFlatUp" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+            <Spinner fx:id="transferTimeDown" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="5" />
+            <Spinner fx:id="swingTimeDown" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="6" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" top="5.0" />
+         </padding>
+      </GridPane>
+   </children>
+</AnchorPane>

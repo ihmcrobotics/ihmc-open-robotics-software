@@ -146,7 +146,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerParentRegistry);
+      managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
@@ -236,12 +236,10 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
-                                                                              defaultTouchdownTime,
                                                                               defaultInitialTransferTime,
                                                                               defaultFinalTransferTime,
                                                                               controllerToolbox.getContactableFeet(),

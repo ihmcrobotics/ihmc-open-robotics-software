@@ -12,6 +12,8 @@ public interface QuadrupedFootstepPlannerListener
 
    void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason reason);
 
+   void rejectNode(FootstepNode rejectedNode, QuadrupedFootstepPlannerNodeRejectionReason reason);
+
    void plannerFinished(List<FootstepNode> plan);
 
    void reportLowestCostNodeList(List<FootstepNode> plan);

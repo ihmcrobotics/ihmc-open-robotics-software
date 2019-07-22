@@ -114,17 +114,15 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    public void addSpinnerHandle(double angleOnSteeringWheelingInDegrees, double percentOfSteeringWheelRadius, double handleLength, double handleRadius,
          double distanceFromWheel)
    {
-      RigidBodyTransform transform = new RigidBodyTransform();
 
       double angleOnSteeringWheel = Math.toRadians(angleOnSteeringWheelingInDegrees);
       double distanceFromCenter = percentOfSteeringWheelRadius * steeringWheelRadius;
       double xHandle = distanceFromCenter * Math.cos(angleOnSteeringWheel);
       double yHandle = distanceFromCenter * Math.sin(angleOnSteeringWheel);
 
-      Vector3D translation = new Vector3D(xHandle, yHandle, distanceFromWheel);
-      transform.setTranslation(translation);
+      Point3D translation = new Point3D(xHandle, yHandle, distanceFromWheel);
       
-      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, handleLength, handleRadius);
+      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, translation, Axis.Z, handleLength, handleRadius);
       spokesCylinders.add(spinnerHandleCylinder);
 
       steeringWheelLinkGraphics.translate(translation);
@@ -151,7 +149,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       RigidBodyTransform transform = new RigidBodyTransform();
       crossBar.get(transform);
       
-      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, height, radius);
+      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, height, radius);
+      spinnerHandleCylinder.getCylinder3d().applyTransform(transform);
       spokesCylinders.add(spinnerHandleCylinder);
       
       steeringWheelLinkGraphics.transform(transform);
@@ -202,7 +201,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       invertTransform.set(transform);
       invertTransform.invert();
 
-      steeringWheelTorus = new FrameTorus3d(steeringWheelFrame, transform, steeringWheelRadius, steeringWheelThickness / 2.0);
+      steeringWheelTorus = new FrameTorus3d(steeringWheelFrame, steeringWheelRadius, steeringWheelThickness / 2.0);
+      steeringWheelTorus.getTorus3d().applyTransform(transform);
       steeringWheelLinkGraphics.transform(transform);
       steeringWheelLinkGraphics.addArcTorus(0.0, 2 * Math.PI, steeringWheelRadius, steeringWheelThickness / 2.0, YoAppearance.DarkRed());
       steeringWheelLinkGraphics.translate(0.0, 0.0, -steeringColunmLength);
@@ -222,7 +222,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
          RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
          yoGraphicTransform.multiply(transform);
 
-         FrameCylinder3d spokeCylinder = new FrameCylinder3d(steeringWheelFrame, transform, steeringWheelRadius, spokesThickness / 2.0);
+         FrameCylinder3d spokeCylinder = new FrameCylinder3d(steeringWheelFrame, steeringWheelRadius, spokesThickness / 2.0);
+         spokeCylinder.applyTransform(transform);
          spokesCylinders.add(spokeCylinder);
 
          steeringWheelLinkGraphics.transform(transform);

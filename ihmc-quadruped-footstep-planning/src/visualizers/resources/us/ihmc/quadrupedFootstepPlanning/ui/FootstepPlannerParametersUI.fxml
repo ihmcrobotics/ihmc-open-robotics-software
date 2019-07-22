@@ -62,15 +62,14 @@
                                 <Label text="Step up weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                                 <Label text="Step down weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                                 <Label text="Heuristics weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                                
+
                                 <Spinner fx:id="maxWalkingSpeedMultiplier" editable="true" GridPane.columnIndex="1" />
                                 <Spinner fx:id="bodyGroundClearance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Spinner fx:id="minXClearanceFromFoot" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                 <Spinner fx:id="minYClearanceFromFoot" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                 <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                                <Spinner fx:id="projectInsideDistanceForExpansion" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                <Spinner fx:id="projectInsideDistanceForPostProcessing" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                                <Spinner fx:id="projectInsideDistance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                 <Spinner fx:id="maximumXYWiggleDistance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                                 <Spinner fx:id="cliffHeightToAvoid" editable="true" GridPane.columnIndex="3" />
                                 <Spinner fx:id="minFrontEndForwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />

@@ -60,10 +60,10 @@ public class QuadrupedMomentumRateOfChangeModule
       centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
 
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
-      ReferenceFrame comFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
+      ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
       LinearInvertedPendulumModel linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
-      dcmPositionController = new DivergentComponentOfMotionController(controllerToolbox.getSupportPolygons(), comFrame, runtimeEnvironment.getControlDT(),
+      dcmPositionController = new DivergentComponentOfMotionController(controllerToolbox.getSupportPolygons(), comZUpFrame, runtimeEnvironment.getControlDT(),
                                                                        linearInvertedPendulumModel, registry);
 
       momentumRateCommand.setSelectionMatrixForLinearControl();

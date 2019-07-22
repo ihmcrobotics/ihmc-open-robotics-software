@@ -47,7 +47,6 @@ public class QuadrupedBodyOrientationManager
 
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   private final MovingReferenceFrame bodyFrame;
    private final DoubleParameter maximumBodyOrientationRate = new DoubleParameter("maximumBodyOrientationRate", registry, 0.1);
    private final RateLimitedYoFrameOrientation yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
@@ -77,7 +76,6 @@ public class QuadrupedBodyOrientationManager
 
    public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       pitchOscillationGenerator.setMode(YoFunctionGeneratorMode.SINE);

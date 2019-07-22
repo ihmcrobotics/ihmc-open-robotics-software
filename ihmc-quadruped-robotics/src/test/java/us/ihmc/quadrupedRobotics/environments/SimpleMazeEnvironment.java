@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.environments;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;

@@ -250,6 +250,13 @@ public class AvatarControllerThread
       return inverseDynamicsStructure;
    }
 
+   public void initialize()
+   {
+      firstTick.set(true);
+      humanoidRobotContextData.setControllerRan(false);
+      humanoidRobotContextData.setEstimatorRan(false);
+   }
+
    public void run()
    {
       runController.set(humanoidRobotContextData.getEstimatorRan());

@@ -2,28 +2,35 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIBehavior;
+import javafx.scene.control.CheckBox;
+import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
+import us.ihmc.messager.Messager;
 
-public class StepInPlaceBehaviorUIController extends FXUIBehavior
+public class StepInPlaceBehaviorUIController
 {
+   @FXML private CheckBox enableCheckBox;
    @FXML private Button startStepping;
    @FXML private Button pauseStepping;
 
-   private BehaviorTeleop teleop;
+   private Messager behaviorMessager;
 
-   public void init(BehaviorTeleop teleop)
+   public void init(Messager behaviorMessager)
    {
-      this.teleop = teleop;
+      this.behaviorMessager = behaviorMessager;
+   }
+
+   @FXML public void enable()
+   {
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Enable, enableCheckBox.isSelected());
    }
 
    @FXML public void startStepping()
    {
-      teleop.setStepping(true);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
    }
 
    @FXML public void pauseStepping()
    {
-      teleop.setStepping(false);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
    }
 }

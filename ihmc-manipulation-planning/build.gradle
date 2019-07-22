@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.15.8"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -20,8 +21,8 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.28"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
 
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"

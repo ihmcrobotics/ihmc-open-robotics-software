@@ -1,0 +1,88 @@
+#ifndef __controller_msgs__msg__FootstepPlanningStatistics__idl__
+#define __controller_msgs__msg__FootstepPlanningStatistics__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_HIGH_OR_LOW =
+      0;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FORWARD_AND_DOWN =
+      1;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR =
+      2;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR_AND_HIGH =
+      3;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_WIDE_ENOUGH =
+      4;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_IN_PLACE =
+      5;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_NOT_ENOUGH_AREA =
+      6;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_COULD_NOT_SNAP =
+      7;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_COULD_NOT_WIGGLE_INSIDE =
+      8;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
+      9;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_TOO_MUCH_PENETRATION_AFTER_WIGGLE =
+      10;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_LONG_ENOUGH =
+      11;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE =
+      12;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_BLOCKING_BODY =
+      13;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY =
+      14;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM =
+      15;
+
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       * This messages gives statistical information about a footstep planning
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningStatistics_")
+      struct FootstepPlanningStatistics
+      {
+        /**
+         * Total time taken by the toolbox to generate plan
+         */
+        @defaultValue(value=-1.0)
+        double time_taken;
+        /**
+         * Total number of unique steps considered while planning
+         */
+        long number_of_steps_considered;
+        /**
+         * Array holding the percentage of rejected steps corresponding to each rejection reason
+         */
+        sequence<double, 16> rejection_fractions;
+        /**
+         * Fraction of total considered steps that were rejected
+         */
+        double fraction_of_rejected_steps;
+      };
+    };
+  };
+};
+
+#endif

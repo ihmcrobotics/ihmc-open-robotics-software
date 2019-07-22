@@ -119,10 +119,10 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
-
    @FXML
    private Slider previewSlider;
-
+   @FXML
+   private Button sendPlanButton;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -181,14 +181,21 @@ public class MainTabController
    @FXML
    public void requestStopWalking()
    {
-      messager.submitMessage(stepListMessageTopic, new QuadrupedTimedStepListMessage());
-      requestStanding();
+      if (abortWalkingTopic != null)
+      {
+         messager.submitMessage(abortWalkingTopic, true);
+      }
+
+      if (enableStepTeleopTopic != null)
+      {
+         messager.submitMessage(enableStepTeleopTopic, false);
+      }
    }
 
-   private void requestStanding()
+   @FXML
+   public void clearFootstepPlan()
    {
-      if (desiredSteppingStateNameTopic != null)
-         messager.submitMessage(desiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
+      messager.submitMessage(footstepPlanTopic, null);
    }
 
    @FXML
@@ -275,6 +282,9 @@ public class MainTabController
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
    private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
+   private Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic;
+   private Topic<Boolean> abortWalkingTopic;
+   private Topic<Boolean> enableStepTeleopTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -305,6 +315,16 @@ public class MainTabController
    public void setPlanarRegionDataClearTopic(Topic<Boolean> planarRegionDataClearTopic)
    {
       this.planarRegionDataClearTopic = planarRegionDataClearTopic;
+   }
+
+   public void setAbortWalkingTopic(Topic<Boolean> abortWalkingTopic)
+   {
+      this.abortWalkingTopic = abortWalkingTopic;
+   }
+
+   public void setEnableStepTeleopTopic(Topic<Boolean> enableStepTeleopTopic)
+   {
+      this.enableStepTeleopTopic = enableStepTeleopTopic;
    }
 
    public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)
@@ -400,9 +420,10 @@ public class MainTabController
       this.stepListMessageTopic = stepListMessageTopic;
    }
 
-   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic)
+   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic, Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic)
    {
       this.desiredSteppingStateNameTopic = desiredSteppingStateNameTopic;
+      this.currentSteppingStateNameTopic = currentSteppingStateNameTopic;
    }
 
    public void bindControls()
@@ -464,6 +485,43 @@ public class MainTabController
       footstepPlanPreviewPlaybackManager = new FootstepPlanPreviewPlaybackManager(messager);
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+
+      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
+      messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
+      messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
+         if (m != null && m == QuadrupedSteppingStateEnum.STAND)
+            clearFootstepPlan();
+      });
+   }
+
+   private boolean isValidPlan(FootstepPlan plan)
+   {
+      if (quadrupedReferenceFrames == null)
+         return true;
+      double maximumStepTranslation = 1.0;
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         FramePoint3D startPosition = new FramePoint3D();
+         Point3DReadOnly goalPosition = plan.getFootstep(i).getGoalPosition();
+
+         if(i < 4)
+         {
+            startPosition.setToZero(quadrupedReferenceFrames.getSoleFrame(plan.getFootstep(i).getRobotQuadrant()));
+            startPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+         {
+            QuadrupedTimedStep previousStep = plan.getFootstep(i - 4);
+            startPosition.set(previousStep.getGoalPosition());
+         }
+
+         if(startPosition.distance(goalPosition) > maximumStepTranslation)
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    private void setupControls()

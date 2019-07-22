@@ -3,18 +3,20 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
+   //TODO: Make these parameters or something, rather than hardcoded here.
    private static final double pathViolationWeight = 30.0;
+   private static final double distanceFromPathTolerance = 0.2;
+   private static final double deltaYawFromPathTolerance = 0.2;
+
    private final BodyPathPlanner bodyPath;
    private final FootstepPlannerParameters parameters;
    private final FootstepPlannerCostParameters costParameters;
@@ -41,12 +43,21 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
       double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
-      double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
-      double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
+      double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
+      double pathCropAmount = distanceToPath - croppedDistanceToPath;
 
-      double yaw = pathViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw());
+      double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
+      double remainingDistance = pathLength + pathCropAmount + pathViolationWeight * croppedDistanceToPath;
+
+      double yawDifferenceFromPathYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw()));
+      double remainingYawToGoal =  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), closestPointOnPath.getYaw()));
+      double croppedYawDifferenceFromPathYaw = Math.max(0.0, yawDifferenceFromPathYaw - deltaYawFromPathTolerance);
+      double yawCropAmount = yawDifferenceFromPathYaw - croppedYawDifferenceFromPathYaw;
+
+      double yawCost = remainingYawToGoal + yawCropAmount + pathViolationWeight * croppedYawDifferenceFromPathYaw;
+
       double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep() * minSteps;
+      return remainingDistance + costParameters.getYawWeight() * yawCost + costParameters.getCostPerStep() * minSteps;
    }
 
    public void setGoalAlpha(double alpha)

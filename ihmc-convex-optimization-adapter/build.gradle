@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.15.8"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -20,7 +21,7 @@ mainDependencies {
    compile group: "org.ojalgo", name: "ojalgo", version: "40.0.0"
 
    compile group: "us.ihmc", name: "IHMCOptimizerWrappers", version: "0.0.26"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"

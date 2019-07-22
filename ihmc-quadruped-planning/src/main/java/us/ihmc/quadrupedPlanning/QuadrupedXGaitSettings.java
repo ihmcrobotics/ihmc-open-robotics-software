@@ -6,6 +6,8 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    private double stanceWidth;
    private double stepGroundClearance;
    private double endPhaseShift;
+   private double maxHorizontalSpeedFraction = 0.5;
+   private double maxYawSpeedFraction = 0.75;
    private QuadrupedSpeed quadrupedSpeed;
 
    private final QuadrupedGaitTimingsBasics paceSlowTimings = new QuadrupedGaitTimings();
@@ -63,6 +65,18 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    }
 
    @Override
+   public double getMaxHorizontalSpeedFraction()
+   {
+      return maxHorizontalSpeedFraction;
+   }
+
+   @Override
+   public double getMaxYawSpeedFraction()
+   {
+      return maxYawSpeedFraction;
+   }
+
+   @Override
    public double getStepGroundClearance()
    {
       return stepGroundClearance;
@@ -96,6 +110,18 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    public void setStepGroundClearance(double stepGroundClearance)
    {
       this.stepGroundClearance = stepGroundClearance;
+   }
+
+   @Override
+   public void setMaxHorizontalSpeedFraction(double fraction)
+   {
+      this.maxHorizontalSpeedFraction = fraction;
+   }
+
+   @Override
+   public void setMaxYawSpeedFraction(double fraction)
+   {
+      this.maxYawSpeedFraction = fraction;
    }
 
    @Override
