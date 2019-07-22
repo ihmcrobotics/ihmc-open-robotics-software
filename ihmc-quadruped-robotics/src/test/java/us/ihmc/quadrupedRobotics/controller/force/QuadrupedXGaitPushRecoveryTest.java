@@ -118,6 +118,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       double stepLength = walkingSpeed * (2 * stepDuration);
       List<QuadrupedTimedStepMessage> steps = getSteps(endPhaseShift, stepLength, 1.0, 0.0, stepDuration, 10);
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setAreStepsAdjustable(true);
       stepTeleopManager.publishTimedStepListToController(message);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

@@ -10,6 +10,7 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -74,13 +75,18 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
    {
       setUpSimulation(null);
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
       stepTeleopManager.setEndPhaseShift(180);
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
                                            ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                            ROS2TopicQualifier.OUTPUT),
-                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
+                                           s -> {
+         QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
+         stepMessage.setAreStepsAdjustable(true);
+         stepTeleopManager.publishTimedStepListToController(stepMessage);
+                                           });
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
                                            ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                            ROS2TopicQualifier.OUTPUT),
@@ -98,10 +104,10 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 1.5 * FootstepNode.gridSizeXY));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 1.5 * FootstepNode.gridSizeXY));
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 1.5 * FootstepNode.gridSizeYaw));
-      conductor.addDurationGoal(variables.getYoTime(), 25.0);
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), 1.5, 0.1));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), 0.5, 0.1));
+      conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), -Math.PI * 0.25, 0.25));
+      conductor.addDurationGoal(variables.getYoTime(), 10.0);
       conductor.simulate();
    }
 

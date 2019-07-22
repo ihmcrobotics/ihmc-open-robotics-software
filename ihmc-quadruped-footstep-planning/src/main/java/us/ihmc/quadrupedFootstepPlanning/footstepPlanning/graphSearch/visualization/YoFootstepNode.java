@@ -16,11 +16,13 @@ public class YoFootstepNode
    private final QuadrantDependentList<YoFramePoint2D> nodePositions = new QuadrantDependentList<>();
    private final YoDouble nominalStanceLength;
    private final YoDouble nominalStanceWidth;
+   private final YoDouble nodeYaw;
 
    public YoFootstepNode(YoVariableRegistry registry)
    {
       movingQuadrant = YoEnum.create("movingQuadrant", RobotQuadrant.class, registry);
       movingNodePosition = new YoFramePoint2D("movingNodePosition", ReferenceFrame.getWorldFrame(), registry);
+      nodeYaw = new YoDouble("nodeYaw", registry);
       movingNodePosition.setToNaN();
       nominalStanceLength = new YoDouble("nominalStanceLength", registry);
       nominalStanceWidth = new YoDouble("nominalStanceWidth", registry);
@@ -42,6 +44,7 @@ public class YoFootstepNode
       movingNodePosition.set(nodePositions.get(movingQuadrant.getEnumValue()));
       nominalStanceLength.set(node.getNominalStanceLength());
       nominalStanceWidth.set(node.getNominalStanceWidth());
+      nodeYaw.set(node.getStepYaw());
    }
 
    public YoFramePoint2D getYoPosition(RobotQuadrant robotQuadrant)
@@ -63,7 +66,7 @@ public class YoFootstepNode
       }
 
       return new FootstepNode(movingQuadrant.getEnumValue(), nodePositions.get(RobotQuadrant.FRONT_LEFT), nodePositions.get(RobotQuadrant.FRONT_RIGHT),
-                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT), nominalStanceLength.getDoubleValue(),
-                              nominalStanceWidth.getDoubleValue());
+                              nodePositions.get(RobotQuadrant.HIND_LEFT), nodePositions.get(RobotQuadrant.HIND_RIGHT), nodeYaw.getDoubleValue(),
+                              nominalStanceLength.getDoubleValue(), nominalStanceWidth.getDoubleValue());
    }
 }

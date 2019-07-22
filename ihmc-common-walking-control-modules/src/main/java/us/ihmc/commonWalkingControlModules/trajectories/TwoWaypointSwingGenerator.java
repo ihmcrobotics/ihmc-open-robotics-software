@@ -214,6 +214,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          {
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
+
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
                waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);

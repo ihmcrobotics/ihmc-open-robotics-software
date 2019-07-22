@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -28,24 +27,21 @@ public class DistanceAndYawBasedCost implements FootstepCost
 
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
 
-      AxisAngle bodyOrientation = new AxisAngle(startNode.getNominalYaw(), 0.0, 0.0);
+      Vector2D offsetToFoot = new Vector2D(movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()), movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      offsetToFoot.scale(0.5);
 
-      Vector2D forward = new Vector2D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0);
-      Vector2D side = new Vector2D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()));
-
-      bodyOrientation.transform(forward);
-      bodyOrientation.transform(side);
+      startNode.getStepOrientation().transform(offsetToFoot);
 
       Point2D nominalStartFoot = new Point2D(startXGaitCenter);
-      nominalStartFoot.add(forward);
-      nominalStartFoot.add(side);
+      nominalStartFoot.add(offsetToFoot);
 
       double stepX = nominalStartFoot.getX() - endNode.getX(movingQuadrant);
       double stepY = nominalStartFoot.getY() - endNode.getY(movingQuadrant);
 
       double stepDistance = EuclidCoreTools.norm(stepX, stepY);
-      double stepYaw = endNode.getNominalYaw() - startNode.getNominalYaw();
+      double stepYaw = endNode.getStepYaw() - startNode.getStepYaw();
 
-      return plannerParameters.getDistanceHeuristicWeight() * stepDistance + plannerParameters.getYawWeight() * stepYaw;
+      // don't include yaw, because this is captured in the step distance, too
+      return plannerParameters.getDistanceWeight() * stepDistance;// + plannerParameters.getYawWeight() * stepYaw;
    }
 }

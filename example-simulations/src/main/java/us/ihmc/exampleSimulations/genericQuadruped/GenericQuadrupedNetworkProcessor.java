@@ -3,10 +3,10 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedFootstepPlannerParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -23,7 +23,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    {
       this(new GenericQuadrupedModelFactory(),
            new GenericQuadrupedPhysicalProperties().getFeetGroundContactPoints(),
-           new DefaultFootstepPlannerParameters(),
+           new GenericQuadrupedFootstepPlannerParameters(),
            new GenericQuadrupedXGaitSettings(),
            new GenericQuadrupedPointFootSnapperParameters(),
            pubSubImplementation,
