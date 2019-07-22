@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.graphics;
+package us.ihmc.pathPlanning.visibilityGraphs.ui.graphics;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
