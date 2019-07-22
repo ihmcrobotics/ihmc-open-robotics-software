@@ -74,6 +74,8 @@ public class ToeOffManager
 
    private final BooleanProvider lookAtTwoStepCapturabilityForToeOff;
 
+   private final BooleanProvider forceToeOffAtJointLimit;
+
    private final DoubleProvider ankleLowerLimitToTriggerToeOff;
    private final DoubleProvider kneeUpperLimitToTriggerToeOff;
    private final DoubleProvider kneeLowerLimitToTriggerToeOff;
@@ -185,16 +187,18 @@ public class ToeOffManager
 
       ankleLowerLimitToTriggerToeOff = new DoubleParameter("ankleLowerLimitToTriggerToeOff", registry, toeOffParameters.getAnkleLowerLimitToTriggerToeOff());
       kneeUpperLimitToTriggerToeOff = new DoubleParameter("kneeUpperLimitToTriggerToeOff", registry, toeOffParameters.getKneeUpperLimitToTriggerToeOff());
-      kneeLowerLimitToTriggerToeOff = new DoubleParameter("kneeLowerLimitToTriggerToeOff", registry, 0.0);
+      kneeLowerLimitToTriggerToeOff = new DoubleParameter("kneeLowerLimitToTriggerToeOff", registry, toeOffParameters.getKneeLowerLimitToTriggerToeOff());
       icpPercentOfStanceForDSToeOff = new DoubleParameter("icpPercentOfStanceForDSToeOff", registry, toeOffParameters.getICPPercentOfStanceForDSToeOff());
       icpPercentOfStanceForSSToeOff = new DoubleParameter("icpPercentOfStanceForSSToeOff", registry, toeOffParameters.getICPPercentOfStanceForSSToeOff());
 
-      icpProximityForToeOff = new DoubleParameter("icpProximityForToeOff", registry, toeOffParameters.getECMPProximityForToeOff());
+      icpProximityForToeOff = new DoubleParameter("icpProximityForToeOff", registry, toeOffParameters.getICPProximityForToeOff());
       ecmpProximityForToeOff = new DoubleParameter("ecmpProximityForToeOff", registry, toeOffParameters.getECMPProximityForToeOff());
       copProximityForToeOff = new DoubleParameter("copProximityForToeOff", registry, toeOffParameters.getCoPProximityForToeOff());
 
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
+
+      forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, toeOffParameters.forceToeOffAtJointLimit());
 
       lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
@@ -836,6 +840,14 @@ public class ToeOffManager
          needToSwitchToToeOffForAnkleLimit.set(ankleAtLimit);
          needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
          needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
+         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
+
+         if (forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue())
+         {
+            doLineToeOff.set(true);
+            computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
+            return false;
+         }
 
          if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
          {
@@ -844,8 +856,7 @@ public class ToeOffManager
             return false;
          }
 
-         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
-         if (needToSwitchToToeOffForJointLimit.getBooleanValue())
+         if (!forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());
@@ -922,6 +933,14 @@ public class ToeOffManager
          needToSwitchToToeOffForAnkleLimit.set(ankleAtLimit);
          needToSwitchToToeOffForLeadingKneeAtLimit.set(leadingKneeAtLimit);
          needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
+         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
+
+         if (forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue())
+         {
+            doPointToeOff.set(true);
+            computeToePointContact.set(updatePointContactDuringToeOff.getValue());
+            return false;
+         }
 
          if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
          {
@@ -930,8 +949,7 @@ public class ToeOffManager
             return false;
          }
 
-         needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
-         if (needToSwitchToToeOffForJointLimit.getBooleanValue())
+         if (!forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue())
          {
             doPointToeOff.set(true);
             computeToePointContact.set(updatePointContactDuringToeOff.getValue());
