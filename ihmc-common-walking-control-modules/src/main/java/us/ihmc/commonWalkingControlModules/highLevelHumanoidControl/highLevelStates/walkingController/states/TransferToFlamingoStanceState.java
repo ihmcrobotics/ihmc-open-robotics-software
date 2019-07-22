@@ -27,6 +27,13 @@ public class TransferToFlamingoStanceState extends TransferState
    }
 
    @Override
+   public void doAction(double timeInState)
+   {
+      switchToToeOffIfPossible();
+      super.doAction(timeInState);
+   }
+
+   @Override
    public void onEntry()
    {
       super.onEntry();
@@ -52,8 +59,7 @@ public class TransferToFlamingoStanceState extends TransferState
 
       double swingTime = Double.POSITIVE_INFINITY;
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double defaultTouchdownDuration = walkingMessageHandler.getDefaultTouchdownTime();
-      footstepTiming.setTimings(Double.POSITIVE_INFINITY, defaultTouchdownDuration, initialTransferTime);
+      footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);

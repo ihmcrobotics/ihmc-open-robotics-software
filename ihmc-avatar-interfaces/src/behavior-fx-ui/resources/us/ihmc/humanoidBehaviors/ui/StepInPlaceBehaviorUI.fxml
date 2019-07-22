@@ -1,15 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController">
+<AnchorPane prefHeight="102.0" prefWidth="167.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController">
     <children>
-        <GridPane hgap="15.0" vgap="2.0" layoutX="15.0" layoutY="17.0">
+        <GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="177.0" prefWidth="215.0" vgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
+            <HBox>
+               <children>
+                  <CheckBox fx:id="enableCheckBox" mnemonicParsing="false" onAction="#enable" text="Enable" />
+               </children>
+            </HBox>
                 <Button fx:id="startStepping" onAction="#startStepping" prefWidth="130.0" text="Start Stepping" GridPane.rowIndex="1" />
                 <Button fx:id="pauseStepping" onAction="#pauseStepping" prefWidth="130.0" text="Pause Stepping" GridPane.rowIndex="2" />
             </children>
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
         </GridPane>
     </children>
 </AnchorPane>

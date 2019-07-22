@@ -3,11 +3,11 @@ package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +32,11 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    public void setPaused(boolean pause)
    {
       teleopManager.setPaused(pause);
+
+      if(pause)
+      {
+         reportMessage(new AbortWalkingMessage());
+      }
    }
 
    public void processBodyPathPlanMessage(QuadrupedBodyPathPlanMessage message)

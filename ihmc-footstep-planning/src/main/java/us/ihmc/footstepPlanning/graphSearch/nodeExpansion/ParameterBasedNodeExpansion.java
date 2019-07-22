@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -49,16 +50,20 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> expansion)
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      for (double x = parameters.getMinimumStepLength(); x < parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
+      double reachSquared = MathTools.square(parameters.getMaximumStepReach());
+      for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
       {
-         for (double y = parameters.getMinimumStepWidth(); y < parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
+         for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
+            if (MathTools.square(x) + MathTools.square(y) > reachSquared)
+               continue;
+
             if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
             {
                continue;
             }
 
-            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
+            for (double yaw = parameters.getMinimumStepYaw(); yaw <= parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);

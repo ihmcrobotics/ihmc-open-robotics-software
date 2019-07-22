@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.15.8"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -29,15 +30,15 @@ mainDependencies {
    compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
    compile group: "us.ihmc", name: "log-tools", version: "0.3.1"
 
-   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.11.0"
-   compile group: "us.ihmc", name: "euclid-shape", version: "0.11.0"
-   compile group: "us.ihmc", name: "mecano", version: "0.0.19"
-   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.19"
+   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
+   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
+   compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
+   compile group: "us.ihmc", name: "mecano", version: "0.0.20"
+   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.20"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
-   compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
+   compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }

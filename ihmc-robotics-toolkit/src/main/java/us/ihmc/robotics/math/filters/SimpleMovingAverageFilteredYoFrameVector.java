@@ -52,6 +52,7 @@ public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D im
       return new SimpleMovingAverageFilteredYoFrameVector(x, y, z, unfilteredVector.getReferenceFrame());
    }
 
+   @Override
    public void update()
    {
       x.update();
@@ -81,6 +82,7 @@ public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D im
       z.update(vectorUnfiltered.getZ());
    }
 
+   @Override
    public void reset()
    {
       x.reset();

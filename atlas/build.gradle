@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.15.8"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
    id("org.hidetake.ssh") version "2.9.0"
@@ -33,18 +34,18 @@ mainDependencies {
    compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
    compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
    compile group: "org.ros.rosjava_messages", name: "multisense_ros", version: "3.4.2"
-   compile group: "us.ihmc.thirdparty.org.opencv", name: "opencv", version: "3.2.0-170503"
+   compile group: "org.bytedeco", name: "javacv-platform", version: "1.5"
    compile "org.ros.rosjava_messages:geometry_msgs:1.11.9"
    compile "org.boofcv:recognition:0.24.1"
 
-   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
+   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
@@ -131,12 +132,13 @@ task createAllStartScripts() {
       // just a placeholder
    }
 }
-def scripts = ['behavior-backpack'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorBackpack'
+def scripts = ['behavior-module'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorModule'
 ]
 scripts.each() { scriptName, className ->
    def t = tasks.create(name: scriptName, type: CreateStartScripts) {
       mainClassName = className
       applicationName = scriptName
+      defaultJvmOpts = ['-Dlog.level.us.ihmc=debug']
       outputDir = new File(project.buildDir, 'scripts')
       classpath = jar.outputs.files + project.configurations.runtime
    }
@@ -182,7 +184,7 @@ task deploy(dependsOn: installDist) {
                put(from: from + it, into: directory + "/lib")
             }
 
-            execute("chmod +x " + directory + "/bin/behavior-backpack")
+            execute("chmod +x " + directory + "/bin/behavior-module")
 
             execute("echo " + project.version + " > " + directory + "/version.txt")
          }

@@ -17,7 +17,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapSequenceRenderer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -26,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class FootstepPlannerProcessViewer extends AnimationTimer
 {
@@ -57,8 +55,8 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    public FootstepPlannerProcessViewer(Messager messager)
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion,
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                                parameters::getProjectInsideUsingConvexHull,
                                                                                                 true);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
 

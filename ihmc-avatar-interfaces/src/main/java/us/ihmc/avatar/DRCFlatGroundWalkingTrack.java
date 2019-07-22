@@ -5,6 +5,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 import java.util.ArrayList;
 
+import javax.swing.JButton;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
@@ -128,6 +130,14 @@ public class DRCFlatGroundWalkingTrack
 
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
+
+      if (robotInitialSetup.supportsReset())
+      {
+         JButton resetButton = new JButton("Reset Robot");
+         resetButton.addActionListener(e -> avatarSimulation.resetRobot());
+         avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
+      }
+
       avatarSimulation.start();
    }
 

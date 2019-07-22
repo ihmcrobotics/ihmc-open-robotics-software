@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, QuadrupedStepMessage>
 {
@@ -14,6 +15,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    private RobotQuadrant robotQuadrant;
    private FramePoint3D goalPosition = new FramePoint3D();
    private double groundClearance = 0.0;
+   private TrajectoryType trajectoryType;
 
    public QuadrupedStepCommand()
    {
@@ -36,6 +38,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
       robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
       groundClearance = message.getGroundClearance();
       goalPosition.setIncludingFrame(worldFrame, message.getGoalPosition());
+      trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
    }
 
    @Override
@@ -45,6 +48,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
       robotQuadrant = other.robotQuadrant;
       groundClearance = other.groundClearance;
       goalPosition.setIncludingFrame(other.goalPosition);
+      trajectoryType = other.getTrajectoryType();
    }
 
    public RobotQuadrant getRobotQuadrant()
@@ -60,6 +64,11 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    public FramePoint3D getGoalPosition()
    {
       return goalPosition;
+   }
+   
+   public TrajectoryType getTrajectoryType()
+   {
+      return trajectoryType;
    }
 
    @Override
