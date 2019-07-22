@@ -7,7 +7,7 @@ import us.ihmc.tools.property.StoredPropertySet;
 
 public class PlanarRegionSLAMParameters extends StoredPropertySet
 {
-   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList("planarRegionSLAMParameters");
+   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList(PlanarRegionSLAMParameters.class);
 
    public static final IntegerStoredPropertyKey iterations = keys.addIntegerKey("Iterations");
    public static final DoubleStoredPropertyKey boundingBoxHeight = keys.addDoubleKey("Bounding box height");
