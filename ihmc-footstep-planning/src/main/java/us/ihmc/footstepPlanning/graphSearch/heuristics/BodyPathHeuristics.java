@@ -43,18 +43,21 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
       double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
-      distanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
+      double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
+      double pathCropAmount = distanceToPath - croppedDistanceToPath;
 
       double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
-      double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
+      double remainingDistance = pathLength + pathCropAmount + pathViolationWeight * croppedDistanceToPath;
 
-      double yawDifferenceFromPathYaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw());
-      yawDifferenceFromPathYaw = Math.max(0.0, distanceToPath - deltaYawFromPathTolerance);
+      double yawDifferenceFromPathYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw()));
+      double remainingYawToGoal =  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), closestPointOnPath.getYaw()));
+      double croppedYawDifferenceFromPathYaw = Math.max(0.0, yawDifferenceFromPathYaw - deltaYawFromPathTolerance);
+      double yawCropAmount = yawDifferenceFromPathYaw - croppedYawDifferenceFromPathYaw;
 
-      double yawCost = pathViolationWeight * yawDifferenceFromPathYaw;
+      double yawCost = remainingYawToGoal + yawCropAmount + pathViolationWeight * croppedYawDifferenceFromPathYaw;
 
       double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + costParameters.getYawWeight() * Math.abs(yawCost) + costParameters.getCostPerStep() * minSteps;
+      return remainingDistance + costParameters.getYawWeight() * yawCost + costParameters.getCostPerStep() * minSteps;
    }
 
    public void setGoalAlpha(double alpha)

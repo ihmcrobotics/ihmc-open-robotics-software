@@ -23,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.OneWaypointSwingGenerator;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -41,6 +42,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
+   
+   private static final double minSwingHeight = 0.04;
+   private static final double maxSwingHeight = 0.3;
+
+   private static final double defaultSwingHeight = 0.08;
+   private static final double obstacleClearanceSwingHeight = 0.1;
 
    private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
    private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
@@ -99,7 +106,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final FootSwitchInterface footSwitch;
 
+   private final YoDouble speedUpFactorRateLimit;
    private final YoDouble swingTimeSpeedUpFactor;
+   private final RateLimitedYoVariable limitedSwingTimeSpeedUpFactor;
    private final YoDouble maxSwingTimeSpeedUpFactor;
    private final BooleanProvider isSwingSpeedUpEnabled;
 
@@ -125,7 +134,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
       hasMinimumTimePassed = new YoBoolean(namePrefix + "HasMinimumTimePassed", registry);
 
+      speedUpFactorRateLimit = new YoDouble(namePrefix + "SpeedUpFactorRateLimit", registry);
+      speedUpFactorRateLimit.set(10.0);
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
+      limitedSwingTimeSpeedUpFactor = new RateLimitedYoVariable(namePrefix + "LimitedTimeSpeedUpFactor", registry, speedUpFactorRateLimit, swingTimeSpeedUpFactor, controlDT);
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
 
       isSwingPastDone = new YoBoolean(namePrefix + "IsSwingPastDone", registry);
@@ -144,13 +156,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
 
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
-
-      //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-
-      double minSwingHeight = 0.04;
-      double maxSwingHeight = 0.3;
-      double defaultSwingHeight = 0.04;
-
+      
       oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix + "1", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                            graphicsListRegistry);
       twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
@@ -199,6 +205,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       timeInState.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
+      limitedSwingTimeSpeedUpFactor.set(1.0);
       timeInStateWithSwingSpeedUp.setToNaN();
       timeRemainingInState.setToNaN();
       timeRemainingInStateWithSwingSpeedUp.setToNaN();
@@ -228,12 +235,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double swingDuration = Math
             .max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
       setFootstepDurationInternal(swingDuration);
-
-      activeTrajectoryType.set(TrajectoryType.DEFAULT);
-
-      if (checkStepUpOrDown(finalPosition))
-         activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
-
+      
+      activeTrajectoryType.set(getTrajectoryType());
       fillAndInitializeTrajectories(true);
 
       touchdownTrigger.set(false);
@@ -244,6 +247,25 @@ public class QuadrupedSwingState extends QuadrupedFootState
          PrintTools.debug(
                currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance()
                      + ", " + currentStepCommand.getTimeInterval());
+      }
+   }
+
+   private TrajectoryType getTrajectoryType()
+   {
+      if (currentStepCommand.getTrajectoryType() != null)
+      {
+         return currentStepCommand.getTrajectoryType();
+      }
+      else
+      {
+         if (checkStepUpOrDown(finalPosition))
+         {
+            return TrajectoryType.OBSTACLE_CLEARANCE;
+         }
+         else
+         {
+            return TrajectoryType.DEFAULT;
+         }
       }
    }
 
@@ -269,6 +291,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       blendForStepAdjustment();
 
+      limitedSwingTimeSpeedUpFactor.update();
+      
       double time;
       if (!isSwingSpeedUpEnabled.getValue() || timeInStateWithSwingSpeedUp.isNaN())
       {
@@ -276,7 +300,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         timeInStateWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         timeInStateWithSwingSpeedUp.add(limitedSwingTimeSpeedUpFactor.getDoubleValue() * controlDT);
          time = timeInStateWithSwingSpeedUp.getDoubleValue();
          timeRemainingInStateWithSwingSpeedUp.set(swingDuration.getDoubleValue() - time);
       }
@@ -301,9 +325,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (isSwingSpeedUpEnabled.getValue() && !timeInStateWithSwingSpeedUp.isNaN())
       {
-         desiredVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
 
-         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
+         double speedUpFactorSquared = limitedSwingTimeSpeedUpFactor.getDoubleValue() * limitedSwingTimeSpeedUpFactor.getDoubleValue();
          desiredAcceleration.scale(speedUpFactorSquared);
       }
 
@@ -368,15 +392,23 @@ public class QuadrupedSwingState extends QuadrupedFootState
          waypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
          waypointCalculator.setStepTime(swingDuration.getDoubleValue());
          waypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
-         waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
          if (activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT)
-            oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());
-
+         {
+            oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
          else if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
-            twoWaypointSwingTrajectoryCalculator
-                  .setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+            double swingHeight = Math.max(obstacleClearanceSwingHeight, currentStepCommand.getGroundClearance());
+            waypointCalculator.setSwingHeight(swingHeight);
+         }
          else
-            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
+         
          waypointCalculator.initialize();
       }
 
@@ -431,14 +463,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         speedUpFactor = Double.POSITIVE_INFINITY;
+         speedUpFactor = 1.0;
       }
 
       if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > parameters.getMinRequiredSpeedUpFactor() && speedUpFactor > swingTimeSpeedUpFactor
             .getDoubleValue()))
       {
          speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
-
          swingTimeSpeedUpFactor.set(speedUpFactor);
          if (timeInStateWithSwingSpeedUp.isNaN())
             timeInStateWithSwingSpeedUp.set(timeInState.getDoubleValue());
@@ -452,7 +483,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double swingDuration = this.swingDuration.getDoubleValue();
       if (!timeInStateWithSwingSpeedUp.isNaN())
       {
-         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / limitedSwingTimeSpeedUpFactor.getDoubleValue();
          return swingTimeRemaining;
       }
       else
@@ -519,6 +550,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration.setToNaN();
       timeInState.setToNaN();
       swingTimeSpeedUpFactor.setToNaN();
+      limitedSwingTimeSpeedUpFactor.setToNaN();
       timeRemainingInState.setToNaN();
       timeInStateWithSwingSpeedUp.setToNaN();
 

@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,9 +40,6 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.tools.thread.TypedNotification;
-
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
 /**
  * Walk through a list of waypoints in order, looping forever.
@@ -84,6 +84,8 @@ public class PatrolBehavior
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final WaypointManager waypointManager;
+   private final AtomicReference<Boolean> enable;
+
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReviewEnabled;
@@ -101,7 +103,7 @@ public class PatrolBehavior
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.setOnEntry(STOP, this::onStopStateEntry);
       factory.setDoAction(STOP, this::doStopStateAction);
-      factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
+      factory.addTransition(STOP, NAVIGATE, this::transitionFromStop);
       factory.setOnEntry(NAVIGATE, this::onNavigateStateEntry);
       factory.setDoAction(NAVIGATE, this::doNavigateStateAction);
       factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, NAVIGATE, STOP), this::transitionFromNavigate);
@@ -141,6 +143,7 @@ public class PatrolBehavior
       });
       messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
 
+      enable = messager.createInput(Enable, false);
       loop = messager.createInput(Loop, false);
       swingOvers = messager.createInput(SwingOvers, false);
       planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
@@ -163,7 +166,8 @@ public class PatrolBehavior
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
-      stateMachine.doActionAndTransition();
+      if (enable.get())
+         stateMachine.doActionAndTransition();
    }
 
    private void onStopStateEntry()
@@ -238,10 +242,7 @@ public class PatrolBehavior
 
       PlanarRegionsListMessage latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionListMessage();
 
-      footstepPlanResultNotification
-            = behaviorHelper.requestPlan(midFeetZUpPose,
-                                                         new FramePose3D(waypointManager.peekNextPose()),
-                                                         latestPlanarRegionList);
+      footstepPlanResultNotification = behaviorHelper.requestPlan(midFeetZUpPose, new FramePose3D(waypointManager.peekNextPose()), latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
@@ -323,10 +324,7 @@ public class PatrolBehavior
 
       HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage,
-                                                                    humanoidReferenceFrames,
-                                                                    swingOverPlanarRegions,
-                                                                    planarRegionsList);
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
    private void doWalkStateAction(double timeInState)
@@ -344,8 +342,8 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and looping disabled
-         {                                                                                      // and it's going to loop
+         if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and
+         {                                                                                             // looping disabled and it's going to loop
             return STOP;
          }
          else
@@ -414,8 +412,9 @@ public class PatrolBehavior
    private void pollInterrupts()
    {
       HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
-      if (!stateMachine.getCurrentStateKey().equals(STOP)
-            && controllerState != HighLevelControllerName.WALKING) // STOP if robot falls
+      boolean isWalking = behaviorHelper.isRobotWalking();
+
+      if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {
          LogTools.debug("Stopping from robot state: {}", controllerState.name());
          stopNotification.set();

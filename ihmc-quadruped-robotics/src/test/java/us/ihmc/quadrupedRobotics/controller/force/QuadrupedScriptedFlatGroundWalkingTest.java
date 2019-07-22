@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.TimeIntervalMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +13,12 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
@@ -28,6 +32,9 @@ import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
+
+import static controller_msgs.msg.dds.QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED;
+import static controller_msgs.msg.dds.QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
 
 public abstract class QuadrupedScriptedFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -252,6 +259,15 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.simulate();
 
       List<QuadrupedTimedStepMessage> steps = getSteps();
+      int initialSize = steps.size();
+
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
+      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
+                                           s ->
+                                           {
+                                              if (s.takeNextData().getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+                                                 steps.remove(0);
+                                           });
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
       stepTeleopManager.publishTimedStepListToController(message);
 
@@ -275,10 +291,14 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       Assertions.assertTrue(EuclidCoreTools.epsilonEquals(robotBodyY, variables.getRobotBodyY().getDoubleValue(), 1e-2));
 
       // send the second half of the step list, check that the robot resumes walking when new steps are received
-      int initialSize = steps.size();
-      while (steps.size() > initialSize / 2)
+      double initialTime = steps.get(0).getTimeInterval().getStartTime();
+      for (QuadrupedTimedStepMessage step : steps)
       {
-         steps.remove(0);
+         TimeIntervalMessage timeInterval = step.getTimeInterval();
+         double startTime = timeInterval.getStartTime();
+         double endTime = timeInterval.getEndTime();
+         timeInterval.setStartTime(startTime - initialTime);
+         timeInterval.setEndTime(endTime - initialTime);
       }
       message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
       stepTeleopManager.publishTimedStepListToController(message);

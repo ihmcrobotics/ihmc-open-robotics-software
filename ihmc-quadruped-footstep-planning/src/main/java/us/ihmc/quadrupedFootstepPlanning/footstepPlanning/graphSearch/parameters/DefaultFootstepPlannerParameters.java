@@ -18,7 +18,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
       return 0.3;
    }
@@ -27,28 +27,28 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMinimumFrontStepLength()
    {
-      return -0.2;
+      return -getMaximumFrontStepLength();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
       return -0.15;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return 0.25;
+      return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
-      return -0.25;
+      return -0.2;
    }
 
    /** {@inheritDoc} */
@@ -66,7 +66,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    }
 
    @Override
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
       return 1.0;
    }
@@ -74,13 +74,19 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getXGaitWeight()
    {
-      return 0.05;
+      return 7.5;
+   }
+
+   @Override
+   public double getDesiredVelocityWeight()
+   {
+      return 1.0;
    }
 
    @Override
    public double getYawWeight()
    {
-      return 1.0;
+      return 2.5;
    }
 
    @Override
@@ -106,30 +112,17 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    {
       return 1.75;
    }
+
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForExpansion()
+   public double getProjectInsideDistance()
    {
       return 0.02;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForPostProcessing()
-   {
-      return 0.04;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   public boolean getProjectInsideUsingConvexHull()
    {
       return true;
    }

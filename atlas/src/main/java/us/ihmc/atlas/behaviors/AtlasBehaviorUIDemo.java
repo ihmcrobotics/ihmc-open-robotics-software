@@ -36,6 +36,7 @@ public class AtlasBehaviorUIDemo extends Application
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean USE_FLAT_GROUND = false;
    private static final boolean USE_KINEMATIC_SIMULATION = false;
+   public static final boolean CREATE_YO_VARIABLE_SERVER = false;
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
    private final int recordFrequencySpeedup = 10;
@@ -62,7 +63,7 @@ public class AtlasBehaviorUIDemo extends Application
          LogTools.info("Creating simulation");
          if (USE_KINEMATIC_SIMULATION)
          {
-            AvatarKinematicsSimulation.createForManualTest(createRobotModel(), true);
+            AvatarKinematicsSimulation.createForManualTest(createRobotModel(), CREATE_YO_VARIABLE_SERVER);
          }
          else
          {

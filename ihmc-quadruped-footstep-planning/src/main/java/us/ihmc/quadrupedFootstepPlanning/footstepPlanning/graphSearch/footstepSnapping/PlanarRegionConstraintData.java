@@ -42,7 +42,8 @@ public class PlanarRegionConstraintData
       if (polygonScaler.scaleConvexPolygon(internalRegionToScale, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray()))
          return scaledRegionPolygon;
       else
-         return null;
+         return scaledRegionPolygon;
+//         return null;
    }
 
    private ConvexPolygon2DReadOnly computedScaledConvexHull(ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
@@ -51,7 +52,8 @@ public class PlanarRegionConstraintData
       if (polygonScaler.scaleConvexPolygon(planarRegion.getConvexHull(), projectionInsideDelta, scaledRegionPolygon))
          return scaledRegionPolygon;
       else
-         return null;
+//         return null;
+         return scaledRegionPolygon;
    }
 
    private static TIntArrayList computeIndicesToIgnoreForRegion(ConvexPolygon2DReadOnly containingRegion, List<ConvexPolygon2D> allRegions)

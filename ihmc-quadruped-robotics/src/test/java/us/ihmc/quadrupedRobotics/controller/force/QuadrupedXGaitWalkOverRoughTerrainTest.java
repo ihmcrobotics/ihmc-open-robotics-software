@@ -139,6 +139,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       conductor.simulate();
 
       stepTeleopManager.requestStanding();
+      stepTeleopManager.requestAbortWalking();
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
       conductor.simulate();
 

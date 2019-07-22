@@ -176,9 +176,7 @@ public class RemoteQuadrupedTeleopManager
 
    private void requestStopWalking()
    {
-      QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
-      steppingMessage.setQuadrupedSteppingRequestedEvent(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
-      steppingStatePublisher.publish(steppingMessage);
+      abortWalkingMessagePublisher.publish(new AbortWalkingMessage());
    }
 
    public void requestXGait()

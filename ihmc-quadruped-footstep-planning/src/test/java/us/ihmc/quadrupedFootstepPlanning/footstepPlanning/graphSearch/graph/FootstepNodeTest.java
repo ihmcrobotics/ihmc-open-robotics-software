@@ -52,8 +52,12 @@ public class FootstepNodeTest
          Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
          Point2DReadOnly otherHindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
 
-         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, 1.5, 0.5);
-         nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight, 1.5, 0.5);
+
+         double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                     hindRight.getX(), hindRight.getY());
+
+         nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, 1.5, 0.5);
+         nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight, yaw, 1.5, 0.5);
 
          assertTrue("number : " + i, nodeA.quadrantGeometricallyEquals(nodeB));
 
