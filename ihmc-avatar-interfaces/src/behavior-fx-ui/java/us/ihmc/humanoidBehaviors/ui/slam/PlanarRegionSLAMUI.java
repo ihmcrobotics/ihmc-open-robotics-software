@@ -9,16 +9,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.ros2.Ros2Node;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class PlanarRegionSLAMUI extends Application
 {

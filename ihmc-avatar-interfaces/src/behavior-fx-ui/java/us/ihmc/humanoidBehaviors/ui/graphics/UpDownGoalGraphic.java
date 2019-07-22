@@ -1,21 +1,17 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class UpDownGoalGraphic
 {
