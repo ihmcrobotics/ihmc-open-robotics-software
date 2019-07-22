@@ -926,7 +926,7 @@ public class ToeOffManager
          if (!isDesiredICPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
-            computeToeLineContact.set(true);
+            computeToePointContact.set(true);
             return false;
          }
 
@@ -941,7 +941,7 @@ public class ToeOffManager
          if (!isCurrentICPOKForToeOffFilt.getBooleanValue())
          {
             doLineToeOff.set(false);
-            computeToeLineContact.set(true);
+            computeToePointContact.set(true);
             return false;
          }
 
