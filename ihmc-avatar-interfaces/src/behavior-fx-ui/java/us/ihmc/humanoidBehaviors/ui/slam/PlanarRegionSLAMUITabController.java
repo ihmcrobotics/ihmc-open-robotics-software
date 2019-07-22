@@ -13,11 +13,11 @@ import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -86,20 +86,20 @@ public class PlanarRegionSLAMUITabController extends Group
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      parameterLabel1.setText(PlanarRegionSLAMParameterKeys.iterations.getTitleCasedName());
-      parameterLabel2.setText(PlanarRegionSLAMParameterKeys.minimumNormalDotProduct.getTitleCasedName());
-      parameterLabel3.setText(PlanarRegionSLAMParameterKeys.dampedLeastSquaresLambda.getTitleCasedName());
-      parameterLabel4.setText(PlanarRegionSLAMParameterKeys.boundingBoxHeight.getTitleCasedName());
+      parameterLabel1.setText(PlanarRegionSLAMParameters.iterations.getTitleCasedName());
+      parameterLabel2.setText(PlanarRegionSLAMParameters.minimumNormalDotProduct.getTitleCasedName());
+      parameterLabel3.setText(PlanarRegionSLAMParameters.dampedLeastSquaresLambda.getTitleCasedName());
+      parameterLabel4.setText(PlanarRegionSLAMParameters.boundingBoxHeight.getTitleCasedName());
       Platform.runLater(() ->
       {
       parameterSpinner1.setValueFactory(
-            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameterKeys.iterations), 1));
+            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterations), 1));
       parameterSpinner2.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameterKeys.minimumNormalDotProduct), 0.05));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.05));
       parameterSpinner3.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameterKeys.dampedLeastSquaresLambda), 0.05));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.dampedLeastSquaresLambda), 0.05));
       parameterSpinner4.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameterKeys.boundingBoxHeight), 0.005));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.boundingBoxHeight), 0.005));
       });
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
