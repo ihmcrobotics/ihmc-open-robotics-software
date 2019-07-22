@@ -23,6 +23,4 @@ public class PlanarRegionSLAMResult
    {
       return mergedMap;
    }
-   
-   
 }

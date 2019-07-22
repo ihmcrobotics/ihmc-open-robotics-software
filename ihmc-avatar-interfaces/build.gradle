@@ -78,7 +78,6 @@ behaviorFxUiDependencies {
 }
 
 testDependencies {
-
    compile ihmc.sourceSetProject("behavior-clean-room")
    compile ihmc.sourceSetProject("behavior-fx-ui")
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"

@@ -347,5 +347,4 @@ public class PlanarRegionSLAMTools
 
       return collisionResult.areShapesColliding();
    }
-
 }

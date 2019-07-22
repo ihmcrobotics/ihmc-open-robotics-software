@@ -83,5 +83,4 @@ public class ConcaveHullMergerListener
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, intersectionPoint), intersectionVertexColorTwo);
       }
    }
-
 }
