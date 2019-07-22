@@ -165,6 +165,15 @@ public abstract class ToeOffParameters
    }
 
    /**
+    * If this returns true, the Toe Off Manager will not check if the current desired ICP is in a good enough position to allow toe off.
+    * If this returns false, the Toe Off Manager will not transition to toe off unless the desired ICP is in a good enough position.
+    */
+   public boolean forceToeOffAtJointLimit()
+   {
+      return false;
+   }
+
+   /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
     */
