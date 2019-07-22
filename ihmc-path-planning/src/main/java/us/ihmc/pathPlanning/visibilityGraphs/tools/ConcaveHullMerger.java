@@ -351,6 +351,5 @@ public class ConcaveHullMerger
          return null;
 
       return new ImmutablePair<Integer, Point2D>(bestIndex, new Point2D(bestIntersection));
-
    }
 }

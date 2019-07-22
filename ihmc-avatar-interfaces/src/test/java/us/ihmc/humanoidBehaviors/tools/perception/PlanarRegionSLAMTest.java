@@ -26,6 +26,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -653,6 +654,5 @@ class PlanarRegionSLAMTest
       catch (InterruptedException e)
       {
       }
-
    }
 }
