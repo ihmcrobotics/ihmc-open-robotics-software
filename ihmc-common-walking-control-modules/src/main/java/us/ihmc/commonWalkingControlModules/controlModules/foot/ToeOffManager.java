@@ -127,6 +127,15 @@ public class ToeOffManager
    private final YoBoolean isStepLongEnough = new YoBoolean("isStepLongEnough", registry);
    private final YoBoolean isStepLongEnoughAlongX = new YoBoolean("isStepLongEnoughAlongX", registry);
 
+
+   // debug variables
+   private final YoDouble ecmpProximityToOnToes = new YoDouble("ecmpProximityToOnToes", registry);
+   private final YoDouble copProximityToOnToes = new YoDouble("copProximityToOnToes", registry);
+   private final YoDouble desiredICPProximityToOnToes = new YoDouble("desiredICPProximityToOnToes", registry);
+   private final YoDouble currentICPProximityToOnToes = new YoDouble("currentICPProximityToOnToes", registry);
+   private final YoDouble desiredICPProximityToLeadingFoot = new YoDouble("desiredICPProximityToLeadingFoot", registry);
+   private final YoDouble currentICPProximityToLeadingFoot = new YoDouble("currentICPProximityToLeadingFoot", registry);
+
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint3D> contactStatePoints = new ArrayList<>();
 
@@ -490,10 +499,12 @@ public class ToeOffManager
    // FIXME I think this may not be working correctly.
    private void checkECMPLocation(FramePoint2D desiredECMP)
    {
+      desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
+      ecmpProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredECMP));
+
       if (checkECMPForToeOff.getValue())
       {
-         desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredECMP) <= ecmpProximityForToeOff.getValue());
+         isDesiredECMPOKForToeOff.set(ecmpProximityToOnToes.getDoubleValue() < ecmpProximityForToeOff.getValue());
          isDesiredECMPOKForToeOffFilt.update();
       }
       else
@@ -505,10 +516,12 @@ public class ToeOffManager
 
    private void checkCoPLocation(FramePoint2D desiredCoP)
    {
+      desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
+      copProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredCoP));
+
       if (checkCoPForToeOff.getValue())
       {
-         desiredCoP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredCoPOKForToeOff.set(onToesSupportPolygon.signedDistance(desiredCoP) <= copProximityForToeOff.getValue());
+         isDesiredCoPOKForToeOff.set(copProximityToOnToes.getDoubleValue() < copProximityForToeOff.getValue());
          isDesiredCoPOKForToeOffFilt.update();
       }
       else
@@ -521,36 +534,29 @@ public class ToeOffManager
    private double checkICPLocations(RobotSide trailingLeg, FramePoint2D desiredICP, FramePoint2D currentICP, FramePoint2D toeOffPoint,
                                     FrameConvexPolygon2D leadingFootSupportPolygon, ReferenceFrame nextSoleFrame, double percentProximity)
    {
-      boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
-      double requiredProximity;
+      desiredICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredICP));
+      currentICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(currentICP));
+      desiredICPProximityToLeadingFoot.set(leadingFootSupportPolygon.signedDistance(desiredICP));
+      currentICPProximityToLeadingFoot.set(leadingFootSupportPolygon.signedDistance(currentICP));
+
+      double requiredProximityToLeadingFoot;
       if (percentProximity > 0.0)
-      {
-         // compute stance length
-         requiredProximity = computeRequiredICPProximity(trailingLeg, nextSoleFrame, toeOffPoint, percentProximity);
-
-         isDesiredICPOKForToeOff = onToesSupportPolygon.signedDistance(desiredICP) < icpProximityForToeOff.getValue();
-         isDesiredICPOKForToeOff &= leadingFootSupportPolygon.signedDistance(desiredICP) < requiredProximity;
-
-         isCurrentICPOKForToeOff = onToesSupportPolygon.signedDistance(currentICP) < icpProximityForToeOff.getValue();
-         isCurrentICPOKForToeOff &= leadingFootSupportPolygon.signedDistance(currentICP) < requiredProximity;
-      }
+         requiredProximityToLeadingFoot = computeRequiredICPProximity(trailingLeg, nextSoleFrame, toeOffPoint, percentProximity);
       else
-      {
-         requiredProximity = 0.0;
+         requiredProximityToLeadingFoot = 0.0;
 
-         isDesiredICPOKForToeOff = onToesSupportPolygon.signedDistance(desiredICP) < icpProximityForToeOff.getValue();
-         isDesiredICPOKForToeOff &= leadingFootSupportPolygon.isPointInside(desiredICP);
+      boolean isDesiredICPOKForToeOff = desiredICPProximityToOnToes.getDoubleValue() < icpProximityForToeOff.getValue();
+      isDesiredICPOKForToeOff &= desiredICPProximityToLeadingFoot.getDoubleValue() < requiredProximityToLeadingFoot;
 
-         isCurrentICPOKForToeOff = onToesSupportPolygon.signedDistance(currentICP) < icpProximityForToeOff.getValue();
-         isCurrentICPOKForToeOff &= leadingFootSupportPolygon.isPointInside(currentICP);
-      }
+      boolean isCurrentICPOKForToeOff = currentICPProximityToOnToes.getDoubleValue() < icpProximityForToeOff.getValue();
+      isCurrentICPOKForToeOff &= currentICPProximityToLeadingFoot.getDoubleValue() < requiredProximityToLeadingFoot;
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
       this.isCurrentICPOKForToeOffFilt.update();
       this.isDesiredICPOKForToeOffFilt.update();
 
-      return requiredProximity;
+      return requiredProximityToLeadingFoot;
    }
 
    private double computeRequiredICPProximity(RobotSide trailingLeg, ReferenceFrame nextSoleFrame, FramePoint2D toeOffPoint, double percentOfStanceForToeOff)
