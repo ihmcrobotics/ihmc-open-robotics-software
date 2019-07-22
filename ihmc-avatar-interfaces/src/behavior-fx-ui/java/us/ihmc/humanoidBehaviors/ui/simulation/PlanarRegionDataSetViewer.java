@@ -2,13 +2,12 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
 
 public class PlanarRegionDataSetViewer extends Application
 {
@@ -21,12 +20,13 @@ public class PlanarRegionDataSetViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(PlanarRegionDataImporter.importUsingFileChooser(primaryStage));
+      File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
+      regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(dataFolder));
       regionsGraphic.update();
 
       view3dFactory.addNodeToView(regionsGraphic);
 
-      primaryStage.setTitle(getClass().getSimpleName());
+      primaryStage.setTitle(dataFolder.getPath());
       primaryStage.setMaximized(false);
       primaryStage.setScene(view3dFactory.getScene());
 
