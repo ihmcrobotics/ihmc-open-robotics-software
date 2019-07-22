@@ -11,6 +11,8 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
             PlanarRegionSLAMParameters.class,
             "ihmc-open-robotics-software",
             "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
+
+      load();
    }
 
    public double getBoundingBoxHeight()
@@ -59,7 +61,6 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    public static void main(String[] args)
    {
       PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
-      planarRegionSLAMParameters.load();
       planarRegionSLAMParameters.save();
    }
 }
