@@ -61,7 +61,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
-      //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
       if (visualize)
       {
@@ -86,11 +86,7 @@ class PlanarRegionSLAMTest
       for (PlanarRegion key : keySet)
       {
          PairList<PlanarRegion, Point2D> pairList = matchesAndReferencePoints.get(key);
-         //         assertEquals(3, pairList.size());//TODO: Fix
-
-         ImmutablePair<PlanarRegion, Point2D> immutablePair = pairList.get(0);
-         PlanarRegion planarRegionMatch = immutablePair.getLeft();
-         Point2D referencePoint = immutablePair.getRight();
+         assertEquals(5, pairList.size());
       }
 
       parameters.setIterations(1);
@@ -101,7 +97,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTransformsAreInverses(transformResult, smallTranslationTransform, 1e-7);
-      //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(6, mergedMap.getNumberOfPlanarRegions());
 
       // Small rotation transform with all six walls.
       RigidBodyTransform smallRotationTransform = new RigidBodyTransform();
@@ -116,7 +112,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTransformsAreInverses(transformResult, smallRotationTransform, 1e-5);
-      //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(6, mergedMap.getNumberOfPlanarRegions());
 
       // Small translation and rotation transform with all six walls.
       RigidBodyTransform smallRotationAndTranslationTransform = new RigidBodyTransform();
@@ -131,7 +127,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTransformsAreInverses(transformResult, smallRotationAndTranslationTransform, 1e-5);
-      //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(6, mergedMap.getNumberOfPlanarRegions());
 
       // With only two walls, will only get two translations and two rotations. Use no floor here.
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), false, true, true);
@@ -148,7 +144,7 @@ class PlanarRegionSLAMTest
       assertTrue(rotationResult.epsilonEquals(new Vector3D(), 1e-7));
       assertTrue(translationResult.epsilonEquals(new Vector3D(-smallTranslationTransform.getTranslationX(), -smallTranslationTransform.getTranslationY(), 0.0),
                                                  1e-7));
-      //      assertEquals(2, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(4, mergedMap.getNumberOfPlanarRegions());
 
       // Use only floor here. The other regions each have one wall.
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, true, false);
@@ -161,7 +157,7 @@ class PlanarRegionSLAMTest
       transformResult.get(rotationResult, translationResult);
       assertTrue(rotationResult.epsilonEquals(new Vector3D(), 1e-7));
       assertTrue(translationResult.epsilonEquals(new Vector3D(0.0, 0.0, -smallTranslationTransform.getTranslationZ()), 1e-7));
-      //      assertEquals(2, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(6, mergedMap.getNumberOfPlanarRegions());
 
       // The floor alone should not give yaw.
       RigidBodyTransform smallYawTransform = new RigidBodyTransform();
@@ -175,7 +171,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
-      //      assertEquals(1, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(2, mergedMap.getNumberOfPlanarRegions());
 
       // The floor alone should give pitch and roll, but might have some yaw in it.
       RigidBodyTransform smallPitchAndRollTransforms = new RigidBodyTransform();
@@ -189,7 +185,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTransformsAreInverses(transformResult, smallPitchAndRollTransforms, 1e-3);
-      //      assertEquals(1, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(2, mergedMap.getNumberOfPlanarRegions());
 
       // Two walls should give yaw, pitch, and roll
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, true, false);
@@ -200,7 +196,7 @@ class PlanarRegionSLAMTest
       transformResult = slamResult.getTransformFromIncomingToMap();
 
       assertTransformsAreInverses(transformResult, smallRotationTransform, 1e-5);
-      //      assertEquals(2, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
+      assertEquals(4, mergedMap.getNumberOfPlanarRegions());
    }
 
    private void assertTransformsAreInverses(RigidBodyTransform expectedTransform, RigidBodyTransform transform, double epsilon)
