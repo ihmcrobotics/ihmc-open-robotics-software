@@ -1,49 +1,65 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
-public class PlanarRegionSLAMParameters
+import us.ihmc.humanoidBehaviors.tools.perception.parameters.PlanarRegionSLAMParameterKeys;
+import us.ihmc.tools.property.StoredPropertySet;
+
+public class PlanarRegionSLAMParameters extends StoredPropertySet
 {
-   private int iterations = 3;
-   private double boundingBoxHeight = 0.05;
-   private double minimumNormalDotProduct = 0.98; //Math.cos(Math.toRadians(5.0));
-   private double dampedLeastSquaresLambda = 0.5;
+   public PlanarRegionSLAMParameters()
+   {
+      super(PlanarRegionSLAMParameterKeys.keys,
+            PlanarRegionSLAMParameters.class,
+            "ihmc-open-robotics-software",
+            "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
+   }
 
    public double getBoundingBoxHeight()
    {
-      return boundingBoxHeight;
+      return get(PlanarRegionSLAMParameterKeys.boundingBoxHeight);
    }
 
    public void setBoundingBoxHeight(double boundingBoxHeight)
    {
-      this.boundingBoxHeight = boundingBoxHeight;
+      set(PlanarRegionSLAMParameterKeys.boundingBoxHeight, boundingBoxHeight);
    }
 
    public int getIterations()
    {
-      return iterations;
+      return get(PlanarRegionSLAMParameterKeys.iterations);
    }
 
    public void setIterations(int iterations)
    {
-      this.iterations = iterations;
+      set(PlanarRegionSLAMParameterKeys.iterations, iterations);
    }
 
    public double getMinimumNormalDotProduct()
    {
-      return minimumNormalDotProduct;
+      return get(PlanarRegionSLAMParameterKeys.minimumNormalDotProduct);
    }
 
    public void setMinimumNormalDotProduct(double minimumNormalDotProduct)
    {
-      this.minimumNormalDotProduct = minimumNormalDotProduct;
+      set(PlanarRegionSLAMParameterKeys.minimumNormalDotProduct, minimumNormalDotProduct);
    }
 
    public double getDampedLeastSquaresLambda()
    {
-      return dampedLeastSquaresLambda;
+      return get(PlanarRegionSLAMParameterKeys.dampedLeastSquaresLambda);
    }
 
    public void setDampedLeastSquaresLambda(double dampedLeastSquaresLambda)
    {
-      this.dampedLeastSquaresLambda = dampedLeastSquaresLambda;
+      set(PlanarRegionSLAMParameterKeys.dampedLeastSquaresLambda, dampedLeastSquaresLambda);
+   }
+
+   /**
+    * Run to update file with new parameters.
+    */
+   public static void main(String[] args)
+   {
+      PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
+      planarRegionSLAMParameters.load();
+      planarRegionSLAMParameters.save();
    }
 }
