@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
@@ -17,19 +16,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionsListPointSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -52,7 +46,7 @@ public class ParameterBasedNodeExpansionTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Yellow(),
                                                                                                                    YoAppearance.Blue(),
                                                                                                                    YoAppearance.Beige());
@@ -61,19 +55,21 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithBaseAtOrigin()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setStanceLength(stanceLength);
 
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
+      double yaw = 0.0;
       FootstepNode baseNode = new FootstepNode(quadrantToCheck, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
-                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, stanceLength, stanceWidth);
+                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, yaw, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
       for (FootstepNode expandedNode : expandedNodes)
       {
-         assertFalse("baseNode " + expandedNode + " is not supposed to be equal to " + baseNode, expandedNode.quadrantGeometricallyEquals(baseNode));
+         assertFalse("baseNode " + expandedNode + " is not supposed to be equal to " + baseNode, expandedNode.equals(baseNode));
       }
 
       if (visualize)
@@ -95,8 +91,8 @@ public class ParameterBasedNodeExpansionTest
                         0.5 * expectedNewQuadrant.getSide().negateIfRightSide(baseNode.getNominalStanceWidth()));
                double lowerXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength());
                double upperXBound = foot.getX() + (expectedNewQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength());
-               double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMinimumStepWidth() : parameters.getMaximumStepWidth());
-               double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth());
+               double lowerYBound = foot.getY() - (robotQuadrant.getSide() == RobotSide.LEFT ? -parameters.getMaximumStepInward() : parameters.getMaximumStepOutward());
+               double upperYBound = foot.getY() + (robotQuadrant.getSide() == RobotSide.LEFT ? parameters.getMaximumStepOutward() : -parameters.getMaximumStepInward());
                double xFoot = node.getX(robotQuadrant);
                double yFoot = node.getY(robotQuadrant);
                assertTrue(robotQuadrant.getCamelCaseName() + " foot X " + xFoot + " is not within bounds " + lowerXBound + " < x < " + upperXBound, MathTools.intervalContains(xFoot, lowerXBound, upperXBound, FootstepNode.gridSizeXY));
@@ -115,10 +111,11 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithTranslatedAndRotated()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
       PoseReferenceFrame centerFrame = new PoseReferenceFrame("centerFrame", ReferenceFrame.getWorldFrame());
       FramePoint2D frontLeft = new FramePoint2D(centerFrame, 0.5 * stanceLength, 0.5 * stanceWidth);
@@ -136,7 +133,10 @@ public class ParameterBasedNodeExpansionTest
       hindLeft.changeFrame(ReferenceFrame.getWorldFrame());
       hindRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -183,21 +183,22 @@ public class ParameterBasedNodeExpansionTest
          }
 
          @Override
-         public double getMinimumStepWidth()
+         public double getMaximumStepInward()
          {
             return -0.3;
          }
 
          @Override
-         public double getMaximumStepWidth()
+         public double getMaximumStepOutward()
          {
             return 0.35;
          }
       };
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
       double frontLeftX = 0.5;
       double frontLeftY = 0.5;
@@ -210,8 +211,11 @@ public class ParameterBasedNodeExpansionTest
 
       RobotQuadrant expectedNewQuadrant = RobotQuadrant.HIND_LEFT;
 
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
 
-      FootstepNode baseNode = new FootstepNode(expectedNewQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+      FootstepNode baseNode = new FootstepNode(expectedNewQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, yaw,
+                                               stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -307,9 +311,9 @@ public class ParameterBasedNodeExpansionTest
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
-                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                              parameters::getProjectInsideUsingConvexHull, true);
+      SnapBasedNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       scs.setGroundVisible(false);
@@ -329,19 +333,19 @@ public class ParameterBasedNodeExpansionTest
 
 
       // do x gait regions for each guy
-      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), new AxisAngle(baseNode.getNominalYaw(), 0.0, 0.0));
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), baseNode.getStepOrientation());
 
       ConvexPolygon2D frontReachableRegion = new ConvexPolygon2D();
-      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMinimumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMinimumStepWidth());
-      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepWidth());
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepOutward());
+      frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepInward());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepInward());
+      frontReachableRegion.addVertex(parameters.getMinimumFrontStepLength(), parameters.getMaximumStepOutward());
       frontReachableRegion.update();
       ConvexPolygon2D hindReachableRegion = new ConvexPolygon2D();
-      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMinimumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMinimumStepWidth());
-      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepWidth());
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepOutward());
+      hindReachableRegion.addVertex(parameters.getMaximumHindStepLength(), parameters.getMaximumStepInward());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepInward());
+      hindReachableRegion.addVertex(parameters.getMinimumHindStepLength(), parameters.getMaximumStepOutward());
       hindReachableRegion.update();
 
       RobotQuadrant movingQuadrant = baseNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();

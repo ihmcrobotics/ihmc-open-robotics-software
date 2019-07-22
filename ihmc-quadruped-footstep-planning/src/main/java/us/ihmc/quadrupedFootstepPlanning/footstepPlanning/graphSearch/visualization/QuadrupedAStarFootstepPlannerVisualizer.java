@@ -122,6 +122,12 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    }
 
    @Override
+   public void rejectNode(FootstepNode rejectedNode, QuadrupedFootstepPlannerNodeRejectionReason reason)
+   {
+      // TODO
+   }
+
+   @Override
    public void plannerFinished(List<FootstepNode> plan)
    {
 

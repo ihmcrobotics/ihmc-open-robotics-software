@@ -18,29 +18,14 @@ public class ObjectDetectionAnchorPaneController
 
    private static final String defaultHostAddress = "10.100.3.157";
 
-   @FXML
-   private TextField serverADD;
-
-   @FXML
-   private Button btnConnect;
-
-   @FXML
-   private Button btnObjectDetection;
-
-   @FXML
-   private Button btnClear;
-
-   @FXML
-   private CheckBox cboxDoor;
-
-   @FXML
-   private CheckBox cboxDoorHandle;
-
-   @FXML
-   private CheckBox cboxCup;
-
-   @FXML
-   private CheckBox cboxhuman;
+   @FXML private TextField serverADD;
+   @FXML private Button btnConnect;
+   @FXML private Button btnObjectDetection;
+   @FXML private Button btnClear;
+   @FXML private CheckBox cboxDoor;
+   @FXML private CheckBox cboxDoorHandle;
+   @FXML private CheckBox cboxCup;
+   @FXML private CheckBox cboxhuman;
 
    public void initialize(SharedMemoryJavaFXMessager messager)
    {

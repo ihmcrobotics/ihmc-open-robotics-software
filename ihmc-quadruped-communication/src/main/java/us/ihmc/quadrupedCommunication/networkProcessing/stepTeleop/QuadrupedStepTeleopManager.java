@@ -21,6 +21,7 @@ import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -32,6 +33,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class QuadrupedStepTeleopManager
 {
+   private static final TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
@@ -62,7 +65,7 @@ public class QuadrupedStepTeleopManager
       this.bodyPathMultiplexer = new QuadrupedBodyPathMultiplexer(referenceFrames, timestamp, xGaitSettings, firstStepDelay, graphicsListRegistry, registry);
       this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, timestamp, bodyPathMultiplexer, firstStepDelay, registry);
 
-      desiredVelocityRateLimit.set(10.0);
+      desiredVelocityRateLimit.set(1.0);
       limitedDesiredVelocity = new RateLimitedYoFrameVector("limitedTeleopDesiredVelocity", "", registry, desiredVelocityRateLimit, updateDT, desiredVelocity);
 
       groundPlaneSnapper = new PlanarGroundPointFootSnapper(referenceFrames);
@@ -184,7 +187,12 @@ public class QuadrupedStepTeleopManager
       List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
       for (int i = 0; i < steps.size(); i++)
       {
-         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
+         QuadrupedTimedStepMessage stepMessage = QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i));
+
+         if(trajectoryType != null)
+            stepMessage.getQuadrupedStepMessage().setTrajectoryType(trajectoryType.toByte());
+
+         stepMessages.add(stepMessage);
       }
 
       stepListMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);

@@ -35,6 +35,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 @Tag("humanoid-obstacle-2")
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
@@ -135,6 +136,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
       ThreadTools.sleep(1000);
+      YoBoolean useSmartIntegrator = (YoBoolean) drcSimulationTestHelper.getYoVariableRegistry().getVariable("useSmartICPIntegrator");
+      useSmartIntegrator.set(true);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);

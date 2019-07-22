@@ -22,6 +22,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
 {
    private final Point2D footPosition = new Point2D();
@@ -51,12 +54,21 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
    }
 
+   private PlanarRegion originalRegion;
+   private final HashMap<PlanarRegion, RigidBodyTransform> regionsChecked = new HashMap<>();
    @Override
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(footPosition, new Vector2D(), constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
-                                                                                 constraintDataParameters);
+      constraintDataParameters.projectionInsideDelta = Math.min(projectionInsideDelta.getValue(), 0.025);
+      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(footPosition, new Vector2D(), constraintDataHolder,
+                                                                                               planarRegionsList.getPlanarRegionsAsList(),
+                                                                                               constraintDataParameters);
+      constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
+
+      originalRegion = highestPlanarRegion;
+      regionsChecked.clear();
+
 
       return snapFromPointInWorld(footPosition, highestPlanarRegion);
 
@@ -72,6 +84,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       else
       {
          RigidBodyTransform snapTransform = PlanarRegionSnapTools.getSnapTransformToRegion(footPositionInWorld, highestPlanarRegion);
+         regionsChecked.put(highestPlanarRegion, snapTransform);
 
          if (snapTransform == null)
             return FootstepNodeSnapData.emptyData();
@@ -81,18 +94,25 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
          if (snapTransform == null)
             return FootstepNodeSnapData.emptyData();
 
-         Point3D pointInWorld = new Point3D(footPositionInWorld);
-         snapTransform.transform(pointInWorld);
+         Point3D snappedPointInWorld = new Point3D(footPositionInWorld);
+         snapTransform.transform(snappedPointInWorld);
 
-         PlanarRegion newRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(pointInWorld.getX(), pointInWorld.getY(),  new Vector2D(), constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
-                                                                         constraintDataParameters);
+         constraintDataParameters.projectionInsideDelta = Math.min(projectionInsideDelta.getValue(), 0.025);
+         PlanarRegion newRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(snappedPointInWorld.getX(), snappedPointInWorld.getY(),  new Vector2D(),
+                                                                                        constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
+                                                                                        constraintDataParameters);
+         constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
+
 
          if (newRegion == null)
             return FootstepNodeSnapData.emptyData();
 
          if (!newRegion.equals(highestPlanarRegion))
          {
-            return snapFromPointInWorld(new Point2D(pointInWorld), newRegion);
+            if (regionsChecked.containsKey(newRegion))
+               return new FootstepNodeSnapData(regionsChecked.get(originalRegion));
+
+            return snapFromPointInWorld(new Point2D(snappedPointInWorld), newRegion);
          }
 
          return new FootstepNodeSnapData(snapTransform);
@@ -141,23 +161,6 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
          TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, containingRegion, constraintDataParameters);
          return PolygonWiggler.wigglePolygon(footholdPolygon, containingRegion, wiggleParameters, indicesToExclude.toArray()).getCentroid();
       }
-   }
-
-   private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformOfPointInLocalToPointInLocal, PlanarRegion regionToWiggleInto)
-   {
-      RigidBodyTransform localToWorld = new RigidBodyTransform();
-      RigidBodyTransform worldToLocal = new RigidBodyTransform();
-      regionToWiggleInto.getTransformToWorld(localToWorld);
-      regionToWiggleInto.getTransformToLocal(worldToLocal);
-
-
-      RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform(wiggleTransformOfPointInLocalToPointInLocal);
-      localToWorld.transform((Vector3DBasics) wiggleTransformWorldToWorld.getTranslationVector());
-      localToWorld.transform((RotationMatrix) wiggleTransformWorldToWorld.getRotationMatrix());
-//      wiggleTransformWorldToWorld.set(localToWorld);
-//      wiggleTransformWorldToWorld.multiply(wiggleTransformOfPointInLocalToPointInLocal);
-//      wiggleTransformWorldToWorld.multiply(worldToLocal);
-      return wiggleTransformWorldToWorld;
    }
 
    private void updateWiggleParameters()

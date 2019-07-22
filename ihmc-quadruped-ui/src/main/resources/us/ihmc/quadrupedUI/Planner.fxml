@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController">
    <children>
       <VBox layoutX="10.0" layoutY="10.0" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -56,6 +56,7 @@
                               <Spinner fx:id="horizonLength" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <CheckBox fx:id="correctStepHeightError" minWidth="-Infinity" selected="true" text="Correct step height" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                               <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestClearREA" text="Clear Planar Regions" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearFootstepPlan" text="Clear Footsteps" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
                      </children>
@@ -96,7 +97,7 @@
                         <VBox alignment="CENTER" spacing="5.0" VBox.vgrow="SOMETIMES">
                            <children>
                                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestStopWalking" text="Stop Walking" />
-                                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendPlan" text="Send Plan" />
+                                  <Button fx:id="sendPlanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendPlan" text="Send Plan" />
                            </children>
                         </VBox>
                      </children>
