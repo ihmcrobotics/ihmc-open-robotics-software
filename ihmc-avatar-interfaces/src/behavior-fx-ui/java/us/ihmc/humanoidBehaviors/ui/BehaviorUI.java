@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
+import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
