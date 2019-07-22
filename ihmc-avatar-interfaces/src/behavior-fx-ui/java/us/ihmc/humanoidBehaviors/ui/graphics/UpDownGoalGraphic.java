@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 
 import java.util.ArrayList;
 import java.util.List;
