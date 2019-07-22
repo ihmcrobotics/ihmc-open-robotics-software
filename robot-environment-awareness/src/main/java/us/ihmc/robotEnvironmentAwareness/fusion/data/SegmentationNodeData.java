@@ -132,6 +132,9 @@ public class SegmentationNodeData
       return pointsInSegment;
    }
 
+   /**
+    * If this segment is big enough (isBigSegment = true), coplanar test is done with the closest label among this segment.
+    */
    public boolean isCoplanar(SegmentationRawData fusionDataSegment, double threshold, boolean isBigSegment)
    {
       Point3D nodeDataCenter = new Point3D(center);

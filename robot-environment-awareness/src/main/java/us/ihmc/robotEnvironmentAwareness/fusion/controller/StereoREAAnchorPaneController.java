@@ -5,7 +5,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
@@ -77,11 +76,14 @@ public class StereoREAAnchorPaneController
 
       segmentationRawDataFilteringParametersProperty.bindBidirectionalSparseThreshold(minSparse.valueProperty(), sparseRatio.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterFlyingPoint(flyingPoint.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalFlyingPointParameters(flyingPointDistance.valueProperty(), minimumNeighbors.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalFlyingPointParameters(flyingPointDistance.valueProperty(),
+                                                                                            minimumNeighbors.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterCentrality(centrality.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(), centralityThreshold.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalCentralityParameters(centralityRadius.valueProperty(),
+                                                                                           centralityThreshold.valueProperty());
       segmentationRawDataFilteringParametersProperty.bindBidirectionalEnableFilterEllipticity(ellipticity.selectedProperty());
-      segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(), ellipticityThreshold.valueProperty());
+      segmentationRawDataFilteringParametersProperty.bindBidirectionalEllipticityParameters(ellipticityLength.valueProperty(),
+                                                                                            ellipticityThreshold.valueProperty());
       messager.bindBidirectional(LidarImageFusionAPI.SegmentationRawDataFilteringParameters, segmentationRawDataFilteringParametersProperty, true);
 
       planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseLowerThreshold.valueProperty(), sparseUpperThreshold.valueProperty());

@@ -11,14 +11,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 public class ImageProcessingAnchorPaneController
 {
    private JavaFXMessager messager;
-   @FXML
-   private ToggleButton btnEnableStreaming;
-   
-   @FXML
-   private Button btnTaskingSnapshot;
-   
-   @FXML
-   private Button btnClearImageView;
+   @FXML private ToggleButton btnEnableStreaming;
+   @FXML private Button btnTaskingSnapshot;
+   @FXML private Button btnClearImageView;
 
    public void initialize(JavaFXMessager messager)
    {
@@ -35,7 +30,7 @@ public class ImageProcessingAnchorPaneController
 
       messager.bindBidirectional(LidarImageFusionAPI.EnableStreaming, btnEnableStreaming.selectedProperty(), false);
    }
-   
+
    public void clearImageView()
    {
       messager.submitMessage(LidarImageFusionAPI.ClearSnapShot, true);

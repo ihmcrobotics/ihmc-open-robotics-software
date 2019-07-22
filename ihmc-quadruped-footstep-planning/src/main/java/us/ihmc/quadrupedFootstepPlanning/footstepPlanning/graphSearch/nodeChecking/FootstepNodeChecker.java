@@ -8,21 +8,26 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public abstract class FootstepNodeChecker
 {
    protected PlanarRegionsList planarRegionsList;
    protected final ArrayList<QuadrupedFootstepPlannerListener> listeners = new ArrayList<>();
+   private HashSet<FootstepNode> rejectedNodes = new HashSet<>();
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
+      rejectedNodes.clear();
    }
 
-   protected void rejectNode(FootstepNode node, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason rejectionReason)
+   protected void rejectNode(FootstepNode node, QuadrupedFootstepPlannerNodeRejectionReason rejectionReason)
    {
+      rejectedNodes.add(node);
       for (QuadrupedFootstepPlannerListener listener : listeners)
-         listener.rejectNode(node, parentNode, rejectionReason);
+         listener.rejectNode(node, rejectionReason);
    }
 
    protected boolean hasPlanarRegions()
@@ -36,19 +41,15 @@ public abstract class FootstepNodeChecker
          listeners.add(listener);
    }
 
-   public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValid(FootstepNode node)
    {
-      if(node.equals(previousNode))
-      {
-         throw new RuntimeException("Cannot check a node with itself");
-      }
-      else
-      {
-         return isNodeValidInternal(node, previousNode);
-      }
+      if (rejectedNodes.contains(node))
+         return false;
+
+      return isNodeValidInternal(node);
    }
 
-   public abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);
+   public abstract boolean isNodeValidInternal(FootstepNode node);
 
    public abstract void addStartNode(FootstepNode startNode, QuadrantDependentList<RigidBodyTransform> startNodeTransforms);
 }

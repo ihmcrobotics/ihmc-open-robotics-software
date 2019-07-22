@@ -7,6 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -62,12 +63,11 @@ public class QuadrupedBalanceManager
    private final QuadrupedCenterOfMassHeightManager centerOfMassHeightManager;
    private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
    private final QuadrupedStepAdjustmentController stepAdjustmentController;
+   private final QuadrupedSwingSpeedUpCalculator swingSpeedUpCalculator;
 
    private final QuadrupedBodyICPBasedTranslationManager bodyICPBasedTranslationManager;
 
    private final DCMPlannerInterface dcmPlanner;
-
-   private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
@@ -83,8 +83,6 @@ public class QuadrupedBalanceManager
 
    private final BooleanProvider updateLipmHeightFromDesireds = new BooleanParameter("updateLipmHeightFromDesireds", registry, true);
 
-   private final BooleanProvider useSimpleSwingSpeedUpCalculation = new BooleanParameter("useSimpleSwingSpeedUpCalculation", registry, true);
-   private final DoubleProvider durationForEmergencySwingSpeedUp = new DoubleParameter("durationForEmergencySwingSpeedUp", registry, 0.35);
 
    private final YoDouble normalizedDcmErrorForDelayedLiftOff = new YoDouble("normalizedDcmErrorForDelayedLiftOff", registry);
 
@@ -136,6 +134,7 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
       stepAdjustmentController = new QuadrupedStepAdjustmentController(controllerToolbox, registry);
+      swingSpeedUpCalculator = new QuadrupedSwingSpeedUpCalculator(controllerToolbox, registry);
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep::new);
       adjustedActiveSteps.clear();
@@ -276,10 +275,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      // update dcm estimate
-      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-
-      yoDesiredDCMPosition.set(dcmPositionEstimate);
+      yoDesiredDCMPosition.set(controllerToolbox.getDCMPositionEstimate());
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
@@ -323,14 +319,16 @@ public class QuadrupedBalanceManager
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
+   public void setHoldCurrentDesiredPosition(boolean holdPosition)
+   {
+      dcmPlanner.setHoldCurrentDesiredPosition(holdPosition);
+   }
+
    public void compute()
    {
       centerOfMassHeightManager.update();
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
-
-      // update dcm estimate
-      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
@@ -343,7 +341,7 @@ public class QuadrupedBalanceManager
 
       double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
 
-      momentumRateOfChangeModule.setDCMEstimate(dcmPositionEstimate);
+      momentumRateOfChangeModule.setDCMEstimate(controllerToolbox.getDCMPositionEstimate());
       momentumRateOfChangeModule.setDCMSetpoints(yoDesiredDCMPosition, yoDesiredDCMVelocity);
       momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
       momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredECMP);
@@ -379,10 +377,9 @@ public class QuadrupedBalanceManager
 
    private double computeNormalizedEllipticDcmError(double maxXError, double maxYError, YoDouble normalizedError)
    {
-      dcmError2d.setIncludingFrame(momentumRateOfChangeModule.getDcmError());
-      ReferenceFrame midZUpFrame = controllerToolbox.getSupportPolygons().getMidFeetZUpFrame();
-      dcmError2d.changeFrame(midZUpFrame);
-      normalizedError.set(MathTools.square(dcmError2d.getX() / maxXError) + MathTools.square(dcmError2d.getY() / maxYError));
+      FrameVector3DReadOnly dcmError = momentumRateOfChangeModule.getDcmError();
+      dcmError.checkReferenceFrameMatch(controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame());
+      normalizedError.set(MathTools.square(dcmError.getX() / maxXError) + MathTools.square(dcmError.getY() / maxYError));
 
       return normalizedError.getDoubleValue();
    }
@@ -403,103 +400,15 @@ public class QuadrupedBalanceManager
       return stepAdjustmentController.stepHasBeenAdjusted();
    }
 
-   public double estimateSwingSpeedUpTimeUnderDisturbance()
-   {
-      if (computeNormalizedEllipticDcmErrorForSpeedUp() < 1.0)
-         return 0.0;
-
-      if (activeSteps.isEmpty())
-         return 0.0;
-
-      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-
-      double deltaTimeToBeAccounted;
-      if (useSimpleSwingSpeedUpCalculation.getValue())
-      {
-         double shortestSpeedUp = Double.POSITIVE_INFINITY;
-         double currentTime = robotTimestamp.getDoubleValue();
-         for (int i = 0; i < activeSteps.size(); i++)
-         {
-            QuadrupedTimedStep activeStep = activeSteps.get(i);
-            double duration = activeStep.getTimeInterval().getDuration();
-            double phaseThroughStep = (currentTime - activeStep.getTimeInterval().getStartTime()) / duration;
-            double nominalRemainingTime = durationForEmergencySwingSpeedUp.getValue() * (1.0 - phaseThroughStep);
-            double actualRemainingTime = duration - nominalRemainingTime;
-
-            shortestSpeedUp = Math.min(shortestSpeedUp, actualRemainingTime - nominalRemainingTime);
-         }
-
-         deltaTimeToBeAccounted = Math.max(shortestSpeedUp, 0.0);
-      }
-      else
-      {
-         deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(dcmPositionEstimate);
-      }
-
-      if (Double.isNaN(deltaTimeToBeAccounted))
-         return 0.0;
-
-      return deltaTimeToBeAccounted;
-   }
-
-   private final FramePoint2D desiredICP2d = new FramePoint2D();
-   private final FramePoint2D finalICP2d = new FramePoint2D();
-   private final FrameLine2D desiredICPToFinalICPLine = new FrameLine2D();
-   private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
-   private final FramePoint2D actualICP2d = new FramePoint2D();
-
-   /** FIXME This is a hack 6/26/2018 Robert Griffin **/
-   private final FrameVector2D dcmError2d = new FrameVector2D();
-   private final FrameLine2D adjustedICPDynamicsLine = new FrameLine2D();
    private final FramePoint3D perfectCMP = new FramePoint3D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint3DReadOnly actualCapturePointPosition)
+   public double estimateSwingSpeedUpTimeUnderDisturbance()
    {
-      desiredICP2d.setIncludingFrame(yoDesiredDCMPosition);
-      finalICP2d.setIncludingFrame(yoFinalDesiredDCM);
-      actualICP2d.setIncludingFrame(actualCapturePointPosition);
       dcmPlanner.getDesiredECMPPosition(perfectCMP);
       perfectCMP.changeFrame(worldFrame);
-      dcmError2d.setToZero(worldFrame);
-
-      /**
-       * FIXME This is a hack 6/26/2018 Robert Griffin
-       * The ICP plan is not being updated with the step adjustment. We approximate the step adjustment here by offsetting the final ICP and then projecting
-       * the desired ICP onto these dynamics. Without this, the foot will not be set down more quickly for lateral errors
-       */
-      dcmError2d.sub(actualICP2d, desiredICP2d);
-
-      double estimatedDesiredExponential = perfectCMP.distanceXY(finalICP2d) / perfectCMP.distanceXY(desiredICP2d);
-      finalICP2d.scaleAdd(estimatedDesiredExponential, dcmError2d, finalICP2d);
-
-      if (actualICP2d.distance(finalICP2d) < 1.0e-10)
-         return Double.NaN;
-
-      adjustedICPDynamicsLine.set(actualICP2d, finalICP2d);
-      adjustedICPDynamicsLine.orthogonalProjection(desiredICP2d); // projects the desired icp onto this dynamics line
-
-      if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
-      {
-         return Double.NaN;
-      }
-
-      desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
-      double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
-      if (percentAlongLineSegmentICP < 0.0)
-      {
-         desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
-         desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
-      }
-
-      double actualDistanceDueToDisturbance = perfectCMP.distanceXY(actualICP2d);
-      double expectedDistanceAccordingToPlan = perfectCMP.distanceXY(desiredICP2d);
-
-      double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
-
-      if (distanceRatio < 1.0e-3)
-         return 0.0;
-      else
-         return Math.log(distanceRatio) / linearInvertedPendulumModel.getNaturalFrequency();
+      return swingSpeedUpCalculator.estimateSwingSpeedUpTimeUnderDisturbance(activeSteps, computeNormalizedEllipticDcmErrorForSpeedUp(), yoDesiredDCMPosition,
+                                                                             yoFinalDesiredDCM, controllerToolbox.getDCMPositionEstimate(),
+                                                                             perfectCMP);
    }
 
    public void enableBodyXYControl()

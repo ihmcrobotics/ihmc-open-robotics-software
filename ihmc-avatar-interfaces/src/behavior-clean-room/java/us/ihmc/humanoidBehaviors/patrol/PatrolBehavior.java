@@ -242,10 +242,7 @@ public class PatrolBehavior
 
       PlanarRegionsListMessage latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionListMessage();
 
-      footstepPlanResultNotification
-            = behaviorHelper.requestPlan(midFeetZUpPose,
-                                                         new FramePose3D(waypointManager.peekNextPose()),
-                                                         latestPlanarRegionList);
+      footstepPlanResultNotification = behaviorHelper.requestPlan(midFeetZUpPose, new FramePose3D(waypointManager.peekNextPose()), latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
@@ -327,10 +324,7 @@ public class PatrolBehavior
 
       HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage,
-                                                                    humanoidReferenceFrames,
-                                                                    swingOverPlanarRegions,
-                                                                    planarRegionsList);
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
    private void doWalkStateAction(double timeInState)
@@ -348,8 +342,8 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and looping disabled
-         {                                                                                      // and it's going to loop
+         if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and
+         {                                                                                             // looping disabled and it's going to loop
             return STOP;
          }
          else

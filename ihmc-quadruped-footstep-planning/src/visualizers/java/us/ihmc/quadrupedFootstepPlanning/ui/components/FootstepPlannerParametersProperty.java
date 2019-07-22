@@ -11,22 +11,22 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField maximumFrontStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLength, SettableFootstepPlannerParameters::setMaximumFrontStepLength);
    private final DoubleField minimumFrontStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLength, SettableFootstepPlannerParameters::setMinimumFrontStepLength);
    private final DoubleField maximumHindStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepReach, SettableFootstepPlannerParameters::setMaximumHindStepReach);
-   private final DoubleField maximumHindStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLength, SettableFootstepPlannerParameters::setMaximumHindStepLength);
+   private final DoubleField maximumHindStepLength = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLength, SettableFootstepPlannerParameters::setMaximumHindStepLength);
    private final DoubleField minimumHindStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLength, SettableFootstepPlannerParameters::setMinimumHindStepLength);
-   private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
-   private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, SettableFootstepPlannerParameters::setMinimumStepWidth);
-   private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, SettableFootstepPlannerParameters::setMinimumStepYaw);
-   private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, SettableFootstepPlannerParameters::setMaximumStepYaw);
+   private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepOutward, SettableFootstepPlannerParameters::setMaximumStepOutward);
+   private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepInward, SettableFootstepPlannerParameters::setMaximumStepInward);
+   private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYawInward, SettableFootstepPlannerParameters::setMaximumStepYawInward);
+   private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYawOutward, SettableFootstepPlannerParameters::setMaximumStepYawOutward);
 
    private final DoubleField maximumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumFrontStepLengthWhenSteppingUp);
    private final DoubleField minimumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMinimumFrontStepLengthWhenSteppingUp);
-   private final DoubleField maximumHindStepLengthWhenSteppingUp= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingUp);
+   private final DoubleField maximumHindStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingUp);
    private final DoubleField minimumHindStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMinimumHindStepLengthWhenSteppingUp);
    private final DoubleField stepZForSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getStepZForSteppingUp, SettableFootstepPlannerParameters::setStepZForSteppingUp);
 
    private final DoubleField maximumFrontStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMaximumFrontStepLengthWhenSteppingDown);
    private final DoubleField minimumFrontStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMinimumFrontStepLengthWhenSteppingDown);
-   private final DoubleField maximumHindStepLengthWhenSteppingDown= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingDown);
+   private final DoubleField maximumHindStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingDown);
    private final DoubleField minimumHindStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMinimumHindStepLengthWhenSteppingDown);
    private final DoubleField stepZForSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getStepZForSteppingDown, SettableFootstepPlannerParameters::setStepZForSteppingDown);
 
@@ -35,8 +35,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private final DoubleField maxWalkingSpeedMultiplier = new DoubleField(SettableFootstepPlannerParameters::getMaxWalkingSpeedMultiplier, SettableFootstepPlannerParameters::setMaxWalkingSpeedMultiplier);
 
-   private final DoubleField projectInsideDistanceForExpansion = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForExpansion, SettableFootstepPlannerParameters::setProjectInsideDistanceForExpansion);
-   private final DoubleField projectInsideDistanceForPostProcessing = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForPostProcessing, SettableFootstepPlannerParameters::setProjectInsideDistanceForPostProcessing);
+   private final DoubleField projectInsideDistance = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistance, SettableFootstepPlannerParameters::setProjectInsideDistance);
    private final DoubleField maximumXYWiggleDistance = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private final DoubleField minFrontEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndForwardDistanceFromCliffBottoms);
@@ -45,8 +44,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField minHindEndBackwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndBackwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndBackwardDistanceFromCliffBottoms);
    private final DoubleField minLateralDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumLateralDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumLateralDistanceFromCliffBottoms);
 
-   private final DoubleField distanceWeight = new DoubleField(SettableFootstepPlannerParameters::getDistanceHeuristicWeight, SettableFootstepPlannerParameters::setDistanceHeuristicWeight);
+   private final DoubleField distanceWeight = new DoubleField(SettableFootstepPlannerParameters::getDistanceWeight, SettableFootstepPlannerParameters::setDistanceWeight);
    private final DoubleField xGaitWeight = new DoubleField(SettableFootstepPlannerParameters::getXGaitWeight, SettableFootstepPlannerParameters::setXGaitWeight);
+   private final DoubleField desiredVelocityWeight = new DoubleField(SettableFootstepPlannerParameters::getDesiredVelocityWeight, SettableFootstepPlannerParameters::setDesiredVelocityWeight);
    private final DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, SettableFootstepPlannerParameters::setYawWeight);
    private final DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, SettableFootstepPlannerParameters::setCostPerStep);
    private final DoubleField stepUpWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, SettableFootstepPlannerParameters::setStepUpWeight);
@@ -56,9 +56,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField minXClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromFoot, SettableFootstepPlannerParameters::setMinXClearanceFromFoot);
    private final DoubleField minYClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromFoot, SettableFootstepPlannerParameters::setMinYClearanceFromFoot);
    private final DoubleField minimumSurfaceInclineRadians = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, SettableFootstepPlannerParameters::setMinimumSurfaceInclineRadians);
-   
-   private final BooleanField projectIntoConvexHullExpansion = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringExpansion, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringExpansion);
-   private final BooleanField projectIntoConvexHullPostProcessing= new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringPostProcessing, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringPostProcessing);
+
+   private final DoubleField finalTurnProximity = new DoubleField(SettableFootstepPlannerParameters::getFinalTurnProximity, SettableFootstepPlannerParameters::setFinalTurnProximity);
+   private final DoubleField finalSlowDownProximity = new DoubleField(SettableFootstepPlannerParameters::getFinalSlowDownProximity, SettableFootstepPlannerParameters::setFinalSlowDownProximity);
+
+   private final BooleanField projectIntoConvexHull = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHull, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHull);
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -171,14 +173,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, cliffHeightToAvoid);
    }
 
-   public void bidirectionalBindProjectInsideDistanceForExpansion(Property<? extends Number> property)
+   public void bidirectionalBindProjectInsideDistance(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForExpansion);
-   }
-
-   public void bidirectionalBindProjectInsideDistanceForPostProcessing(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForPostProcessing);
+      bindFieldBidirectionalToNumberProperty(property, projectInsideDistance);
    }
 
    public void bidirectionalBindMaximumXYWiggleDistance(Property<? extends Number> property)
@@ -291,13 +288,8 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumSurfaceInclineRadians);
    }
 
-   public void bidirectionalBindProjectIntoConvexHullExpansion(Property<Boolean> property)
+   public void bidirectionalBindProjectIntoConvexHull(Property<Boolean> property)
    {
-      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullExpansion);
-   }
-
-   public void bidirectionalBindProjectIntoConvexHullPostProcessing(Property<Boolean> property)
-   {
-      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullPostProcessing);
+      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHull);
    }
 }
