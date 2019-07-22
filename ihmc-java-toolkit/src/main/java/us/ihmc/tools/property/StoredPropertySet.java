@@ -3,12 +3,14 @@ package us.ihmc.tools.property;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -48,45 +50,45 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    }
 
    @Override
-   public double getValue(DoubleStoredPropertyKey key)
+   public double get(DoubleStoredPropertyKey key)
    {
       return (Double) values[key.getIndex()];
    }
 
    @Override
-   public int getValue(IntegerStoredPropertyKey key)
+   public int get(IntegerStoredPropertyKey key)
    {
       return (Integer) values[key.getIndex()];
    }
 
    @Override
-   public boolean getValue(BooleanStoredPropertyKey key)
+   public boolean get(BooleanStoredPropertyKey key)
    {
       return (Boolean) values[key.getIndex()];
    }
 
-   public void setValue(DoubleStoredPropertyKey key, double value)
+   public void set(DoubleStoredPropertyKey key, double value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(IntegerStoredPropertyKey key, int value)
+   public void set(IntegerStoredPropertyKey key, int value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(BooleanStoredPropertyKey key, boolean value)
+   public void set(BooleanStoredPropertyKey key, boolean value)
    {
       values[key.getIndex()] = value;
    }
 
    @Override
-   public List<Object> getAllValues()
+   public List<Object> getAll()
    {
       return Arrays.asList(values);
    }
 
-   public void setAllValues(List<Object> newValues)
+   public void setAll(List<Object> newValues)
    {
       for (int i = 0; i < values.length; i++)
       {
@@ -99,32 +101,50 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
-         properties.load(accessStreamForLoading());
+         InputStream streamForLoading = accessStreamForLoading();
 
-         for (StoredPropertyKey<?> key : keys.keys())
+         if (streamForLoading == null)
          {
-            if (!properties.containsKey(key.getCamelCasedName()))
-            {
-               throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
-            }
+            LogTools.warn("Parameter file {} could not be found. Values will be null.", saveFileName);
+         }
+         else
+         {
+            LogTools.info("Loading parameters from {}", saveFileName);
+            properties.load(streamForLoading);
 
-            String stringValue = (String) properties.get(key.getCamelCasedName());
+            for (StoredPropertyKey<?> key : keys.keys())
+            {
+               if (!properties.containsKey(key.getCamelCasedName()))
+               {
+                  throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
+               }
 
-            if (key.getType().equals(Double.class))
-            {
-               values[key.getIndex()] = Double.valueOf(stringValue);
-            }
-            else if (key.getType().equals(Integer.class))
-            {
-               values[key.getIndex()] = Integer.valueOf(stringValue);
-            }
-            else if (key.getType().equals(Boolean.class))
-            {
-               values[key.getIndex()] = Boolean.valueOf(stringValue);
-            }
-            else
-            {
-               throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+               String stringValue = (String) properties.get(key.getCamelCasedName());
+
+               if (stringValue.equals("null"))
+               {
+                  LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileName);
+               }
+               else
+               {
+                  if (key.getType().equals(Double.class))
+                  {
+                     values[key.getIndex()] = Double.valueOf(stringValue);
+                  }
+                  else if (key.getType().equals(Integer.class))
+                  {
+                     values[key.getIndex()] = Integer.valueOf(stringValue);
+                  }
+                  else if (key.getType().equals(Boolean.class))
+                  {
+                     values[key.getIndex()] = Boolean.valueOf(stringValue);
+                  }
+                  else
+                  {
+                     throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+                  }
+               }
+
             }
          }
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -138,7 +158,14 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
+            if (values[key.getIndex()] == null)
+            {
+               properties.setProperty(key.getCamelCasedName(), "null");
+            }
+            else
+            {
+               properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
+            }
          }
 
          Path fileForSaving = findFileForSaving();
@@ -186,35 +213,44 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
 
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
 
-      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize();
-      boolean openRoboticsFound = false;
+      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
+      boolean directoryFound = false;
       for (Path path : absoluteWorkingDirectory)
       {
          reworkedPath = reworkedPath.resolve(path); // building up the path
 
          if (path.toString().equals(directoryNameToAssumePresent))
          {
-            openRoboticsFound = true;
+            directoryFound = true;
             break;
          }
       }
 
-      if (!openRoboticsFound)
+      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
       {
-         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}",
+         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
+         directoryFound = true;
+      }
+
+      if (!directoryFound)
+      {
+         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
                        directoryNameToAssumePresent,
-                       absoluteWorkingDirectory);
+                       absoluteWorkingDirectory,
+                       reworkedPath);
          return absoluteWorkingDirectory;
       }
 
       String s = classForLoading.getPackage().toString();
-      LogTools.info(s);
+      LogTools.debug(s);
       String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
-      LogTools.info(packagePath);
+      LogTools.debug(packagePath);
 
       Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
 
       Path finalPath = reworkedPath.resolve(subPath);
+
+      FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       return finalPath;
    }

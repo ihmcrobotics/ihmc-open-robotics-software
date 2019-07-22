@@ -1146,6 +1146,17 @@ public class PlanarRegion implements SupportingVertexHolder
       updateConvexHull();
    }
 
+   //TODO: +++JEP 190719 I think this is the correct implementation for transform(). Double check and if so, replace the one above with this.
+   public void transformByPreMultiply(RigidBodyTransform transform)
+   {
+      fromLocalToWorldTransform.preMultiply(transform);
+      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
+      fromWorldToLocalTransform.invert();
+
+      updateBoundingBox();
+      updateConvexHull();
+   }
+
    public void update()
    {
       updateBoundingBox();

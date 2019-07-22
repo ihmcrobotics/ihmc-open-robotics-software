@@ -6,6 +6,8 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -995,5 +998,44 @@ public class GeometryTools
                                                                                                              rotatationAxis);
    
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
+   }
+
+   public static Point3D midpoint(Point3DReadOnly a, Point3DReadOnly b)
+   {
+      Point3D midpoint = new Point3D(a);
+      midpoint.interpolate(a, b, 0.5);
+      return midpoint;
+   }
+
+   public static Vector3D vector(Point3DReadOnly from, Point3DReadOnly to)
+   {
+      Vector3D vector = new Vector3D(to);
+      vector.sub(from);
+      return vector;
+   }
+
+   public static Box3D convertBoundingBoxToBox(BoundingBox3DReadOnly boundingBox)
+   {
+      Point3DReadOnly minPoint = boundingBox.getMinPoint();
+      Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
+
+      Point3D boxCenter = GeometryTools.midpoint(minPoint, maxPoint);
+      Vector3D size = GeometryTools.vector(minPoint, maxPoint);
+
+      return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
+   }
+
+   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: Check, Unit test, JavaDoc, move where BoundingBox union is, and implement for BoundingBox3D.
+   {
+      double maxX = Math.min(a.getMaxX(), b.getMaxX());
+      double maxY = Math.min(a.getMaxY(), b.getMaxY());
+      double minX = Math.max(a.getMinX(), b.getMinX());
+      double minY = Math.max(a.getMinY(), b.getMinY());
+
+      if ((maxX <= minX) || (maxY <= minY))
+         return null;
+
+      BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
+      return  intersection;
    }
 }

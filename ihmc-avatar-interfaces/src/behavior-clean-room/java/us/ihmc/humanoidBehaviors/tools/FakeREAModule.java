@@ -1,10 +1,12 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
@@ -12,22 +14,25 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class FakeREAModule
 {
-   private final PlanarRegionsList constantPlanarRegions;
+   private volatile PlanarRegionsList regionsToPublish;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final HashMap<Integer, PlanarRegion> customPlanarRegions = new HashMap<>();
+   private final PausablePeriodicThread thread;
 
-   public FakeREAModule(PlanarRegionsList constantPlanarRegions)
+   public FakeREAModule(PlanarRegionsList regionsToPublish)
    {
-      this.constantPlanarRegions = constantPlanarRegions;
+      this.regionsToPublish = regionsToPublish;
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, LIDARBasedREAModule.ROS2_ID.getNodeName());
 
@@ -39,13 +44,27 @@ public class FakeREAModule
                          LIDARBasedREAModule.ROS2_ID.qualifyMore(LIDARBasedREAModule.CUSTOM_REGION_QUALIFIER),
                          this::acceptCustomRegion);
 
-      ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
-      scheduler.schedule(this::process, 500, TimeUnit.MILLISECONDS);
+      thread = new PausablePeriodicThread(this::process, 0.5, getClass().getSimpleName());
+   }
+
+   public void start()
+   {
+      thread.start();
+   }
+
+   public void stop()
+   {
+      thread.stop();
+   }
+
+   public void setRegionsToPublish(PlanarRegionsList regionsToPublish)
+   {
+      this.regionsToPublish = regionsToPublish;
    }
 
    private void process()
    {
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(constantPlanarRegions.getPlanarRegionsAsList());
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(regionsToPublish.getPlanarRegionsAsList());
 
       synchronized (this)
       {

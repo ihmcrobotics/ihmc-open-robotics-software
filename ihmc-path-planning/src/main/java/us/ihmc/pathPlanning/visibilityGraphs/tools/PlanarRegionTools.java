@@ -12,14 +12,13 @@ import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -37,6 +36,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -875,6 +875,90 @@ public class PlanarRegionTools
          area += planarRegion.getConvexPolygon(i).getArea();
       }
       return area;
+   }
+
+   public static Point2D getAverageCentroid2DInLocal(PlanarRegion planarRegion)
+   {
+      Point2D centroid = new Point2D();
+
+      int count = 0;
+      double xSum = 0.0;
+      double ySum = 0.0;
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         Point2DReadOnly convexPolygonCentroid = convexPolygon.getCentroid();
+
+         xSum += convexPolygonCentroid.getX();
+         ySum += convexPolygonCentroid.getY();
+         ++count;
+      }
+
+      centroid.setX(xSum / count);
+      centroid.setY(ySum / count);
+
+      return centroid;
+   }
+
+   public static Point3D getAverageCentroid3DInWorld(PlanarRegion planarRegion)
+   {
+      Point2D averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
+      Point3D point3D = new Point3D(averageCentroid2DInLocal);
+      point3D.applyTransform(getTransformToWorld(planarRegion));
+      return point3D;
+   }
+
+   public static BoundingBox3D getBoundingBox3DInLocal(PlanarRegion planarRegion)
+   {
+      BoundingBox3D boundingBox3DInLocal = new BoundingBox3D();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            boundingBox3DInLocal.updateToIncludePoint(convexPolygon.getVertex(j).getX(), convexPolygon.getVertex(j).getY(), 0.0);
+         }
+      }
+
+      return boundingBox3DInLocal;
+   }
+
+   public static BoundingBox2D getBoundingBox2DInLocal(PlanarRegion planarRegion)
+   {
+      BoundingBox2D boundingBox2DInLocal = new BoundingBox2D();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            boundingBox2DInLocal.updateToIncludePoint(convexPolygon.getVertex(j).getX(), convexPolygon.getVertex(j).getY());
+         }
+      }
+
+      return boundingBox2DInLocal;
+   }
+
+   public static RigidBodyTransform getTransformToWorld(PlanarRegion planarRegion)
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+      return transformToWorld;
+   }
+
+   public static RigidBodyTransform getTransformToLocal(PlanarRegion planarRegion)
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      planarRegion.getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
+   public static Box3D getLocalBoundingBox3DInWorld(PlanarRegion planarRegion, double height)
+   {
+      BoundingBox3D boundingBox3DInLocal = getBoundingBox3DInLocal(planarRegion);
+      boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
+      boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
+      Box3D box = GeometryTools.convertBoundingBoxToBox(boundingBox3DInLocal);
+      box.applyTransform(getTransformToWorld(planarRegion));
+      return box;
    }
 
    public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius, PlanarRegion query)

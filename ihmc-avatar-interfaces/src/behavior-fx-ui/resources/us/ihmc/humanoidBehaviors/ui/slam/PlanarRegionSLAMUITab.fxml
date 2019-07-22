@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMUITabController">
+   <center>
+      <FlowPane alignment="CENTER_LEFT" prefWrapLength="1100.0" BorderPane.alignment="CENTER_LEFT">
+         <children>
+            <GridPane prefWidth="300.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <padding>
+                  <Insets left="5.0" />
+               </padding>
+               <children>
+                  <CheckBox fx:id="acceptNewRegionListsCheckbox" mnemonicParsing="false" onAction="#acceptNewRegionListsCheckbox" selected="true" text="Accept new region lists" />
+                  <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+                     <children>
+                        <Button fx:id="exportMapButton" mnemonicParsing="false" onAction="#exportMapButton" text="Export map..." />
+                        <Button fx:id="clearMapButton" mnemonicParsing="false" onAction="#clearMapButton" text="Clear map">
+                           <FlowPane.margin>
+                              <Insets />
+                           </FlowPane.margin>
+                        </Button>
+                     </children>
+                  </FlowPane>
+                  <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                     <children>
+                        <Button fx:id="slamButton" mnemonicParsing="false" onAction="#slamButton" text="SLAM" />
+                        <Button fx:id="slamStepButton" disable="true" mnemonicParsing="false" onAction="#slamStepButton" text="Step">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <FlowPane.margin>
+                              <Insets />
+                           </FlowPane.margin>
+                        </Button>
+                        <TextField fx:id="slamStepStatus" editable="false" prefHeight="26.0" prefWidth="123.0" />
+                     </children>
+                  </FlowPane>
+                  <FlowPane alignment="CENTER_LEFT" hgap="10.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                     <children>
+                        <Button fx:id="exportIncomingButton" mnemonicParsing="false" onAction="#exportIncomingButton" text="Export incoming..." />
+                        <Button fx:id="clearIncomingButton" mnemonicParsing="false" onAction="#clearIncomingButton" text="Clear incoming" />
+                     </children>
+                  </FlowPane>
+               </children>
+            </GridPane>
+            <Separator orientation="VERTICAL" />
+            <GridPane prefWidth="300.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <CheckBox fx:id="fakeREAPublisherCheckbox" mnemonicParsing="false" onAction="#fakeREAPublisherCheckbox" text="Fake REA Publisher" />
+                  <RadioButton fx:id="dataset1RadioButton" mnemonicParsing="false" onAction="#dataset1RadioButton" selected="true" text="DATASET_1" GridPane.rowIndex="1" />
+                  <RadioButton fx:id="dataset2RadioButton" mnemonicParsing="false" onAction="#dataset2RadioButton" text="DATASET_2" GridPane.rowIndex="2" />
+                  <RadioButton fx:id="dataset3RadioButton" mnemonicParsing="false" onAction="#dataset3RadioButton" text="DATASET_3" GridPane.rowIndex="3" />
+                  <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
+                     <children>
+                        <RadioButton fx:id="loadFromFileRadioButton" mnemonicParsing="false" onAction="#loadFromFileRadioButton" text="Load from file..." />
+                     </children>
+                  </FlowPane>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" />
+               </padding>
+            </GridPane>
+            <Separator orientation="VERTICAL" />
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="220.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label fx:id="parameterLabel1" text="Parameter 1" />
+                  <Label fx:id="parameterLabel2" text="Parameter 2" GridPane.rowIndex="1" />
+                  <Label fx:id="parameterLabel3" text="Parameter 3" GridPane.rowIndex="2" />
+                  <Spinner fx:id="parameterSpinner1" editable="true" GridPane.columnIndex="1" />
+                  <Spinner fx:id="parameterSpinner2" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Spinner fx:id="parameterSpinner3" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="parameterLabel4" text="Parameter 4" GridPane.rowIndex="3" />
+                  <Spinner fx:id="parameterSpinner4" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Button fx:id="saveParametersButton" mnemonicParsing="false" text="Save" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                     <GridPane.margin>
+                        <Insets left="10.0" />
+                     </GridPane.margin>
+                  </Button>
+               </children>
+            </GridPane>
+         </children>
+      </FlowPane>
+   </center>
+</BorderPane>

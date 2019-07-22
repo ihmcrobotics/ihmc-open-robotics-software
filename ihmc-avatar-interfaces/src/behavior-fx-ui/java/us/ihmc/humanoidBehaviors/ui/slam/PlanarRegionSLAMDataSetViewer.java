@@ -1,10 +1,9 @@
-package us.ihmc.humanoidBehaviors.ui.simulation;
+package us.ihmc.humanoidBehaviors.ui.slam;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
 import java.nio.file.Path;
