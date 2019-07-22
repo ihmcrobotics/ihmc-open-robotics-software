@@ -37,6 +37,7 @@ class PlanarRegionSLAMTest
 {
    private static boolean visualize = false;
 
+   //test commit.
    @Test
    public void testSLAMWithThreeNiceWalls()
    {
