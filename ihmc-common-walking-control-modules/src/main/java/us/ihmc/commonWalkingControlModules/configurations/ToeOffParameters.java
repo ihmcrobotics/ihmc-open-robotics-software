@@ -37,6 +37,16 @@ public abstract class ToeOffParameters
    }
 
    /**
+    * Maximum distance of the ICP to the toe off support polygon before allowing toe off.
+    *
+    * @return ICP distance (m).
+    */
+   public double getICPProximityForToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
     * Whether or not the location of the CoP in the trailing foot must be close enough to the support polygon before allowing toe off.
     *
     * @return whether or not to check the CoP location.
