@@ -1,26 +1,31 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Color;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
-import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class ConcaveHullMergerTest
 {
@@ -60,6 +65,179 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB3, concaveHull[i++], epsilon);
 
       assertEquals(3, mergedPlanarRegion.getNumberOfConvexPolygons());
+   }
+
+   @Test
+   public void testMergePlanarRegionsWithDifferentTranslations()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      Point2D pointB0 = new Point2D(0.0, 0.0);
+      Point2D pointB1 = new Point2D(0.0, 1.0);
+      Point2D pointB2 = new Point2D(1.0, 1.0);
+      Point2D pointB3 = new Point2D(1.0, 0.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
+
+      RigidBodyTransform transformA = new RigidBodyTransform();
+      transformA.setTranslation(1.0, 2.0, 3.0);
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      transformB.setTranslation(1.5, 2.5, 3.0);
+
+      PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
+      PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+
+      regionA.setRegionId(1);
+      regionB.setRegionId(2);
+      mergedPlanarRegion.setRegionId(3);
+
+      BoundingBox3D mergedBoundingBox = mergedPlanarRegion.getBoundingBox3dInWorld();
+      assertEquals(new BoundingBox3D(1.0, 2.0, 3.0, 2.5, 3.5, 3.0), mergedBoundingBox);
+
+      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(8, concaveHull.length);
+
+      assertConcaveHullContains(concaveHull, 0.0, 0.0);
+      assertConcaveHullContains(concaveHull, 0.0, 1.0);
+      assertConcaveHullContains(concaveHull, 0.5, 1.0);
+      assertConcaveHullContains(concaveHull, 0.5, 1.5);
+      assertConcaveHullContains(concaveHull, 1.5, 1.5);
+      assertConcaveHullContains(concaveHull, 1.5, 0.5);
+      assertConcaveHullContains(concaveHull, 1.0, 0.5);
+      assertConcaveHullContains(concaveHull, 1.0, 0.0);
+
+      assertEquals(2, mergedPlanarRegion.getNumberOfConvexPolygons());
+
+      if (visualize)
+      {
+         visualizePlanarRegions(regionA, regionB, mergedPlanarRegion);
+         ThreadTools.sleepForever();
+      }
+   }
+
+   @Test
+   public void testMergePlanarRegionsWithDifferentTransforms()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(1.0, 2.0);
+      Point2D pointA1 = new Point2D(1.0, 3.0);
+      Point2D pointA2 = new Point2D(2.0, 3.0);
+      Point2D pointA3 = new Point2D(2.0, 2.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+
+      RigidBodyTransform transformA = new RigidBodyTransform();
+      transformA.setTranslation(0.1, -0.2, 0.3);
+      transformA.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+
+      RigidBodyTransform transformAInverse = new RigidBodyTransform(transformA);
+      transformAInverse.invert();
+
+      PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
+
+      Point3D pointOnPlaneA = new Point3D(5.17, 6.3, 0.0);
+      transformA.transform(pointOnPlaneA);
+
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      transformB.setTranslation(pointOnPlaneA);
+      transformB.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+      RigidBodyTransform transformBInverse = new RigidBodyTransform(transformB);
+      transformBInverse.invert();
+
+      Point3D pointB0 = new Point3D(1.5, 2.5, 0.0);
+      Point3D pointB1 = new Point3D(1.5, 3.5, 0.0);
+      Point3D pointB2 = new Point3D(2.5, 3.5, 0.0);
+      Point3D pointB3 = new Point3D(2.5, 2.5, 0.0);
+
+      transformA.transform(pointB0);
+      transformBInverse.transform(pointB0);
+
+      transformA.transform(pointB1);
+      transformBInverse.transform(pointB1);
+
+      transformA.transform(pointB2);
+      transformBInverse.transform(pointB2);
+
+      transformA.transform(pointB3);
+      transformBInverse.transform(pointB3);
+
+      assertEquals(0.0, pointB0.getZ(), 1e-7);
+      assertEquals(0.0, pointB1.getZ(), 1e-7);
+      assertEquals(0.0, pointB2.getZ(), 1e-7);
+      assertEquals(0.0, pointB3.getZ(), 1e-7);
+
+      Point2D point2DB0 = new Point2D(pointB0);
+      Point2D point2DB1 = new Point2D(pointB1);
+      Point2D point2DB2 = new Point2D(pointB2);
+      Point2D point2DB3 = new Point2D(pointB3);
+
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(point2DB0, point2DB1, point2DB2, point2DB3));
+      PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
+
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+
+      regionA.setRegionId(1);
+      regionB.setRegionId(2);
+      mergedPlanarRegion.setRegionId(3);
+
+      BoundingBox3D mergedBoundingBox = mergedPlanarRegion.getBoundingBox3dInWorld();
+
+      BoundingBox3D expectedBox = generateBoundingBox(transformA,
+                                                      pointA0,
+                                                      pointA1,
+                                                      pointA2,
+                                                      pointA3,
+                                                      new Point2D(1.5, 2.5),
+                                                      new Point2D(1.5, 3.5),
+                                                      new Point2D(2.5, 3.5),
+                                                      new Point2D(2.5, 2.5));
+
+      assertTrue(expectedBox.epsilonEquals(mergedBoundingBox, 1e-7));
+
+      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(8, concaveHull.length);
+
+      assertConcaveHullContains(concaveHull, 1.0, 2.0);
+      assertConcaveHullContains(concaveHull, 1.0, 3.0);
+      assertConcaveHullContains(concaveHull, 1.5, 3.0);
+      assertConcaveHullContains(concaveHull, 1.5, 3.5);
+      assertConcaveHullContains(concaveHull, 2.5, 3.5);
+      assertConcaveHullContains(concaveHull, 2.5, 2.5);
+      assertConcaveHullContains(concaveHull, 2.0, 2.5);
+      assertConcaveHullContains(concaveHull, 2.0, 2.0);
+
+      assertEquals(2, mergedPlanarRegion.getNumberOfConvexPolygons());
+
+      if (visualize)
+      {
+         visualizePlanarRegions(regionA, regionB, mergedPlanarRegion);
+         ThreadTools.sleepForever();
+      }
+   }
+
+   private BoundingBox3D generateBoundingBox(RigidBodyTransform transform, Point2D... pointsInBox)
+   {
+      Point3D minPoint = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      Point3D maxPoint = new Point3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+
+      for (Point2D pointInBox : pointsInBox)
+      {
+         Point3D point = new Point3D(pointInBox);
+         transform.transform(point);
+
+         minPoint.set(Math.min(minPoint.getX(), point.getX()), Math.min(minPoint.getY(), point.getY()), Math.min(minPoint.getZ(), point.getZ()));
+         maxPoint.set(Math.max(maxPoint.getX(), point.getX()), Math.max(maxPoint.getY(), point.getY()), Math.max(maxPoint.getZ(), point.getZ()));
+      }
+
+      return new BoundingBox3D(minPoint, maxPoint);
    }
 
    @Test
@@ -326,18 +504,6 @@ public class ConcaveHullMergerTest
 
    }
 
-   private Point2D[] convertToPointArray(double[][] hull)
-   {
-      Point2D[] points = new Point2D[hull.length];
-
-      for (int i = 0; i < hull.length; i++)
-      {
-         points[i] = new Point2D(hull[i][0], hull[i][1]);
-      }
-
-      return points;
-   }
-
    @Test
    public void testFindIntersection()
    {
@@ -366,4 +532,82 @@ public class ConcaveHullMergerTest
       assertEquals(0, intersection.getLeft());
    }
 
+   private Point2D[] convertToPointArray(double[][] hull)
+   {
+      Point2D[] points = new Point2D[hull.length];
+
+      for (int i = 0; i < hull.length; i++)
+      {
+         points[i] = new Point2D(hull[i][0], hull[i][1]);
+      }
+
+      return points;
+   }
+
+   private void assertConcaveHullContains(Point2D[] concaveHull, double x, double y)
+   {
+      double epsilon = 1e-7;
+
+      for (Point2D point : concaveHull)
+      {
+         if (point.epsilonEquals(new Point2D(x, y), epsilon))
+            return;
+      }
+      String errorMessage = "Concave Hull does not contain (" + x + ", " + y + "). \nConcave Hull = ";
+      for (Point2D point : concaveHull)
+      {
+         errorMessage += point + "\n";
+      }
+      fail(errorMessage);
+   }
+
+   private void visualizePlanarRegions(PlanarRegion... regions)
+   {
+      PlanarRegionsList list = new PlanarRegionsList(regions);
+      visualizePlanarRegions(list);
+   }
+
+   private void visualizePlanarRegions(PlanarRegionsList planarRegions)
+   {
+      JavaFXApplicationCreator.createAJavaFXApplication();
+
+      PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic(false);
+      regionsGraphic.generateMeshes(planarRegions);
+      regionsGraphic.update();
+
+      final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+      Platform.runLater(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            //            double preferredWidth = 1000.0;
+            //            double preferredHeight = 1000.0;
+
+            View3DFactory view3dFactory = new View3DFactory(1200, 800);
+            view3dFactory.addCameraController(0.05, 2000.0, true);
+            view3dFactory.addWorldCoordinateSystem(0.3);
+            view3dFactory.addDefaultLighting();
+            view3dFactory.addNodeToView(regionsGraphic);
+
+            Stage stage = new Stage();
+            stage.setTitle(getClass().getSimpleName());
+            stage.setMaximized(false);
+            stage.setScene(view3dFactory.getScene());
+
+            stage.centerOnScreen();
+            stage.show();
+            countDownLatch.countDown();
+         }
+      });
+
+      try
+      {
+         countDownLatch.await();
+      }
+      catch (InterruptedException e)
+      {
+      }
+   }
 }
