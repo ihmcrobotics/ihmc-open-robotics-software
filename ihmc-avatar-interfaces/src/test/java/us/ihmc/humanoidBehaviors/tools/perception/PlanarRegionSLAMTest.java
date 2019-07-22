@@ -63,10 +63,12 @@ class PlanarRegionSLAMTest
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
       //      assertEquals(3, mergedMap.getNumberOfPlanarRegions()); //TODO: Fix
 
-      
-//      visualizePlanarRegions(map);
-//      visualizePlanarRegions(mergedMap);
-//      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         visualizePlanarRegions(map);
+         visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
       
       // Small translation transform with all six walls.
       RigidBodyTransform smallTranslationTransform = new RigidBodyTransform();
