@@ -16,12 +16,11 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-/** Class for merging two convex hulls. Goes around the outside, adding a point at a time.
- * Keeps track of what is the outside working hull and the inside resting hull.
- * Does a pre-filter to move the points slightly if there are duplicates between the two
- * hulls or points of the second are on the edge of the first.
- * 
- * Fills in holes that are formed when two hulls are merged.
+/**
+ * Class for merging two convex hulls. Goes around the outside, adding a point at a time. Keeps
+ * track of what is the outside working hull and the inside resting hull. Does a pre-filter to move
+ * the points slightly if there are duplicates between the two hulls or points of the second are on
+ * the edge of the first. Fills in holes that are formed when two hulls are merged.
  */
 public class ConcaveHullMerger
 {
@@ -29,8 +28,14 @@ public class ConcaveHullMerger
    private static final double amountToMove = 0.0015;
 
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
-   //TODO: Clockwise or counterclockwise order?
 
+   /**
+    * Merges two PlanarRegions and returns the merged PlanarRegion.
+    * 
+    * @param regionOne First PlanarRegion to merge.
+    * @param regionTwo Second PlanarRegion to merge.
+    * @return Merged planarRegions.
+    */
    public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo)
    {
       RigidBodyTransform transformTwoToWorld = new RigidBodyTransform();
@@ -39,8 +44,8 @@ public class ConcaveHullMerger
       RigidBodyTransform transformWorldToOne = new RigidBodyTransform();
       regionOne.getTransformToLocal(transformWorldToOne);
 
-      RigidBodyTransform transformTwoToOne = new RigidBodyTransform(transformTwoToWorld);
-      transformTwoToOne.multiply(transformWorldToOne);
+      RigidBodyTransform transformTwoToOne = new RigidBodyTransform(transformWorldToOne);
+      transformTwoToOne.multiply(transformTwoToWorld);
 
       Point2D[] concaveHullTwoVertices = regionTwo.getConcaveHull();
       Point2D[] concaveHullTwoVerticesTransformed = new Point2D[concaveHullTwoVertices.length];
@@ -77,6 +82,7 @@ public class ConcaveHullMerger
    /**
     * Merges two ConcaveHulls. ConcaveHulls are assumed to be in clockwise order. Will fill holes.
     * Assumes that the two ConcaveHulls do intersect by some non-infinitesimal amount.
+    * 
     * @param hullOne One hull to merge.
     * @param hullTwo The other hull to merge.
     * @return Merged hull.
@@ -136,11 +142,6 @@ public class ConcaveHullMerger
 
       int nextIndex = (workingHullIndex + 1) % workingHull.length;
 
-      //      LogTools.info("startingVertex = " + startingVertex);
-      //
-      //      LogTools.info("STARTING!! workingHullIndex = " + workingHullIndex);
-      //      LogTools.info("nextIndex = " + nextIndex);
-
       int edgeStartIndexToSkip = -1;
       int count = 0;
       while (count < hullOne.length + hullTwo.length + 2)
@@ -161,14 +162,10 @@ public class ConcaveHullMerger
          {
             workingVertex = nextVertex;
 
-            //            LogTools.info("workingVertex = " + workingVertex);
-
             if (workingVertex == startingVertex)
                break;
 
             nextIndex = (nextIndex + 1) % workingHull.length;
-            //            LogTools.info("nextIndex = " + nextIndex);
-
             edgeStartIndexToSkip = -1;
          }
          else
@@ -194,8 +191,6 @@ public class ConcaveHullMerger
 
             nextIndex = intersection.getLeft();
             workingVertex = intersectionPoint;
-
-            //            LogTools.info("Swap. edgeStartIndexToSkip = " + edgeStartIndexToSkip + ", nextIndex = " + nextIndex);
          }
 
       }
@@ -209,10 +204,13 @@ public class ConcaveHullMerger
    }
 
    /**
-    * Goes through hullTwo and moves any points that are either duplicates of those on hullOne or on the edges of hullOne.
-    * @param hullOne 
+    * Goes through hullTwo and moves any points that are either duplicates of those on hullOne or on
+    * the edges of hullOne.
+    * 
+    * @param hullOne
     * @param hullTwo Hull to be processed.
-    * @return Processed hull. Will be deep copy of hullTwo if there are no duplicates or points on the edges.
+    * @return Processed hull. Will be deep copy of hullTwo if there are no duplicates or points on the
+    *         edges.
     */
    private static Point2D[] preprocessHullTwoToMoveDuplicatesOrOnEdges(Point2D[] hullOne, Point2D[] hullTwo)
    {
@@ -227,8 +225,10 @@ public class ConcaveHullMerger
    }
 
    /**
-    * Returns a moved version of the hullPoint if it is a copy of a vertex on the given hull or close to the edge.
-    * @param hullOne Hull to check for closeness to.
+    * Returns a moved version of the hullPoint if it is a copy of a vertex on the given hull or close
+    * to the edge.
+    * 
+    * @param hullOne   Hull to check for closeness to.
     * @param hullPoint Point to move if necessary
     * @return Moved hull point.
     */
@@ -301,12 +301,14 @@ public class ConcaveHullMerger
    }
 
    /**
-    * Finds the intersection in a concave hull as an edge crosses from outside to inside the hull.
-    * If there are multiple intersections, returns the one that is closest to the edges start point.
-    * If there is no intersection, returns null.
-    * @param edge Edge to check for crossing.
+    * Finds the intersection in a concave hull as an edge crosses from outside to inside the hull. If
+    * there are multiple intersections, returns the one that is closest to the edges start point. If
+    * there is no intersection, returns null.
+    * 
+    * @param edge        Edge to check for crossing.
     * @param concaveHull Concave Hull to check if edge crosses it.
-    * @return Point2D where the hull crosses and the second index of the concave hull edge that it intersects.
+    * @return Point2D where the hull crosses and the second index of the concave hull edge that it
+    *         intersects.
     */
    public static Pair<Integer, Point2D> findClosestIntersection(LineSegment2D edge, Point2D[] concaveHull, int edgeStartIndexToSkip)
    {
@@ -330,9 +332,6 @@ public class ConcaveHullMerger
 
             if (intersection != null)
             {
-               //               System.out.println("Found edge. IndexToSkip = " + edgeStartIndexToSkip);
-               //               if (edge.getFirstEndpoint().distanceSquared(intersection) > 1e-10)
-
                double distanceSquared = edge.getFirstEndpoint().distanceSquared(intersection);
 
                if (distanceSquared < bestDistanceSquared)
