@@ -11,7 +11,7 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
 
    public static final IntegerStoredPropertyKey iterations = keys.addIntegerKey("Iterations");
    public static final DoubleStoredPropertyKey boundingBoxHeight = keys.addDoubleKey("Bounding box height");
-   public static final DoubleStoredPropertyKey minimumNormalDotProduct = keys.addDoubleKey("Minimum normal dot product");  //Math.cos(Math.toRadians(5.0));
+   public static final DoubleStoredPropertyKey minimumNormalDotProduct = keys.addDoubleKey("Minimum normal dot product");
    public static final DoubleStoredPropertyKey dampedLeastSquaresLambda = keys.addDoubleKey("Damped least squares lambda");
 
    public PlanarRegionSLAMParameters()
