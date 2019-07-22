@@ -32,6 +32,7 @@ visualizersDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
 }
 
 testDependencies {
