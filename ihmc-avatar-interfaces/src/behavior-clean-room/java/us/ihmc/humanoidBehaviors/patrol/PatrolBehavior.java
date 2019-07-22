@@ -419,11 +419,7 @@ public class PatrolBehavior
    {
       HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
       boolean isWalking = behaviorHelper.isRobotWalking();
-<<<<<<< Upstream, based on branch 'feature/playing-with-behaviors' of https://stash.ihmc.us/scm/libs/ihmc-open-robotics-software.git
 
-=======
-      
->>>>>>> 0a075d9 isRobotWalking method.
       if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {
          LogTools.debug("Stopping from robot state: {}", controllerState.name());
