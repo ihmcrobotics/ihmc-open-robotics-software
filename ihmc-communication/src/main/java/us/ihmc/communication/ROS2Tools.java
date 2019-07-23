@@ -24,13 +24,14 @@ public class ROS2Tools
 {
    public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
    public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
+   public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
 
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
    public static final String INPUT_ROS_TOPIC_PREFIX = "/input";
 
    public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
-   public static final String QUADRUPED_CONTROL_MODULE = "/quadruped_control";
+   public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
 
    public static final String FOOTSTEP_PLANNER_TOOLBOX = "/toolbox/footstep_plan";
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
