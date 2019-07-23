@@ -20,9 +20,14 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Provides a load/saveable property set access by strongly typed static keys.
+ * Provides a load/saveable property set accessed by strongly typed static keys.
  *
- * The property set is loaded from the classpath and saved to the classpath if running from source.
+ * The property INI file is saved to the classpath by file and loaded from the classpath by resource.
+ *
+ * Some of the benefits of this framework:
+ * - Keys are created with title cased names available for GUI fields
+ * - No YoVariableServer required
+ * - INI file can be placed in higher level projects to override the defaults
  */
 public class StoredPropertySet implements StoredPropertySetReadOnly
 {
