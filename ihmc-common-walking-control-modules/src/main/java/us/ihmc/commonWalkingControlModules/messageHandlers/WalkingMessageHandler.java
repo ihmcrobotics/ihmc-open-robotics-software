@@ -94,6 +94,8 @@ public class WalkingMessageHandler
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
+   private final YoDouble defaultTransferSplitFraction = new YoDouble("defaultTransferSplitFraction", registry);
+
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
    private final YoLong lastCommandID = new YoLong("lastFootStepDataListCommandID", registry);
 
@@ -126,8 +128,9 @@ public class WalkingMessageHandler
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
-                                SideDependentList<? extends ContactablePlaneBody> contactableFeet, StatusMessageOutputManager statusOutputManager,
-                                YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                double defaultTransferSplitFraction, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
 
@@ -139,6 +142,7 @@ public class WalkingMessageHandler
       this.defaultInitialTransferTime.set(defaultInitialTransferTime);
       this.defaultFinalTransferTime.set(defaultFinalTransferTime);
       this.finalTransferTime.set(defaultFinalTransferTime);
+      this.defaultTransferSplitFraction.set(defaultTransferSplitFraction);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -242,6 +246,12 @@ public class WalkingMessageHandler
          defaultTransferTime.set(commandDefaultTransferTime);
          defaultSwingTime.set(commandDefaultSwingTime);
       }
+      double commandDefaultTransferSplitFraction = command.getDefaultTransferSplitFraction();
+      if (!Double.isNaN(commandDefaultTransferSplitFraction) && commandDefaultTransferSplitFraction > 0.0)
+      {
+         defaultTransferSplitFraction.set(commandDefaultTransferSplitFraction);
+      }
+
 
       double commandFinalTransferTime = command.getFinalTransferDuration();
 
@@ -823,6 +833,14 @@ public class WalkingMessageHandler
 
    private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
    {
+
+      double transferSplitFraction = footstepData.getTransferSplitFraction();
+      if (Double.isNaN(transferSplitFraction) || transferSplitFraction <= 0.0)
+      {
+         transferSplitFraction = defaultTransferSplitFraction.getDoubleValue();
+      }
+      footstepToSet.setTransferSplitFraction(transferSplitFraction);
+
       footstepToSet.set(footstepData, trustHeight, isAdjustable);
       footstepToSet.addOffset(planOffsetInWorld);
    }
@@ -847,6 +865,7 @@ public class WalkingMessageHandler
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
+
 
       timingToSet.setTimings(swingDuration, transferDuration);
       timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());

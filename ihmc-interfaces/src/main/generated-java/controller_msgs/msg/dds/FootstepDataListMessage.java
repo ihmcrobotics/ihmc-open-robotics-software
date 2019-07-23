@@ -54,6 +54,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
             */
    public double final_transfer_duration_ = -1.0;
    /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double default_transfer_split_fraction_ = -1.0;
+   /**
             * If false the controller adjust each footstep height to be at the support sole height.
             */
    public boolean trust_height_of_footsteps_ = true;
@@ -99,6 +105,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       default_transfer_duration_ = other.default_transfer_duration_;
 
       final_transfer_duration_ = other.final_transfer_duration_;
+
+      default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
 
       trust_height_of_footsteps_ = other.trust_height_of_footsteps_;
 
@@ -224,6 +232,25 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
    /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public void setDefaultTransferSplitFraction(double default_transfer_split_fraction)
+   {
+      default_transfer_split_fraction_ = default_transfer_split_fraction;
+   }
+   /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double getDefaultTransferSplitFraction()
+   {
+      return default_transfer_split_fraction_;
+   }
+
+   /**
             * If false the controller adjust each footstep height to be at the support sole height.
             */
    public void setTrustHeightOfFootsteps(boolean trust_height_of_footsteps)
@@ -327,6 +354,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_duration_, other.final_transfer_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_split_fraction_, other.default_transfer_split_fraction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.trust_height_of_footsteps_, other.trust_height_of_footsteps_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_footsteps_adjustable_, other.are_footsteps_adjustable_, epsilon)) return false;
@@ -360,6 +389,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if(this.final_transfer_duration_ != otherMyClass.final_transfer_duration_) return false;
 
+      if(this.default_transfer_split_fraction_ != otherMyClass.default_transfer_split_fraction_) return false;
+
       if(this.trust_height_of_footsteps_ != otherMyClass.trust_height_of_footsteps_) return false;
 
       if(this.are_footsteps_adjustable_ != otherMyClass.are_footsteps_adjustable_) return false;
@@ -391,6 +422,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append(this.default_transfer_duration_);      builder.append(", ");
       builder.append("final_transfer_duration=");
       builder.append(this.final_transfer_duration_);      builder.append(", ");
+      builder.append("default_transfer_split_fraction=");
+      builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
       builder.append("trust_height_of_footsteps=");
       builder.append(this.trust_height_of_footsteps_);      builder.append(", ");
       builder.append("are_footsteps_adjustable=");
