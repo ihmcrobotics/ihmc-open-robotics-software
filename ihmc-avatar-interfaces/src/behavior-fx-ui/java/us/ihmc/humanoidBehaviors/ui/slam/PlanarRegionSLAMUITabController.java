@@ -16,6 +16,7 @@ import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javaFXVisualizers.RandomColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
@@ -109,6 +110,7 @@ public class PlanarRegionSLAMUITabController extends Group
       });
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
+      livePlanarRegionsGraphic.setColorFunction(new RandomColorFunction()); // make incoming regions color always changing
       getChildren().add(livePlanarRegionsGraphic);
 
       mapGraphic = new PlanarRegionsGraphic(false);

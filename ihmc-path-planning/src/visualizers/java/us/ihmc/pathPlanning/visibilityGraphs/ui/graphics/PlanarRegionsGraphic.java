@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -22,11 +23,11 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 public class PlanarRegionsGraphic extends Group
 {
-   private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
-
    private volatile List<Node> regionNodes;
    private List<Node> lastNodes = null; // optimization
 
@@ -37,6 +38,8 @@ public class PlanarRegionsGraphic extends Group
    private boolean drawAreaText = false;
    private boolean drawBoundingBox = false;
    private boolean drawNormal;
+
+   private Function<Integer, Color> colorFunction = new IdMappedColorFunction();
 
    public PlanarRegionsGraphic()
    {
@@ -129,7 +132,7 @@ public class PlanarRegionsGraphic extends Group
       }
 
       MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-      regionMeshView.setMaterial(new PhongMaterial(getRegionColor(planarRegion.getRegionId())));
+      regionMeshView.setMaterial(new PhongMaterial(colorFunction.apply(planarRegion.getRegionId())));
 
       synchronized (regionMeshAddSync)
       {
@@ -164,36 +167,8 @@ public class PlanarRegionsGraphic extends Group
       this.drawNormal = drawNormal;
    }
 
-   public static Color getRegionColor(int regionId)
+   public void setColorFunction(Function<Integer, Color> colorFunction)
    {
-      return getRegionColor(regionId, 1.0);
-   }
-
-   public static Color getRegionColor(int regionId, double opacity)
-   {
-      java.awt.Color awtColor = colorPicker.getColor(regionId);
-      return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
-   }
-
-   /**
-    * Keeps a list N of good colors to render planar regions. Region i is given color i mod N
-    */
-   private static class PlanarRegionColorPicker
-   {
-      private final ArrayList<java.awt.Color> colors = new ArrayList<>();
-
-      PlanarRegionColorPicker()
-      {
-         colors.add(new java.awt.Color(104, 130, 219));
-         colors.add(new java.awt.Color(113, 168, 133));
-         colors.add(new java.awt.Color(196, 182, 90));
-         colors.add(new java.awt.Color(190, 89, 110));
-         colors.add(new java.awt.Color(155, 80, 190));
-      }
-
-      java.awt.Color getColor(int regionId)
-      {
-         return colors.get(Math.abs(regionId % colors.size()));
-      }
+      this.colorFunction = colorFunction;
    }
 }
