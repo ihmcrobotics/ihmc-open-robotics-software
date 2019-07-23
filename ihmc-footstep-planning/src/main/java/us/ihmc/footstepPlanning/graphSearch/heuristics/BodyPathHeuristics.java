@@ -41,20 +41,22 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
       double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
       double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
-      double pathCropAmount = distanceToPath - croppedDistanceToPath;
 
       double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
-      double remainingDistance = pathLength + pathCropAmount + pathViolationWeight * croppedDistanceToPath;
+      double remainingDistance = pathLength + distanceToPath - croppedDistanceToPath;;
+      double pathDistanceViolationCost = pathViolationWeight * croppedDistanceToPath;
 
-      double yawDifferenceFromPathYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw()));
-      double remainingYawToGoal =  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), closestPointOnPath.getYaw()));
+      double referenceYaw = closestPointOnPath.getYaw();
+      double yawDifferenceFromPathYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw));
+      double remainingYawToGoal =  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), referenceYaw));
+
       double croppedYawDifferenceFromPathYaw = Math.max(0.0, yawDifferenceFromPathYaw - deltaYawFromPathTolerance);
-      double yawCropAmount = yawDifferenceFromPathYaw - croppedYawDifferenceFromPathYaw;
 
-      double yawCost = remainingYawToGoal + yawCropAmount + pathViolationWeight * croppedYawDifferenceFromPathYaw;
+      double remainingYaw = remainingYawToGoal + yawDifferenceFromPathYaw - croppedYawDifferenceFromPathYaw;
+      double pathYawViolationCost = pathViolationWeight * croppedYawDifferenceFromPathYaw;
 
-      double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + parameters.getYawWeight() * yawCost + parameters.getCostPerStep() * minSteps;
+      double minSteps = remainingDistance / parameters.getMaximumStepReach() + Math.abs(yawDifferenceFromPathYaw + remainingYawToGoal) / (0.5 * parameters.getMaximumStepYaw());
+      return remainingDistance + pathDistanceViolationCost + pathYawViolationCost + parameters.getYawWeight() * remainingYaw + parameters.getCostPerStep() * minSteps;
    }
 
    public void setGoalAlpha(double alpha)
