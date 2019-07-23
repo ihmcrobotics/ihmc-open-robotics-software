@@ -119,7 +119,8 @@ public class PlanarRegionSLAM
       Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions,
                                                                                                                                   parameters.getMinimumNormalDotProduct());
 
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(normalSimilarityFiltered);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(parameters.getMinimumRegionOverlapDistance(),
+                                                                                                                                                    normalSimilarityFiltered);
       return matchesWithReferencePoints;
    }
 

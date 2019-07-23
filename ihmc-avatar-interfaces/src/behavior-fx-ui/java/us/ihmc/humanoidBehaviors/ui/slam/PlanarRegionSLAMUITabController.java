@@ -54,10 +54,13 @@ public class PlanarRegionSLAMUITabController extends Group
    @FXML private Label parameterLabel2;
    @FXML private Label parameterLabel3;
    @FXML private Label parameterLabel4;
+   @FXML private Label parameterLabel5;
+
    @FXML private Spinner<Integer> parameterSpinner1;
    @FXML private Spinner<Double> parameterSpinner2;
    @FXML private Spinner<Double> parameterSpinner3;
    @FXML private Spinner<Double> parameterSpinner4;
+   @FXML private Spinner<Double> parameterSpinner5;
 
    private List<RadioButton> datasetSelectionRadioButtons = new ArrayList<>();
 
@@ -90,16 +93,19 @@ public class PlanarRegionSLAMUITabController extends Group
       parameterLabel2.setText(PlanarRegionSLAMParameters.minimumNormalDotProduct.getTitleCasedName());
       parameterLabel3.setText(PlanarRegionSLAMParameters.dampedLeastSquaresLambda.getTitleCasedName());
       parameterLabel4.setText(PlanarRegionSLAMParameters.boundingBoxHeight.getTitleCasedName());
+      parameterLabel5.setText(PlanarRegionSLAMParameters.minimumRegionOverlapDistance.getTitleCasedName());
       Platform.runLater(() ->
       {
       parameterSpinner1.setValueFactory(
             new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterations), 1));
       parameterSpinner2.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.05));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.01));
       parameterSpinner3.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.dampedLeastSquaresLambda), 0.05));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.dampedLeastSquaresLambda), 0.1));
       parameterSpinner4.setValueFactory(
             new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.boundingBoxHeight), 0.005));
+      parameterSpinner5.setValueFactory(
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumRegionOverlapDistance), 0.01));
       });
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);

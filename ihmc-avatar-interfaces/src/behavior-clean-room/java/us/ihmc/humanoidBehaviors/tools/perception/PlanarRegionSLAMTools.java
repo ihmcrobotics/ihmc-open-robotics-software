@@ -203,7 +203,7 @@ public class PlanarRegionSLAMTools
       return normalFilteredMap;
    }
 
-   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance, Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
    {
       HashMap<PlanarRegion, PairList<PlanarRegion, Point2D>> normalFilteredMap = new HashMap<>();
       for (PlanarRegion mapRegion : matchesSoFar.keySet())
@@ -215,69 +215,17 @@ public class PlanarRegionSLAMTools
             RigidBodyTransform transformFromWorldToMap = PlanarRegionTools.getTransformToLocal(mapRegion);
             RigidBodyTransform transformFromNewDataToWorld = PlanarRegionTools.getTransformToWorld(newDataRegion);
 
-            BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getBoundingBox2DInLocal(newDataRegion);
-            Point3D newDataBoundingBoxMinPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMinPoint());
-            Point3D newDataBoundingBoxMaxPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMaxPoint());
+            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = computeNewDataRegionBoundingBoxProjectedToMapLocal(newDataRegion,
+                                                                                                                           transformFromWorldToMap,
+                                                                                                                           transformFromNewDataToWorld);
 
-            transformFromNewDataToWorld.transform(newDataBoundingBoxMinPoint);
-            transformFromNewDataToWorld.transform(newDataBoundingBoxMaxPoint);
-
-            transformFromWorldToMap.transform(newDataBoundingBoxMinPoint);
-            transformFromWorldToMap.transform(newDataBoundingBoxMaxPoint);
-
-            // If the planes are perfectly aligned, then the z coordinates will be zero.
-            double minX = Math.min(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
-            double minY = Math.min(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
-            double maxX = Math.max(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
-            double maxY = Math.max(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
-
-            Point2D newDataBoundingBoxMinPoint2D = new Point2D(minX, minY);
-            Point2D newDataBoundingBoxMaxPoint2D = new Point2D(maxX, maxY);
-
-            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = new BoundingBox2D(newDataBoundingBoxMinPoint2D, newDataBoundingBoxMaxPoint2D);
             BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getBoundingBox2DInLocal(mapRegion);
 
-            //TODO: Parameterize the epsilon...
-            boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -0.001);
+            //TODO: Test case for minimumRegionOverlapDistance.
+            boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -minimumRegionOverlapDistance);
             if (boundingBoxShadowsMapRegion)
             {
-               BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
-
-               if (intersection == null)
-               {
-                  LogTools.error("Woops. Should never get here!!");
-                  LogTools.error("mapBoundingBoxInMapLocal = " + mapBoundingBoxInMapLocal);
-                  LogTools.error("newDataRegionBoundingBoxProjectedToMapLocal = " + newDataRegionBoundingBoxProjectedToMapLocal);
-                  continue;
-               }
-
-               Point2DBasics centerPoint = new Point2D();
-               Point2DBasics minPoint = new Point2D();
-               Point2DBasics maxPoint = new Point2D();
-
-               intersection.getCenterPoint(centerPoint);
-               intersection.getMinPoint(minPoint);
-               intersection.getMaxPoint(maxPoint);
-
-               Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint, transformFromWorldToMap,
-                                                                                                       transformFromNewDataToWorld);
-               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld);
-               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld);
-               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-
-               Point2D otherCorner = new Point2D(minPoint.getX(), maxPoint.getY());
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap,
-                                                                                               transformFromNewDataToWorld);
-               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-
-               otherCorner = new Point2D(maxPoint.getX(), minPoint.getY());
-               newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner, transformFromWorldToMap,
-                                                                                               transformFromNewDataToWorld);
-               shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+               addCornerPointsOfBoundingBoxIntersectionToMatches(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal, newDataRegion, transformFromWorldToMap, transformFromNewDataToWorld, shadowMatches);
             }
          }
 
@@ -287,6 +235,77 @@ public class PlanarRegionSLAMTools
          }
       }
       return normalFilteredMap;
+   }
+
+   private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal, BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal, PlanarRegion newDataRegion, RigidBodyTransform transformFromWorldToMap, RigidBodyTransform transformFromNewDataToWorld, PairList<PlanarRegion, Point2D> shadowMatches)
+   {
+      BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+
+      if (intersection == null)
+      {
+         LogTools.error("Woops. Should never get here!!");
+         LogTools.error("mapBoundingBoxInMapLocal = " + mapBoundingBoxInMapLocal);
+         LogTools.error("newDataRegionBoundingBoxProjectedToMapLocal = " + newDataRegionBoundingBoxProjectedToMapLocal);
+         return;
+      }
+
+      Point2DBasics centerPoint = new Point2D();
+      Point2DBasics minPoint = new Point2D();
+      Point2DBasics maxPoint = new Point2D();
+
+      intersection.getCenterPoint(centerPoint);
+      intersection.getMinPoint(minPoint);
+      intersection.getMaxPoint(maxPoint);
+
+      Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint,
+                                                                                              transformFromWorldToMap,
+                                                                                              transformFromNewDataToWorld);
+      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+
+      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+
+      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld);
+      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+
+      Point2D otherCorner = new Point2D(minPoint.getX(), maxPoint.getY());
+      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner,
+                                                                                      transformFromWorldToMap,
+                                                                                      transformFromNewDataToWorld);
+      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+
+      otherCorner = new Point2D(maxPoint.getX(), minPoint.getY());
+      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner,
+                                                                                      transformFromWorldToMap,
+                                                                                      transformFromNewDataToWorld);
+      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+      
+   }
+
+   private static BoundingBox2D computeNewDataRegionBoundingBoxProjectedToMapLocal(PlanarRegion newDataRegion, RigidBodyTransform transformFromWorldToMap,
+                                                                                   RigidBodyTransform transformFromNewDataToWorld)
+   {
+      BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getBoundingBox2DInLocal(newDataRegion);
+      Point3D newDataBoundingBoxMinPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMinPoint());
+      Point3D newDataBoundingBoxMaxPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMaxPoint());
+
+      transformFromNewDataToWorld.transform(newDataBoundingBoxMinPoint);
+      transformFromNewDataToWorld.transform(newDataBoundingBoxMaxPoint);
+
+      transformFromWorldToMap.transform(newDataBoundingBoxMinPoint);
+      transformFromWorldToMap.transform(newDataBoundingBoxMaxPoint);
+
+      // If the planes are perfectly aligned, then the z coordinates will be zero.
+      double minX = Math.min(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
+      double minY = Math.min(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
+      double maxX = Math.max(newDataBoundingBoxMinPoint.getX(), newDataBoundingBoxMaxPoint.getX());
+      double maxY = Math.max(newDataBoundingBoxMinPoint.getY(), newDataBoundingBoxMaxPoint.getY());
+
+      Point2D newDataBoundingBoxMinPoint2D = new Point2D(minX, minY);
+      Point2D newDataBoundingBoxMaxPoint2D = new Point2D(maxX, maxY);
+
+      BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = new BoundingBox2D(newDataBoundingBoxMinPoint2D, newDataBoundingBoxMaxPoint2D);
+      return newDataRegionBoundingBoxProjectedToMapLocal;
    }
 
    private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransform transformFromWorldToMap,
