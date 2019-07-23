@@ -64,6 +64,10 @@ float64 swing_duration -1.0
 float64 transfer_duration -1.0
 # The time to delay this command on the controller side before being executed.
 float64 execution_delay_time 0.0
+# The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+# A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+# A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+float64 transfer_split_fraction -1.0
 
 # Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
 # effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
