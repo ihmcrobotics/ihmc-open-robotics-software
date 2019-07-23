@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.RealtimeRos2Subscription;
@@ -23,12 +22,13 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
+   public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
+
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
    public static final String INPUT_ROS_TOPIC_PREFIX = "/input";
 
-   // TODO Move these up into application classes; seems bad to define them centrally
-   public static final String HUMANOID_CONTROL_MODULE = "/humanoid_control";
+   public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
    public static final String QUADRUPED_CONTROL_MODULE = "/quadruped_control";
 
    public static final String FOOTSTEP_PLANNER_TOOLBOX = "/toolbox/footstep_plan";
@@ -305,6 +305,11 @@ public class ROS2Tools
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createPublisher(ros2Node, messageType, topicName);
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
+   {
+      return new IHMCROS2Publisher<>(ros2Node, messageType, robotName, identifier);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName)
