@@ -24,6 +24,7 @@ public class ROS2Tools
 {
    public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
    public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
+   public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
    public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
 
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
@@ -48,7 +49,7 @@ public class ROS2Tools
    public static final String REA_MODULE = REA.getModuleTopicQualifier();
    public static final String REA_CUSTOM_REGION_QUALIFIER = "/custom_region";
 
-   public static final String SREA_MODULE = "/srea";
+   public static final String STEREO_REA_MODULE = STEREO_REA.getModuleTopicQualifier();
 
    public enum ROS2TopicQualifier
    {
