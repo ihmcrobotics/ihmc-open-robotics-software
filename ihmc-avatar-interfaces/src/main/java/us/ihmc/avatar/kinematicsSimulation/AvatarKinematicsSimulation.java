@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
@@ -14,7 +13,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -76,25 +74,25 @@ public class AvatarKinematicsSimulation
       this.robotModel = robotModel;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, HighLevelHumanoidControllerFactory.ROS2_ID.getNodeName("kinematic"));
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.HUMANOID_CONTROLLER.getNodeName("kinematic"));
 
       robotConfigurationDataPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                 RobotConfigurationData.class,
                                                                 robotModel.getSimpleRobotName(),
-                                                                HighLevelHumanoidControllerFactory.ROS2_ID);
+                                                                ROS2Tools.HUMANOID_CONTROLLER);
       walkingStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                        WalkingStatusMessage.class,
                                                        robotModel.getSimpleRobotName(),
-                                                       HighLevelHumanoidControllerFactory.ROS2_ID);
+                                                       ROS2Tools.HUMANOID_CONTROLLER);
       footstepStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                         FootstepStatusMessage.class,
                                                         robotModel.getSimpleRobotName(),
-                                                        HighLevelHumanoidControllerFactory.ROS2_ID);
+                                                        ROS2Tools.HUMANOID_CONTROLLER);
 
       new ROS2Callback<>(ros2Node,
                          FootstepDataListMessage.class,
                          robotModel.getSimpleRobotName(),
-                         HighLevelHumanoidControllerFactory.ROS2_ID,
+                         ROS2Tools.HUMANOID_CONTROLLER,
                          this::acceptFootstepDataListMessage);
 
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);

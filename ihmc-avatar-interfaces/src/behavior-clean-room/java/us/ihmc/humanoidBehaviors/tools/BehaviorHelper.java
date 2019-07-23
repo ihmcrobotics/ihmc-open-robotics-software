@@ -8,7 +8,6 @@ import java.util.function.Function;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Input;
@@ -208,7 +207,7 @@ public class BehaviorHelper
 
    public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, robotModel.getSimpleRobotName(), HighLevelHumanoidControllerFactory.ROS2_ID, consumer);
+      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER, consumer);
    }
 
    public HighLevelControllerName getLatestControllerState()
