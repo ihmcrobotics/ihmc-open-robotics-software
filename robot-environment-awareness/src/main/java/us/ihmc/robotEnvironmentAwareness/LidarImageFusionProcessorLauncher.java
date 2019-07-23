@@ -3,10 +3,8 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionProcessorCommunicationModule;
@@ -23,8 +21,7 @@ public class LidarImageFusionProcessorLauncher extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("SREA_module", ROS2Tools.SREA_MODULE);
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2_ID.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.STEREO_REA.getNodeName());
       //Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_lidar_image_fusion_ui");
 
       messager = new SharedMemoryJavaFXMessager(LidarImageFusionAPI.API);
