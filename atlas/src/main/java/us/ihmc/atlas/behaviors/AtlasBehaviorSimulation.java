@@ -91,6 +91,7 @@ public class AtlasBehaviorSimulation
       avatarSimulationFactory.setCreateYoVariableServer(false);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      avatarSimulation.getSimulationConstructionSet().getGUI().getFrame().setSize(1350, 900);
 
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()
