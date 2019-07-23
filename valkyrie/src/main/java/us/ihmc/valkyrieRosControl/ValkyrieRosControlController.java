@@ -155,7 +155,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final double gravity = 9.80665;
 
    public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
-   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = HighLevelHumanoidControllerFactory.ROS2_ID.getNodeName("valkyrie");
+   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = ROS2Tools.HUMANOID_CONTROLLER.getNodeName("valkyrie");
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
