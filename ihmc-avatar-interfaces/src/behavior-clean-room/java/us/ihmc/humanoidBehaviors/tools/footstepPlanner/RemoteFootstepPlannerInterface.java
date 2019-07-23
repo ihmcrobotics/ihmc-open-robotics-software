@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -88,7 +87,7 @@ public class RemoteFootstepPlannerInterface
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
                          robotModel.getSimpleRobotName(),
-                         MultiStageFootstepPlanningModule.ROS2_ID,
+                         ROS2Tools.FOOTSTEP_PLANNER,
                          this::acceptFootstepPlannerResult);
    }
 
