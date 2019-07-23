@@ -23,6 +23,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 public class ROS2Tools
 {
    public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
+   public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
 
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
@@ -43,7 +44,8 @@ public class ROS2Tools
 
    public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
    public static final String BEHAVIOR_MODULE = "/behavior";
-   public static final String REA_MODULE = "/rea";
+   public static final String REA_MODULE = REA.getModuleTopicQualifier();
+   public static final String REA_CUSTOM_REGION_QUALIFIER = "/custom_region";
 
    public static final String SREA_MODULE = "/srea";
 
