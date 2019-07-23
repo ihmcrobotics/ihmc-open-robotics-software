@@ -26,6 +26,7 @@ public class ROS2Tools
    public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
    public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
    public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
+   public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
 
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
@@ -34,7 +35,7 @@ public class ROS2Tools
    public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
    public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
 
-   public static final String FOOTSTEP_PLANNER_TOOLBOX = "/toolbox/footstep_plan";
+   public static final String FOOTSTEP_PLANNER_TOOLBOX = FOOTSTEP_PLANNER.getModuleTopicQualifier();
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
