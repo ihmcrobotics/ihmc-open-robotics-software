@@ -37,6 +37,8 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private final BodyPathHeuristics heuristics;
    private final YoDouble planningHorizonLength;
 
+   private FootstepPlannerGoal highLevelGoal;
+
    public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParametersReadOnly parameters,
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
                                     BipedalFootstepPlannerListener... listeners)
@@ -99,6 +101,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      highLevelGoal = goal;
    }
 
    @Override
@@ -143,6 +146,11 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       FramePose3D footstepPlannerGoal = new FramePose3D();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
       footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+
+      if (alpha >= 1.0)
+      {
+         footstepPlannerGoal.setOrientation(highLevelGoal.getGoalPoseBetweenFeet().getOrientation());
+      }
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
