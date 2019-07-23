@@ -32,6 +32,10 @@ float64 default_transfer_duration -1.0
 # footstep list is finished. If the value is negative the default_transfer_duration will be used,
 # which in turn if not provided indicate the controller to use its own internal default value.
 float64 final_transfer_duration -1.0
+# The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+# A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+# A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+float64 default_transfer_split_fraction -1.0
 # If false the controller adjust each footstep height to be at the support sole height.
 bool trust_height_of_footsteps true
 # Contains information on whether the robot can automatically adjust its footsteps to retain balance.

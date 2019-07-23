@@ -123,6 +123,13 @@ module controller_msgs
          */
         double execution_delay_time;
         /**
+         * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+         * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+         * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+         */
+        @defaultValue(value=-1.0)
+        double transfer_split_fraction;
+        /**
          * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
          * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
          * different from the pitch of the foothold pose provided in this message.
