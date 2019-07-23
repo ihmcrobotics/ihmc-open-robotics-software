@@ -101,6 +101,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             */
    public double execution_delay_time_;
    /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double transfer_split_fraction_ = -1.0;
+   /**
             * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
             * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
             * different from the pitch of the foothold pose provided in this message.
@@ -155,6 +161,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       transfer_duration_ = other.transfer_duration_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
+      transfer_split_fraction_ = other.transfer_split_fraction_;
 
       touchdown_duration_ = other.touchdown_duration_;
 
@@ -370,6 +378,25 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public void setTransferSplitFraction(double transfer_split_fraction)
+   {
+      transfer_split_fraction_ = transfer_split_fraction;
+   }
+   /**
+            * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double getTransferSplitFraction()
+   {
+      return transfer_split_fraction_;
+   }
+
+   /**
             * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
             * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
             * different from the pitch of the foothold pose provided in this message.
@@ -468,6 +495,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_split_fraction_, other.transfer_split_fraction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.touchdown_duration_, other.touchdown_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.liftoff_duration_, other.liftoff_duration_, epsilon)) return false;
@@ -506,6 +535,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+
+      if(this.transfer_split_fraction_ != otherMyClass.transfer_split_fraction_) return false;
 
       if(this.touchdown_duration_ != otherMyClass.touchdown_duration_) return false;
 
@@ -549,6 +580,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.transfer_duration_);      builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);      builder.append(", ");
+      builder.append("transfer_split_fraction=");
+      builder.append(this.transfer_split_fraction_);      builder.append(", ");
       builder.append("touchdown_duration=");
       builder.append(this.touchdown_duration_);      builder.append(", ");
       builder.append("liftoff_duration=");

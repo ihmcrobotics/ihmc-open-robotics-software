@@ -37,6 +37,12 @@ float64 default_transfer_duration
 # Field default value -1.0
 float64 final_transfer_duration
 
+# The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+# A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+# A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+# Field default value -1.0
+float64 default_transfer_split_fraction
+
 # If false the controller adjust each footstep height to be at the support sole height.
 # Field default value True
 bool trust_height_of_footsteps
