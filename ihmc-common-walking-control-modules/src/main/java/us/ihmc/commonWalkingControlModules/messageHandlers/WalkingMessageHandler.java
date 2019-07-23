@@ -247,7 +247,7 @@ public class WalkingMessageHandler
          defaultSwingTime.set(commandDefaultSwingTime);
       }
       double commandDefaultTransferSplitFraction = command.getDefaultTransferSplitFraction();
-      if (!Double.isNaN(commandDefaultTransferSplitFraction) && commandDefaultTransferSplitFraction > 1.0e-2)
+      if (!Double.isNaN(commandDefaultTransferSplitFraction) && commandDefaultTransferSplitFraction > 0.0)
       {
          defaultTransferSplitFraction.set(commandDefaultTransferSplitFraction);
       }

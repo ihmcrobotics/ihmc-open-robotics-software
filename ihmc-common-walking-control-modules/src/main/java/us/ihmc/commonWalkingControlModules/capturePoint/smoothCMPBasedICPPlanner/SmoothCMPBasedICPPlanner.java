@@ -788,6 +788,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
       double swingDuration = timing.getSwingTime();
       double transferTime = timing.getTransferTime();
+      double transferDurationAlpha = footstep.getTransferSplitFraction();
 
       if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
          swingDuration = 1.0;
@@ -795,12 +796,15 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       if (!Double.isFinite(transferTime) || transferTime < 0.0)
          transferTime = 1.0;
 
+      if (!Double.isFinite(transferDurationAlpha) || transferDurationAlpha < 0.0)
+         transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
+
       swingDurations.get(footstepIndex).set(swingDuration);
       transferDurations.get(footstepIndex).set(transferTime);
 
       swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
-      transferDurationAlphas.get(footstepIndex).set(defaultTransferDurationAlpha.getDoubleValue());
       swingDurationShiftFractions.get(footstepIndex).set(defaultSwingDurationShiftFraction.getDoubleValue());
+      transferDurationAlphas.get(footstepIndex).set(transferDurationAlpha);
 
       finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
       finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
