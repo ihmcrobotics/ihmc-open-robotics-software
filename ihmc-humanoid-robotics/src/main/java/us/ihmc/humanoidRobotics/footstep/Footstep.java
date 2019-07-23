@@ -52,6 +52,7 @@ public class Footstep implements Settable<Footstep>
    private double swingTrajectoryBlendDuration = 0.0;
    private boolean trustHeight = true;
 
+   private double transferSplitFraction = Double.NaN;
    private boolean isAdjustable = false;
 
    private final FramePose3D tempPose = new FramePose3D();
@@ -118,6 +119,7 @@ public class Footstep implements Settable<Footstep>
       this.robotSide = other.robotSide;
       this.footstepType = other.footstepType;
       this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
+      this.transferSplitFraction = other.getTransferSplitFraction();
       this.trustHeight = other.trustHeight;
       this.isAdjustable = other.isAdjustable;
       this.scriptedFootstep = other.scriptedFootstep;
@@ -158,6 +160,7 @@ public class Footstep implements Settable<Footstep>
    {
       this.robotSide = command.getRobotSide();
       this.swingTrajectoryBlendDuration = command.getSwingTrajectoryBlendDuration();
+      this.transferSplitFraction = command.getTransferSplitFraction();
       this.trajectoryType = command.getTrajectoryType();
       this.swingHeight = command.getSwingHeight();
       this.isAdjustable = isAdjustable;
@@ -219,6 +222,7 @@ public class Footstep implements Settable<Footstep>
       customPositionWaypoints.clear();
       swingTrajectory.clear();
       swingTrajectoryBlendDuration = 0.0;
+      transferSplitFraction = Double.NaN;
       trustHeight = true;
       isAdjustable = false;
       scriptedFootstep = false;
@@ -273,6 +277,16 @@ public class Footstep implements Settable<Footstep>
    public double getSwingTrajectoryBlendDuration()
    {
       return swingTrajectoryBlendDuration;
+   }
+
+   public void setTransferSplitFraction(double transferSplitFraction)
+   {
+      this.transferSplitFraction = transferSplitFraction;
+   }
+
+   public double getTransferSplitFraction()
+   {
+      return transferSplitFraction;
    }
 
    public double getSwingHeight()
