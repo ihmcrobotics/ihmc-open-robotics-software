@@ -3,14 +3,13 @@ package us.ihmc.tools.property;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -230,49 +229,23 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return findSaveFileDirectory().resolve(saveFileName);
    }
 
+   /**
+    *  find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
+    *  or just save the file in the working directory
+    */
    private Path findSaveFileDirectory()
    {
-      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
-      // of just save the file in the working directory
+      Path defuzzedPath = WorkspacePathTools.handleWorkingDirectoryFuzziness(directoryNameToAssumePresent);
 
-      Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
-
-      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
-      boolean directoryFound = false;
-      for (Path path : absoluteWorkingDirectory)
+      if (defuzzedPath == null)
       {
-         reworkedPath = reworkedPath.resolve(path); // building up the path
-
-         if (path.toString().equals(directoryNameToAssumePresent))
-         {
-            directoryFound = true;
-            break;
-         }
+         return Paths.get(".").toAbsolutePath().normalize(); // current working directory
       }
 
-      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
-      {
-         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
-         directoryFound = true;
-      }
+      String packageWithDots = classForLoading.getPackage().toString();
+      String packageWithSlashes = packageWithDots.split(" ")[1].replaceAll("\\.", "/");
 
-      if (!directoryFound)
-      {
-         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
-                       directoryNameToAssumePresent,
-                       absoluteWorkingDirectory,
-                       reworkedPath);
-         return absoluteWorkingDirectory;
-      }
-
-      String s = classForLoading.getPackage().toString();
-      LogTools.debug(s);
-      String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
-      LogTools.debug(packagePath);
-
-      Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
-
-      Path finalPath = reworkedPath.resolve(subPath);
+      Path finalPath = defuzzedPath.resolve(subsequentPathToResourceFolder).resolve(packageWithSlashes);
 
       FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
