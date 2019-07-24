@@ -36,11 +36,11 @@ import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
 {
-   private static boolean visualize = false;
-
    @Test
    public void testSLAMWithThreeNiceWalls()
    {
+      boolean visualize = false;
+
       PlanarRegionsList map;
       PlanarRegionsList newData;
 
@@ -212,6 +212,8 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithRandomPolygonsAndSmallExactTransforms()
    {
+      boolean visualize = false;
+
       PlanarRegionsList map = new PlanarRegionsList();
       PlanarRegionsList newData = new PlanarRegionsList();
 
@@ -288,12 +290,13 @@ class PlanarRegionSLAMTest
       assertEquals(numberInMap + numberInNewData - numberInBoth, perfectCombinedMap.getNumberOfPlanarRegions());
       //      assertEquals(perfectCombinedMap.getNumberOfPlanarRegions(), mergedMap.getNumberOfPlanarRegions());
 
+      assertPlanarRegionsListAreEquivalentThroughPointProjections(random, perfectCombinedMap, mergedMap);
+      
       if (visualize)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
       }
-      assertPlanarRegionsListAreEquivalentThroughPointProjections(random, perfectCombinedMap, mergedMap);
    }
 
    private void assertPlanarRegionsListAreEquivalentThroughPointProjections(Random random, PlanarRegionsList regionsOne, PlanarRegionsList regionsTwo)

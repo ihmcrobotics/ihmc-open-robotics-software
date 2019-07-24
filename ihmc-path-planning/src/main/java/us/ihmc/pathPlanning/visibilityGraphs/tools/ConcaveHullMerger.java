@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -64,6 +65,10 @@ public class ConcaveHullMerger
       }
 
       ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(regionOne.getConcaveHull(), concaveHullTwoVerticesTransformed, listener);
+      if (mergedConcaveHull == null)
+         return null;
+
+      //TODO: What should this be set to? Should we make it be a parameter?
       double depthThreshold = 0.001;
       ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<ConvexPolygon2D>();
 
@@ -96,6 +101,11 @@ public class ConcaveHullMerger
    public static ArrayList<Point2D> mergeConcaveHulls(Point2D[] hullOne, Point2D[] hullTwo, ConcaveHullMergerListener listener)
    {
       hullTwo = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullOne, hullTwo);
+
+      BoundingBox2D hullOneBoundingBox = createBoundingBox(hullOne);
+      BoundingBox2D hullTwoBoundingBox = createBoundingBox(hullTwo);
+      
+      BoundingBox2D unionOfOriginalBoundingBoxes = BoundingBox2D.union(hullOneBoundingBox, hullTwoBoundingBox);
 
       if (listener != null)
       {
@@ -203,7 +213,60 @@ public class ConcaveHullMerger
          LogTools.error("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!");
       }
 
+      BoundingBox2D finalBoundingBox = createBoundingBox(mergedVertices);
+      if (boundingBoxShrunk(unionOfOriginalBoundingBoxes, finalBoundingBox))
+         return null;
+
       return mergedVertices;
+   }
+
+   private static boolean boundingBoxShrunk(BoundingBox2D unionOfOriginalBoundingBoxes, BoundingBox2D finalBoundingBox)
+   {
+//      return false;
+      
+      if (unionOfOriginalBoundingBoxes.getMinX() < finalBoundingBox.getMinX()) return true;
+      if (unionOfOriginalBoundingBoxes.getMinY() < finalBoundingBox.getMinY()) return true;
+      
+      if (unionOfOriginalBoundingBoxes.getMaxX() > finalBoundingBox.getMaxX()) return true;
+      if (unionOfOriginalBoundingBoxes.getMaxY() > finalBoundingBox.getMaxY()) return true;
+      return false;
+   }
+
+   //TODO: This should be in a geometry tool somewhere or a constructor for BoundingBox2D.
+   private static BoundingBox2D createBoundingBox(Point2D[] pointList)
+   {
+      double minX = Double.POSITIVE_INFINITY;
+      double minY = Double.POSITIVE_INFINITY;
+      double maxX = Double.NEGATIVE_INFINITY;
+      double maxY = Double.NEGATIVE_INFINITY;
+      
+      for (Point2D point : pointList)
+      {
+         minX = Math.min(minX, point.getX());
+         minY = Math.min(minY, point.getY());
+         maxX = Math.max(maxX, point.getX());
+         maxY = Math.max(maxY, point.getY());
+      }
+      
+      return new BoundingBox2D(minX, minY, maxX, maxY);
+   }
+
+   private static BoundingBox2D createBoundingBox(Iterable<Point2D> pointList)
+   {
+      double minX = Double.POSITIVE_INFINITY;
+      double minY = Double.POSITIVE_INFINITY;
+      double maxX = Double.NEGATIVE_INFINITY;
+      double maxY = Double.NEGATIVE_INFINITY;
+      
+      for (Point2D point : pointList)
+      {
+         minX = Math.min(minX, point.getX());
+         minY = Math.min(minY, point.getY());
+         maxX = Math.max(maxX, point.getX());
+         maxY = Math.max(maxY, point.getY());
+      }
+      
+      return new BoundingBox2D(minX, minY, maxX, maxY);
    }
 
    /**
