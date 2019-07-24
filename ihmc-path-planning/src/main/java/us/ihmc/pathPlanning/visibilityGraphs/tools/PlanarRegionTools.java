@@ -18,7 +18,6 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -907,7 +906,7 @@ public class PlanarRegionTools
       return point3D;
    }
 
-   public static BoundingBox3D getBoundingBox3DInLocal(PlanarRegion planarRegion)
+   public static BoundingBox3D getLocalBoundingBox3DInLocal(PlanarRegion planarRegion)
    {
       BoundingBox3D boundingBox3DInLocal = new BoundingBox3D();
 
@@ -922,7 +921,7 @@ public class PlanarRegionTools
       return boundingBox3DInLocal;
    }
 
-   public static BoundingBox2D getBoundingBox2DInLocal(PlanarRegion planarRegion)
+   public static BoundingBox2D getLocalBoundingBox2DInLocal(PlanarRegion planarRegion)
    {
       BoundingBox2D boundingBox2DInLocal = new BoundingBox2D();
 
@@ -953,7 +952,7 @@ public class PlanarRegionTools
 
    public static Box3D getLocalBoundingBox3DInWorld(PlanarRegion planarRegion, double height)
    {
-      BoundingBox3D boundingBox3DInLocal = getBoundingBox3DInLocal(planarRegion);
+      BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
       Box3D box = GeometryTools.convertBoundingBoxToBox(boundingBox3DInLocal);
