@@ -647,14 +647,18 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void setFinalTransferDuration(double duration)
    {
-      if(duration < Epsilons.ONE_HUNDREDTH)
+      if (duration < Epsilons.ONE_HUNDREDTH)
          return;
+
       defaultFinalTransferDuration.set(duration);
    }
 
    @Override
    public void setFinalTransferDurationAlpha(double durationAlpha)
    {
+      if (Double.isNaN(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0))
+         return;
+
       finalTransferDurationAlpha.set(durationAlpha);
    }
 
@@ -809,13 +813,13 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       double swingDurationAlpha = shiftFractions.getSwingSplitFraction();
       double transferDurationAlpha = shiftFractions.getTransferSplitFraction();
 
-      if (!Double.isFinite(swingDurationAlpha) || swingDurationAlpha < 0.0)
+      if (!Double.isFinite(swingDurationAlpha) || !MathTools.intervalContains(swingDurationAlpha, 0.0, 1.0, false, false))
          swingDurationAlpha = defaultSwingDurationAlpha.getDoubleValue();
 
-      if (!Double.isFinite(swingShiftFraction) || swingShiftFraction < 0.0)
+      if (!Double.isFinite(swingShiftFraction) || !MathTools.intervalContains(swingShiftFraction, 0.0, 1.0, false, false))
          swingShiftFraction = defaultSwingDurationShiftFraction.getDoubleValue();
 
-      if (!Double.isFinite(transferDurationAlpha) || transferDurationAlpha < 0.0)
+      if (!Double.isFinite(transferDurationAlpha) || !MathTools.intervalContains(transferDurationAlpha, 0.0, 1.0, false, false))
          transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
 
       swingDurationAlphas.get(footstepIndex).set(swingDurationAlpha);
