@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -25,8 +26,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class ExploreAreaBehaviorUIController extends Group
 {
-   @FXML
-   private CheckBox exploreAreaCheckBox;
+   @FXML private CheckBox exploreAreaCheckBox;
+   @FXML private TextField stateTextField;
 
    //   @FXML
    //   private Button singleSupportButton;
@@ -55,12 +56,12 @@ public class ExploreAreaBehaviorUIController extends Group
                                              result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
 
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState, state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
       planarRegionsGraphic = new PlanarRegionsGraphic();
    }
 
-   @FXML
-   public void exploreArea()
+   @FXML public void exploreArea()
    {
       behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }

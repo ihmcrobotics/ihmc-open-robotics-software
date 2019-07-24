@@ -64,10 +64,11 @@ public class ExploreAreaBehavior
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
-   private final List<Point3D> pointsObservedFrom = new ArrayList<Point3D>();
+   private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
    private final double turnChestTrajectoryDuration = 1.0;
-   private final double perceiveDuration = 14.0;
+   private final double turnTrajectoryWaitTimeMulitplier = 1.0;
+   private final double perceiveDuration = 0.0;
 
    private int chestYawForLookingAroundIndex = 0;
 
@@ -148,6 +149,11 @@ public class ExploreAreaBehavior
       factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
       factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
       factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
+      factory.getFactory().addStateChangedListener((from, to) ->
+      {
+         messager.submitMessage(ExploreAreaBehaviorAPI.CurrentState, to);
+         LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+      });
 
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(ExploreAreaBehaviorState.Stop);
@@ -194,7 +200,7 @@ public class ExploreAreaBehavior
 
    private boolean readyToTransitionFromLookAroundToPerceive(double timeInState)
    {
-      return (timeInState > 9.0 * turnChestTrajectoryDuration);
+      return (timeInState > turnTrajectoryWaitTimeMulitplier * turnChestTrajectoryDuration);
    }
 
    private void onPerceiveStateEntry()
@@ -653,20 +659,24 @@ public class ExploreAreaBehavior
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       private static final Category RootCategory = apiFactory.createRootCategory("ExploreAreaBehavior");
       private static final CategoryTheme ExploreAreaTheme = apiFactory.createCategoryTheme("ExploreArea");
-      private static final Category ExploreAreaCategory = RootCategory.child(ExploreAreaTheme);
 
-      public static final Topic<Boolean> ExploreArea = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ExploreArea"));
-      public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ConcatenatedMap"));
-      public static final Topic<Point3D> ObservationPosition = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ObservationPosition"));
-      public static final Topic<Boolean> DrawMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("DrawMap"));
-      public static final Topic<Boolean> ClearPlanarRegions = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("ClearPlanarRegions"));
-      public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("AddPlanarRegionToMap"));
-      public static final Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = ExploreAreaCategory.topic(apiFactory.createTypedTopicTheme("AddPolygonToPlanarRegion"));
+      public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
+      public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
+      public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
+      public static final Topic<Boolean> DrawMap = topic("DrawMap");
+      public static final Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");
+      public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");
+      public static final Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = topic("AddPolygonToPlanarRegion");
+      public static final Topic<ExploreAreaBehaviorState> CurrentState = topic("CurrentState");
+
+      private static final <T> Topic<T> topic(String name)
+      {
+         return RootCategory.child(ExploreAreaTheme).topic(apiFactory.createTypedTopicTheme(name));
+      }
 
       public static final MessagerAPI create()
       {
          return apiFactory.getAPIAndCloseFactory();
       }
    }
-
 }
