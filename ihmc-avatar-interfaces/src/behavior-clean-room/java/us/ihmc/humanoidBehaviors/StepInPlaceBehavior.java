@@ -28,7 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 
-public class StepInPlaceBehavior
+public class StepInPlaceBehavior implements BehaviorInterface
 {
    private final BehaviorHelper behaviorHelper;
    private final AtomicReference<Boolean> enable;
@@ -50,6 +50,12 @@ public class StepInPlaceBehavior
       messager.registerTopicListener(API.Abort, this::doOnAbort);
       
       behaviorHelper.startScheduledThread(getClass().getSimpleName(), this::stepInPlace, 1, TimeUnit.SECONDS);
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
    }
 
    private void doOnAbort(boolean abort)

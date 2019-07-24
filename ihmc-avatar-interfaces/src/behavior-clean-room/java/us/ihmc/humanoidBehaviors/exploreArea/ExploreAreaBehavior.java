@@ -33,6 +33,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
@@ -60,7 +61,7 @@ import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.tools.thread.TypedNotification;
 
-public class ExploreAreaBehavior
+public class ExploreAreaBehavior implements BehaviorInterface
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
@@ -161,6 +162,12 @@ public class ExploreAreaBehavior
       ExceptionHandlingThreadScheduler exploreAreaThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
                                                                                                 DefaultExceptionHandler.PRINT_STACKTRACE, 5);
       exploreAreaThread.schedule(this::runExploreAreaThread, 5, TimeUnit.MILLISECONDS);
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
    }
 
    private boolean noLongerExploring(double timeInState)
