@@ -62,6 +62,7 @@ public class TransferToFlamingoStanceState extends TransferState
       double swingTime = Double.POSITIVE_INFINITY;
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
 
       double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
@@ -71,6 +72,7 @@ public class TransferToFlamingoStanceState extends TransferState
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming, footstepShiftFractions);
       balanceManager.setICPPlanTransferToSide(transferToSide);
       balanceManager.initializeICPPlanForTransfer(swingTime, initialTransferTime, finalTransferTime);

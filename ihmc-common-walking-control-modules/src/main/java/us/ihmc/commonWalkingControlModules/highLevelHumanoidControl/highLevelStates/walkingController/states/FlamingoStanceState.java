@@ -139,6 +139,8 @@ public class FlamingoStanceState extends SingleSupportState
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
       double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
@@ -149,6 +151,8 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
       balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
@@ -199,6 +203,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
       double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
       double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
@@ -207,6 +212,7 @@ public class FlamingoStanceState extends SingleSupportState
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
       balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);

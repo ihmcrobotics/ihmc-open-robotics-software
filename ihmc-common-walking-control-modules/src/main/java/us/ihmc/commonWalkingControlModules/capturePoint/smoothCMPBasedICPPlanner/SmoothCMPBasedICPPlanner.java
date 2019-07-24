@@ -669,11 +669,21 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void setFinalTransferDurationAlpha(double durationAlpha)
    {
-      if (Double.isNaN(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0))
+      if (!Double.isFinite(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0, false, false))
          return;
 
       finalTransferDurationAlpha.set(durationAlpha);
    }
+
+   @Override
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0))
+         return;
+
+      finalTransferWeightDistribution.set(weightDistribution);
+   }
+
 
    @Override
    public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
