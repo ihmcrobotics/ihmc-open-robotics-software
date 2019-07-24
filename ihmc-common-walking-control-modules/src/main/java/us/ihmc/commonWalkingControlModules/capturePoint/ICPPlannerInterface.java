@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -29,7 +30,7 @@ public interface ICPPlannerInterface
     * <p>
     * This is required before initializing the planner for a single support phase.
     * </p>
-    * 
+    *
     * @param robotSide the side of the support leg.
     */
    void setSupportLeg(RobotSide robotSide);
@@ -39,7 +40,7 @@ public interface ICPPlannerInterface
     * <p>
     * This is required before initializing the planner for a transfer phase.
     * </p>
-    * 
+    *
     * @param robotSide the side towards which the robot is about to transfer.
     */
    void setTransferToSide(RobotSide robotSide);
@@ -52,7 +53,7 @@ public interface ICPPlannerInterface
     * <p>
     * This is required before initializing the planner for a transfer phase.
     * </p>
-    * 
+    *
     * @param robotSide the side from which the robot is about to transfer.
     */
    void setTransferFromSide(RobotSide robotSide);
@@ -66,11 +67,11 @@ public interface ICPPlannerInterface
     * The reference to {@code footstep} is saved internally. The active ICP plan can be modified by
     * updating a footstep and then calling the method {@link #updateCurrentPlan()}.
     * </p>
-    * 
+    *
     * @param footstep the new footstep to be queued to the current list of footsteps. Not modified.
     * @param timing the timings to use when performing the footstep. Not modified.
     */
-   void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
+   void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions);
 
    /**
     * Prepares the planner to hold the given ICP position {@code icpPositionToHold} during the
@@ -79,7 +80,7 @@ public interface ICPPlannerInterface
     * This is usually useful for dealing with unexpected switch to double support where centering
     * the ICP in the support polygon would be undesirable.
     * </p>
-    * 
+    *
     * @param icpPositionToHold the position at which the ICP will be held during the next double
     *           support phase. Not modified.
     */
@@ -96,7 +97,7 @@ public interface ICPPlannerInterface
     * Call {@link #setFinalTransferDuration(double)} beforehand to change the time taken to
     * re-center the ICP.
     * </p>
-    * 
+    *
     * @param initialTime typically refers to the current controller time. Marks the initial phase
     *           time for the planner.
     */
@@ -109,7 +110,7 @@ public interface ICPPlannerInterface
     * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the transfer side has been
     * registered using {@link #setTransferToSide(RobotSide)} before calling this method.
     * </p>
-    * 
+    *
     * @param initialTime typically refers to the current controller time. Marks the initial phase
     *           time for the planner.
     */
@@ -133,7 +134,7 @@ public interface ICPPlannerInterface
     * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the support side has been
     * registered using {@link #setSupportLeg(RobotSide)} before calling this method.
     * </p>
-    * 
+    *
     * @param initialTime typically refers to the current controller time. Marks the initial phase
     *           time for the planner.
     */
@@ -170,7 +171,7 @@ public interface ICPPlannerInterface
     * Note this method is to be used when in single support and assumes that the internal state of
     * the planner is up-to-date, i.e. {@link #compute(double)} has been called in the current
     * control tick.
-    * 
+    *
     * @param actualCapturePointPosition the current position of the measured ICP. Not modified.
     * @return the estimated time remaining before the capture point reaches its desired position at
     *         the end of this state.
@@ -185,7 +186,7 @@ public interface ICPPlannerInterface
     * <p>
     * The ICP planner has to be updated before accessing its outputs.
     * </p>
-    * 
+    *
     * @param time the current controller time.
     */
    void compute(double time);
@@ -196,7 +197,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
    void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack);
@@ -207,7 +208,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
    void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack);
@@ -218,7 +219,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
    void getDesiredCapturePointPosition(YoFramePoint3D desiredCapturePointPositionToPack);
@@ -251,7 +252,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
    void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack);
@@ -262,7 +263,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
    void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack);
@@ -273,7 +274,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
    void getDesiredCapturePointVelocity(YoFrameVector3D desiredCapturePointVelocityToPack);
@@ -295,7 +296,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
    void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack);
@@ -306,7 +307,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
    void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack);
@@ -317,7 +318,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
    void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack);
@@ -328,7 +329,7 @@ public interface ICPPlannerInterface
     * The ICP planner has to be updated every control tick using the method
     * {@link #compute(double)}.
     * </p>
-    * 
+    *
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
    void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack);
@@ -379,21 +380,21 @@ public interface ICPPlannerInterface
 
    /**
     * Gets the time relative to the beginning of the current state.
-    * 
+    *
     * @return the time spent in the current state.
     */
    double getTimeInCurrentState();
 
    /**
     * Gets the time remaining before the end of the current state.
-    * 
+    *
     * @return the time remaining.
     */
    double getTimeInCurrentStateRemaining();
 
    /**
     * Gets the current state overall duration.
-    * 
+    *
     * @return the current state duration.
     */
    double getCurrentStateDuration();
@@ -411,7 +412,7 @@ public interface ICPPlannerInterface
     * <p>
     * This method mostly affects {@link #initializeForStanding(double)}.
     * </p>
-    * 
+    *
     * @param duration
     */
    void setFinalTransferDuration(double duration);
@@ -452,21 +453,21 @@ public interface ICPPlannerInterface
     * {@code omega0 = Math.sqrt(g / z0)}, where {@code g} is equal to the magnitude of the gravity,
     * and {@code z0} is the constant center of mass height of the robot with respect to is feet.
     * </p>
-    * 
+    *
     * @param omega0 the robot's natural frequency.
     */
    void setOmega0(double omega0);
 
    /**
     * Returns whether the ICP planner currently assumes to that the robot is in double support.
-    * 
+    *
     * @return whether the ICP plan is in double support state or not.
     */
    boolean isInDoubleSupport();
 
    /**
     * Returns whether the ICP planner currently assumes to that the robot is standing.
-    * 
+    *
     * @return whether the ICP plan is in standing state or not.
     */
    boolean isInStanding();
@@ -474,21 +475,21 @@ public interface ICPPlannerInterface
    /**
     * Returns whether the ICP planner currently assumes to that the robot is performing the first
     * transfer of a walking sequence, i.e. just left standing state.
-    * 
+    *
     * @return whether the ICP plan is in initial transfer state or not.
     */
    boolean isInInitialTransfer();
 
    /**
     * Retrieves the desired ICP position at the end of the current state.
-    * 
+    *
     * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
     */
    void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack);
 
    /**
     * Retrieves the desired ICP position at the end of the current state.
-    * 
+    *
     * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
     */
    void getFinalDesiredCapturePointPosition(YoFramePoint2D finalDesiredCapturePointPositionToPack);
@@ -506,14 +507,14 @@ public interface ICPPlannerInterface
     * This is typically useful to estimate where the robot will put its center of pressure at the
     * end of single support.
     * </p>
-    * 
+    *
     * @param exitCMPToPack the next exit CMP position. Modified.
     */
    void getNextExitCMP(FramePoint3D exitCMPToPack);
 
    /**
     * Tests if the ICP planner is done with the current state.
-    * 
+    *
     * @return {@code true} if the plan for the current state is done, returns {@code false}
     *         otherwise.
     */
@@ -522,7 +523,7 @@ public interface ICPPlannerInterface
    /**
     * Tests the current state in the ICP plan results in having the desired CMP located at the exit
     * CMP.
-    * 
+    *
     * @return {@code true} if the current CMP is located on the exit CMP, returns {@code false}
     *         otherwise.
     */

@@ -394,10 +394,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
       double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultTransferSplitFraction, feet,
-                                                                              statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction, feet, statusMessageOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);

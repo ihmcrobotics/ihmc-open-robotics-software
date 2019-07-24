@@ -39,6 +39,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
@@ -111,6 +112,12 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    protected final YoDouble defaultSwingDurationAlpha = new YoDouble(namePrefix + "DefaultSwingDurationAlpha",
                                                                    "Repartition of the swing duration around the exit corner point.", registry);
    protected final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
+
+
+
+   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+   private final YoDouble defaultSwingDurationShiftFraction;
+
 
    /**
     * Repartition of the transfer duration around the entry corner point:
@@ -201,8 +208,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
    private final AngularMomentumTrajectoryMultiplexer angularMomentumTrajectoryGenerator;
 
-   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
-   private final YoDouble defaultSwingDurationShiftFraction;
 
    private final YoInteger numberOfUpcomingFootsteps;
    private final RecyclingArrayList<FootstepData> upcomingFootstepsData;
@@ -761,7 +766,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
       if (footstep == null)
       {
@@ -788,7 +793,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
       double swingDuration = timing.getSwingTime();
       double transferTime = timing.getTransferTime();
-      double transferDurationAlpha = footstep.getTransferSplitFraction();
 
       if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
          swingDuration = 1.0;
@@ -796,17 +800,28 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       if (!Double.isFinite(transferTime) || transferTime < 0.0)
          transferTime = 1.0;
 
-      if (!Double.isFinite(transferDurationAlpha) || transferDurationAlpha < 0.0)
-         transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
-
       swingDurations.get(footstepIndex).set(swingDuration);
       transferDurations.get(footstepIndex).set(transferTime);
 
-      swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
-      swingDurationShiftFractions.get(footstepIndex).set(defaultSwingDurationShiftFraction.getDoubleValue());
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+
+      double swingShiftFraction = shiftFractions.getSwingDurationShiftFraction();
+      double swingDurationAlpha = shiftFractions.getSwingSplitFraction();
+      double transferDurationAlpha = shiftFractions.getTransferSplitFraction();
+
+      if (!Double.isFinite(swingDurationAlpha) || swingDurationAlpha < 0.0)
+         swingDurationAlpha = defaultSwingDurationAlpha.getDoubleValue();
+
+      if (!Double.isFinite(swingShiftFraction) || swingShiftFraction < 0.0)
+         swingShiftFraction = defaultSwingDurationShiftFraction.getDoubleValue();
+
+      if (!Double.isFinite(transferDurationAlpha) || transferDurationAlpha < 0.0)
+         transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
+
+      swingDurationAlphas.get(footstepIndex).set(swingDurationAlpha);
+      swingDurationShiftFractions.get(footstepIndex).set(swingShiftFraction);
       transferDurationAlphas.get(footstepIndex).set(transferDurationAlpha);
 
-      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
       finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
 
