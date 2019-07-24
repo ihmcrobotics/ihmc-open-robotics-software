@@ -54,12 +54,11 @@ public class PlanarRegionSLAM
       return result;
    }
 
-   private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
-                                                                                      PlanarRegionSLAMParameters parameters)
+   private static PlanarRegionsList
+   generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData, PlanarRegionSLAMParameters parameters)
    {
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
-                                                                                                                                        transformedNewData,
-                                                                                                                                        parameters);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints
+            = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData, parameters);
 
       PlanarRegionsList mergedMap = new PlanarRegionsList();
 
@@ -74,18 +73,18 @@ public class PlanarRegionSLAM
          {
             for (ImmutablePair<PlanarRegion, Point2D> matchingRegion : matchingRegions)
             {
-               PlanarRegion newRegion = matchingRegion.getLeft();
-               if (newRegionsConsidered.contains(newRegion))
+               PlanarRegion newRegionCopy = matchingRegion.getLeft().copy();
+               if (newRegionsConsidered.contains(newRegionCopy))
                {
                   continue;
                }
-               newRegionsConsidered.add(newRegion);
+               newRegionsConsidered.add(newRegionCopy);
 
-               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion);
+               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegionCopy);
             }
          }
 
-         mergedMap.addPlanarRegion(mapPlanarRegion.copy());
+         mergedMap.addPlanarRegion(mapPlanarRegion);
       }
 
       for (PlanarRegion newRegion : transformedNewData.getPlanarRegionsAsList())
