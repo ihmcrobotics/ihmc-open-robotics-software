@@ -368,6 +368,13 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      icpPlanner.setFinalTransferWeightDistribution(weightDistribution);
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setTransferDurationAlpha(int stepNubmer, double transferDurationAlpha)
    {
       icpPlanner.setTransferDurationAlpha(stepNubmer, transferDurationAlpha);
