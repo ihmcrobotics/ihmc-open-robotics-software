@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -70,7 +71,7 @@ class PlanarRegionSLAMTest
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
       }
-      
+
       // Small translation transform with all six walls.
       RigidBodyTransform smallTranslationTransform = new RigidBodyTransform();
       double delta = 0.05;
@@ -278,11 +279,12 @@ class PlanarRegionSLAMTest
       }
 
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      parameters.setIterations(3);
-      parameters.setBoundingBoxHeight(0.1);
-      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setIterations(6);
+      parameters.setBoundingBoxHeight(0.2);
+      parameters.setDampedLeastSquaresLambda(0.1);
 
-      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
+      ConcaveHullMergerListener visualizer = (visualize ? new ConcaveHullMergerListener() : null);
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters, visualizer);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
       RigidBodyTransform transformResult = slamResult.getTransformFromIncomingToMap();
 
@@ -291,7 +293,7 @@ class PlanarRegionSLAMTest
       //      assertEquals(perfectCombinedMap.getNumberOfPlanarRegions(), mergedMap.getNumberOfPlanarRegions());
 
       assertPlanarRegionsListAreEquivalentThroughPointProjections(random, perfectCombinedMap, mergedMap);
-      
+
       if (visualize)
       {
          visualizePlanarRegions(mergedMap);
@@ -321,8 +323,13 @@ class PlanarRegionSLAMTest
 
    private Point3D randomPointInsideBoundingBox(Random random, BoundingBox3D boundingBox)
    {
-      return EuclidCoreRandomTools.nextPoint3D(random, boundingBox.getMinX(), boundingBox.getMaxX(), boundingBox.getMinY(), boundingBox.getMaxY(),
-                                               boundingBox.getMinZ(), boundingBox.getMaxZ());
+      return EuclidCoreRandomTools.nextPoint3D(random,
+                                               boundingBox.getMinX(),
+                                               boundingBox.getMaxX(),
+                                               boundingBox.getMinY(),
+                                               boundingBox.getMaxY(),
+                                               boundingBox.getMinZ(),
+                                               boundingBox.getMaxZ());
    }
 
    private static BoundingBox3D computePlanarRegionsListBoundingBox3D(PlanarRegionsList planarRegionsList)
