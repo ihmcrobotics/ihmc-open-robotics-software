@@ -12,20 +12,26 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
+
+import java.nio.file.Path;
 
 /**
  * Runs self contained behavior demo.
@@ -106,9 +112,26 @@ public class AtlasBehaviorUIDemo extends Application
 
    private PlanarRegionsList createPlanarRegions()
    {
-      //      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
-      //      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
-      return PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter();
+//      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
+//      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
+//      return PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter();
+      return slamDataset();
+   }
+
+   private PlanarRegionsList slamDataset()
+   {
+      PlanarRegionsList map = PlanarRegionsList.flatGround(10.0);
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion")).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted")).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion")).getMergedMap();
+      return map;
+   }
+
+   private PlanarRegionsList loadDataSet(String dataSetName)
+   {
+      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
+      return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 
    @Override
