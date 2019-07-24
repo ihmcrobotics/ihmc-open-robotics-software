@@ -340,8 +340,7 @@ public class PlanarRegionSLAMTools
       newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
       newDataReferencePoint.applyInverseTransform(transformFromNewDataToWorld);
 
-      Point2D newDataReferencePointInNewDataLocal = new Point2D(newDataReferencePoint.getX(), newDataReferencePoint.getY());
-      return newDataReferencePointInNewDataLocal;
+      return new Point2D(newDataReferencePoint);
    }
 
    public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData,
