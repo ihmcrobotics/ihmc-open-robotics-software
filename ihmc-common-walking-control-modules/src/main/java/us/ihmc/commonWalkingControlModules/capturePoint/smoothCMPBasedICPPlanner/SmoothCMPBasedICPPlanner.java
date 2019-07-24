@@ -134,6 +134,9 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    protected final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
 
+   private final YoDouble defaultTransferWeightDistribution = new YoDouble(namePrefix + "DefaultWeightDistribution", registry);
+   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
+   private final YoDouble finalTransferWeightDistribution = new YoDouble(namePrefix + "FinalTransferWeightDistribution", registry);
 
    /** Time at which the current state was initialized. */
    protected final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
@@ -281,6 +284,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                     "Repartition of the transfer duration around the entry corner point.", registry);
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);
+
+         YoDouble weightDistribution = new YoDouble(namePrefix + "TransferWeightDistribution" + i, registry);
+         weightDistribution.setToNaN();
+         transferWeightDistributions.add(weightDistribution);
       }
       YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + maxNumberOfFootstepsToConsider, registry);
       YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + maxNumberOfFootstepsToConsider,
@@ -310,9 +317,15 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          icpPhaseExitCornerPoints.add(new YoMutableFramePoint3D(namePrefix + "ExitCornerPoints" + i, "", registry));
       }
 
+      defaultTransferWeightDistribution.set(0.5);
+      finalTransferWeightDistribution.set(0.5);
+
+
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
                                                                   numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
-                                                                  swingDurationShiftFractions, transferDurationAlphas, debug, numberOfUpcomingFootsteps,
+                                                                  swingDurationShiftFractions, transferDurationAlphas, transferWeightDistributions,
+                                                                  finalTransferWeightDistribution,
+                                                                  debug, numberOfUpcomingFootsteps,
                                                                   upcomingFootstepsData, soleZUpFrames, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
@@ -827,6 +840,12 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.get(footstepIndex).set(transferDurationAlpha);
 
       finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
+
+      double weightDistribution = shiftFractions.getTransferWeightDistribution();
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0))
+         weightDistribution = defaultTransferWeightDistribution.getDoubleValue();
+
+      transferWeightDistributions.get(footstepIndex).set(weightDistribution);
    }
 
    /** {@inheritDoc} */

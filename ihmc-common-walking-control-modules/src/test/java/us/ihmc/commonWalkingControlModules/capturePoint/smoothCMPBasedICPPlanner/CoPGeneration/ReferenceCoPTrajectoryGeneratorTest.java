@@ -74,7 +74,10 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
+   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
    private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
+
+   private final YoDouble percentageChickenSupport = new YoDouble("percentageChickenSupport", parentRegistry);
 
    @BeforeEach
    public void setUp()
@@ -124,13 +127,16 @@ public class ReferenceCoPTrajectoryGeneratorTest
          YoDouble swingDurationShiftFraction = new YoDouble("swingDurationShiftFraction" + i, parentRegistry);
          YoDouble transferDuration = new YoDouble("transferDuration" + i, parentRegistry);
          YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, parentRegistry);
+         YoDouble transferWeightDistribution = new YoDouble("transferWeightDistribution" + i, parentRegistry);
 
          swingDurations.add(swingDuration);
          swingSplitFractions.add(swingSplitFraction);
          swingDurationShiftFractions.add(swingDurationShiftFraction);
          transferDurations.add(transferDuration);
          transferSplitFractions.add(transferSplitFraction);
+         transferWeightDistributions.add(transferWeightDistribution);
       }
+      percentageChickenSupport.set(0.5);
       YoDouble transferDuration = new YoDouble("transferDuration" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
       YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
       transferDurations.add(transferDuration);
@@ -140,8 +146,9 @@ public class ReferenceCoPTrajectoryGeneratorTest
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
                                                              numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
-                                                             swingDurationShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps,
-                                                             upcomingFootstepsData, soleZUpFrames, parentRegistry);
+                                                             swingDurationShiftFractions, transferSplitFractions, transferWeightDistributions,
+                                                             percentageChickenSupport, numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames,
+                                                             parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
