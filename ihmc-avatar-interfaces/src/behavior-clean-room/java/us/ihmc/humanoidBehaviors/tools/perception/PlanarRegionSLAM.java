@@ -38,7 +38,7 @@ public class PlanarRegionSLAM
       PlanarRegionsList transformedNewData = newDataIn;
       RigidBodyTransform totalDriftCorrectionTransform = new RigidBodyTransform();
 
-      for (int i = 0; i < parameters.getIterations(); i++)
+      for (int i = 0; i < parameters.getIterationsForMatching(); i++)
       {
          Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
                                                                                                                                            transformedNewData,

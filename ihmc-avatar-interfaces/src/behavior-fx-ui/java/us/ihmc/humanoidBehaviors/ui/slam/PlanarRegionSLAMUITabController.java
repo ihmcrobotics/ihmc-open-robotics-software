@@ -90,7 +90,7 @@ public class PlanarRegionSLAMUITabController extends Group
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      parameterLabel1.setText(PlanarRegionSLAMParameters.iterations.getTitleCasedName());
+      parameterLabel1.setText(PlanarRegionSLAMParameters.iterationsForMatching.getTitleCasedName());
       parameterLabel2.setText(PlanarRegionSLAMParameters.minimumNormalDotProduct.getTitleCasedName());
       parameterLabel3.setText(PlanarRegionSLAMParameters.dampedLeastSquaresLambda.getTitleCasedName());
       parameterLabel4.setText(PlanarRegionSLAMParameters.boundingBoxHeight.getTitleCasedName());
@@ -98,7 +98,7 @@ public class PlanarRegionSLAMUITabController extends Group
       Platform.runLater(() ->
       {
       parameterSpinner1.setValueFactory(
-            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterations), 1));
+            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterationsForMatching), 1));
       parameterSpinner2.setValueFactory(
             new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.01));
       parameterSpinner3.setValueFactory(

@@ -56,7 +56,7 @@ class PlanarRegionSLAMTest
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
       parameters.setBoundingBoxHeight(0.1);
       parameters.setDampedLeastSquaresLambda(0.0);
-      parameters.setIterations(1);
+      parameters.setIterationsForMatching(1);
 
       slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
@@ -91,7 +91,7 @@ class PlanarRegionSLAMTest
          assertEquals(5, pairList.size());
       }
 
-      parameters.setIterations(1);
+      parameters.setIterationsForMatching(1);
       parameters.setBoundingBoxHeight(0.1);
 
       slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
@@ -108,7 +108,7 @@ class PlanarRegionSLAMTest
       map = createSomeRightAngledWalls(true, new RigidBodyTransform(), true, true, true);
       newData = createSomeRightAngledWalls(true, smallRotationTransform, true, true, true);
 
-      parameters.setIterations(2);
+      parameters.setIterationsForMatching(2);
       slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
       mergedMap = slamResult.getMergedMap();
       transformResult = slamResult.getTransformFromIncomingToMap();
@@ -279,7 +279,7 @@ class PlanarRegionSLAMTest
       }
 
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      parameters.setIterations(6);
+      parameters.setIterationsForMatching(6);
       parameters.setBoundingBoxHeight(0.2);
       parameters.setDampedLeastSquaresLambda(0.1);
 
