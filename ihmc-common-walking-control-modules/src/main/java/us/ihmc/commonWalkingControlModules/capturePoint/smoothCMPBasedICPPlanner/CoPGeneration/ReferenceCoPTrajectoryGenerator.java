@@ -61,11 +61,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private static final int maxNumberOfCoPWaypoints = 20;
    private final boolean debug;
 
-   public enum UseSplitFractionFor
-   {
-      POSITION, TIME
-   }
-
    private final String fullPrefix;
    // Standard declarations
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -115,7 +110,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<YoDouble> swingSplitFractions;
    private final List<YoDouble> swingDurationShiftFractions;
    private final List<YoDouble> transferSplitFractions;
-   private final List<UseSplitFractionFor> useTransferSplitFractionFor;
    private final List<FootstepData> upcomingFootstepsData;
 
    private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
@@ -215,11 +209,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
-      this.useTransferSplitFractionFor = new ArrayList<>(transferSplitFractions.size());
       this.numberOfUpcomingFootsteps = numberOfUpcomingFootsteps;
       this.upcomingFootstepsData = upcomingFootstepsData;
-      for (int i = 0; i < transferSplitFractions.size(); i++)
-         useTransferSplitFractionFor.add(UseSplitFractionFor.TIME);
 
       this.numberOfPointsPerFoot = new YoInteger(fullPrefix + "NumberOfPointsPerFootstep", registry);
       this.orderOfSplineInterpolation = new YoEnum<>(fullPrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
@@ -919,18 +910,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void computeMidfeetCoPPointLocation(FramePoint3D copLocationToPack, int footstepIndex)
    {
-      if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.POSITION)
-      {
-         computeMidFeetPointByPositionFraction(copLocationToPack, transferringFromPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex),
-                                               transferSplitFractions.get(footstepIndex).getDoubleValue(),
-                                               transferringToPolygon.get(footstepIndex).getReferenceFrame());
-      }
-      else
-      {
+
          computeMidFeetPointByPositionFraction(copLocationToPack, transferringFromPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex),
                                                transferWeightDistributions.get(footstepIndex).getDoubleValue(),
                                                transferringToPolygon.get(footstepIndex).getReferenceFrame());
-      }
 
       copLocationToPack.changeFrame(worldFrame);
    }
@@ -1017,25 +1000,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       double segmentDuration;
 
-      if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
+      if (segmentIndex == 0)
       {
-         if (segmentIndex == 0)
-         {
-            segmentDuration = transferTime * splitFraction;
-         }
-         else if (segmentIndex == 1)
-         {
-            segmentDuration = transferTime * (1.0 - splitFraction);
-         }
-         else
-         {
-            throw new RuntimeException("For some reason we didn't just use a array that summed to one");
-         }
+         segmentDuration = transferTime * splitFraction;
+      }
+      else if (segmentIndex == 1)
+      {
+         segmentDuration = transferTime * (1.0 - splitFraction);
       }
       else
       {
-         segmentDuration = transferTime * 0.5;
+         throw new RuntimeException("For some reason we didn't just use an array that summed to one");
       }
+
 
       // modifying durations if it's the first step, and the robot is going to perform a continuity adjustment
       if (footstepIndex == 0 && goingToPerformInitialDSSmoothingAdjustment.getBooleanValue())
