@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -124,10 +125,10 @@ public class PlanarRegionSLAM
       return matchesWithReferencePoints;
    }
 
-   public static PlanarRegionSLAMResult intentionallyDrift(PlanarRegionsList newData)
+   public static PlanarRegionSLAMResult intentionallyRandomlyDrift(PlanarRegionsList newData, Random random)
    {
-      AxisAngle smallRotation = new AxisAngle(0.1, 0.1, 0.1);
-      Vector3D smallTranslation = new Vector3D(0.05, -0.05, 0.05);
+      AxisAngle smallRotation = new AxisAngle(random.nextDouble() % 0.2, random.nextDouble() % 0.2, random.nextDouble() % 0.2);
+      Vector3D smallTranslation = new Vector3D((random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
       PlanarRegionsList transformedNewData = newData.copy();
       transformedNewData.transform(smallTransform);
@@ -135,5 +136,4 @@ public class PlanarRegionSLAM
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
    }
-
 }
