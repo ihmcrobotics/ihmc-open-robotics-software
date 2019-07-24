@@ -26,11 +26,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
@@ -199,6 +199,44 @@ class PlanarRegionSLAMTest
 
       assertTransformsAreInverses(transformResult, smallRotationTransform, 1e-5);
       assertEquals(4, mergedMap.getNumberOfPlanarRegions());
+   }
+
+   @Test
+   public void testSLAMWithTrickyCase()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+
+      Point2D pointB0 = new Point2D(0.2, 0.0);
+      Point2D pointB1 = new Point2D(1.2, 1.0);
+      Point2D pointB2 = new Point2D(1.2, 0.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      PlanarRegionsList planarRegionsListA = new PlanarRegionsList(regionA);
+      PlanarRegionsList planarRegionsListB = new PlanarRegionsList(regionB);
+      
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListB, parameters, listener);
+
+      PlanarRegionsList mergedMap = slamResult.getMergedMap();
+
+      if (visualize)
+      {
+         visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
+      
+      assertEquals(2, mergedMap.getNumberOfPlanarRegions());
    }
 
    private void assertTransformsAreInverses(RigidBodyTransform expectedTransform, RigidBodyTransform transform, double epsilon)
