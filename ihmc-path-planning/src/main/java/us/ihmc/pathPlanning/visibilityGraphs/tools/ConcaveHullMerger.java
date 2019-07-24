@@ -35,11 +35,12 @@ public class ConcaveHullMerger
    }
 
    /**
-    * Merges two PlanarRegions and returns the merged PlanarRegion.
+    * Merges two PlanarRegions and returns the merged PlanarRegion by projecting regionTwo onto the plan of regionOne, finding the intersection of their concave hull 
+    * on the plane of regionOne, and then forming a new PlanarRegion using that new concave hull. If the concave hulls of the two PlanarRegions do not intersect, returns null.
     * 
     * @param regionOne First PlanarRegion to merge.
     * @param regionTwo Second PlanarRegion to merge.
-    * @return Merged planarRegions.
+    * @return Merged planarRegions or null if the concave hull of the two PlanarRegions do not intersect.
     */
    public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, ConcaveHullMergerListener listener)
    {
