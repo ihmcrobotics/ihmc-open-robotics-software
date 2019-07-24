@@ -132,7 +132,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                       "Repartition of the transfer duration around the entry corner point.", registry);
    protected final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
 
-   protected final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
 
    private final YoDouble defaultTransferWeightDistribution = new YoDouble(namePrefix + "DefaultWeightDistribution", registry);
    private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
@@ -678,7 +678,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void setFinalTransferWeightDistribution(double weightDistribution)
    {
-      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0))
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
          return;
 
       finalTransferWeightDistribution.set(weightDistribution);
@@ -849,10 +849,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       swingDurationShiftFractions.get(footstepIndex).set(swingShiftFraction);
       transferDurationAlphas.get(footstepIndex).set(transferDurationAlpha);
 
-      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
-
       double weightDistribution = shiftFractions.getTransferWeightDistribution();
-      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0))
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
          weightDistribution = defaultTransferWeightDistribution.getDoubleValue();
 
       transferWeightDistributions.get(footstepIndex).set(weightDistribution);

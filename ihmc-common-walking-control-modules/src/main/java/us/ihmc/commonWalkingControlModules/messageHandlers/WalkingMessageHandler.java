@@ -294,10 +294,10 @@ public class WalkingMessageHandler
 
 
       double commandDefaultTransferWeightDistribution = command.getDefaultTransferWeightDistribution();
-      if (!Double.isNaN(commandDefaultTransferWeightDistribution) && MathTools.intervalContains(commandDefaultTransferWeightDistribution, 0.0, 1.0))
+      if (!Double.isNaN(commandDefaultTransferWeightDistribution) && MathTools.intervalContains(commandDefaultTransferWeightDistribution, 0.0, 1.0, false, false))
          defaultTransferWeightDistribution.set(commandDefaultSwingDurationShiftFraction);
       double commandFinalTransferWeightDistribution = command.getFinalTransferWeightDistribution();
-      if (!Double.isNaN(commandFinalTransferWeightDistribution) && commandFinalTransferSplitFraction >= 0.0)
+      if (!Double.isNaN(commandFinalTransferWeightDistribution) && MathTools.intervalContains(commandFinalTransferSplitFraction, 0.0, 1.0, false, false))
          finalTransferWeightDistribution.set(commandFinalTransferWeightDistribution);
       else
          finalTransferWeightDistribution.set(defaultFinalTransferWeightDistribution.getDoubleValue());
