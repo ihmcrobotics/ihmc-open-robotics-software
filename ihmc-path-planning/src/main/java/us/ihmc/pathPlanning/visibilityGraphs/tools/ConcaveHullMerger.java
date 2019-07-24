@@ -26,6 +26,7 @@ public class ConcaveHullMerger
 {
    private static final double minimumDistanceSquared = 0.001 * 0.001;
    private static final double amountToMove = 0.0015;
+   public static final double depthThreshold = 0.001;
 
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
 
@@ -58,7 +59,6 @@ public class ConcaveHullMerger
       }
 
       ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(regionOne.getConcaveHull(), concaveHullTwoVerticesTransformed);
-      double depthThreshold = 0.001;
       ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<ConvexPolygon2D>();
 
       ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, depthThreshold, newPolygonsFromConcaveHull);
