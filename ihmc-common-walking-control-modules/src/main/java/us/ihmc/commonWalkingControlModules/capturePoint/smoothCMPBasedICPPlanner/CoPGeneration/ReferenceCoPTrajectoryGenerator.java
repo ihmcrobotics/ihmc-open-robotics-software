@@ -46,6 +46,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTraje
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -87,8 +88,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoDouble footstepLengthThresholdToPutExitCoPOnToesSteppingDown;
    private final YoDouble footstepLengthThresholdToPutExitCoPOnToes;
    private final YoDouble exitCoPForwardSafetyMarginOnToes;
-   private final YoDouble percentageChickenSupport;
-   private final YoDouble percentageWeightDistribution;
+   private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
    private CoPPointName exitCoPName;
    private final YoDouble additionalTimeForFinalTransfer;
 
@@ -108,6 +108,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoDouble maxContinuityAdjustmentSegmentDurationDS;
    private final YoDouble maxContinuityAdjustmentSegmentDurationSS;
 
+   private final DoubleProvider finalTransferWeightDistribution;
+   private final List<YoDouble> transferWeightDistributions;
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
    private final List<YoDouble> swingSplitFractions;
@@ -161,34 +163,35 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
    /**
-    * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to
+    * Creates CoP planner object. Should be followed by call to {@link #initializeParameters(ICPPlannerParameters)} ()} to
     * pass planning parameters
-    *
-    * @param namePrefix
     */
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
-                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, List<YoDouble> weightDistributions,
+                                          DoubleProvider finalTransferWeightDistribution, IntegerProvider numberOfUpcomingFootsteps,
+                                          List<FootstepData> upcomingFootstepsData, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
-           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames,
-           parentRegistry);
+           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, weightDistributions, finalTransferWeightDistribution, false,
+           numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames, parentRegistry);
 
    }
 
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, boolean debug,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
+                                          List<YoDouble> weightDistributions, DoubleProvider finalTransferWeightDistribution, boolean debug,
                                           IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
       this.debug = debug;
+      this.finalTransferWeightDistribution = finalTransferWeightDistribution;
       additionalTimeForFinalTransfer = new YoDouble(fullPrefix + "AdditionalTimeForFinalTransfer", registry);
       safeDistanceFromCoPToSupportEdges = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
@@ -199,14 +202,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       footstepLengthThresholdToPutExitCoPOnToes = new YoDouble(fullPrefix + "FootstepLengthThresholdToPutExitCoPOnToes", parentRegistry);
       exitCoPForwardSafetyMarginOnToes = new YoDouble(fullPrefix + "ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
-      percentageChickenSupport = new YoDouble(namePrefix + "PercentageChickenSupport", registry);
-      percentageWeightDistribution = new YoDouble(namePrefix + "PercentageWeightDistribution", registry);
+      percentageStandingWeightDistributionOnLeftFoot = new YoDouble(namePrefix + "PercentageStandingWeightDistributionOnLeftFoot", registry);
 
       maxContinuityAdjustmentSegmentDurationDS = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDurationDS", registry);
       maxContinuityAdjustmentSegmentDurationSS = new YoDouble(namePrefix + "MaxContinuityAdjustmentSegmentDurationSS", registry);
       maxContinuityAdjustmentSegmentDurationDS.set(0.2);
       maxContinuityAdjustmentSegmentDurationSS.set(0.15);
 
+      this.transferWeightDistributions = weightDistributions;
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
       this.swingSplitFractions = swingSplitFractions;
@@ -306,8 +309,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       safeDistanceFromCoPToSupportEdges.set(parameters.getCoPSafeDistanceAwayFromSupportEdges());
       numberOfPointsPerFoot.set(parameters.getNumberOfCoPWayPointsPerFoot());
       orderOfSplineInterpolation.set(parameters.getOrderOfCoPInterpolation());
-      percentageChickenSupport.set(0.5);
-      percentageWeightDistribution.set(0.5);
+      percentageStandingWeightDistributionOnLeftFoot.set(finalTransferWeightDistribution.getValue());
 
       EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactors = parameters.getStepLengthToCoPOffsetFactors();
 
@@ -568,7 +570,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          if (atAStop)
          {  // this guy is starting a series of steps from standing
-            computeMidFeetPointWithChickenSupportForInitialTransfer(previousCoPLocation);
+            double fraction = transferToSide == RobotSide.LEFT ? percentageStandingWeightDistributionOnLeftFoot.getValue() : 1.0 - percentageStandingWeightDistributionOnLeftFoot.getValue();
+            computeMidFeetPointByFractionForInitialTransfer(previousCoPLocation, fraction);
             copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
          }
          else
@@ -651,24 +654,16 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.activeTrajectory = swingCoPTrajectories.get(0);
    }
 
-   private void computeMidFeetPointWithChickenSupportForInitialTransfer(FramePoint3D framePointToPack)
+   private void computeMidFeetPointByFractionForInitialTransfer(FramePoint3D framePointToPack, double fraction)
    {
-      computeMidFeetPointWithChickenSupport(framePointToPack, transferringFromPolygon.getFirst(), transferringToPolygon.getFirst());
+      computeMidFeetPointByPositionFraction(framePointToPack, transferringFromPolygon.getFirst(), transferringToPolygon.getFirst(), fraction,
+                                            transferringFromPolygon.getLast().getReferenceFrame());
    }
 
-   private void computeMidFeetPointWithChickenSupportForFinalTransfer(FramePoint3D framePointToPack)
+   private void computeMidFeetPointByFractionForFinalTransfer(FramePoint3D framePointToPack, double fraction)
    {
-      computeMidFeetPointWithChickenSupport(framePointToPack, transferringFromPolygon.getLast(), transferringToPolygon.getLast());
-   }
-
-   /**
-    * Assumes foot polygon and double support polygon has been updated
-    */
-   private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2D transferringFromPolygon,
-                                                      FrameConvexPolygon2D transferringToPolygon)
-   {
-      computeMidFeetPointByPositionFraction(framePointToPack, transferringFromPolygon, transferringToPolygon, percentageChickenSupport.getDoubleValue(),
-                                            transferringFromPolygon.getReferenceFrame());
+      computeMidFeetPointByPositionFraction(framePointToPack, transferringFromPolygon.getLast(), transferringToPolygon.getLast(), fraction,
+                                            transferringFromPolygon.getLast().getReferenceFrame());
    }
 
    // do not use these temporary variables anywhere except this method to avoid modifying them in unwanted places.
@@ -724,12 +719,14 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getLast().getCentroid(), worldFrame);
       copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
 
-      computeMidfeetCoPPointLocation(tempPointForCoPCalculation, 0);
+      computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(),
+                                            percentageStandingWeightDistributionOnLeftFoot.getDoubleValue(), worldFrame);
 
       double segmentDuration = getTransferSegmentTimes(0, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.MIDFEET_COP, segmentDuration, tempPointForCoPCalculation);
 
-      computeMidFeetPointWithChickenSupportForFinalTransfer(tempPointForCoPCalculation);
+      // FIXME figure out the right fraction for this.
+      computeMidFeetPointByFractionForFinalTransfer(tempPointForCoPCalculation, finalTransferWeightDistribution.getValue());
       tempPointForCoPCalculation.changeFrame(worldFrame);
       segmentDuration = getTransferSegmentTimes(1, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
@@ -757,13 +754,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
 
       computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(),
-                                            percentageWeightDistribution.getDoubleValue(), worldFrame);
+                                            percentageStandingWeightDistributionOnLeftFoot.getDoubleValue(), worldFrame);
 
       double segmentDuration = getTransferSegmentTimes(0, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.MIDFEET_COP, segmentDuration, tempPointForCoPCalculation);
 
       computeMidFeetPointByPositionFraction(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(),
-                                            percentageWeightDistribution.getDoubleValue(), worldFrame);
+                                            percentageStandingWeightDistributionOnLeftFoot.getDoubleValue(), worldFrame);
 
       segmentDuration = getTransferSegmentTimes(1, 0) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
       copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
@@ -779,7 +776,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getLast().getCentroid(), worldFrame);
       copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
 
-      computeMidfeetCoPPointLocation(tempPointForCoPCalculation, footstepIndex);
+      computeMidFeetPointByFractionForFinalTransfer(tempPointForCoPCalculation, finalTransferWeightDistribution.getValue());
 
       double segmentDuration = getTransferSegmentTimes(0, footstepIndex);
       if (isLastTransfer)
@@ -787,7 +784,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          segmentDuration += 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
          copLocationWaypoint.addWaypoint(CoPPointName.MIDFEET_COP, segmentDuration, tempPointForCoPCalculation);
 
-         computeMidFeetPointWithChickenSupportForFinalTransfer(tempPointForCoPCalculation);
+         computeMidFeetPointByFractionForFinalTransfer(tempPointForCoPCalculation, finalTransferWeightDistribution.getValue());
          tempPointForCoPCalculation.changeFrame(worldFrame);
          segmentDuration = getTransferSegmentTimes(1, footstepIndex) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
          copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
@@ -797,11 +794,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             RobotSide lastStepSide = upcomingFootstepsData.get(upcomingFootstepsData.size() - 1).getSupportSide();
             if (lastStepSide == RobotSide.RIGHT)
             {
-               percentageWeightDistribution.set(1.0 - percentageChickenSupport.getDoubleValue());
+               percentageStandingWeightDistributionOnLeftFoot.set(1.0 - finalTransferWeightDistribution.getValue());
             }
             else
             {
-               percentageWeightDistribution.set(percentageChickenSupport.getDoubleValue());
+               percentageStandingWeightDistributionOnLeftFoot.set(finalTransferWeightDistribution.getValue());
             }
          }
       }
@@ -931,7 +928,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else
       {
          computeMidFeetPointByPositionFraction(copLocationToPack, transferringFromPolygon.get(footstepIndex), transferringToPolygon.get(footstepIndex),
-                                               percentageChickenSupport.getDoubleValue(), transferringToPolygon.get(footstepIndex).getReferenceFrame());
+                                               transferWeightDistributions.get(footstepIndex).getDoubleValue(),
+                                               transferringToPolygon.get(footstepIndex).getReferenceFrame());
       }
 
       copLocationToPack.changeFrame(worldFrame);
@@ -1479,7 +1477,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       setFootPolygonFromCurrentState(tempPolygonA, lastTransferToSide.getOppositeSide());
       setFootPolygonFromCurrentState(tempPolygonB, lastTransferToSide);
 
-      computeMidFeetPointWithChickenSupport(tempFramePoint1, tempPolygonA, tempPolygonB);
+      computeMidFeetPointByPositionFraction(tempFramePoint1, tempPolygonA, tempPolygonB, finalTransferWeightDistribution.getValue(),
+                                            tempPolygonA.getReferenceFrame());
       tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
       copPositionToPack.set(tempFramePoint1);
    }
