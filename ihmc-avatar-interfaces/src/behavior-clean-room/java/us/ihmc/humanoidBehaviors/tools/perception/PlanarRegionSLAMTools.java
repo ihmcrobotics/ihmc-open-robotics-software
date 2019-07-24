@@ -18,6 +18,7 @@ import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -203,41 +204,63 @@ public class PlanarRegionSLAMTools
       return normalFilteredMap;
    }
 
-   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance, Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
+   /**
+    * Filters the match set down further.
+    *
+    * For each match so far, find newData regions that "shadow" the corresponding map region.
+    * By "shadow" we mean as if shining an orthogonal light source at the map region and seeing the shadow cast upon it
+    * by a newData region. Shadow must overlap more than minimumRegionOverlapDistance.
+    *
+    * Then, for each shadow match, add four or more reference points, like the vertices of the shadow.
+    * These points are the "fit" points that are put into the fit optimization algorithm.
+    *
+    * @param minimumRegionOverlapDistance
+    * @param matchesSoFar
+    * @return mapToShadowMatchAndFitPoints
+    */
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>>
+   filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance, Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
    {
-      HashMap<PlanarRegion, PairList<PlanarRegion, Point2D>> normalFilteredMap = new HashMap<>();
+      HashMap<PlanarRegion, PairList<PlanarRegion, Point2D>> mapToShadowMatchAndFitPoints = new HashMap<>();
       for (PlanarRegion mapRegion : matchesSoFar.keySet())
       {
          PairList<PlanarRegion, Point2D> shadowMatches = new PairList<>();
 
          for (PlanarRegion newDataRegion : matchesSoFar.get(mapRegion))
          {
-            RigidBodyTransform transformFromWorldToMap = PlanarRegionTools.getTransformToLocal(mapRegion);
-            RigidBodyTransform transformFromNewDataToWorld = PlanarRegionTools.getTransformToWorld(newDataRegion);
-
-            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = computeNewDataRegionBoundingBoxProjectedToMapLocal(newDataRegion,
-                                                                                                                           transformFromWorldToMap,
-                                                                                                                           transformFromNewDataToWorld);
+            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal
+                  = computeNewDataRegionBoundingBoxProjectedToMapLocal(newDataRegion, mapRegion.getTransformToLocal(), newDataRegion.getTransformToWorld());
 
             BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getLocalBoundingBox2DInLocal(mapRegion);
 
-            //TODO: Test case for minimumRegionOverlapDistance.
-            boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -minimumRegionOverlapDistance);
+            //TODO: Test case for minimumRegionOverlapDistance
+            boolean boundingBoxShadowsMapRegion
+                  = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -minimumRegionOverlapDistance);
             if (boundingBoxShadowsMapRegion)
             {
-               addCornerPointsOfBoundingBoxIntersectionToMatches(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal, newDataRegion, transformFromWorldToMap, transformFromNewDataToWorld, shadowMatches);
+               addCornerPointsOfBoundingBoxIntersectionToMatches(mapBoundingBoxInMapLocal,
+                                                                 newDataRegionBoundingBoxProjectedToMapLocal,
+                                                                 newDataRegion,
+                                                                 mapRegion.getTransformToLocal(),
+                                                                 newDataRegion.getTransformToWorld(),
+                                                                 shadowMatches);
             }
          }
 
          if (!shadowMatches.isEmpty())
          {
-            normalFilteredMap.put(mapRegion, shadowMatches);
+            mapToShadowMatchAndFitPoints.put(mapRegion, shadowMatches);
          }
       }
-      return normalFilteredMap;
+      return mapToShadowMatchAndFitPoints;
    }
 
-   private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal, BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal, PlanarRegion newDataRegion, RigidBodyTransform transformFromWorldToMap, RigidBodyTransform transformFromNewDataToWorld, PairList<PlanarRegion, Point2D> shadowMatches)
+   private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal,
+                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal,
+                                                                         PlanarRegion newDataRegion,
+                                                                         RigidBodyTransformReadOnly transformFromWorldToMap,
+                                                                         RigidBodyTransformReadOnly transformFromNewDataToWorld,
+                                                                         PairList<PlanarRegion, Point2D> shadowMatches)
    {
       BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
@@ -282,8 +305,9 @@ public class PlanarRegionSLAMTools
       
    }
 
-   private static BoundingBox2D computeNewDataRegionBoundingBoxProjectedToMapLocal(PlanarRegion newDataRegion, RigidBodyTransform transformFromWorldToMap,
-                                                                                   RigidBodyTransform transformFromNewDataToWorld)
+   private static BoundingBox2D computeNewDataRegionBoundingBoxProjectedToMapLocal(PlanarRegion newDataRegion,
+                                                                                   RigidBodyTransformReadOnly transformFromWorldToMap,
+                                                                                   RigidBodyTransformReadOnly transformFromNewDataToWorld)
    {
       BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getLocalBoundingBox2DInLocal(newDataRegion);
       Point3D newDataBoundingBoxMinPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMinPoint());
@@ -308,8 +332,9 @@ public class PlanarRegionSLAMTools
       return newDataRegionBoundingBoxProjectedToMapLocal;
    }
 
-   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransform transformFromWorldToMap,
-                                                                    RigidBodyTransform transformFromNewDataToWorld)
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal,
+                                                                    RigidBodyTransformReadOnly transformFromWorldToMap,
+                                                                    RigidBodyTransformReadOnly transformFromNewDataToWorld)
    {
       Point3D newDataReferencePoint = new Point3D(pointInMapLocal);
       newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);

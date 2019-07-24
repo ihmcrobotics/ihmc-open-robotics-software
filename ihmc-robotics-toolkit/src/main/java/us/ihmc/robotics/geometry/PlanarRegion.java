@@ -930,6 +930,20 @@ public class PlanarRegion implements SupportingVertexHolder
       return fromLocalToWorldTransform;
    }
 
+   public RigidBodyTransform getTransformToWorldCopy()
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      getTransformToWorld(transformToWorld);
+      return transformToWorld;
+   }
+
+   public RigidBodyTransform getTransformToLocalCopy()
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
    /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
