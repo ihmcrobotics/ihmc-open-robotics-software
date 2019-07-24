@@ -114,14 +114,11 @@ public class PlanarRegionSLAMTools
 
       DenseMatrix64F x = new DenseMatrix64F(6, 1);
 
-      DenseMatrix64F ATranspose = new DenseMatrix64F(A);
-      CommonOps.transpose(ATranspose);
-
       DenseMatrix64F ATransposeTimesA = new DenseMatrix64F(6, 6);
-      CommonOps.mult(ATranspose, A, ATransposeTimesA);
+      CommonOps.multTransA(A, A, ATransposeTimesA);
 
       DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
-      CommonOps.mult(ATranspose, b, ATransposeB);
+      CommonOps.multTransA(A, b, ATransposeB);
 
       // Use damped least squares (also called regularized least squares) to prevent blow up when data is sparse.
       // See https://www2.math.uconn.edu/~leykekhman/courses/MARN_5898/Lectures/Linear_least_squares_reg.pdf
