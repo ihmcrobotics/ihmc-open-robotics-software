@@ -102,8 +102,7 @@ public class PlanarRegionSLAMGraphic extends Group
          for (ImmutablePair<PlanarRegion, Point2D> matchedReferencePoint : matchedReferencePoints)
          {
             Point3D matchedReferencePoint3D = new Point3D(matchedReferencePoint.getRight());
-            RigidBodyTransform transformToWorld = PlanarRegionTools.getTransformToWorld(matchedReferencePoint.getLeft());
-            matchedReferencePoint3D.applyTransform(transformToWorld);
+            matchedReferencePoint3D.applyTransform(matchedReferencePoint.getLeft().getTransformToWorld());
             meshBuilder.addSphere(0.01, matchedReferencePoint3D);
          }
       }

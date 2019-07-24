@@ -86,7 +86,7 @@ public class PlanarRegionsGraphic extends Group
    {
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
 
-      RigidBodyTransform transformToWorld = PlanarRegionTools.getTransformToWorld(planarRegion);
+      RigidBodyTransform transformToWorld = planarRegion.getTransformToWorldCopy();
 
       meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 

@@ -902,7 +902,7 @@ public class PlanarRegionTools
    {
       Point2D averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
       Point3D point3D = new Point3D(averageCentroid2DInLocal);
-      point3D.applyTransform(getTransformToWorld(planarRegion));
+      point3D.applyTransform(planarRegion.getTransformToWorld());
       return point3D;
    }
 
@@ -936,27 +936,13 @@ public class PlanarRegionTools
       return boundingBox2DInLocal;
    }
 
-   public static RigidBodyTransform getTransformToWorld(PlanarRegion planarRegion)
-   {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
-      return transformToWorld;
-   }
-
-   public static RigidBodyTransform getTransformToLocal(PlanarRegion planarRegion)
-   {
-      RigidBodyTransform transformToLocal = new RigidBodyTransform();
-      planarRegion.getTransformToLocal(transformToLocal);
-      return transformToLocal;
-   }
-
    public static Box3D getLocalBoundingBox3DInWorld(PlanarRegion planarRegion, double height)
    {
       BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
       Box3D box = GeometryTools.convertBoundingBoxToBox(boundingBox3DInLocal);
-      box.applyTransform(getTransformToWorld(planarRegion));
+      box.applyTransform(planarRegion.getTransformToWorld());
       return box;
    }
 
