@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -907,13 +908,13 @@ public class WalkingMessageHandler
       double swingSplitFraction = footstepData.getSwingSplitFraction();
       double transferSplitFraction = footstepData.getTransferSplitFraction();
 
-      if (Double.isNaN(transferSplitFraction) || transferSplitFraction < 0.0 || transferSplitFraction > 1.0)
+      if (Double.isNaN(transferSplitFraction) || !MathTools.intervalContains(transferSplitFraction, 0.0, 1.0, false, false))
          transferSplitFraction = defaultTransferSplitFraction.getDoubleValue();
 
-      if (Double.isNaN(swingSplitFraction) || swingSplitFraction < 0.0 || swingSplitFraction > 1.0)
+      if (Double.isNaN(swingSplitFraction) || !MathTools.intervalContains(swingSplitFraction, 0.0, 1.0, false, false))
          swingSplitFraction = defaultSwingSplitFraction.getDoubleValue();
 
-      if (Double.isNaN(swingDurationShiftFraction) || swingDurationShiftFraction < 0.0 || swingDurationShiftFraction > 1.0)
+      if (Double.isNaN(swingDurationShiftFraction) || !MathTools.intervalContains(swingDurationShiftFraction, 0.0, 1.0, false, false))
          swingDurationShiftFraction = defaultSwingDurationShiftFraction.getDoubleValue();
 
       shiftFractionsToSet.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
