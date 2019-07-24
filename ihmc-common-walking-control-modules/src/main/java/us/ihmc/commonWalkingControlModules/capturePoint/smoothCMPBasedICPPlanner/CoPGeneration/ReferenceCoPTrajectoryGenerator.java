@@ -404,6 +404,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int swingTrajectoryIndex = 0;
       int waypointIndex = 0;
       int additionalTransferIndex = 0;
+      for (int i = 0; i < copWaypointsViz.size(); i++)
+         copWaypointsViz.get(i).setToNaN();
+
       for (int i = 0;
            waypointIndex < copWaypointsViz.size() && i < copLocationWaypoints.size() && !copLocationWaypoints.get(i).getCoPPointList().isEmpty(); i++)
       {
@@ -584,7 +587,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          // compute all the upcoming footsteps
          for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
             computeCoPPointsForFootstep(footstepIndex);
-         computeCoPPointsForFinalTransfer(planIncludesFinalTransfer, numberOfUpcomingFootsteps);
+         computeCoPPointsForFinalTransfer(planIncludesFinalTransfer, numberOfUpcomingFootsteps, atAStop);
       }
 
       // generate the cop trajectory
@@ -634,7 +637,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
             computeCoPPointsForFootstep(footstepIndex);
-         computeCoPPointsForFinalTransfer(isPlanEnding, numberOfUpcomingFootsteps);
+         computeCoPPointsForFinalTransfer(isPlanEnding, numberOfUpcomingFootsteps, false);
       }
 
       // generate the cop trajectory
@@ -725,18 +728,18 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void computeCoPPointsForStanding()
    {
-      getDoubleSupportPolygonCentroid(previousCoPLocation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(), worldFrame);
+//      getDoubleSupportPolygonCentroid(previousCoPLocation, transferringToPolygon.getFirst(), transferringFromPolygon.getFirst(), worldFrame);
+//
+//      CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
+//      copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
+//
+//       set swing parameters for angular momentum estimation
+//      convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
+//      copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
+//      convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getFirst().getCentroid(), worldFrame);
+//      copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
 
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
-      copLocationWaypoint.addWaypoint(CoPPointName.START_COP, 0.0, previousCoPLocation);
-
-      // set swing parameters for angular momentum estimation
-      convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getFirst().getCentroid(), worldFrame);
-      copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
-      convertToFramePointRetainingZ(tempFramePoint1, transferringFromPolygon.getFirst().getCentroid(), worldFrame);
-      copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
-
-      copLocationWaypoint = copLocationWaypoints.add();
 
       // this is for angular momentum generation
       convertToFramePointRetainingZ(tempFramePoint1, transferringToPolygon.getLast().getCentroid(), worldFrame);
@@ -757,7 +760,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
    }
 
-   private void computeCoPPointsForFinalTransfer(boolean isLastTransfer, int footstepIndex)
+   private void computeCoPPointsForFinalTransfer(boolean isLastTransfer, int footstepIndex, boolean atAStop)
    {
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
 
@@ -780,7 +783,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          segmentDuration = getTransferSegmentTimes(1, footstepIndex) + 0.5 * additionalTimeForFinalTransfer.getDoubleValue();
          copLocationWaypoint.addWaypoint(CoPPointName.FINAL_COP, segmentDuration, tempPointForCoPCalculation);
 
-         if (numberOfUpcomingFootsteps.getValue() > 0)
+         if (numberOfUpcomingFootsteps.getValue() > 0 && !atAStop)
          {
             RobotSide lastStepSide = upcomingFootstepsData.get(upcomingFootstepsData.size() - 1).getSupportSide();
             if (lastStepSide == RobotSide.RIGHT)
