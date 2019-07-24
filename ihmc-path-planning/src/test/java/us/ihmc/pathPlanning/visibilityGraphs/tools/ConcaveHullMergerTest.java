@@ -66,6 +66,76 @@ public class ConcaveHullMergerTest
    }
 
    @Test
+   public void testMergeSquareInsideAnotherSquare()
+   {
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      Point2D pointB0 = new Point2D(0.2, 0.2);
+      Point2D pointB1 = new Point2D(0.2, 0.8);
+      Point2D pointB2 = new Point2D(0.8, 0.8);
+      Point2D pointB3 = new Point2D(0.8, 0.2);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+
+      Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(4, concaveHull.length);
+
+      assertConcaveHullContains(concaveHull, pointA0);
+      assertConcaveHullContains(concaveHull, pointA1);
+      assertConcaveHullContains(concaveHull, pointA2);
+      assertConcaveHullContains(concaveHull, pointA3);
+
+      assertEquals(1, mergedPlanarRegion.getNumberOfConvexPolygons());
+
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+
+      concaveHull = mergedPlanarRegion.getConcaveHull();
+      assertEquals(4, concaveHull.length);
+
+      assertConcaveHullContains(concaveHull, pointA0);
+      assertConcaveHullContains(concaveHull, pointA1);
+      assertConcaveHullContains(concaveHull, pointA2);
+      assertConcaveHullContains(concaveHull, pointA3);
+
+      assertEquals(1, mergedPlanarRegion.getNumberOfConvexPolygons());
+   }
+
+   @Test
+   public void testMergeSquaresClearlyNotIntersecting()
+   {
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      Point2D pointB0 = new Point2D(1.2, 0.2);
+      Point2D pointB1 = new Point2D(1.2, 0.8);
+      Point2D pointB2 = new Point2D(1.8, 0.8);
+      Point2D pointB3 = new Point2D(1.8, 0.2);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      assertNull(mergedPlanarRegion);
+
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      assertNull(mergedPlanarRegion);
+   }
+
+   @Test
    public void testMergePlanarRegionsWithDifferentTranslations()
    {
       boolean visualize = false;
@@ -540,6 +610,11 @@ public class ConcaveHullMergerTest
       }
 
       return points;
+   }
+
+   private void assertConcaveHullContains(Point2D[] concaveHull, Point2D point)
+   {
+      assertConcaveHullContains(concaveHull, point.getX(), point.getY());
    }
 
    private void assertConcaveHullContains(Point2D[] concaveHull, double x, double y)
