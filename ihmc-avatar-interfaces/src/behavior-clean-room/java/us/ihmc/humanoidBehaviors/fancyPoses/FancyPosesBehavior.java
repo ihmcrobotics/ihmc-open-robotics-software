@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -32,7 +33,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 
-public class FancyPosesBehavior
+public class FancyPosesBehavior implements BehaviorInterface
 {
    private final BehaviorHelper behaviorHelper;
    private final AtomicReference<Boolean> enable;
@@ -74,6 +75,12 @@ public class FancyPosesBehavior
       messager.registerTopicListener(API.Abort, this::doOnAbort);
 
       behaviorHelper.startScheduledThread(getClass().getSimpleName(), this::doBehavior, 1, TimeUnit.SECONDS);
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
    }
 
    private void doOnAbort(boolean abort)
