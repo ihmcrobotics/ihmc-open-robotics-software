@@ -146,10 +146,12 @@ public class WalkingSingleSupportState extends SingleSupportState
             double transferDuration = footstepTiming.getTransferTime();
 
             double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+            double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
 
             balanceManager.clearICPPlan();
             balanceManager.setFinalTransferTime(finalTransferTime);
             balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+            balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
@@ -219,6 +221,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
+
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          swingTime = defaultSwingTime;
@@ -242,6 +247,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setNextFootstep(nextFootstep);
       balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());

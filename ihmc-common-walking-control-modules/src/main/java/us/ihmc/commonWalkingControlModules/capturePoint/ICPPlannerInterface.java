@@ -419,6 +419,8 @@ public interface ICPPlannerInterface
 
    void setFinalTransferDurationAlpha(double durationAlpha);
 
+   void setFinalTransferWeightDistribution(double weightDistribution);
+
    /**
     * Allows setting of the transfer duration alpha (see {@link #defaultTransferDurationAlpha}) for the specified step number.
     *

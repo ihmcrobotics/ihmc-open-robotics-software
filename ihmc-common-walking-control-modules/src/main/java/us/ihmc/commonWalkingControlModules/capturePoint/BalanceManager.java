@@ -747,6 +747,11 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      icpPlanner.setFinalTransferWeightDistribution(weightDistribution);
+   }
+
    public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
    {
       icpPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
