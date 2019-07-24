@@ -249,7 +249,7 @@ public class ExploreAreaBehavior
          PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters();
 
          slamParameters.setBoundingBoxHeight(0.03);
-         slamParameters.setIterations(10);
+         slamParameters.setIterationsForMatching(10);
          slamParameters.setDampedLeastSquaresLambda(1.0);
 
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
