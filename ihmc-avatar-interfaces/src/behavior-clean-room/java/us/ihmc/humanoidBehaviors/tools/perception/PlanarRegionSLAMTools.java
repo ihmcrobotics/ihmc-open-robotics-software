@@ -115,7 +115,7 @@ public class PlanarRegionSLAMTools
       DenseMatrix64F x = new DenseMatrix64F(6, 1);
 
       DenseMatrix64F ATransposeTimesA = new DenseMatrix64F(6, 6);
-      CommonOps.multTransA(A, A, ATransposeTimesA);
+      CommonOps.multInner(A, ATransposeTimesA);
 
       DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
       CommonOps.multTransA(A, b, ATransposeB);
