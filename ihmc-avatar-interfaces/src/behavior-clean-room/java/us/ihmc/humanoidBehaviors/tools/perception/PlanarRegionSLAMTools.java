@@ -132,12 +132,12 @@ public class PlanarRegionSLAMTools
       CommonOps.add(ATransposeTimesAPlusLambdaI, lambdaI, ATransposeTimesAPlusLambdaI);
 
       solver.setA(ATransposeTimesAPlusLambdaI);
-      SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
 
       solver.solve(ATransposeB, x);
 
       if (verbose)
       {
+         SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
          double[] singularValues = decomposition.getSingularValues();
          LogTools.info("singularValues = " + doubleArrayToString(singularValues));
          LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
