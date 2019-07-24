@@ -230,14 +230,14 @@ public class ConcaveHullMerger
       {
          if (unionOfOriginalBoundingBoxes.equals(finalBoundingBox))
          {
-            if ((!isPointInsideConcaveHull(hullTwo[0], hullOne)) && (!isPointInsideConcaveHull(hullOne[0], hullTwo)))
-            {
-               return null;
-            }
 
             // Check to make sure the smaller concave hull is inside the bigger one. 
             // At this point can do that by just finding one vertex that is either inside or one that is outside.
             // Since there were no crossings, they all must be inside or all outside.
+            if ((!isPointInsideConcaveHull(hullTwo[0], hullOne)) && (!isPointInsideConcaveHull(hullOne[0], hullTwo)))
+            {
+               return null;
+            }
          }
       }
 
