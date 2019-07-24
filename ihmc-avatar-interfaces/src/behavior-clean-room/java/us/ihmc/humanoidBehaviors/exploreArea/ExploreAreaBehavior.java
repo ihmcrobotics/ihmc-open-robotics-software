@@ -49,6 +49,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -232,6 +233,9 @@ public class ExploreAreaBehavior
       addNewPlanarRegionsToTheMap(latestPlanarRegionsList);
    }
 
+   private ConcaveHullMergerListener listener = null;
+//   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
+
    private void addNewPlanarRegionsToTheMap(PlanarRegionsList latestPlanarRegionsList)
    {
       messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
@@ -248,7 +252,7 @@ public class ExploreAreaBehavior
          slamParameters.setIterations(10);
          slamParameters.setDampedLeastSquaresLambda(1.0);
 
-         PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters);
+         PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
 
          concatenatedMap = slamResult.getMergedMap();
          RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
@@ -420,13 +424,9 @@ public class ExploreAreaBehavior
       LogTools.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
             + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
 
-      Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
-      double bestDistance = distancesFromStart.get(bestGoalPoint);
-      List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
-
       desiredFramePoses = new ArrayList<>();
 
-      if (bestGoalPoint == null)
+      if (feasibleGoalPoints.isEmpty())
       {
          LogTools.info("Couldn't find a place to walk to. Just stepping in place.");
 
@@ -439,6 +439,10 @@ public class ExploreAreaBehavior
          desiredFramePoses.add(desiredFramePose);
          return;
       }
+
+      Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
+      double bestDistance = distancesFromStart.get(bestGoalPoint);
+      List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
       LogTools.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 
