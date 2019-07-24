@@ -80,12 +80,12 @@ public class PlanarRegionSLAM
                {
                   continue;
                }
-               newRegionsConsidered.add(newRegion);
 
                PlanarRegion mergedMapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion.copy(), listener);
                if (mergedMapPlanarRegion != null)
                {
                   mapPlanarRegion = mergedMapPlanarRegion;
+                  newRegionsConsidered.add(newRegion);
                }
             }
          }
