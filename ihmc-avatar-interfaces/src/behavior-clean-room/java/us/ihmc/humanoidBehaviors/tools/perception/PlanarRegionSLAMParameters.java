@@ -24,7 +24,7 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList(PlanarRegionSLAMParameters.class);
 
-   public static final IntegerStoredPropertyKey iterations = keys.addIntegerKey("Iterations");
+   public static final IntegerStoredPropertyKey iterationsForMatching = keys.addIntegerKey("Iterations for matching");
    public static final DoubleStoredPropertyKey boundingBoxHeight = keys.addDoubleKey("Bounding box height");
    public static final DoubleStoredPropertyKey minimumNormalDotProduct = keys.addDoubleKey("Minimum normal dot product");
    public static final DoubleStoredPropertyKey dampedLeastSquaresLambda = keys.addDoubleKey("Damped least squares lambda");
@@ -50,14 +50,14 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
       set(PlanarRegionSLAMParameters.boundingBoxHeight, boundingBoxHeight);
    }
 
-   public int getIterations()
+   public int getIterationsForMatching()
    {
-      return get(iterations);
+      return get(iterationsForMatching);
    }
 
-   public void setIterations(int iterations)
+   public void setIterationsForMatching(int iterationsForMatching)
    {
-      set(PlanarRegionSLAMParameters.iterations, iterations);
+      set(PlanarRegionSLAMParameters.iterationsForMatching, iterationsForMatching);
    }
 
    public double getMinimumNormalDotProduct()
@@ -84,7 +84,7 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    {
       return get(minimumRegionOverlapDistance);
    }
-   
+
    public void setMinimumRegionOverlapDistance(double minimumRegionOverlapDistance)
    {
       set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, minimumRegionOverlapDistance);
@@ -98,6 +98,4 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
       PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
       planarRegionSLAMParameters.save();
    }
-
-
 }
