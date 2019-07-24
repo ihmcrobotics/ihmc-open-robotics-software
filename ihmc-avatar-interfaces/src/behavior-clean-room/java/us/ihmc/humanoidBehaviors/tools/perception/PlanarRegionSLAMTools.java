@@ -219,7 +219,7 @@ public class PlanarRegionSLAMTools
                                                                                                                            transformFromWorldToMap,
                                                                                                                            transformFromNewDataToWorld);
 
-            BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getBoundingBox2DInLocal(mapRegion);
+            BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getLocalBoundingBox2DInLocal(mapRegion);
 
             //TODO: Test case for minimumRegionOverlapDistance.
             boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -minimumRegionOverlapDistance);
@@ -285,7 +285,7 @@ public class PlanarRegionSLAMTools
    private static BoundingBox2D computeNewDataRegionBoundingBoxProjectedToMapLocal(PlanarRegion newDataRegion, RigidBodyTransform transformFromWorldToMap,
                                                                                    RigidBodyTransform transformFromNewDataToWorld)
    {
-      BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getBoundingBox2DInLocal(newDataRegion);
+      BoundingBox2D newDataRegionBoundingBoxInLocal = PlanarRegionTools.getLocalBoundingBox2DInLocal(newDataRegion);
       Point3D newDataBoundingBoxMinPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMinPoint());
       Point3D newDataBoundingBoxMaxPoint = new Point3D(newDataRegionBoundingBoxInLocal.getMaxPoint());
 
