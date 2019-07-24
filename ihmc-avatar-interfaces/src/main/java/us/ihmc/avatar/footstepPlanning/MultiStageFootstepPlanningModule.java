@@ -20,7 +20,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -40,7 +39,6 @@ public class MultiStageFootstepPlanningModule
    private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 2;
-   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier(MultiStageFootstepPlanningModule.class, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX);
 
    private final String name = getClass().getSimpleName();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -74,7 +72,7 @@ public class MultiStageFootstepPlanningModule
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, ROS2_ID.getNodeName());
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, ROS2Tools.FOOTSTEP_PLANNER.getNodeName());
       CommandInputManager commandInputManager = new CommandInputManager(name, FootstepPlannerCommunicationProperties.getSupportedCommands());
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(FootstepPlannerCommunicationProperties.getSupportedStatusMessages());
       new ControllerNetworkSubscriber(FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
