@@ -44,6 +44,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -249,9 +250,9 @@ public class BalanceManager
       parentRegistry.addChild(registry);
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
-      icpPlanner.addFootstepToPlan(footstep, timing);
+      icpPlanner.addFootstepToPlan(footstep, timing, shiftFractions);
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
    }
@@ -744,6 +745,11 @@ public class BalanceManager
 
       centerOfMassPosition.changeFrame(worldFrame);
       icpPlanner.holdCurrentICP(centerOfMassPosition);
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      icpPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
    }
 
    public void setFinalTransferTime(double finalTransferDuration)

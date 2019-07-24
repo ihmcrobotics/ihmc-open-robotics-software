@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -24,6 +25,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private static final int numberOfFootstepsToConsider = 3;
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(numberOfFootstepsToConsider);
 
    private final DoubleProvider minimumTransferTime;
 
@@ -90,8 +92,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
+         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
+         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
          if (i == 0)
          {
@@ -99,7 +103,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
-         balanceManager.addFootstepToPlan(footstep, timing);
+         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);
