@@ -357,13 +357,6 @@ public class PlanarRegionSLAMTools
 
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
    {
-      Box3D boxA = GeometryTools.convertBoundingBoxToBox(a.getBoundingBox3dInWorld());
-      Box3D boxB = GeometryTools.convertBoundingBoxToBox(b.getBoundingBox3dInWorld());
-
-      GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
-
-      EuclidShape3DCollisionResult collisionResult = gjkCollisionDetector.evaluateCollision(boxA, boxB);
-
-      return collisionResult.areShapesColliding();
+      return a.getBoundingBox3dInWorld().intersectsEpsilon(b.getBoundingBox3dInWorld(), 1e-8);
    }
 }
