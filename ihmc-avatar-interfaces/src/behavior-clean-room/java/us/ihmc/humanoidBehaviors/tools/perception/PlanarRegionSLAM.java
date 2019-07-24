@@ -73,14 +73,14 @@ public class PlanarRegionSLAM
          {
             for (ImmutablePair<PlanarRegion, Point2D> matchingRegion : matchingRegions)
             {
-               PlanarRegion newRegionCopy = matchingRegion.getLeft().copy();
-               if (newRegionsConsidered.contains(newRegionCopy))
+               PlanarRegion newRegion = matchingRegion.getLeft();
+               if (newRegionsConsidered.contains(newRegion))
                {
                   continue;
                }
-               newRegionsConsidered.add(newRegionCopy);
+               newRegionsConsidered.add(newRegion);
 
-               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegionCopy);
+               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion.copy());
             }
          }
 
