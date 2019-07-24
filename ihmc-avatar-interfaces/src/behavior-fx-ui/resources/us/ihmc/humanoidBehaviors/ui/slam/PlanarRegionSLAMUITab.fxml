@@ -116,7 +116,7 @@
                   <Spinner fx:id="parameterSpinner3" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <Spinner fx:id="parameterSpinner4" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Spinner fx:id="parameterSpinner5" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <Button fx:id="saveParametersButton" mnemonicParsing="false" text="Save" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                  <Button fx:id="saveParametersButton" mnemonicParsing="false" text="Save" onAction="#saveParametersButton" GridPane.columnIndex="2" GridPane.rowIndex="3">
                      <GridPane.margin>
                         <Insets left="10.0" />
                      </GridPane.margin>
