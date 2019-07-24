@@ -101,6 +101,18 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             */
    public double execution_delay_time_;
    /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public double swing_duration_shift_fraction_ = -1.0;
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public double swing_split_fraction_ = -1.0;
+   /**
             * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
             * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
             * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
@@ -161,6 +173,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       transfer_duration_ = other.transfer_duration_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
+      swing_duration_shift_fraction_ = other.swing_duration_shift_fraction_;
+
+      swing_split_fraction_ = other.swing_split_fraction_;
 
       transfer_split_fraction_ = other.transfer_split_fraction_;
 
@@ -378,6 +394,44 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public void setSwingDurationShiftFraction(double swing_duration_shift_fraction)
+   {
+      swing_duration_shift_fraction_ = swing_duration_shift_fraction;
+   }
+   /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public double getSwingDurationShiftFraction()
+   {
+      return swing_duration_shift_fraction_;
+   }
+
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public void setSwingSplitFraction(double swing_split_fraction)
+   {
+      swing_split_fraction_ = swing_split_fraction;
+   }
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public double getSwingSplitFraction()
+   {
+      return swing_split_fraction_;
+   }
+
+   /**
             * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
             * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
             * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
@@ -495,6 +549,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_shift_fraction_, other.swing_duration_shift_fraction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_split_fraction_, other.swing_split_fraction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_split_fraction_, other.transfer_split_fraction_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.touchdown_duration_, other.touchdown_duration_, epsilon)) return false;
@@ -535,6 +593,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
+
+      if(this.swing_duration_shift_fraction_ != otherMyClass.swing_duration_shift_fraction_) return false;
+
+      if(this.swing_split_fraction_ != otherMyClass.swing_split_fraction_) return false;
 
       if(this.transfer_split_fraction_ != otherMyClass.transfer_split_fraction_) return false;
 
@@ -580,6 +642,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.transfer_duration_);      builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);      builder.append(", ");
+      builder.append("swing_duration_shift_fraction=");
+      builder.append(this.swing_duration_shift_fraction_);      builder.append(", ");
+      builder.append("swing_split_fraction=");
+      builder.append(this.swing_split_fraction_);      builder.append(", ");
       builder.append("transfer_split_fraction=");
       builder.append(this.transfer_split_fraction_);      builder.append(", ");
       builder.append("touchdown_duration=");
