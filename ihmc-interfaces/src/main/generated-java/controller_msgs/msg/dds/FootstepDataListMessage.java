@@ -78,6 +78,18 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
             */
    public double final_transfer_split_fraction_ = -1.0;
    /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double default_transfer_weight_distribution_ = -1.0;
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double final_transfer_weight_distribution_ = -1.0;
+   /**
             * If false the controller adjust each footstep height to be at the support sole height.
             */
    public boolean trust_height_of_footsteps_ = true;
@@ -131,6 +143,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
 
       final_transfer_split_fraction_ = other.final_transfer_split_fraction_;
+
+      default_transfer_weight_distribution_ = other.default_transfer_weight_distribution_;
+
+      final_transfer_weight_distribution_ = other.final_transfer_weight_distribution_;
 
       trust_height_of_footsteps_ = other.trust_height_of_footsteps_;
 
@@ -332,6 +348,44 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
    /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public void setDefaultTransferWeightDistribution(double default_transfer_weight_distribution)
+   {
+      default_transfer_weight_distribution_ = default_transfer_weight_distribution;
+   }
+   /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double getDefaultTransferWeightDistribution()
+   {
+      return default_transfer_weight_distribution_;
+   }
+
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public void setFinalTransferWeightDistribution(double final_transfer_weight_distribution)
+   {
+      final_transfer_weight_distribution_ = final_transfer_weight_distribution;
+   }
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double getFinalTransferWeightDistribution()
+   {
+      return final_transfer_weight_distribution_;
+   }
+
+   /**
             * If false the controller adjust each footstep height to be at the support sole height.
             */
    public void setTrustHeightOfFootsteps(boolean trust_height_of_footsteps)
@@ -443,6 +497,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_split_fraction_, other.final_transfer_split_fraction_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_weight_distribution_, other.default_transfer_weight_distribution_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_weight_distribution_, other.final_transfer_weight_distribution_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.trust_height_of_footsteps_, other.trust_height_of_footsteps_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_footsteps_adjustable_, other.are_footsteps_adjustable_, epsilon)) return false;
@@ -484,6 +542,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if(this.final_transfer_split_fraction_ != otherMyClass.final_transfer_split_fraction_) return false;
 
+      if(this.default_transfer_weight_distribution_ != otherMyClass.default_transfer_weight_distribution_) return false;
+
+      if(this.final_transfer_weight_distribution_ != otherMyClass.final_transfer_weight_distribution_) return false;
+
       if(this.trust_height_of_footsteps_ != otherMyClass.trust_height_of_footsteps_) return false;
 
       if(this.are_footsteps_adjustable_ != otherMyClass.are_footsteps_adjustable_) return false;
@@ -523,6 +585,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
       builder.append("final_transfer_split_fraction=");
       builder.append(this.final_transfer_split_fraction_);      builder.append(", ");
+      builder.append("default_transfer_weight_distribution=");
+      builder.append(this.default_transfer_weight_distribution_);      builder.append(", ");
+      builder.append("final_transfer_weight_distribution=");
+      builder.append(this.final_transfer_weight_distribution_);      builder.append(", ");
       builder.append("trust_height_of_footsteps=");
       builder.append(this.trust_height_of_footsteps_);      builder.append(", ");
       builder.append("are_footsteps_adjustable=");

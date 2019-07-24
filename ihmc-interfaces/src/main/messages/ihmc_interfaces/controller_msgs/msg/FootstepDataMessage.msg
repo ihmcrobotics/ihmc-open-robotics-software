@@ -76,6 +76,10 @@ float64 swing_split_fraction -1.0
 # A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
 # A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
 float64 transfer_split_fraction -1.0
+# The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+float64 transfer_weight_distribution -1.0
 
 # Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
 # effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be

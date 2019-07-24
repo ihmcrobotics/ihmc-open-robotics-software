@@ -81,6 +81,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -156,6 +158,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -202,6 +207,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_6(data.getTransferSplitFraction());
 
+      cdr.write_type_6(data.getTransferWeightDistribution());
+
       cdr.write_type_6(data.getTouchdownDuration());
 
       cdr.write_type_6(data.getLiftoffDuration());
@@ -238,6 +245,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       	
       data.setTransferSplitFraction(cdr.read_type_6());
       	
+      data.setTransferWeightDistribution(cdr.read_type_6());
+      	
       data.setTouchdownDuration(cdr.read_type_6());
       	
       data.setLiftoffDuration(cdr.read_type_6());
@@ -267,6 +276,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("swing_duration_shift_fraction", data.getSwingDurationShiftFraction());
       ser.write_type_6("swing_split_fraction", data.getSwingSplitFraction());
       ser.write_type_6("transfer_split_fraction", data.getTransferSplitFraction());
+      ser.write_type_6("transfer_weight_distribution", data.getTransferWeightDistribution());
       ser.write_type_6("touchdown_duration", data.getTouchdownDuration());
       ser.write_type_6("liftoff_duration", data.getLiftoffDuration());
    }
@@ -293,6 +303,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setSwingDurationShiftFraction(ser.read_type_6("swing_duration_shift_fraction"));
       data.setSwingSplitFraction(ser.read_type_6("swing_split_fraction"));
       data.setTransferSplitFraction(ser.read_type_6("transfer_split_fraction"));
+      data.setTransferWeightDistribution(ser.read_type_6("transfer_weight_distribution"));
       data.setTouchdownDuration(ser.read_type_6("touchdown_duration"));
       data.setLiftoffDuration(ser.read_type_6("liftoff_duration"));
    }
