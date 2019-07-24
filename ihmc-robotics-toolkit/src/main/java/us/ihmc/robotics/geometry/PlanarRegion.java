@@ -22,6 +22,7 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -917,6 +918,16 @@ public class PlanarRegion implements SupportingVertexHolder
    public void getTransformToLocal(RigidBodyTransform transformToPack)
    {
       transformToPack.set(fromWorldToLocalTransform);
+   }
+
+   public RigidBodyTransformReadOnly getTransformToLocal()
+   {
+      return fromWorldToLocalTransform;
+   }
+
+   public RigidBodyTransformReadOnly getTransformToWorld()
+   {
+      return fromLocalToWorldTransform;
    }
 
    /**
