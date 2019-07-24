@@ -136,6 +136,67 @@ public class ConcaveHullMergerTest
    }
 
    @Test
+   public void testMergeShapesNotIntersectingThoughBoundingBoxesClearlyIntersect()
+   {
+      boolean visualize = false; //true;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+
+      Point2D pointB0 = new Point2D(0.4, 0.3);
+      Point2D pointB1 = new Point2D(0.6, 0.5);
+      Point2D pointB2 = new Point2D(0.6, 0.3);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, listener);
+      if (visualize)
+         ThreadTools.sleepForever();
+      assertNull(mergedPlanarRegion);
+
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      assertNull(mergedPlanarRegion);
+   }
+
+   @Test
+   public void testMergeShapesNotIntersectingButBoundingBoxesLookLikeFullyInside()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+
+      Point2D pointB0 = new Point2D(0.2, 0.0);
+      Point2D pointB1 = new Point2D(1.2, 1.0);
+      Point2D pointB2 = new Point2D(1.2, 0.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, listener);
+      assertNull(mergedPlanarRegion);
+
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      assertNull(mergedPlanarRegion);
+
+      if (visualize)
+         ThreadTools.sleepForever();
+   }
+
+   @Test
    public void testMergePlanarRegionsWithDifferentTranslations()
    {
       boolean visualize = false;

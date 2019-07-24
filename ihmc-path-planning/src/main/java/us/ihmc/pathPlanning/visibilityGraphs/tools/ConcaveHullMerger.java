@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -36,12 +37,15 @@ public class ConcaveHullMerger
    }
 
    /**
-    * Merges two PlanarRegions and returns the merged PlanarRegion by projecting regionTwo onto the plan of regionOne, finding the intersection of their concave hull 
-    * on the plane of regionOne, and then forming a new PlanarRegion using that new concave hull. If the concave hulls of the two PlanarRegions do not intersect, returns null.
+    * Merges two PlanarRegions and returns the merged PlanarRegion by projecting regionTwo onto the
+    * plan of regionOne, finding the intersection of their concave hull on the plane of regionOne, and
+    * then forming a new PlanarRegion using that new concave hull. If the concave hulls of the two
+    * PlanarRegions do not intersect, returns null.
     * 
     * @param regionOne First PlanarRegion to merge.
     * @param regionTwo Second PlanarRegion to merge.
-    * @return Merged planarRegions or null if the concave hull of the two PlanarRegions do not intersect.
+    * @return Merged planarRegions or null if the concave hull of the two PlanarRegions do not
+    *         intersect.
     */
    public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, ConcaveHullMergerListener listener)
    {
@@ -104,7 +108,10 @@ public class ConcaveHullMerger
 
       BoundingBox2D hullOneBoundingBox = createBoundingBox(hullOne);
       BoundingBox2D hullTwoBoundingBox = createBoundingBox(hullTwo);
-      
+
+      if (!hullOneBoundingBox.intersectsExclusive(hullTwoBoundingBox))
+         return null;
+
       BoundingBox2D unionOfOriginalBoundingBoxes = BoundingBox2D.union(hullOneBoundingBox, hullTwoBoundingBox);
 
       if (listener != null)
@@ -150,6 +157,7 @@ public class ConcaveHullMerger
       }
 
       // Go in order until you hit an edge on the other convex hull or get to the end.
+      boolean foundAnIntersection = false;
       ArrayList<Point2D> mergedVertices = new ArrayList<Point2D>();
       Point2D workingVertex = startingVertex;
 
@@ -184,6 +192,7 @@ public class ConcaveHullMerger
          else
          {
             // If intersect an edge, take the path to the left.
+            foundAnIntersection = true;
             Point2D intersectionPoint = intersection.getRight();
 
             if (listener != null)
@@ -217,18 +226,35 @@ public class ConcaveHullMerger
       if (boundingBoxShrunk(unionOfOriginalBoundingBoxes, finalBoundingBox))
          return null;
 
+      if (!foundAnIntersection)
+      {
+         if (unionOfOriginalBoundingBoxes.equals(finalBoundingBox))
+         {
+            if ((!isPointInsideConcaveHull(hullTwo[0], hullOne)) && (!isPointInsideConcaveHull(hullOne[0], hullTwo)))
+            {
+               return null;
+            }
+
+            // Check to make sure the smaller concave hull is inside the bigger one. 
+            // At this point can do that by just finding one vertex that is either inside or one that is outside.
+            // Since there were no crossings, they all must be inside or all outside.
+         }
+      }
+
       return mergedVertices;
    }
 
    private static boolean boundingBoxShrunk(BoundingBox2D unionOfOriginalBoundingBoxes, BoundingBox2D finalBoundingBox)
    {
-//      return false;
-      
-      if (unionOfOriginalBoundingBoxes.getMinX() < finalBoundingBox.getMinX()) return true;
-      if (unionOfOriginalBoundingBoxes.getMinY() < finalBoundingBox.getMinY()) return true;
-      
-      if (unionOfOriginalBoundingBoxes.getMaxX() > finalBoundingBox.getMaxX()) return true;
-      if (unionOfOriginalBoundingBoxes.getMaxY() > finalBoundingBox.getMaxY()) return true;
+      if (unionOfOriginalBoundingBoxes.getMinX() < finalBoundingBox.getMinX())
+         return true;
+      if (unionOfOriginalBoundingBoxes.getMinY() < finalBoundingBox.getMinY())
+         return true;
+
+      if (unionOfOriginalBoundingBoxes.getMaxX() > finalBoundingBox.getMaxX())
+         return true;
+      if (unionOfOriginalBoundingBoxes.getMaxY() > finalBoundingBox.getMaxY())
+         return true;
       return false;
    }
 
@@ -239,7 +265,7 @@ public class ConcaveHullMerger
       double minY = Double.POSITIVE_INFINITY;
       double maxX = Double.NEGATIVE_INFINITY;
       double maxY = Double.NEGATIVE_INFINITY;
-      
+
       for (Point2D point : pointList)
       {
          minX = Math.min(minX, point.getX());
@@ -247,7 +273,7 @@ public class ConcaveHullMerger
          maxX = Math.max(maxX, point.getX());
          maxY = Math.max(maxY, point.getY());
       }
-      
+
       return new BoundingBox2D(minX, minY, maxX, maxY);
    }
 
@@ -257,7 +283,7 @@ public class ConcaveHullMerger
       double minY = Double.POSITIVE_INFINITY;
       double maxX = Double.NEGATIVE_INFINITY;
       double maxY = Double.NEGATIVE_INFINITY;
-      
+
       for (Point2D point : pointList)
       {
          minX = Math.min(minX, point.getX());
@@ -265,7 +291,7 @@ public class ConcaveHullMerger
          maxX = Math.max(maxX, point.getX());
          maxY = Math.max(maxY, point.getY());
       }
-      
+
       return new BoundingBox2D(minX, minY, maxX, maxY);
    }
 
@@ -417,5 +443,82 @@ public class ConcaveHullMerger
          return null;
 
       return new ImmutablePair<Integer, Point2D>(bestIndex, new Point2D(bestIntersection));
+   }
+
+   /**
+    * Checks if a point is inside a concave hull defined by a list of points. Does so by forming a ray
+    * from the point and making sure it crosses the hull an odd number of times. Since a previous step
+    * pushed points away from corners or vertices of the other hull, we don't need to worry too much
+    * about edge cases here or small epsilon issues. The one place we do need to worry is if a ray
+    * perfectly crosses the vertex of two edges to escape. In this case it might be counted 0, 1, or 2 times. 
+    * So to avoid this problem, we use three different rays and let them vote on it. Not very elegant, but should
+    * give a 6 sigma solution unless an adversary wants to throw us off. But for our uses here, it is good enough.
+    * 
+    * @param pointToCheck Point2D to check if inside the concaveHull
+    * @param concaveHull  Array of Point2Ds that define the concaveHull.
+    * @return true if the point is inside the concaveHull.
+    */
+   private static boolean isPointInsideConcaveHull(Point2D pointToCheck, Point2D[] concaveHull)
+   {
+      //TODO: Check with Sylvain to see if he has well tested, robust versions of this method.
+      //TODO: Add some failing test cases for the adversary edge cases and figure out a good fix.
+      int previousIndex = concaveHull.length - 1;
+      int nextIndex = 0;
+
+      Vector2D rayDirectionOne = new Vector2D(1.01, 0.02);
+      Vector2D rayDirectionTwo = new Vector2D(-1.05, 2.09);
+      Vector2D rayDirectionThree = new Vector2D(-1.07, -1.03);
+
+      int crossingCountOne = countNumberOfCrossings(pointToCheck, concaveHull, previousIndex, nextIndex, rayDirectionOne);
+      int crossingCountTwo = countNumberOfCrossings(pointToCheck, concaveHull, previousIndex, nextIndex, rayDirectionTwo);
+      int crossingCountThree = countNumberOfCrossings(pointToCheck, concaveHull, previousIndex, nextIndex, rayDirectionThree);
+
+      boolean isOddNumberOne = isOddNumber(crossingCountOne);
+      boolean isOddNumberTwo = isOddNumber(crossingCountTwo);
+      boolean isOddNumberThree = isOddNumber(crossingCountThree);
+
+      return (voteOnBooleans(isOddNumberOne, isOddNumberTwo, isOddNumberThree));
+   }
+
+   private static boolean voteOnBooleans(boolean... votes)
+   {
+      int numberFor = 0;
+      int numberAgainst = 0;
+
+      for (boolean vote : votes)
+      {
+         if (vote)
+            numberFor++;
+         else
+            numberAgainst++;
+      }
+
+      return (numberFor > numberAgainst);
+   }
+
+   private static int countNumberOfCrossings(Point2D pointToCheck, Point2D[] concaveHull, int previousIndex, int nextIndex, Vector2D rayDirection)
+   {
+      int crossingCount = 0;
+      while (nextIndex < concaveHull.length)
+      {
+         Point2D previousVertex = concaveHull[previousIndex];
+         Point2D nextVertex = concaveHull[nextIndex];
+
+         boolean rayIntersects = EuclidGeometryTools.doRay2DAndLineSegment2DIntersect(pointToCheck, rayDirection, previousVertex, nextVertex);
+
+         if (rayIntersects)
+         {
+            crossingCount++;
+         }
+
+         previousIndex = nextIndex;
+         nextIndex++;
+      }
+      return crossingCount;
+   }
+
+   private static boolean isOddNumber(int number)
+   {
+      return (number % 2 != 0);
    }
 }
