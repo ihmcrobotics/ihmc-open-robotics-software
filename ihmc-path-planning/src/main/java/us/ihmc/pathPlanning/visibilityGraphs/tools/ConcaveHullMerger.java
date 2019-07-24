@@ -28,6 +28,11 @@ public class ConcaveHullMerger
    private static final double amountToMove = 0.0015;
 
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
+   //TODO: Maybe call this class PlanarRegionMergeTools
+   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo)
+   {
+      return mergePlanarRegions(regionOne, regionTwo, null);
+   }
 
    /**
     * Merges two PlanarRegions and returns the merged PlanarRegion.
@@ -36,7 +41,7 @@ public class ConcaveHullMerger
     * @param regionTwo Second PlanarRegion to merge.
     * @return Merged planarRegions.
     */
-   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo)
+   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, ConcaveHullMergerListener listener)
    {
       RigidBodyTransform transformTwoToWorld = new RigidBodyTransform();
       regionTwo.getTransformToWorld(transformTwoToWorld);
@@ -57,7 +62,7 @@ public class ConcaveHullMerger
          concaveHullTwoVerticesTransformed[i] = new Point2D(point3D);
       }
 
-      ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(regionOne.getConcaveHull(), concaveHullTwoVerticesTransformed);
+      ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(regionOne.getConcaveHull(), concaveHullTwoVerticesTransformed, listener);
       double depthThreshold = 0.001;
       ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<ConvexPolygon2D>();
 
@@ -95,9 +100,6 @@ public class ConcaveHullMerger
       {
          listener.preprocessedHull(hullOne, hullTwo);
       }
-
-      //      printHull("hullOne", hullOne);
-      //      printHull("hullTwo", hullTwo);
 
       // Find a point that is guaranteed to be on the outside by finding one with the lowest x. 
       // In case of ties, first one should be fine
