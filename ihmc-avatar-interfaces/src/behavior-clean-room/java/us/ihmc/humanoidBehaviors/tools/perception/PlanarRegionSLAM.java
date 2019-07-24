@@ -11,15 +11,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAM
 {
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters)
    {
-      return slam(map, newDataIn, new PlanarRegionSLAMParameters());
+      return slam(map, newDataIn, parameters, null);
    }
 
    /**
@@ -30,7 +31,8 @@ public class PlanarRegionSLAM
     * @param parameters
     * @return Merged PlanarRegionsList and drift transform
     */
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters,
+                                             ConcaveHullMergerListener listener)
    {
       PlanarRegionsList transformedNewData = newDataIn;
       RigidBodyTransform totalDriftCorrectionTransform = new RigidBodyTransform();
@@ -48,13 +50,13 @@ public class PlanarRegionSLAM
          transformedNewData.transformByPreMultiply(driftCorrectionTransform);
       }
 
-      PlanarRegionsList mergedMap = generateMergedMapByMergingAllPlanarRegionsMatches(map, transformedNewData, parameters);
+      PlanarRegionsList mergedMap = generateMergedMapByMergingAllPlanarRegionsMatches(map, transformedNewData, parameters, listener);
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(totalDriftCorrectionTransform, mergedMap);
       return result;
    }
 
    private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
-                                                                                      PlanarRegionSLAMParameters parameters)
+                                                                                      PlanarRegionSLAMParameters parameters, ConcaveHullMergerListener listener)
    {
       Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
                                                                                                                                         transformedNewData,
@@ -80,7 +82,7 @@ public class PlanarRegionSLAM
                }
                newRegionsConsidered.add(newRegion);
 
-               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion);
+               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion, listener);
             }
          }
 
