@@ -119,6 +119,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             */
    public double transfer_split_fraction_ = -1.0;
    /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double transfer_weight_distribution_ = -1.0;
+   /**
             * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
             * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
             * different from the pitch of the foothold pose provided in this message.
@@ -179,6 +185,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       swing_split_fraction_ = other.swing_split_fraction_;
 
       transfer_split_fraction_ = other.transfer_split_fraction_;
+
+      transfer_weight_distribution_ = other.transfer_weight_distribution_;
 
       touchdown_duration_ = other.touchdown_duration_;
 
@@ -451,6 +459,25 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public void setTransferWeightDistribution(double transfer_weight_distribution)
+   {
+      transfer_weight_distribution_ = transfer_weight_distribution;
+   }
+   /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double getTransferWeightDistribution()
+   {
+      return transfer_weight_distribution_;
+   }
+
+   /**
             * Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
             * effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
             * different from the pitch of the foothold pose provided in this message.
@@ -555,6 +582,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_split_fraction_, other.transfer_split_fraction_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_weight_distribution_, other.transfer_weight_distribution_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.touchdown_duration_, other.touchdown_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.liftoff_duration_, other.liftoff_duration_, epsilon)) return false;
@@ -599,6 +628,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if(this.swing_split_fraction_ != otherMyClass.swing_split_fraction_) return false;
 
       if(this.transfer_split_fraction_ != otherMyClass.transfer_split_fraction_) return false;
+
+      if(this.transfer_weight_distribution_ != otherMyClass.transfer_weight_distribution_) return false;
 
       if(this.touchdown_duration_ != otherMyClass.touchdown_duration_) return false;
 
@@ -648,6 +679,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.swing_split_fraction_);      builder.append(", ");
       builder.append("transfer_split_fraction=");
       builder.append(this.transfer_split_fraction_);      builder.append(", ");
+      builder.append("transfer_weight_distribution=");
+      builder.append(this.transfer_weight_distribution_);      builder.append(", ");
       builder.append("touchdown_duration=");
       builder.append(this.touchdown_duration_);      builder.append(", ");
       builder.append("liftoff_duration=");

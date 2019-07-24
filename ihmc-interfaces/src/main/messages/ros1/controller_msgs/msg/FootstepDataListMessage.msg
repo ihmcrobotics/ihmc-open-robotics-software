@@ -61,6 +61,18 @@ float64 default_transfer_split_fraction
 # Field default value -1.0
 float64 final_transfer_split_fraction
 
+# The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+# Field default value -1.0
+float64 default_transfer_weight_distribution
+
+# The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+# Field default value -1.0
+float64 final_transfer_weight_distribution
+
 # If false the controller adjust each footstep height to be at the support sole height.
 # Field default value True
 bool trust_height_of_footsteps

@@ -61,6 +61,10 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -93,6 +97,12 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList().get(i0), current_alignment);}
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -158,6 +168,10 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_6(data.getFinalTransferSplitFraction());
 
+      cdr.write_type_6(data.getDefaultTransferWeightDistribution());
+
+      cdr.write_type_6(data.getFinalTransferWeightDistribution());
+
       cdr.write_type_7(data.getTrustHeightOfFootsteps());
 
       cdr.write_type_7(data.getAreFootstepsAdjustable());
@@ -190,6 +204,10 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setFinalTransferSplitFraction(cdr.read_type_6());
       	
+      data.setDefaultTransferWeightDistribution(cdr.read_type_6());
+      	
+      data.setFinalTransferWeightDistribution(cdr.read_type_6());
+      	
       data.setTrustHeightOfFootsteps(cdr.read_type_7());
       	
       data.setAreFootstepsAdjustable(cdr.read_type_7());
@@ -215,6 +233,8 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_6("default_swing_split_fraction", data.getDefaultSwingSplitFraction());
       ser.write_type_6("default_transfer_split_fraction", data.getDefaultTransferSplitFraction());
       ser.write_type_6("final_transfer_split_fraction", data.getFinalTransferSplitFraction());
+      ser.write_type_6("default_transfer_weight_distribution", data.getDefaultTransferWeightDistribution());
+      ser.write_type_6("final_transfer_weight_distribution", data.getFinalTransferWeightDistribution());
       ser.write_type_7("trust_height_of_footsteps", data.getTrustHeightOfFootsteps());
       ser.write_type_7("are_footsteps_adjustable", data.getAreFootstepsAdjustable());
       ser.write_type_7("offset_footsteps_with_execution_error", data.getOffsetFootstepsWithExecutionError());
@@ -236,6 +256,8 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setDefaultSwingSplitFraction(ser.read_type_6("default_swing_split_fraction"));
       data.setDefaultTransferSplitFraction(ser.read_type_6("default_transfer_split_fraction"));
       data.setFinalTransferSplitFraction(ser.read_type_6("final_transfer_split_fraction"));
+      data.setDefaultTransferWeightDistribution(ser.read_type_6("default_transfer_weight_distribution"));
+      data.setFinalTransferWeightDistribution(ser.read_type_6("final_transfer_weight_distribution"));
       data.setTrustHeightOfFootsteps(ser.read_type_7("trust_height_of_footsteps"));
       data.setAreFootstepsAdjustable(ser.read_type_7("are_footsteps_adjustable"));
       data.setOffsetFootstepsWithExecutionError(ser.read_type_7("offset_footsteps_with_execution_error"));

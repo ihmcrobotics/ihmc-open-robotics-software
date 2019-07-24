@@ -285,7 +285,7 @@ public class WalkingMessageHandler
       if (!Double.isNaN(commandDefaultTransferSplitFraction) && MathTools.intervalContains(commandDefaultTransferSplitFraction, 0.0, 1.0, false, false))
          defaultTransferSplitFraction.set(commandDefaultTransferSplitFraction);
 
-      double commandFinalTransferSplitFraction = command.getFinalTransferDuration();
+      double commandFinalTransferSplitFraction = command.getFinalTransferSplitFraction();
 
       if (commandFinalTransferSplitFraction > 0.0)
          finalTransferSplitFraction.set(commandFinalTransferSplitFraction);

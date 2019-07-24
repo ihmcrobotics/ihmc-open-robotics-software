@@ -100,6 +100,12 @@ float64 swing_split_fraction
 # Field default value -1.0
 float64 transfer_split_fraction
 
+# The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+# Field default value -1.0
+float64 transfer_weight_distribution
+
 # Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
 # effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
 # different from the pitch of the foothold pose provided in this message.

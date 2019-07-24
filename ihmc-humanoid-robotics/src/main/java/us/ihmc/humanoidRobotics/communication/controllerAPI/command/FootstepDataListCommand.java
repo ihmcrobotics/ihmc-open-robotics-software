@@ -19,6 +19,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double defaultSwingDurationShiftFraction;
    private double defaultTransferSplitFraction;
    private double finalTransferSplitFraction;
+   private double defaultTransferWeightDistribution;
+   private double finalTransferWeightDistribution;
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
@@ -47,6 +49,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDurationShiftFraction = Double.NaN;
       defaultTransferSplitFraction = Double.NaN;
       finalTransferSplitFraction = Double.NaN;
+      defaultTransferWeightDistribution = Double.NaN;
+      finalTransferWeightDistribution = Double.NaN;
       footsteps.clear();
       clearQueuableCommandVariables();
    }
@@ -64,6 +68,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDurationShiftFraction = message.getDefaultSwingDurationShiftFraction();
       defaultTransferSplitFraction = message.getDefaultTransferSplitFraction();
       finalTransferSplitFraction = message.getFinalTransferSplitFraction();
+      defaultTransferWeightDistribution = message.getDefaultTransferWeightDistribution();
+      finalTransferWeightDistribution = message.getFinalTransferWeightDistribution();
       executionTiming = ExecutionTiming.fromByte(message.getExecutionTiming());
       trustHeightOfFootsteps = message.getTrustHeightOfFootsteps();
       areFootstepsAdjustable = message.getAreFootstepsAdjustable();
@@ -92,6 +98,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDurationShiftFraction = other.defaultSwingDurationShiftFraction;
       defaultTransferSplitFraction = other.defaultTransferSplitFraction;
       finalTransferSplitFraction = other.finalTransferSplitFraction;
+      defaultTransferWeightDistribution = other.defaultTransferWeightDistribution;
+      finalTransferWeightDistribution = other.finalTransferWeightDistribution;
       executionTiming = other.executionTiming;
       adjustedExecutionTime = other.adjustedExecutionTime;
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
@@ -165,6 +173,16 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public double getFinalTransferSplitFraction()
    {
       return finalTransferSplitFraction;
+   }
+
+   public double getDefaultTransferWeightDistribution()
+   {
+      return defaultTransferWeightDistribution;
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution;
    }
 
    public ExecutionTiming getExecutionTiming()

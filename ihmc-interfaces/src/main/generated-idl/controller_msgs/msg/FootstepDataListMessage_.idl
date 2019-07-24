@@ -94,6 +94,20 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double final_transfer_split_fraction;
         /**
+         * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+         * A lower fraction means that the midpoint is located near the trailing foot.
+         * A higher fraction means that the midpoint is located near the leading foot.
+         */
+        @defaultValue(value=-1.0)
+        double default_transfer_weight_distribution;
+        /**
+         * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+         * A lower fraction means that the midpoint is located near the trailing foot.
+         * A higher fraction means that the midpoint is located near the leading foot.
+         */
+        @defaultValue(value=-1.0)
+        double final_transfer_weight_distribution;
+        /**
          * If false the controller adjust each footstep height to be at the support sole height.
          */
         @defaultValue(value=True)

@@ -48,6 +48,14 @@ float64 default_transfer_split_fraction -1.0
 # A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
 # A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
 float64 final_transfer_split_fraction -1.0
+# The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+float64 default_transfer_weight_distribution -1.0
+# The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+float64 final_transfer_weight_distribution -1.0
 # If false the controller adjust each footstep height to be at the support sole height.
 bool trust_height_of_footsteps true
 # Contains information on whether the robot can automatically adjust its footsteps to retain balance.
