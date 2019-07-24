@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -58,9 +59,8 @@ public class PlanarRegionSLAM
    private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
                                                                                       PlanarRegionSLAMParameters parameters, ConcaveHullMergerListener listener)
    {
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
-                                                                                                                                        transformedNewData,
-                                                                                                                                        parameters);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints
+            = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData, parameters);
 
       PlanarRegionsList mergedMap = new PlanarRegionsList();
 
@@ -82,11 +82,15 @@ public class PlanarRegionSLAM
                }
                newRegionsConsidered.add(newRegion);
 
-               mapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion, listener);
+               PlanarRegion mergedMapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion.copy(), listener);
+               if (mergedMapPlanarRegion != null)
+               {
+                  mapPlanarRegion = mergedMapPlanarRegion;
+               }
             }
          }
 
-         mergedMap.addPlanarRegion(mapPlanarRegion.copy());
+         mergedMap.addPlanarRegion(mapPlanarRegion);
       }
 
       for (PlanarRegion newRegion : transformedNewData.getPlanarRegionsAsList())
@@ -126,10 +130,10 @@ public class PlanarRegionSLAM
       return matchesWithReferencePoints;
    }
 
-   public static PlanarRegionSLAMResult intentionallyDrift(PlanarRegionsList newData)
+   public static PlanarRegionSLAMResult intentionallyRandomlyDrift(PlanarRegionsList newData, Random random)
    {
-      AxisAngle smallRotation = new AxisAngle(0.1, 0.1, 0.1);
-      Vector3D smallTranslation = new Vector3D(0.05, -0.05, 0.05);
+      AxisAngle smallRotation = new AxisAngle(random.nextDouble() % 0.2, random.nextDouble() % 0.2, random.nextDouble() % 0.2);
+      Vector3D smallTranslation = new Vector3D((random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
       PlanarRegionsList transformedNewData = newData.copy();
       transformedNewData.transform(smallTransform);
@@ -137,5 +141,4 @@ public class PlanarRegionSLAM
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
    }
-
 }
