@@ -128,8 +128,8 @@ public class PlanarRegionSLAMTools
       DenseMatrix64F lambdaI = CommonOps.identity(6);
       CommonOps.scale(parameters.getDampedLeastSquaresLambda(), lambdaI);
 
-      DenseMatrix64F ATransposeTimesAPlusLambdaI = new DenseMatrix64F(ATransposeTimesA);
-      CommonOps.add(ATransposeTimesAPlusLambdaI, lambdaI, ATransposeTimesAPlusLambdaI);
+      DenseMatrix64F ATransposeTimesAPlusLambdaI = new DenseMatrix64F(6, 6);
+      CommonOps.add(ATransposeTimesA, lambdaI, ATransposeTimesAPlusLambdaI);
 
       solver.setA(ATransposeTimesAPlusLambdaI);
 
