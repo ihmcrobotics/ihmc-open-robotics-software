@@ -58,7 +58,7 @@ public class ExploreAreaBehaviorUIController extends Group
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState, state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
-      planarRegionsGraphic = new PlanarRegionsGraphic();
+      planarRegionsGraphic = new PlanarRegionsGraphic(false);
    }
 
    @FXML public void exploreArea()
