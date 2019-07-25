@@ -1033,7 +1033,18 @@ public class GeometryTools
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
    }
 
-   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: Check, Unit test, JavaDoc, move where BoundingBox union is, and implement for BoundingBox3D.
+   /**
+    * Finds the intersection of two bounding boxes defined by a bounding box
+    *
+    * Allocates a new BoundingBox2D.
+    *
+    * TODO: Check, Unit test, move where BoundingBox union is, and implement for BoundingBox3D.
+    *
+    * @param a
+    * @param b
+    * @return the intersection bounding box, or null if no intersection
+    */
+   public static BoundingBox2D getIntersectionOfTwoBoundingBoxes(BoundingBox2D a, BoundingBox2D b)
    {
       double maxX = Math.min(a.getMaxX(), b.getMaxX());
       double maxY = Math.min(a.getMaxY(), b.getMaxY());
