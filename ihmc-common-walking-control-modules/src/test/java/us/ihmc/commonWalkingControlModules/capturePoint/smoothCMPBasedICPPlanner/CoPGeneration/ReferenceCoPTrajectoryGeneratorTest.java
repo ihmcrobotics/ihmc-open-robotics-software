@@ -129,6 +129,13 @@ public class ReferenceCoPTrajectoryGeneratorTest
          YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, parentRegistry);
          YoDouble transferWeightDistribution = new YoDouble("transferWeightDistribution" + i, parentRegistry);
 
+         swingDuration.setToNaN();
+         swingSplitFraction.setToNaN();
+         swingDurationShiftFraction.setToNaN();
+         transferDuration.setToNaN();
+         transferSplitFraction.setToNaN();
+         transferWeightDistribution.setToNaN();
+
          swingDurations.add(swingDuration);
          swingSplitFractions.add(swingSplitFraction);
          swingDurationShiftFractions.add(swingDurationShiftFraction);
@@ -139,8 +146,13 @@ public class ReferenceCoPTrajectoryGeneratorTest
       percentageChickenSupport.set(0.5);
       YoDouble transferDuration = new YoDouble("transferDuration" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
       YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
+      YoDouble transferWeightDistribution = new YoDouble("transferWeightDistribution" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
+      transferDuration.setToNaN();
+      transferSplitFraction.setToNaN();
+      transferWeightDistribution.setToNaN();
       transferDurations.add(transferDuration);
       transferSplitFractions.add(transferSplitFraction);
+      transferWeightDistributions.add(transferWeightDistribution);
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
@@ -176,12 +188,24 @@ public class ReferenceCoPTrajectoryGeneratorTest
       FrameQuaternion footstepOrientation = new FrameQuaternion();
       upcomingFootstepsData.clear();
 
-      for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
+      for (int i = 0; i < numberOfFootstepsToPlan; i++)
       {
          Footstep footstep = new Footstep(robotSide);
-         footstepLocation.set(i * stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
+         footstepLocation.set((i + 1) * stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
          footstep.setPose(footstepLocation, footstepOrientation);
          FootstepTiming timing = new FootstepTiming(swingTime, transferTime);
+         if (i < transferDurations.size() - 1)
+            transferDurations.get(i).set(transferTime);
+         if (i < transferSplitFractions.size() - 1)
+            transferSplitFractions.get(i).set(0.5);
+         if (i < transferWeightDistributions.size() - 1)
+            transferWeightDistributions.get(i).set(0.5);
+         if (i < swingDurations.size() - 1)
+            swingDurations.get(i).set(swingTime);
+         if (i < swingSplitFractions.size() - 1)
+            swingSplitFractions.get(i).set(0.5);
+         if (i < swingDurationShiftFractions.size() - 1)
+            swingDurationShiftFractions.get(i).set(0.95);
          upcomingFootstepsData.add(new FootstepData(footstep, timing));
          robotSide = robotSide.getOppositeSide();
       }
