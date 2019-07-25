@@ -1000,17 +1000,27 @@ public class GeometryTools
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
    }
 
-   public static Point3D midpoint(Point3DReadOnly a, Point3DReadOnly b)
+   public static void centroid(Point3DReadOnly a, Point3DReadOnly b, Point3D centroidToPack)
    {
-      Point3D midpoint = new Point3D(a);
-      midpoint.interpolate(a, b, 0.5);
-      return midpoint;
+      centroidToPack.interpolate(a, b, 0.5);
+   }
+
+   public static void vector(Point3DReadOnly from, Point3DReadOnly to, Vector3D vectorToPack)
+   {
+      vectorToPack.sub(to, from);
+   }
+
+   public static Point3D centroid(Point3DReadOnly a, Point3DReadOnly b)
+   {
+      Point3D centroid = new Point3D(a);
+      centroid(a, b, centroid);
+      return centroid;
    }
 
    public static Vector3D vector(Point3DReadOnly from, Point3DReadOnly to)
    {
-      Vector3D vector = new Vector3D(to);
-      vector.sub(from);
+      Vector3D vector = new Vector3D();
+      vector(from, to, vector);
       return vector;
    }
 
@@ -1027,7 +1037,7 @@ public class GeometryTools
       Point3DReadOnly minPoint = boundingBox.getMinPoint();
       Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
 
-      Point3D boxCenter = GeometryTools.midpoint(minPoint, maxPoint);
+      Point3D boxCenter = GeometryTools.centroid(minPoint, maxPoint);
       Vector3D size = GeometryTools.vector(minPoint, maxPoint);
 
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
