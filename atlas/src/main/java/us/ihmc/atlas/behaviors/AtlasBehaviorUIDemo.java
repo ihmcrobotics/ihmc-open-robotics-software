@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
@@ -121,9 +122,10 @@ public class AtlasBehaviorUIDemo extends Application
    private PlanarRegionsList slamDataset()
    {
       PlanarRegionsList map = PlanarRegionsList.flatGround(10.0);
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion")).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted")).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion")).getMergedMap();
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion"), parameters).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted"), parameters).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion"), parameters).getMergedMap();
       return map;
    }
 
