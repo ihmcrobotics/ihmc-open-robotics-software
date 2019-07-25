@@ -90,7 +90,7 @@ public class PlanarRegionSLAM
             }
          }
 
-         mergedMap.addPlanarRegion(mapPlanarRegion);
+         mergedMap.addPlanarRegion(mapPlanarRegion.copy());
       }
 
       for (PlanarRegion newRegion : transformedNewData.getPlanarRegionsAsList())
@@ -136,7 +136,7 @@ public class PlanarRegionSLAM
       Vector3D smallTranslation = new Vector3D((random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
       PlanarRegionsList transformedNewData = newData.copy();
-      transformedNewData.transform(smallTransform);
+      transformedNewData.transformByPreMultiply(smallTransform);
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
