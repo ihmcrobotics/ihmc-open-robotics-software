@@ -177,8 +177,6 @@ public class PlanarRegionSLAMTools
       return returnString;
    }
 
-   // MERGING
-
    public static Map<PlanarRegion, List<PlanarRegion>> filterMatchesBasedOnNormalSimilarity(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar,
                                                                                             double threshold)
    {
@@ -205,21 +203,20 @@ public class PlanarRegionSLAMTools
    }
 
    /**
-    * Filters the match set down further.
+    * Filters the match set down further. For each match so far, find newData regions that "shadow" the
+    * corresponding map region. By "shadow" we mean as if shining an orthogonal light source at the map
+    * region and seeing the shadow cast upon it by a newData region. Shadow must overlap more than
+    * minimumRegionOverlapDistance. Then, for each shadow match, add several reference points,
+    * like the vertices of the shadow. These points are the "fit" points that are put into the fit
+    * optimization algorithm.
     *
-    * For each match so far, find newData regions that "shadow" the corresponding map region.
-    * By "shadow" we mean as if shining an orthogonal light source at the map region and seeing the shadow cast upon it
-    * by a newData region. Shadow must overlap more than minimumRegionOverlapDistance.
-    *
-    * Then, for each shadow match, add four or more reference points, like the vertices of the shadow.
-    * These points are the "fit" points that are put into the fit optimization algorithm.
-    *
-    * @param minimumRegionOverlapDistance
-    * @param matchesSoFar
-    * @return mapToShadowMatchAndFitPoints
+    * @param minimumRegionOverlapDistance The minimum amount that two regions must overlap in order to consider them part of the same region.
+    * @param maximumPointProjectionDistance The maximum distance that a point will be projected from one region to the other when slam happens.
+    * @param matchesSoFar 
+    * @return A map from a map PlanarRegion to a PairList of new data PlanarRegions and Point2Ds that are points on the new region that we would like to move towards the plane of the map region.
     */
-   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>>
-   filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance, Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
+   public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance, double maximumPointProjectionDistance,
+                                                                                                            Map<PlanarRegion, List<PlanarRegion>> matchesSoFar)
    {
       HashMap<PlanarRegion, PairList<PlanarRegion, Point2D>> mapToShadowMatchAndFitPoints = new HashMap<>();
       for (PlanarRegion mapRegion : matchesSoFar.keySet())
@@ -228,14 +225,14 @@ public class PlanarRegionSLAMTools
 
          for (PlanarRegion newDataRegion : matchesSoFar.get(mapRegion))
          {
-            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal
-                  = computeNewDataRegionBoundingBoxProjectedToMapLocal(newDataRegion, mapRegion.getTransformToLocal(), newDataRegion.getTransformToWorld());
+            BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal = computeNewDataRegionBoundingBoxProjectedToMapLocal(newDataRegion,
+                                                                                                                           mapRegion.getTransformToLocal(),
+                                                                                                                           newDataRegion.getTransformToWorld());
 
             BoundingBox2D mapBoundingBoxInMapLocal = PlanarRegionTools.getLocalBoundingBox2DInLocal(mapRegion);
 
-            //TODO: Test case for minimumRegionOverlapDistance
-            boolean boundingBoxShadowsMapRegion
-                  = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal, -minimumRegionOverlapDistance);
+            boolean boundingBoxShadowsMapRegion = mapBoundingBoxInMapLocal.intersectsEpsilon(newDataRegionBoundingBoxProjectedToMapLocal,
+                                                                                             -minimumRegionOverlapDistance);
             if (boundingBoxShadowsMapRegion)
             {
                addCornerPointsOfBoundingBoxIntersectionToMatches(mapBoundingBoxInMapLocal,
@@ -243,6 +240,7 @@ public class PlanarRegionSLAMTools
                                                                  newDataRegion,
                                                                  mapRegion.getTransformToLocal(),
                                                                  newDataRegion.getTransformToWorld(),
+                                                                 maximumPointProjectionDistance,
                                                                  shadowMatches);
             }
          }
@@ -256,10 +254,10 @@ public class PlanarRegionSLAMTools
    }
 
    private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal,
-                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal,
-                                                                         PlanarRegion newDataRegion,
+                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal, PlanarRegion newDataRegion,
                                                                          RigidBodyTransformReadOnly transformFromWorldToMap,
                                                                          RigidBodyTransformReadOnly transformFromNewDataToWorld,
+                                                                         double maximumPointProjectionDistance,
                                                                          PairList<PlanarRegion, Point2D> shadowMatches)
    {
       BoundingBox2D intersection = GeometryTools.getIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
@@ -280,29 +278,52 @@ public class PlanarRegionSLAMTools
       intersection.getMinPoint(minPoint);
       intersection.getMaxPoint(maxPoint);
 
-      Point2D newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint,
-                                                                                              transformFromWorldToMap,
-                                                                                              transformFromNewDataToWorld);
-      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+      Point2D newCenterPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint, transformFromWorldToMap, transformFromNewDataToWorld, maximumPointProjectionDistance);
 
-      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld);
-      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+      Point2D newMinimumPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(minPoint, transformFromWorldToMap, transformFromNewDataToWorld, maximumPointProjectionDistance);
 
-      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld);
-      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+      Point2D newMaximumPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(maxPoint, transformFromWorldToMap, transformFromNewDataToWorld, maximumPointProjectionDistance);
 
       Point2D otherCorner = new Point2D(minPoint.getX(), maxPoint.getY());
-      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner,
-                                                                                      transformFromWorldToMap,
-                                                                                      transformFromNewDataToWorld);
-      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
+      Point2D newDataOtherCornerPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner,
+                                                                                                transformFromWorldToMap,
+                                                                                                transformFromNewDataToWorld, maximumPointProjectionDistance);
 
-      otherCorner = new Point2D(maxPoint.getX(), minPoint.getY());
-      newDataReferencePointInNewDataLocal = createNewDataReferencePointInNewDataLocal(otherCorner,
-                                                                                      transformFromWorldToMap,
-                                                                                      transformFromNewDataToWorld);
-      shadowMatches.add(newDataRegion, newDataReferencePointInNewDataLocal);
-      
+      Point2D finalCorner = new Point2D(maxPoint.getX(), minPoint.getY());
+      Point2D newFinalCornerPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(finalCorner, transformFromWorldToMap, transformFromNewDataToWorld, maximumPointProjectionDistance);
+
+      addAllIfAllAreNotNull(shadowMatches, newDataRegion,
+                            newCenterPointInNewDataLocal,
+                            newMinimumPointInNewDataLocal,
+                            newMaximumPointInNewDataLocal,
+                            newDataOtherCornerPointInNewDataLocal,
+                            newFinalCornerPointInNewDataLocal);
+
+   }
+
+   private static void addAllIfAllAreNotNull(PairList<PlanarRegion, Point2D> shadowMatches, PlanarRegion planarRegion, Point2D... pointsToAdd)
+   {
+      boolean areAnyNull = areAnyNull(pointsToAdd);
+
+      if (areAnyNull)
+      {
+         return;
+      }
+
+      for (Point2D point : pointsToAdd)
+      {
+         shadowMatches.add(planarRegion, point);
+      }
+   }
+
+   private static boolean areAnyNull(Point2D[] points)
+   {
+      for (Point2D point : points)
+      {
+         if (point == null)
+            return true;
+      }
+      return false;
    }
 
    private static BoundingBox2D computeNewDataRegionBoundingBoxProjectedToMapLocal(PlanarRegion newDataRegion,
@@ -332,13 +353,20 @@ public class PlanarRegionSLAMTools
       return newDataRegionBoundingBoxProjectedToMapLocal;
    }
 
-   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal,
-                                                                    RigidBodyTransformReadOnly transformFromWorldToMap,
-                                                                    RigidBodyTransformReadOnly transformFromNewDataToWorld)
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransformReadOnly transformFromWorldToMap,
+                                                                    RigidBodyTransformReadOnly transformFromNewDataToWorld, double maximumPointProjectionDistance)
    {
+//      System.err.println("\npointInMapLocal = " + pointInMapLocal);
+      
       Point3D newDataReferencePoint = new Point3D(pointInMapLocal);
       newDataReferencePoint.applyInverseTransform(transformFromWorldToMap);
       newDataReferencePoint.applyInverseTransform(transformFromNewDataToWorld);
+
+//      System.err.println("\nnewDataReferencePoint = " + newDataReferencePoint);
+
+      double distanceProjectedToLocal = Math.abs(newDataReferencePoint.getZ());
+      if (distanceProjectedToLocal > maximumPointProjectionDistance)
+         return null;
 
       return new Point2D(newDataReferencePoint);
    }

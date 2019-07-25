@@ -59,8 +59,9 @@ public class PlanarRegionSLAM
    private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
                                                                                       PlanarRegionSLAMParameters parameters, ConcaveHullMergerListener listener)
    {
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints
-            = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData, parameters);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
+                                                                                                                                        transformedNewData,
+                                                                                                                                        parameters);
 
       PlanarRegionsList mergedMap = new PlanarRegionsList();
 
@@ -81,7 +82,10 @@ public class PlanarRegionSLAM
                   continue;
                }
 
-               PlanarRegion mergedMapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion, newRegion.copy(), listener);
+               PlanarRegion mergedMapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion,
+                                                                                         newRegion.copy(),
+                                                                                         parameters.getMaximumPointProjectionDistance(),
+                                                                                         listener);
                if (mergedMapPlanarRegion != null)
                {
                   mapPlanarRegion = mergedMapPlanarRegion;
@@ -126,6 +130,7 @@ public class PlanarRegionSLAM
                                                                                                                                   parameters.getMinimumNormalDotProduct());
 
       Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(parameters.getMinimumRegionOverlapDistance(),
+                                                                                                                                                    parameters.getMaximumPointProjectionDistance(),
                                                                                                                                                     normalSimilarityFiltered);
       return matchesWithReferencePoints;
    }
