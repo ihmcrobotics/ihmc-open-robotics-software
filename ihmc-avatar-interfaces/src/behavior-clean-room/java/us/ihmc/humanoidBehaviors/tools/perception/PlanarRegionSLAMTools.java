@@ -262,7 +262,7 @@ public class PlanarRegionSLAMTools
                                                                          RigidBodyTransformReadOnly transformFromNewDataToWorld,
                                                                          PairList<PlanarRegion, Point2D> shadowMatches)
    {
-      BoundingBox2D intersection = GeometryTools.intersection(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+      BoundingBox2D intersection = GeometryTools.getIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
       if (intersection == null)
       {
