@@ -165,9 +165,10 @@ public class ConcaveHullMerger
 
       int edgeStartIndexToSkip = -1;
       int count = 0;
-      while (count < hullOne.length + hullTwo.length + 2)
+      boolean exitedWithoutALoop = false;
+
+      while (count <= hullOne.length + hullTwo.length)
       {
-         count++;
          mergedVertices.add(workingVertex);
 
          Point2D nextVertex = workingHull[nextIndex];
@@ -184,8 +185,12 @@ public class ConcaveHullMerger
             workingVertex = nextVertex;
 
             if (workingVertex == startingVertex)
+            {
+               exitedWithoutALoop = true;
                break;
+            }
 
+            count++;
             nextIndex = (nextIndex + 1) % workingHull.length;
             edgeStartIndexToSkip = -1;
          }
@@ -214,12 +219,15 @@ public class ConcaveHullMerger
             nextIndex = intersection.getLeft();
             workingVertex = intersectionPoint;
          }
-
       }
 
-      if (mergedVertices.size() > hullOne.length + hullTwo.length)
+      if (!exitedWithoutALoop)
       {
          LogTools.error("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!");
+         if (listener != null)
+         {
+            listener.hullGotLooped(hullOne, hullTwo, mergedVertices);
+         }
       }
 
       BoundingBox2D finalBoundingBox = createBoundingBox(mergedVertices);
@@ -379,7 +387,7 @@ public class ConcaveHullMerger
       return new Point2D(hullPoint);
    }
 
-   private static void printHull(String name, Point2D[] hullPoints)
+   public static void printHull(String name, Point2D[] hullPoints)
    {
       System.out.print(name + " = new double[][]{");
 
@@ -387,7 +395,15 @@ public class ConcaveHullMerger
       {
          Point2D point = hullPoints[i];
 
-         System.out.println("{" + point.getX() + ", " + point.getY() + "}");
+         System.out.print("{" + point.getX() + ", " + point.getY() + "}");
+         if (i == hullPoints.length -1 )
+         {
+            System.out.println();
+         }
+         else
+         {
+            System.out.println(",");
+         }
       }
       System.out.println("};");
    }
