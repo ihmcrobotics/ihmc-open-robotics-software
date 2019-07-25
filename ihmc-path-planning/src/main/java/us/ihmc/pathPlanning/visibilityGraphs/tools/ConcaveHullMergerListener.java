@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -17,6 +18,9 @@ public class ConcaveHullMergerListener
    private final FrameGeometry2dPlotter plotter;
    private final Color colorOne = Color.red;
    private final Color colorTwo = Color.green;
+   private final Color loopedVerticesColor = Color.blue;
+   
+   
    private final Color startingVertexColorOne = Color.pink;
    private final Color startingVertexColorTwo = Color.cyan;
    private final Color intersectionVertexColorOne = Color.black;
@@ -83,4 +87,34 @@ public class ConcaveHullMergerListener
          plotter.addFramePoint2d(new FramePoint2D(worldFrame, intersectionPoint), intersectionVertexColorTwo);
       }
    }
+
+   public void hullGotLooped(Point2D[] hullOne, Point2D[] hullTwo, ArrayList<Point2D> mergedVertices)
+   {
+      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame("Caught Loop!", xMin, xMax, yMin, yMax);
+      FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+      plotter.setPointPixels(16);
+      
+      for (Point2D point : hullOne)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorOne);
+      }
+
+      for (Point2D point : hullTwo)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), colorTwo);
+      }
+      
+      plotter.setPointPixels(8);
+
+      for (Point2D point : mergedVertices)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(worldFrame, point), loopedVerticesColor);
+      }
+      
+      System.out.println("\n\n");
+      ConcaveHullMerger.printHull("hullOne", hullOne);
+      System.out.println("\n\n");
+      ConcaveHullMerger.printHull("hullTwo", hullTwo);
+   }
+   
 }
