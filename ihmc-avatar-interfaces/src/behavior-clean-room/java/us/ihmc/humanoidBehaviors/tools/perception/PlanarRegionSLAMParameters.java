@@ -29,7 +29,8 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey minimumNormalDotProduct = keys.addDoubleKey("Minimum normal dot product");
    public static final DoubleStoredPropertyKey dampedLeastSquaresLambda = keys.addDoubleKey("Damped least squares lambda");
    public static final DoubleStoredPropertyKey minimumRegionOverlapDistance = keys.addDoubleKey("Minimum Region Overlap Distance");
-
+   public static final DoubleStoredPropertyKey maximumPointProjectionDistance = keys.addDoubleKey("Maximum Point Projection Distance");
+   
    public PlanarRegionSLAMParameters()
    {
       super(keys,
@@ -89,6 +90,17 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    {
       set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, minimumRegionOverlapDistance);
    }
+   
+   public double getMaximumPointProjectionDistance()
+   {
+      return get(maximumPointProjectionDistance);
+   }
+
+   public void setMaximumPointProjectionDistance(double maximumPointProjectionDistance)
+   {
+      set(PlanarRegionSLAMParameters.maximumPointProjectionDistance, maximumPointProjectionDistance);
+   }
+   
 
    /**
     * Run to update file with new parameters.
