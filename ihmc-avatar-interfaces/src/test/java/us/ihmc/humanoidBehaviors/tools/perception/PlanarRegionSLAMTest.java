@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -350,6 +351,53 @@ class PlanarRegionSLAMTest
       if (visualize)
       {
          visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
+   }
+
+   @Test
+   public void testSLAMWithThreeWallsAndAShallowRamp()
+   {
+      boolean visualize = false;
+
+      PlanarRegionsList map;
+      PlanarRegionsList newData;
+
+      PlanarRegionSLAMResult slamResult;
+      PlanarRegionsList mergedMap;
+      RigidBodyTransform transformResult;
+
+      // No transform. Exactly the same walls. But make sure the ramp does not disappear.
+      map = createSomeRightAngledWalls(false, new RigidBodyTransform(), true, true, true);
+      newData = createSomeRightAngledWalls(false, new RigidBodyTransform(), true, true, true);
+
+      double[][] rampPoints = new double[][] {{0.0, 0.0}, {3.0, 0.0}, {3.0, 1.0}, {0.0, 1.0}};
+      RigidBodyTransform rampTransform = new RigidBodyTransform();
+      rampTransform.setRotationPitch(Math.toRadians(-5.0));
+      ConvexPolygon2D rampPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(rampPoints));
+      PlanarRegion rampPlanarRegion = new PlanarRegion(rampTransform, rampPolygon);
+      newData.addPlanarRegion(rampPlanarRegion);
+
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setBoundingBoxHeight(0.1);
+      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setIterationsForMatching(1);
+
+      slamResult = PlanarRegionSLAM.slam(map, newData, parameters);
+      mergedMap = slamResult.getMergedMap();
+      transformResult = slamResult.getTransformFromIncomingToMap();
+
+      LogTools.info("transformResult = \n{} ", transformResult);
+      assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
+      assertEquals(4, mergedMap.getNumberOfPlanarRegions());
+
+      PlanarRegion projectionRegionToMakeSureRampExists = mergedMap.findClosestPlanarRegionToPointByProjectionOntoXYPlane(new Point2D(2.0, 0.5));
+      RigidBodyTransform rampTransformRecovered = projectionRegionToMakeSureRampExists.getTransformToWorldCopy();
+      assertTrue(rampTransformRecovered.epsilonEquals(rampTransform, 1e-7));
+
+      if (visualize)
+      {
+         visualizePlanarRegions(map, newData, mergedMap);
          ThreadTools.sleepForever();
       }
    }
@@ -773,13 +821,19 @@ class PlanarRegionSLAMTest
       return square;
    }
 
-   private void visualizePlanarRegions(PlanarRegionsList planarRegions)
+   private void visualizePlanarRegions(PlanarRegionsList... planarRegions)
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic(false);
-      regionsGraphic.generateMeshes(planarRegions);
-      regionsGraphic.update();
+      ArrayList<PlanarRegionsGraphic> planarRegionGraphics = new ArrayList<PlanarRegionsGraphic>();
+
+      for (PlanarRegionsList planarRegionsList : planarRegions)
+      {
+         PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic(false);
+         regionsGraphic.generateMeshes(planarRegionsList);
+         regionsGraphic.update();
+         planarRegionGraphics.add(regionsGraphic);
+      }
 
       final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -795,7 +849,11 @@ class PlanarRegionSLAMTest
             view3dFactory.addCameraController(0.05, 2000.0, true);
             view3dFactory.addWorldCoordinateSystem(0.3);
             view3dFactory.addDefaultLighting();
-            view3dFactory.addNodeToView(regionsGraphic);
+
+            for (PlanarRegionsGraphic regionsGraphic : planarRegionGraphics)
+            {
+               view3dFactory.addNodeToView(regionsGraphic);
+            }
 
             Stage stage = new Stage();
             stage.setTitle(getClass().getSimpleName());
