@@ -106,7 +106,17 @@ public class PlanarRegionSLAMUITabController extends Group
       parameterSpinner4.setValueFactory(
             new DoubleSpinnerValueFactory(0.0, 0.2, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.boundingBoxHeight), 0.005));
       parameterSpinner5.setValueFactory(
-            new DoubleSpinnerValueFactory(0.0, 0.2, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumRegionOverlapDistance), 0.01));
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumRegionOverlapDistance), 0.01));
+      parameterSpinner1.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.iterationsForMatching, parameterSpinner1.getValue()));
+      parameterSpinner2.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.minimumNormalDotProduct, parameterSpinner2.getValue()));
+      parameterSpinner3.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.dampedLeastSquaresLambda, parameterSpinner3.getValue()));
+      parameterSpinner4.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.boundingBoxHeight, parameterSpinner4.getValue()));
+      parameterSpinner5.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, parameterSpinner5.getValue()));
       });
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
