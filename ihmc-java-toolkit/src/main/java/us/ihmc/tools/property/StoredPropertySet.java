@@ -15,9 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Provides a load/saveable property set accessed by strongly typed static keys.
@@ -159,7 +157,15 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    {
       ExceptionTools.handle(() ->
       {
-         Properties properties = new Properties();
+         Properties properties = new Properties()
+         {
+            @Override
+            public synchronized Enumeration<Object> keys() {
+               TreeSet<Object> tree = new TreeSet<>(Comparator.comparingInt(o -> indexOfCamelCaseName(o))); // sort by index
+               tree.addAll(super.keySet());
+               return Collections.enumeration(tree);
+            }
+         };
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
@@ -174,10 +180,23 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
          }
 
          Path fileForSaving = findFileForSaving();
+         LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
          properties.store(new PrintWriter(fileForSaving.toFile()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
 
          convertLineEndingsToUnix(fileForSaving);
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   private int indexOfCamelCaseName(Object camelCaseName)
+   {
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         if (key.getCamelCasedName().equals(camelCaseName))
+         {
+            return key.getIndex();
+         }
+      }
+      return 0;
    }
 
    private void convertLineEndingsToUnix(Path fileForSaving)
