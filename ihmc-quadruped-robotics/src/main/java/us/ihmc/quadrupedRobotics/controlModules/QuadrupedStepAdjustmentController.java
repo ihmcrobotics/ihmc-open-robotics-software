@@ -51,7 +51,7 @@ public class QuadrupedStepAdjustmentController
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
    private final DoubleParameter dcmErrorDeadbandForStepAdjustment = new DoubleParameter("dcmErrorDeadbandForStepAdjustment", registry, 0.0);
    private final BooleanParameter useTimeBasedStepAdjustment = new BooleanParameter("useTimeBasedStepAdjustment", registry, true);
-   private final BooleanParameter projectAdjustmentIntoPlanarRegions = new BooleanParameter("projectAdjustmentIntoPlanarRegions", registry, false);
+   private final BooleanParameter projectAdjustmentIntoPlanarRegions = new BooleanParameter("projectAdjustmentIntoPlanarRegions", registry, true);
 
    private final BooleanParameter allowStepAdjustment = new BooleanParameter("allowStepAdjustment", registry, true);
 
