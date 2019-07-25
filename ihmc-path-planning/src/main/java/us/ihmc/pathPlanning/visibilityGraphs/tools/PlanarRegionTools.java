@@ -949,7 +949,7 @@ public class PlanarRegionTools
       BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
-      Box3D box = GeometryTools.convertBoundingBoxToBox(boundingBox3DInLocal);
+      Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
       box.applyTransform(planarRegion.getTransformToWorld());
       return box;
    }

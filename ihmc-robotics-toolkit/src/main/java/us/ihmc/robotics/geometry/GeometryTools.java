@@ -1014,7 +1014,15 @@ public class GeometryTools
       return vector;
    }
 
-   public static Box3D convertBoundingBoxToBox(BoundingBox3DReadOnly boundingBox)
+   /**
+    * Creates a 3D Euclid Box (a Shape) out of a 3D Bounding Box.
+    *
+    * Allocates a new Box3D.
+    *
+    * @param boundingBox
+    * @return box
+    */
+   public static Box3D convertBoundingBox3DToBox3D(BoundingBox3DReadOnly boundingBox)
    {
       Point3DReadOnly minPoint = boundingBox.getMinPoint();
       Point3DReadOnly maxPoint = boundingBox.getMaxPoint();

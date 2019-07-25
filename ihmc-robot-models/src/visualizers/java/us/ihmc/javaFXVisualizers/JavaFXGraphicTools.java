@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
@@ -90,7 +89,7 @@ public class JavaFXGraphicTools
 
    public static void drawBoxEdges(JavaFXMeshBuilder meshBuilder, BoundingBox3DReadOnly boundingBox, double lineWidth)
    {
-      drawBoxEdges(meshBuilder, GeometryTools.convertBoundingBoxToBox(boundingBox), lineWidth);
+      drawBoxEdges(meshBuilder, GeometryTools.convertBoundingBox3DToBox3D(boundingBox), lineWidth);
    }
 
    public static void drawBoxEdges(JavaFXMeshBuilder meshBuilder, Box3DReadOnly box, double lineWidth)
