@@ -923,13 +923,21 @@ public class PlanarRegionTools
 
    public static BoundingBox2D getLocalBoundingBox2DInLocal(PlanarRegion planarRegion)
    {
-      BoundingBox2D boundingBox2DInLocal = new BoundingBox2D();
+      BoundingBox2D boundingBox2DInLocal = null;
 
       for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
          for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
          {
-            boundingBox2DInLocal.updateToIncludePoint(convexPolygon.getVertex(j).getX(), convexPolygon.getVertex(j).getY());
+            Point2DReadOnly vertex = convexPolygon.getVertex(j);
+            if (boundingBox2DInLocal == null)
+            {
+               boundingBox2DInLocal = new BoundingBox2D(vertex, vertex);
+            }
+            else
+            {
+               boundingBox2DInLocal.updateToIncludePoint(vertex);
+            }
          }
       }
 
