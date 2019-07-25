@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -28,7 +29,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -222,9 +225,9 @@ class PlanarRegionSLAMTest
 
       PlanarRegionsList planarRegionsListA = new PlanarRegionsList(regionA);
       PlanarRegionsList planarRegionsListB = new PlanarRegionsList(regionB);
-      
+
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      
+
       ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListB, parameters, listener);
 
@@ -235,8 +238,120 @@ class PlanarRegionSLAMTest
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
       }
-      
+
       assertEquals(2, mergedMap.getNumberOfPlanarRegions());
+   }
+
+   @Test
+   public void testSLAMWithAddingTwoSquaresToMapSquare()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      Point2D pointB0 = new Point2D(-1.0, 0.0);
+      Point2D pointB1 = new Point2D(-1.0, 1.0);
+      Point2D pointB2 = new Point2D(0.1, 1.0);
+      Point2D pointB3 = new Point2D(0.1, 0.0);
+
+      Point2D pointC0 = new Point2D(0.9, 0.0);
+      Point2D pointC1 = new Point2D(0.9, 1.0);
+      Point2D pointC2 = new Point2D(2.0, 1.0);
+      Point2D pointC3 = new Point2D(2.0, 0.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
+      ConvexPolygon2D polygonC = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointC0, pointC1, pointC2, pointC3));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+      PlanarRegion regionC = new PlanarRegion(new RigidBodyTransform(), polygonC);
+
+      PlanarRegionsList planarRegionsListA = new PlanarRegionsList(regionA);
+      PlanarRegionsList planarRegionsListBC = new PlanarRegionsList(regionB, regionC);
+
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setMinimumRegionOverlapDistance(0.0999);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
+      PlanarRegionsList mergedMap = slamResult.getMergedMap();
+
+      assertEquals(1, mergedMap.getNumberOfPlanarRegions());
+      PlanarRegion planarRegion = mergedMap.getPlanarRegion(0);
+      BoundingBox3D boundingBox3d = planarRegion.getBoundingBox3dInWorld();
+      assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 1e-3));
+
+      parameters.setMinimumRegionOverlapDistance(0.1001);
+      slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
+      mergedMap = slamResult.getMergedMap();
+      assertEquals(3, mergedMap.getNumberOfPlanarRegions());
+
+      slamResult = PlanarRegionSLAM.slam(planarRegionsListBC, planarRegionsListA, parameters, listener);
+      mergedMap = slamResult.getMergedMap();
+      assertEquals(3, mergedMap.getNumberOfPlanarRegions());
+
+      if (visualize)
+      {
+         visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
+   }
+
+   @Test
+   public void testSLAMWithThreeUnconnectedSquares()
+   {
+      boolean visualize = false;
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      Point2D pointB0 = new Point2D(-1.0, 0.0);
+      Point2D pointB1 = new Point2D(-1.0, 1.0);
+      Point2D pointB2 = new Point2D(-0.1, 1.0);
+      Point2D pointB3 = new Point2D(-0.1, 0.0);
+
+      Point2D pointC0 = new Point2D(1.1, 0.0);
+      Point2D pointC1 = new Point2D(1.1, 1.0);
+      Point2D pointC2 = new Point2D(2.0, 1.0);
+      Point2D pointC3 = new Point2D(2.0, 0.0);
+
+      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
+      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
+      ConvexPolygon2D polygonC = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointC0, pointC1, pointC2, pointC3));
+
+      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+      PlanarRegion regionC = new PlanarRegion(new RigidBodyTransform(), polygonC);
+
+      PlanarRegionsList planarRegionsListA = new PlanarRegionsList(regionA);
+      PlanarRegionsList planarRegionsListBC = new PlanarRegionsList(regionB, regionC);
+
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setMinimumRegionOverlapDistance(0.05);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
+      PlanarRegionsList mergedMap = slamResult.getMergedMap();
+      assertEquals(3, mergedMap.getNumberOfPlanarRegions());
+
+      slamResult = PlanarRegionSLAM.slam(planarRegionsListBC, planarRegionsListA, parameters, listener);
+      mergedMap = slamResult.getMergedMap();
+      assertEquals(3, mergedMap.getNumberOfPlanarRegions());
+
+      if (visualize)
+      {
+         visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
    }
 
    private void assertTransformsAreInverses(RigidBodyTransform expectedTransform, RigidBodyTransform transform, double epsilon)
@@ -702,5 +817,12 @@ class PlanarRegionSLAMTest
       catch (InterruptedException e)
       {
       }
+   }
+
+   public static void main(String[] args)
+   {
+      //      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionSLAM.class, PlanarRegionSLAMTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClasses(new Class[] {PlanarRegionSLAM.class, ConcaveHullMerger.class},
+                                                               new Class[] {PlanarRegionSLAMTest.class, ConcaveHullMergerTest.class});
    }
 }

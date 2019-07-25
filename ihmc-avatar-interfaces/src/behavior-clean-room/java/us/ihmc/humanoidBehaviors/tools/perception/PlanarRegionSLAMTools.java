@@ -57,6 +57,9 @@ public class PlanarRegionSLAMTools
          numberOfMatches += newDataRegionWithReferencePoints.size();
       }
 
+      if (numberOfMatches == 0)
+         return new RigidBodyTransform();
+
       DenseMatrix64F A = new DenseMatrix64F(numberOfMatches, 6);
       DenseMatrix64F b = new DenseMatrix64F(numberOfMatches, 1); // negative distance to planes
 
