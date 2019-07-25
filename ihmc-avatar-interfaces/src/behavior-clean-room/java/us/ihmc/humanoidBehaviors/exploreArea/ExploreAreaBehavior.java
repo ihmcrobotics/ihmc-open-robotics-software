@@ -63,6 +63,8 @@ import us.ihmc.tools.thread.TypedNotification;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
+   private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
+
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
