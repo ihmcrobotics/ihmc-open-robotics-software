@@ -19,7 +19,7 @@ mainDependencies {
    compile group: "net.wimpi", name: "jamod", version: "1.2"
    compile group: "commons-collections", name: "commons-collections", version: "3.2.1"
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
@@ -33,7 +33,7 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 applicationName = "RobotiqControlThread"
