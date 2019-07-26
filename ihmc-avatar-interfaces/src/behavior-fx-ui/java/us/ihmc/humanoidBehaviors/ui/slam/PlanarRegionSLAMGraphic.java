@@ -87,7 +87,7 @@ public class PlanarRegionSLAMGraphic extends Group
                                                                                                          listToMerge,
                                                                                                          parameters.getBoundingBoxHeight());
       Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
-      matchesWithReferencePoints = filterMatchesBasedOn2DBoundingBoxShadow(0.01, normalSimilarityFiltered);
+      matchesWithReferencePoints = filterMatchesBasedOn2DBoundingBoxShadow(0.01, 0.03, normalSimilarityFiltered);
 
       meshGraphic.generateMeshesAsync();
 

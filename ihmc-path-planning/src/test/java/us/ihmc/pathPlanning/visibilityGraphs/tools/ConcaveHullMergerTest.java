@@ -46,7 +46,7 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
 
       Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(8, concaveHull.length);
@@ -84,7 +84,7 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
 
       Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(4, concaveHull.length);
@@ -96,7 +96,7 @@ public class ConcaveHullMergerTest
 
       assertEquals(1, mergedPlanarRegion.getNumberOfConvexPolygons());
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
 
       concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(4, concaveHull.length);
@@ -128,10 +128,10 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
       assertNull(mergedPlanarRegion);
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
       assertNull(mergedPlanarRegion);
    }
 
@@ -156,12 +156,12 @@ public class ConcaveHullMergerTest
 
       ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, listener);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       if (visualize)
          ThreadTools.sleepForever();
       assertNull(mergedPlanarRegion);
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
       assertNull(mergedPlanarRegion);
    }
 
@@ -186,10 +186,10 @@ public class ConcaveHullMergerTest
 
       ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, listener);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       assertNull(mergedPlanarRegion);
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA);
+      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
       assertNull(mergedPlanarRegion);
 
       if (visualize)
@@ -221,7 +221,7 @@ public class ConcaveHullMergerTest
 
       PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
 
       regionA.setRegionId(1);
       regionB.setRegionId(2);
@@ -311,7 +311,7 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(point2DB0, point2DB1, point2DB2, point2DB3));
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB);
+      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
 
       regionA.setRegionId(1);
       regionB.setRegionId(2);
