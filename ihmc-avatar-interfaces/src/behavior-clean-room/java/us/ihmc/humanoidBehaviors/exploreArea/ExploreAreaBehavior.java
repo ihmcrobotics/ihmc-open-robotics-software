@@ -66,12 +66,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final List<Double> chestYawsForLookingAround = Arrays.asList(0.0);//-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
+   private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
    private final double turnChestTrajectoryDuration = 1.0;
-   private final double turnTrajectoryWaitTimeMulitplier = 1.0;
-   private final double perceiveDuration = 20.0;
+   private final double turnTrajectoryWaitTimeMulitplier = 3.0;
+   private final double perceiveDuration = 28.0;
    
    private int chestYawForLookingAroundIndex = 0;
 
@@ -97,10 +97,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -8.0, 6.0, 8.0);
 
-   private double minimumDistanceBetweenObservationPoints = 2.0;
+   private double minimumDistanceBetweenObservationPoints = 0.0; //2.0;
    private double minDistanceToWalkIfPossible = 3.0;
-   private double exploreGridXSteps = 0.25;
-   private double exploreGridYSteps = 0.25;
+   private double exploreGridXSteps = 0.5;
+   private double exploreGridYSteps = 0.5;
 
    public ExploreAreaBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
@@ -265,9 +265,11 @@ public class ExploreAreaBehavior implements BehaviorInterface
       {
          PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters();
 
-         slamParameters.setBoundingBoxHeight(0.03);
-         slamParameters.setIterationsForMatching(10);
-         slamParameters.setDampedLeastSquaresLambda(1.0);
+         slamParameters.setIterationsForMatching(3);
+         slamParameters.setBoundingBoxHeight(0.05);
+         slamParameters.setMinimumNormalDotProduct(0.99);
+         slamParameters.setDampedLeastSquaresLambda(5.0); 
+         slamParameters.setMaximumPointProjectionDistance(0.05);
 
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
 
@@ -279,7 +281,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       computeMapBoundingBox3D();
 
       LogTools.info("concatenatedMap has " + concatenatedMap.getNumberOfPlanarRegions() + " planar Regions");
-      LogTools.info("boundingBox = " + concatenatedMapBoundingBox);
+      LogTools.info("concatenatedMapBoundingBox = " + concatenatedMapBoundingBox);
 
       List<PlanarRegion> planarRegionsAsList = concatenatedMap.getPlanarRegionsAsList();
 
@@ -419,7 +421,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
       for (Point3D testGoal : potentialPoints)
       {
          //         LogTools.info("Looking for body path to " + testGoal);
-         messager.submitMessage(ExploreAreaBehaviorAPI.PlanningToPosition, testGoal);
 
          List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(midFeetPosition, testGoal);
          numberConsidered++;
@@ -427,6 +428,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          if (bodyPath != null)
          {
             //            LogTools.info("Found body path to " + testGoal);
+            messager.submitMessage(ExploreAreaBehaviorAPI.FoundBodyPathTo, new Point3D(testGoal));
 
             feasibleGoalPoints.add(testGoal);
             potentialBodyPaths.put(testGoal, bodyPath);
@@ -681,8 +683,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
       public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
-      public static final Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
       public static final Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
+      public static final Topic<Point3D> FoundBodyPathTo = topic("FoundBodyPathTo");
+      public static final Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
       public static final Topic<Boolean> DrawMap = topic("DrawMap");
       public static final Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");
       public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");

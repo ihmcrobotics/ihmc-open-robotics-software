@@ -62,6 +62,8 @@ public class ExploreAreaBehaviorUIController extends Group
                                              result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PlanningToPosition,
                                              result -> Platform.runLater(() -> displayPlanningToPosition(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.FoundBodyPathTo,
+                                             result -> Platform.runLater(() -> displayFoundBodyPathTo(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ClearPlanarRegions,
                                              result -> Platform.runLater(() -> clearPlanarRegions(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
@@ -71,7 +73,8 @@ public class ExploreAreaBehaviorUIController extends Group
                                              result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
 
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState, state -> Platform.runLater(() -> stateTextField.setText(state.name())));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState,
+                                             state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
       JavaFXParameterTable javaFXParameterTable = new JavaFXParameterTable(parameterTable);
 
@@ -98,15 +101,11 @@ public class ExploreAreaBehaviorUIController extends Group
 
       javaFXParameterTable.updateEntries();
 
-
-//      TableColumn<AnchorPane, ExploreAreaBehaviorParameters> nameColumn = new TableColumn<>("Name");
-//      nameColumn.setCellValueFactory(param -> param.getTableView());
-
+      //      TableColumn<AnchorPane, ExploreAreaBehaviorParameters> nameColumn = new TableColumn<>("Name");
+      //      nameColumn.setCellValueFactory(param -> param.getTableView());
 
       planarRegionsGraphic = new PlanarRegionsGraphic(false);
    }
-
-//   class
 
    @FXML public void exploreArea()
    {
@@ -118,42 +117,32 @@ public class ExploreAreaBehaviorUIController extends Group
       parameters.save();
    }
 
+   private BunchOfPointsDisplayer observationPointsDisplayer = new BunchOfPointsDisplayer(this);
+   private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(this);
+   private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(this);
+   private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(this);
+   
    public void displayObservationPosition(Point3D observationPosition)
    {
-      PositionGraphic observationPositionGraphic = new PositionGraphic(Color.AZURE, 0.04);
-      observationPositionGraphic.setPosition(observationPosition);
-      getChildren().add(observationPositionGraphic.getNode());
+      observationPointsDisplayer.displayPoint(observationPosition, Color.AZURE, 0.04);
    }
 
-   private PositionGraphic planningToPositionGraphic;
-   public void displayPlanningToPosition(Point3D planningToPosition)
-   {
-      if (planningToPositionGraphic != null)
-      {
-         getChildren().remove(planningToPositionGraphic.getNode());
-      }
-
-      planningToPositionGraphic = new PositionGraphic(Color.AZURE, 0.04);
-      planningToPositionGraphic.setPosition(planningToPosition);
-      getChildren().add(planningToPositionGraphic.getNode());
-   }
-
-   ArrayList<PositionGraphic> potentialPointsToExploreGraphics = new ArrayList<PositionGraphic>();
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
    {
-      for (PositionGraphic graphic : potentialPointsToExploreGraphics)
-      {
-         getChildren().remove(graphic.getNode());
-      }
-      potentialPointsToExploreGraphics.clear();
+      potentialPointsToExploreDisplayer.clear();
+      foundBodyPathToPointsDisplayer.clear();
+      planningToPointsDisplayer.clear();
+      potentialPointsToExploreDisplayer.displayPoints(potentialPointsToExplore, Color.BLACK, 0.01);
+   }
 
-      for (Point3D point : potentialPointsToExplore)
-      {
-         PositionGraphic potentialPointToExploreGraphic = new PositionGraphic(Color.BLACK, 0.02);
-         potentialPointToExploreGraphic.setPosition(point);
-         potentialPointsToExploreGraphics.add(potentialPointToExploreGraphic);
-         getChildren().add(potentialPointToExploreGraphic.getNode());
-      }
+   public void displayFoundBodyPathTo(Point3D foundBodyPathToPoint)
+   {
+      foundBodyPathToPointsDisplayer.displayPoint(foundBodyPathToPoint, Color.CORAL, 0.02);
+   }
+
+   public void displayPlanningToPosition(Point3D planningToPosition)
+   {
+      planningToPointsDisplayer.displayPoint(planningToPosition, Color.BLUEVIOLET, 0.03);
    }
 
    public void clearPlanarRegions(boolean input)
@@ -208,5 +197,42 @@ public class ExploreAreaBehaviorUIController extends Group
       }
 
       polygons.add(polygon);
+   }
+
+   private static class BunchOfPointsDisplayer
+   {
+      private final Group group;
+      private final ArrayList<PositionGraphic> positionGraphics = new ArrayList<PositionGraphic>();
+
+      public BunchOfPointsDisplayer(Group group)
+      {
+         this.group = group;
+      }
+
+      public void clear()
+      {
+         for (PositionGraphic graphic : positionGraphics)
+         {
+            group.getChildren().remove(graphic.getNode());
+         }
+
+         positionGraphics.clear();
+      }
+
+      public void displayPoints(ArrayList<Point3D> points, Color color, double diameter)
+      {
+         for (Point3D point : points)
+         {
+            displayPoint(point, color, diameter);
+         }
+      }
+
+      public void displayPoint(Point3D point, Color color, double diameter)
+      {
+         PositionGraphic potentialPointToExploreGraphic = new PositionGraphic(color, diameter);
+         potentialPointToExploreGraphic.setPosition(point);
+         positionGraphics.add(potentialPointToExploreGraphic);
+         group.getChildren().add(potentialPointToExploreGraphic.getNode());
+      }
    }
 }
