@@ -10,5 +10,7 @@ public interface StoredPropertySetReadOnly
 
    boolean get(BooleanStoredPropertyKey key);
 
+   Object get(StoredPropertyKey key);
+
    List<Object> getAll();
 }

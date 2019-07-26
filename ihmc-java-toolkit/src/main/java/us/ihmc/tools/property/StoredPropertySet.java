@@ -69,6 +69,12 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return (Boolean) values[key.getIndex()];
    }
 
+   @Override
+   public Object get(StoredPropertyKey key)
+   {
+      return values[key.getIndex()];
+   }
+
    public void set(DoubleStoredPropertyKey key, double value)
    {
       values[key.getIndex()] = value;
@@ -80,6 +86,11 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    }
 
    public void set(BooleanStoredPropertyKey key, boolean value)
+   {
+      values[key.getIndex()] = value;
+   }
+
+   public void set(StoredPropertyKey key, Object value)
    {
       values[key.getIndex()] = value;
    }
