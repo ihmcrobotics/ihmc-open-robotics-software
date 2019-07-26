@@ -127,6 +127,11 @@ public class BehaviorHelper
       return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames, PlanarRegionsList planarRegionsList)
+   {
+      return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, false, planarRegionsList);
+   }
+
    public void pauseWalking()
    {
       remoteRobotControllerInterface.pauseWalking();

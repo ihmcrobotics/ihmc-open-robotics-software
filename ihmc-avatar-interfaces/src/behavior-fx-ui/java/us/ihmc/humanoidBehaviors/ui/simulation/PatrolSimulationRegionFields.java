@@ -37,6 +37,20 @@ public class PatrolSimulationRegionFields
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList createStairs()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(0.75, 0.75);
+      generator.translate(0.75, 0.0, -0.25);
+      generator.addRectangle(0.75, 0.75);
+      generator.translate(0.75, 0.0, -0.25);
+      generator.addRectangle(0.75, 0.75);
+      generator.translate(0.75, 0.0, -0.25);
+      generator.addRectangle(0.75, 0.75);
+      return generator.getPlanarRegionsList();
+   }
+
    public static PlanarRegionsList createUpDownOpenHouseRegions()
    {
       Random random = new Random(8349829898174L);
