@@ -25,6 +25,8 @@ public class AtlasLocalizationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
+   private static final double EPSILON = 1.0e-3;
+
    private DRCSimulationTestHelper testHelper;
 
    @Test
@@ -41,29 +43,33 @@ public class AtlasLocalizationTest
       testHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FramePose3D pelvisPose = new FramePose3D();
-      ReferenceFrame pelvisFrame = testHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
+      ReferenceFrame pelvisFrame = testHelper.getReferenceFrames().getPelvisFrame();
 
       pelvisPose.setToZero(pelvisFrame);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
       System.out.println("Started at " + pelvisPose.getX());
 
       pelvisPose.setToZero(pelvisFrame);
-      pelvisPose.setX(0.1);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPose.setX(0.1);
 
       StampedPosePacket posePacket = new StampedPosePacket();
-      long timestamp = Conversions.secondsToNanoseconds(testHelper.getSimulationConstructionSet().getTime() - robotModel.getEstimatorDT());
       posePacket.setConfidenceFactor(1.0);
       posePacket.getPose().set(pelvisPose);
-      posePacket.setTimestamp(timestamp);
-      pelvisPoseCorrectionCommunicator.set(posePacket);
-      testHelper.simulateAndBlockAndCatchExceptions(5.0);
+      for (int i = 0; i < 5; i++)
+      {
+         long timestamp = Conversions.secondsToNanoseconds(testHelper.getSimulationConstructionSet().getTime() - robotModel.getEstimatorDT());
+         posePacket.setTimestamp(timestamp);
+         pelvisPoseCorrectionCommunicator.set(posePacket);
+         testHelper.simulateAndBlockAndCatchExceptions(1.0);
+      }
 
       pelvisPose.setToZero(pelvisFrame);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      double deadzone = testHelper.getYoVariable("xDeadzoneSize").getValueAsDouble();
       System.out.println("Ended at " + pelvisPose.getX());
-      System.out.println("Should be at " + posePacket.getPose().getX());
-      EuclidGeometryTestTools.assertPose3DEquals(posePacket.getPose(), pelvisPose, 0.03);
+      System.out.println("Should be at " + posePacket.getPose().getX() + " with deadzone of " + deadzone);
+      EuclidGeometryTestTools.assertPose3DEquals(posePacket.getPose(), pelvisPose, deadzone + EPSILON);
    }
 
    private class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
