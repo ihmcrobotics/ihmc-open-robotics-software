@@ -19,7 +19,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid-geometry", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-quadruped-basics", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning", version: "source"

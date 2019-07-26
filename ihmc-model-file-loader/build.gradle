@@ -20,7 +20,7 @@ mainDependencies {
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
 
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
@@ -29,7 +29,7 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

@@ -23,7 +23,7 @@ mainDependencies {
    compile group: "org.reflections", name: "reflections", version: "0.9.10"
 
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-ros2-library", version: "0.13.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
@@ -33,6 +33,6 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
