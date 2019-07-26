@@ -46,6 +46,7 @@
               </GridPane>
             <Separator orientation="VERTICAL" />
             <TableView fx:id="parameterTable" prefHeight="195.0" prefWidth="566.0" />
+            <Button mnemonicParsing="false" onAction="#saveButton" text="Save" />
          </children>
       </FlowPane>
     </children>

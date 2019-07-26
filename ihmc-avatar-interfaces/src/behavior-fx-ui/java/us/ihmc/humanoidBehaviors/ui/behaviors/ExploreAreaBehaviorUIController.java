@@ -113,6 +113,11 @@ public class ExploreAreaBehaviorUIController extends Group
       behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }
 
+   @FXML public void saveButton()
+   {
+      parameters.save();
+   }
+
    public void displayObservationPosition(Point3D observationPosition)
    {
       PositionGraphic observationPositionGraphic = new PositionGraphic(Color.AZURE, 0.04);
