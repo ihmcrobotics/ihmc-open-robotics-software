@@ -53,7 +53,7 @@ public class AtlasBehaviorUIDemo extends Application
       SLAM_REAL_DATA,
       STAIRS
    }
-   private static final Environment ENVIRONMENT = Environment.STAIRS;
+   private static final Environment ENVIRONMENT = Environment.SLAM_REAL_DATA;
 
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
