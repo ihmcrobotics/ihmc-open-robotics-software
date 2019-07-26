@@ -66,13 +66,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
+   private final List<Double> chestYawsForLookingAround = Arrays.asList(0.0);//-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
    private final double turnChestTrajectoryDuration = 1.0;
    private final double turnTrajectoryWaitTimeMulitplier = 1.0;
-   private final double perceiveDuration = 0.0;
-
+   private final double perceiveDuration = 20.0;
+   
    private int chestYawForLookingAroundIndex = 0;
 
    public enum ExploreAreaBehaviorState
@@ -95,10 +95,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final NavigableRegionsManager navigableRegionsManager;
 
-   private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -8.0, 0.0, 8.0);
+   private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -8.0, 6.0, 8.0);
 
    private double minimumDistanceBetweenObservationPoints = 2.0;
    private double minDistanceToWalkIfPossible = 3.0;
+   private double exploreGridXSteps = 0.25;
+   private double exploreGridYSteps = 0.25;
 
    public ExploreAreaBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
@@ -362,22 +364,20 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
       midFeetPosition.changeFrame(worldFrame);
 
-      ArrayList<Point3DReadOnly> potentialPoints = new ArrayList<>();
+      ArrayList<Point3D> potentialPoints = new ArrayList<>();
 
       // Do a grid over the bounding box to find potential places to step.
-      double xSteps = 0.5;
-      double ySteps = 0.5;
 
       double minimumX = Math.max(maximumExplorationArea.getMinX(), concatenatedMapBoundingBox.getMinX());
       double minimumY = Math.max(maximumExplorationArea.getMinY(), concatenatedMapBoundingBox.getMinY());
       double maximumX = Math.min(maximumExplorationArea.getMaxX(), concatenatedMapBoundingBox.getMaxX());
       double maximumY = Math.min(maximumExplorationArea.getMaxY(), concatenatedMapBoundingBox.getMaxY());
 
-      for (double x = minimumX + xSteps / 2.0; x <= maximumX; x = x + xSteps)
+      for (double x = minimumX + exploreGridXSteps / 2.0; x <= maximumX; x = x + exploreGridXSteps)
       {
-         for (double y = minimumY + ySteps / 2.0; y <= maximumY; y = y + ySteps)
+         for (double y = minimumY + exploreGridYSteps / 2.0; y <= maximumY; y = y + exploreGridYSteps)
          {
-            Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
+            Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
             if (projectedPoint == null)
                continue;
 
@@ -389,6 +389,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       LogTools.info("Found " + potentialPoints.size() + " potential Points on the grid.");
+
+      ArrayList<Point3D> potentialPointsToSend = new ArrayList<Point3D>();
+      potentialPointsToSend.addAll(potentialPoints);
+      messager.submitMessage(ExploreAreaBehaviorAPI.PotentialPointsToExplore, potentialPointsToSend);
 
       // Compute distances to each.
 
@@ -412,9 +416,11 @@ public class ExploreAreaBehavior implements BehaviorInterface
       int maxNumberOfFeasiblePointsToLookFor = 30;
       int numberConsidered = 0;
 
-      for (Point3DReadOnly testGoal : potentialPoints)
+      for (Point3D testGoal : potentialPoints)
       {
          //         LogTools.info("Looking for body path to " + testGoal);
+         messager.submitMessage(ExploreAreaBehaviorAPI.PlanningToPosition, testGoal);
+
          List<Point3DReadOnly> bodyPath = navigableRegionsManager.calculateBodyPath(midFeetPosition, testGoal);
          numberConsidered++;
 
@@ -487,7 +493,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       return false;
    }
 
-   private void sortBasedOnBestDistances(ArrayList<Point3DReadOnly> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart,
+   private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart,
                                          double minDistanceIfPossible)
    {
       Comparator<Point3DReadOnly> comparator = new Comparator<Point3DReadOnly>()
@@ -564,6 +570,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
          desiredFramePoses.remove(0);
 
          LogTools.info("Planning to " + goal);
+         Point3D goalToSend = new Point3D(goal.getPosition());
+
+         messager.submitMessage(ExploreAreaBehaviorAPI.PlanningToPosition, goalToSend);
+
          footstepPlanResultNotification = behaviorHelper.requestPlan(midFeetZUpPose, goal, concatenatedMap);
       }
       else
@@ -671,6 +681,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
       public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
+      public static final Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");
+      public static final Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
       public static final Topic<Boolean> DrawMap = topic("DrawMap");
       public static final Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");
       public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");

@@ -43,9 +43,6 @@ public class ExploreAreaBehaviorUIController extends Group
 
    private final ObservableList<JavaFXParameterTableEntry> parameterTableItems = FXCollections.observableArrayList();
 
-   //   @FXML
-   //   private Button singleSupportButton;
-
    private Messager behaviorMessager;
 
    private PlanarRegionsGraphic planarRegionsGraphic;
@@ -61,6 +58,10 @@ public class ExploreAreaBehaviorUIController extends Group
       this.behaviorMessager = behaviorMessager;
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ObservationPosition,
                                              result -> Platform.runLater(() -> displayObservationPosition(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PotentialPointsToExplore,
+                                             result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PlanningToPosition,
+                                             result -> Platform.runLater(() -> displayPlanningToPosition(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ClearPlanarRegions,
                                              result -> Platform.runLater(() -> clearPlanarRegions(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
@@ -117,6 +118,37 @@ public class ExploreAreaBehaviorUIController extends Group
       PositionGraphic observationPositionGraphic = new PositionGraphic(Color.AZURE, 0.04);
       observationPositionGraphic.setPosition(observationPosition);
       getChildren().add(observationPositionGraphic.getNode());
+   }
+
+   private PositionGraphic planningToPositionGraphic;
+   public void displayPlanningToPosition(Point3D planningToPosition)
+   {
+      if (planningToPositionGraphic != null)
+      {
+         getChildren().remove(planningToPositionGraphic.getNode());
+      }
+
+      planningToPositionGraphic = new PositionGraphic(Color.AZURE, 0.04);
+      planningToPositionGraphic.setPosition(planningToPosition);
+      getChildren().add(planningToPositionGraphic.getNode());
+   }
+
+   ArrayList<PositionGraphic> potentialPointsToExploreGraphics = new ArrayList<PositionGraphic>();
+   public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
+   {
+      for (PositionGraphic graphic : potentialPointsToExploreGraphics)
+      {
+         getChildren().remove(graphic.getNode());
+      }
+      potentialPointsToExploreGraphics.clear();
+
+      for (Point3D point : potentialPointsToExplore)
+      {
+         PositionGraphic potentialPointToExploreGraphic = new PositionGraphic(Color.BLACK, 0.02);
+         potentialPointToExploreGraphic.setPosition(point);
+         potentialPointsToExploreGraphics.add(potentialPointToExploreGraphic);
+         getChildren().add(potentialPointToExploreGraphic.getNode());
+      }
    }
 
    public void clearPlanarRegions(boolean input)
