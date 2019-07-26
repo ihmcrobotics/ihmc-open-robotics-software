@@ -24,7 +24,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
