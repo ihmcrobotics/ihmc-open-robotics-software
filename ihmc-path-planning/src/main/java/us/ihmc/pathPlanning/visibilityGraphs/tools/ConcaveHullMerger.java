@@ -31,9 +31,9 @@ public class ConcaveHullMerger
 
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
    //TODO: Maybe call this class PlanarRegionMergeTools
-   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo)
+   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance)
    {
-      return mergePlanarRegions(regionOne, regionTwo, null);
+      return mergePlanarRegions(regionOne, regionTwo, maximumProjectionDistance, null);
    }
 
    /**
@@ -47,7 +47,7 @@ public class ConcaveHullMerger
     * @return Merged planarRegions or null if the concave hull of the two PlanarRegions do not
     *         intersect.
     */
-   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, ConcaveHullMergerListener listener)
+   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance, ConcaveHullMergerListener listener)
    {
       RigidBodyTransform transformTwoToWorld = new RigidBodyTransform();
       regionTwo.getTransformToWorld(transformTwoToWorld);
@@ -65,6 +65,8 @@ public class ConcaveHullMerger
       {
          Point3D point3D = new Point3D(concaveHullTwoVertices[i]);
          transformTwoToOne.transform(point3D);
+         if (Math.abs(point3D.getZ()) > maximumProjectionDistance)
+            return null;
          concaveHullTwoVerticesTransformed[i] = new Point2D(point3D);
       }
 
