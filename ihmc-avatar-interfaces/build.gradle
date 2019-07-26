@@ -65,7 +65,7 @@ mainDependencies {
 
 behaviorCleanRoomDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.0"
+   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.1"
 }
 
 behaviorFxUiDependencies {
