@@ -18,7 +18,7 @@ mainDependencies {
    compile group: "org.ejml", name: "core", version: "0.30"
 
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 

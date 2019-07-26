@@ -180,6 +180,7 @@ public class AvatarEstimatorThread
                          .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolder)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
+         estimatorFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
          estimatorController.addRobotController(drcStateEstimator);
       }
