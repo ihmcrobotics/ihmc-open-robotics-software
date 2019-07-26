@@ -1,39 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="102.0" prefWidth="167.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController">
+<AnchorPane prefHeight="187.0" prefWidth="861.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController">
     <children>
-        <GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" vgap="5.0">
-            <children>
-            <HBox>
-               <children>
-                  <CheckBox fx:id="exploreAreaCheckBox" mnemonicParsing="false" onAction="#exploreArea" text="Explore Area" />
-               </children>
-            </HBox>
-                <Button fx:id="singleSupportButton" text="SingleSupport" GridPane.rowIndex="1" />
-            <Label text="State:" GridPane.rowIndex="3" />
-            <TextField fx:id="stateTextField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            </children>
-         <columnConstraints>
-            <ColumnConstraints />
-            <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
-         </rowConstraints>
-        </GridPane>
+      <FlowPane prefWrapLength="1300.0">
+         <children>
+              <GridPane hgap="10.0" vgap="5.0">
+                  <children>
+                  <HBox>
+                     <children>
+                        <CheckBox fx:id="exploreAreaCheckBox" mnemonicParsing="false" onAction="#exploreArea" text="Explore Area">
+                           <padding>
+                              <Insets left="5.0" top="5.0" />
+                           </padding>
+                        </CheckBox>
+                     </children>
+                  </HBox>
+                      <Button fx:id="singleSupportButton" text="SingleSupport" GridPane.rowIndex="1" />
+                  <Label text="State:" GridPane.rowIndex="3" />
+                  <TextField fx:id="stateTextField" editable="false" prefHeight="26.0" prefWidth="172.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  </children>
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
+               </rowConstraints>
+              </GridPane>
+            <Separator orientation="VERTICAL" />
+            <TableView fx:id="parameterTable" prefHeight="195.0" prefWidth="566.0" />
+         </children>
+      </FlowPane>
     </children>
 </AnchorPane>
