@@ -622,9 +622,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void onWalkToNextLocationStateEntry()
    {
       HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
-      boolean swingOverPlanarRegions = true;
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageFromPlan, referenceFrames, swingOverPlanarRegions, planarRegionsListFromPlan);
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageFromPlan, referenceFrames, planarRegionsListFromPlan);
    }
 
    private void doWalkToNextLocationStateAction(double timeInState)
