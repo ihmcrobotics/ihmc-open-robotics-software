@@ -95,9 +95,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final NavigableRegionsManager navigableRegionsManager;
 
-   private final BoundingBox2D maximumExplorationArea = new BoundingBox2D(-6.0, -8.0, 6.0, 8.0);
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
 
-   private double minimumDistanceBetweenObservationPoints = 0.0; //2.0;
+   private double minimumDistanceBetweenObservationPoints = 2.0;
    private double minDistanceToWalkIfPossible = 3.0;
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
@@ -370,14 +370,18 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       // Do a grid over the bounding box to find potential places to step.
 
-      double minimumX = Math.max(maximumExplorationArea.getMinX(), concatenatedMapBoundingBox.getMinX());
-      double minimumY = Math.max(maximumExplorationArea.getMinY(), concatenatedMapBoundingBox.getMinY());
-      double maximumX = Math.min(maximumExplorationArea.getMaxX(), concatenatedMapBoundingBox.getMaxX());
-      double maximumY = Math.min(maximumExplorationArea.getMaxY(), concatenatedMapBoundingBox.getMaxY());
+      BoundingBox3D intersectionBoundingBox = getBoundingBoxIntersection(maximumExplorationArea, concatenatedMapBoundingBox);
+      
+      ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<BoundingBox3D>();
+      explorationBoundingBoxes.add(maximumExplorationArea);
+      explorationBoundingBoxes.add(concatenatedMapBoundingBox);
+      explorationBoundingBoxes.add(intersectionBoundingBox);
+      
+      messager.submitMessage(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes, explorationBoundingBoxes);
 
-      for (double x = minimumX + exploreGridXSteps / 2.0; x <= maximumX; x = x + exploreGridXSteps)
+      for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
       {
-         for (double y = minimumY + exploreGridYSteps / 2.0; y <= maximumY; y = y + exploreGridYSteps)
+         for (double y = intersectionBoundingBox.getMinY() + exploreGridYSteps / 2.0; y <= intersectionBoundingBox.getMaxY(); y = y + exploreGridYSteps)
          {
             Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 0.0), concatenatedMap);
             if (projectedPoint == null)
@@ -481,6 +485,20 @@ public class ExploreAreaBehavior implements BehaviorInterface
          desiredFramePoses.add(desiredFramePose);
       }
 
+   }
+
+   private BoundingBox3D getBoundingBoxIntersection(BoundingBox3D boxOne, BoundingBox3D boxTwo)
+   {
+      //TODO: There should be BoundingBox2D.intersection() and BoundingBox3D.intersection() methods, same as union();
+      double minimumX = Math.max(boxOne.getMinX(), boxTwo.getMinX());
+      double minimumY = Math.max(boxOne.getMinY(), boxTwo.getMinY());
+      double minimumZ = Math.max(boxOne.getMinZ(), boxTwo.getMinZ());
+      
+      double maximumX = Math.min(boxOne.getMaxX(), boxTwo.getMaxX());
+      double maximumY = Math.min(boxOne.getMaxY(), boxTwo.getMaxY());
+      double maximumZ = Math.min(boxOne.getMaxZ(), boxTwo.getMaxZ());
+      
+      return new BoundingBox3D(minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ);
    }
 
    private boolean pointIsTooCloseToPreviousObservationPoint(Point3DReadOnly pointToCheck)
@@ -683,6 +701,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
       public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
+      public static final Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");
       public static final Topic<ArrayList<Point3D>> PotentialPointsToExplore = topic("PotentialPointsToExplore");
       public static final Topic<Point3D> FoundBodyPathTo = topic("FoundBodyPathTo");
       public static final Topic<Point3D> PlanningToPosition = topic("PlanningToPosition");

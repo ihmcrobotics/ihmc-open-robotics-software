@@ -10,11 +10,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,11 +26,12 @@ import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
+import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.javafx.parameter.JavaFXParameterTable;
 import us.ihmc.javafx.parameter.JavaFXParameterTableEntry;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
@@ -37,9 +42,12 @@ public class ExploreAreaBehaviorUIController extends Group
 {
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
-   @FXML private CheckBox exploreAreaCheckBox;
-   @FXML private TextField stateTextField;
-   @FXML private TableView parameterTable;
+   @FXML
+   private CheckBox exploreAreaCheckBox;
+   @FXML
+   private TextField stateTextField;
+   @FXML
+   private TableView parameterTable;
 
    private final ObservableList<JavaFXParameterTableEntry> parameterTableItems = FXCollections.observableArrayList();
 
@@ -58,6 +66,8 @@ public class ExploreAreaBehaviorUIController extends Group
       this.behaviorMessager = behaviorMessager;
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ObservationPosition,
                                              result -> Platform.runLater(() -> displayObservationPosition(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
+                                             result -> Platform.runLater(() -> displayExplorationBoundingBoxes(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PotentialPointsToExplore,
                                              result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PlanningToPosition,
@@ -94,7 +104,9 @@ public class ExploreAreaBehaviorUIController extends Group
          JavaFXParameterTableEntry javaFXParameterTableEntry = new JavaFXParameterTableEntry<>(parameterKey.getTitleCasedName(),
                                                                                                () -> parameters.get(parameterKey),
                                                                                                newValue -> parameters.set(parameterKey, newValue),
-                                                                                               observable -> { },
+                                                                                               observable ->
+                                                                                               {
+                                                                                               },
                                                                                                spinnerValueFactory);
          javaFXParameterTable.addEntry(javaFXParameterTableEntry);
       }
@@ -107,12 +119,14 @@ public class ExploreAreaBehaviorUIController extends Group
       planarRegionsGraphic = new PlanarRegionsGraphic(false);
    }
 
-   @FXML public void exploreArea()
+   @FXML
+   public void exploreArea()
    {
       behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }
 
-   @FXML public void saveButton()
+   @FXML
+   public void saveButton()
    {
       parameters.save();
    }
@@ -121,10 +135,23 @@ public class ExploreAreaBehaviorUIController extends Group
    private BunchOfPointsDisplayer potentialPointsToExploreDisplayer = new BunchOfPointsDisplayer(this);
    private BunchOfPointsDisplayer foundBodyPathToPointsDisplayer = new BunchOfPointsDisplayer(this);
    private BunchOfPointsDisplayer planningToPointsDisplayer = new BunchOfPointsDisplayer(this);
-   
+   private BunchOfBoundingBoxesDisplayer boundingBoxesDisplayer = new BunchOfBoundingBoxesDisplayer(this);
+
    public void displayObservationPosition(Point3D observationPosition)
    {
       observationPointsDisplayer.displayPoint(observationPosition, Color.AZURE, 0.04);
+   }
+
+   private void displayExplorationBoundingBoxes(ArrayList<BoundingBox3D> boxes)
+   {
+      boundingBoxesDisplayer.clear();
+      Color[] boundingBoxColors = new Color[] {Color.INDIANRED, Color.DARKSEAGREEN, Color.CADETBLUE};
+
+      for (int i = 0; i < boxes.size(); i++)
+      {
+         Color color = boundingBoxColors[i % boundingBoxColors.length];
+         boundingBoxesDisplayer.displayBoundingBox(boxes.get(i), color, 0.1);
+      }
    }
 
    public void displayPotentialPointsToExplore(ArrayList<Point3D> potentialPointsToExplore)
@@ -235,4 +262,33 @@ public class ExploreAreaBehaviorUIController extends Group
          group.getChildren().add(potentialPointToExploreGraphic.getNode());
       }
    }
+
+   private static class BunchOfBoundingBoxesDisplayer
+   {
+      private final Group group;
+      private final ArrayList<BoundingBox3DGraphic> boundingBoxGraphics = new ArrayList<BoundingBox3DGraphic>();
+
+      public BunchOfBoundingBoxesDisplayer(Group group)
+      {
+         this.group = group;
+      }
+
+      public void clear()
+      {
+         for (BoundingBox3DGraphic graphic : boundingBoxGraphics)
+         {
+            group.getChildren().remove(graphic.getNode());
+         }
+
+         boundingBoxGraphics.clear();
+      }
+
+      public void displayBoundingBox(BoundingBox3D boundingBox, Color color, double lineWidth)
+      {
+         BoundingBox3DGraphic boundingBox3DGraphic = new BoundingBox3DGraphic(boundingBox, color, lineWidth);
+         boundingBoxGraphics.add(boundingBox3DGraphic);
+         group.getChildren().add(boundingBox3DGraphic.getNode());
+      }
+   }
+
 }
