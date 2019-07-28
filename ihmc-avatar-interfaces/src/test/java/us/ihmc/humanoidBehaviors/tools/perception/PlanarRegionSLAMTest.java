@@ -33,6 +33,7 @@ import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -231,7 +232,7 @@ class PlanarRegionSLAMTest
 
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListB, parameters, listener);
 
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
@@ -280,14 +281,23 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.0999);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
 
       assertEquals(1, mergedMap.getNumberOfPlanarRegions());
       PlanarRegion planarRegion = mergedMap.getPlanarRegion(0);
       BoundingBox3D boundingBox3d = planarRegion.getBoundingBox3dInWorld();
-      assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 1e-3));
+
+      assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 2.0e-3));
+
+      if (visualize)
+      {
+         visualizePlanarRegions(planarRegionsListA);
+         visualizePlanarRegions(planarRegionsListBC);
+         visualizePlanarRegions(mergedMap);
+         ThreadTools.sleepForever();
+      }
 
       parameters.setMinimumRegionOverlapDistance(0.1001);
       slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
@@ -340,7 +350,7 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.05);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
 
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
@@ -530,7 +540,7 @@ class PlanarRegionSLAMTest
       parameters.setMaximumPointProjectionDistance(0.1);
       parameters.setDampedLeastSquaresLambda(0.1);
 
-      ConcaveHullMergerListener visualizer = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener visualizer = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters, visualizer);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
       RigidBodyTransform transformResult = slamResult.getTransformFromIncomingToMap();
