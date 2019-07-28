@@ -19,6 +19,6 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

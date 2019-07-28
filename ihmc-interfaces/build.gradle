@@ -38,7 +38,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid-geometry", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
    compile group: "us.ihmc", name: "ros2-common-interfaces", version: "0.13.4"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
 }
 
 testDependencies {
@@ -46,7 +46,7 @@ testDependencies {
 }
 
 generatorDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.13.4"
 }
 

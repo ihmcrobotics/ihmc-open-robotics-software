@@ -21,13 +21,13 @@ mainDependencies {
    compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
    compile group: "com.google.guava", name: "guava", version: "18.0"
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

@@ -19,20 +19,20 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ekf", version: "0.2.6"
+   compile group: "us.ihmc", name: "ekf", version: "0.2.10"
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.14"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
