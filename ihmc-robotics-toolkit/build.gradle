@@ -35,10 +35,10 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
    compile group: "us.ihmc", name: "mecano", version: "0.0.20"
    compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.20"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.14"
+   compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.15"
    compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
@@ -47,5 +47,5 @@ testDependencies {
    compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
    compile group: "org.jfree", name: "jcommon", version: "1.0.21"
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
 }
