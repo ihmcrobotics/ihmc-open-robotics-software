@@ -526,12 +526,11 @@ public class ConcaveHullMerger
       for (int i = 0; i < hullOne.size(); i++)
       {
          Point2D startVertex = hullOne.get(i);
-         Point2D nextVertex = hullOne.get((i + 1) % hullOne.size());
+         Point2D nextVertex = hullOne.get(nextIndex(i, hullOne));
+         Point2D previousVertex = hullOne.get(previousIndex(i, hullOne));
 
          if (hullPoint.distanceSquared(startVertex) < minimumDistanceSquared)
          {
-            Point2D previousVertex = hullOne.get((i - 1 + hullOne.size()) % hullOne.size());
-
             Vector2D toPrevious = new Vector2D(previousVertex);
             toPrevious.sub(startVertex);
             toPrevious.normalize();
@@ -556,15 +555,16 @@ public class ConcaveHullMerger
       for (int i = 0; i < hullOne.size(); i++)
       {
          Point2D startVertex = hullOne.get(i);
-         Point2D nextVertex = hullOne.get((i + 1) % hullOne.size());
+         Point2D nextVertex = hullOne.get(nextIndex(i, hullOne));
 
          LineSegment2D edge = new LineSegment2D(startVertex, nextVertex);
          if (edge.distanceSquared(hullPoint) < minimumDistanceSquared)
          {
             Vector2D adjustment = new Vector2D(nextVertex);
-            adjustment.add(startVertex);
+            adjustment.sub(startVertex);
             adjustment.normalize();
-            adjustment.set(-adjustment.getY(), adjustment.getX());
+
+            adjustment.set(adjustment.getY(), -adjustment.getX());
             adjustment.scale(amountToMove);
 
             Point2D adjustedPoint = new Point2D(hullPoint);
