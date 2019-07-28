@@ -289,7 +289,7 @@ class PlanarRegionSLAMTest
       PlanarRegion planarRegion = mergedMap.getPlanarRegion(0);
       BoundingBox3D boundingBox3d = planarRegion.getBoundingBox3dInWorld();
 
-      assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 2.0e-3));
+      assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 1e-7));
 
       if (visualize)
       {
