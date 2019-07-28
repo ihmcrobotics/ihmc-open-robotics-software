@@ -18,6 +18,8 @@ import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizati
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.javaFXVisualizers.RandomColorFunction;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
@@ -36,8 +38,15 @@ public class PlanarRegionSLAMUITabController extends Group
 {
    private PlanarRegionSLAMParameters planarRegionSLAMParameters;
 
-   private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-   private static final String DATASET_2 = "IntentionallyDrifted";
+   private static final String DATASET_1 = "190728_01_Trouble_MapPlanarRegions";
+   private static final String DATASET_2 = "190728_01_Trouble_NewPlanarRegions";
+   
+   
+//   private static final String DATASET_1 = "190727_Trouble_MapPlanarRegions";
+//   private static final String DATASET_2 = "190727_Trouble_NewPlanarRegions";
+   
+//   private static final String DATASET_1 = "20190710_174025_PlanarRegion";
+//   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
@@ -156,7 +165,8 @@ public class PlanarRegionSLAMUITabController extends Group
    private void slam()
    {
       PlanarRegionsList newData = livePlanarRegionsGraphic.getLatestPlanarRegionsList();
-      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters);
+      ConcaveHullMergerListener listener = new ConcaveHullGraphicalMergerListener();
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters, listener);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
 
       RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
