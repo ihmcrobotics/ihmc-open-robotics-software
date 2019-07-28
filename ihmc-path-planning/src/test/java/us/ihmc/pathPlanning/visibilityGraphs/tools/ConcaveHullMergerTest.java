@@ -154,7 +154,7 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
       PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       if (visualize)
@@ -184,7 +184,7 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
       PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       assertNull(mergedPlanarRegion);
@@ -447,14 +447,8 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      Point2D[] hullA = new Point2D[hullAVertices.size()];
-      Point2D[] hullB = new Point2D[hullBVertices.size()];
-
-      hullAVertices.toArray(hullA);
-      hullBVertices.toArray(hullB);
-
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullA, hullB, listener);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -506,14 +500,8 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB6);
       hullBVertices.add(pointB7);
 
-      Point2D[] hullA = new Point2D[hullAVertices.size()];
-      Point2D[] hullB = new Point2D[hullBVertices.size()];
-
-      hullAVertices.toArray(hullA);
-      hullBVertices.toArray(hullB);
-
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullA, hullB, listener);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(8, mergedHulls.size());
 
@@ -561,14 +549,8 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      Point2D[] hullA = new Point2D[hullAVertices.size()];
-      Point2D[] hullB = new Point2D[hullBVertices.size()];
-
-      hullAVertices.toArray(hullA);
-      hullBVertices.toArray(hullB);
-
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullA, hullB, listener);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
 
@@ -577,6 +559,112 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA0, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA1, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
+
+      if (visualize)
+         ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testMergeRemoveColinearPoints()
+   {
+      boolean visualize = false;
+
+      ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointC0 = new Point2D(0.0, 0.5);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointC1 = new Point2D(0.5, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointC2 = new Point2D(1.0, 0.5);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+      Point2D pointC3 = new Point2D(0.5, 0.0);
+
+      hullAVertices.add(pointA0);
+      hullAVertices.add(pointC0);
+      hullAVertices.add(pointA1);
+      hullAVertices.add(pointC1);
+      hullAVertices.add(pointA2);
+      hullAVertices.add(pointC2);
+      hullAVertices.add(pointA3);
+      hullAVertices.add(pointC3);
+
+      ArrayList<Point2D> hullBVertices = new ArrayList<Point2D>();
+
+      Point2D pointB0 = new Point2D(0.5, 0.5);
+      Point2D pointB1 = new Point2D(0.5, 0.6);
+      Point2D pointB2 = new Point2D(0.6, 0.6);
+      Point2D pointB3 = new Point2D(0.6, 0.5);
+
+      hullBVertices.add(pointB0);
+      hullBVertices.add(pointB1);
+      hullBVertices.add(pointB2);
+      hullBVertices.add(pointB3);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+
+      assertEquals(4, mergedHulls.size());
+
+      int i = 0;
+      double epsilon = 1e-7;
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA0, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA1, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
+
+      if (visualize)
+         ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testMergeRemoveSlivers()
+   {
+      boolean visualize = false;
+
+      ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
+
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointS1 = new Point2D(0.1, 10.1);
+      Point2D pointS2 = new Point2D(0.01, 1.0);
+      Point2D pointS3 = new Point2D(0.9999, 1.0);
+      Point2D pointS4 = new Point2D(0.99995, 1.01);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      hullAVertices.add(pointA0);
+      hullAVertices.add(pointA1);
+      hullAVertices.add(pointS1);
+      hullAVertices.add(pointS2);
+      hullAVertices.add(pointS3);
+      hullAVertices.add(pointS4);
+      hullAVertices.add(pointA2);
+      hullAVertices.add(pointA3);
+
+      ArrayList<Point2D> hullBVertices = new ArrayList<Point2D>();
+
+      Point2D pointB0 = new Point2D(0.5, 0.5);
+      Point2D pointB1 = new Point2D(0.5, 0.6);
+      Point2D pointB2 = new Point2D(0.6, 0.6);
+      Point2D pointB3 = new Point2D(0.6, 0.5);
+
+      hullBVertices.add(pointB0);
+      hullBVertices.add(pointB1);
+      hullBVertices.add(pointB2);
+      hullBVertices.add(pointB3);
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
+
+      assertEquals(4, mergedHulls.size());
+
+      int i = 0;
+      double epsilon = 1e-7;
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA0, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA1, mergedHulls.get(i++), epsilon);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointS3, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
 
       if (visualize)
@@ -623,10 +711,10 @@ public class ConcaveHullMergerTest
             {-0.14178226448362094, -0.32370311833003684}, {-0.140508233857459, -0.2346025872800086}, {-0.17330307409554194, -0.149159839926986},
             {-0.19239786762148312, -0.09986922600319931}, {-0.19854388436229184, -8.514394122500213E-4}, {-0.22962867228965547, 0.05809039869701854}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArray(hullOne), convertToPointArray(hullTwo), listener);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
-      assertEquals(74, mergedHulls.size());
+      assertEquals(72, mergedHulls.size());
 
       if (visualize)
          ThreadTools.sleepForever();
@@ -699,14 +787,78 @@ public class ConcaveHullMergerTest
             {-3.8132915079838856, -0.8608667191971495}, {-3.8043304894665138, -0.8101139758334739}, {-3.7971833266524024, -0.7475298426445478},
             {-3.8155070000929037, -0.6502645615646477}, {-3.8099417680550687, -0.5730421391584346}, {-3.8250805933151035, -0.47766611704632744}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullMergerListener() : null);
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArray(hullOne), convertToPointArray(hullTwo), listener);
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
-      assertEquals(hullOne.length + hullTwo.length + 1, mergedHulls.size());
-      assertEquals(176, mergedHulls.size());
+      assertEquals(164, mergedHulls.size());
 
       if (visualize)
          ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testMergeConcaveHullsTroublesomeWhenNearlyIdentical()
+   {
+      boolean visualize = false;
+
+      double[][] hullOne = new double[][] {{-0.22528910636901855, 0.28605905175209045}, {-0.1752581000328064, 0.2756955623626709},
+            {-0.10332929342985153, 0.24632740020751953}, {-0.05382351204752922, 0.28411903977394104}, {-0.010817715898156166, 0.3718038499355316},
+            {8.111802744679153E-4, 0.29732465744018555}, {0.060906536877155304, 0.2479160577058792}, {0.03242022916674614, 0.17993474006652832},
+            {0.050539299845695496, 0.10181768238544464}, {0.17091168463230133, 0.020121606066823006}, {0.17031608521938324, 0.020255591720342636},
+            {0.1703745722770691, 0.020217331126332283}, {0.16976216435432434, 0.02038019895553589}, {0.11882562935352325, 0.031838782131671906},
+            {0.07250593602657318, -0.02279113605618477}, {0.10450576990842819, -0.10478051751852036}, {0.14919164776802063, -0.15212774276733398},
+            {0.11351815611124039, -0.19198139011859894}, {0.12179604172706604, -0.26129671931266785}, {0.1837044060230255, -0.29922211170196533},
+            {0.08616393804550171, -0.35188886523246765}, {0.01468310970813036, -0.33285972476005554}, {0.04612547159194946, -0.27007755637168884},
+            {0.028615305200219154, -0.23202171921730042}, {0.011710579507052898, -0.19585317373275757}, {-0.0401255339384079, -0.1556309312582016},
+            {-0.09073073416948318, -0.20682352781295776}, {-0.14255684614181519, -0.1741705983877182}, {-0.17794781923294067, 0.024299168959259987},
+            {-0.19740694761276245, 0.08807963132858276}, {-0.197884663939476, 0.2125331163406372}};
+
+      double[][] hullTwo = new double[][] {{-0.22529910611381146, 0.2860550296305229}, {-0.1752687403766458, 0.2756884483461346},
+            {-0.10334174892340853, 0.24631584104908202}, {-0.05383363214300615, 0.2841044210867823}, {-0.010822417171192271, 0.3717865733225872},
+            {8.018761427599047E-4, 0.29730666230504005}, {0.06089417912462361, 0.2478943487742924}, {0.032403670232445704, 0.17991479171880903},
+            {0.05051791321467289, 0.10179661442990506}, {0.17088524884767012, 0.020093099258163993}, {0.11879991783150554, 0.03181349421734921},
+            {0.07247684848929238, -0.022813561309552602}, {0.10447161532706783, -0.10480492020306813}, {0.14915456700027793, -0.1521549069468984},
+            {0.11347861247604732, -0.19200634960062485}, {0.12175221436983483, -0.2613221902344628}, {0.183658234704434, -0.2992514084861219},
+            {0.08611451217227299, -0.35191213391688886}, {0.014634860030003893, -0.3328785759677305}, {0.046081101779333895, -0.27009835083730116},
+            {0.028573287291988405, -0.2320414316282917}, {0.011670796866622882, -0.19587184150171666}, {-0.04016283069860461, -0.1556463956340615},
+            {-0.09077119450640433, -0.20683586469025897}, {-0.1425952883834524, -0.17417973247544907}, {-0.17797399591242255, 0.02429222165093927},
+            {-0.19742918259614284, 0.08807388647119463}, {-0.19789920767358, 0.2125274007666813}};
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+
+      assertEquals(27, mergedHulls.size());
+
+      if (visualize)
+         ThreadTools.sleepForever();
+   }
+
+   // TODO: Get this test working. It crosses its own path.
+   //@Test
+   public void testMergeConcaveHullsTroublesomeSkinnyOne()
+   {
+      boolean visualize = false;
+
+      double[][] hullOne = new double[][] {{0.03324427828192711, -0.06848959624767303}, {0.034265462309122086, -0.0691266655921936},
+            {0.03324427828192711, -0.06848959624767303}, {0.03423566743731499, -0.0690872073173523}, {0.03472326323390007, -0.06941226869821548},
+            {0.13587459921836853, -0.13251610100269318}, {0.13272781670093536, -0.19862303137779236}, {0.19089597463607788, -0.21636398136615753},
+            {0.26549431681632996, -0.2942051291465759}, {0.2768421769142151, -0.3913511037826538}, {0.1343332976102829, -0.20247167348861694},
+            {0.13426625728607178, -0.2023698091506958}, {0.18867763876914978, -0.22048182785511017}, {0.26151809096336365, -0.2962256968021393},
+            {0.2766615152359009, -0.3901367485523224}, {0.13011109828948975, -0.1960570365190506}, {0.13001465797424316, -0.1959104984998703},
+            {0.13001017272472382, -0.19590459764003754}, {0.12981820106506348, -0.20088918507099152}, {0.13426625728607178, -0.2023698091506958},
+            {0.13011109828948975, -0.1960570365190506}, {0.12753614783287048, -0.19264696538448334}};
+
+      double[][] hullTwo = new double[][] {{0.13592818607655313, -0.13242901683856703}, {0.13277958016400696, -0.19853586025089806},
+            {0.19094724867835142, -0.21627841478840013}, {0.26554344369702665, -0.2941216202077965}, {0.27688862424314487, -0.39126790764752944},
+            {0.03329963129665654, -0.06839968113853566}};
+
+      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
+
+      if (visualize)
+         ThreadTools.sleepForever();
+      assertEquals(48, mergedHulls.size());
+
    }
 
    @Test
@@ -724,14 +876,11 @@ public class ConcaveHullMergerTest
       hullAVertices.add(pointA2);
       hullAVertices.add(pointA3);
 
-      Point2D[] hullA = new Point2D[hullAVertices.size()];
-      hullAVertices.toArray(hullA);
-
       Point2D firstEndPoint = new Point2D(0.5, -0.5);
       Point2D secondEndPoint = new Point2D(0.5, 0.5);
       LineSegment2D edge = new LineSegment2D(firstEndPoint, secondEndPoint);
 
-      Pair<Integer, Point2D> intersection = ConcaveHullMerger.findClosestIntersection(edge, hullA, -1);
+      Pair<Integer, Point2D> intersection = ConcaveHullMerger.findClosestIntersection(edge, hullAVertices, -1);
 
       assertTrue(intersection.getRight().epsilonEquals(new Point2D(0.5, 0.0), 1e-7));
       assertEquals(0, intersection.getLeft());
@@ -744,6 +893,18 @@ public class ConcaveHullMergerTest
       for (int i = 0; i < hull.length; i++)
       {
          points[i] = new Point2D(hull[i][0], hull[i][1]);
+      }
+
+      return points;
+   }
+
+   private ArrayList<Point2D> convertToPointArrayList(double[][] hull)
+   {
+      ArrayList<Point2D> points = new ArrayList<>();
+
+      for (int i = 0; i < hull.length; i++)
+      {
+         points.add(new Point2D(hull[i][0], hull[i][1]));
       }
 
       return points;
@@ -819,5 +980,40 @@ public class ConcaveHullMergerTest
       catch (InterruptedException e)
       {
       }
+   }
+
+   private class EnsureNoLoopsListener implements ConcaveHullMergerListener
+   {
+      @Override
+      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      {
+      }
+
+      @Override
+      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      {
+      }
+
+      @Override
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      {
+      }
+
+      @Override
+      public void consideringWorkingEdge(LineSegment2D workingEdge, boolean workingHullIsOne)
+      {
+      }
+
+      @Override
+      public void foundIntersectionPoint(Point2D intersectionPoint, boolean workingHullIsOne)
+      {
+      }
+
+      @Override
+      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      {
+         fail("hull got looped!");
+      }
+
    }
 }
