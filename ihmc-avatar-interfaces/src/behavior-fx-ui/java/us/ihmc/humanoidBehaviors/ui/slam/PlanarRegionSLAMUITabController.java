@@ -259,25 +259,25 @@ public class PlanarRegionSLAMUITabController extends Group
    @FXML private void dataset1RadioButton()
    {
       setRadioButtonSelection(dataset1RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_1));
+      fakeREAModule.setMap(loadDataSet(DATASET_1));
    }
 
    @FXML private void dataset2RadioButton()
    {
       setRadioButtonSelection(dataset2RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_2));
+      fakeREAModule.setMap(loadDataSet(DATASET_2));
    }
 
    @FXML private void dataset3RadioButton()
    {
       setRadioButtonSelection(dataset3RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_3));
+      fakeREAModule.setMap(loadDataSet(DATASET_3));
    }
 
    @FXML private void loadFromFileRadioButton()
    {
       setRadioButtonSelection(loadFromFileRadioButton);
-      fakeREAModule.setRegionsToPublish(PlanarRegionDataImporter.importUsingFileChooser(window));
+      fakeREAModule.setMap(PlanarRegionDataImporter.importUsingFileChooser(window));
    }
 
    @FXML private void saveParametersButton()

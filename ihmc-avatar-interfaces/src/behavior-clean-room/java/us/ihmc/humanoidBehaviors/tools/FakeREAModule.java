@@ -17,16 +17,16 @@ import java.util.HashMap;
 
 public class FakeREAModule
 {
-   private volatile PlanarRegionsList regionsToPublish;
+   private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final HashMap<Integer, PlanarRegion> customPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
 
-   public FakeREAModule(PlanarRegionsList regionsToPublish)
+   public FakeREAModule(PlanarRegionsList map)
    {
-      this.regionsToPublish = regionsToPublish;
+      this.map = map;
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
@@ -51,14 +51,14 @@ public class FakeREAModule
       thread.stop();
    }
 
-   public void setRegionsToPublish(PlanarRegionsList regionsToPublish)
+   public void setMap(PlanarRegionsList map)
    {
-      this.regionsToPublish = regionsToPublish;
+      this.map = map;
    }
 
    private void process()
    {
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(regionsToPublish.getPlanarRegionsAsList());
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(map.getPlanarRegionsAsList());
 
       synchronized (this)
       {

@@ -1065,6 +1065,12 @@ public class PlanarRegion implements SupportingVertexHolder
       convexHull.set(other.convexHull);
    }
 
+   public void setTransformOnly(PlanarRegion other)
+   {
+      fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
+      fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
+   }
+
    public void setBoundingBoxEpsilon(double epsilon)
    {
       boundingBoxEpsilon = epsilon;
