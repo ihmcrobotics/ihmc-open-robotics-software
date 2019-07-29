@@ -9,13 +9,14 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
 public interface FootstepPlannerParametersReadOnly
 {
-   StoredPropertySet getStoredPropertySet();
+   StoredPropertySetBasics getStoredPropertySet();
 
    /**
     * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner

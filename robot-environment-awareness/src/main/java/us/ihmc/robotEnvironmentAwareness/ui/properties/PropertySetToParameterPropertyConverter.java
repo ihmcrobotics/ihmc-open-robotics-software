@@ -9,7 +9,7 @@ public class PropertySetToParameterPropertyConverter
 {
 
 
-   public void bidirectionalBindToDoubleProperty(Property<? extends Number> property, DoubleStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener propertyChangedListener)
+   public void bidirectionalBindToDoubleProperty(Property<? extends Number> property, DoubleStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener propertyChangedListener)
    {
       DoubleBidirectionalBind binding = new DoubleBidirectionalBind(property, key, propertySet, propertyChangedListener);
       ((Property<Double>) property).setValue(propertySet.get(key));
@@ -17,7 +17,7 @@ public class PropertySetToParameterPropertyConverter
       key.addListener(binding);
    }
 
-   public void bidirectionalBindToIntegerProperty(Property<? extends Number> property, IntegerStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener propertyChangedListener)
+   public void bidirectionalBindToIntegerProperty(Property<? extends Number> property, IntegerStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener propertyChangedListener)
    {
       IntegerBidirectionalBind binding = new IntegerBidirectionalBind(property, key, propertySet, propertyChangedListener);
       ((Property<Integer>) property).setValue(propertySet.get(key));
@@ -25,7 +25,7 @@ public class PropertySetToParameterPropertyConverter
       key.addListener(binding);
    }
 
-   public void bidirectionalBindToBooleanProperty(Property<Boolean> property, BooleanStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener propertyChangedListener)
+   public void bidirectionalBindToBooleanProperty(Property<Boolean> property, BooleanStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener propertyChangedListener)
    {
       BooleanBidirectionalBind binding = new BooleanBidirectionalBind(property, key, propertySet, propertyChangedListener);
       property.setValue(propertySet.get(key));
@@ -37,10 +37,10 @@ public class PropertySetToParameterPropertyConverter
    {
       private final Property<? extends Number> numberProperty;
       private final DoubleStoredPropertyKey key;
-      private final StoredPropertySet propertySet;
+      private final StoredPropertySetBasics propertySet;
       private final InvalidationListener fieldChangeListener;
 
-      private DoubleBidirectionalBind(Property<? extends Number> numberProperty, DoubleStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener propertyChangedListener)
+      private DoubleBidirectionalBind(Property<? extends Number> numberProperty, DoubleStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener propertyChangedListener)
       {
          this.numberProperty = numberProperty;
          this.key = key;
@@ -72,10 +72,10 @@ public class PropertySetToParameterPropertyConverter
    {
       private final Property<? extends Number> numberProperty;
       private final IntegerStoredPropertyKey key;
-      private final StoredPropertySet propertySet;
+      private final StoredPropertySetBasics propertySet;
       private final InvalidationListener fieldChangeListener;
 
-      private IntegerBidirectionalBind(Property<? extends Number> numberProperty, IntegerStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener fieldChangeListener)
+      private IntegerBidirectionalBind(Property<? extends Number> numberProperty, IntegerStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener fieldChangeListener)
       {
          this.numberProperty = numberProperty;
          this.key = key;
@@ -107,10 +107,10 @@ public class PropertySetToParameterPropertyConverter
    {
       private final Property<Boolean> booleanProperty;
       private final BooleanStoredPropertyKey key;
-      private final StoredPropertySet propertySet;
+      private final StoredPropertySetBasics propertySet;
       private final InvalidationListener fieldChangeListener;
 
-      private BooleanBidirectionalBind(Property<Boolean> numberProperty, BooleanStoredPropertyKey key, StoredPropertySet propertySet, InvalidationListener fieldChangeListener)
+      private BooleanBidirectionalBind(Property<Boolean> numberProperty, BooleanStoredPropertyKey key, StoredPropertySetBasics propertySet, InvalidationListener fieldChangeListener)
       {
          this.booleanProperty = numberProperty;
          this.key = key;
