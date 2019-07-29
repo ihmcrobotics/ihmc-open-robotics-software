@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,11 +37,11 @@ public class CollisionEndStanceFreeSearchPolicy implements PlannerHeuristicNodeS
    private final AtomicReference<FootstepNode> validNode = new AtomicReference<>();
    private final AtomicReference<FootstepNode> parentOfValidNode = new AtomicReference<>();
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final BodyCollisionNodeChecker collisionNodeChecker;
    private final FootstepNodeSnapper snapper;
 
-   public CollisionEndStanceFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepNodeSnapper snapper, FootstepPlannerParameters parameters)
+   public CollisionEndStanceFreeSearchPolicy(BodyCollisionNodeChecker collisionNodeChecker, FootstepNodeSnapper snapper, FootstepPlannerParametersReadOnly parameters)
    {
       this.collisionNodeChecker = collisionNodeChecker;
       this.parameters = parameters;

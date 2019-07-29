@@ -38,7 +38,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCh
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -60,7 +60,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    private SideDependentList<FootstepNode> goalNodes;
    private HashSet<FootstepNode> expandedNodes;
@@ -94,13 +94,13 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
-   public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
+   public AStarFootstepPlanner(FootstepPlannerParametersReadOnly parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
    {
       this(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, null, null, parentRegistry);
    }
 
-   public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
+   public AStarFootstepPlanner(FootstepPlannerParametersReadOnly parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper,
                                BipedalFootstepPlannerListener listener, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry parentRegistry)
    {
@@ -486,14 +486,14 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
    }
 
-   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
+   public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)
    {
       return createPlanner(parameters, listener, footPolygons, expansion, null, registry);
    }
 
-   public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
+   public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     HeuristicSearchAndActionPolicyDefinitions policyDefinitions, YoVariableRegistry registry)
    {
@@ -505,7 +505,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, parameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getCostParameters().getAStarHeuristicsWeight(), parameters);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters.getAStarHeuristicsWeight(), parameters);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);

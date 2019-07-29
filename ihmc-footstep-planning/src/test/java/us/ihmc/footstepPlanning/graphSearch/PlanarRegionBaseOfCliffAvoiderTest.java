@@ -4,15 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -64,7 +62,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new FootstepPlanningParameters()
       {
          @Override
          public double getCliffHeightToAvoid()
@@ -131,7 +129,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new FootstepPlanningParameters()
       {
          @Override
          public double getCliffHeightToAvoid()

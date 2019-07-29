@@ -2,13 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoFootstepPlannerParameters implements FootstepPlannerParameters
+public class YoFootstepPlannerParameters implements FootstepPlannerParametersReadOnly
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -51,7 +50,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 
    private final YoFootstepPlannerCostParameters costParameters;
 
-   public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
+   public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParametersReadOnly defaults)
    {
       costParameters = new YoFootstepPlannerCostParameters(registry, defaults.getCostParameters());
 
@@ -59,7 +58,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       set(defaults);
    }
 
-   public void set(FootstepPlannerParameters defaults)
+   public void set(FootstepPlannerParametersReadOnly defaults)
    {
       setCheckForBodyBoxCollisions(defaults.checkForBodyBoxCollisions());
       setPerformHeuristicSearchPolicies(defaults.performHeuristicSearchPolicies());

@@ -6,4 +6,9 @@ public class IntegerStoredPropertyKey extends StoredPropertyKey<Integer>
    {
       super(Integer.class, id, titleCasedName);
    }
+
+   public IntegerStoredPropertyKey(int id, String titleCasedName, int defaultValue)
+   {
+      super(Integer.class, id, titleCasedName, defaultValue);
+   }
 }

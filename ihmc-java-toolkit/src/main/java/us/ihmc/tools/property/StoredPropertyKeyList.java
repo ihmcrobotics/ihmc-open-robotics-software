@@ -30,6 +30,13 @@ public class StoredPropertyKeyList
       return key;
    }
 
+   public DoubleStoredPropertyKey addDoubleKey(String titleCasedName, double defaultValue)
+   {
+      DoubleStoredPropertyKey key = new DoubleStoredPropertyKey(indexCount++, titleCasedName, defaultValue);
+      keys.add(key);
+      return key;
+   }
+
    public IntegerStoredPropertyKey addIntegerKey(String titleCasedName)
    {
       IntegerStoredPropertyKey key = new IntegerStoredPropertyKey(indexCount++, titleCasedName);
@@ -37,9 +44,23 @@ public class StoredPropertyKeyList
       return key;
    }
 
+   public IntegerStoredPropertyKey addIntegerKey(String titleCasedName, int defaultValue)
+   {
+      IntegerStoredPropertyKey key = new IntegerStoredPropertyKey(indexCount++, titleCasedName, defaultValue);
+      keys.add(key);
+      return key;
+   }
+
    public BooleanStoredPropertyKey addBooleanKey(String titleCasedName)
    {
       BooleanStoredPropertyKey key = new BooleanStoredPropertyKey(indexCount++, titleCasedName);
+      keys.add(key);
+      return key;
+   }
+
+   public BooleanStoredPropertyKey addBooleanKey(String titleCasedName, boolean defaultValue)
+   {
+      BooleanStoredPropertyKey key = new BooleanStoredPropertyKey(indexCount++, titleCasedName, defaultValue);
       keys.add(key);
       return key;
    }

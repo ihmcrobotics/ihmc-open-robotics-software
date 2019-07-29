@@ -11,7 +11,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -32,14 +32,14 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
    private double groundHeight = 0.0;
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    public TurnWalkTurnPlanner()
    {
       this(new DefaultTurnWalkTurnPlannerParameters());
    }
 
-   public TurnWalkTurnPlanner(FootstepPlannerParameters parameters)
+   public TurnWalkTurnPlanner(FootstepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }
@@ -285,7 +285,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
    }
 
-   private static class DefaultTurnWalkTurnPlannerParameters implements FootstepPlannerParameters
+   private static class DefaultTurnWalkTurnPlannerParameters implements FootstepPlannerParametersReadOnly
    {
       @Override
       public double getIdealFootstepWidth()
