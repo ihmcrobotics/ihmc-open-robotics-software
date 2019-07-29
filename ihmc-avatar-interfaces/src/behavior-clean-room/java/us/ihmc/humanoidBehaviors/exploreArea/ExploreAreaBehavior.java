@@ -1,5 +1,9 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,14 +17,15 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,8 +34,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -40,7 +47,9 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResu
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
@@ -52,8 +61,10 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -71,13 +82,21 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final double turnChestTrajectoryDuration = 1.0;
    private final double turnTrajectoryWaitTimeMulitplier = 3.0;
-   private final double perceiveDuration = 28.0;
-   
+   private final double perceiveDuration = 28.0; //1.0
+
    private int chestYawForLookingAroundIndex = 0;
 
+   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
+
+   private double minimumDistanceBetweenObservationPoints = 2.0;
+   private double minDistanceToWalkIfPossible = 3.0;
+   private double exploreGridXSteps = 0.5;
+   private double exploreGridYSteps = 0.5;
+   private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
+   
    public enum ExploreAreaBehaviorState
    {
-      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation
+      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation, TurnInPlace
    }
 
    private final BehaviorHelper behaviorHelper;
@@ -86,21 +105,15 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final StateMachine<ExploreAreaBehaviorState, State> stateMachine;
 
    private final AtomicReference<Boolean> explore;
+   private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<Boolean>();
 
    private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
-   private PlanarRegionsList concatenatedMap;
+   private PlanarRegionsList concatenatedMap, latestPlanarRegionsList;
    private BoundingBox3D concatenatedMapBoundingBox;
 
    private final NavigableRegionsManager navigableRegionsManager;
-
-   private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
-
-   private double minimumDistanceBetweenObservationPoints = 2.0;
-   private double minDistanceToWalkIfPossible = 3.0;
-   private double exploreGridXSteps = 0.5;
-   private double exploreGridYSteps = 0.5;
 
    public ExploreAreaBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
    {
@@ -123,29 +136,38 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       factory.setOnEntry(ExploreAreaBehaviorState.Perceive, this::onPerceiveStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.Perceive, this::doPerceiveStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.Perceive, ExploreAreaBehaviorState.GrabPlanarRegions,
+      factory.addTransition(ExploreAreaBehaviorState.Perceive,
+                            ExploreAreaBehaviorState.GrabPlanarRegions,
                             this::readyToTransitionFromPerceiveToGrabPlanarRegions);
 
       factory.setOnEntry(ExploreAreaBehaviorState.GrabPlanarRegions, this::onGrabPlanarRegionsStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.GrabPlanarRegions, this::doGrabPlanarRegionsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions, ExploreAreaBehaviorState.LookAround,
+      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
+                            ExploreAreaBehaviorState.LookAround,
                             this::readyToTransitionFromGrabPlanarRegionsToLookAround);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions, ExploreAreaBehaviorState.DetermineNextLocations,
+      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
+                            ExploreAreaBehaviorState.DetermineNextLocations,
                             this::readyToTransitionFromGrabPlanarRegionsToDetermineNextLocations);
 
       factory.setOnEntry(ExploreAreaBehaviorState.DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.DetermineNextLocations, this::doDetermineNextLocationsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations, ExploreAreaBehaviorState.Plan,
+      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations,
+                            ExploreAreaBehaviorState.Plan,
                             this::readyToTransitionFromDetermineNextLocationsToPlan);
 
       factory.setOnEntry(ExploreAreaBehaviorState.Plan, this::onPlanStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.Plan, this::doPlanStateAction);
       factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.WalkToNextLocation, this::readyToTransitionFromPlanToWalkToNextLocation);
       factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.Plan, this::readyToTransitionFromPlanToPlan);
+      factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.TurnInPlace, this::readyToTransitionFromPlanToTurnInPlace);
 
       factory.setOnEntry(ExploreAreaBehaviorState.WalkToNextLocation, this::onWalkToNextLocationStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.WalkToNextLocation, this::doWalkToNextLocationStateAction);
       factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
+
+      factory.setOnEntry(ExploreAreaBehaviorState.TurnInPlace, this::onTurnInPlaceStateEntry);
+      factory.setDoAction(ExploreAreaBehaviorState.TurnInPlace, this::doTurnInPlaceStateAction);
+      factory.addTransition(ExploreAreaBehaviorState.TurnInPlace, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromTurnInPlaceToStop);
 
       // Go to stop from any state when no longer exploring.
       factory.addTransition(ExploreAreaBehaviorState.LookAround, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
@@ -154,6 +176,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
       factory.addTransition(ExploreAreaBehaviorState.Plan, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
       factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
+      factory.addTransition(ExploreAreaBehaviorState.TurnInPlace, ExploreAreaBehaviorState.Stop, this::noLongerExploring);
       factory.getFactory().addStateChangedListener((from, to) ->
       {
          messager.submitMessage(ExploreAreaBehaviorAPI.CurrentState, to);
@@ -164,7 +187,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       stateMachine = factory.getFactory().build(ExploreAreaBehaviorState.Stop);
 
       ExceptionHandlingThreadScheduler exploreAreaThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
-                                                                                                DefaultExceptionHandler.PRINT_STACKTRACE, 5);
+                                                                                                DefaultExceptionHandler.PRINT_STACKTRACE,
+                                                                                                5);
       exploreAreaThread.schedule(this::runExploreAreaThread, 5, TimeUnit.MILLISECONDS);
    }
 
@@ -250,13 +274,77 @@ public class ExploreAreaBehavior implements BehaviorInterface
       addNewPlanarRegionsToTheMap(latestPlanarRegionsList);
    }
 
-   private ConcaveHullMergerListener listener = null;
-//   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
+   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener()
+   {
+      boolean savedOutTroublesomeRegions = false;
+
+      @Override
+      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      {
+      }
+
+      @Override
+      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      {
+      }
+
+      @Override
+      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      {
+         hullGotLooped.set(true);
+
+         LogTools.error("Hull got looped.");
+
+         if (savedOutTroublesomeRegions)
+            return;
+
+         savedOutTroublesomeRegions = true;
+
+         LogTools.error("First occurance this run, so saving out PlanarRegions");
+
+         try
+         {
+            Path planarRegionsPath = new File("Troublesome" + File.separator + "MapPlanarRegions").toPath();
+            LogTools.error("map planarRegionsPath = {}", planarRegionsPath);
+            Files.createDirectories(planarRegionsPath);
+            PlanarRegionFileTools.exportPlanarRegionData(planarRegionsPath, concatenatedMap.copy());
+
+            planarRegionsPath = new File("Troublesome" + File.separator + "NewPlanarRegions").toPath();
+            LogTools.error("new planarRegionsPath = {}", planarRegionsPath);
+            Files.createDirectories(planarRegionsPath);
+            PlanarRegionFileTools.exportPlanarRegionData(planarRegionsPath, latestPlanarRegionsList.copy());
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+
+         //         ThreadTools.sleepForever();
+      }
+
+      @Override
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      {
+      }
+
+      @Override
+      public void foundIntersectionPoint(Point2D intersectionPoint, boolean workingHullIsOne)
+      {
+      }
+
+      @Override
+      public void consideringWorkingEdge(LineSegment2D workingEdge, boolean workingHullIsOne)
+      {
+      }
+   };
+
+   //   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
 
    private void addNewPlanarRegionsToTheMap(PlanarRegionsList latestPlanarRegionsList)
    {
       messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
 
+      this.latestPlanarRegionsList = latestPlanarRegionsList;
       if (concatenatedMap == null)
       {
          concatenatedMap = latestPlanarRegionsList;
@@ -268,9 +356,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
          slamParameters.setIterationsForMatching(3);
          slamParameters.setBoundingBoxHeight(0.05);
          slamParameters.setMinimumNormalDotProduct(0.99);
-         slamParameters.setDampedLeastSquaresLambda(5.0); 
+         slamParameters.setDampedLeastSquaresLambda(5.0);
          slamParameters.setMaximumPointProjectionDistance(0.05);
 
+         hullGotLooped.set(false);
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
 
          concatenatedMap = slamResult.getMergedMap();
@@ -371,12 +460,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       // Do a grid over the bounding box to find potential places to step.
 
       BoundingBox3D intersectionBoundingBox = getBoundingBoxIntersection(maximumExplorationArea, concatenatedMapBoundingBox);
-      
+
       ArrayList<BoundingBox3D> explorationBoundingBoxes = new ArrayList<BoundingBox3D>();
       explorationBoundingBoxes.add(maximumExplorationArea);
       explorationBoundingBoxes.add(concatenatedMapBoundingBox);
       explorationBoundingBoxes.add(intersectionBoundingBox);
-      
+
       messager.submitMessage(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes, explorationBoundingBoxes);
 
       for (double x = intersectionBoundingBox.getMinX() + exploreGridXSteps / 2.0; x <= intersectionBoundingBox.getMaxX(); x = x + exploreGridXSteps)
@@ -419,7 +508,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       navigableRegionsManager.setPlanarRegions(concatenatedMap.getPlanarRegionsAsList());
 
-      int maxNumberOfFeasiblePointsToLookFor = 30;
       int numberConsidered = 0;
 
       for (Point3D testGoal : potentialPoints)
@@ -493,11 +581,11 @@ public class ExploreAreaBehavior implements BehaviorInterface
       double minimumX = Math.max(boxOne.getMinX(), boxTwo.getMinX());
       double minimumY = Math.max(boxOne.getMinY(), boxTwo.getMinY());
       double minimumZ = Math.max(boxOne.getMinZ(), boxTwo.getMinZ());
-      
+
       double maximumX = Math.min(boxOne.getMaxX(), boxTwo.getMaxX());
       double maximumY = Math.min(boxOne.getMaxY(), boxTwo.getMaxY());
       double maximumZ = Math.min(boxOne.getMaxZ(), boxTwo.getMaxZ());
-      
+
       return new BoundingBox3D(minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ);
    }
 
@@ -513,8 +601,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       return false;
    }
 
-   private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart,
-                                         double minDistanceIfPossible)
+   private void sortBasedOnBestDistances(ArrayList<Point3D> potentialPoints, HashMap<Point3DReadOnly, Double> distancesFromStart, double minDistanceIfPossible)
    {
       Comparator<Point3DReadOnly> comparator = new Comparator<Point3DReadOnly>()
       {
@@ -576,6 +663,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private FootstepPlan footstepPlan = null;
    private FootstepDataListMessage footstepDataListMessageFromPlan = null;
    private PlanarRegionsList planarRegionsListFromPlan = null;
+   private boolean outOfPlans = false;
 
    private void onPlanStateEntry()
    {
@@ -599,6 +687,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       else
       {
          LogTools.info("Out of places to plan too!!!! We're lost!!");
+         outOfPlans = true;
       }
    }
 
@@ -631,6 +720,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void resetFootstepPlanning()
    {
+      outOfPlans = false;
       plannerFinished = false;
       foundValidPlan = false;
       footstepPlan = null;
@@ -649,6 +739,11 @@ public class ExploreAreaBehavior implements BehaviorInterface
       return (foundValidPlan == true);
    }
 
+   private boolean readyToTransitionFromPlanToTurnInPlace(double timeInState)
+   {
+      return outOfPlans;
+   }
+
    private void onWalkToNextLocationStateEntry()
    {
       HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
@@ -661,7 +756,79 @@ public class ExploreAreaBehavior implements BehaviorInterface
       walkingCompleted.poll();
    }
 
+   private void onTurnInPlaceStateEntry()
+   {
+      ArrayList<Pose3D> posesFromThePreviousStep = new ArrayList<Pose3D>();
+
+      RobotSide supportSide = RobotSide.RIGHT;
+      RobotSide initialSupportSide = supportSide;
+      double rotationPerStepOutside = Math.PI / 4.0;
+      double rotationPerStepInside = Math.PI / 8.0;
+
+      Quaternion orientation = new Quaternion();
+      orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
+      Point3D translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
+      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
+
+      supportSide = supportSide.getOppositeSide();
+      orientation = new Quaternion();
+      orientation.setYawPitchRoll(rotationPerStepInside, 0.0, 0.0);
+      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
+      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
+
+      supportSide = supportSide.getOppositeSide();
+      orientation = new Quaternion();
+      orientation.setYawPitchRoll(rotationPerStepOutside, 0.0, 0.0);
+      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
+      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
+
+      supportSide = supportSide.getOppositeSide();
+      orientation = new Quaternion();
+      translation = new Point3D(0.0, supportSide.negateIfLeftSide(0.2), 0.0);
+      posesFromThePreviousStep.add(new Pose3D(translation, orientation));
+
+      requestWalk(initialSupportSide, posesFromThePreviousStep);
+   }
+
+   private void requestWalk(RobotSide supportSide, ArrayList<Pose3D> posesFromThePreviousStep)
+   {
+      RobotSide swingSide = supportSide.getOppositeSide();
+      FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
+      Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      ReferenceFrame supportFootFrame = referenceFrames.getSoleFrame(supportSide);
+
+      for (Pose3D pose : posesFromThePreviousStep)
+      {
+         FramePose3D nextStepFramePose = new FramePose3D(supportFootFrame, pose);
+         PoseReferenceFrame nextStepFrame = new PoseReferenceFrame("nextStepFrame", nextStepFramePose);
+
+         nextStepFramePose.changeFrame(worldFrame);
+
+         FootstepDataMessage footstepMessage = footstepDataList.add();
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, nextStepFramePose);
+         footstepMessage.set(footstep);
+
+         supportSide = supportSide.getOppositeSide();
+         swingSide = swingSide.getOppositeSide();
+         supportFootFrame = nextStepFrame;
+      }
+
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageToTurnInPlace, referenceFrames, concatenatedMap);
+   }
+
+   private void doTurnInPlaceStateAction(double timeInState)
+   {
+      walkingCompleted.poll();
+   }
+
    private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
+   {
+      return (walkingCompleted.hasNext());
+      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
+   }
+
+   private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
    {
       return (walkingCompleted.hasNext());
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
