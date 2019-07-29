@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.Random;
@@ -13,9 +13,9 @@ public class FootstepPlanningTestTools
 {
    private final static double epsilon = 1e-7;
 
-   public static FootstepPlannerParameters createRandomParameters(Random random)
+   public static FootstepPlannerParametersReadOnly createRandomParameters(Random random)
    {
-      FootstepPlannerParameters parameters = new FootstepPlannerParameters()
+      FootstepPlannerParametersReadOnly parameters = new FootstepPlannerParametersReadOnly()
       {
          private final double idealWidth = RandomNumbers.nextDouble(random, 0.01, 1.0);
 
@@ -452,7 +452,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getPitchWeight(), other.getPitchWeight(), epsilon);
    }
 
-   public static void assertParametersEqual(FootstepPlannerParameters parameters, FootstepPlannerParameters other)
+   public static void assertParametersEqual(FootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersReadOnly other)
    {
       assertEquals(parameters.checkForBodyBoxCollisions(), other.checkForBodyBoxCollisions());
       assertEquals(parameters.performHeuristicSearchPolicies(), other.performHeuristicSearchPolicies());

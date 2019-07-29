@@ -10,7 +10,8 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -20,7 +21,8 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
+   private FootstepPlanningParameters planningParameters;
 
    @FXML
    private CheckBox returnBestEffortPlan;
@@ -111,9 +113,10 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   public void setPlannerParameters(FootstepPlanningParameters parameters)
    {
       parametersProperty.setPlannerParameters(parameters);
+      this.planningParameters = parameters;
    }
 
    public void setupControls()
@@ -157,37 +160,37 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty());
-      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v -> planningParameters.set(v));
 
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty(), v -> publishParameters());
 
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty(), v -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty(), v -> publishParameters());
 
-      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty(), v -> publishParameters());
+
+      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty(), v -> publishParameters());
       
-      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty(), v -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty(), v -> publishParameters());
 
-      parametersProperty.bidirectionBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty());
-
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
+      parametersProperty.bidirectionalBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty(), v -> publishParameters());
 
       // these dimensions work best for valkyrie
       stanceFootShape.setHeight(footLength * metersToPixel);
@@ -202,33 +205,16 @@ public class FootstepPlannerParametersUIController
       updateStepShape();
    }
 
+   private void publishParameters()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+   }
+
+
    @FXML
    public void saveToFile()
    {
-      if (filePropertyHelper == null)
-      {
-         PrintTools.warn("Can not save to file.");
-         return;
-      }
-
-      System.out.println("Saving Parameters to file.");
-
-      filePropertyHelper.saveProperty("maxStepLength", maxStepLength.getValue());
-      filePropertyHelper.saveProperty("maxStepWidth", maxStepWidth.getValue());
-      filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
-      filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
-      filePropertyHelper.saveProperty("maxStepZ", maxStepZ.getValue());
-      filePropertyHelper.saveProperty("minSurfaceIncline", minSurfaceIncline.getValue());
-      filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
-      filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
-      filePropertyHelper.saveProperty("minFootholdPercent", minFootholdPercent.getValue());
-      filePropertyHelper.saveProperty("minXClearance", minXClearance.getValue());
-      filePropertyHelper.saveProperty("minYClearance", minYClearance.getValue());
-      filePropertyHelper.saveProperty("cliffHeightSpinner", cliffHeightSpinner.getValue());
-      filePropertyHelper.saveProperty("cliffClearance", cliffClearance.getValue());
-      filePropertyHelper.saveProperty("maxXYWiggleSpinner", maxXYWiggleSpinner.getValue());
-      filePropertyHelper.saveProperty("maxYawWiggleSpinner", maxYawWiggleSpinner.getValue());
-      filePropertyHelper.saveProperty("wiggleInsideDeltaSpinner", wiggleInsideDeltaSpinner.getValue());
+      planningParameters.getStoredPropertySet().save();
    }
 
    public void loadFromFile()
@@ -304,23 +290,5 @@ public class FootstepPlannerParametersUIController
       clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance.getValue()) * metersToPixel);
       clearanceBox.setWidth(metersToPixel * (minYClearance.getValue() * 2.0));
       clearanceBox.setHeight(metersToPixel * (minXClearance.getValue() * 2.0));
-   }
-
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
-   {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
-      {
-         @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
-         {
-            return new SettableFootstepPlannerParameters(messageContent);
-         }
-      };
    }
 }

@@ -27,7 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPo
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -82,12 +82,12 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
-   private final FootstepPlannerParameters footstepPlanningParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
-   public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
+   public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                 BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener multiStageListener,
                                 IntegerProvider planId, long tickDurationMs)
 
@@ -129,7 +129,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       initialize.set(true);
    }
 
-   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParameters footstepPlannerParameters, BodyPathPlanner bodyPathPlanner,
+   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, BodyPathPlanner bodyPathPlanner,
                                                                      MultiStagePlannerListener multiStageListener,
                                                                      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
    {

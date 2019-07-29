@@ -1,10 +1,10 @@
 package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 
-public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
+public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParametersReadOnly
 {
    @Override
    public boolean checkForBodyBoxCollisions()

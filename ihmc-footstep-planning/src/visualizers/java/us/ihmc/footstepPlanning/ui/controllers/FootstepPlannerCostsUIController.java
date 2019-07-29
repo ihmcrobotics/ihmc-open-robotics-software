@@ -6,7 +6,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -15,7 +16,9 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 public class FootstepPlannerCostsUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
+   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty();
+   private FootstepPlanningParameters planningParameters;
+
 
    @FXML
    private CheckBox useQuadraticHeightCost;
@@ -48,8 +51,9 @@ public class FootstepPlannerCostsUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   public void setPlannerParameters(FootstepPlanningParameters parameters)
    {
+      this.planningParameters = parameters;
       property.setPlannerParameters(parameters);
    }
 
@@ -72,40 +76,28 @@ public class FootstepPlannerCostsUIController
    {
       setupControls();
 
-      property.bidirectionalBindUseQuadraticDistanceCost(useQuadraticDistanceCost.selectedProperty());
-      property.bidirectionalBindUseQuadraticHeightCost(useQuadraticHeightCost.selectedProperty());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v -> planningParameters.set(v));
 
-      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
-      property.bidirectionalBindAStarHeuristicsWeight(aStarHeuristicsWeight.getValueFactory().valueProperty());
 
-      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindPitchWeight(pitchWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindRollWeight(rollWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindUseQuadraticDistanceCost(useQuadraticDistanceCost.selectedProperty(), v -> publishParameters());
+      property.bidirectionalBindUseQuadraticHeightCost(useQuadraticHeightCost.selectedProperty(), v -> publishParameters());
 
-      property.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
+      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindAStarHeuristicsWeight(aStarHeuristicsWeight.getValueFactory().valueProperty(), v -> publishParameters());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
+      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindPitchWeight(pitchWeight.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindRollWeight(rollWeight.getValueFactory().valueProperty(), v -> publishParameters());
+
+      property.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty(), v -> publishParameters());
+      property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty(), v -> publishParameters());
    }
 
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
+   private void publishParameters()
    {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
-      {
-         @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
-         {
-            return new SettableFootstepPlannerParameters(messageContent);
-         }
-      };
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createLowWeightValueFactory()

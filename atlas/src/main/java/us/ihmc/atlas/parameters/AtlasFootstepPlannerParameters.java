@@ -1,8 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
-public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
+public class AtlasFootstepPlannerParameters implements FootstepPlannerParametersReadOnly
 {
    private boolean wiggleIntoConvexHull = true;
    private boolean rejectIfCannotFullyWiggleInside = false;
