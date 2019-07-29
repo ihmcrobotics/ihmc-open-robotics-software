@@ -121,7 +121,7 @@ public class FootstepPlanningStage implements FootstepPlanner
                                                    bodyPathPlanner,
                                                    footstepPlannerParameters,
                                                    contactPointsInSoleFrame,
-                                                   footstepPlannerParameters.getCostParameters().getBodyPathBasedHeuristicsWeight(),
+                                                   footstepPlannerParameters.getBodyPathBasedHeuristicsWeight(),
                                                    registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      createBodyPathBasedAStarPlanner(footstepPlannerParameters, bodyPathPlanner, multiStageListener, contactPointsInSoleFrame));
@@ -139,7 +139,7 @@ public class FootstepPlanningStage implements FootstepPlanner
                                            bodyPathPlanner,
                                            footstepPlannerParameters,
                                            contactPointsInSoleFrame,
-                                           footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(),
+                                           footstepPlannerParameters.getAStarHeuristicsWeight(),
                                            registry,
                                            plannerListener);
    }
@@ -166,7 +166,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlanningParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(),
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getAStarHeuristicsWeight(),
                                                                                    footstepPlanningParameters);
 
       StagePlannerListener plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());

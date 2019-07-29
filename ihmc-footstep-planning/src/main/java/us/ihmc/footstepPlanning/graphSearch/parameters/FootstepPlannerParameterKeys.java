@@ -8,7 +8,7 @@ import us.ihmc.tools.property.StoredPropertyKeyList;
 
 public class FootstepPlannerParameterKeys
 {
-   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList("bipedFootstepPlannerParameters");
+   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList("footstepPlannerParameters");
 
    public static final BooleanStoredPropertyKey checkForBodyBoxCollisions                  = keys.addBooleanKey("Check for body box collisions", false);
    public static final BooleanStoredPropertyKey performHeuristicSearchPolicies             = keys.addBooleanKey("Perform heuristic search policies", true);

@@ -75,8 +75,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
-      if (get(key) == value)
-         return;
+      if (values[key.getIndex()] != null)
+      {
+         if (get(key) == value)
+            return;
+      }
 
       values[key.getIndex()] = value;
       key.notifyOfVariableChanged();
@@ -85,8 +88,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
-      if (get(key) == value)
-         return;
+      if (values[key.getIndex()] != null)
+      {
+         if (get(key) == value)
+            return;
+      }
 
       values[key.getIndex()] = value;
       key.notifyOfVariableChanged();
@@ -95,8 +101,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
-      if (get(key) == value)
-         return;
+      if (values[key.getIndex()] != null)
+      {
+         if (get(key) == value)
+            return;
+      }
 
       values[key.getIndex()] = value;
       key.notifyOfVariableChanged();
