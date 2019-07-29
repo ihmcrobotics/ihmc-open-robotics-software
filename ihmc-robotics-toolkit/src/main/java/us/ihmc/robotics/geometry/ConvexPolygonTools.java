@@ -832,11 +832,12 @@ public class ConvexPolygonTools
       return cutPolygonWithLine(cuttingLine, (ConvexPolygon2DBasics) polygonToCut, sideOfLineToCut);
    }
 
-   private final Point2D intersectionPoint1 = new Point2D();
-   private final Point2D intersectionPoint2 = new Point2D();
-
    // TODO Needs to be extracted to Euclid.
-   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(Line2DReadOnly cuttingLine,
+                                        ConvexPolygon2DBasics polygonToCut,
+                                        RobotSide sideOfLineToCut,
+                                        Point2D intersectionPoint1,
+                                        Point2D intersectionPoint2)
    {
       int intersectionPoints = polygonToCut.intersectionWith(cuttingLine, intersectionPoint1, intersectionPoint2);
 
@@ -867,6 +868,14 @@ public class ConvexPolygonTools
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }
+   }
+
+   private final Point2D intersectionPoint1 = new Point2D();
+   private final Point2D intersectionPoint2 = new Point2D();
+
+   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      return cutPolygonWithLine(cuttingLine, polygonToCut, sideOfLineToCut, intersectionPoint1, intersectionPoint2);
    }
 
    /**
