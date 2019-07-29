@@ -269,6 +269,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       getStoredPropertySet().set(FootstepPlannerParameterKeys.boundingBoxCost, boundingBoxCost);
    }
 
+   default void setFinalTurnProximity(double finalTurnProximity)
+   {
+      getStoredPropertySet().set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
