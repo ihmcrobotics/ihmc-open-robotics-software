@@ -2,20 +2,20 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.PropertySetToParameterPropertyConverter;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
 public class FootstepPlannerParametersProperty extends PropertySetToParameterPropertyConverter
 {
-   private FootstepPlanningParameters parameters;
+   private FootstepPlannerParametersBasics parameters;
 
    public FootstepPlannerParametersProperty()
    {
    }
 
-   public void setPlannerParameters(FootstepPlanningParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.parameters = parameters;
    }

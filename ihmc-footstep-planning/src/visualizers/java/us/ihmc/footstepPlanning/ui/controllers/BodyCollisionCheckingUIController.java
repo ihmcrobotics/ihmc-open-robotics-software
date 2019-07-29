@@ -1,20 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class BodyCollisionCheckingUIController
 {
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
-   private FootstepPlanningParameters planningParameters;
+   private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
    private CheckBox enableBodyCollisionChecking;
@@ -44,7 +43,7 @@ public class BodyCollisionCheckingUIController
 
    }
 
-   public void setPlannerParameters(FootstepPlanningParameters plannerParameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics plannerParameters)
    {
       this.planningParameters = plannerParameters;
       parametersProperty.setPlannerParameters(plannerParameters);

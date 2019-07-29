@@ -6,18 +6,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 
 public class FootstepPlannerCostsUIController
 {
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty();
-   private FootstepPlanningParameters planningParameters;
+   private FootstepPlannerParametersBasics planningParameters;
 
 
    @FXML
@@ -51,7 +48,7 @@ public class FootstepPlannerCostsUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlanningParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.planningParameters = parameters;
       property.setPlannerParameters(parameters);

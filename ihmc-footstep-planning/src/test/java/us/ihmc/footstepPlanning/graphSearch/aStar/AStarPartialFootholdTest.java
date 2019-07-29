@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -78,7 +78,7 @@ public class AStarPartialFootholdTest
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose3d);
    }
 
-   private class TestParameters extends FootstepPlanningParameters
+   private class TestParameters extends DefaultFootstepPlannerParameters
    {
       @Override
       public double getMinimumFootholdPercent()

@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -36,7 +36,7 @@ public class AStarStartNodeInAVoidTest
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-      FootstepPlanningParameters parameters = new FootstepPlanningParameters();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);

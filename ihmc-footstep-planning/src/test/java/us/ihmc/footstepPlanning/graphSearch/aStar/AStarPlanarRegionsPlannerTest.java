@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -147,7 +147,7 @@ public class AStarPlanarRegionsPlannerTest
 
       FootstepNode node = new FootstepNode(0.0, 0.0, Math.PI, RobotSide.RIGHT);
 
-      FootstepPlannerParametersReadOnly parameters = new FootstepPlanningParameters();
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
       HashSet<FootstepNode> neighbors = expansion.expandNode(node);
 
@@ -203,7 +203,7 @@ public class AStarPlanarRegionsPlannerTest
 
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-      FootstepPlannerParametersReadOnly parameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public FootstepPlannerCostParameters getCostParameters()

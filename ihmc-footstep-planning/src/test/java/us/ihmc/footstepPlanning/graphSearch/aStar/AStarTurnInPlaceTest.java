@@ -8,7 +8,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,7 +23,7 @@ public class AStarTurnInPlaceTest
    public void testTurningInPlace()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-      FootstepPlanningParameters parameters = new FootstepPlanningParameters();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
 

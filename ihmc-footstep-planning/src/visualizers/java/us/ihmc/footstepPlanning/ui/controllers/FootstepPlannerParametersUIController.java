@@ -1,28 +1,20 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import java.io.File;
-import java.io.IOException;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.shape.Rectangle;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
-   private FootstepPlanningParameters planningParameters;
+   private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
    private CheckBox returnBestEffortPlan;
@@ -90,22 +82,9 @@ public class FootstepPlannerParametersUIController
 
    private static final double metersToPixel = 200;
 
-   private FilePropertyHelper filePropertyHelper;
 
    public FootstepPlannerParametersUIController()
    {
-      File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-         filePropertyHelper = new FilePropertyHelper(configurationFile);
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
    }
 
    public void attachMessager(JavaFXMessager messager)
@@ -113,7 +92,7 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlanningParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       parametersProperty.setPlannerParameters(parameters);
       this.planningParameters = parameters;
@@ -215,48 +194,6 @@ public class FootstepPlannerParametersUIController
    public void saveToFile()
    {
       planningParameters.getStoredPropertySet().save();
-   }
-
-   public void loadFromFile()
-   {
-      if (filePropertyHelper == null)
-      {
-         return;
-      }
-
-      Double value;
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepLength")) != null)
-         maxStepLength.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepWidth")) != null)
-         maxStepWidth.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepWidth")) != null)
-         minStepWidth.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepLength")) != null)
-         minStepLength.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepZ")) != null)
-         maxStepZ.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minSurfaceIncline")) != null)
-         minSurfaceIncline.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepYaw")) != null)
-         maxStepYaw.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepYaw")) != null)
-         minStepYaw.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minFootholdPercent")) != null)
-         minFootholdPercent.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minXClearance")) != null)
-         minXClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minYClearance")) != null)
-         minYClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner")) != null)
-         cliffHeightSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("cliffClearance")) != null)
-         cliffClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner")) != null)
-         maxXYWiggleSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner")) != null)
-         maxYawWiggleSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner")) != null)
-         wiggleInsideDeltaSpinner.getValueFactory().setValue(value);
    }
 
    private void updateStepShape()
