@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class DefaultFootstepPlannerParameters implements FootstepPlannerParametersBasics
+public class DefaultFootstepPlannerParameters implements SaveableFootstepPlannerParameters
 {
    private final StoredPropertySet propertySet;
 

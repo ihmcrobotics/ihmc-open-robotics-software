@@ -29,7 +29,7 @@ import java.util.*;
  * - No YoVariableServer required
  * - INI file can be placed in higher level projects to override the defaults
  */
-public class StoredPropertySet implements StoredPropertySetReadOnly
+public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
    private final String saveFileName;
@@ -72,6 +72,7 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return (Boolean) values[key.getIndex()];
    }
 
+   @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
       if (get(key) == value)
@@ -81,6 +82,7 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       key.notifyOfVariableChanged();
    }
 
+   @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
       if (get(key) == value)
@@ -90,6 +92,7 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       key.notifyOfVariableChanged();
    }
 
+   @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
       if (get(key) == value)
@@ -105,6 +108,7 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return Arrays.asList(values);
    }
 
+   @Override
    public void setAll(List<Object> newValues)
    {
       for (int i = 0; i < values.length; i++)

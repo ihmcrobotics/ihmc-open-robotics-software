@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -778,12 +777,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Body box base Z isn't equal.", parameters.getBodyBoxBaseZ(), packet.getBodyBoxBaseZ(), epsilon);
       assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
       assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
-
-      checkFootstepPlannerCostParameters(parameters.getCostParameters(), packet.getCostParameters());
-   }
-
-   private static void checkFootstepPlannerCostParameters(FootstepPlannerCostParameters parameters, FootstepPlannerCostParametersPacket packet)
-   {
       assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
       assertEquals("Use quadratic height cost flags aren't equal.", parameters.useQuadraticHeightCost(), packet.getUseQuadraticHeightCost());
 
@@ -804,6 +797,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
    }
+
 
    private static void checkVisibilityGraphsParameters(VisibilityGraphsParameters parameters, VisibilityGraphsParametersPacket packet)
    {
