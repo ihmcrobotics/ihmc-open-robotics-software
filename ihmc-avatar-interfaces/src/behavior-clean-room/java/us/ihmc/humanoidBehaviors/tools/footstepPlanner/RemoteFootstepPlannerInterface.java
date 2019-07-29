@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
@@ -60,7 +60,7 @@ public class RemoteFootstepPlannerInterface
       {
          messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
          {
-            FootstepPlanningParameters settableFootstepPlannerParameters = new FootstepPlanningParameters();
+            DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);
             footstepPlannerParameters = settableFootstepPlannerParameters;
             timeout = parameters.getTimeout();
@@ -136,7 +136,7 @@ public class RemoteFootstepPlannerInterface
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
-      FootstepPlanningParameters settableFootstepPlannerParameters = new FootstepPlanningParameters();
+      DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
       if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
       {
          settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds

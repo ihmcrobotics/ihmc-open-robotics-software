@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
 
 public class TunedFootstepPlannerParameters
 {

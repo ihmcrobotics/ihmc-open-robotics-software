@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.aStar.FootstepNodeVisualization;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -35,7 +35,7 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepPlannerParametersReadOnly parameters = new FootstepPlanningParameters();
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
       planner = AStarFootstepPlanner.createPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }

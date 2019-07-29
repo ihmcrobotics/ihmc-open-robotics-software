@@ -106,4 +106,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    {
       getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
    }
+
+   default void setIdealFootstepWidth(double idealFootstepWidth)
+   {
+      getStoredPropertySet().set(FootstepPlannerParameterKeys.idealFootstepWidth, idealFootstepWidth);
+   }
+
+   default void setIdealFootstepLength(double idealFootstepLength)
+   {
+      getStoredPropertySet().set(FootstepPlannerParameterKeys.idealFootstepLength, idealFootstepLength);
+   }
 }

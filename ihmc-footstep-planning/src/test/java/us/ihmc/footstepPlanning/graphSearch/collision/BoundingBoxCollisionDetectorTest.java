@@ -13,7 +13,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -25,7 +25,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testBodyCollisionWithZeroYaw()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getBodyBoxDepth()
@@ -127,7 +127,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollisionWithRotatedBody()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getBodyBoxDepth()
@@ -191,7 +191,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testHeightDetection()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getBodyBoxDepth()
@@ -254,7 +254,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollidingWithACube()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getBodyBoxDepth()
@@ -329,7 +329,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testClosestPointsInFrontAndBack()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new FootstepPlanningParameters()
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getBodyBoxDepth()

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
@@ -86,7 +86,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");
-      parameters = new YoFootstepPlannerParameters(registry, new FootstepPlanningParameters());
+      parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlannerTools.createDefaultFootPolygons();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
