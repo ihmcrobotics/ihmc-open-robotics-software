@@ -1,9 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,9 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -28,15 +21,16 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
-import us.ihmc.javafx.parameter.JavaFXParameterTable;
 import us.ihmc.javafx.parameter.JavaFXParameterTableEntry;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.IntegerStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKey;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 public class ExploreAreaBehaviorUIController extends Group
 {
@@ -86,35 +80,8 @@ public class ExploreAreaBehaviorUIController extends Group
       behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState,
                                              state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
-      JavaFXParameterTable javaFXParameterTable = new JavaFXParameterTable(parameterTable);
-
-      for (StoredPropertyKey<?> parameterKey : parameters.keys.keys())
-      {
-         SpinnerValueFactory spinnerValueFactory = null;
-
-         if (parameterKey.getType().equals(Double.class)) // TODO: Guess have to store these too? Optionally override?
-         {
-            spinnerValueFactory = new DoubleSpinnerValueFactory(-100.0, 100.0, parameters.get((DoubleStoredPropertyKey) parameterKey), 0.1);
-         }
-         else if (parameterKey.getType().equals(Integer.class))
-         {
-            spinnerValueFactory = new IntegerSpinnerValueFactory(-100, 100, parameters.get((IntegerStoredPropertyKey) parameterKey), 1);
-         }
-
-         JavaFXParameterTableEntry javaFXParameterTableEntry = new JavaFXParameterTableEntry<>(parameterKey.getTitleCasedName(),
-                                                                                               () -> parameters.get(parameterKey),
-                                                                                               newValue -> parameters.set(parameterKey, newValue),
-                                                                                               observable ->
-                                                                                               {
-                                                                                               },
-                                                                                               spinnerValueFactory);
-         javaFXParameterTable.addEntry(javaFXParameterTableEntry);
-      }
-
-      javaFXParameterTable.updateEntries();
-
-      //      TableColumn<AnchorPane, ExploreAreaBehaviorParameters> nameColumn = new TableColumn<>("Name");
-      //      nameColumn.setCellValueFactory(param -> param.getTableView());
+      JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
+      javaFXStoredPropertyTable.setup(parameters, parameters.keys);
 
       planarRegionsGraphic = new PlanarRegionsGraphic(false);
    }
