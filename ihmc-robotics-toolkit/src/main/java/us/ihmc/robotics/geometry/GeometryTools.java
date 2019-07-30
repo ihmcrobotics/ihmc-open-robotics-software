@@ -1048,30 +1048,6 @@ public class GeometryTools
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
    }
 
-   public static void centroid(Point3DReadOnly a, Point3DReadOnly b, Point3D centroidToPack)
-   {
-      centroidToPack.interpolate(a, b, 0.5);
-   }
-
-   public static void vector(Point3DReadOnly from, Point3DReadOnly to, Vector3D vectorToPack)
-   {
-      vectorToPack.sub(to, from);
-   }
-
-   public static Point3D centroid(Point3DReadOnly a, Point3DReadOnly b)
-   {
-      Point3D centroid = new Point3D(a);
-      centroid(a, b, centroid);
-      return centroid;
-   }
-
-   public static Vector3D vector(Point3DReadOnly from, Point3DReadOnly to)
-   {
-      Vector3D vector = new Vector3D();
-      vector(from, to, vector);
-      return vector;
-   }
-
    /**
     * Creates a 3D Euclid Box (a Shape) out of a 3D Bounding Box.
     *
@@ -1085,8 +1061,10 @@ public class GeometryTools
       Point3DReadOnly minPoint = boundingBox.getMinPoint();
       Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
 
-      Point3D boxCenter = GeometryTools.centroid(minPoint, maxPoint);
-      Vector3D size = GeometryTools.vector(minPoint, maxPoint);
+      Point3D boxCenter = new Point3D();
+      boxCenter.interpolate(minPoint, maxPoint, 0.5);
+      Vector3D size = new Vector3D();
+      size.sub(maxPoint, minPoint);
 
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
    }

@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector.FallDetectionType;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -21,6 +22,7 @@ public class QuadrupedTestYoVariables
    private final YoDouble robotBodyYaw;
 
    private final YoBoolean isFallDetected;
+   private final YoEnum<FallDetectionType> fallDetectionType;
 
    private final QuadrantDependentList<YoBoolean> controllerFootSwitches = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoBoolean> footSwitches = new QuadrantDependentList<>();
@@ -79,6 +81,7 @@ public class QuadrupedTestYoVariables
       robotBodyYaw = (YoDouble) scs.getVariable("q_yaw");
 
       isFallDetected = (YoBoolean) scs.getVariable("isFallDetected");
+      fallDetectionType = (YoEnum<FallDetectionType>) scs.getVariable("fallDetectionReason");
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -183,6 +186,11 @@ public class QuadrupedTestYoVariables
    public YoBoolean getIsFallDetected()
    {
       return isFallDetected;
+   }
+
+   public YoEnum<FallDetectionType> getFallDetectionType()
+   {
+      return fallDetectionType;
    }
 
    public YoEnum<HighLevelControllerName> getUserTrigger()
