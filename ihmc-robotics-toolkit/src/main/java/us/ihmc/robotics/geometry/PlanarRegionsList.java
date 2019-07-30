@@ -376,6 +376,14 @@ public class PlanarRegionsList
          regions.get(i).transform(rigidBodyTransform);
       }
    }
+   
+   public void transformByPreMultiply(RigidBodyTransform rigidBodyTransform)
+   {
+      for (int i = 0; i < regions.size(); i++)
+      {
+         regions.get(i).transformByPreMultiply(rigidBodyTransform);
+      }
+   }
 
    public static PlanarRegionsList generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons,
                                                                                                   double maxAbsoluteXYForPolygons,

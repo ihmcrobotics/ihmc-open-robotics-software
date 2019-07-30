@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.graphics;
+package us.ihmc.javafx.graphics;
 
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

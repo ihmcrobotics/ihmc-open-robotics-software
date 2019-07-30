@@ -1,5 +1,7 @@
 package us.ihmc.tools.property;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +12,11 @@ public class StoredPropertyKeyList
    private final List<StoredPropertyKey<?>> keys = new ArrayList<>();
 
    private String saveFileName;
+
+   public StoredPropertyKeyList(Class<?> classToNameAfter)
+   {
+      this(StringUtils.uncapitalize(classToNameAfter.getSimpleName()));
+   }
 
    public StoredPropertyKeyList(String saveFileName)
    {

@@ -14,6 +14,19 @@ public class PlanarRegionDataImporter
 {
    public static PlanarRegionsList importUsingFileChooser(Window ownerWindow)
    {
+      File dataFolder = chooseFile(ownerWindow);
+      if (dataFolder == null)
+      {
+         return null;
+      }
+      else
+      {
+         return PlanarRegionFileTools.importPlanarRegionData(dataFolder);
+      }
+   }
+
+   public static File chooseFile(Window ownerWindow)
+   {
       DirectoryChooser directoryChooser = new DirectoryChooser();
       File initialDirectory = getDefaultFilePath();
 
@@ -32,7 +45,7 @@ public class PlanarRegionDataImporter
       else
       {
          setDefaultFilePath(result);
-         return PlanarRegionFileTools.importPlanarRegionData(result);
+         return result;
       }
    }
 

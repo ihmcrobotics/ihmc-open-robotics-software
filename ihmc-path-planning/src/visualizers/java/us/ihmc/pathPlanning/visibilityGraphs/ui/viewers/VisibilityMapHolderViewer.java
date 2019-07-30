@@ -14,6 +14,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
@@ -111,7 +112,7 @@ public class VisibilityMapHolderViewer extends AnimationTimer
       if (customMaterial != null)
          meshView.setMaterial(customMaterial);
       else
-         meshView.setMaterial(new PhongMaterial(PlanarRegionViewer.getRegionColor(visibilityMapHolder.getMapId())));
+         meshView.setMaterial(new PhongMaterial(IdMappedColorFunction.INSTANCE.apply(visibilityMapHolder.getMapId())));
 
       mapToRender.set(meshView);
    }
