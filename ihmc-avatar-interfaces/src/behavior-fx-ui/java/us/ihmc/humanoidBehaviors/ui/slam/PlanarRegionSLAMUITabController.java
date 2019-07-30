@@ -26,6 +26,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -151,8 +152,8 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private PlanarRegionsList loadDataSet(String dataSetName)
    {
-      String prefix = "ihmc-open-robotics-software/robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/";
-      Path path = Paths.get(prefix + dataSetName);
+      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
       return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 
