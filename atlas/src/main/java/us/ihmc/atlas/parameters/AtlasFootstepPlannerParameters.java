@@ -57,6 +57,8 @@ public class AtlasFootstepPlannerParameters implements SaveableFootstepPlannerPa
       setBodyBoxBaseY(0.0);
       setBodyBoxBaseZ(0.25);
       setFinalTurnProximity(1.0);
+
+      getStoredPropertySet().load();
    }
 
    @Override
