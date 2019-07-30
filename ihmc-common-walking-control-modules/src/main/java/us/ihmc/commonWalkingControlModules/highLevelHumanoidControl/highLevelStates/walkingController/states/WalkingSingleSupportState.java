@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -19,10 +21,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -67,6 +70,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public WalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -324,11 +328,39 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
+      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());
       tempOrientation.setIncludingFrame(nextFootstep.getFootstepPose().getOrientation());
-      tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide()));
-      feetManager.touchDown(nextFootstep.getRobotSide(), tempOrientation.getPitch(), footstepTiming.getTouchdownDuration());
+      tempOrientation.changeFrame(soleZUpFrame);
+      double pitch = tempOrientation.getPitch();
+
+      if (doManualTouchdown())
+      {
+         // Get the initial condition from the swing trajectory
+         FrameSE3TrajectoryPoint lastWaypoint = nextFootstep.getSwingTrajectory().get(nextFootstep.getSwingTrajectory().size() - 1);
+         tempOrientation.setIncludingFrame(lastWaypoint.getOrientation());
+         tempOrientation.changeFrame(soleZUpFrame);
+         tempAngularVelocity.setIncludingFrame(lastWaypoint.getAngularVelocity());
+         tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
+      }
+      else
+      {
+         // Get the initial condition from the robot state
+         MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(nextFootstep.getRobotSide());
+         tempOrientation.setToZero(soleFrame);
+         tempOrientation.changeFrame(soleZUpFrame);
+         tempAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
+         tempAngularVelocity.changeFrame(soleZUpFrame);
+      }
+      double initialPitch = tempOrientation.getPitch();
+      double initialPitchVelocity = tempAngularVelocity.getY();
+      feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
 
       setYoVariablesToNaN();
+   }
+
+   private boolean doManualTouchdown()
+   {
+      return nextFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(nextFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
