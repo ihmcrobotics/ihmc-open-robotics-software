@@ -12,12 +12,37 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 {
    private static final int SIGNIFICANT_FIGURES_FOR_PRINT_OUT = 3;
 
+   protected String failurePrefix = null;
+   protected StringProvider stringProvider = null;
+
+   public interface StringProvider
+   {
+      String getString();
+   }
+
    protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
+      this();
+
       for (YoVariable<?> yoVariable : yoVariables)
       {
          yoVariable.addVariableChangedListener(this::notifyOfVariableChange);
       }
+   }
+
+   public YoVariableTestGoal()
+   {
+      this("");
+   }
+
+   public YoVariableTestGoal(String failurePrefix)
+   {
+      this.failurePrefix = failurePrefix;
+   }
+
+   public YoVariableTestGoal(StringProvider stringProvider)
+   {
+      this.stringProvider = stringProvider;
    }
 
    public void notifyOfVariableChange(YoVariable<?> v)
@@ -41,7 +66,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
             String numberStringOne = getFormattedDoubleYoVariable(variableOne);
             String numberStringTwo = getFormattedDoubleYoVariable(variableTwo);
             String epsilonString = FormattingTools.getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            return numberStringOne + " (+/- " + epsilonString + ") == " + numberStringTwo;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + numberStringOne + " (+/- " + epsilonString + ") == " + numberStringTwo;
          }
       };
    }
@@ -62,7 +89,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
             String numberString = getFormattedDoubleYoVariable(yoDouble);
             String epsilonString = FormattingTools.getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             String goalString = FormattingTools.getFormattedToSignificantFigures(goalValue, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            return numberString + " (+/- " + epsilonString + ") == " + goalString;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + numberString + " (+/- " + epsilonString + ") == " + goalString;
          }
       };
    }
@@ -82,7 +111,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          {
             String numberString = getFormattedDoubleYoVariable(yoDouble);
             String greaterThanString = FormattingTools.getFormattedToSignificantFigures(greaterThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            return numberString + " > " + greaterThanString;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + numberString + " > " + greaterThanString;
          }
       };
    }
@@ -103,7 +134,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
             String minuendString = getFormattedDoubleYoVariable(minuend);
             String subtrahendString = getFormattedDoubleYoVariable(subtrahend);
             String differenceString = FormattingTools.getFormattedToSignificantFigures(difference, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            return minuendString + " - " + subtrahendString + " > " + differenceString;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + minuendString + " - " + subtrahendString + " > " + differenceString;
          }
       };
    }
@@ -123,7 +156,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          {
             String numberString = getFormattedDoubleYoVariable(yoDouble);
             String lessThanString = FormattingTools.getFormattedToSignificantFigures(lessThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            return numberString + " < " + lessThanString;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + numberString + " < " + lessThanString;
          }
       };
    }
@@ -141,7 +176,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          @Override
          public String toString()
          {
-            return getFormattedEnumYoVariable(yoEnum) + " == " + enumValue.name();
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + getFormattedEnumYoVariable(yoEnum) + " == " + enumValue.name();
          }
       };
    }
@@ -159,7 +196,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          @Override
          public String toString()
          {
-            return getFormattedBooleanYoVariable(yoBoolean) + " == " + booleanValue;
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + getFormattedBooleanYoVariable(yoBoolean) + " == " + booleanValue;
          }
 
       };
@@ -178,7 +217,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          @Override
          public String toString()
          {
-            return goalOne.toString() + " or " + goalTwo.toString();
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + goalOne.toString() + " or " + goalTwo.toString();
          }
 
       };
@@ -186,7 +227,12 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    public static YoVariableTestGoal and(YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
    {
-      return new YoVariableTestGoal()
+      return and("", goalOne, goalTwo);
+   }
+
+   public static YoVariableTestGoal and(String prefix, YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
+   {
+      return new YoVariableTestGoal(prefix)
       {
          @Override
          public boolean currentlyMeetsGoal()
@@ -197,7 +243,30 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          @Override
          public String toString()
          {
-            return goalOne.toString() + " and " + goalTwo.toString();
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + goalOne.toString() + " and " + goalTwo.toString();
+         }
+
+      };
+   }
+
+   public static YoVariableTestGoal and(StringProvider stringProvider, YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
+   {
+      return new YoVariableTestGoal(stringProvider)
+      {
+         @Override
+         public boolean currentlyMeetsGoal()
+         {
+            return goalOne.currentlyMeetsGoal() && goalTwo.currentlyMeetsGoal();
+         }
+
+         @Override
+         public String toString()
+         {
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + goalOne.toString() + " and " + goalTwo.toString();
          }
 
       };
@@ -216,7 +285,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
          @Override
          public String toString()
          {
-            return "not " + goal.toString();
+            if (stringProvider != null)
+               failurePrefix = stringProvider.getString();
+            return failurePrefix + "not " + goal.toString();
          }
       };
    }
