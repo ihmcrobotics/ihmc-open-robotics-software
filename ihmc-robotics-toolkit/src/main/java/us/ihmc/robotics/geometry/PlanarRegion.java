@@ -22,6 +22,7 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -919,6 +920,30 @@ public class PlanarRegion implements SupportingVertexHolder
       transformToPack.set(fromWorldToLocalTransform);
    }
 
+   public RigidBodyTransformReadOnly getTransformToLocal()
+   {
+      return fromWorldToLocalTransform;
+   }
+
+   public RigidBodyTransformReadOnly getTransformToWorld()
+   {
+      return fromLocalToWorldTransform;
+   }
+
+   public RigidBodyTransform getTransformToWorldCopy()
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      getTransformToWorld(transformToWorld);
+      return transformToWorld;
+   }
+
+   public RigidBodyTransform getTransformToLocalCopy()
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
    /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
@@ -1139,6 +1164,17 @@ public class PlanarRegion implements SupportingVertexHolder
    public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
    {
       fromLocalToWorldTransform.multiply(fromDesiredToCurrentTransform);
+      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
+      fromWorldToLocalTransform.invert();
+
+      updateBoundingBox();
+      updateConvexHull();
+   }
+
+   //TODO: +++JEP 190719 I think this is the correct implementation for transform(). Double check and if so, replace the one above with this.
+   public void transformByPreMultiply(RigidBodyTransform transform)
+   {
+      fromLocalToWorldTransform.preMultiply(transform);
       fromWorldToLocalTransform.set(fromLocalToWorldTransform);
       fromWorldToLocalTransform.invert();
 
