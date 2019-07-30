@@ -22,7 +22,12 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
-      this();
+      this("", yoVariables);
+   }
+
+   protected YoVariableTestGoal(String failurePrefix, YoVariable<?>... yoVariables)
+   {
+      this(failurePrefix);
 
       for (YoVariable<?> yoVariable : yoVariables)
       {
@@ -98,7 +103,12 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    public static YoVariableTestGoal doubleGreaterThan(final YoDouble yoDouble, final double greaterThan)
    {
-      return new YoVariableTestGoal(yoDouble)
+      return doubleGreaterThan("", yoDouble, greaterThan);
+   }
+
+   public static YoVariableTestGoal doubleGreaterThan(String failurePrefix, final YoDouble yoDouble, final double greaterThan)
+   {
+      return new YoVariableTestGoal(failurePrefix, yoDouble)
       {
          @Override
          public boolean currentlyMeetsGoal()
@@ -120,7 +130,12 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    public static YoVariableTestGoal deltaGreaterThan(final YoDouble minuend, final YoDouble subtrahend, final double difference)
    {
-      return new YoVariableTestGoal(minuend, subtrahend)
+      return deltaGreaterThan("", minuend, subtrahend, difference);
+   }
+
+   public static YoVariableTestGoal deltaGreaterThan(String failurePrefix, final YoDouble minuend, final YoDouble subtrahend, final double difference)
+   {
+      return new YoVariableTestGoal(failurePrefix, minuend, subtrahend)
       {
          @Override
          public boolean currentlyMeetsGoal()
@@ -294,7 +309,7 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
    
    public static YoVariableTestGoal timeInFuture(YoDouble timeYoVariable, double durationFromNow)
    {
-      return doubleGreaterThan(timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
+      return doubleGreaterThan("Time did not simulate for long enough. ", timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
    }
 
    private static String getFormattedBooleanYoVariable(final YoBoolean yoBoolean)
