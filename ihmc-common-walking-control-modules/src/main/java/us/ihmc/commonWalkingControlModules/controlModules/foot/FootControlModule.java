@@ -535,17 +535,17 @@ public class FootControlModule
       return stateMachine.getCurrentState().pollStatusToReport();
    }
 
-   public void liftOff(double pitch, double duration)
+   public void liftOff(double pitch, double pitchVelocity, double duration)
    {
       // Should not do this in the toe off state.
       if (getCurrentConstraintType() != ConstraintType.FULL)
          return;
 
-      supportState.liftOff(pitch, duration);
+      supportState.liftOff(pitch, pitchVelocity, duration);
    }
 
-   public void touchDown(double pitch, double duration)
+   public void touchDown(double initialPitch, double initialPitchVelocity, double pitch, double duration)
    {
-      supportState.touchDown(pitch, duration);
+      supportState.touchDown(initialPitch, initialPitchVelocity, pitch, duration);
    }
 }
