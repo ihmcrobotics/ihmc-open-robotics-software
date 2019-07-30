@@ -57,7 +57,7 @@ public class ValkyrieFootstepPlannerParameters implements SaveableFootstepPlanne
       setMaximum2dDistanceFromBoundingBoxToPenalize(0.05);
       setBoundingBoxCost(0.0);
 
-      propertySet.load();
+      getStoredPropertySet().load();
    }
 
    @Override

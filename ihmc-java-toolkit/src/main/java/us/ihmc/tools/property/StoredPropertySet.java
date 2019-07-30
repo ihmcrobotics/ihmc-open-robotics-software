@@ -52,6 +52,12 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.saveFileName = keys.getSaveFileName() + ".ini";
 
       values = new Object[keys.keys().size()];
+
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         if (key.hasDefaultValue())
+            values[key.getIndex()] = key.getDefaultValue();
+      }
    }
 
    @Override
