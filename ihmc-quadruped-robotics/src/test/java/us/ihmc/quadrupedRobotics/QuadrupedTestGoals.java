@@ -15,11 +15,11 @@ public class QuadrupedTestGoals
 
    public static YoVariableTestGoal bodyHeight(QuadrupedTestYoVariables variables, double height)
    {
-      return YoVariableTestGoal.deltaGreaterThan(variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), height);
+      return YoVariableTestGoal.deltaGreaterThan("Body height went too low. ", variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), height);
    }
 
    public static YoVariableTestGoal timeInFuture(QuadrupedTestYoVariables variables, double durationFromNow)
    {
-      return YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + durationFromNow);
+      return YoVariableTestGoal.timeInFuture(variables.getYoTime(), durationFromNow);
    }
 }
