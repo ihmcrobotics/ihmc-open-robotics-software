@@ -34,7 +34,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
-   private boolean visualize = true;
+   private boolean visualize = false;
    private final Random random = new Random(4587L);
 
    @BeforeEach
@@ -62,20 +62,9 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters()
-      {
-         @Override
-         public double getCliffHeightToAvoid()
-         {
-            return 0.01;
-         }
-
-         @Override
-         public double getMinimumDistanceFromCliffBottoms()
-         {
-            return minimumDistanceFromCliffBottom;
-         }
-      });
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters());
+      parameters.setCliffHeightToAvoid(0.01);
+      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       double footLength = 0.2;
       double footWidth = 0.1;
@@ -129,20 +118,9 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters()
-      {
-         @Override
-         public double getCliffHeightToAvoid()
-         {
-            return cliffHeightToAvoid;
-         }
-
-         @Override
-         public double getMinimumDistanceFromCliffBottoms()
-         {
-            return minimumDistanceFromCliffBottom;
-         }
-      });
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters());
+      parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
+      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
