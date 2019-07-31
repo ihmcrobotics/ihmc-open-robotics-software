@@ -800,10 +800,6 @@ public class ConvexPolygonTools
       return cropPolygonToAboveLine(polygonToCrop, cuttingLine, upDirection, croppedPolygonToPack, new Point2D(), new Point2D());
    }
 
-   // Colinear parallel edge intersection not possible due to EuclidGeometryTools#intersectionBetweenLine2DAndLineSegment2D implementation,
-   // which reads "When the line and the line segment are collinear, they are assumed to intersect at lineSegmentStart."
-   public static enum ConvexPolygonCropResult { KEEP_ALL, REMOVE_ALL, CUT }
-
    public static ConvexPolygonCropResult cropPolygonToAboveLine(ConvexPolygon2DReadOnly polygonToCrop,
                                                                 Line2DReadOnly cuttingLine,
                                                                 Vector2DReadOnly upDirection,
@@ -868,12 +864,6 @@ public class ConvexPolygonTools
          if (polygonToCrop.getNumberOfVertices() < 3)
             throw new RuntimeException("Two intersections only possible for convex polygon of size 3 or greater.");
 
-         croppedPolygonToPack.clear();
-         if (vertex0IsAbove)
-         {
-            croppedPolygonToPack.addVertex(polygonToCrop.getVertex(0));
-         }
-
          // find vertex after intersections
          int vertexAfterIntersectionOne = -1;
          int vertexAfterIntersectionTwo = -1;
@@ -899,36 +889,31 @@ public class ConvexPolygonTools
             }
          }
 
-         boolean hasMetFirstIntersectionYet = false;
-         for (int i = 0; i < polygonToCrop.getNumberOfVertices();) // loop over vertices
+         croppedPolygonToPack.clear();
+         for (int i = 0; i < polygonToCrop.getNumberOfVertices(); i++) // loop over vertices
          {
+            if (vertex0IsAbove || i > 0)
+            {
+               LogTools.debug("Adding v({})", i);
+               croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i));
+            }
+
             if (vertexAfterIntersectionOne == i + 1) // encounter 1st intersection, decisions to be made
             {
+               LogTools.debug("Adding i(0)");
                croppedPolygonToPack.addVertex(firstIntersectionToPack);
                if (vertex0IsAbove) // traverse from i(0) to i(1)
                {
+                  LogTools.debug("Adding i(1)");
                   croppedPolygonToPack.addVertex(secondIntersectionToPack);
-                  i = vertexAfterIntersectionTwo;
-                  if (i < polygonToCrop.getNumberOfVertices()) // check if we aren't finished
-                  {
-                     croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i + 1));
-                  }
-               }
-               else // keep going past i(0) to traverse the side to keep
-               {
-                  croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i + 1));
-                  i++;
+                  i = vertexAfterIntersectionTwo - 1; // cut across polygon; the for loop i++ will immediately add 1 more
                }
             }
             else if (vertexAfterIntersectionTwo == i + 1) // here, this is always the last to add
             {
+               LogTools.debug("Adding i(1)");
                croppedPolygonToPack.addVertex(secondIntersectionToPack);
                break;
-            }
-            else // normal case
-            {
-               croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i + 1));
-               i++;
             }
          }
       }
