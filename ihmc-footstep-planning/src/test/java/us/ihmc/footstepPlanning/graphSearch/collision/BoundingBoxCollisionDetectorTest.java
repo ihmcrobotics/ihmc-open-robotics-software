@@ -21,8 +21,8 @@ public class BoundingBoxCollisionDetectorTest
    public void testBodyCollisionWithZeroYaw()
    {
       FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
-      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
-      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(0.5);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
       ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
