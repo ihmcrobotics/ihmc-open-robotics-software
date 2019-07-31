@@ -29,9 +29,9 @@ public class ConcavePolygonToolsTest
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
 
-      assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
+      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
@@ -62,19 +62,155 @@ public class ConcavePolygonToolsTest
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, negativeXDirection, croppedResult);
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, negativeXDirection, croppedResult);
 
-      assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
+      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D expected = new ConvexPolygon2D();
+      expected.addVertex(-1.0, 1.0);
+      expected.addVertex(0.0, 1.0);
+      expected.addVertex(0.0, -1.0);
+      expected.addVertex(-1.0, -1.0);
+      expected.update();
+
+      // assert equal
+      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+   }
+
+   @Test
+   public void testKeepSideSimpleConvexPolygonAbove1()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      LogTools.info("{}", size2square0center.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(1.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(1.0, 0.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+
+      LogTools.debug("{}", croppedResult);
+      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D expected = new ConvexPolygon2D();
+      expected.addVertex(1.0, 1.0);
+      expected.addVertex(1.0, -1.0);
+      expected.update();
+
+      // assert equal
+      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+   }
+
+
+   @Test
+   public void testRemoveAllSimpleConvexPolygonAbove2()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      LogTools.info("{}", size2square0center.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(2.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(1.0, 0.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+
+      assertEquals(ConcavePolygonCropResult.REMOVE_ALL, result, "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
-      aboveYAxisRectangle.addVertex(-1.0, 1.0);
-      aboveYAxisRectangle.addVertex(0.0, 1.0);
-      aboveYAxisRectangle.addVertex(0.0, -1.0);
-      aboveYAxisRectangle.addVertex(-1.0, -1.0);
-      aboveYAxisRectangle.update();
 
       // assert equal
       assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+   }
+
+   @Test
+   public void testKeepAllSimpleConvexPolygonAbove1()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      LogTools.info("{}", size2square0center.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(1.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(-1.0, 0.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+
+      LogTools.debug("{}", croppedResult);
+      assertEquals(ConcavePolygonCropResult.KEEP_ALL, result, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D expected = new ConvexPolygon2D();
+      expected.addVertex(1.0, 1.0);
+      expected.addVertex(1.0, -1.0);
+      expected.addVertex(-1.0, -1.0);
+      expected.addVertex(-1.0, 1.0);
+      expected.update();
+
+      // assert equal
+      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+   }
+
+   @Test
+   public void testKeepAllSimpleConvexPolygonAbove2()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      LogTools.info("{}", size2square0center.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(2.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(-1.0, 0.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+
+      assertEquals(ConcavePolygonCropResult.KEEP_ALL, result, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D expected = new ConvexPolygon2D();
+      expected.addVertex(1.0, 1.0);
+      expected.addVertex(1.0, -1.0);
+      expected.addVertex(-1.0, -1.0);
+      expected.addVertex(-1.0, 1.0);
+      expected.update();
+
+      // assert equal
+      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
    }
 }
