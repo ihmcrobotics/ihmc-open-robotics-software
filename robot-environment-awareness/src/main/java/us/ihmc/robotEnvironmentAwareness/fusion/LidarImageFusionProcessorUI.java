@@ -20,7 +20,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.DataImporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.ros2.Ros2Node;
 
 public class LidarImageFusionProcessorUI
@@ -38,17 +40,15 @@ public class LidarImageFusionProcessorUI
 
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
 
-   @FXML
-   private PointCloudAnchorPaneController pointCloudAnchorPaneController;
+   @FXML private PointCloudAnchorPaneController pointCloudAnchorPaneController;
 
-   @FXML
-   private ImageProcessingAnchorPaneController imageProcessingAnchorPaneController;
+   @FXML private ImageProcessingAnchorPaneController imageProcessingAnchorPaneController;
 
-   @FXML
-   private ObjectDetectionAnchorPaneController objectDetectionAnchorPaneController;
-   
-   @FXML
-   private StereoREAAnchorPaneController stereoREAAnchorPaneController;
+   @FXML private ObjectDetectionAnchorPaneController objectDetectionAnchorPaneController;
+
+   @FXML private StereoREAAnchorPaneController stereoREAAnchorPaneController;
+
+   @FXML private DataImporterAnchorPaneController dataImporterAnchorPaneController;
 
    private LidarImageFusionProcessorUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
    {
@@ -59,7 +59,7 @@ public class LidarImageFusionProcessorUI
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       mainPane = loader.load();
 
-      initializeControllers(reaMessager);
+      initializeControllers(reaMessager, primaryStage);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -88,6 +88,7 @@ public class LidarImageFusionProcessorUI
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager reaMessager = new REAUIMessager(moduleMessager);
       reaMessager.startMessager();
+      new PlanarRegionDataExporter(reaMessager);
 
       return new LidarImageFusionProcessorUI(ros2Node, messager, reaMessager, primaryStage);
    }
@@ -112,7 +113,7 @@ public class LidarImageFusionProcessorUI
       }
    }
 
-   private void initializeControllers(REAUIMessager reaMessager)
+   private void initializeControllers(REAUIMessager reaMessager, Stage primaryStage)
    {
       File configurationFile = new File(UI_CONFIGURATION_FILE_NAME);
       try
@@ -133,5 +134,6 @@ public class LidarImageFusionProcessorUI
       imageProcessingAnchorPaneController.initialize(messager);
       objectDetectionAnchorPaneController.initialize(messager);
       stereoREAAnchorPaneController.initialize(messager);
+      dataImporterAnchorPaneController.initialize(reaMessager, messager, primaryStage);
    }
 }
