@@ -6,6 +6,8 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConcavePolygonToolsTest
@@ -28,10 +30,9 @@ public class ConcavePolygonToolsTest
       Vector2D xDirection = new Vector2D(1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
 
-      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
+      assertEquals(1, result.size(), "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
@@ -42,7 +43,7 @@ public class ConcavePolygonToolsTest
       aboveYAxisRectangle.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertTrue(result.get(0).epsilonEquals(aboveYAxisRectangle, 1e-7));
    }
 
    @Test
@@ -61,10 +62,9 @@ public class ConcavePolygonToolsTest
       Vector2D negativeXDirection = new Vector2D(-1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, negativeXDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, negativeXDirection);
 
-      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
+      assertEquals(1, result.size(), "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D expected = new ConvexPolygon2D();
@@ -75,7 +75,7 @@ public class ConcavePolygonToolsTest
       expected.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+      assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
    }
 
    @Test
@@ -96,11 +96,10 @@ public class ConcavePolygonToolsTest
       Vector2D xDirection = new Vector2D(1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
 
-      LogTools.debug("{}", croppedResult);
-      assertEquals(ConcavePolygonCropResult.CUT, result, "supposed to cut");
+      assertEquals(1, result.size(), "supposed to cut");
+      LogTools.debug("{}", result.get(0));
 
       // create the ideal result
       ConvexPolygon2D expected = new ConvexPolygon2D();
@@ -109,7 +108,7 @@ public class ConcavePolygonToolsTest
       expected.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+      assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
    }
 
 
@@ -131,16 +130,9 @@ public class ConcavePolygonToolsTest
       Vector2D xDirection = new Vector2D(1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
 
-      assertEquals(ConcavePolygonCropResult.REMOVE_ALL, result, "supposed to cut");
-
-      // create the ideal result
-      ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
-
-      // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertEquals(0, result.size(), "supposed to cut");
    }
 
    @Test
@@ -161,11 +153,10 @@ public class ConcavePolygonToolsTest
       Vector2D xDirection = new Vector2D(-1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
 
-      LogTools.debug("{}", croppedResult);
-      assertEquals(ConcavePolygonCropResult.KEEP_ALL, result, "supposed to cut");
+      assertEquals(1, result.size(), "supposed to cut");
+      LogTools.debug("{}", result.get(0));
 
       // create the ideal result
       ConvexPolygon2D expected = new ConvexPolygon2D();
@@ -176,7 +167,7 @@ public class ConcavePolygonToolsTest
       expected.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+      assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
    }
 
    @Test
@@ -197,10 +188,9 @@ public class ConcavePolygonToolsTest
       Vector2D xDirection = new Vector2D(-1.0, 0.0);
 
       // cut it above a line
-      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConcavePolygonCropResult result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      List<ConvexPolygon2D> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
 
-      assertEquals(ConcavePolygonCropResult.KEEP_ALL, result, "supposed to cut");
+      assertEquals(1, result.size(), "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D expected = new ConvexPolygon2D();
@@ -211,6 +201,6 @@ public class ConcavePolygonToolsTest
       expected.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(expected, 1e-7));
+      assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
    }
 }
