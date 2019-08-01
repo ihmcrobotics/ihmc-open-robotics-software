@@ -38,15 +38,8 @@ public class PlanarRegionSLAMUITabController extends Group
 {
    private PlanarRegionSLAMParameters planarRegionSLAMParameters;
 
-   private static final String DATASET_1 = "190728_01_Trouble_MapPlanarRegions";
-   private static final String DATASET_2 = "190728_01_Trouble_NewPlanarRegions";
-   
-   
-//   private static final String DATASET_1 = "190727_Trouble_MapPlanarRegions";
-//   private static final String DATASET_2 = "190727_Trouble_NewPlanarRegions";
-   
-//   private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-//   private static final String DATASET_2 = "IntentionallyDrifted";
+   private static final String DATASET_1 = "20190710_174025_PlanarRegion";
+   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
