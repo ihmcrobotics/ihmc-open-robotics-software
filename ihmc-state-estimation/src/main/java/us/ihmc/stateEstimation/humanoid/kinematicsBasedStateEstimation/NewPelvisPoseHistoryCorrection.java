@@ -26,20 +26,21 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
-   
+   private static final boolean DEFAULT_INTERPOLATE_AND_FILTER_ERROR = true;
+
+   //TODO: Put parameters in a parameters class.
    private static final double Z_DEADZONE_SIZE = 0.014;
    private static final double Y_DEADZONE_SIZE = 0.014;
    private static final double X_DEADZONE_SIZE = 0.014;
    private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
+   private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
+   private static final boolean ENABLE_ROTATION_CORRECTION = true;
    
    private final YoBoolean enableProcessNewPackets;
    
    private static final boolean ENABLE_GRAPHICS = true;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = true;
-   
-   private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
    private final YoVariableRegistry registry;
    
@@ -47,6 +48,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
+   
+   private final CorrectedPelvisPoseErrorTooBigChecker correctedPelvisPoseErrorTooBigChecker;
    private final ClippedSpeedOffsetErrorInterpolator offsetErrorInterpolator;
    private final OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseUpdater;
    
@@ -149,8 +152,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       alphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
       
       confidenceFactor = new YoDouble("PelvisErrorCorrectionConfidenceFactor", registry);
-      
+
+      correctedPelvisPoseErrorTooBigChecker = new CorrectedPelvisPoseErrorTooBigChecker(registry);
       offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
+     
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
       
       iterativeClosestPointReferenceFrame = outdatedPoseUpdater.getLocalizationReferenceFrameToBeUpdated();
@@ -297,6 +302,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          else
          {
             System.err.println("Error in NewPelvisPoseHistoryCorrection: pelvisPoseBuffer is out of range.");
+            System.err.println("timeStampedExternalPose.getTimeStamp() = " + timeStampedExternalPose.getTimeStamp());
             System.err.println("consider increasing the size of the buffer");
          }
       }
@@ -325,8 +331,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
-      
-      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, true))
+
+      if(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, true))
       {
          requestLocalizationReset();
          isErrorTooBig.set(true);
