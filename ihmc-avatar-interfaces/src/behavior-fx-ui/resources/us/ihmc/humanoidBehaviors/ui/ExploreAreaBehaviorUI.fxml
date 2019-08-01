@@ -29,9 +29,10 @@
                         </CheckBox>
                      </children>
                   </HBox>
-                      <Button fx:id="singleSupportButton" text="SingleSupport" GridPane.rowIndex="1" />
+                      <Button fx:id="randomPoseUpdateButton" text="RandomPoseUpdate" onAction="#randomPoseUpdate" GridPane.rowIndex="1" />
+                      <Button fx:id="doSlamButton" text="DoSlam" onAction="#doSlamButtonClicked" GridPane.rowIndex="2" />
                   <Label text="State:" GridPane.rowIndex="3" />
-                  <TextField fx:id="stateTextField" editable="false" prefHeight="26.0" prefWidth="172.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="stateTextField" editable="false" prefHeight="26.0" prefWidth="172.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   </children>
                <columnConstraints>
                   <ColumnConstraints />

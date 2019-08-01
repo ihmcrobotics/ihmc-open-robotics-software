@@ -93,7 +93,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
    private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
-   
+
    public enum ExploreAreaBehaviorState
    {
       Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation, TurnInPlace
@@ -121,6 +121,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       this.messager = messager;
 
       explore = messager.createInput(ExploreAreaBehaviorAPI.ExploreArea, false);
+      messager.registerTopicListener(ExploreAreaBehaviorAPI.RandomPoseUpdate, this::randomPoseUpdate);
+      messager.registerTopicListener(ExploreAreaBehaviorAPI.DoSlam, this::doSlam);
       navigableRegionsManager = new NavigableRegionsManager();
 
       LogTools.debug("Initializing patrol behavior");
@@ -198,6 +200,33 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    }
 
+   private void randomPoseUpdate(boolean doRandomPoseUpdate)
+   {
+      if (doRandomPoseUpdate)
+      {
+         Pair<HumanoidReferenceFrames, Long> referenceFramesAndTimestamp = behaviorHelper.pollHumanoidReferenceFramesAndTimestamp();
+         
+         HumanoidReferenceFrames referenceFrames = referenceFramesAndTimestamp.getLeft();
+         Long timestamp = referenceFramesAndTimestamp.getRight();
+
+         FramePose3D framePose = new FramePose3D(referenceFrames.getPelvisFrame());
+         framePose.changeFrame(worldFrame);
+         Pose3D pose3D = new Pose3D(framePose);
+
+         RigidBodyTransform transform = new RigidBodyTransform();
+         
+         //TODO: Make random or allow user to input update on gui.
+         transform.setTranslation(0.01, -0.01, 0.005);
+//         transform.setRotationYaw(0.1);
+         pose3D.appendTransform(transform);
+
+         LogTools.info("Sending pose update {}", pose3D);
+
+         double confidenceFactor = 1.0;
+         behaviorHelper.publishPose(pose3D, confidenceFactor , timestamp);
+      }
+   }
+
    private boolean noLongerExploring(double timeInState)
    {
       return !explore.get();
@@ -268,10 +297,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onGrabPlanarRegionsStateEntry()
    {
+      messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
       rememberObservationPoint();
-      PlanarRegionsList latestPlanarRegionsList = behaviorHelper.getLatestPlanarRegionList();
-
-      addNewPlanarRegionsToTheMap(latestPlanarRegionsList);
+      doSlam(true);
    }
 
    private ConcaveHullMergerListener listener = new ConcaveHullMergerListener()
@@ -340,9 +368,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    //   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
 
-   private void addNewPlanarRegionsToTheMap(PlanarRegionsList latestPlanarRegionsList)
+   private void doSlam(boolean doSlam)
    {
-      messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
+      PlanarRegionsList latestPlanarRegionsList = behaviorHelper.getLatestPlanarRegionList();
 
       this.latestPlanarRegionsList = latestPlanarRegionsList;
       if (concatenatedMap == null)
@@ -365,6 +393,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          concatenatedMap = slamResult.getMergedMap();
          RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
          LogTools.info("SLAM transformFromIncomingToMap = \n " + transformFromIncomingToMap);
+
+         publishPoseUpdateForStateEstimator(transformFromIncomingToMap);
       }
 
       computeMapBoundingBox3D();
@@ -397,6 +427,24 @@ public class ExploreAreaBehavior implements BehaviorInterface
       //         messager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ConcatenatedMap, concatenatedMapMessage);
 
       // Find a point that has not been observed, but is close to a point that can be walked to, in order to observe it...
+   }
+
+   private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap)
+   {
+      Pair<HumanoidReferenceFrames, Long> referenceFramesAndTimestamp = behaviorHelper.pollHumanoidReferenceFramesAndTimestamp();
+      HumanoidReferenceFrames referenceFrames = referenceFramesAndTimestamp.getLeft();
+      Long timestamp = referenceFramesAndTimestamp.getRight();
+
+      FramePose3D framePose = new FramePose3D(referenceFrames.getPelvisFrame());
+      framePose.changeFrame(worldFrame);
+      Pose3D pose3D = new Pose3D(framePose);
+
+      //TODO: Verify which transform or appendTransform to use...
+//      pose3D.applyTransform(transformFromIncomingToMap);
+      pose3D.appendTransform(transformFromIncomingToMap);
+
+      double confidenceFactor = 1.0;
+      behaviorHelper.publishPose(pose3D, confidenceFactor, timestamp);
    }
 
    private void computeMapBoundingBox3D()
@@ -866,6 +914,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       private static final CategoryTheme ExploreAreaTheme = apiFactory.createCategoryTheme("ExploreArea");
 
       public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
+      public static final Topic<Boolean> RandomPoseUpdate = topic("RandomPoseUpdate");
+      public static final Topic<Boolean> DoSlam = topic("DoSlam");
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
       public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
       public static final Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");

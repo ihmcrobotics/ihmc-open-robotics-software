@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -38,6 +39,10 @@ public class ExploreAreaBehaviorUIController extends Group
 
    @FXML
    private CheckBox exploreAreaCheckBox;
+   @FXML
+   private Button randomPoseUpdateButton;
+   @FXML
+   private Button doSlamButton;
    @FXML
    private TextField stateTextField;
    @FXML
@@ -90,6 +95,18 @@ public class ExploreAreaBehaviorUIController extends Group
    public void exploreArea()
    {
       behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
+   }
+
+   @FXML
+   public void randomPoseUpdate()
+   {
+      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
+   }
+
+   @FXML
+   public void doSlamButtonClicked()
+   {
+      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DoSlam, true);
    }
 
    @FXML
