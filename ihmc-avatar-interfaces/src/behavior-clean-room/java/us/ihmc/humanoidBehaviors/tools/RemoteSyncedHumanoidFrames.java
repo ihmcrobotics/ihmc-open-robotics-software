@@ -6,9 +6,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.function.Function;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class RemoteSyncedHumanoidFrames extends RemoteSyncedRobotModel
 {
@@ -29,6 +33,13 @@ public class RemoteSyncedHumanoidFrames extends RemoteSyncedRobotModel
       humanoidReferenceFrames.updateFrames();
 
       return humanoidReferenceFrames;
+   }
+
+   public Pair<HumanoidReferenceFrames, Long> pollHumanoidReferenceFramesAndTimestamp()
+   {
+      Pair<FullHumanoidRobotModel, Long> modelAndTimestampe = pollFullRobotModelAndTimestamp();
+      humanoidReferenceFrames.updateFrames();
+      return new ImmutablePair<HumanoidReferenceFrames, Long>(humanoidReferenceFrames, modelAndTimestampe.getRight());
    }
 
    private String getString(MovingReferenceFrame frame)

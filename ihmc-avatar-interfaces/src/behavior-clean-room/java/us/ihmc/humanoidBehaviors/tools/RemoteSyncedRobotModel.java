@@ -11,12 +11,16 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 
 import static us.ihmc.communication.ROS2Tools.*;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 public class RemoteSyncedRobotModel
 {
    protected final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
+   private long monotonicTime = 0L;
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
@@ -40,6 +44,7 @@ public class RemoteSyncedRobotModel
    public FullHumanoidRobotModel pollFullRobotModel()
    {
       RobotConfigurationData latestRobotConfigurationData = robotConfigurationData.getLatest();
+      monotonicTime = latestRobotConfigurationData.getMonotonicTime();
 
       fullRobotModel.getRootJoint().setJointOrientation(latestRobotConfigurationData.getRootOrientation());
       fullRobotModel.getRootJoint().setJointPosition(latestRobotConfigurationData.getRootTranslation());
@@ -54,8 +59,21 @@ public class RemoteSyncedRobotModel
       return fullRobotModel;
    }
 
+   public Pair<FullHumanoidRobotModel, Long> pollFullRobotModelAndTimestamp()
+   {
+      FullHumanoidRobotModel fullRobotModel = pollFullRobotModel();
+      ImmutablePair<FullHumanoidRobotModel, Long> modelAndTimestamp = new ImmutablePair<FullHumanoidRobotModel, Long>(fullRobotModel, monotonicTime);
+      return modelAndTimestamp;
+   }
+
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public Pair<FullHumanoidRobotModel, Long> getFullRobotModelAndTimestamp()
+   {
+      ImmutablePair<FullHumanoidRobotModel, Long> modelAndTimestamp = new ImmutablePair<FullHumanoidRobotModel, Long>(fullRobotModel, monotonicTime);
+      return modelAndTimestamp;
    }
 }
