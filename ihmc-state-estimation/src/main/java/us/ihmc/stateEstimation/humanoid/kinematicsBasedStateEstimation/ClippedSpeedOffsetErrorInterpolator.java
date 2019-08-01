@@ -1,6 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -17,6 +16,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -29,11 +29,8 @@ public class ClippedSpeedOffsetErrorInterpolator
    
    private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
    
-   private static final double MAXIMUM_TRANSLATION_ERROR = 0.15;
-   private static final double MAXIMUM_ANGLE_ERROR_IN_DEGRESS = 10.0;
-   
-   private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.05;
-   private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.05;
+   private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.5; //0.05;
+   private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.5; //0.05;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -77,23 +74,18 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoDouble alphaFilter_AlphaValue;
    private final YoDouble alphaFilter_PositionValue;
    private final YoDouble cLippedAlphaFilterValue;
-   private final YoDouble previousClippedAlphaFilterValue;
 
    private final YoDouble maxTranslationalCorrectionVelocity;
    private final YoDouble maxRotationalCorrectionVelocity;
+   
+   private final YoDouble maximumAlphaFilterChangeTranslation;
+   private final YoDouble maximumAlphaFilterChangeRotation;
+   private final YoDouble maximumAlphaFilterChange;
 
    private final Vector3D distanceToTravelVector = new Vector3D();
    private final YoDouble distanceToTravel;
 
-   private final FrameQuaternion rotationToTravel = new FrameQuaternion(worldFrame);
    private final YoDouble angleToTravel;
-   private final AxisAngle axisAngletoTravel = new AxisAngle();
-
-   private final YoDouble translationalSpeedForGivenDistanceToTravel;
-   private final YoDouble rotationalSpeedForGivenAngleToTravel;
-
-   private final YoDouble temporaryTranslationAlphaClipped;
-   private final YoDouble temporaryRotationAlphaClipped;
 
    private final ReferenceFrame stateEstimatorReferenceFrame;
    private final RigidBodyTransform stateEstimatorTransform_Translation = new RigidBodyTransform();
@@ -126,19 +118,6 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoDouble startYaw;
    private final YoDouble goalYaw;
    private final YoDouble interpolatedYaw;
-   
-   //used to check if the orientation error is too big
-   private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
-   private final FrameQuaternion iterativeClosestPointOrientation = new FrameQuaternion();
-   private final FramePoint3D iterativeClosestPointTranslation = new FramePoint3D();
-   private final AxisAngle axisAngleForError = new AxisAngle();
-   private final YoDouble maximumErrorAngleInDegrees;
-   private final YoDouble maximumErrorTranslation;
-   
-   private final YoDouble angleError;
-   private final YoDouble translationErrorX;
-   private final YoDouble translationErrorY;
-   private final YoDouble translationErrorZ;
    
    //for feedBack in scs
    private final YoFramePoseUsingYawPitchRoll yoStartOffsetErrorPose_InWorldFrame;
@@ -187,25 +166,29 @@ public class ClippedSpeedOffsetErrorInterpolator
       alphaFilter = new AlphaFilteredYoVariable("alphaFilter", registry, alphaFilter_AlphaValue, alphaFilter_PositionValue);
 
       cLippedAlphaFilterValue = new YoDouble("cLippedAlphaFilterValue", registry);
-      cLippedAlphaFilterValue.set(0.0);
-      previousClippedAlphaFilterValue = new YoDouble("previousClippedAlphaFilterValue", registry);
-      previousClippedAlphaFilterValue.set(0.0);
+//      cLippedAlphaFilterValue.set(0.0);
+//      previousClippedAlphaFilterValue = new YoDouble("previousClippedAlphaFilterValue", registry);
+//      previousClippedAlphaFilterValue.set(0.0);
 
       maxTranslationalCorrectionVelocity = new YoDouble("maxTranslationalCorrectionVelocity", registry);
       maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
       maxRotationalCorrectionVelocity = new YoDouble("maxRotationalCorrectionVelocity", registry);
       maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED);
 
+      maximumAlphaFilterChangeTranslation = new YoDouble("maximumAlphaFilterChangeTranslation", registry);
+      maximumAlphaFilterChangeRotation = new YoDouble("maximumAlphaFilterChangeRotation", registry);
+      maximumAlphaFilterChange = new YoDouble("maximumAlphaFilterChange", registry);
+
       distanceToTravel = new YoDouble("distanceToTravel", registry);
       distanceToTravel.set(0.0);
       angleToTravel = new YoDouble("angleToTravel", registry);
       angleToTravel.set(0.0);
 
-      translationalSpeedForGivenDistanceToTravel = new YoDouble("translationalSpeedForGivenDistanceToTravel", registry);
-      rotationalSpeedForGivenAngleToTravel = new YoDouble("rotationalSpeedForGivenAngleToTravel", registry);
-
-      temporaryTranslationAlphaClipped = new YoDouble("temporaryTranslationAlphaClipped", registry);
-      temporaryRotationAlphaClipped = new YoDouble("temporaryRotationAlphaClipped", registry);
+//      translationalSpeedForGivenDistanceToTravel = new YoDouble("translationalSpeedForGivenDistanceToTravel", registry);
+//      rotationalSpeedForGivenAngleToTravel = new YoDouble("rotationalSpeedForGivenAngleToTravel", registry);
+//
+//      temporaryTranslationAlphaClipped = new YoDouble("temporaryTranslationAlphaClipped", registry);
+//      temporaryRotationAlphaClipped = new YoDouble("temporaryRotationAlphaClipped", registry);
 
       xDeadzoneSize = new YoDouble("xDeadzoneSize", registry);
       xDeadzoneSize.set(X_DEADZONE_SIZE);
@@ -248,50 +231,11 @@ public class ClippedSpeedOffsetErrorInterpolator
          }
       });
 
-      maximumErrorAngleInDegrees = new YoDouble("maximumErrorAngleInDegrees", registry);
-      maximumErrorAngleInDegrees.set(MAXIMUM_ANGLE_ERROR_IN_DEGRESS);
-      maximumErrorTranslation = new YoDouble("maximumErrorTranslation", registry);
-      maximumErrorTranslation.set(MAXIMUM_TRANSLATION_ERROR);
+     
       
       startYaw = new YoDouble("startYaw", registry);
       goalYaw = new YoDouble("goalYaw", registry);
       interpolatedYaw = new YoDouble("interpolatedYaw", registry);
-    
-      angleError = new YoDouble("angleError", registry);
-      translationErrorX = new YoDouble("translationErrorX", registry);
-      translationErrorY = new YoDouble("translationErrorY", registry);
-      translationErrorZ = new YoDouble("translationErrorZ", registry);
-      
-   }
-
-   public boolean checkIfErrorIsTooBig(FramePose3D correctedPelvisPoseInWorldFrame, FramePose3D iterativeClosestPointInWorldFramePose, boolean isRotationCorrectionEnabled)
-   {
-      correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
-      
-      iterativeClosestPointOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
-      iterativeClosestPointTranslation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getPosition());
-      
-      iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
-      iterativeClosestPointTranslation.changeFrame(correctedPelvisPoseReferenceFrame);
-      
-      axisAngleForError.set(iterativeClosestPointOrientation);
-
-      angleError.set(Math.abs(axisAngleForError.getAngle()));
-      translationErrorX.set(Math.abs(iterativeClosestPointTranslation.getX()));
-      translationErrorY.set(Math.abs(iterativeClosestPointTranslation.getY()));
-      translationErrorZ.set(Math.abs(iterativeClosestPointTranslation.getZ()));
-      
-      if(isRotationCorrectionEnabled && Math.abs(axisAngleForError.getAngle()) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
-         return true;
-      
-      if(Math.abs(iterativeClosestPointTranslation.getX()) > maximumErrorTranslation.getDoubleValue())
-         return true;
-      if(Math.abs(iterativeClosestPointTranslation.getY()) > maximumErrorTranslation.getDoubleValue())
-         return true;
-      if(Math.abs(iterativeClosestPointTranslation.getZ()) > maximumErrorTranslation.getDoubleValue())
-         return true;
-      
-      return false;
    }
 
    public void setInterpolatorInputs(FramePose3D startOffsetError, FramePose3D goalOffsetError, double alphaFilterPosition)
@@ -315,17 +259,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       /////////////////////
 
       initializeAlphaFilter(alphaFilterPosition);
-      
-      updateMaxTranslationAlphaVariationSpeed();
-      updateMaxRotationAlphaVariationSpeed();
    }
 
    private void initializeAlphaFilter(double alphaFilterPosition)
    {
       alphaFilter_PositionValue.set(alphaFilterPosition);
       alphaFilter.set(0.0);
-      previousClippedAlphaFilterValue.set(0.0);
-      cLippedAlphaFilterValue.set(0.0);
       hasBeenCalled.set(false);
    }
    
@@ -390,27 +329,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
    }
-
-   private void updateMaxTranslationAlphaVariationSpeed()
-   {
-      //Translation
-      distanceToTravelVector.sub(updatedGoalOffsetWithDeadzone_Translation, updatedStartOffset_Translation);
-      distanceToTravel.set(distanceToTravelVector.length());
-      translationalSpeedForGivenDistanceToTravel.set(distanceToTravel.getDoubleValue() / dt.getDoubleValue());
-   }
-
-   private void updateMaxRotationAlphaVariationSpeed()
-   {
-      //Rotation
-      rotationToTravel.difference(updatedGoalOffsetWithDeadZone_Rotation, updatedStartOffset_Rotation);
-      axisAngletoTravel.set(rotationToTravel);
-      angleToTravel.set(axisAngletoTravel.getAngle());
-      rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());
-
-   }
    
    public void interpolateError(FramePose3D offsetPoseToPack)
    {
+      double alphaFilterBeforeUpdate = alphaFilter.getDoubleValue();
+      
       if (!hasBeenCalled.getBooleanValue())
       {
          alphaFilter.update(0.0);
@@ -420,39 +343,6 @@ public class ClippedSpeedOffsetErrorInterpolator
       {
          alphaFilter.update();
       }
-
-      //translation
-      if (translationalSpeedForGivenDistanceToTravel.getDoubleValue() * alphaFilter.getDoubleValue() <= translationalSpeedForGivenDistanceToTravel
-            .getDoubleValue()
-            * previousClippedAlphaFilterValue.getDoubleValue()
-            + (maxTranslationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / distanceToTravel.getDoubleValue()))
-      {
-         temporaryTranslationAlphaClipped.set(alphaFilter.getDoubleValue());
-      }
-      else
-      {
-         temporaryTranslationAlphaClipped.set(previousClippedAlphaFilterValue.getDoubleValue()
-               + (maxTranslationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / distanceToTravel.getDoubleValue()));
-      }
-
-      //rotation
-      if (rotationalSpeedForGivenAngleToTravel.getDoubleValue() * alphaFilter.getDoubleValue() <= rotationalSpeedForGivenAngleToTravel.getDoubleValue()
-            * previousClippedAlphaFilterValue.getDoubleValue() + (maxRotationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / angleToTravel.getDoubleValue()))
-      {
-         temporaryRotationAlphaClipped.set(alphaFilter.getDoubleValue());
-      }
-      else
-      {
-         temporaryRotationAlphaClipped.set(previousClippedAlphaFilterValue.getDoubleValue()
-               + (maxRotationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / angleToTravel.getDoubleValue()));
-      }
-
-      //chose the smaller alpha (so the slower correction) between translation and rotation
-      cLippedAlphaFilterValue.set(Math.min(temporaryTranslationAlphaClipped.getDoubleValue(), temporaryRotationAlphaClipped.getDoubleValue()));
-      cLippedAlphaFilterValue.set(MathTools.clamp(cLippedAlphaFilterValue.getDoubleValue(), 0.0, 1.0));
-      
-      
-      previousClippedAlphaFilterValue.set(cLippedAlphaFilterValue.getDoubleValue());
 
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
       stateEstimatorTransform_Translation.setRotationToZero();
@@ -481,8 +371,10 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedGoalOffsetTransform.getRotation(updatedGoalOffset_Rotation_quat);
 
       //interpolation here
-      interpolatedTranslation.interpolate(updatedStartOffset_Translation, updatedGoalOffset_Translation, cLippedAlphaFilterValue.getDoubleValue());
-
+      
+      distanceToTravelVector.sub(updatedGoalOffset_Translation, updatedStartOffset_Translation);
+      distanceToTravel.set(distanceToTravelVector.length());
+            
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
          stateEstimatorTransform_Rotation.getRotationYawPitchRoll(stateEstimatorYawPitchRoll);
@@ -493,14 +385,44 @@ public class ClippedSpeedOffsetErrorInterpolator
          updatedGoalOffset_Rotation_quat.getYawPitchRoll(temporaryYawPitchRoll);
          goalYaw.set(temporaryYawPitchRoll[0]);
          
-         interpolatedYaw.set((1 - cLippedAlphaFilterValue.getDoubleValue()) * startYaw.getDoubleValue() + cLippedAlphaFilterValue.getDoubleValue() * goalYaw.getDoubleValue());
-         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+         angleToTravel.set(Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw.getValue(), startYaw.getValue())));
       }
       else
       {
+         angleToTravel.set(0.0);
          stateEstimatorTransform_Rotation.getRotation(interpolatedRotation);
       }
 
+      maximumAlphaFilterChangeTranslation.set(1.0);
+      maximumAlphaFilterChangeRotation.set(1.0);
+      
+      if (distanceToTravel.getDoubleValue() > 1e-3)
+      {
+         maximumAlphaFilterChangeTranslation.set(maxTranslationalCorrectionVelocity.getValue() * dt.getValue() / distanceToTravel.getValue());
+      }
+      
+      if (angleToTravel.getDoubleValue() > 1e-3)
+      {
+         maximumAlphaFilterChangeRotation.set(maxRotationalCorrectionVelocity.getValue() * dt.getValue() / angleToTravel.getValue());
+      }
+      
+      maximumAlphaFilterChange.set(Math.min(maximumAlphaFilterChangeTranslation.getValue(), maximumAlphaFilterChangeRotation.getValue()));
+      double alphaFilterChange = alphaFilter.getDoubleValue() - alphaFilterBeforeUpdate;
+      
+      if (alphaFilterChange > maximumAlphaFilterChange.getValue())
+      {
+         alphaFilter.set(alphaFilterBeforeUpdate + maximumAlphaFilterChange.getValue());
+      }
+       
+      cLippedAlphaFilterValue.set(MathTools.clamp(alphaFilter.getDoubleValue(), 0.0, 1.0));
+
+      
+      
+      interpolatedTranslation.interpolate(updatedStartOffset_Translation, updatedGoalOffset_Translation, cLippedAlphaFilterValue.getDoubleValue());
+
+      interpolatedYaw.set(AngleTools.interpolateAngle(startYaw.getValue(), goalYaw.getValue(), cLippedAlphaFilterValue.getDoubleValue()));
+    interpolatedRotation.setYawPitchRoll(interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+      
       offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
 
       //scs feedback only
@@ -546,5 +468,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       this.yDeadzoneSize.set(yDeadzoneSize);
       this.zDeadzoneSize.set(zDeadzoneSize);
       this.yawDeadzoneSize.set(yawDeadzoneSize);
+   }
+
+   public void setMaximumTranslationAndRotationVelocity(double maxTranslationalCorrectionVelocity, double maxRotationalCorrectionVelocity)
+   {
+      this.maxTranslationalCorrectionVelocity.set(maxTranslationalCorrectionVelocity);
+      this.maxRotationalCorrectionVelocity.set(maxRotationalCorrectionVelocity);
    }
 }
