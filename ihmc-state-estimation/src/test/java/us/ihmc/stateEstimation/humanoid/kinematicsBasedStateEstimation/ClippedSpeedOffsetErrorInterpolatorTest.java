@@ -1,15 +1,16 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -21,14 +22,15 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
@@ -72,6 +74,85 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   @Test
+   public void testSimpleCases()
+   {
+      boolean visualize = true;
+      
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      SimulationConstructionSet scs = null;
+
+      boolean correctRotation = false;
+      double dt = 0.001;
+      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoDouble alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
+      alphaFilterBreakFrequency.set(100.0);
+      RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
+
+      if (visualize)
+      {
+         Robot robot = new Robot(getClass().getSimpleName());
+         scs  = new SimulationConstructionSet(robot, parameters);
+         scs.addYoVariableRegistry(registry);
+         scs.startOnAThread();
+      }
+
+      
+      ReferenceFrame referenceFrameToBeCorrected = new ReferenceFrame("referenceFrameToBeCorrected", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(referenceFrameToBeCorrectedTransform);
+         }
+      };
+
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
+                                                                                                                        alphaFilterBreakFrequency, dt, correctRotation);
+
+
+      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
+      clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(10000.0, 10000.0);
+
+      FramePose3D startOffsetError = new FramePose3D(worldFrame);
+      FramePose3D goalOffsetError = new FramePose3D(worldFrame);
+
+      double alphaFilterPosition = 1.0;
+      clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
+
+      FramePose3D offsetPoseToPack = new FramePose3D(worldFrame);
+      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+
+      assertTrue(offsetPoseToPack.epsilonEquals(new FramePose3D(worldFrame), 1e-7));
+      
+      
+      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
+      goalOffsetError.setPosition(new Point3D(0.02, 0.03, -0.04));
+      double initialDistance = startOffsetError.getPositionDistance(goalOffsetError);
+      
+      clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
+      
+      int numberOfTicks = 100;
+      
+      for (int i=0; i<numberOfTicks; i++)
+      {
+         if (visualize)
+         {
+            scs.tickAndUpdate();
+         }
+      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+      
+      System.out.println(offsetPoseToPack);
+      }
+      
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
+
+   }
+   
+   
    @Disabled
    @Test
    public void testRandomTranslationErrorInterpolation()
@@ -706,6 +787,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, false);
 
+      CorrectedPelvisPoseErrorTooBigChecker correctedPelvisPoseErrorTooBigChecker = new CorrectedPelvisPoseErrorTooBigChecker(registry);
+
       FramePose3D startPose = new FramePose3D(worldFrame, new Point3D(), new Quaternion(0.0,0.0,0.0,1.0));
       FramePose3D goalPose = new FramePose3D(worldFrame);
       Quaternion goalOrientation= new Quaternion();
@@ -713,64 +796,64 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       for(int i = 0; i < 200; i++)
       {
          goalPose.set(RandomGeometry.nextPoint3D(random, 0.1, 0.1, 0.1),RandomGeometry.nextQuaternion(random, Math.toRadians(9.2)));
-         assertFalse(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+         assertFalse(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
       }
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.1), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(10.3), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(0.0), Math.toRadians(10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.2), Math.toRadians(10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(20.0), Math.toRadians(10.2), Math.toRadians(10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.1), Math.toRadians(0.0), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.1), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(-10.3), Math.toRadians(0.0));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(0.0), Math.toRadians(-10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose, true));
+      assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
 
    }
