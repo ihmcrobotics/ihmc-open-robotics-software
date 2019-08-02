@@ -204,26 +204,16 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       if (doRandomPoseUpdate)
       {
-         Pair<HumanoidReferenceFrames, Long> referenceFramesAndTimestamp = behaviorHelper.pollHumanoidReferenceFramesAndTimestamp();
-         
-         HumanoidReferenceFrames referenceFrames = referenceFramesAndTimestamp.getLeft();
-         Long timestamp = referenceFramesAndTimestamp.getRight();
-
-         FramePose3D framePose = new FramePose3D(referenceFrames.getPelvisFrame());
-         framePose.changeFrame(worldFrame);
-         Pose3D pose3D = new Pose3D(framePose);
-
          RigidBodyTransform transform = new RigidBodyTransform();
-         
+
          //TODO: Make random or allow user to input update on gui.
-         transform.setTranslation(0.01, -0.01, 0.005);
-//         transform.setRotationYaw(0.1);
-         pose3D.appendTransform(transform);
+//         transform.setTranslation(0.01, -0.01, 0.01);
+//         transform.setTranslation(0.02, -0.02, 0.0);
+//         transform.setTranslation(0.02, -0.02, 0.02);
+           transform.setRotationYaw(0.025);
 
-         LogTools.info("Sending pose update {}", pose3D);
-
-         double confidenceFactor = 1.0;
-         behaviorHelper.publishPose(pose3D, confidenceFactor , timestamp);
+         boolean sendingSlamCorrection = false;
+         publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
       }
    }
 
@@ -394,7 +384,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
          LogTools.info("SLAM transformFromIncomingToMap = \n " + transformFromIncomingToMap);
 
-         publishPoseUpdateForStateEstimator(transformFromIncomingToMap);
+         boolean sendingSlamCorrection = true;
+         publishPoseUpdateForStateEstimator(transformFromIncomingToMap, sendingSlamCorrection);
       }
 
       computeMapBoundingBox3D();
@@ -429,7 +420,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       // Find a point that has not been observed, but is close to a point that can be walked to, in order to observe it...
    }
 
-   private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap)
+   private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
    {
       Pair<HumanoidReferenceFrames, Long> referenceFramesAndTimestamp = behaviorHelper.pollHumanoidReferenceFramesAndTimestamp();
       HumanoidReferenceFrames referenceFrames = referenceFramesAndTimestamp.getLeft();
@@ -440,8 +431,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       Pose3D pose3D = new Pose3D(framePose);
 
       //TODO: Verify which transform or appendTransform to use...
-//      pose3D.applyTransform(transformFromIncomingToMap);
-      pose3D.appendTransform(transformFromIncomingToMap);
+
+      RigidBodyTransform transform = new RigidBodyTransform(transformFromIncomingToMap);
+      
+      if (sendingSlamCorrection)
+      {
+         pose3D.prependTransform(transform);
+      }
+      else
+      {
+         pose3D.appendTransform(transform);
+      }
 
       double confidenceFactor = 1.0;
       behaviorHelper.publishPose(pose3D, confidenceFactor, timestamp);
