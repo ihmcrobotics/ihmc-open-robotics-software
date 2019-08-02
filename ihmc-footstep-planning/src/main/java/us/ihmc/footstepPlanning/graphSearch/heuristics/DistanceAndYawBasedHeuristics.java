@@ -71,8 +71,6 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       else
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
-      double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getYaw();
-      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
+      return AngleTools.interpolateAngle(goalNode.getYaw(), pathHeading, yawMultiplier);
    }
 }

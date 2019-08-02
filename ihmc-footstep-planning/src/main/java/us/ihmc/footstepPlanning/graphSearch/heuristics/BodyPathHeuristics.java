@@ -47,8 +47,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double remainingDistance = remainingPathLength + distanceToPath - croppedDistanceToPath;
       double pathDistanceViolationCost = pathViolationWeight * croppedDistanceToPath;
 
-      double goalProximityMultiplier = computeGoalProximityMultiplier(node, goalNode);
-      double referenceYaw = computeReferenceGoalYaw(goalNode.getYaw(), goalProximityMultiplier, closestPointOnPath.getYaw());
+      double referenceYaw = computeReferenceGoalYaw(node, goalNode, closestPointOnPath.getYaw());
 
       double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw));
       double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), referenceYaw));
@@ -62,7 +61,8 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       return remainingDistance + pathDistanceViolationCost + pathYawViolationCost + parameters.getYawWeight() * remainingYaw + parameters.getCostPerStep() * minSteps;
    }
 
-   private double computeGoalProximityMultiplier(FootstepNode node, FootstepNode goalNode)
+
+   private double computeReferenceGoalYaw(FootstepNode node, FootstepNode goalNode, double pathHeading)
    {
       double distanceToGoal = node.euclideanDistance(goalNode);
       double finalTurnProximity = this.finalTurnProximity;//parameters.getFinalTurnProximity();
@@ -78,14 +78,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       else
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
-      return yawMultiplier;
-   }
-
-   private double computeReferenceGoalYaw(double goalYaw, double yawMultiplier, double pathHeading)
-   {
-      double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalYaw;
-      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
+      return AngleTools.interpolateAngle(goalNode.getYaw(), pathHeading, yawMultiplier);
    }
 
    public void setGoalAlpha(double alpha)
