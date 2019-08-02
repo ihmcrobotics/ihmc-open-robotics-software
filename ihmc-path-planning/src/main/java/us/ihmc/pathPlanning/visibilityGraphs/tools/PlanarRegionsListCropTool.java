@@ -15,7 +15,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class PlanarRegionsListCropper
+public class PlanarRegionsListCropTool
 {
    public static class Result
    {
@@ -29,7 +29,11 @@ public class PlanarRegionsListCropper
 
       for (PlanarRegion mapRegion : map.getPlanarRegionsAsList())
       {
-
+         Result result = cropRegionByPlane(plane, mapRegion);
+         if (!result.fullyDeleteRegion)
+         {
+            croppedRegions.addPlanarRegion(result.croppedOrKeptRegion);
+         }
       }
 
       return croppedRegions;
