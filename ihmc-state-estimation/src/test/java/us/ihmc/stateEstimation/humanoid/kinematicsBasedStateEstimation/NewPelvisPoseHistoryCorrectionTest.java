@@ -118,7 +118,15 @@ public class NewPelvisPoseHistoryCorrectionTest
    private void setupCorrector()
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
-      pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator);
+      
+      ClippedSpeedOffsetErrorInterpolatorParameters parameters = new ClippedSpeedOffsetErrorInterpolatorParameters();
+      parameters.setIsRotationCorrectionEnabled(true);
+      parameters.setBreakFrequency(10.0);
+      parameters.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
+      parameters.setMaxTranslationalCorrectionSpeed(0.5);
+      parameters.setMaxRotationalCorrectionSpeed(0.5);
+      
+      pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator, parameters);
    }
 
    private void generatePelvisWayPoints()
