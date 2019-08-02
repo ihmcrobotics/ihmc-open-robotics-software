@@ -65,6 +65,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  pitchWeight                                = keys.addDoubleKey ("Pitch weight", 0.0);
    public static final DoubleStoredPropertyKey  maximum2dDistanceFromBoundingBoxToPenalize = keys.addDoubleKey ("Maximum 2D distance from bounding box to penalize", 0.0);
    public static final DoubleStoredPropertyKey  boundingBoxCost                            = keys.addDoubleKey ("Bounding box cost", 0.0);
-   public static final DoubleStoredPropertyKey  footholdAreaWeight                         = keys.addDoubleKey ("Foothold area weight", 1.0);
+   public static final DoubleStoredPropertyKey  footholdAreaWeight                         = keys.addDoubleKey ("Foothold area weight", 0.0);
    public static final DoubleStoredPropertyKey  longStepWeight                             = keys.addDoubleKey ("Long step weight", 1.0);
 }
