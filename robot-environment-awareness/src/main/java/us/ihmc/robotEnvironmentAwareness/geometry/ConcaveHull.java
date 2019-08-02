@@ -29,8 +29,12 @@ public class ConcaveHull implements Iterable<Point2D>
 
    public ConcaveHull(ConcaveHull other)
    {
-      this.hullVertices = new ArrayList<>();
-      other.forEach(hullVertices::add);
+      hullVertices = new ArrayList<>();
+
+      for (Point2D hullVertex : other.hullVertices)
+      {
+         hullVertices.add(new Point2D(hullVertex)); // TODO: Make sure this doesn't break anything
+      }
    }
 
    public boolean isEmpty()
