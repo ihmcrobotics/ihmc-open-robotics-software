@@ -26,9 +26,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
-   //TODO: Put parameters in a parameters class.
-   private static final boolean ENABLE_ROTATION_CORRECTION = true;
-
    private final YoBoolean enableProcessNewPackets;
 
    private static final boolean ENABLE_GRAPHICS = true;
@@ -95,22 +92,24 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
 
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize)
+                                         YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
+                                         ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
-      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, null);
+      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, null, parameters);
    }
 
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
                                          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt,
-                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize)
+                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
+                                         ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
-      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber);
+      this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber, parameters);
    }
 
    public NewPelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+                                         YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber,
+                                         ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
-
       this.estimatorDT = estimatorDT;
 
       this.rootJoint = sixDofJoint;
@@ -128,7 +127,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       confidenceFactor = new YoDouble("PelvisErrorCorrectionConfidenceFactor", registry);
 
       correctedPelvisPoseErrorTooBigChecker = new CorrectedPelvisPoseErrorTooBigChecker(registry);
-      offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
+
+      offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, this.estimatorDT, parameters);
 
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
 

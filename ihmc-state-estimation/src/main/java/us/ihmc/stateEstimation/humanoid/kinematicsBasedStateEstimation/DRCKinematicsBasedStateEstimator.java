@@ -94,11 +94,28 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       usePelvisCorrector.set(true);
 
       if (USE_NEW_PELVIS_POSE_CORRECTOR)
-         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry,
-                                                                               yoGraphicsListRegistry, 1000);
+      {
+         ClippedSpeedOffsetErrorInterpolatorParameters parameters = new ClippedSpeedOffsetErrorInterpolatorParameters();
+         parameters.setIsRotationCorrectionEnabled(true);
+         parameters.setBreakFrequency(10.0);
+         parameters.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
+         parameters.setMaxTranslationalCorrectionSpeed(0.5);
+         parameters.setMaxRotationalCorrectionSpeed(0.5);
+
+         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                               stateEstimatorParameters.getEstimatorDT(),
+                                                                               registry,
+                                                                               yoGraphicsListRegistry,
+                                                                               1000,
+                                                                               parameters);
+      }
       else
-         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry,
+      {
+         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure,
+                                                                            stateEstimatorParameters.getEstimatorDT(),
+                                                                            registry,
                                                                             1000);
+      }
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);

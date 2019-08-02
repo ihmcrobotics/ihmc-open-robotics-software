@@ -72,7 +72,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    {
       boolean visualize = false;
 
-      boolean correctRotation = true;
       double dt = 0.001;
       YoVariableRegistry registry = new YoVariableRegistry("Test");
       RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
@@ -86,16 +85,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          }
       };
 
+      ClippedSpeedOffsetErrorInterpolatorParameters interpolatorParameters = new ClippedSpeedOffsetErrorInterpolatorParameters();
+      interpolatorParameters.setIsRotationCorrectionEnabled(true);
+      interpolatorParameters.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
+      interpolatorParameters.setMaximumTranslationAndRotationSpeed(10000.0, 10000.0);
+      interpolatorParameters.setBreakFrequency(100000.0);
+      interpolatorParameters.setIsRotationCorrectionEnabled(true);
+      
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
                                                                                                                         referenceFrameToBeCorrected,
                                                                                                                         dt,
-                                                                                                                        correctRotation);
+                                                                                                                        interpolatorParameters);
 
       // No dead zone, no speed limits, and no filter: Should move to full range in one tick
-      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
-      clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(10000.0, 10000.0);
-      clippedSpeedOffsetErrorInterpolator.setAlphaFilterBreakFrequency(100000.0);
-      clippedSpeedOffsetErrorInterpolator.setIsRotationCorrectionEnabled(true);
+
 
       FramePose3D startOffsetError = new FramePose3D(worldFrame);
       FramePose3D goalOffsetError = new FramePose3D(worldFrame);
@@ -219,18 +222,19 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    {
       Random random = new Random(8765L);
 
-      boolean correctRotation = false;
-      boolean visualize = correctRotation;
+      boolean visualize = false;
 
       YoVariableRegistry registry = new YoVariableRegistry("Test");
 
       int numberOfTicks = 10000;
       double dt = 0.001;
 
+      ClippedSpeedOffsetErrorInterpolatorParameters interpolationParameters = new ClippedSpeedOffsetErrorInterpolatorParameters();
+      interpolationParameters.setIsRotationCorrectionEnabled(false);
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
                                                                                                                         referenceFrameToBeCorrected,
                                                                                                                         dt,
-                                                                                                                        correctRotation);
+                                                                                                                        interpolationParameters);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -333,8 +337,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
                                                                                                                         referenceFrameToBeCorrected,
-                                                                                                                        dt,
-                                                                                                                        true);
+                                                                                                                        dt);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(random, 0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -418,8 +421,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
                                                                                                                         referenceFrameToBeCorrected,
-                                                                                                                        dt,
-                                                                                                                        true);
+                                                                                                                        dt);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(random, 0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -563,10 +565,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       Random random = new Random(1984L);
       int numberOfTicks = 2000;
 
+      ClippedSpeedOffsetErrorInterpolatorParameters parameters = new ClippedSpeedOffsetErrorInterpolatorParameters();
+      parameters.setIsRotationCorrectionEnabled(false);
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
                                                                                                                         referenceFrameToBeCorrected,
                                                                                                                         dt,
-                                                                                                                        false);
+                                                                                                                        parameters);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(random, 0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
