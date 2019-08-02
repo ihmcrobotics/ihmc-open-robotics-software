@@ -33,8 +33,8 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
 
-   private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.5; //0.05;
-   private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.5; //0.05;
+   private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.05;
+   private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.05;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -175,9 +175,6 @@ public class ClippedSpeedOffsetErrorInterpolator
       alphaFilter = new AlphaFilteredYoVariable("alphaFilter", registry, alphaFilter_AlphaValue, alphaFilter_PositionValue);
 
       cLippedAlphaFilterValue = new YoDouble("cLippedAlphaFilterValue", registry);
-      //      cLippedAlphaFilterValue.set(0.0);
-      //      previousClippedAlphaFilterValue = new YoDouble("previousClippedAlphaFilterValue", registry);
-      //      previousClippedAlphaFilterValue.set(0.0);
 
       maxTranslationalCorrectionVelocity = new YoDouble("maxTranslationalCorrectionVelocity", registry);
       maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
@@ -192,12 +189,6 @@ public class ClippedSpeedOffsetErrorInterpolator
       distanceToTravel.set(0.0);
       angleToTravel = new YoDouble("angleToTravel", registry);
       angleToTravel.set(0.0);
-
-      //      translationalSpeedForGivenDistanceToTravel = new YoDouble("translationalSpeedForGivenDistanceToTravel", registry);
-      //      rotationalSpeedForGivenAngleToTravel = new YoDouble("rotationalSpeedForGivenAngleToTravel", registry);
-      //
-      //      temporaryTranslationAlphaClipped = new YoDouble("temporaryTranslationAlphaClipped", registry);
-      //      temporaryRotationAlphaClipped = new YoDouble("temporaryRotationAlphaClipped", registry);
 
       xDeadzoneSize = new YoDouble("xDeadzoneSize", registry);
       xDeadzoneSize.set(X_DEADZONE_SIZE);
@@ -258,6 +249,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       {
          startOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
          goalOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+//         goalOffsetErrorPose.set(startOffsetError);
       }
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
@@ -430,8 +422,11 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       interpolatedTranslation.interpolate(updatedStartOffset_Translation, updatedGoalOffset_Translation, cLippedAlphaFilterValue.getValue());
 
-      interpolatedYaw.set(AngleTools.interpolateAngle(startYaw.getValue(), goalYaw.getValue(), cLippedAlphaFilterValue.getValue()));
-      interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+      if (isRotationCorrectionEnabled.getBooleanValue())
+      {
+         interpolatedYaw.set(AngleTools.interpolateAngle(startYaw.getValue(), goalYaw.getValue(), cLippedAlphaFilterValue.getValue()));
+         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
+      }
 
       offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
 
