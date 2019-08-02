@@ -1,8 +1,11 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -14,23 +17,35 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class FakeREAModule
 {
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+   private ROS2Input<RobotConfigurationData> robotConfigurationData;
 
    private final HashMap<Integer, PlanarRegion> customPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
 
    public FakeREAModule(PlanarRegionsList map)
    {
+      this(map, null);
+   }
+
+   public FakeREAModule(PlanarRegionsList map, DRCRobotModel robotModel)
+   {
       this.map = map;
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+
+      if (robotModel != null)
+      {
+         robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+      }
 
       new ROS2Callback<>(ros2Node,
                          PlanarRegionsListMessage.class,
@@ -58,7 +73,8 @@ public class FakeREAModule
 
    private void process()
    {
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(map.getPlanarRegionsAsList());
+      List<PlanarRegion> regionsInView = map.getPlanarRegionsAsList();
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(regionsInView);
 
       synchronized (this)
       {
