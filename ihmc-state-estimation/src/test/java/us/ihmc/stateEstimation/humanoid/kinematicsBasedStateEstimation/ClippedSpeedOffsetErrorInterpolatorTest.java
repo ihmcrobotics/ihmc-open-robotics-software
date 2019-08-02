@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -27,22 +28,15 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
-   SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
-
-   SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-   SimulationConstructionSet scs;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
    private final Vector3D referenceFrameToBeCorrectedTransform_Translation = new Vector3D();
-   private final Quaternion referenceFrameToBeCorrectedTransform_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+   private final Quaternion referenceFrameToBeCorrectedTransform_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
    int numberOfWaypoints = 2;
    TimeStampedTransformBuffer referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame = new TimeStampedTransformBuffer(numberOfWaypoints);
@@ -59,7 +53,6 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    };
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoDouble alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
    private final double dt = 0.001;
 
    @BeforeEach
@@ -75,29 +68,15 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    @Test
-   public void testSimpleCases()
+   public void testClippedSpeedOffsetErrorInterpolator()
    {
-      boolean visualize = true;
-      
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      SimulationConstructionSet scs = null;
+      boolean visualize = false;
 
       boolean correctRotation = false;
       double dt = 0.001;
       YoVariableRegistry registry = new YoVariableRegistry("Test");
-      YoDouble alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
-      alphaFilterBreakFrequency.set(100.0);
       RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
 
-      if (visualize)
-      {
-         Robot robot = new Robot(getClass().getSimpleName());
-         scs  = new SimulationConstructionSet(robot, parameters);
-         scs.addYoVariableRegistry(registry);
-         scs.startOnAThread();
-      }
-
-      
       ReferenceFrame referenceFrameToBeCorrected = new ReferenceFrame("referenceFrameToBeCorrected", worldFrame)
       {
          @Override
@@ -107,62 +86,145 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          }
       };
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-                                                                                                                        alphaFilterBreakFrequency, dt, correctRotation);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        correctRotation);
 
-
+      // No dead zone, no speed limits, and no filter: Should move to full range in one tick
       clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
       clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(10000.0, 10000.0);
+      clippedSpeedOffsetErrorInterpolator.setAlphaFilterBreakFrequency(100000.0);
+      clippedSpeedOffsetErrorInterpolator.setIsRotationCorrectionEnabled(true);
 
       FramePose3D startOffsetError = new FramePose3D(worldFrame);
       FramePose3D goalOffsetError = new FramePose3D(worldFrame);
 
+      // Simple test with no error:
       double alphaFilterPosition = 1.0;
       clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
 
       FramePose3D offsetPoseToPack = new FramePose3D(worldFrame);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
-
       assertTrue(offsetPoseToPack.epsilonEquals(new FramePose3D(worldFrame), 1e-7));
-      
-      
+      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+      assertTrue(offsetPoseToPack.epsilonEquals(new FramePose3D(worldFrame), 1e-7));
+
+      // Simple test with some error:
+
       startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
-      goalOffsetError.setPosition(new Point3D(0.02, 0.03, -0.04));
-      double initialDistance = startOffsetError.getPositionDistance(goalOffsetError);
-      
+      startOffsetError.setOrientationYawPitchRoll(-0.023, 0.179, 0.11);
+      goalOffsetError.setPosition(new Point3D(0.02, 0.037, -0.04));
+      goalOffsetError.setOrientationYawPitchRoll(0.17, 0.114, -0.005);
+
       clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
-      
-      int numberOfTicks = 100;
-      
-      for (int i=0; i<numberOfTicks; i++)
+      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+
+      FramePose3D expectedPose = new FramePose3D(worldFrame);
+      expectedPose.set(startOffsetError);
+      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+
+      assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
+      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+      expectedPose.set(goalOffsetError);
+      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+      assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
+
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      SimulationConstructionSet scs = null;
+      if (visualize)
       {
+         Robot robot = new Robot(getClass().getSimpleName());
+         scs = new SimulationConstructionSet(robot, parameters);
+         scs.addYoVariableRegistry(registry);
+         scs.startOnAThread();
+      }
+      
+      // With some speed limits, should follow those speed limits:
+
+      startOffsetError.setPosition(new Point3D(0.01, 0.001, 0.0));
+      startOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
+      goalOffsetError.setPosition(new Point3D(0.02, 0.002, 0.0));
+      goalOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
+      
+      double distanceFromStartToGoal = startOffsetError.getPosition().distance(goalOffsetError.getPosition());
+      clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(distanceFromStartToGoal, 1.0);
+
+      clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
+
+      Vector3D translationPerTick = new Vector3D();
+      translationPerTick.sub(goalOffsetError.getPosition(), startOffsetError.getPosition());
+      translationPerTick.scale(dt);
+
+      int numberOfTicks = (int) Math.round(1.0 / dt);
+      Point3D expectedPosition = new Point3D(startOffsetError.getPosition());
+
+      for (int i = 0; i < numberOfTicks; i++)
+      {
+         clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+         assertTrue(expectedPosition.epsilonEquals(offsetPoseToPack.getPosition(), 1e-7));
+         expectedPosition.add(translationPerTick);
+
          if (visualize)
          {
             scs.tickAndUpdate();
+            scs.setTime(scs.getTime() + 1.0);
          }
-      clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
-      
-      System.out.println(offsetPoseToPack);
       }
       
+      // With rotation speed limits:
+
+      double startYaw = 0.01;
+      double endYaw = 0.02;
+      
+      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
+      startOffsetError.setOrientationYawPitchRoll(startYaw, 0.02, 0.03);
+      goalOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
+      goalOffsetError.setOrientationYawPitchRoll(endYaw, 0.014, -0.045);
+
+      double rotationFromStartToGoal = endYaw - startYaw;
+
+      clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(1.0, rotationFromStartToGoal);
+      clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
+
+      double rotationPerTick = rotationFromStartToGoal * dt;
+
+      numberOfTicks = (int) Math.round(1.0 / dt);
+      double expectedYaw = startYaw;
+
+      for (int i = 0; i < numberOfTicks; i++)
+      {
+         clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
+
+         org.junit.jupiter.api.Assertions.assertEquals(expectedYaw, offsetPoseToPack.getYaw(), 1e-7);
+         expectedYaw += rotationPerTick;
+
+         if (visualize)
+         {
+            scs.tickAndUpdate();
+            scs.setTime(scs.getTime() + 1.0);
+         }
+      }
+
+
       if (visualize)
       {
          ThreadTools.sleepForever();
       }
 
    }
-   
-   
+
    @Disabled
    @Test
    public void testRandomTranslationErrorInterpolation()
    {
       Random random = new Random();
       int numberOfTicks = 2000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, false);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        false);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -177,11 +239,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform startPoseTransform = new RigidBodyTransform();
          Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+         Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
          startPoseTransform.setIdentity();
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
          startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -190,11 +252,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
          Vector3D goalPose_Translation = RandomGeometry.nextVector3D(random, 0.04);
-         Quaternion goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+         Quaternion goalPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -219,8 +281,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
          goalPose.set(goalPoseTransform);
@@ -235,10 +297,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    {
       Random random = new Random();
       int numberOfTicks = 2000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, true);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        true);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -253,11 +316,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform startPoseTransform = new RigidBodyTransform();
          Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+         Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
          startPoseTransform.setIdentity();
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
          startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -276,8 +339,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          goalPose_RotationWithoutPitchAndRoll.setYawPitchRoll(goalPoseYawPitchRoll[0], 0.0, 0.0);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -301,12 +364,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
          referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
 
-
          FramePose3D expectedGoalPose = new FramePose3D(worldFrame);
          RigidBodyTransform expectedGoalPoseTransform = new RigidBodyTransform();
          expectedGoalPoseTransform.setIdentity();
-         expectedGoalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         expectedGoalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         expectedGoalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         expectedGoalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          expectedGoalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          expectedGoalPoseTransform.multiply(new RigidBodyTransform(goalPose_RotationWithoutPitchAndRoll, new Vector3D()));
          expectedGoalPose.set(expectedGoalPoseTransform);
@@ -322,10 +384,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    {
       Random random = new Random();
       int numberOfTicks = 2000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, true);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        true);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -340,11 +403,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform startPoseTransform = new RigidBodyTransform();
          Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+         Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
          startPoseTransform.setIdentity();
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
          startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -356,8 +419,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          Quaternion goalPose_Rotation = RandomGeometry.nextQuaternion(random, 0.04);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -382,8 +445,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
          goalPose.set(goalPoseTransform);
@@ -392,15 +455,16 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
+   @Disabled
    @Test
    public void testMaxTranslationalCorrectionSpeedClip()
    {
       int numberOfTicks = 10000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, false);
-
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        false);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -413,11 +477,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       RigidBodyTransform startPoseTransform = new RigidBodyTransform();
       Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       startPoseTransform.setIdentity();
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
       startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -426,11 +490,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
       Vector3D goalPose_Translation = new Vector3D(1.0, 1.0, 1.0);
-      Quaternion goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion goalPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       goalPoseTransform.setIdentity();
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
       goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -447,7 +511,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrected.update();
          clippedSpeedOffsetErrorInterpolator.interpolateError(interpolatedPose);
 
-         if (j>0 && (j%999) == 0)
+         if (j > 0 && (j % 999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
@@ -458,10 +522,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            FrameQuaternion rotationDisplacement = new FrameQuaternion();
             rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
@@ -479,10 +543,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    public void testMaxRotationalCorrectionSpeedClip()
    {
       int numberOfTicks = 10000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, true);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        true);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -495,11 +560,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       RigidBodyTransform startPoseTransform = new RigidBodyTransform();
       Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       startPoseTransform.setIdentity();
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
       startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -508,12 +573,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
       Vector3D goalPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion goalPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       goalPose_Rotation.setYawPitchRoll(1.0, 1.0, 1.0);
 
       goalPoseTransform.setIdentity();
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
       goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -530,7 +595,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrected.update();
          clippedSpeedOffsetErrorInterpolator.interpolateError(interpolatedPose);
 
-         if (j>0 && (j%999) == 0)
+         if (j > 0 && (j % 999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
@@ -541,10 +606,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            FrameQuaternion rotationDisplacement = new FrameQuaternion();
             rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
@@ -562,10 +627,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {
       int numberOfTicks = 10000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, true);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        true);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -579,11 +645,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       //test when rotation is bigger than translation
       RigidBodyTransform startPoseTransform = new RigidBodyTransform();
       Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-      Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       startPoseTransform.setIdentity();
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
       startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -592,12 +658,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
       Vector3D goalPose_Translation = new Vector3D(0.2, 0.2, 0.2);
-      Quaternion goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion goalPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       goalPose_Rotation.setYawPitchRoll(1.0, 1.0, 1.0);
 
       goalPoseTransform.setIdentity();
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
       goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -614,7 +680,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrected.update();
          clippedSpeedOffsetErrorInterpolator.interpolateError(interpolatedPose);
 
-         if (j>0 && (j%999) == 0)
+         if (j > 0 && (j % 999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
@@ -625,10 +691,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            FrameQuaternion rotationDisplacement = new FrameQuaternion();
             rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
@@ -642,11 +708,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       //test when translation is bigger than rotation
       startPoseTransform = new RigidBodyTransform();
       startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-      startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       startPoseTransform.setIdentity();
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
       startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -655,12 +721,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       goalPoseTransform = new RigidBodyTransform();
       goalPose_Translation = new Vector3D(1.0, 1.0, 1.0);
-      goalPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      goalPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       goalPose_Rotation.setYawPitchRoll(0.2, 0.2, 0.2);
 
       goalPoseTransform.setIdentity();
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+      goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
       goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
       goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -677,7 +743,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrected.update();
          clippedSpeedOffsetErrorInterpolator.interpolateError(interpolatedPose);
 
-         if (j>0 && (j%999) == 0)
+         if (j > 0 && (j % 999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
             FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
@@ -688,8 +754,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             interpolatedPoseOneSecondEarlier.get(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
-                  interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
+                                                            interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
             FrameQuaternion rotationDisplacement = new FrameQuaternion();
             rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
@@ -703,15 +769,17 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
+   @Disabled
    @Test
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
       Random random = new Random();
       int numberOfTicks = 2000;
-      alphaFilterBreakFrequency.set(0.6);
 
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, false);
+      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry,
+                                                                                                                        referenceFrameToBeCorrected,
+                                                                                                                        dt,
+                                                                                                                        false);
 
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
@@ -726,11 +794,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform startPoseTransform = new RigidBodyTransform();
          Vector3D startPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion startPose_Rotation = new Quaternion(0.0,0.0,0.0,1.0);
+         Quaternion startPose_Rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
          startPoseTransform.setIdentity();
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
          startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
 
@@ -742,8 +810,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          Quaternion goalPose_Rotation = RandomGeometry.nextQuaternion(random, 0.04);
 
          goalPoseTransform.setIdentity();
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), goalPose_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), goalPose_Translation));
          goalPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          goalPoseTransform.multiply(new RigidBodyTransform(goalPose_Rotation, new Vector3D()));
 
@@ -768,8 +836,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
 
          startPoseTransform.setIdentity();
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), referenceFrameToBeCorrectedTransform_Translation));
-         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0,0.0,0.0,1.0), startPose_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
+         startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), startPose_Translation));
          startPoseTransform.multiply(new RigidBodyTransform(referenceFrameToBeCorrectedTransform_Rotation, new Vector3D()));
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
          startPose.set(startPoseTransform);
@@ -782,20 +850,16 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    public void testErrorRotationCheckIsBehavingProperly()
    {
       Random random = new Random();
-      alphaFilterBreakFrequency.set(0.6);
-
-      ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
-            alphaFilterBreakFrequency, dt, false);
 
       CorrectedPelvisPoseErrorTooBigChecker correctedPelvisPoseErrorTooBigChecker = new CorrectedPelvisPoseErrorTooBigChecker(registry);
 
-      FramePose3D startPose = new FramePose3D(worldFrame, new Point3D(), new Quaternion(0.0,0.0,0.0,1.0));
+      FramePose3D startPose = new FramePose3D(worldFrame, new Point3D(), new Quaternion(0.0, 0.0, 0.0, 1.0));
       FramePose3D goalPose = new FramePose3D(worldFrame);
-      Quaternion goalOrientation= new Quaternion();
+      Quaternion goalOrientation = new Quaternion();
 
-      for(int i = 0; i < 200; i++)
+      for (int i = 0; i < 200; i++)
       {
-         goalPose.set(RandomGeometry.nextPoint3D(random, 0.1, 0.1, 0.1),RandomGeometry.nextQuaternion(random, Math.toRadians(9.2)));
+         goalPose.set(RandomGeometry.nextPoint3D(random, 0.1, 0.1, 0.1), RandomGeometry.nextQuaternion(random, Math.toRadians(9.2)));
          assertFalse(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
       }
 
@@ -855,15 +919,13 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
-
    }
-
 
    private void generateRandomReferenceFrameToBeCorrectedWaypoints(long firstTimestamp, long lastTimestamp)
    {
       Random random = new Random();
       Vector3D translation = new Vector3D();
-      Quaternion rotation = new Quaternion(0.0,0.0,0.0,1.0);
+      Quaternion rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
       translation = RandomGeometry.nextVector3D(random);
       rotation = RandomGeometry.nextQuaternion(random);
@@ -882,4 +944,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.put(temporaryReferenceFrameToBeCorrectedTransformInWorldFrame, timeStamp);
    }
 
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(ClippedSpeedOffsetErrorInterpolator.class, ClippedSpeedOffsetErrorInterpolatorTest.class);
+   }
 }
