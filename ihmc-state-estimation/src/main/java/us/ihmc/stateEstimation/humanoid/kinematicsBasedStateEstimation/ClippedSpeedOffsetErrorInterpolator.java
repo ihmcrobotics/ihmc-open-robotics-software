@@ -25,17 +25,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ClippedSpeedOffsetErrorInterpolator
 {
-   private static final double Z_DEADZONE_SIZE = 0.014;
-   private static final double Y_DEADZONE_SIZE = 0.014;
-   private static final double X_DEADZONE_SIZE = 0.014;
-
-   private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
-
-   private static final double YAW_DEADZONE_IN_DEGREES = 1.0;
-
-   private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.05;
-   private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.05;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoBoolean isRotationCorrectionEnabled;
@@ -148,13 +137,18 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFrameYawPitchRoll yoGoalOffsetFrameOrientation_Rotation;
    private final YoFrameYawPitchRoll yoInterpolatedOffsetFrameOrientation_Rotation;
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, boolean correctRotation)
+   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt)
+   {
+      this(parentRegistry, referenceFrame, estimator_dt, new ClippedSpeedOffsetErrorInterpolatorParameters());
+   }
+
+   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
-      this.alphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
+      this.alphaFilterBreakFrequency.set(parameters.getBreakFrequency());
 
       this.dt = new YoDouble("dt", registry);
       this.dt.set(estimator_dt);
@@ -162,7 +156,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       this.stateEstimatorReferenceFrame = referenceFrame;
 
       isRotationCorrectionEnabled = new YoBoolean("isRotationCorrectionEnabled", registry);
-      isRotationCorrectionEnabled.set(correctRotation);
+      isRotationCorrectionEnabled.set(parameters.getIsRotationCorrectionEnabled());
 
       hasBeenCalled = new YoBoolean("hasbeenCalled", registry);
       hasBeenCalled.set(false);
@@ -177,9 +171,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       cLippedAlphaFilterValue = new YoDouble("cLippedAlphaFilterValue", registry);
 
       maxTranslationalCorrectionVelocity = new YoDouble("maxTranslationalCorrectionVelocity", registry);
-      maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
+      maxTranslationalCorrectionVelocity.set(parameters.getMaxTranslationalCorrectionSpeed());
       maxRotationalCorrectionVelocity = new YoDouble("maxRotationalCorrectionVelocity", registry);
-      maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED);
+      maxRotationalCorrectionVelocity.set(parameters.getMaxRotationalCorrectionSpeed());
 
       maximumAlphaFilterChangeTranslation = new YoDouble("maximumAlphaFilterChangeTranslation", registry);
       maximumAlphaFilterChangeRotation = new YoDouble("maximumAlphaFilterChangeRotation", registry);
@@ -191,11 +185,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       angleToTravel.set(0.0);
 
       xDeadzoneSize = new YoDouble("xDeadzoneSize", registry);
-      xDeadzoneSize.set(X_DEADZONE_SIZE);
+      xDeadzoneSize.set(parameters.getXDeadzoneSize());
       yDeadzoneSize = new YoDouble("yDeadzoneSize", registry);
-      yDeadzoneSize.set(Y_DEADZONE_SIZE);
+      yDeadzoneSize.set(parameters.getYDeadzoneSize());
       zDeadzoneSize = new YoDouble("zDeadzoneSize", registry);
-      zDeadzoneSize.set(Z_DEADZONE_SIZE);
+      zDeadzoneSize.set(parameters.getZDeadzoneSize());
 
       goalTranslationRawX = new YoDouble("goalTranslationRawX", registry);
       goalTranslationRawY = new YoDouble("goalTranslationRawY", registry);
@@ -206,7 +200,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalTranslationWithDeadzoneZ = new DeadzoneYoVariable("goalTranslationWithDeadzoneZ", goalTranslationRawZ, zDeadzoneSize, registry);
 
       yawDeadzoneSize = new YoDouble("yawDeadzoneSize", registry);
-      yawDeadzoneSize.set(Math.toRadians(YAW_DEADZONE_IN_DEGREES));
+      yawDeadzoneSize.set(Math.toRadians(parameters.getYawDeadzoneInDegrees()));
       goalYawRaw = new YoDouble("goalYawRaw", registry);
       goalYawWithDeadZone = new DeadzoneYoVariable("goalYawWithDeadZone", goalYawRaw, yawDeadzoneSize, registry);
 
