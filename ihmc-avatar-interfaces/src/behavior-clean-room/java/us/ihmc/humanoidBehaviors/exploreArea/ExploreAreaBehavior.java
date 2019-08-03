@@ -123,6 +123,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       explore = messager.createInput(ExploreAreaBehaviorAPI.ExploreArea, false);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.RandomPoseUpdate, this::randomPoseUpdate);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.DoSlam, this::doSlam);
+      messager.registerTopicListener(ExploreAreaBehaviorAPI.ClearMap, this::clearMap);
       navigableRegionsManager = new NavigableRegionsManager();
 
       LogTools.debug("Initializing patrol behavior");
@@ -378,11 +379,14 @@ public class ExploreAreaBehavior implements BehaviorInterface
          slamParameters.setMaximumPointProjectionDistance(0.05);
 
          hullGotLooped.set(false);
-         PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
+         RigidBodyTransform referenceTransform = behaviorHelper.pollHumanoidReferenceFrames().getIMUFrame().getTransformToWorldFrame();
+         LogTools.info("Doing SLAM with IMU reference Transform \n {} ", referenceTransform);
+
+         PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, referenceTransform, listener);
 
          concatenatedMap = slamResult.getMergedMap();
          RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
-         LogTools.info("SLAM transformFromIncomingToMap = \n " + transformFromIncomingToMap);
+         LogTools.info("SLAM transformFromIncomingToMap = \n {}", transformFromIncomingToMap);
 
          boolean sendingSlamCorrection = true;
          publishPoseUpdateForStateEstimator(transformFromIncomingToMap, sendingSlamCorrection);
@@ -418,6 +422,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       //         messager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ConcatenatedMap, concatenatedMapMessage);
 
       // Find a point that has not been observed, but is close to a point that can be walked to, in order to observe it...
+   }
+
+   private void clearMap(boolean clearMap)
+   {
+      messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
+//      concatenatedMap = null;
    }
 
    private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
@@ -916,6 +926,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public static final Topic<Boolean> ExploreArea = topic("ExploreArea");
       public static final Topic<Boolean> RandomPoseUpdate = topic("RandomPoseUpdate");
       public static final Topic<Boolean> DoSlam = topic("DoSlam");
+      public static final Topic<Boolean> ClearMap = topic("ClearMap");
       public static final Topic<PlanarRegionsListMessage> ConcatenatedMap = topic("ConcatenatedMap");
       public static final Topic<Point3D> ObservationPosition = topic("ObservationPosition");
       public static final Topic<ArrayList<BoundingBox3D>> ExplorationBoundingBoxes = topic("ExplorationBoundingBoxes");

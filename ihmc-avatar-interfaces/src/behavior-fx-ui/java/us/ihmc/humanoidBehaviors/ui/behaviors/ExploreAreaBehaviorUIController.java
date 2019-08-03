@@ -44,6 +44,8 @@ public class ExploreAreaBehaviorUIController extends Group
    @FXML
    private Button doSlamButton;
    @FXML
+   private Button clearMapButton;
+   @FXML
    private TextField stateTextField;
    @FXML
    private TableView parameterTable;
@@ -107,6 +109,12 @@ public class ExploreAreaBehaviorUIController extends Group
    public void doSlamButtonClicked()
    {
       behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DoSlam, true);
+   }
+
+   @FXML
+   public void clearMapButtonClicked()
+   {
+      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ClearMap, true);
    }
 
    @FXML
