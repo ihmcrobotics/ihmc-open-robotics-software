@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
-import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -461,9 +460,16 @@ class PlanarRegionSLAMTest
    {
       RigidBodyTransform inverseTransform = new RigidBodyTransform(transform);
       inverseTransform.invert();
-
       assertTrue(inverseTransform.epsilonEquals(expectedTransform, epsilon),
-                 "\ntransform = " + inverseTransform + ", \nexpectedTransform = " + expectedTransform);
+                 "\ntransform = \n" + inverseTransform + ", \nexpectedTransform = \n" + expectedTransform);
+   }
+
+   private void assertTransformsAreNotInverses(RigidBodyTransform expectedTransform, RigidBodyTransform transform, double epsilon)
+   {
+      RigidBodyTransform inverseTransform = new RigidBodyTransform(transform);
+      inverseTransform.invert();
+      assertFalse(inverseTransform.epsilonEquals(expectedTransform, epsilon),
+                  "\ntransform = \n" + inverseTransform + ", \nexpectedTransform = \n" + expectedTransform);
    }
 
    @Test
@@ -556,6 +562,144 @@ class PlanarRegionSLAMTest
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
       }
+   }
+
+   @Test
+   /**
+    * This test is for normalization when the sensor is far from the world origin. In this case the
+    * sensor might have a small rotation, but that would translate into a small rotation and a large
+    * translation of the world origin. With damped least squares normalization, this might give an
+    * error of a large translation of the robot if the rotation is accepted since it is small but the
+    * translation is not accepted because it is large. By doing it in the frame of the sensor, the
+    * sensed items will only move a little.
+    */
+   public void testSLAMWithThreeNiceWallsFarFromTheOrigin()
+   {
+      boolean visualize = false;
+
+      // Parameters, with DampedLeastSquaresLambda = 0, everything should be fine without a better reference.
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      parameters.setBoundingBoxHeight(0.1);
+      parameters.setDampedLeastSquaresLambda(0.0);
+      parameters.setMaximumPointProjectionDistance(0.1);
+      parameters.setIterationsForMatching(5);
+
+      // Small rotation and translation transform but near the origin.
+      double delta = 0.05;
+      RigidBodyTransform smallRotationAndTranslationTransform = new RigidBodyTransform();
+      smallRotationAndTranslationTransform.setTranslation(delta * 0.17, -delta * 0.33, delta * 0.117);
+      smallRotationAndTranslationTransform.setRotationYawPitchRoll(delta * 1.0, delta * 0.13, -delta * 0.17);
+
+      PlanarRegionsList mapNearOrigin = createSomeRightAngledWalls(0, false, new RigidBodyTransform(), true, true, true);
+      PlanarRegionsList newDataNearOrigin = createSomeRightAngledWalls(6, false, smallRotationAndTranslationTransform, true, true, true);
+
+      PlanarRegionSLAMResult slamResultNearOrigin = PlanarRegionSLAM.slam(mapNearOrigin, newDataNearOrigin, parameters);
+      PlanarRegionsList mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
+      RigidBodyTransform transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
+
+      if (visualize)
+      {
+         System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
+      }
+
+      assertTransformsAreInverses(transformResultNearOrigin, smallRotationAndTranslationTransform, 1e-7);
+      assertEquals(3, mergedMapNearOrigin.getNumberOfPlanarRegions());
+
+      // Large transform from the origin. With lambda = 0, will get exact right answer, even though it is 
+      // a large transformResult, as opposed to the previous one.
+      double largeMovementFromTheOrigin = 10.0;
+      RigidBodyTransform largeTransform = new RigidBodyTransform();
+      largeTransform.setTranslation(largeMovementFromTheOrigin * 1.0, largeMovementFromTheOrigin * 0.5, largeMovementFromTheOrigin * 0.2);
+      largeTransform.setRotationYawPitchRoll(0.5, 0.0, 0.0);
+
+      RigidBodyTransform newDataTransform = new RigidBodyTransform();
+      newDataTransform.set(largeTransform);
+      newDataTransform.multiply(smallRotationAndTranslationTransform);
+
+      PlanarRegionsList mapFarFromOrigin = createSomeRightAngledWalls(0, false, largeTransform, true, true, true);
+      PlanarRegionsList newDataFarFromOrigin = createSomeRightAngledWalls(6, false, newDataTransform, true, true, true);
+
+      PlanarRegionSLAMResult slamResultFarFromOrigin = PlanarRegionSLAM.slam(mapFarFromOrigin, newDataFarFromOrigin, parameters);
+      PlanarRegionsList mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
+      RigidBodyTransform transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
+
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+      expectedTransform.set(smallRotationAndTranslationTransform);
+      expectedTransform.preMultiply(largeTransform);
+
+      RigidBodyTransform largeTransformInverse = new RigidBodyTransform(largeTransform);
+      largeTransformInverse.invert();
+      expectedTransform.multiply(largeTransformInverse);
+
+      RigidBodyTransform expectedLocalTransform = new RigidBodyTransform();
+      expectedLocalTransform.set(transformResultFarFromOrigin);
+      expectedLocalTransform.preMultiply(largeTransformInverse);
+      expectedLocalTransform.multiply(largeTransform);
+
+      if (visualize)
+      {
+         System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
+      }
+
+      assertTransformsAreInverses(smallRotationAndTranslationTransform, expectedLocalTransform, 1e-7);
+      assertTransformsAreInverses(transformResultFarFromOrigin, expectedTransform, 1e-7);
+      assertEquals(3, mergedMapFarFromOrigin.getNumberOfPlanarRegions());
+
+      // Now change lambda. Will get very different results.
+      parameters.setDampedLeastSquaresLambda(0.5);
+
+      slamResultNearOrigin = PlanarRegionSLAM.slam(mapNearOrigin, newDataNearOrigin, parameters);
+      mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
+      transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
+
+      if (visualize)
+      {
+         System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
+      }
+
+      if (visualize)
+      {
+         visualizePlanarRegions(mapNearOrigin, mergedMapNearOrigin);
+      }
+
+      // With lambda set, near the origin you will still get nearly the right answer, but larger epsilon.
+      assertTransformsAreInverses(transformResultNearOrigin, smallRotationAndTranslationTransform, 1e-4);
+      assertEquals(3, mergedMapNearOrigin.getNumberOfPlanarRegions());
+
+      // Far from the origin, will not get close to the right transform
+      slamResultFarFromOrigin = PlanarRegionSLAM.slam(mapFarFromOrigin, newDataFarFromOrigin, parameters);
+      mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
+      transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
+
+      if (visualize)
+      {
+         System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
+      }
+
+      // Make sure they are far from being inverses.
+      assertTransformsAreNotInverses(transformResultFarFromOrigin, expectedTransform, 0.2);
+      assertEquals(3, mergedMapFarFromOrigin.getNumberOfPlanarRegions());
+
+      // But now if we use a reference on the robot, we should get a good result.
+      // Here we'll use the large transform, and check that we get the exact result as
+      // in the case of no transform.
+      RigidBodyTransform transformFromRobotToWorld = new RigidBodyTransform(largeTransform);
+
+      slamResultFarFromOrigin = PlanarRegionSLAM.slam(mapFarFromOrigin, newDataFarFromOrigin, parameters, transformFromRobotToWorld);
+      mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
+      transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
+
+      if (visualize)
+      {
+         System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
+         System.out.println("expectedTransform = \n" + expectedTransform);
+
+         visualizePlanarRegions(mapFarFromOrigin, mergedMapFarFromOrigin);
+         ThreadTools.sleepForever();
+      }
+
+      assertTransformsAreInverses(transformResultFarFromOrigin, expectedTransform, 2.0e-3);
+      assertEquals(3, mergedMapFarFromOrigin.getNumberOfPlanarRegions());
    }
 
    private void assertPlanarRegionsListAreEquivalentThroughPointProjections(Random random, PlanarRegionsList regionsOne, PlanarRegionsList regionsTwo)
