@@ -28,6 +28,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    ROCKS,
    LADDER,
    IN_FRONT_OF_ZIGZAG_BLOCKS,
+   IN_FRONT_OF_SECOND_ZIGZAG_BLOCKS,
    SINGLE_CYLINDERBLOCKS,
    TOP_OF_SLOPES,
    DEFAULT_BUT_ALMOST_PI,
@@ -58,6 +59,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.ROCKS, new OffsetAndYawRobotInitialSetup(0.0, 2.044, 0.0));
       addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING, new SquaredUpDRCDemo01Robot(0.0, 3.0, Math.toRadians(45.0), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS, new SquaredUpDRCDemo01Robot(0.0, 5.9, Math.toRadians(44.2), Math.toRadians(45.0)));
+      addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_SECOND_ZIGZAG_BLOCKS, new SquaredUpDRCDemo01Robot(0.0, 21.2, Math.toRadians(44.2), Math.toRadians(180.0-45.0)));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD, new SquaredUpDRCDemo01Robot(0.0, 7.0, Math.toRadians(44.2), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD, new SquaredUpDRCDemo01Robot(0.0, 10.80, Math.toRadians(44.0), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS, new SquaredUpDRCDemo01Robot(0.0, 18.6, Math.toRadians(44.2), Math.toRadians(45.0)));
