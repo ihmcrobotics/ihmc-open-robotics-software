@@ -55,7 +55,7 @@ public class PlanarRegionSLAM
                                                                                                                                            transformedNewData,
                                                                                                                                            parameters);
 
-         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints, parameters);
+         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints, parameters, referenceTransform);
          totalDriftCorrectionTransform.preMultiply(driftCorrectionTransform);
 
          transformedNewData = transformedNewData.copy();
