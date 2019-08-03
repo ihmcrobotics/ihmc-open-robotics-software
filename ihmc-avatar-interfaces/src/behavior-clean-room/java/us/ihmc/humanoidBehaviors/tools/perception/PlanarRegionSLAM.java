@@ -21,7 +21,18 @@ public class PlanarRegionSLAM
 {
    public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters)
    {
-      return slam(map, newDataIn, parameters, null);
+      return slam(map, newDataIn, parameters, null, null);
+   }
+
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters,
+                                             ConcaveHullMergerListener listener)
+   {
+      return slam(map, newDataIn, parameters, null, listener);
+   }
+
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform)
+   {
+      return slam(map, newDataIn, parameters, referenceTransform, null);
    }
 
    /**
@@ -32,7 +43,7 @@ public class PlanarRegionSLAM
     * @param parameters
     * @return Merged PlanarRegionsList and drift transform
     */
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters,
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform,
                                              ConcaveHullMergerListener listener)
    {
       PlanarRegionsList transformedNewData = newDataIn;
