@@ -554,6 +554,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       // 4. Two cinder block high hurdle for testcase purposes only, not part of actual trial obstacle course
       combinedTerrainObject.addTerrainObject(setUpZigZagHurdles("zigZagHurdlesTwoHigh", courseAngleDeg, startDistance, new int[] {8, 7}, 45.0));
 
+      // 5. Add a block/wall far out so that there is a far object to test SLAM against.
+      setUpWall(combinedTerrainObject, new double[] {12.0f, 15.0f}, 0.65, 1.0, 1.0, 45.0, YoAppearance.DarkGoldenRod());
       return combinedTerrainObject;
    }
 
