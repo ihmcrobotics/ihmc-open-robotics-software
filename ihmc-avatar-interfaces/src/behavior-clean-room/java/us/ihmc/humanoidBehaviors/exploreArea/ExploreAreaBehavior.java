@@ -372,11 +372,15 @@ public class ExploreAreaBehavior implements BehaviorInterface
       {
          PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters();
 
-         slamParameters.setIterationsForMatching(3);
+         //TODO: Tune these and add parameter decay factor for each iteration. 
+         // Maybe have an array of values to use for each iteration.
+         //TODO: Have SLAM return statistics, like residual error, to help determine the goodness of the data
+         // and take action accordingly.
+         slamParameters.setIterationsForMatching(5);
          slamParameters.setBoundingBoxHeight(0.05);
          slamParameters.setMinimumNormalDotProduct(0.99);
          slamParameters.setDampedLeastSquaresLambda(5.0);
-         slamParameters.setMaximumPointProjectionDistance(0.05);
+         slamParameters.setMaximumPointProjectionDistance(0.10);
 
          hullGotLooped.set(false);
          RigidBodyTransform referenceTransform = behaviorHelper.pollHumanoidReferenceFrames().getIMUFrame().getTransformToWorldFrame();
@@ -427,7 +431,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void clearMap(boolean clearMap)
    {
       messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
-//      concatenatedMap = null;
+      concatenatedMap = null;
    }
 
    private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
