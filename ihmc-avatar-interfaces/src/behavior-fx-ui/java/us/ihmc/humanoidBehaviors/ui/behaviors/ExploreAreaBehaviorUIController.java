@@ -54,7 +54,7 @@ public class ExploreAreaBehaviorUIController extends Group
 
    private Messager behaviorMessager;
 
-   private PlanarRegionsGraphic planarRegionsGraphic;
+   private PlanarRegionsGraphic planarRegionsGraphic = null;
 
    private ArrayList<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
 
@@ -89,8 +89,6 @@ public class ExploreAreaBehaviorUIController extends Group
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, parameters.keys);
-
-      planarRegionsGraphic = new PlanarRegionsGraphic(false);
    }
 
    @FXML
@@ -166,13 +164,26 @@ public class ExploreAreaBehaviorUIController extends Group
 
    public void clearPlanarRegions(boolean input)
    {
+      if (planarRegionsGraphic != null)
+      {
+         getChildren().remove(planarRegionsGraphic);
+      }
+      planarRegionsGraphic = null;
+
+      transformMap.clear();
+      numberOfPolygonsMap.clear();
       planarRegions.clear();
       polygonsMap.clear();
    }
 
    public void drawMap(boolean input)
    {
-      getChildren().remove(planarRegionsGraphic);
+      if (planarRegionsGraphic != null)
+      {
+         getChildren().remove(planarRegionsGraphic);
+      }
+
+      planarRegionsGraphic = new PlanarRegionsGraphic(false);
 
       planarRegions.clear();
 
