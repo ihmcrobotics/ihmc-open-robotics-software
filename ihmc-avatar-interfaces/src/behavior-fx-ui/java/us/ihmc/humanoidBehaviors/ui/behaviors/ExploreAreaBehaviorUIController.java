@@ -159,7 +159,8 @@ public class ExploreAreaBehaviorUIController extends Group
 
    public void displayPlanningToPosition(Point3D planningToPosition)
    {
-      planningToPointsDisplayer.displayPoint(planningToPosition, Color.BLUEVIOLET, 0.03);
+      planningToPointsDisplayer.clear();
+      planningToPointsDisplayer.displayPoint(planningToPosition, Color.BLUEVIOLET, 0.1);
    }
 
    public void clearPlanarRegions(boolean input)
