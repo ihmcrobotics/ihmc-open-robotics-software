@@ -744,7 +744,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          FramePose3D goal = desiredFramePoses.get(0);
          desiredFramePoses.remove(0);
 
-         LogTools.info("Planning to " + goal);
+         LogTools.info("\nPlanning to " + goal);
          Point3D goalToSend = new Point3D(goal.getPosition());
 
          messager.submitMessage(ExploreAreaBehaviorAPI.PlanningToPosition, goalToSend);
@@ -760,6 +760,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doPlanStateAction(double timeInState)
    {
+      //TODO: Something wrong with the planner. If you check on the results too quickly you get some errors. Need to fix planner issues.
+      if (timeInState < 3.0)
+         return;
+
       plannerFinished = footstepPlanResultNotification.poll();
 
       if (plannerFinished)
