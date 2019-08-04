@@ -152,7 +152,7 @@ public class ConcaveHullMerger
          listener.hullsAreInvalid(hullOneList);
          return hullTwoList;
       }
- 
+
       hullTwoList = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullOneList, hullTwoList);
 
       BoundingBox2D hullOneBoundingBox = createBoundingBox(hullOneList);
