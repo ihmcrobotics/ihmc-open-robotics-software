@@ -355,6 +355,11 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public void consideringWorkingEdge(LineSegment2D workingEdge, boolean workingHullIsOne)
       {
       }
+
+      @Override
+      public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+      {
+      }
    };
 
    //   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
