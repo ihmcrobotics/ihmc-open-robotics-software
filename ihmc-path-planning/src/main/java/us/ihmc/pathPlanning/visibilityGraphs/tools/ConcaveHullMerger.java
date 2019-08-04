@@ -37,7 +37,7 @@ public class ConcaveHullMerger
 
    //TODO: Check with Sylvain to see if this already exists somewhere else. If not, clean it up nicely and move it somewhere.
    //TODO: Maybe call this class PlanarRegionMergeTools
-   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance)
+   public static ArrayList<PlanarRegion> mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance)
    {
       return mergePlanarRegions(regionOne, regionTwo, maximumProjectionDistance, null);
    }
@@ -50,11 +50,11 @@ public class ConcaveHullMerger
     * 
     * @param regionOne First PlanarRegion to merge.
     * @param regionTwo Second PlanarRegion to merge.
-    * @return Merged planarRegions or null if the concave hull of the two PlanarRegions do not
-    *         intersect.
+    * @return List of merged planarRegions. The list will be empty if the PlanarRegions did not
+    *         intersect. Returns null if both PlanarRegions were invalid somehow.
     */
-   public static PlanarRegion mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance,
-                                                 ConcaveHullMergerListener listener)
+   public static ArrayList<PlanarRegion> mergePlanarRegions(PlanarRegion regionOne, PlanarRegion regionTwo, double maximumProjectionDistance,
+                                                            ConcaveHullMergerListener listener)
    {
       RigidBodyTransform transformTwoToWorld = new RigidBodyTransform();
       regionTwo.getTransformToWorld(transformTwoToWorld);
@@ -66,20 +66,25 @@ public class ConcaveHullMerger
       transformTwoToOne.multiply(transformTwoToWorld);
 
       Point2D[] concaveHullTwoVertices = regionTwo.getConcaveHull();
-      Point2D[] concaveHullTwoVerticesTransformed = new Point2D[concaveHullTwoVertices.length];
+      ArrayList<Point2D> concaveHullTwoVerticesTransformed = new ArrayList<Point2D>(concaveHullTwoVertices.length);
 
       for (int i = 0; i < concaveHullTwoVertices.length; i++)
       {
          Point3D point3D = new Point3D(concaveHullTwoVertices[i]);
          transformTwoToOne.transform(point3D);
          if (Math.abs(point3D.getZ()) > maximumProjectionDistance)
-            return null;
-         concaveHullTwoVerticesTransformed[i] = new Point2D(point3D);
+            return new ArrayList<PlanarRegion>();
+         concaveHullTwoVerticesTransformed.add(new Point2D(point3D));
       }
 
-      ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(regionOne.getConcaveHull(), concaveHullTwoVerticesTransformed, listener);
+      ArrayList<Point2D> concaveHullOneVertices = convertFromArrayToList(regionOne.getConcaveHull());
+
+      ArrayList<Point2D> mergedConcaveHull = mergeConcaveHulls(concaveHullOneVertices, concaveHullTwoVerticesTransformed, listener);
       if (mergedConcaveHull == null)
          return null;
+
+      if (mergedConcaveHull.isEmpty())
+         return new ArrayList<PlanarRegion>();
 
       ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<ConvexPolygon2D>();
 
@@ -93,26 +98,23 @@ public class ConcaveHullMerger
 
       PlanarRegion planarRegion = new PlanarRegion(transformOneToWorld, mergedConcaveHullArray, newPolygonsFromConcaveHull);
       planarRegion.setRegionId(regionOne.getRegionId());
-      return planarRegion;
-   }
 
-   public static ArrayList<Point2D> mergeConcaveHulls(Point2D[] hullOne, Point2D[] hullTwo, ConcaveHullMergerListener listener)
-   {
-      return mergeConcaveHulls(convertFromArrayToList(hullOne), convertFromArrayToList(hullTwo), listener);
-   }
-   
-   public static ArrayList<Point2D> mergeConcaveHulls(Point2D[] hullOne, Point2D[] hullTwo)
-   {
-      return mergeConcaveHulls(convertFromArrayToList(hullOne), convertFromArrayToList(hullTwo), null);
+      ArrayList<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
+      planarRegions.add(planarRegion);
+
+      return planarRegions;
    }
 
    /**
-    * Merges two ConcaveHulls. ConcaveHulls are assumed to be in clockwise order. Will fill holes.
-    * Assumes that the two ConcaveHulls do intersect by some non-infinitesimal amount.
+    * Merges two ConcaveHulls. ConcaveHulls are assumed to be in clockwise order. Will fill holes. If
+    * the concave hulls do not intersect at all (including one fully inside the other) then returns
+    * null. Preprocesses both hulls to remove slivers, nearly or fully colinear points, etc. If after
+    * preprocessing, both hulls are invalid, returns null. If one hull is invalid, returns the other.
+    * If there is no intersection of the preprocessed hulls, returns an empty list.
     * 
     * @param hullOne One hull to merge.
     * @param hullTwo The other hull to merge.
-    * @return Merged hull.
+    * @return Merged hull. Returns null if they do not intersect.
     */
    public static ArrayList<Point2D> mergeConcaveHulls(ArrayList<Point2D> hullOneIn, ArrayList<Point2D> hullTwoIn, ConcaveHullMergerListener listener)
    {
@@ -126,22 +128,30 @@ public class ConcaveHullMerger
 
       ArrayList<Point2D> hullOneList = hullOneIn;
       ArrayList<Point2D> hullTwoList = hullTwoIn;
-      
+
       hullOneList = preprocessHullByRemovingPoints(hullOneList);
       hullTwoList = preprocessHullByRemovingPoints(hullTwoList);
 
-      boolean hullOneListIsValid = ((hullOneList != null) && (hullOneList.size() >= 3));
-      boolean hullTwoListIsValid = ((hullTwoList != null) && (hullTwoList.size() >= 3));
+      boolean hullOneListIsValid = ((hullOneList != null) && (hullOneList.size() >= 3) && (!isConcaveHullSelfIntersecting(hullOneList)));
+      boolean hullTwoListIsValid = ((hullTwoList != null) && (hullTwoList.size() >= 3) && (!isConcaveHullSelfIntersecting(hullTwoList)));
 
       if ((!hullOneListIsValid) && (!hullTwoListIsValid))
       {
-         return hullOneIn;
+         listener.hullsAreInvalid(hullOneList, hullTwoList);
+         return null;
       }
 
       if (!hullTwoListIsValid)
+      {
+         listener.hullsAreInvalid(hullTwoList);
          return hullOneList;
+      }
+
       if (!hullOneListIsValid)
+      {
+         listener.hullsAreInvalid(hullOneList);
          return hullTwoList;
+      }
 
       hullTwoList = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullOneList, hullTwoList);
 
@@ -149,7 +159,7 @@ public class ConcaveHullMerger
       BoundingBox2D hullTwoBoundingBox = createBoundingBox(hullTwoList);
 
       if (!hullOneBoundingBox.intersectsExclusive(hullTwoBoundingBox))
-         return null;
+         return new ArrayList<Point2D>();
 
       BoundingBox2D unionOfOriginalBoundingBoxes = BoundingBox2D.union(hullOneBoundingBox, hullTwoBoundingBox);
 
@@ -274,7 +284,7 @@ public class ConcaveHullMerger
 
       BoundingBox2D finalBoundingBox = createBoundingBox(mergedVertices);
       if (boundingBoxShrunk(unionOfOriginalBoundingBoxes, finalBoundingBox))
-         return null;
+         return new ArrayList<Point2D>();
 
       if (!foundAnIntersection)
       {
@@ -286,7 +296,7 @@ public class ConcaveHullMerger
             // Since there were no crossings, they all must be inside or all outside.
             if ((!isPointInsideConcaveHull(hullTwoList.get(0), hullOneList)) && (!isPointInsideConcaveHull(hullOneList.get(0), hullTwoList)))
             {
-               return null;
+               return new ArrayList<>();
             }
          }
       }
@@ -294,16 +304,61 @@ public class ConcaveHullMerger
       return mergedVertices;
    }
 
+   /**
+    * Checks if a concave hull is self intersecting by seeing if any edge intersects any other edge,
+    * except for itself and the one right before and right after it. We do not have to check those two
+    * edges since we remove slivers before calling this method. Lists with 3 or fewer points or a null
+    * list return false.
+    * 
+    * @param concaveHull Hull to check.
+    * @return Whether or not the hull is self intersecting.
+    */
+   public static boolean isConcaveHullSelfIntersecting(ArrayList<Point2D> concaveHull)
+   {
+      if (concaveHull == null)
+         return false;
+
+      if (concaveHull.size() < 4)
+         return false;
+
+      for (int i = 0; i < concaveHull.size(); i++)
+      {
+         Point2D currentVertex = concaveHull.get(i);
+         Point2D nextVertex = concaveHull.get(nextIndex(i, concaveHull));
+         LineSegment2D edge = new LineSegment2D(currentVertex, nextVertex);
+
+         int j = nextIndex(nextIndex(i, concaveHull), concaveHull);
+         while (true)
+         {
+            Point2D firstVertexToCheck = concaveHull.get(j);
+            Point2D secondVertexToCheck = concaveHull.get(nextIndex(j, concaveHull));
+
+            if (secondVertexToCheck == currentVertex)
+               break;
+
+            LineSegment2D edgeToCheck = new LineSegment2D(firstVertexToCheck, secondVertexToCheck);
+
+            boolean edgesIntersect = edge.intersectionWith(edgeToCheck, null);
+            if (edgesIntersect)
+               return true;
+
+            j = nextIndex(j, concaveHull);
+         }
+      }
+
+      return false;
+   }
+
    private static ArrayList<Point2D> preprocessHullByRemovingPoints(ArrayList<Point2D> hull)
    {
       if ((hull == null) || (hull.size() < 3))
          return hull;
-      
+
       int incomingHullSize = hull.size();
-      
+
       hull = preprocessToRemovePointsThatAreTooCloseTogether(hull);
       hull = preprocessToRemoveSliversWithSmallAngles(hull);
-      
+
       if (hull.size() < incomingHullSize)
          return preprocessHullByRemovingPoints(hull);
 
@@ -435,7 +490,7 @@ public class ConcaveHullMerger
    {
       return (index + 1) % hull.size();
    }
-   
+
    private static int previousIndex(int index, ArrayList<Point2D> hull)
    {
       return (index - 1 + hull.size()) % hull.size();
@@ -727,4 +782,5 @@ public class ConcaveHullMerger
    {
       return (number % 2 != 0);
    }
+
 }
