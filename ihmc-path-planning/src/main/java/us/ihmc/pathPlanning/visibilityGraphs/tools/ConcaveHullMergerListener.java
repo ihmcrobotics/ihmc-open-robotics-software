@@ -20,5 +20,7 @@ public interface ConcaveHullMergerListener
 
    public abstract void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices);
 
+   public abstract void hullsAreInvalid(ArrayList<Point2D>...invalidHulls);
+
 
 }

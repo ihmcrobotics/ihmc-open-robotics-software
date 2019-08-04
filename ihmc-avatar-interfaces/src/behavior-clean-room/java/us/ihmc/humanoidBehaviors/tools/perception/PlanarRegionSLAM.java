@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,13 +94,25 @@ public class PlanarRegionSLAM
                   continue;
                }
 
-               PlanarRegion mergedMapPlanarRegion = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion,
+               ArrayList<PlanarRegion> mergedMapPlanarRegions = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion,
                                                                                          newRegion.copy(),
                                                                                          parameters.getMaximumPointProjectionDistance(),
                                                                                          listener);
-               if (mergedMapPlanarRegion != null)
+
+               if (mergedMapPlanarRegions == null)
                {
-                  mapPlanarRegion = mergedMapPlanarRegion;
+                  // If something went wrong, just throw out both the map and the new region.
+                  newRegionsConsidered.add(newRegion);
+               }
+
+               else if (mergedMapPlanarRegions.isEmpty())
+               {
+                  // If there was no intersection, keep both map and new region.
+               }
+
+               else
+               {
+                  mapPlanarRegion = mergedMapPlanarRegions.get(0);
                   newRegionsConsidered.add(newRegion);
                }
             }
