@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
 
@@ -163,6 +164,12 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
       ConcaveHullMerger.printHull("hullOne", hullOne);
       System.out.println("\n\n");
       ConcaveHullMerger.printHull("hullTwo", hullTwo);
+   }
+
+   @Override
+   public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+   {
+      LogTools.error("Got some invalid hulls.");
    }
 
 }

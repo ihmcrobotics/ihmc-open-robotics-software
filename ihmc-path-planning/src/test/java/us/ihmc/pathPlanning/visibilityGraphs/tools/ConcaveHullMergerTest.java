@@ -46,7 +46,8 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(8, concaveHull.length);
@@ -84,7 +85,8 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       Point2D[] concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(4, concaveHull.length);
@@ -96,7 +98,8 @@ public class ConcaveHullMergerTest
 
       assertEquals(1, mergedPlanarRegion.getNumberOfConvexPolygons());
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+      mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+      mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(4, concaveHull.length);
@@ -128,11 +131,11 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
-      assertNull(mergedPlanarRegion);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      assertTrue(mergedPlanarRegions.isEmpty());
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
-      assertNull(mergedPlanarRegion);
+      mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+      assertTrue(mergedPlanarRegions.isEmpty());
    }
 
    @Test
@@ -156,13 +159,13 @@ public class ConcaveHullMergerTest
 
       ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       if (visualize)
          ThreadTools.sleepForever();
-      assertNull(mergedPlanarRegion);
+      assertTrue(mergedPlanarRegions.isEmpty());
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
-      assertNull(mergedPlanarRegion);
+      mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+      assertTrue(mergedPlanarRegions.isEmpty());
    }
 
    @Test
@@ -186,11 +189,11 @@ public class ConcaveHullMergerTest
 
       ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
-      assertNull(mergedPlanarRegion);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
+      assertTrue(mergedPlanarRegions.isEmpty());
 
-      mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
-      assertNull(mergedPlanarRegion);
+      mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+      assertTrue(mergedPlanarRegions.isEmpty());
 
       if (visualize)
          ThreadTools.sleepForever();
@@ -221,7 +224,8 @@ public class ConcaveHullMergerTest
 
       PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       regionA.setRegionId(1);
       regionB.setRegionId(2);
@@ -311,7 +315,8 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(point2DB0, point2DB1, point2DB2, point2DB3));
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
 
-      PlanarRegion mergedPlanarRegion = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
+      PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
       regionA.setRegionId(1);
       regionB.setRegionId(2);
@@ -396,13 +401,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      Point2D[] hullA = new Point2D[hullAVertices.size()];
-      Point2D[] hullB = new Point2D[hullBVertices.size()];
-
-      hullAVertices.toArray(hullA);
-      hullBVertices.toArray(hullB);
-
-      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullA, hullB);
+      ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, null);
 
       assertEquals(8, mergedHulls.size());
 
@@ -1096,7 +1095,13 @@ public class ConcaveHullMergerTest
       @Override
       public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
       {
-         fail("hull got looped!");
+         fail("Hull got looped!");
+      }
+
+      @Override
+      public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+      {
+         fail("Hulls are invalid");
       }
 
    }
