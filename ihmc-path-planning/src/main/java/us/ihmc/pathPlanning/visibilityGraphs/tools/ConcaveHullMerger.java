@@ -100,7 +100,7 @@ public class ConcaveHullMerger
    {
       return mergeConcaveHulls(convertFromArrayToList(hullOne), convertFromArrayToList(hullTwo), listener);
    }
-   
+
    public static ArrayList<Point2D> mergeConcaveHulls(Point2D[] hullOne, Point2D[] hullTwo)
    {
       return mergeConcaveHulls(convertFromArrayToList(hullOne), convertFromArrayToList(hullTwo), null);
@@ -126,7 +126,7 @@ public class ConcaveHullMerger
 
       ArrayList<Point2D> hullOneList = hullOneIn;
       ArrayList<Point2D> hullTwoList = hullTwoIn;
-      
+
       hullOneList = preprocessHullByRemovingPoints(hullOneList);
       hullTwoList = preprocessHullByRemovingPoints(hullTwoList);
 
@@ -294,16 +294,61 @@ public class ConcaveHullMerger
       return mergedVertices;
    }
 
+   /**
+    * Checks if a concave hull is self intersecting by seeing if any edge intersects any other edge,
+    * except for itself and the one right before and right after it. We do not have to check those two
+    * edges since we remove slivers before calling this method. Lists with 3 or fewer points or a null
+    * list return false.
+    * 
+    * @param concaveHull Hull to check.
+    * @return Whether or not the hull is self intersecting.
+    */
+   public static boolean isConcaveHullSelfIntersecting(ArrayList<Point2D> concaveHull)
+   {
+      if (concaveHull == null)
+         return false;
+
+      if (concaveHull.size() < 4)
+         return false;
+
+      for (int i = 0; i < concaveHull.size(); i++)
+      {
+         Point2D currentVertex = concaveHull.get(i);
+         Point2D nextVertex = concaveHull.get(nextIndex(i, concaveHull));
+         LineSegment2D edge = new LineSegment2D(currentVertex, nextVertex);
+
+         int j = nextIndex(nextIndex(i, concaveHull), concaveHull);
+         while (true)
+         {
+            Point2D firstVertexToCheck = concaveHull.get(j);
+            Point2D secondVertexToCheck = concaveHull.get(nextIndex(j, concaveHull));
+
+            if (secondVertexToCheck == currentVertex)
+               break;
+
+            LineSegment2D edgeToCheck = new LineSegment2D(firstVertexToCheck, secondVertexToCheck);
+
+            boolean edgesIntersect = edge.intersectionWith(edgeToCheck, null);
+            if (edgesIntersect)
+               return true;
+
+            j = nextIndex(j, concaveHull);
+         }
+      }
+
+      return false;
+   }
+
    private static ArrayList<Point2D> preprocessHullByRemovingPoints(ArrayList<Point2D> hull)
    {
       if ((hull == null) || (hull.size() < 3))
          return hull;
-      
+
       int incomingHullSize = hull.size();
-      
+
       hull = preprocessToRemovePointsThatAreTooCloseTogether(hull);
       hull = preprocessToRemoveSliversWithSmallAngles(hull);
-      
+
       if (hull.size() < incomingHullSize)
          return preprocessHullByRemovingPoints(hull);
 
@@ -435,7 +480,7 @@ public class ConcaveHullMerger
    {
       return (index + 1) % hull.size();
    }
-   
+
    private static int previousIndex(int index, ArrayList<Point2D> hull)
    {
       return (index - 1 + hull.size()) % hull.size();
@@ -727,4 +772,5 @@ public class ConcaveHullMerger
    {
       return (number % 2 != 0);
    }
+
 }

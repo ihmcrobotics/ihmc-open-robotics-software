@@ -862,6 +862,90 @@ public class ConcaveHullMergerTest
    }
 
    @Test
+   public void testDetectSelfIntersectingConcaveHulls()
+   {
+      // Non-intersecting square.
+      Point2D pointA0 = new Point2D(0.0, 0.0);
+      Point2D pointA1 = new Point2D(0.0, 1.0);
+      Point2D pointA2 = new Point2D(1.0, 1.0);
+      Point2D pointA3 = new Point2D(1.0, 0.0);
+
+      ArrayList<Point2D> nonIntersectingConcaveHull = new ArrayList<Point2D>();
+      nonIntersectingConcaveHull.add(pointA0);
+      nonIntersectingConcaveHull.add(pointA1);
+      nonIntersectingConcaveHull.add(pointA2);
+      nonIntersectingConcaveHull.add(pointA3);
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(nonIntersectingConcaveHull));
+
+      // Intersecting figure eight.
+      ArrayList<Point2D> intersectingConcaveHull = new ArrayList<Point2D>();
+      intersectingConcaveHull.add(pointA0);
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA3);
+      intersectingConcaveHull.add(pointA2);
+      assertTrue(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      // Make sure all orders return true:
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA2);
+      intersectingConcaveHull.add(pointA0);
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA3);
+      assertTrue(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA3);
+      intersectingConcaveHull.add(pointA2);
+      intersectingConcaveHull.add(pointA0);
+      intersectingConcaveHull.add(pointA1);
+      assertTrue(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA3);
+      intersectingConcaveHull.add(pointA2);
+      intersectingConcaveHull.add(pointA0);
+      assertTrue(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      // Null, Zero, One, Two, or Three Vertices are not intersecting.
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(null));
+
+      intersectingConcaveHull.clear();
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA1);
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA3);
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA3);
+      intersectingConcaveHull.add(pointA2);
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+
+      // Backwards does not change things for non-intersecting.
+      nonIntersectingConcaveHull.clear();
+      nonIntersectingConcaveHull.add(pointA3);
+      nonIntersectingConcaveHull.add(pointA2);
+      nonIntersectingConcaveHull.add(pointA1);
+      nonIntersectingConcaveHull.add(pointA0);
+      assertFalse(ConcaveHullMerger.isConcaveHullSelfIntersecting(nonIntersectingConcaveHull));
+
+      // And backwards does not change things for intersecting.
+      intersectingConcaveHull.clear();
+      intersectingConcaveHull.add(pointA2);
+      intersectingConcaveHull.add(pointA3);
+      intersectingConcaveHull.add(pointA1);
+      intersectingConcaveHull.add(pointA0);
+      assertTrue(ConcaveHullMerger.isConcaveHullSelfIntersecting(intersectingConcaveHull));
+   }
+
+   @Test
    public void testFindIntersection()
    {
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
