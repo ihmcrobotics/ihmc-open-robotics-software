@@ -18,11 +18,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -78,6 +80,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
+   private final List<Double> headPitchForLookingAround = Arrays.asList(-20.0, 0.0, 20.0);
+
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
    private final double turnChestTrajectoryDuration = 1.0;
@@ -96,7 +100,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    public enum ExploreAreaBehaviorState
    {
-      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation, TurnInPlace
+      Stop, LookAround, Perceive, GrabPlanarRegions, DetermineNextLocations, Plan, WalkToNextLocation, TakeAStep, TurnInPlace
    }
 
    private final BehaviorHelper behaviorHelper;
@@ -166,7 +170,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       factory.setOnEntry(ExploreAreaBehaviorState.WalkToNextLocation, this::onWalkToNextLocationStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.WalkToNextLocation, this::doWalkToNextLocationStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
+//      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
+      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.TakeAStep, this::readyToTransitionFromWalkToNextLocationToTakeAStep);
+
+      factory.setOnEntry(ExploreAreaBehaviorState.TakeAStep, this::onTakeAStepStateEntry);
+      factory.setDoAction(ExploreAreaBehaviorState.TakeAStep, this::doTakeAStepStateAction);
+      factory.addTransition(ExploreAreaBehaviorState.TakeAStep, ExploreAreaBehaviorState.TakeAStep, this::readyToTransitionFromTakeAStepToTakeAStep);
+      factory.addTransition(ExploreAreaBehaviorState.TakeAStep, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromTakeAStepToStop);
 
       factory.setOnEntry(ExploreAreaBehaviorState.TurnInPlace, this::onTurnInPlaceStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.TurnInPlace, this::doTurnInPlaceStateAction);
@@ -245,8 +255,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onLookAroundStateEntry()
    {
-      double chestYaw = Math.toRadians(chestYawsForLookingAround.get(chestYawForLookingAroundIndex++));
+      double chestYaw = Math.toRadians(chestYawsForLookingAround.get(chestYawForLookingAroundIndex));
+      double headPitch = Math.toRadians(headPitchForLookingAround.get(chestYawForLookingAroundIndex));
       turnChest(chestYaw, turnChestTrajectoryDuration);
+      pitchHead(headPitch, turnChestTrajectoryDuration);
+
+      chestYawForLookingAroundIndex++;
    }
 
    private void doLookAroundStateAction(double timeInState)
@@ -452,7 +466,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       //TODO: Verify which transform or appendTransform to use...
 
       RigidBodyTransform transform = new RigidBodyTransform(transformFromIncomingToMap);
-      
+
       if (sendingSlamCorrection)
       {
          pose3D.prependTransform(transform);
@@ -815,16 +829,76 @@ public class ExploreAreaBehavior implements BehaviorInterface
       return outOfPlans;
    }
 
+   private RecyclingArrayList<FootstepDataMessage> footstepDataList = null;
+   private int footstepIndex = 0;
+
    private void onWalkToNextLocationStateEntry()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      //      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      footstepDataList = footstepDataListMessageFromPlan.getFootstepDataList();
+      footstepIndex = 0;
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageFromPlan, referenceFrames, planarRegionsListFromPlan);
+      //      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageFromPlan, referenceFrames, planarRegionsListFromPlan);
    }
 
    private void doWalkToNextLocationStateAction(double timeInState)
    {
+      //      walkingCompleted.poll();
+   }
+
+   private boolean readyToTransitionFromWalkToNextLocationToTakeAStep(double timeInState)
+   {
+      return true;
+   }
+
+//   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
+//   {
+//      return (walkingCompleted.hasNext());
+//      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
+//   }
+
+   private void onTakeAStepStateEntry()
+   {
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+
+      FootstepDataMessage footstepDataMessage = footstepDataList.get(footstepIndex);
+
+      FootstepDataListMessage messageWithOneStep = new FootstepDataListMessage(footstepDataListMessageFromPlan);
+      messageWithOneStep.getFootstepDataList().clear();
+      messageWithOneStep.getFootstepDataList().add().set(footstepDataMessage);
+      walkingCompleted = behaviorHelper.requestWalk(messageWithOneStep, referenceFrames, planarRegionsListFromPlan);
+
+      LogTools.info("Stepping to " + footstepDataMessage.getLocation());
+
+      if (footstepIndex < footstepDataList.size() - 1)
+      {
+         FootstepDataMessage nextFootstep = footstepDataList.get(footstepIndex + 1);
+         System.out.println("Stare at next Footstep " + nextFootstep.getLocation());
+
+         double chestYaw = 0.0;
+         double headPitch = 0.0;
+         turnChest(chestYaw, turnChestTrajectoryDuration);
+         pitchHead(headPitch, turnChestTrajectoryDuration);
+      }
+
+      footstepIndex++;
+   }
+
+   private void doTakeAStepStateAction(double timeInState)
+   {
       walkingCompleted.poll();
+   }
+
+   private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
+   {
+      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasNext()));
+      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
+   }
+
+   private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
+   {
+      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasNext()));
+      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private void onTurnInPlaceStateEntry()
@@ -861,6 +935,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       requestWalk(initialSupportSide, posesFromThePreviousStep);
    }
 
+   private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
+   {
+      return (walkingCompleted.hasNext());
+      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
+   }
+
    private void requestWalk(RobotSide supportSide, ArrayList<Pose3D> posesFromThePreviousStep)
    {
       RobotSide swingSide = supportSide.getOppositeSide();
@@ -893,18 +973,6 @@ public class ExploreAreaBehavior implements BehaviorInterface
       walkingCompleted.poll();
    }
 
-   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
-   {
-      return (walkingCompleted.hasNext());
-      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
-   }
-
-   private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
-   {
-      return (walkingCompleted.hasNext());
-      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
-   }
-
    public void turnChest(double chestYaw, double trajectoryTime)
    {
       HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
@@ -913,8 +981,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FrameQuaternion chestOrientation = new FrameQuaternion(midFeetZUpFrame, chestYaw, 0.0, 0.0);
       chestOrientation.changeFrame(worldFrame);
       behaviorHelper.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
-
       behaviorHelper.requestPelvisGoHome(trajectoryTime);
+   }
+   
+   public void pitchHead(double headPitch, double trajectoryTime)
+   {
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+
+      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+      FrameQuaternion headOrientation = new FrameQuaternion(chestFrame, 0.0, headPitch, 0.0);
+      headOrientation.changeFrame(worldFrame);
+      behaviorHelper.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
    }
 
    //TODO: Hijacking PatrolBehavior Viz here. Should not be doing that. Should have some common vizzes for things like this that are shared.

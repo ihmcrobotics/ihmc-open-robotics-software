@@ -225,6 +225,17 @@ public class BehaviorHelper
       remoteRobotControllerInterface.requestChestOrientationTrajectory(chestOrientationMessage);
    }
 
+   public void requestHeadOrientationTrajectory(double trajectoryTime, FrameQuaternion headOrientation, ReferenceFrame dataFrame,
+                                                 ReferenceFrame trajectoryFrame)
+   {
+      HeadTrajectoryMessage headOrientationMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime,
+                                                                                                         headOrientation,
+                                                                                                         dataFrame,
+                                                                                                         trajectoryFrame);
+      headOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteRobotControllerInterface.requestHeadOrientationTrajectory(headOrientationMessage);
+   }
+
    public void requestPelvisOrientationTrajectory(double trajectoryTime, FrameQuaternion pelvisOrientation)
    {
 
