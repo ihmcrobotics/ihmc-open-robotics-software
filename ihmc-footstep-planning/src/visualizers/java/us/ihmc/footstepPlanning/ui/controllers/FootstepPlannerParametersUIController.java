@@ -122,14 +122,14 @@ public class FootstepPlannerParametersUIController
       maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
       wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
 
-      maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      maxStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      maxStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      maxStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      maxStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minXClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minYClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
       
       cliffHeightSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       cliffClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
@@ -139,37 +139,37 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v -> planningParameters.set(v));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters -> planningParameters.set(parameters));
 
-      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty(), observable -> publishParameters());
       
-      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
 
-      parametersProperty.bidirectionalBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty(), v -> publishParameters());
+      parametersProperty.bidirectionalBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty(), observable -> publishParameters());
+      parametersProperty.bidirectionalBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty(), observable -> publishParameters());
 
       // these dimensions work best for valkyrie
       stanceFootShape.setHeight(footLength * metersToPixel);
