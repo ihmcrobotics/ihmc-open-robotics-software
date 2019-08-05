@@ -1,13 +1,10 @@
 package us.ihmc.tools.property;
 
-import javafx.beans.InvalidationListener;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -87,53 +84,25 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
-      if (values[key.getIndex()] != null)
-      {
-         if (get(key) == value)
-            return;
-      }
-
       values[key.getIndex()] = value;
-      key.notifyOfVariableChanged();
    }
 
    @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
-      if (values[key.getIndex()] != null)
-      {
-         if (get(key) == value)
-            return;
-      }
-
       values[key.getIndex()] = value;
-      key.notifyOfVariableChanged();
    }
 
    @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
-      if (values[key.getIndex()] != null)
-      {
-         if (get(key) == value)
-            return;
-      }
-
       values[key.getIndex()] = value;
-      key.notifyOfVariableChanged();
    }
 
    @Override
    public <T> void set(StoredPropertyKey<T> key, T value)
    {
-      if (values[key.getIndex()] != null)
-      {
-         if (get(key) == value)
-            return;
-      }
-
       values[key.getIndex()] = value;
-      key.notifyOfVariableChanged();
    }
 
    @Override
