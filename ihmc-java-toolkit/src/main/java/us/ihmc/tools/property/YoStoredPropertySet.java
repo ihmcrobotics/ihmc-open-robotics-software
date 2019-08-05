@@ -63,6 +63,12 @@ public class YoStoredPropertySet implements StoredPropertySetBasics
    }
 
    @Override
+   public <T> T get(StoredPropertyKey<T> key)
+   {
+      return null;
+   }
+
+   @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
       if (get(key) == value)
@@ -90,6 +96,18 @@ public class YoStoredPropertySet implements StoredPropertySetBasics
 
       ((YoBoolean) yoVariables.get(key)).set(value);
       key.notifyOfVariableChanged();
+   }
+
+   @Override
+   public <T> void set(StoredPropertyKey<T> key, T value)
+   {
+
+   }
+
+   @Override
+   public <T> StoredPropertyBasics<T> getProperty(StoredPropertyKey<T> key)
+   {
+      return null;
    }
 
    @Override
