@@ -1,22 +1,15 @@
 package us.ihmc.tools.property;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class StoredPropertyKey<T> implements Observable
+public class StoredPropertyKey<T>
 {
    private final String titleCasedName;
    private final String saveName;
    private final Class<T> type;
    private final int index;
    private final Object defaultValue;
-
-   private final List<InvalidationListener> listeners = new ArrayList<>();
 
    public StoredPropertyKey(Class<T> type, int index, String titleCasedName)
    {
@@ -51,24 +44,6 @@ public class StoredPropertyKey<T> implements Observable
    public Class<T> getType()
    {
       return type;
-   }
-
-   public void addListener(InvalidationListener var1)
-   {
-      this.listeners.add(var1);
-   }
-
-   public void removeListener(InvalidationListener var1)
-   {
-      this.listeners.remove(var1);
-   }
-
-   public void notifyOfVariableChanged()
-   {
-      for (int i = 0; i < listeners.size(); i++)
-      {
-         listeners.get(i).invalidated(this);
-      }
    }
 
    public Object getDefaultValue()
