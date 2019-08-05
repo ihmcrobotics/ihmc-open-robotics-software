@@ -734,6 +734,23 @@ public class HumanoidMessageTools
    }
 
    /**
+    * Use this constructor to go straight to the given end points with final velocity using the given weights. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *           number of joints. Can be {@code null}.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
+    *           joint will use the controller default weight. Can be {@code null}.
+    */
+   public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities, double[] weights)
+   {
+      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
+      return message;
+   }
+
+   /**
     * Create a message using the given joint trajectory points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
