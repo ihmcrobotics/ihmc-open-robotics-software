@@ -64,6 +64,13 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    }
 
    @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;
