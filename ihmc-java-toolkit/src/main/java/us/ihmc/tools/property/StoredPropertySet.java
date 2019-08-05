@@ -36,6 +36,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private final String directoryNameToAssumePresent;
    private final String subsequentPathToResourceFolder;
 
+   private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
+
    public StoredPropertySet(StoredPropertyKeyList keys,
                             Class<?> classForLoading,
                             String directoryNameToAssumePresent,
@@ -53,7 +55,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
       for (StoredPropertyKey<?> key : keys.keys())
       {
          if (key.hasDefaultValue())
-            values[key.getIndex()] = key.getDefaultValue();
+         {
+            setForListeners(key, key.getDefaultValue());
+         }
       }
    }
 
@@ -84,25 +88,25 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
    @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
    @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
    @Override
    public <T> void set(StoredPropertyKey<T> key, T value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
    @Override
@@ -120,9 +124,45 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void setAll(List<Object> newValues)
    {
-      for (int i = 0; i < values.length; i++)
+      for (int i = 0; i < keys.keys().size(); i++)
       {
-         values[i] = newValues.get(i);
+         setForListeners(keys.keys().get(i), newValues.get(i));
+      }
+   }
+
+   private void setForListeners(StoredPropertyKey key, Object newValue)
+   {
+      if (!values[key.getIndex()].equals(newValue))
+      {
+         values[key.getIndex()] = newValue;
+
+         if (propertyChangedListeners.get(key) != null)
+         {
+            for (Runnable propertyChangedListener : propertyChangedListeners.get(key))
+            {
+               propertyChangedListener.run();
+            }
+         }
+      }
+   }
+
+   @Override
+   public void addPropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged)
+   {
+      if (propertyChangedListeners.get(key) == null)
+      {
+         propertyChangedListeners.put(key, new ArrayList<>());
+      }
+
+      propertyChangedListeners.get(key).add(onPropertyChanged);
+   }
+
+   @Override
+   public void removePropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged)
+   {
+      if (propertyChangedListeners.get(key) != null)
+      {
+         propertyChangedListeners.get(key).remove(onPropertyChanged);
       }
    }
 
@@ -148,7 +188,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
                {
                   if (key.hasDefaultValue())
                   {
-                     values[key.getIndex()] = key.getDefaultValue();
+                     setForListeners(key, key.getDefaultValue());
                      continue;
                   }
 
@@ -165,15 +205,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
                {
                   if (key.getType().equals(Double.class))
                   {
-                     values[key.getIndex()] = Double.valueOf(stringValue);
+                     setForListeners(key, Double.valueOf(stringValue));
                   }
                   else if (key.getType().equals(Integer.class))
                   {
-                     values[key.getIndex()] = Integer.valueOf(stringValue);
+                     setForListeners(key, Integer.valueOf(stringValue));
                   }
                   else if (key.getType().equals(Boolean.class))
                   {
-                     values[key.getIndex()] = Boolean.valueOf(stringValue);
+                     setForListeners(key, Boolean.valueOf(stringValue));
                   }
                   else
                   {

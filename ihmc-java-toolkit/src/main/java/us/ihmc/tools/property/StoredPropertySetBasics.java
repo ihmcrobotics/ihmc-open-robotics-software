@@ -17,6 +17,10 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void setAll(List<Object> newValues);
 
+   void addPropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
+
+   void removePropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
+
    void load();
 
    void save();
