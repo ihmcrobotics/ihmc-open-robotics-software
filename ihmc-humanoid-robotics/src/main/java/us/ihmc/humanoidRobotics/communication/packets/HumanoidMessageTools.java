@@ -272,6 +272,27 @@ public class HumanoidMessageTools
       message.setRobotSide(robotSide.toByte());
       return message;
    }
+   
+   /**
+    * Use this constructor to go straight to the given end points with final velocity using the specified qp weights.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide is used to define which arm is performing the trajectory.
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *           number of arm joints.
+    * @param desiredJointVelocities desired final joint velocities. The array length should be equal to the
+    *           number of arm joints. Can be {@code null}.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
+    *           joint will use the controller default weight. Can be {@code null}.
+    */
+   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities, double[] weights)
+   {
+      ArmTrajectoryMessage message = new ArmTrajectoryMessage();
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
 
    /**
     * Create a message using the given joint trajectory points. Set the id of the message to
@@ -1387,6 +1408,43 @@ public class HumanoidMessageTools
       return message;
    }
 
+   /**
+    * Use this constructor to go straight to the given end points using the specified qp weights.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *           number of controlled joints.
+    * @param desiredJointVelocities desired joint velocities. The array length should be equal to the
+    *           number of controlled joints. Can be {@code null}.
+    * @param weights the qp weights for the joint accelerations. The array length should be equal to the
+    *           number of controlled joints. Can be {@code null}. 
+    */
+   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities, double[] weights)
+   {
+      JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage;
+         if (desiredJointVelocities == null)
+         {
+            if (weights == null)
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+            else
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex], weights[jointIndex]);
+         }
+         else
+         {
+            if (weights == null)
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex], desiredJointVelocities[jointIndex], -1.0);
+            else
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex], desiredJointVelocities[jointIndex], weights[jointIndex]);
+         }
+         message.getJointTrajectoryMessages().add().set(oneDoFJointTrajectoryMessage);
+      }
+      return message;
+   }
+
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double[] trajectoryTimes, double[] desiredJointPositions)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
@@ -1444,9 +1502,7 @@ public class HumanoidMessageTools
     */
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
-      OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
-      message.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0));
-      return message;
+      return createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition, -1.0);
    }
 
    /**
@@ -1458,7 +1514,21 @@ public class HumanoidMessageTools
     */
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double weight)
    {
-      OneDoFJointTrajectoryMessage message = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition);
+      return createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition, 0.0, weight);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end point and terminate at the given velocity.
+    *
+    * @param trajectoryTime how long it takes to reach the desired position.
+    * @param desiredPosition desired end point position.
+    * @param desiredVelocity desired final velocity.
+    * @param weight the weight for the qp
+    */
+   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double desiredVelocity, double weight)
+   {
+      OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
+      message.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, desiredVelocity));
       message.setWeight(weight);
       return message;
    }
