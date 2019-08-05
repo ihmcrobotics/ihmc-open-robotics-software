@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -41,6 +43,7 @@ public class RemoteRobotControllerInterface
    private final IHMCROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<ChestTrajectoryMessage> chestOrientationTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<HeadTrajectoryMessage> headOrientationTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<PelvisOrientationTrajectoryMessage> pelvisOrientationTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<PelvisTrajectoryMessage> pelvisTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<GoHomeMessage> goHomeMessagePublisher;
@@ -53,10 +56,11 @@ public class RemoteRobotControllerInterface
    {
       String robotName = robotModel.getSimpleRobotName();
       ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
-
+      
       footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, robotName, controllerId);
       armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, robotName, controllerId);
       chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, robotName, controllerId);
+      headOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, HeadTrajectoryMessage.class, robotName, controllerId);
       pelvisOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisOrientationTrajectoryMessage.class, robotName, controllerId);
       pelvisTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisTrajectoryMessage.class, robotName, controllerId);
       goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, robotName, controllerId);
@@ -133,6 +137,11 @@ public class RemoteRobotControllerInterface
    public void requestChestOrientationTrajectory(ChestTrajectoryMessage message)
    {
       chestOrientationTrajectoryMessagePublisher.publish(message);
+   }
+
+   public void requestHeadOrientationTrajectory(HeadTrajectoryMessage message)
+   {
+      headOrientationTrajectoryMessagePublisher.publish(message);
    }
 
    public void requestPelvisOrientationTrajectory(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
