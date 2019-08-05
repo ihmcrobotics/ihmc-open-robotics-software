@@ -6,14 +6,14 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
    private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
@@ -94,7 +94,6 @@ public class FootstepPlannerParametersUIController
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
-      parametersProperty.setPlannerParameters(parameters);
       this.planningParameters = parameters;
    }
 
@@ -139,37 +138,41 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters -> planningParameters.set(parameters));
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters.getStoredPropertySet());
+      javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
+      javaFXStoredPropertyMap.put(performHeuristicSearchPolicies, FootstepPlannerParameterKeys.performHeuristicSearchPolicies);
+      javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
+      javaFXStoredPropertyMap.put(maxStepWidth, FootstepPlannerParameterKeys.maxStepWidth);
+      javaFXStoredPropertyMap.put(minStepWidth, FootstepPlannerParameterKeys.minStepWidth);
+      javaFXStoredPropertyMap.put(minStepLength, FootstepPlannerParameterKeys.maxStepWidth);
+      javaFXStoredPropertyMap.put(maxStepZ, FootstepPlannerParameterKeys.minStepLength);
+      javaFXStoredPropertyMap.put(minSurfaceIncline, FootstepPlannerParameterKeys.minSurfaceIncline);
+      javaFXStoredPropertyMap.put(maxStepYaw, FootstepPlannerParameterKeys.maxStepYaw);
+      javaFXStoredPropertyMap.put(minStepYaw, FootstepPlannerParameterKeys.minStepYaw);
+      javaFXStoredPropertyMap.put(minFootholdPercent, FootstepPlannerParameterKeys.minFootholdPercent);
+      javaFXStoredPropertyMap.put(minXClearance, FootstepPlannerParameterKeys.minXClearanceFromStance);
+      javaFXStoredPropertyMap.put(minYClearance, FootstepPlannerParameterKeys.minYClearanceFromStance);
+      javaFXStoredPropertyMap.put(cliffHeightSpinner, FootstepPlannerParameterKeys.cliffHeightToAvoid);
+      javaFXStoredPropertyMap.put(cliffClearance, FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(maxXYWiggleSpinner, FootstepPlannerParameterKeys.maximumXYWiggleDistance);
+      javaFXStoredPropertyMap.put(maxYawWiggleSpinner, FootstepPlannerParameterKeys.maximumYawWiggle);
+      javaFXStoredPropertyMap.put(wiggleInsideDeltaSpinner, FootstepPlannerParameterKeys.wiggleInsideDelta);
+      javaFXStoredPropertyMap.put(maxStepUpX, FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp);
+      javaFXStoredPropertyMap.put(stepUpHeight, FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp);
+      javaFXStoredPropertyMap.put(maxStepDownX, FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown);
+      javaFXStoredPropertyMap.put(stepDownHeight, FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown);
 
-      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty(), observable -> publishParameters());
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      {
+         planningParameters.set(parameters);
 
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty(), observable -> publishParameters());
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
 
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty(), observable -> publishParameters());
-
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty(), observable -> publishParameters());
-
-      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty(), observable -> publishParameters());
-      
-      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty(), observable -> publishParameters());
-
-      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty(), observable -> publishParameters());
-
-      parametersProperty.bidirectionalBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty(), observable -> publishParameters());
-      parametersProperty.bidirectionalBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty(), observable -> publishParameters());
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
 
       // these dimensions work best for valkyrie
       stanceFootShape.setHeight(footLength * metersToPixel);

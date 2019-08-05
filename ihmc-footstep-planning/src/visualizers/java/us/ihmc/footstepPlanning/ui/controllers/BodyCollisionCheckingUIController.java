@@ -6,13 +6,14 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
+
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 
 public class BodyCollisionCheckingUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
    private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
@@ -46,7 +47,6 @@ public class BodyCollisionCheckingUIController
    public void setPlannerParameters(FootstepPlannerParametersBasics plannerParameters)
    {
       this.planningParameters = plannerParameters;
-      parametersProperty.setPlannerParameters(plannerParameters);
    }
 
    public void setupControls()
@@ -67,19 +67,25 @@ public class BodyCollisionCheckingUIController
    {
       setupControls();
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v -> planningParameters.set(v));
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters.getStoredPropertySet());
+      javaFXStoredPropertyMap.put(bodyDepth, FootstepPlannerParameterKeys.bodyBoxDepth);
+      javaFXStoredPropertyMap.put(bodyHeight, FootstepPlannerParameterKeys.bodyBoxHeight);
+      javaFXStoredPropertyMap.put(bodyWidth, FootstepPlannerParameterKeys.bodyBoxWidth);
+      javaFXStoredPropertyMap.put(bodyBoxBaseX, FootstepPlannerParameterKeys.bodyBoxBaseX);
+      javaFXStoredPropertyMap.put(bodyBoxBaseY, FootstepPlannerParameterKeys.bodyBoxBaseY);
+      javaFXStoredPropertyMap.put(bodyBoxBaseZ, FootstepPlannerParameterKeys.bodyBoxBaseZ);
+      javaFXStoredPropertyMap.put(boundingBoxCost, FootstepPlannerParameterKeys.boundingBoxCost);
+      javaFXStoredPropertyMap.put(maximum2dDistanceFromBoundingBoxToPenalize, FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize);
 
-      parametersProperty.bidirectionalBindCheckBodyBoxCollisions(enableBodyCollisionChecking.selectedProperty(), v -> publishParameters());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v ->
+      {
+         planningParameters.set(v);
 
-      parametersProperty.bidirectionalBindBodyBoxDepth(bodyDepth.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBodyBoxHeight(bodyHeight.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBodyBoxWidth(bodyWidth.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBodyBoxBaseX(bodyBoxBaseX.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBodyBoxBaseY(bodyBoxBaseY.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBodyBoxBaseZ(bodyBoxBaseZ.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindBoundingBoxCost(boundingBoxCost.getValueFactory().valueProperty(), v -> publishParameters());
-      parametersProperty.bidirectionalBindMaximum2dDistanceFromBoundingBoxToPenalize(maximum2dDistanceFromBoundingBoxToPenalize.getValueFactory().valueProperty(), v -> publishParameters());
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
 
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
    }
 
    private void publishParameters()
