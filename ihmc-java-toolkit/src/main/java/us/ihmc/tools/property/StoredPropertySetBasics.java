@@ -11,4 +11,8 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
    void set(BooleanStoredPropertyKey key, boolean value);
 
    void setAll(List<Object> newValues);
+
+   void load();
+
+   void save();
 }

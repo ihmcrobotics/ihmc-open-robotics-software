@@ -1,10 +1,10 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SaveableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class AtlasFootstepPlannerParameters implements SaveableFootstepPlannerParameters
+public class AtlasFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
    private final StoredPropertySet propertySet;
 
