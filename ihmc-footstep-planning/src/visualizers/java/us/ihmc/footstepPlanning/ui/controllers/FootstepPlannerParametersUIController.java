@@ -7,7 +7,6 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SaveableFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
@@ -15,7 +14,7 @@ public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty();
-   private SaveableFootstepPlannerParameters planningParameters;
+   private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
    private CheckBox returnBestEffortPlan;
@@ -93,7 +92,7 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(SaveableFootstepPlannerParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       parametersProperty.setPlannerParameters(parameters);
       this.planningParameters = parameters;

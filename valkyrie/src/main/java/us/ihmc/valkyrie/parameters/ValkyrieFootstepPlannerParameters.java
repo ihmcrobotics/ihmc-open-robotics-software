@@ -2,9 +2,8 @@ package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.*;
 import us.ihmc.tools.property.StoredPropertySet;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class ValkyrieFootstepPlannerParameters implements SaveableFootstepPlannerParameters
+public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
    private final StoredPropertySet propertySet;
 

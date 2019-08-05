@@ -121,4 +121,16 @@ public class YoStoredPropertySet implements StoredPropertySetBasics
             ((YoBoolean) yoVariables.get(keys.keys().get(i))).set((Boolean) newValues.get(i));
       }
    }
+
+   @Override
+   public void save()
+   {
+      // this class is probably gonna get reimplemented
+   }
+
+   @Override
+   public void load()
+   {
+      // this class is probably gonna get reimplemented
+   }
 }
