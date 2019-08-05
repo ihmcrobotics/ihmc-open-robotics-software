@@ -23,7 +23,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -203,8 +202,8 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       double desiredEpsilon = 5.0e-3;
       double trackingEpsilon = 5.0e-2;
 
-      double[] controllerDesiredPositions = findControllerDesiredPositions(neckJoints, scs);
-      double[] controllerDesiredVelocities = findControllerDesiredVelocities(neckJoints, scs);
+      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
+      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
 
       for (int i = 0; i < neckJoints.length; i++)
       {
@@ -238,8 +237,8 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       desiredEpsilon = 1.0e-7;
       trackingEpsilon = 5.0e-3;
 
-      controllerDesiredPositions = findControllerDesiredPositions(neckJoints, scs);
-      controllerDesiredVelocities = findControllerDesiredVelocities(neckJoints, scs);
+      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
+      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
 
       for (int i = 0; i < neckJoints.length; i++)
       {
@@ -270,8 +269,8 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
    public static void assertSingleWaypointExecuted(OneDoFJointBasics[] neckJoints, double[] desiredJointPositions, double[] desiredJointVelcoties,
                                                    double epsilon, SimulationConstructionSet scs)
    {
-      double[] controllerDesiredJointPositions = findControllerDesiredPositions(neckJoints, scs);
-      double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(neckJoints, scs);
+      double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
+      double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
 
       assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
       assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
@@ -292,36 +291,6 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
             System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
          }
       }
-   }
-
-   public static double[] findControllerDesiredPositions(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
-   {
-      double[] controllerDesiredJointPositions = new double[neckJoints.length];
-      for (int i = 0; i < neckJoints.length; i++)
-      {
-         String jointName = neckJoints[i].getName();
-         String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
-         String variableName = jointName + subTrajectory + "CurrentValue";
-         YoDouble q_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
-         controllerDesiredJointPositions[i] = q_d.getDoubleValue();
-      }
-      return controllerDesiredJointPositions;
-   }
-
-   public static double[] findControllerDesiredVelocities(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
-   {
-      double[] controllerDesiredJointVelocities = new double[neckJoints.length];
-      for (int i = 0; i < neckJoints.length; i++)
-      {
-         String jointName = neckJoints[i].getName();
-         String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
-         String variableName = jointName + subTrajectory + "CurrentVelocity";
-         YoDouble qd_d = (YoDouble) scs.getVariable(subTrajectoryName, variableName);
-         controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();
-      }
-      return controllerDesiredJointVelocities;
    }
 
    @BeforeEach

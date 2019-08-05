@@ -248,10 +248,7 @@ public class HumanoidMessageTools
     */
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
-      ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
-      message.setRobotSide(robotSide.toByte());
-      return message;
+      return createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, null);
    }
 
    /**
@@ -267,10 +264,7 @@ public class HumanoidMessageTools
     */
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights));
-      message.setRobotSide(robotSide.toByte());
-      return message;
+      return createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, weights);
    }
    
    /**
@@ -711,9 +705,7 @@ public class HumanoidMessageTools
     */
    public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
-      return message;
+      return createNeckTrajectoryMessage(trajectoryTime, desiredJointPositions, null, null);
    }
 
    /**
@@ -728,9 +720,7 @@ public class HumanoidMessageTools
     */
    public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
-      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights));
-      return message;
+      return createNeckTrajectoryMessage(trajectoryTime, desiredJointPositions, null, weights);
    }
 
    /**
@@ -1610,14 +1600,27 @@ public class HumanoidMessageTools
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param jointDesireds desired joint positions. The array length should be equal to the number
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the number
     *           of joints.
     */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds)
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, jointDesireds));
-      return message;
+      return createSpineTrajectoryMessage(trajectoryTime, desiredJointPositions, null, null);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the number
+    *           of joints.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
+    *           joint will use the controller default weight
+    */
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
+   {
+      return createSpineTrajectoryMessage(trajectoryTime, desiredJointPositions, null, weights);
    }
 
    /**
@@ -1630,10 +1633,10 @@ public class HumanoidMessageTools
     * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
     *           joint will use the controller default weight
     */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds, double[] weights)
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities, double[] weights)
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, jointDesireds, weights));
+      message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
       return message;
    }
 
