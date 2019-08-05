@@ -79,6 +79,12 @@ public class StoredPropertySet implements StoredPropertySetBasics
    }
 
    @Override
+   public <T> T get(StoredPropertyKey<T> key)
+   {
+      return (T) values[key.getIndex()];
+   }
+
+   @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
       if (values[key.getIndex()] != null)
@@ -115,6 +121,25 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
       values[key.getIndex()] = value;
       key.notifyOfVariableChanged();
+   }
+
+   @Override
+   public <T> void set(StoredPropertyKey<T> key, T value)
+   {
+      if (values[key.getIndex()] != null)
+      {
+         if (get(key) == value)
+            return;
+      }
+
+      values[key.getIndex()] = value;
+      key.notifyOfVariableChanged();
+   }
+
+   @Override
+   public <T> StoredProperty<T> getProperty(StoredPropertyKey<T> key)
+   {
+      return new StoredProperty<>(key, this);
    }
 
    @Override
