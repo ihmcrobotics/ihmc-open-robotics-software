@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
@@ -48,6 +50,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
@@ -57,9 +60,13 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 @Tag("controller-api")
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
@@ -107,21 +114,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead,
-                                                                                                          ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                          lookStraightAhead,
+                                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                                          pelvisZUpFrame);
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
       drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
 
-      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                 lookLeft,
+                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                  pelvisZUpFrame);
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
       drcSimulationTestHelper.publishToController(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
 
-      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                  lookRight,
+                                                                                                  ReferenceFrame.getWorldFrame(),
                                                                                                   pelvisZUpFrame);
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
@@ -166,16 +179,22 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation,
-                                                                                                        ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        ReferenceFrame.getWorldFrame(),
+                                                                                                        pelvisZUpFrame);
       chestTrajectoryMessage.setSequenceId(random.nextLong());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT));
 
       assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, chest.getName(),
-                                                        statusMessages.remove(0), controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.STARTED,
+                                                        0.0,
+                                                        chest.getName(),
+                                                        statusMessages.remove(0),
+                                                        controllerDT);
 
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
@@ -189,8 +208,15 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest, prefix);
 
       assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
-                                                        desiredRandomChestOrientation, chest.getName(), statusMessages.remove(0), 1.0e-4, controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.COMPLETED,
+                                                        trajectoryTime,
+                                                        null,
+                                                        desiredRandomChestOrientation,
+                                                        chest.getName(),
+                                                        statusMessages.remove(0),
+                                                        1.0e-4,
+                                                        controllerDT);
    }
 
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
@@ -224,7 +250,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(pelvisZUpFrame, Math.PI / 8.0, Math.PI / 8.0, Math.PI / 16.0);
 
       Quaternion desiredOrientation = new Quaternion(desiredChestOrientation);
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame,
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        pelvisZUpFrame,
                                                                                                         pelvisZUpFrame);
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       selectionMatrix3D.selectZAxis(false);
@@ -307,7 +335,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
          Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
 
-         ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame,
+         ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                           desiredOrientation,
+                                                                                                           pelvisZUpFrame,
                                                                                                            pelvisZUpFrame);
 
          WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -331,7 +361,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
 
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame,
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        pelvisZUpFrame,
                                                                                                         pelvisZUpFrame);
 
       WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -409,7 +441,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FrameQuaternion desiredChestOrientation = new FrameQuaternion(pelvisZUpFrame, Math.PI / 16.0, Math.PI / 20.0, Math.PI / 24.0);
 
       Quaternion desiredOrientation = new Quaternion(desiredChestOrientation);
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame,
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        pelvisZUpFrame,
                                                                                                         pelvisZUpFrame);
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       selectionMatrix3D.selectZAxis(random.nextBoolean());
@@ -521,8 +555,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       humanoidReferenceFrames.updateFrames();
 
       assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, chest.getName(),
-                                                        statusMessages.remove(0), controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.STARTED,
+                                                        0.0,
+                                                        chest.getName(),
+                                                        statusMessages.remove(0),
+                                                        controllerDT);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -556,9 +594,15 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
 
       assertEquals(1, statusMessages.size());
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
-                                                        desiredChestOrientations[desiredChestOrientations.length - 1], chest.getName(),
-                                                        statusMessages.remove(0), 1.0e-3, controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.COMPLETED,
+                                                        trajectoryTime,
+                                                        null,
+                                                        desiredChestOrientations[desiredChestOrientations.length - 1],
+                                                        chest.getName(),
+                                                        statusMessages.remove(0),
+                                                        1.0e-3,
+                                                        controllerDT);
    }
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
@@ -633,7 +677,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       int expectedTrajectoryPointIndex = 0;
       double previousTimeInState = timePerWaypoint;
 
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, Math.min(RigidBodyTaskspaceControlState.maxPoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1), scs);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       Math.min(RigidBodyTaskspaceControlState.maxPoints,
+                                                                                numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1),
+                                                                       scs);
 
       double timeInState = 0.0;
 
@@ -740,7 +788,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       int expectedTrajectoryPointIndex = 0;
       double previousTimeInState = timePerWaypoint;
 
-      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, Math.min(RigidBodyTaskspaceControlState.maxPoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1), scs);
+      EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(),
+                                                                       prefix,
+                                                                       Math.min(RigidBodyTaskspaceControlState.maxPoints,
+                                                                                numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1),
+                                                                       scs);
 
       double timeInState = 0.0;
 
@@ -927,9 +979,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          TaskspaceTrajectoryStatusMessage startedStatus = statusMessages.remove(0);
          TaskspaceTrajectoryStatusMessage completedStatus = statusMessages.remove(0);
          long expectedSequenceID = chestTrajectoryMessage.getSequenceId();
-         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID, TrajectoryExecutionStatus.STARTED, startTime, chest.getName(), startedStatus,
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID,
+                                                           TrajectoryExecutionStatus.STARTED,
+                                                           startTime,
+                                                           chest.getName(),
+                                                           startedStatus,
                                                            controllerDT);
-         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID, TrajectoryExecutionStatus.COMPLETED, endTime, chest.getName(), completedStatus,
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID,
+                                                           TrajectoryExecutionStatus.COMPLETED,
+                                                           endTime,
+                                                           chest.getName(),
+                                                           completedStatus,
                                                            controllerDT);
          startTime = endTime;
       }
@@ -1067,15 +1127,19 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead,
-                                                                                                          ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                          lookStraightAhead,
+                                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                                          pelvisZUpFrame);
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
       drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 2, scs);
 
-      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                  lookRight,
+                                                                                                  ReferenceFrame.getWorldFrame(),
                                                                                                   pelvisZUpFrame);
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
@@ -1083,7 +1147,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 3, scs);
 
-      ChestTrajectoryMessage LookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage LookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                 lookLeft,
+                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                  pelvisZUpFrame);
       LookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       LookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
@@ -1091,7 +1157,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(chest.getName(), prefix, 4, scs);
 
-      ChestTrajectoryMessage LookLeftMessageWithChangeTrajFrame = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft,
+      ChestTrajectoryMessage LookLeftMessageWithChangeTrajFrame = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                                    lookLeft,
                                                                                                                     ReferenceFrame.getWorldFrame(),
                                                                                                                     ReferenceFrame.getWorldFrame());
       LookLeftMessageWithChangeTrajFrame.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -1164,21 +1231,27 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FrameQuaternion lookRight = new FrameQuaternion(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead,
-                                                                                                          ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                          lookStraightAhead,
+                                                                                                          ReferenceFrame.getWorldFrame(),
+                                                                                                          pelvisZUpFrame);
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
       drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
 
-      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                 lookLeft,
+                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                  pelvisZUpFrame);
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
       drcSimulationTestHelper.publishToController(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
 
-      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                  lookRight,
+                                                                                                  ReferenceFrame.getWorldFrame(),
                                                                                                   pelvisZUpFrame);
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
       lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId(-1);
@@ -1285,8 +1358,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
       trajectoryTime = 0.5;
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation,
-                                                                                                        ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        ReferenceFrame.getWorldFrame(),
+                                                                                                        pelvisZUpFrame);
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
@@ -1336,8 +1411,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation,
-                                                                                                        ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
+                                                                                                        ReferenceFrame.getWorldFrame(),
+                                                                                                        pelvisZUpFrame);
 
       pelvisZUpFrame.update();
       desiredRandomChestOrientation.changeFrame(pelvisZUpFrame);
@@ -1394,7 +1471,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       double forceMagnitude = fullRobotModel.getTotalMass() * 0.1;
       double zOffset = 0.3;
       String pushJointName = fullRobotModel.getChest().getParentJoint().getName();
-      PushRobotController pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), pushJointName, new Vector3D(0, 0, zOffset),
+      PushRobotController pushController = new PushRobotController(drcSimulationTestHelper.getRobot(),
+                                                                   pushJointName,
+                                                                   new Vector3D(0, 0, zOffset),
                                                                    1.0 / forceMagnitude);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphic(pushController.getForceVisualizer());
       pushController.applyForce(new Vector3D(1.0, 0.0, 0.0), forceMagnitude, Double.POSITIVE_INFINITY);
@@ -1402,7 +1481,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       // Need to hold in world to avoid error from slight robot motions.
       double trajectoryTime = 0.5;
       Quaternion desiredOrientation = new Quaternion();
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation,
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime,
+                                                                                                        desiredOrientation,
                                                                                                         referenceFrames.getPelvisZUpFrame());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
       drcSimulationTestHelper.simulateAndBlock(trajectoryTime + 0.1);
@@ -1418,10 +1498,115 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       // Record the desired chest orientation (in world)
       referenceFrames.updateFrames();
       FrameQuaternion finalOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(),
-                                                             EndToEndTestTools.findFeedbackControllerDesiredOrientation(fullRobotModel.getChest().getName(), drcSimulationTestHelper.getSimulationConstructionSet()));
+                                                             EndToEndTestTools.findFeedbackControllerDesiredOrientation(fullRobotModel.getChest().getName(),
+                                                                                                                        drcSimulationTestHelper.getSimulationConstructionSet()));
       finalOrientation.changeFrame(referenceFrames.getPelvisZUpFrame());
       Quaternion finalDesiredChestOrientation = new Quaternion(finalOrientation);
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, finalDesiredChestOrientation, 1.0e-5);
+   }
+
+   @Test
+   public void testStreaming() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(54651);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoVariableRegistry(testRegistry);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      YoDouble startTime = new YoDouble("startTime", testRegistry);
+      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
+                                               .getYoTime();
+      startTime.set(yoTime.getValue());
+      YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
+      trajectoryTime.set(2.0);
+
+      YoFrameQuaternion initialOrientation = new YoFrameQuaternion("chestInitialOrientation", worldFrame, testRegistry);
+      YoFrameQuaternion finalOrientation = new YoFrameQuaternion("chestFinalOrientation", worldFrame, testRegistry);
+      YoFrameQuaternion desiredOrientation = new YoFrameQuaternion("chestDesiredOrientation", worldFrame, testRegistry);
+      YoFrameVector3D desiredAngularVelocity = new YoFrameVector3D("chestDesiredAngularVelocity", worldFrame, testRegistry);
+
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      initialOrientation.setFromReferenceFrame(chest.getBodyFixedFrame());
+      OneDoFJointBasics[] cloneOneDoFJointKinematicChain = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(fullRobotModel.getPelvis(), chest);
+      MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, cloneOneDoFJointKinematicChain);
+      cloneOneDoFJointKinematicChain[0].updateFramesRecursively();
+      finalOrientation.setFromReferenceFrame(cloneOneDoFJointKinematicChain[cloneOneDoFJointKinematicChain.length - 1].getSuccessor().getBodyFixedFrame());
+
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      {
+         @Override
+         public void initialize()
+         {
+         }
+
+         private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
+
+         @Override
+         public void doControl()
+         {
+            double timeInTrajectory = yoTime.getValue() - startTime.getValue();
+            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
+            double alpha = timeInTrajectory / trajectoryTime.getValue();
+
+            desiredOrientation.interpolate(initialOrientation, finalOrientation, alpha);
+            if (alpha <= 0.0 || alpha >= 1.0)
+               desiredAngularVelocity.setToZero();
+            else
+               calculator.computeAngularVelocity(desiredAngularVelocity, initialOrientation, finalOrientation, 1.0 / trajectoryTime.getValue());
+            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(0.0, desiredOrientation, desiredAngularVelocity, worldFrame));
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return null;
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return RobotController.super.getDescription();
+         }
+
+         @Override
+         public String getName()
+         {
+            return RobotController.super.getName();
+         }
+      });
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      assertTrue(success);
+
+      SO3TrajectoryPoint currentDesiredTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs, chest);
+      double desiredEpsilon = 6.0e-3;
+
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
+      assertControlErrorIsLow(scs, chest, 1.0e-2);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+      assertTrue(success);
+      
+      currentDesiredTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs, chest);
+      desiredEpsilon = 1.0e-7;
+      
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
+      assertControlErrorIsLow(scs, chest, 2.0e-4);
    }
 
    public static Vector3D findControlErrorRotationVector(SimulationConstructionSet scs, RigidBodyBasics chest)
@@ -1462,7 +1647,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       Vector3D error = findControlErrorRotationVector(scs, chest);
       boolean isErrorLow = error.length() <= errorTolerance;
-      assertTrue("Error: " + error, isErrorLow);
+      assertTrue(isErrorLow, "Error: " + error.length());
    }
 
    public static void assertSingleWaypointExecuted(FrameQuaternion desiredOrientation, SimulationConstructionSet scs, RigidBodyBasics body, String prefix)
