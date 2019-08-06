@@ -21,11 +21,13 @@ public class JavaFXStoredPropertyMap extends HashMap<Property, StoredPropertyBas
    public void put(CheckBox checkBox, StoredPropertyKey<Boolean> booleanKey)
    {
       put(checkBox.selectedProperty(), storedPropertySet.getProperty(booleanKey));
+      checkBox.setSelected(storedPropertySet.get(booleanKey));
    }
 
    public void put(Spinner<Double> doubleSpinner, StoredPropertyKey<Double> doubleKey)
    {
       put(doubleSpinner.getValueFactory().valueProperty(), storedPropertySet.getProperty(doubleKey));
+      doubleSpinner.getValueFactory().valueProperty().setValue(storedPropertySet.get(doubleKey));
    }
 
    // add more as needed
