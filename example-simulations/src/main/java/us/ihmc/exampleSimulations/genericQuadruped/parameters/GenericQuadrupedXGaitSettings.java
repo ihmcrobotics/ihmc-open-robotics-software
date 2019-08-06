@@ -64,7 +64,7 @@ public class GenericQuadrupedXGaitSettings implements QuadrupedXGaitSettingsRead
    @Override
    public double getStanceWidth()
    {
-      return 0.2;
+      return 0.25;
    }
 
    @Override
