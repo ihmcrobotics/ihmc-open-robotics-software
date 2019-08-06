@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConcavePolygonToolsTest
 {
-   @Disabled
    @Test
    public void testCutSimpleConcavePolygonAbove()
    {
@@ -145,6 +144,37 @@ public class ConcavePolygonToolsTest
 
       assertEquals(1, result.size(), "supposed to cut");
       LogTools.debug("{}", result.get(0));
+
+      // create the ideal result
+      ConcaveHull expected = new ConcaveHull();
+      expected.addVertex(1.0, 1.0);
+      expected.addVertex(1.0, -1.0);
+
+      // assert equal
+      assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
+   }
+
+   @Test
+   public void testKeepLongSideSimpleConvexPolygonAbove1() // this is a pretty crazy edge case where the initial polygon has a redundant point along
+   {                                                       // a colinear intersection with the cutting line
+      // create simple convex polygon
+      ConcaveHull size2square0center = new ConcaveHull();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, 0.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+
+      LogTools.info("{}", size2square0center);
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(1.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(1.0, 0.0);
+
+      // cut it above a line
+      List<ConcaveHull> result = ConcavePolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection);
+
+      LogTools.info("{}", result.get(0));
+      assertEquals(1, result.size(), "supposed to cut");
 
       // create the ideal result
       ConcaveHull expected = new ConcaveHull();

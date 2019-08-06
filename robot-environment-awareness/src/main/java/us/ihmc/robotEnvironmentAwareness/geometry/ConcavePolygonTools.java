@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonCropResult;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
@@ -55,15 +56,37 @@ public class ConcavePolygonTools
       {
          int nextVertex = EuclidGeometryPolygonTools.next(i, concaveHullVertices.size());
 
-         Point2D intersection = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(cuttingLine.getPoint(),
-                                                                                              cuttingLine.getDirection(),
-                                                                                              concaveHullVertices.get(i),
-                                                                                              concaveHullVertices.get(nextVertex));
-         if (intersection != null)
+         /**
+          * Do a super low level intersection to make obvious all potential cases. This may not be necessary,
+          * but until that's for sure it helps to see these potential corner cases laid out.
+          */
+         double lineSegmentDirectionX = concaveHullVertices.get(nextVertex).getX() - concaveHullVertices.get(i).getX();
+         double lineSegmentDirectionY = concaveHullVertices.get(nextVertex).getY() - concaveHullVertices.get(i).getY();
+         double percentage = EuclidCoreMissingTools.percentageOfIntersectionBetweenTwoLine2DsInfCase(concaveHullVertices.get(i).getX(),
+                                                                                                     concaveHullVertices.get(i).getY(),
+                                                                                                     lineSegmentDirectionX,
+                                                                                                     lineSegmentDirectionY,
+                                                                                                     cuttingLine.getPoint().getX(),
+                                                                                                     cuttingLine.getPoint().getY(),
+                                                                                                     cuttingLine.getDirection().getX(),
+                                                                                                     cuttingLine.getDirection().getY());
+
+         if (percentage == Double.NaN) // non-intersecting parallel
          {
+            // do nothing
+         }
+         else if (percentage == Double.POSITIVE_INFINITY) // colinear edge intersection, store both vertices as intersections
+         {
+
+         }
+         else
+         {
+            Point2D intersection = new Point2D();
             intersections.add(Pair.of(nextVertex, intersection));
          }
       }
+
+      // filter out colinear intersections?
 
       boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(concaveHullToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
       LogTools.debug("Intersection count: {} vertex(0) is above line: {}", intersections.size(), vertex0IsAbove);
@@ -105,6 +128,8 @@ public class ConcavePolygonTools
       }
       else
       {
+         // must handle and colinear intersections
+
 
       }
 

@@ -70,4 +70,73 @@ public class EuclidCoreMissingTools
                                                                lineDirection2x, lineDirection2y, intersectionToPack);
    }
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a
+    * 2D direction and returns a percentage {@code alpha} along the first line such that the
+    * intersection coordinates can be computed as follows: <br>
+    * {@code intersection = pointOnLine1 + alpha * lineDirection1}
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the two lines are parallel but not collinear, the two lines do not intersect and the
+    * returned value is {@link Double#NaN}.
+    * <li>if the two lines are collinear, the two lines are assumed to be intersecting infinitely the returned value {@code Double.POSITIVE_INFINITY}.
+    * </ul>
+    * </p>
+    *
+    * @param pointOnLine1x   x-coordinate of a point located on the first line.
+    * @param pointOnLine1y   y-coordinate of a point located on the first line.
+    * @param lineDirection1x x-component of the first line direction.
+    * @param lineDirection1y y-component of the first line direction.
+    * @param pointOnLine2x   x-coordinate of a point located on the second line.
+    * @param pointOnLine2y   y-coordinate of a point located on the second line.
+    * @param lineDirection2x x-component of the second line direction.
+    * @param lineDirection2y y-component of the second line direction.
+    * @return {@code alpha} the percentage along the first line of the intersection location. This
+    *         method returns {@link Double#NaN} if the lines do not intersect.
+    */
+   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y,
+                                                                         double pointOnLine2x, double pointOnLine2y, double lineDirection2x, double lineDirection2y)
+   {
+      //      We solve for x the problem of the form: A * x = b
+      //            A      *     x     =      b
+      //      / lineDirection1x -lineDirection2x \   / alpha \   / pointOnLine2x - pointOnLine1x \
+      //      |                                  | * |       | = |                               |
+      //      \ lineDirection1y -lineDirection2y /   \ beta  /   \ pointOnLine2y - pointOnLine1y /
+      // Here, only alpha or beta is needed.
+
+      double determinant = -lineDirection1x * lineDirection2y + lineDirection1y * lineDirection2x;
+
+      double dx = pointOnLine2x - pointOnLine1x;
+      double dy = pointOnLine2y - pointOnLine1y;
+
+      if (Math.abs(determinant) < EuclidGeometryTools.ONE_TRILLIONTH)
+      { // The lines are parallel
+         // Check if they are collinear
+         double cross = dx * lineDirection1y - dy * lineDirection1x;
+         if (Math.abs(cross) < EuclidGeometryTools.ONE_TRILLIONTH)
+         {
+            /*
+             * The two lines are collinear. There's an infinite number of intersection. Let's set the
+             * result to infinity, i.e. alpha = infinity so it can be handled.
+             */
+            return Double.POSITIVE_INFINITY;
+         }
+         else
+         {
+            return Double.NaN;
+         }
+      }
+      else
+      {
+         double oneOverDeterminant = 1.0 / determinant;
+         double AInverse00 = oneOverDeterminant * -lineDirection2y;
+         double AInverse01 = oneOverDeterminant * lineDirection2x;
+
+         double alpha = AInverse00 * dx + AInverse01 * dy;
+
+         return alpha;
+      }
+   }
+
 }
