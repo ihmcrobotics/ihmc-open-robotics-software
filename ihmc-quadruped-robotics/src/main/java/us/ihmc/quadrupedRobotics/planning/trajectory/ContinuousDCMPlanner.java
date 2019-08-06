@@ -48,7 +48,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final YoDouble controllerTime;
    private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
 
@@ -105,7 +104,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
                                QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega = omega;
-      this.controllerTime = robotTimestamp;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.dcmFirstSpline = new YoFrameTrajectory3D("dcmFirstSpline", 4, supportFrame, registry);
@@ -161,43 +159,14 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void initializeForStanding()
+   @Override
+   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
    {
-      isStanding.set(true);
-      timedContactSequence.clear();
-      piecewiseConstantCopTrajectory.resetVariables();
-      dcmTrajectory.resetVariables();
-   }
+      timeAtStartOfState.set(initialTime);
+      dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
+      dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
-                                     FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
-   {
-      isStanding.set(false);
-      isInitialTransfer.set(true);
-
-      double currentTime = controllerTime.getDoubleValue();
-      boolean isCurrentPlanValid = stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime;
-
-      if (isCurrentPlanValid)
-      {
-         // compute dcm trajectory
-         computeDcmTrajectory(currentContactStates, stepSequence);
-
-         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
-         timeAtStartOfState.set(controllerTime.getDoubleValue());
-         computeInitialTransitionTrajectory();
-      }
-   }
-
-   public void beganStep()
-   {
-      onStateChange();
-   }
-
-   public void completedStep()
-   {
-      onStateChange();
+      setFirstSplineStartFromCurrentState();
    }
 
    public void setHoldCurrentDesiredPosition(boolean holdPosition)
@@ -210,16 +179,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       }
    }
 
-   private void onStateChange()
-   {
-      isInitialTransfer.set(false);
-
-      dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
-      dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
-      timeAtStartOfState.set(controllerTime.getDoubleValue());
-
-      setFirstSplineStartFromCurrentState();
-   }
 
    private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
@@ -351,9 +310,13 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
 
    @Override
-   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
+   public void computeSetpoints(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
-      timeInState.set(controllerTime.getDoubleValue() - timeAtStartOfState.getValue());
+      timeInState.set(currentTime - timeAtStartOfState.getValue());
+
+      isStanding.set(stepSequence.isEmpty());
+      isInitialTransfer.set(stepSequence.isEmpty());
+      //      isInitialTransfer.set(true);
 
       if (isStanding.getBooleanValue())
       {
@@ -381,7 +344,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          else
             computeTransitionTrajectory();
 
-         double currentTime = controllerTime.getDoubleValue();
          if (dcmFirstSpline.timeIntervalContains(currentTime))
          {
             isInFirstSpline.set(true);

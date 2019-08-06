@@ -247,14 +247,12 @@ public class QuadrupedBalanceManager
    public void clearStepSequence()
    {
       stepSequence.clear();
-//      dcmPlanner.clearStepSequence();
    }
 
    public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
    {
       for (int i = 0; i < Math.min(steps.size(), numberOfStepsToConsider.getIntegerValue()); i++)
          stepSequence.add(steps.get(i));
-//         dcmPlanner.addStepToSequence(steps.get(i));
 
       updateFootstepGraphics(steps);
 
@@ -293,7 +291,7 @@ public class QuadrupedBalanceManager
 
       momentumRateOfChangeModule.initialize();
 
-      dcmPlanner.initializeForStanding();
+//      dcmPlanner.initializeForStanding();
    }
 
    public void initializeForStanding()
@@ -308,7 +306,7 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.initialize();
 
       // FIXME this should do something with the desired values
-      dcmPlanner.initializeForStanding();
+//      dcmPlanner.initializeForStanding();
    }
 
    public void initializeForStepping()
@@ -318,19 +316,19 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), stepSequence, yoDesiredDCMPosition, yoDesiredDCMVelocity);
-//      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates());
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), controllerToolbox.getContactStates(), stepSequence);
    }
 
    public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
    {
-      dcmPlanner.beganStep();
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       stepAdjustmentController.beganStep(robotQuadrant, goalPosition);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
    {
-      dcmPlanner.completedStep();
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
@@ -345,7 +343,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates(), stepSequence);
+      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), controllerToolbox.getContactStates(), stepSequence);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
       yoDesiredDCMPosition.set(dcmPlanner.getDesiredDCMPosition());

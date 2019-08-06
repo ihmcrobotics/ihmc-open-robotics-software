@@ -10,18 +10,18 @@ import java.util.List;
 
 public interface DCMPlannerInterface
 {
-   void initializeForStanding();
+//   void initializeForStanding();
 
-   void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
-                              FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
+//   void initializeForStepping(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
+//                              FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
 
-   void beganStep();
+   void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
 
-   void completedStep();
+//   void initialize();
 
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 
-   void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence);
+   void computeSetpoints(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence);
 
    void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack);
 
