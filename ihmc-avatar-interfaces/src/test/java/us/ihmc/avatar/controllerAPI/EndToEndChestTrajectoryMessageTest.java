@@ -1552,11 +1552,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          {
          }
 
+         private boolean everyOtherTick = false;
          private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
 
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+            
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -1566,7 +1572,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                desiredAngularVelocity.setToZero();
             else
                calculator.computeAngularVelocity(desiredAngularVelocity, initialOrientation, finalOrientation, 1.0 / trajectoryTime.getValue());
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(0.0, desiredOrientation, desiredAngularVelocity, worldFrame));
+            ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(0.0, desiredOrientation, desiredAngularVelocity, worldFrame);
+            message.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getSo3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

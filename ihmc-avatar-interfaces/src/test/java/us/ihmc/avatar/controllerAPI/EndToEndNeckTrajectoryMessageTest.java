@@ -17,6 +17,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -150,9 +151,16 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          {
          }
 
+         private boolean everyOtherTick = false;
+
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -174,7 +182,10 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
                qDDesireds[i] = qDDes;
             }
 
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(0.0, qDesireds, qDDesireds, null));
+            NeckTrajectoryMessage message = HumanoidMessageTools.createNeckTrajectoryMessage(0.0, qDesireds, qDDesireds, null);
+            message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

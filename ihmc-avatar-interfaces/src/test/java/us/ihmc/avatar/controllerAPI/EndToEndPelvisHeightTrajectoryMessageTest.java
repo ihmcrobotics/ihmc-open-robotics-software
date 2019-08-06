@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajec
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -360,9 +361,16 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          {
          }
 
+         private boolean everyOtherTick = false;
+
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -372,7 +380,10 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
                desiredHeightRate.set(0.0);
             else
                desiredHeightRate.set((finalHeight.getValue() - initialHeight.getValue()) / trajectoryTime.getValue());
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.0, desiredHeight.getValue(), desiredHeightRate.getValue()));
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.0, desiredHeight.getValue(), desiredHeightRate.getValue());
+            message.getEuclideanTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getEuclideanTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

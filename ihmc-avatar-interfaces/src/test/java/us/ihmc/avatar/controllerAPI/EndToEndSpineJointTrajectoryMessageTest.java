@@ -439,9 +439,16 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          {
          }
 
+         private boolean everyOtherTick = false;
+
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -463,7 +470,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
                qDDesireds[i] = qDDes;
             }
 
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createSpineTrajectoryMessage(0.0, qDesireds, qDDesireds, null));
+            SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(0.0, qDesireds, qDDesireds, null);
+            message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

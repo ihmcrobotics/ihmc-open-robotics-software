@@ -1,7 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -48,11 +47,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemFactories;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
@@ -432,11 +427,17 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          {
          }
 
+         private boolean everyOtherTick = false;
          private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
 
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -446,7 +447,10 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                desiredAngularVelocity.setToZero();
             else
                calculator.computeAngularVelocity(desiredAngularVelocity, initialOrientation, finalOrientation, 1.0 / trajectoryTime.getValue());
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, desiredOrientation, desiredAngularVelocity, worldFrame));
+            PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(0.0, desiredOrientation, desiredAngularVelocity, worldFrame);
+            message.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getSo3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

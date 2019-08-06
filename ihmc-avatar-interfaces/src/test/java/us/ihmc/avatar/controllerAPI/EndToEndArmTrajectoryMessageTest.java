@@ -895,9 +895,16 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          {
          }
 
+         private boolean everyOtherTick = false;
+
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -925,7 +932,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                   qDDesireds[i] = qDDes;
                }
 
-               drcSimulationTestHelper.publishToController(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.0, qDesireds, qDDesireds, null));
+               ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.0, qDesireds, qDDesireds, null);
+               message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+               message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+               drcSimulationTestHelper.publishToController(message);
             }
          }
 
@@ -983,7 +993,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                + Math.abs(controllerDesiredPositions[i] - armJoints[i].getQ()));
             assertEquals(controllerDesiredVelocities[i],
                          armJoints[i].getQd(),
-                         2.0*trackingEpsilon,
+                         2.0 * trackingEpsilon,
                          "Poor velocity tracking for joint " + armJoints[i].getName() + " err: "
                                + Math.abs(controllerDesiredVelocities[i] - armJoints[i].getQd()));
          }
