@@ -24,11 +24,11 @@ public class FootstepPlanningTestTools
       {
          StoredPropertyKey<?> key = FootstepPlannerParameterKeys.keys.keys().get(i);
          if (key.getType() == Double.class)
-            parameters.getStoredPropertySet().set((DoubleStoredPropertyKey) key, RandomNumbers.nextDouble(random, 0.01, 1.0));
+            parameters.set((DoubleStoredPropertyKey) key, RandomNumbers.nextDouble(random, 0.01, 1.0));
          else if (key.getType() == Integer.class)
-            parameters.getStoredPropertySet().set((IntegerStoredPropertyKey) key, RandomNumbers.nextInt(random, 1, 10));
+            parameters.set((IntegerStoredPropertyKey) key, RandomNumbers.nextInt(random, 1, 10));
          else if (key.getType() == Boolean.class)
-            parameters.getStoredPropertySet().set((BooleanStoredPropertyKey) key, RandomNumbers.nextBoolean(random, 0.5));
+            parameters.set((BooleanStoredPropertyKey) key, RandomNumbers.nextBoolean(random, 0.5));
       }
 
 

@@ -3,10 +3,8 @@ package us.ihmc.valkyrie.parameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.*;
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParametersBasics
+public class ValkyrieFootstepPlannerParameters extends StoredPropertySet implements FootstepPlannerParametersBasics
 {
-   private final StoredPropertySet propertySet;
-
    public ValkyrieFootstepPlannerParameters()
    {
       this("ihmc-open-robotics-software", "valkyrie/src/main/resources");
@@ -15,8 +13,8 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
 
    public ValkyrieFootstepPlannerParameters(String projectName, String pathToResources)
    {
-      propertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                          getClass(),
+      super(FootstepPlannerParameterKeys.keys,
+            ValkyrieFootstepPlannerParameters.class,
                                           projectName,
                                           pathToResources);
 
@@ -56,18 +54,12 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
       setMaximum2dDistanceFromBoundingBoxToPenalize(0.05);
       setBoundingBoxCost(0.0);
 
-      getStoredPropertySet().load();
-   }
-
-   @Override
-   public StoredPropertySet getStoredPropertySet()
-   {
-      return propertySet;
+      load();
    }
 
    public static void main(String[] args)
    {
       ValkyrieFootstepPlannerParameters parameters = new ValkyrieFootstepPlannerParameters();
-      parameters.getStoredPropertySet().save();
+      parameters.save();
    }
 }

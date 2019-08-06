@@ -1,277 +1,278 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
-public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly
+public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
    default void set(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
-      getStoredPropertySet().setAll(footstepPlannerParameters.getStoredPropertySet().getAll());
+      setAll(footstepPlannerParameters.getAll());
    }
 
    default void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.checkForBodyBoxCollisions, checkForBodyBoxCollisions);
+      set(FootstepPlannerParameterKeys.checkForBodyBoxCollisions, checkForBodyBoxCollisions);
    }
 
    default void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.performHeuristicSearchPolicies, performHeuristicSearchPolicies);
+      set(FootstepPlannerParameterKeys.performHeuristicSearchPolicies, performHeuristicSearchPolicies);
    }
 
    default void setMinimumDistanceFromCliffBottoms(double distance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
+      set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
    }
 
    default void setCliffHeightToAvoid(double height)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.cliffHeightToAvoid, height);
+      set(FootstepPlannerParameterKeys.cliffHeightToAvoid, height);
    }
 
    default void setMaximumStepReach(double reach)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maxStepReach, reach);
+      set(FootstepPlannerParameterKeys.maxStepReach, reach);
    }
 
    default void setMaximumStepWidth(double width)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maxStepWidth, width);
+      set(FootstepPlannerParameterKeys.maxStepWidth, width);
    }
 
    default void setMaximumStepYaw(double yaw)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maxStepYaw, yaw);
+      set(FootstepPlannerParameterKeys.maxStepYaw, yaw);
    }
 
    default void setMinimumStepYaw(double yaw)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minStepYaw, yaw);
+      set(FootstepPlannerParameterKeys.minStepYaw, yaw);
    }
 
    default void setMaximumStepZ(double stepZ)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+      set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
    }
 
    default void setMaximumXYWiggleDistance(double wiggleDistance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumXYWiggleDistance, wiggleDistance);
+      set(FootstepPlannerParameterKeys.maximumXYWiggleDistance, wiggleDistance);
    }
 
    default void setMaximumYawWiggle(double wiggleDistance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumYawWiggle, wiggleDistance);
+      set(FootstepPlannerParameterKeys.maximumYawWiggle, wiggleDistance);
    }
 
    default void setMinimumFootholdPercent(double footholdPercent)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minFootholdPercent, footholdPercent);
+      set(FootstepPlannerParameterKeys.minFootholdPercent, footholdPercent);
    }
 
    default void setMinimumStepLength(double minimumStepLength)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minStepLength, minimumStepLength);
+      set(FootstepPlannerParameterKeys.minStepLength, minimumStepLength);
    }
 
    default void setMinimumStepWidth(double minimumStepWidth)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minStepWidth, minimumStepWidth);
+      set(FootstepPlannerParameterKeys.minStepWidth, minimumStepWidth);
    }
 
    default void setMinimumSurfaceInclineRadians(double surfaceInclineRadians)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minSurfaceIncline, surfaceInclineRadians);
+      set(FootstepPlannerParameterKeys.minSurfaceIncline, surfaceInclineRadians);
    }
 
    default void setMinXClearanceFromStance(double clearance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minXClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.minXClearanceFromStance, clearance);
    }
 
    default void setMinYClearanceFromStance(double clearance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minYClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.minYClearanceFromStance, clearance);
    }
 
    default void setWiggleInsideDelta(double wiggleInsideDelta)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
+      set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
    }
 
    default void setMaximumStepZWhenSteppingUp(double maxStepZ)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp, maxStepZ);
+      set(FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp, maxStepZ);
    }
 
    default void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
+      set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
    }
 
    default void setMaximumStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp);
+      set(FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp);
    }
 
    default void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
+      set(FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
    }
 
    default void setIdealFootstepWidth(double idealFootstepWidth)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.idealFootstepWidth, idealFootstepWidth);
+      set(FootstepPlannerParameterKeys.idealFootstepWidth, idealFootstepWidth);
    }
 
    default void setIdealFootstepLength(double idealFootstepLength)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.idealFootstepLength, idealFootstepLength);
+      set(FootstepPlannerParameterKeys.idealFootstepLength, idealFootstepLength);
    }
 
    default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
+      set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
    }
 
    default void setRejectIfCannotFullyWiggleInside(boolean rejectIfCannotFullyWiggleInside)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.rejectIfCannotFullyWiggleInside, rejectIfCannotFullyWiggleInside);
+      set(FootstepPlannerParameterKeys.rejectIfCannotFullyWiggleInside, rejectIfCannotFullyWiggleInside);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximumZPenetrationOnValleyRegions, maximumZPenetrationOnValleyRegions);
+      set(FootstepPlannerParameterKeys.maximumZPenetrationOnValleyRegions, maximumZPenetrationOnValleyRegions);
    }
 
    default void setReturnBestEffortPlan(boolean returnBestEffortPlan)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
+      set(FootstepPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
    }
 
    default void setMinimumStepsForBestEffortPlan(int minimumStepForBestEffortPlan)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
+      set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
    }
 
    default void setBodyGroundClearance(double bodyGroundClearance)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyGroundClearance, bodyGroundClearance);
+      set(FootstepPlannerParameterKeys.bodyGroundClearance, bodyGroundClearance);
    }
 
    default void setBodyBoxHeight(double bodyBoxHeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxHeight, bodyBoxHeight);
+      set(FootstepPlannerParameterKeys.bodyBoxHeight, bodyBoxHeight);
    }
 
    default void setBodyBoxDepth(double bodyBoxDepth)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxDepth, bodyBoxDepth);
+      set(FootstepPlannerParameterKeys.bodyBoxDepth, bodyBoxDepth);
    }
 
    default void setBodyBoxWidth(double bodyBoxWidth)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxWidth, bodyBoxWidth);
+      set(FootstepPlannerParameterKeys.bodyBoxWidth, bodyBoxWidth);
    }
 
    default void setBodyBoxBaseX(double bodyBoxBaseX)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxBaseX, bodyBoxBaseX);
+      set(FootstepPlannerParameterKeys.bodyBoxBaseX, bodyBoxBaseX);
    }
 
    default void setBodyBoxBaseY(double bodyBoxBaseY)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxBaseY, bodyBoxBaseY);
+      set(FootstepPlannerParameterKeys.bodyBoxBaseY, bodyBoxBaseY);
    }
 
    default void setBodyBoxBaseZ(double bodyBoxBaseZ)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
+      set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
    }
 
    default void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.useQuadraticDistanceCost, useQuadraticDistanceCost);
+      set(FootstepPlannerParameterKeys.useQuadraticDistanceCost, useQuadraticDistanceCost);
    }
 
    default void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.useQuadraticHeightCost, useQuadraticHeightCost);
+      set(FootstepPlannerParameterKeys.useQuadraticHeightCost, useQuadraticHeightCost);
    }
 
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
+      set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
    }
 
    default void setVisGraphWithAStarHeuristicsWeight(double visGraphWithAStarHeuristicsWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.visGraphWithAStarHeuristicsWeight, visGraphWithAStarHeuristicsWeight);
+      set(FootstepPlannerParameterKeys.visGraphWithAStarHeuristicsWeight, visGraphWithAStarHeuristicsWeight);
    }
 
    default void setDepthFirstHeuristicsWeight(double depthFirstHeuristicsWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.depthFirstHeuristicsWeight, depthFirstHeuristicsWeight);
+      set(FootstepPlannerParameterKeys.depthFirstHeuristicsWeight, depthFirstHeuristicsWeight);
    }
 
    default void setBodyPathBasedHeuristicWeight(double bodyPathBasedHeuristicWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.bodyPathBasedHeuristicsWeight, bodyPathBasedHeuristicWeight);
+      set(FootstepPlannerParameterKeys.bodyPathBasedHeuristicsWeight, bodyPathBasedHeuristicWeight);
    }
 
    default void setYawWeight(double yawWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.yawWeight, yawWeight);
+      set(FootstepPlannerParameterKeys.yawWeight, yawWeight);
    }
 
    default void setPitchWeight(double pitchWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.pitchWeight, pitchWeight);
+      set(FootstepPlannerParameterKeys.pitchWeight, pitchWeight);
    }
 
    default void setRollWeight(double rollWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.rollWeight, rollWeight);
+      set(FootstepPlannerParameterKeys.rollWeight, rollWeight);
    }
 
    default void setForwardWeight(double forwardWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.forwardWeight, forwardWeight);
+      set(FootstepPlannerParameterKeys.forwardWeight, forwardWeight);
    }
 
    default void setLateralWeight(double lateralWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.lateralWeight, lateralWeight);
+      set(FootstepPlannerParameterKeys.lateralWeight, lateralWeight);
    }
 
    default void setStepUpWeight(double stepUpWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.stepUpWeight, stepUpWeight);
+      set(FootstepPlannerParameterKeys.stepUpWeight, stepUpWeight);
    }
 
    default void setStepDownWeight(double stepDownWeight)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.stepDownWeight, stepDownWeight);
+      set(FootstepPlannerParameterKeys.stepDownWeight, stepDownWeight);
    }
 
    default void setCostPerStep(double costPerStep)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
+      set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
    }
 
    default void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
+      set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
    }
 
    default void setBoundingBoxCost(double boundingBoxCost)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.boundingBoxCost, boundingBoxCost);
+      set(FootstepPlannerParameterKeys.boundingBoxCost, boundingBoxCost);
    }
 
    default void setFinalTurnProximity(double finalTurnProximity)
    {
-      getStoredPropertySet().set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
+      set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
    default void set(FootstepPlannerParametersPacket parametersPacket)

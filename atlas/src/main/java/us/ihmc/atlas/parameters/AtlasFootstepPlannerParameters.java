@@ -4,10 +4,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterK
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class AtlasFootstepPlannerParameters implements FootstepPlannerParametersBasics
+public class AtlasFootstepPlannerParameters extends StoredPropertySet implements FootstepPlannerParametersBasics
 {
-   private final StoredPropertySet propertySet;
-
    public AtlasFootstepPlannerParameters()
    {
       this("ihmc-open-robotics-software", "atlas/src/main/resources");
@@ -15,10 +13,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 
    public AtlasFootstepPlannerParameters(String projectName, String pathToResources)
    {
-      propertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                          getClass(),
-                                          projectName,
-                                          pathToResources);
+      super(FootstepPlannerParameterKeys.keys, AtlasFootstepPlannerParameters.class, projectName, pathToResources);
 
       setWiggleIntoConvexHullOfPlanarRegions(true);
       setRejectIfCannotFullyWiggleInside(false);
@@ -58,18 +53,12 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
       setBodyBoxBaseZ(0.25);
       setFinalTurnProximity(1.0);
 
-      getStoredPropertySet().load();
-   }
-
-   @Override
-   public StoredPropertySet getStoredPropertySet()
-   {
-      return propertySet;
+      load();
    }
 
    public static void main(String[] args)
    {
       AtlasFootstepPlannerParameters parameters = new AtlasFootstepPlannerParameters();
-      parameters.getStoredPropertySet().save();
+      parameters.save();
    }
 }
