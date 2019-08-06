@@ -1,7 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
@@ -36,12 +36,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -65,12 +64,9 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -1311,11 +1307,17 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          {
          }
 
+         private boolean everyOtherTick = false;
          private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
 
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -1336,7 +1338,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                desiredVelocity.getLinearPart().scale(1.0 / trajectoryTime.getValue());
             }
 
-            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(0.0, desiredPose, desiredVelocity));
+            PelvisTrajectoryMessage message = HumanoidMessageTools.createPelvisTrajectoryMessage(0.0, desiredPose, desiredVelocity);
+            message.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getSe3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
          }
 
          @Override

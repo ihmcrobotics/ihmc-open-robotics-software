@@ -1277,11 +1277,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          {
          }
 
+         private boolean everyOtherTick = false;
          private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
 
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -1310,6 +1316,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                                                 desiredVelocities.get(robotSide),
                                                                                                 worldFrame);
                message.getSe3Trajectory().setUseCustomControlFrame(true); // This is to force the controller to use the body-fixed frame
+               message.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+               message.getSe3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
                drcSimulationTestHelper.publishToController(message);
             }
          }

@@ -14,6 +14,7 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 {
    public static final byte EXECUTION_MODE_OVERRIDE = (byte) 0;
    public static final byte EXECUTION_MODE_QUEUE = (byte) 1;
+   public static final byte EXECUTION_MODE_STREAM = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -29,6 +30,10 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * - the trajectory point times are relative to the the last trajectory point time of the previous message.
             * - the time of the first trajectory point has to be greater than zero.
             * - When joint-space trajectory: the controller will queue the joint trajectory messages as a per joint basis.
+            * When EXECUTION_MODE_STREAM is chosen:
+            * The controller is expecting a continuous stream of messages sent at high frequency.
+            * A trajectory message that is part of a stream is expected to have a single trajectory point with a time set to 0.
+            * A stream can be terminated with either an override message or a stream message with a desired velocity of 0.
             */
    public byte execution_mode_;
    /**
@@ -45,6 +50,12 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * The time to delay this message on the controller side before being executed.
             */
    public double execution_delay_time_;
+   /**
+            * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
+            * This integration allows to improve continuity of execution for streams.
+            * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
+            */
+   public double stream_integration_duration_;
 
    public QueueableMessage()
    {
@@ -67,6 +78,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       previous_message_id_ = other.previous_message_id_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
+      stream_integration_duration_ = other.stream_integration_duration_;
 
    }
 
@@ -96,6 +109,10 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * - the trajectory point times are relative to the the last trajectory point time of the previous message.
             * - the time of the first trajectory point has to be greater than zero.
             * - When joint-space trajectory: the controller will queue the joint trajectory messages as a per joint basis.
+            * When EXECUTION_MODE_STREAM is chosen:
+            * The controller is expecting a continuous stream of messages sent at high frequency.
+            * A trajectory message that is part of a stream is expected to have a single trajectory point with a time set to 0.
+            * A stream can be terminated with either an override message or a stream message with a desired velocity of 0.
             */
    public void setExecutionMode(byte execution_mode)
    {
@@ -112,6 +129,10 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * - the trajectory point times are relative to the the last trajectory point time of the previous message.
             * - the time of the first trajectory point has to be greater than zero.
             * - When joint-space trajectory: the controller will queue the joint trajectory messages as a per joint basis.
+            * When EXECUTION_MODE_STREAM is chosen:
+            * The controller is expecting a continuous stream of messages sent at high frequency.
+            * A trajectory message that is part of a stream is expected to have a single trajectory point with a time set to 0.
+            * A stream can be terminated with either an override message or a stream message with a desired velocity of 0.
             */
    public byte getExecutionMode()
    {
@@ -167,6 +188,25 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       return execution_delay_time_;
    }
 
+   /**
+            * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
+            * This integration allows to improve continuity of execution for streams.
+            * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
+            */
+   public void setStreamIntegrationDuration(double stream_integration_duration)
+   {
+      stream_integration_duration_ = stream_integration_duration;
+   }
+   /**
+            * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
+            * This integration allows to improve continuity of execution for streams.
+            * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
+            */
+   public double getStreamIntegrationDuration()
+   {
+      return stream_integration_duration_;
+   }
+
 
    public static Supplier<QueueableMessagePubSubType> getPubSubType()
    {
@@ -195,6 +235,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stream_integration_duration_, other.stream_integration_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -218,6 +260,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
+      if(this.stream_integration_duration_ != otherMyClass.stream_integration_duration_) return false;
+
 
       return true;
    }
@@ -237,7 +281,9 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       builder.append("previous_message_id=");
       builder.append(this.previous_message_id_);      builder.append(", ");
       builder.append("execution_delay_time=");
-      builder.append(this.execution_delay_time_);
+      builder.append(this.execution_delay_time_);      builder.append(", ");
+      builder.append("stream_integration_duration=");
+      builder.append(this.stream_integration_duration_);
       builder.append("}");
       return builder.toString();
    }

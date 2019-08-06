@@ -792,11 +792,17 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
          }
 
+         private boolean everyOtherTick = false;
          private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
 
          @Override
          public void doControl()
          {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
             double timeInTrajectory = yoTime.getValue() - startTime.getValue();
             timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
             double alpha = timeInTrajectory / trajectoryTime.getValue();
@@ -819,6 +825,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             FootTrajectoryMessage message = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPose, desiredVelocity, worldFrame);
             message.getSe3Trajectory().setUseCustomControlFrame(true);
+            message.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getSe3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
             drcSimulationTestHelper.publishToController(message);
          }
 
