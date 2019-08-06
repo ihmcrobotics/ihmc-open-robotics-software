@@ -1,7 +1,5 @@
 package us.ihmc.tools.property;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,18 +8,6 @@ public class StoredPropertyKeyList
    private int indexCount = 0;
 
    private final List<StoredPropertyKey<?>> keys = new ArrayList<>();
-
-   private String saveFileName;
-
-   public StoredPropertyKeyList(Class<?> classToNameAfter)
-   {
-      this(StringUtils.uncapitalize(classToNameAfter.getSimpleName()));
-   }
-
-   public StoredPropertyKeyList(String saveFileName)
-   {
-      this.saveFileName = saveFileName;
-   }
 
    public DoubleStoredPropertyKey addDoubleKey(String titleCasedName)
    {
@@ -68,10 +54,5 @@ public class StoredPropertyKeyList
    public List<StoredPropertyKey<?>> keys()
    {
       return keys;
-   }
-
-   public String getSaveFileName()
-   {
-      return saveFileName;
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.tools.property;
 
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
@@ -48,7 +49,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = keys.getSaveFileName() + ".ini";
+      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + ".ini";
 
       values = new Object[keys.keys().size()];
 
