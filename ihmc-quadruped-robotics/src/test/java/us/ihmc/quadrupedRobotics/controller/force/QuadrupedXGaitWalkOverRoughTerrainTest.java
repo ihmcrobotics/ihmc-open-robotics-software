@@ -125,6 +125,8 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       stepTeleopManager.setXGaitSettings(xGaitSettings);
+      stepTeleopManager.submitPlanarRegionsList(environment.getPlanarRegionsList());
+
 
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
