@@ -58,6 +58,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
+   private final YoFramePoint3D perfectVRPPosition = new YoFramePoint3D("perfectVRPPosition", worldFrame, registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
@@ -251,8 +252,8 @@ public class DCMPlanner implements DCMPlannerInterface
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
-   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                   FixedFrameVector3DBasics desiredDCMVelocityToPack)
+   @Override
+   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       if (isStanding.getBooleanValue())
       {
@@ -284,16 +285,12 @@ public class DCMPlanner implements DCMPlannerInterface
          dcmTrajectory.getPositionAtEndOfSwing(finalDCM);
       }
 
-      desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());
-      desiredDCMVelocity.changeFrame(desiredDCMVelocityToPack.getReferenceFrame());
-
       if (debug)
          runOutputDebugChecks();
 
-      desiredDCMPositionToPack.set(desiredDCMPosition);
-      desiredDCMVelocityToPack.set(desiredDCMVelocity);
-
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectCMPPosition);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectVRPPosition);
+      perfectCMPPosition.set(perfectVRPPosition);
+      perfectCMPPosition.subZ(comHeight.getDoubleValue());
    }
 
 
@@ -315,14 +312,50 @@ public class DCMPlanner implements DCMPlannerInterface
       finalDesiredDCMToPack.setMatchingFrame(finalDCM);
    }
 
-   @Override
-   public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
-   {
-      desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
-   }
-
    public double getFinalTime()
    {
       return dcmTransitionTrajectory.getFinalTime();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredDCMPosition()
+   {
+      return desiredDCMPosition;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
+   {
+      return desiredDCMVelocity;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredCoMPosition()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return null;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return perfectVRPPosition;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return perfectCMPPosition;
    }
 }

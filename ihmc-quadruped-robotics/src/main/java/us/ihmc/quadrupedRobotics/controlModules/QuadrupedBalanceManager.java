@@ -7,7 +7,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -29,7 +28,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ContinuousDCMPlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -331,8 +329,11 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates());
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
+
+      yoDesiredDCMPosition.set(dcmPlanner.getDesiredDCMPosition());
+      yoDesiredDCMVelocity.set(dcmPlanner.getDesiredDCMVelocity());
 
       bodyICPBasedTranslationManager.compute(yoDesiredDCMPosition);
       bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
@@ -405,7 +406,7 @@ public class QuadrupedBalanceManager
 
    public double estimateSwingSpeedUpTimeUnderDisturbance()
    {
-      dcmPlanner.getDesiredECMPPosition(perfectCMP);
+      perfectCMP.setIncludingFrame(dcmPlanner.getDesiredECMPPosition());
       perfectCMP.changeFrame(worldFrame);
       return swingSpeedUpCalculator.estimateSwingSpeedUpTimeUnderDisturbance(activeSteps, computeNormalizedEllipticDcmErrorForSpeedUp(), yoDesiredDCMPosition,
                                                                              yoFinalDesiredDCM, controllerToolbox.getDCMPositionEstimate(),
