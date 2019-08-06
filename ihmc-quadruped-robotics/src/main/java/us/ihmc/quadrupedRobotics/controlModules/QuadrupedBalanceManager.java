@@ -98,6 +98,8 @@ public class QuadrupedBalanceManager
 
    private final List<QuadrupedTimedStep> activeSteps = new ArrayList<>();
 
+   private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
+
    // footstep graphics
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
    private final FramePoint3D stepSequenceVisualizationPosition = new FramePoint3D();
@@ -244,13 +246,15 @@ public class QuadrupedBalanceManager
 
    public void clearStepSequence()
    {
-      dcmPlanner.clearStepSequence();
+      stepSequence.clear();
+//      dcmPlanner.clearStepSequence();
    }
 
    public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
    {
       for (int i = 0; i < Math.min(steps.size(), numberOfStepsToConsider.getIntegerValue()); i++)
-         dcmPlanner.addStepToSequence(steps.get(i));
+         stepSequence.add(steps.get(i));
+//         dcmPlanner.addStepToSequence(steps.get(i));
 
       updateFootstepGraphics(steps);
 
@@ -314,7 +318,8 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), stepSequence, yoDesiredDCMPosition, yoDesiredDCMVelocity);
+//      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates());
    }
 
    public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
@@ -340,7 +345,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates());
+      dcmPlanner.computeSetpoints(controllerToolbox.getContactStates(), stepSequence);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
       yoDesiredDCMPosition.set(dcmPlanner.getDesiredDCMPosition());

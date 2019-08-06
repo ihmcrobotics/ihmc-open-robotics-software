@@ -50,14 +50,12 @@ public class DCMPlanner implements DCMPlannerInterface
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
-   private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoDouble controllerTime;
    private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
-   private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
    private final YoFramePoint3D perfectVRPPosition = new YoFramePoint3D("perfectVRPPosition", worldFrame, registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
@@ -132,12 +130,6 @@ public class DCMPlanner implements DCMPlannerInterface
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void clearStepSequence()
-   {
-      stepSequence.clear();
-      numberOfStepsInPlanner.set(0);
-   }
-
    public void beganStep()
    {
    }
@@ -150,12 +142,6 @@ public class DCMPlanner implements DCMPlannerInterface
    {
    }
 
-   public void addStepToSequence(QuadrupedTimedStep step)
-   {
-      stepSequence.add(step);
-      numberOfStepsInPlanner.increment();
-   }
-
    public void initializeForStanding()
    {
       isStanding.set(true);
@@ -164,18 +150,18 @@ public class DCMPlanner implements DCMPlannerInterface
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
-                                     FrameVector3DReadOnly currentDCMVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
+                                     FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
 
       double currentTime = controllerTime.getDoubleValue();
-      boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
+      boolean isCurrentPlanValid = stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime;
 
       if (isCurrentPlanValid)
       {
          // compute dcm trajectory
-         computeDcmTrajectory(currentContactStates);
+         computeDcmTrajectory(currentContactStates, stepSequence);
 
          dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
          dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
@@ -184,7 +170,7 @@ public class DCMPlanner implements DCMPlannerInterface
       }
    }
 
-   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
+   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
@@ -253,7 +239,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
    @Override
-   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
+   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
       if (isStanding.getBooleanValue())
       {
@@ -264,7 +250,7 @@ public class DCMPlanner implements DCMPlannerInterface
       }
       else
       {
-         computeDcmTrajectory(currentContactStates);
+         computeDcmTrajectory(currentContactStates, stepSequence);
 
          double currentTime = controllerTime.getDoubleValue();
          dcmTrajectory.computeTrajectory(currentTime);
