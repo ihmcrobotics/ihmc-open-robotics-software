@@ -8,15 +8,11 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
    public ValkyrieFootstepPlannerParameters()
    {
       this("ihmc-open-robotics-software", "valkyrie/src/main/resources");
-
    }
 
    public ValkyrieFootstepPlannerParameters(String projectName, String pathToResources)
    {
-      super(FootstepPlannerParameterKeys.keys,
-            ValkyrieFootstepPlannerParameters.class,
-                                          projectName,
-                                          pathToResources);
+      super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPlannerParameters.class, projectName, pathToResources);
 
       setCheckForBodyBoxCollisions(true);
       setIdealFootstepWidth(0.2);
