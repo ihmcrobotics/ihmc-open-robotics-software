@@ -144,8 +144,8 @@ public class FootstepPlannerParametersUIController
       javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
       javaFXStoredPropertyMap.put(maxStepWidth, FootstepPlannerParameterKeys.maxStepWidth);
       javaFXStoredPropertyMap.put(minStepWidth, FootstepPlannerParameterKeys.minStepWidth);
-      javaFXStoredPropertyMap.put(minStepLength, FootstepPlannerParameterKeys.maxStepWidth);
-      javaFXStoredPropertyMap.put(maxStepZ, FootstepPlannerParameterKeys.minStepLength);
+      javaFXStoredPropertyMap.put(minStepLength, FootstepPlannerParameterKeys.minStepLength);
+      javaFXStoredPropertyMap.put(maxStepZ, FootstepPlannerParameterKeys.maxStepZ);
       javaFXStoredPropertyMap.put(minSurfaceIncline, FootstepPlannerParameterKeys.minSurfaceIncline);
       javaFXStoredPropertyMap.put(maxStepYaw, FootstepPlannerParameterKeys.maxStepYaw);
       javaFXStoredPropertyMap.put(minStepYaw, FootstepPlannerParameterKeys.minStepYaw);
