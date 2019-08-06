@@ -9,7 +9,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;

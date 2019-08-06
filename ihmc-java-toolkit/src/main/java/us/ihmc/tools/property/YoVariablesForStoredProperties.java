@@ -25,24 +25,30 @@ public class YoVariablesForStoredProperties extends HashMap<StoredPropertyKey, Y
       {
          if (key.getType() == Double.class)
          {
+            DoubleStoredPropertyKey castedKey = (DoubleStoredPropertyKey) key;
             YoDouble yoDouble = new YoDouble(key.getCamelCasedName(), registry);
+            yoDouble.set(storedPropertySet.get(castedKey), false);
             put(key, yoDouble);
-            storedPropertySet.addPropertyChangedListener(key, () -> yoDouble.set(storedPropertySet.get((DoubleStoredPropertyKey) key)));
-            yoDouble.addVariableChangedListener(v -> storedPropertySet.set((DoubleStoredPropertyKey) key, yoDouble.getValue()));
+            storedPropertySet.addPropertyChangedListener(key, () -> yoDouble.set(storedPropertySet.get(castedKey)));
+            yoDouble.addVariableChangedListener(v -> storedPropertySet.set(castedKey, yoDouble.getValue()));
          }
          else if (key.getType() == Integer.class)
          {
+            IntegerStoredPropertyKey castedKey = (IntegerStoredPropertyKey) key;
             YoInteger yoInteger = new YoInteger(key.getCamelCasedName(), registry);
+            yoInteger.set(storedPropertySet.get(castedKey), false);
             put(key, yoInteger);
-            storedPropertySet.addPropertyChangedListener(key, () -> yoInteger.set(storedPropertySet.get((IntegerStoredPropertyKey) key)));
-            yoInteger.addVariableChangedListener(v -> storedPropertySet.set((IntegerStoredPropertyKey) key, yoInteger.getValue()));
+            storedPropertySet.addPropertyChangedListener(key, () -> yoInteger.set(storedPropertySet.get(castedKey)));
+            yoInteger.addVariableChangedListener(v -> storedPropertySet.set(castedKey, yoInteger.getValue()));
          }
          else if (key.getType() == Boolean.class)
          {
+            BooleanStoredPropertyKey castedKey = (BooleanStoredPropertyKey) key;
             YoBoolean yoBoolean = new YoBoolean(key.getCamelCasedName(), registry);
+            yoBoolean.set(storedPropertySet.get(castedKey), false);
             put(key, yoBoolean);
-            storedPropertySet.addPropertyChangedListener(key, () -> yoBoolean.set(storedPropertySet.get((BooleanStoredPropertyKey) key)));
-            yoBoolean.addVariableChangedListener(v -> storedPropertySet.set((BooleanStoredPropertyKey) key, yoBoolean.getValue()));
+            storedPropertySet.addPropertyChangedListener(key, () -> yoBoolean.set(storedPropertySet.get(castedKey)));
+            yoBoolean.addVariableChangedListener(v -> storedPropertySet.set(castedKey, yoBoolean.getValue()));
          }
          else
          {
