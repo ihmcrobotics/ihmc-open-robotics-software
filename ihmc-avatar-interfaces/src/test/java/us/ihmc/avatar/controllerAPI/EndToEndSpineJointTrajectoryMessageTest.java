@@ -1,8 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -588,14 +588,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)
    {
-      assertFalse("Joint and Taskspace control was inconsistent.", controllerSpy.wasControlInconsistent());
+      assertFalse(controllerSpy.wasControlInconsistent(), "Joint and Taskspace control was inconsistent.");
    }
 
    private static void assertDesiredsContinous(ControllerSpy controllerSpy)
    {
       double maxSpeed = controllerSpy.getMaxSpeed();
       String errorMessage = "The maximum speed along the trajectory was " + maxSpeed + " this was probably caused by a discontinous desired value.";
-      assertTrue(errorMessage, maxSpeed < MAX_SPEED_FOR_CONTINOUS);
+      assertTrue(maxSpeed < MAX_SPEED_FOR_CONTINOUS, errorMessage);
    }
 
    private void executeMessage(SpineTrajectoryMessage message) throws SimulationExceededMaximumTimeException
