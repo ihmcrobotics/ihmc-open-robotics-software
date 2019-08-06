@@ -132,7 +132,17 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    private void setForListeners(StoredPropertyKey key, Object newValue)
    {
-      if (!values[key.getIndex()].equals(newValue))
+      boolean valueChanged;
+      if (values[key.getIndex()] == null)
+      {
+         valueChanged = newValue != null;
+      }
+      else
+      {
+         valueChanged = !values[key.getIndex()].equals(newValue);
+      }
+
+      if (valueChanged)
       {
          values[key.getIndex()] = newValue;
 
