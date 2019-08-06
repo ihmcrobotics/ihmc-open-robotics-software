@@ -7,6 +7,7 @@ import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedCoMTrajectoryPlannerInterface;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -44,6 +45,8 @@ public class QuadrupedRuntimeEnvironment
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches;
 
+   private QuadrupedCoMTrajectoryPlannerInterface comTrajectoryPlanner = null;
+
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
@@ -75,6 +78,11 @@ public class QuadrupedRuntimeEnvironment
       this.robotMotionStatusHolder = robotMotionStatusHolder;
    }
 
+   public void setComTrajectoryPlanner(QuadrupedCoMTrajectoryPlannerInterface comTrajectoryPlanner)
+   {
+      this.comTrajectoryPlanner = comTrajectoryPlanner;
+   }
+
    public double getControlDT()
    {
       return controlDT;
@@ -104,7 +112,6 @@ public class QuadrupedRuntimeEnvironment
    {
       return graphicsListRegistry;
    }
-
 
    public ControllerCoreOptimizationSettings getControllerCoreOptimizationSettings()
    {
@@ -169,5 +176,10 @@ public class QuadrupedRuntimeEnvironment
    public RobotMotionStatusHolder getRobotMotionStatusHolder()
    {
       return robotMotionStatusHolder;
+   }
+
+   public QuadrupedCoMTrajectoryPlannerInterface getCoMTrajectoryPlanner()
+   {
+      return comTrajectoryPlanner;
    }
 }
