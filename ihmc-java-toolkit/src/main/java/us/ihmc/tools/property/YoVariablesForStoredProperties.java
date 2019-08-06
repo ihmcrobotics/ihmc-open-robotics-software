@@ -8,13 +8,13 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.HashMap;
 
-public class YoVariableStoredPropertyMap extends HashMap<StoredPropertyKey, YoVariable>
+public class YoVariablesForStoredProperties extends HashMap<StoredPropertyKey, YoVariable>
 {
    private final StoredPropertySetBasics storedPropertySet;
    private final StoredPropertyKeyList keys;
    private final YoVariableRegistry registry;
 
-   public YoVariableStoredPropertyMap(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, String registryName)
+   public YoVariablesForStoredProperties(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, String registryName)
    {
       this.storedPropertySet = storedPropertySet;
       this.keys = keys;
