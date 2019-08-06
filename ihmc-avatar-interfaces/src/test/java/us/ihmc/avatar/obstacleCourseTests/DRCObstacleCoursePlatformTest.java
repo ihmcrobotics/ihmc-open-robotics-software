@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
@@ -357,6 +359,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
@@ -373,6 +376,11 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
+      footstepDataList.setDefaultSwingDuration(1.1);
+      footstepDataList.setDefaultTransferDuration(0.5);
+      footstepDataList.getFootstepDataList().get(1).setTransferSplitFraction(0.01);
+      footstepDataList.getFootstepDataList().get(0).setSwingDurationShiftFraction(0.999);
+      footstepDataList.getFootstepDataList().get(0).setSwingSplitFraction(0.75);
       drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
