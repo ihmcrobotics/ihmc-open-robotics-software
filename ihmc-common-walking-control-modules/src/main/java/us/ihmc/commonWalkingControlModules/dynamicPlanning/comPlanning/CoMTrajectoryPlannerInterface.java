@@ -34,10 +34,6 @@ public interface CoMTrajectoryPlannerInterface
     */
    void compute(int segmentId, double timeInPhase);
 
-   void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
-                FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
-                FixedFramePoint3DBasics vrpPositionToPack);
-
    /**
     * Sets the initial center of mass position. Note that this should be set at every change in contact! This sets the initial
     * boundary condition for the trajectory planning.
@@ -73,5 +69,10 @@ public interface CoMTrajectoryPlannerInterface
     * Gets the desired position of the Virtual Repellent Point computed in {@link #compute(double)}.
     */
    FramePoint3DReadOnly getDesiredVRPPosition();
+
+   /**
+    * Gets the desired position of the Enhanced Centroidal Momentum Pivot point computed in {@link #compute(double)}.
+    */
+   FramePoint3DReadOnly getDesiredECMPPosition();
 
 }
