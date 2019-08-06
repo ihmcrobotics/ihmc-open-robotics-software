@@ -23,10 +23,21 @@ public interface DCMPlannerInterface
 
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 
-   void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                            FixedFrameVector3DBasics desiredDCMVelocityToPack);
-
-   void getDesiredECMPPosition(FramePoint3DBasics eCMPPositionToPack);
+   void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates);
 
    void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack);
+
+   FramePoint3DReadOnly getDesiredDCMPosition();
+
+   FrameVector3DReadOnly getDesiredDCMVelocity();
+
+   FramePoint3DReadOnly getDesiredCoMPosition();
+
+   FrameVector3DReadOnly getDesiredCoMVelocity();
+
+   FrameVector3DReadOnly getDesiredCoMAcceleration();
+
+   FramePoint3DReadOnly getDesiredVRPPosition();
+
+   FramePoint3DReadOnly getDesiredECMPPosition();
 }

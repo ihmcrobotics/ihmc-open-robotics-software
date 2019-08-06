@@ -364,8 +364,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    }
 
 
-   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                   FixedFrameVector3DBasics desiredDCMVelocityToPack)
+   @Override
+   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       timeInState.set(controllerTime.getDoubleValue() - timeAtStartOfState.getValue());
 
@@ -426,23 +426,55 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       desiredECMPPosition.set(desiredVRPPosition);
       desiredECMPPosition.subZ(comHeight.getDoubleValue());
 
-      desiredDCMPositionToPack.setMatchingFrame(desiredDCMPosition);
-      desiredDCMVelocityToPack.setMatchingFrame(desiredDCMVelocity);
-
-      if (desiredDCMPositionToPack.containsNaN())
+      if (desiredDCMPosition.containsNaN())
          throw new RuntimeException("Invalid setpoint.");
    }
 
-
-
+   @Override
    public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
    {
       finalDesiredDCMToPack.setMatchingFrame(dcmAtEndOfState);
    }
 
    @Override
-   public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
+   public FramePoint3DReadOnly getDesiredDCMPosition()
    {
-      desiredECMPPositionToPack.setIncludingFrame(desiredECMPPosition);
+      return desiredDCMPosition;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
+   {
+      return desiredDCMVelocity;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredCoMPosition()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return null;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return desiredVRPPosition;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return desiredECMPPosition;
    }
 }

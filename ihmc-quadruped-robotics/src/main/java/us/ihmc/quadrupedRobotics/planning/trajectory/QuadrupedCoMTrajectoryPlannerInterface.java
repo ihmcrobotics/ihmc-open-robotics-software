@@ -13,7 +13,7 @@ public interface QuadrupedCoMTrajectoryPlannerInterface
 
    void setNominalCoMHeight(double comHeight);
 
-   void setInitialState(double initialTime, FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity, FramePoint3DReadOnly copPosition)
+   void setInitialState(double initialTime, FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity, FramePoint3DReadOnly copPosition);
 
    void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact);
 
