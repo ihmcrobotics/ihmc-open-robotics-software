@@ -6,16 +6,14 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.List;
+
 public interface DCMPlannerInterface
 {
-   void clearStepSequence();
-
-   void addStepToSequence(QuadrupedTimedStep step);
-
    void initializeForStanding();
 
-   void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
-                              FrameVector3DReadOnly currentDCMVelocity);
+   void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
+                              FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
 
    void beganStep();
 
@@ -23,7 +21,7 @@ public interface DCMPlannerInterface
 
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 
-   void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates);
+   void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence);
 
    void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack);
 

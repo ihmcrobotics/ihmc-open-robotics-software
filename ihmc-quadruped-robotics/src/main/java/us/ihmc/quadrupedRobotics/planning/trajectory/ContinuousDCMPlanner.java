@@ -45,14 +45,12 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
-   private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoDouble controllerTime;
    private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
-   private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
 
    private final YoBoolean isStanding = new YoBoolean("plannerIsStanding", registry);
    private final YoBoolean isInFirstSpline = new YoBoolean("plannerIsInFirstSpline", registry);
@@ -163,18 +161,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void clearStepSequence()
-   {
-      stepSequence.clear();
-      numberOfStepsInPlanner.set(0);
-   }
-
-   public void addStepToSequence(QuadrupedTimedStep step)
-   {
-      stepSequence.add(step);
-      numberOfStepsInPlanner.increment();
-   }
-
    public void initializeForStanding()
    {
       isStanding.set(true);
@@ -183,19 +169,19 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
-                                     FrameVector3DReadOnly currentDCMVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
+                                     FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
       isInitialTransfer.set(true);
 
       double currentTime = controllerTime.getDoubleValue();
-      boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
+      boolean isCurrentPlanValid = stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime;
 
       if (isCurrentPlanValid)
       {
          // compute dcm trajectory
-         computeDcmTrajectory(currentContactStates);
+         computeDcmTrajectory(currentContactStates, stepSequence);
 
          dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
          dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
@@ -235,7 +221,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       setFirstSplineStartFromCurrentState();
    }
 
-   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
+   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
       // compute piecewise constant center of pressure plan
       timedContactSequence.update(stepSequence, soleFrames, currentContactStates, timeAtStartOfState.getDoubleValue());
@@ -365,7 +351,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
 
    @Override
-   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
+   public void computeSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
       timeInState.set(controllerTime.getDoubleValue() - timeAtStartOfState.getValue());
 
@@ -388,7 +374,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       }
       else
       {
-         computeDcmTrajectory(currentContactStates);
+         computeDcmTrajectory(currentContactStates, stepSequence);
 
          if (isInitialTransfer.getBooleanValue())
             computeInitialTransitionTrajectory();
