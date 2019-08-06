@@ -1360,6 +1360,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
 
+      desiredEpsilon = 1.0e-7;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);

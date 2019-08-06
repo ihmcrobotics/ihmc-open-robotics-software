@@ -117,7 +117,6 @@ import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -2028,9 +2027,18 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose)
    {
       return createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
+                                                                   SpatialVectorReadOnly desiredVelocity, ReferenceFrame trajectoryReferenceFrame)
+   {
+      FootTrajectoryMessage message = new FootTrajectoryMessage();
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, trajectoryReferenceFrame));
+      message.setRobotSide(robotSide.toByte());
+      return message;
    }
 
    public static PrepareForLocomotionMessage createPrepareForLocomotionMessage(boolean prepareManipulation, boolean preparePelvis)
