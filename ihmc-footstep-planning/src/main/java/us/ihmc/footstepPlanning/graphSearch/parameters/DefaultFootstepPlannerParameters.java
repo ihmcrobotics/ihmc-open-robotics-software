@@ -2,10 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class DefaultFootstepPlannerParameters implements FootstepPlannerParametersBasics
+public class DefaultFootstepPlannerParameters extends StoredPropertySet implements FootstepPlannerParametersBasics
 {
-   private final StoredPropertySet propertySet;
-
    public DefaultFootstepPlannerParameters() // for tests and stuff that's probably not gonna save
    {
       this(null);
@@ -21,14 +19,9 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       this("ihmc-open-robotics-software", "ihmc-footstep-planning/src/main/resources", footstepPlannerParameters);
    }
 
-   private DefaultFootstepPlannerParameters(String projectName,
-                                            String pathToResources,
-                                            FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   private DefaultFootstepPlannerParameters(String projectName, String pathToResources, FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
-      propertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                          getClass(),
-                                          projectName,
-                                          pathToResources);
+      super(FootstepPlannerParameterKeys.keys, DefaultFootstepPlannerParameters.class, projectName, pathToResources);
 
       if (footstepPlannerParameters != null)
       {
@@ -36,13 +29,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       }
       else
       {
-         propertySet.load();
+         load();
       }
-   }
-
-   @Override
-   public StoredPropertySet getStoredPropertySet()
-   {
-      return propertySet;
    }
 }

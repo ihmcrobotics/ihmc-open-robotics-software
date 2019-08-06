@@ -10,21 +10,20 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.StoredPropertySet;
 import us.ihmc.tools.property.StoredPropertySetBasics;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
-public interface FootstepPlannerParametersReadOnly
+public interface FootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
-   StoredPropertySetBasics getStoredPropertySet();
-
    /**
     * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
     * to run slower.
     */
    default boolean checkForBodyBoxCollisions()
    {
-      return getStoredPropertySet().get(checkForBodyBoxCollisions);
+      return get(checkForBodyBoxCollisions);
    }
 
    /**
@@ -32,7 +31,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean performHeuristicSearchPolicies()
    {
-      return getStoredPropertySet().get(performHeuristicSearchPolicies);
+      return get(performHeuristicSearchPolicies);
    }
 
    /**
@@ -41,7 +40,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getIdealFootstepWidth()
    {
-      return getStoredPropertySet().get(idealFootstepWidth);
+      return get(idealFootstepWidth);
    }
 
    /**
@@ -50,7 +49,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getIdealFootstepLength()
    {
-      return getStoredPropertySet().get(idealFootstepLength);
+      return get(idealFootstepLength);
    }
 
    /**
@@ -70,7 +69,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getWiggleInsideDelta()
    {
-      return getStoredPropertySet().get(wiggleInsideDelta);
+      return get(wiggleInsideDelta);
    }
 
    /**
@@ -87,7 +86,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepReach()
    {
-      return getStoredPropertySet().get(maxStepReach);
+      return get(maxStepReach);
    }
 
    /**
@@ -105,7 +104,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepYaw()
    {
-      return getStoredPropertySet().get(maxStepYaw);
+      return get(maxStepYaw);
    }
 
    /**
@@ -127,7 +126,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumStepWidth()
    {
-      return getStoredPropertySet().get(minStepWidth);
+      return get(minStepWidth);
    }
 
    /**
@@ -145,7 +144,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumStepLength()
    {
-      return getStoredPropertySet().get(minStepLength);
+      return get(minStepLength);
    }
 
    /**
@@ -153,7 +152,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumStepYaw()
    {
-      return getStoredPropertySet().get(minStepYaw);
+      return get(minStepYaw);
    }
 
    /**
@@ -175,7 +174,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepReachWhenSteppingUp()
    {
-      return getStoredPropertySet().get(maximumStepReachWhenSteppingUp);
+      return get(maximumStepReachWhenSteppingUp);
    }
 
    /**
@@ -197,7 +196,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepZWhenSteppingUp()
    {
-      return getStoredPropertySet().get(maximumStepZWhenSteppingUp);
+      return get(maximumStepZWhenSteppingUp);
    }
 
    /**
@@ -219,7 +218,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepXWhenForwardAndDown()
    {
-      return getStoredPropertySet().get(maximumStepXWhenForwardAndDown);
+      return get(maximumStepXWhenForwardAndDown);
    }
 
    /**
@@ -241,7 +240,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepZWhenForwardAndDown()
    {
-      return getStoredPropertySet().get(maximumStepZWhenForwardAndDown);
+      return get(maximumStepZWhenForwardAndDown);
    }
 
    /**
@@ -254,7 +253,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepZ()
    {
-      return getStoredPropertySet().get(maxStepZ);
+      return get(maxStepZ);
    }
 
    /**
@@ -265,7 +264,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumFootholdPercent()
    {
-      return getStoredPropertySet().get(minFootholdPercent);
+      return get(minFootholdPercent);
    }
 
    /**
@@ -279,7 +278,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumSurfaceInclineRadians()
    {
-      return getStoredPropertySet().get(minSurfaceIncline);
+      return get(minSurfaceIncline);
    }
 
    /**
@@ -295,7 +294,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean getWiggleIntoConvexHullOfPlanarRegions()
    {
-      return getStoredPropertySet().get(wiggleIntoConvexHullOfPlanarRegions);
+      return get(wiggleIntoConvexHullOfPlanarRegions);
    }
 
    /**
@@ -306,7 +305,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean getRejectIfCannotFullyWiggleInside()
    {
-      return getStoredPropertySet().get(rejectIfCannotFullyWiggleInside);
+      return get(rejectIfCannotFullyWiggleInside);
    }
 
    /**
@@ -315,7 +314,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumXYWiggleDistance()
    {
-      return getStoredPropertySet().get(maximumXYWiggleDistance);
+      return get(maximumXYWiggleDistance);
    }
 
    /**
@@ -324,7 +323,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumYawWiggle()
    {
-      return getStoredPropertySet().get(maximumYawWiggle);
+      return get(maximumYawWiggle);
    }
 
    /**
@@ -335,7 +334,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumZPenetrationOnValleyRegions()
    {
-      return getStoredPropertySet().get(maximumZPenetrationOnValleyRegions);
+      return get(maximumZPenetrationOnValleyRegions);
    }
 
    /**
@@ -356,7 +355,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximumStepWidth()
    {
-      return getStoredPropertySet().get(maxStepWidth);
+      return get(maxStepWidth);
    }
 
    /**
@@ -372,7 +371,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getCliffHeightToAvoid()
    {
-      return getStoredPropertySet().get(cliffHeightToAvoid);
+      return get(cliffHeightToAvoid);
    }
 
    /**
@@ -388,7 +387,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinimumDistanceFromCliffBottoms()
    {
-      return getStoredPropertySet().get(minimumDistanceFromCliffBottoms);
+      return get(minimumDistanceFromCliffBottoms);
    }
 
    /**
@@ -400,7 +399,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean getReturnBestEffortPlan()
    {
-      return getStoredPropertySet().get(returnBestEffortPlan);
+      return get(returnBestEffortPlan);
    }
 
    /**
@@ -409,7 +408,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default int getMinimumStepsForBestEffortPlan()
    {
-      return getStoredPropertySet().get(minimumStepsForBestEffortPlan);
+      return get(minimumStepsForBestEffortPlan);
    }
 
    /**
@@ -420,7 +419,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyGroundClearance()
    {
-      return getStoredPropertySet().get(bodyGroundClearance);
+      return get(bodyGroundClearance);
    }
 
    /**
@@ -431,7 +430,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxHeight()
    {
-      return getStoredPropertySet().get(bodyBoxHeight);
+      return get(bodyBoxHeight);
    }
 
    /**
@@ -441,7 +440,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxDepth()
    {
-      return getStoredPropertySet().get(bodyBoxDepth);
+      return get(bodyBoxDepth);
    }
 
    /**
@@ -451,7 +450,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxWidth()
    {
-      return getStoredPropertySet().get(bodyBoxWidth);
+      return get(bodyBoxWidth);
    }
 
    /**
@@ -461,7 +460,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxBaseX()
    {
-      return getStoredPropertySet().get(bodyBoxBaseX);
+      return get(bodyBoxBaseX);
    }
 
    /**
@@ -471,7 +470,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxBaseY()
    {
-      return getStoredPropertySet().get(bodyBoxBaseY);
+      return get(bodyBoxBaseY);
    }
 
    /**
@@ -481,7 +480,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBodyBoxBaseZ()
    {
-      return getStoredPropertySet().get(bodyBoxBaseZ);
+      return get(bodyBoxBaseZ);
    }
 
    /**
@@ -491,7 +490,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinXClearanceFromStance()
    {
-      return getStoredPropertySet().get(minXClearanceFromStance);
+      return get(minXClearanceFromStance);
    }
 
    /**
@@ -501,7 +500,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMinYClearanceFromStance()
    {
-      return getStoredPropertySet().get(minYClearanceFromStance);
+      return get(minYClearanceFromStance);
    }
 
    /**
@@ -509,7 +508,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getFinalTurnProximity()
    {
-      return getStoredPropertySet().get(finalTurnProximity);
+      return get(finalTurnProximity);
    }
 
    /**
@@ -517,7 +516,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean useQuadraticDistanceCost()
    {
-      return getStoredPropertySet().get(useQuadraticDistanceCost);
+      return get(useQuadraticDistanceCost);
    }
 
    /**
@@ -525,7 +524,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default boolean useQuadraticHeightCost()
    {
-      return getStoredPropertySet().get(useQuadraticHeightCost);
+      return get(useQuadraticHeightCost);
    }
 
    /**
@@ -533,7 +532,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default DoubleProvider getAStarHeuristicsWeight()
    {
-      return () -> getStoredPropertySet().get(aStarHeuristicsWeight);
+      return () -> get(aStarHeuristicsWeight);
    }
 
    /**
@@ -541,7 +540,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
    {
-      return () -> getStoredPropertySet().get(visGraphWithAStarHeuristicsWeight);
+      return () -> get(visGraphWithAStarHeuristicsWeight);
    }
 
    /**
@@ -549,7 +548,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default DoubleProvider getDepthFirstHeuristicsWeight()
    {
-      return () -> getStoredPropertySet().get(depthFirstHeuristicsWeight);
+      return () -> get(depthFirstHeuristicsWeight);
    }
 
    /**
@@ -557,7 +556,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default DoubleProvider getBodyPathBasedHeuristicsWeight()
    {
-      return () -> getStoredPropertySet().get(bodyPathBasedHeuristicsWeight);
+      return () -> get(bodyPathBasedHeuristicsWeight);
    }
 
    /**
@@ -566,7 +565,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getYawWeight()
    {
-      return getStoredPropertySet().get(yawWeight);
+      return get(yawWeight);
    }
 
    /**
@@ -581,7 +580,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getForwardWeight()
    {
-      return getStoredPropertySet().get(forwardWeight);
+      return get(forwardWeight);
    }
 
    /**
@@ -596,7 +595,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getLateralWeight()
    {
-      return getStoredPropertySet().get(lateralWeight);
+      return get(lateralWeight);
    }
 
    /**
@@ -605,7 +604,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getCostPerStep()
    {
-      return getStoredPropertySet().get(costPerStep);
+      return get(costPerStep);
    }
 
    /**
@@ -614,7 +613,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getStepUpWeight()
    {
-      return getStoredPropertySet().get(stepUpWeight);
+      return get(stepUpWeight);
    }
 
    /**
@@ -623,7 +622,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getStepDownWeight()
    {
-      return getStoredPropertySet().get(stepDownWeight);
+      return get(stepDownWeight);
    }
 
    /**
@@ -631,7 +630,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getRollWeight()
    {
-      return getStoredPropertySet().get(rollWeight);
+      return get(rollWeight);
    }
 
    /**
@@ -639,7 +638,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getPitchWeight()
    {
-      return getStoredPropertySet().get(pitchWeight);
+      return get(pitchWeight);
    }
 
    /**
@@ -648,7 +647,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
-      return getStoredPropertySet().get(maximum2dDistanceFromBoundingBoxToPenalize);
+      return get(maximum2dDistanceFromBoundingBoxToPenalize);
 
    }
 
@@ -659,7 +658,7 @@ public interface FootstepPlannerParametersReadOnly
     */
    default double getBoundingBoxCost()
    {
-      return getStoredPropertySet().get(boundingBoxCost);
+      return get(boundingBoxCost);
    }
 
    /**
@@ -669,5 +668,4 @@ public interface FootstepPlannerParametersReadOnly
    {
       return null;
    }
-
 }

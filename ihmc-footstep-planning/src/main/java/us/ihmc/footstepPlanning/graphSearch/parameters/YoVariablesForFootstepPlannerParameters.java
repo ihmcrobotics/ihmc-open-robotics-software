@@ -5,9 +5,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoVariablesForFootstepPlannerParameters extends YoVariablesForStoredProperties
 {
-   public YoVariablesForFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParametersReadOnly defaults)
+   public YoVariablesForFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParametersBasics defaults)
    {
-      super(defaults.getStoredPropertySet(), FootstepPlannerParameterKeys.keys, YoVariablesForFootstepPlannerParameters.class.getSimpleName());
+      super(defaults, FootstepPlannerParameterKeys.keys, YoVariablesForFootstepPlannerParameters.class.getSimpleName());
       parentRegistry.addChild(getRegistry());
    }
 }

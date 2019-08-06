@@ -72,7 +72,7 @@ public class FootstepPlannerCostsUIController
    {
       setupControls();
 
-      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters.getStoredPropertySet());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       javaFXStoredPropertyMap.put(useQuadraticDistanceCost, FootstepPlannerParameterKeys.useQuadraticDistanceCost);
       javaFXStoredPropertyMap.put(useQuadraticHeightCost, FootstepPlannerParameterKeys.useQuadraticHeightCost);
       javaFXStoredPropertyMap.put(costPerStep, FootstepPlannerParameterKeys.costPerStep);

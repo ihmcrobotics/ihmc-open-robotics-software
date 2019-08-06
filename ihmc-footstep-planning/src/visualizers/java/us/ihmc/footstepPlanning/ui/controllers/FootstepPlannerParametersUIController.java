@@ -138,7 +138,7 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters.getStoredPropertySet());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
       javaFXStoredPropertyMap.put(performHeuristicSearchPolicies, FootstepPlannerParameterKeys.performHeuristicSearchPolicies);
       javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
@@ -196,7 +196,7 @@ public class FootstepPlannerParametersUIController
    @FXML
    public void saveToFile()
    {
-      planningParameters.getStoredPropertySet().save();
+      planningParameters.save();
    }
 
    private void updateStepShape()
