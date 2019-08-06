@@ -798,6 +798,14 @@ public class HumanoidMessageTools
       return message;
    }
 
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation,
+                                                                                             Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+   {
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
+      return message;
+   }
+
    public static WholeBodyTrajectoryToolboxMessage createWholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
                                                                                            List<WaypointBasedTrajectoryMessage> endEffectorTrajectories,
                                                                                            List<ReachingManifoldMessage> reachingManifolds,
