@@ -32,4 +32,13 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
          load();
       }
    }
+
+   /**
+    * Run to update file with new parameters.
+    */
+   public static void main(String[] args)
+   {
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      parameters.save();
+   }
 }
