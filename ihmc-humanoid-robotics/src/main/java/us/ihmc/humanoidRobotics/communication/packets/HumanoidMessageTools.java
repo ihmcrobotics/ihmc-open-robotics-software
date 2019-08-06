@@ -938,9 +938,14 @@ public class HumanoidMessageTools
    public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
                                                                              long trajectoryReferenceFrameId)
    {
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrameId);
+   }
+
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity, long trajectoryReferenceFrameId)
+   {
       EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
-      Vector3D zeroLinearVelocity = new Vector3D();
-      message.getTaskspaceTrajectoryPoints().add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, zeroLinearVelocity));
+      message.getTaskspaceTrajectoryPoints().add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, desiredLinearVelocity));
       message.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -955,7 +960,13 @@ public class HumanoidMessageTools
    public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
-      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, trajectoryReferenceFrame.hashCode());
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrame);
+   }
+
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity, ReferenceFrame trajectoryReferenceFrame)
+   {
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, trajectoryReferenceFrame.hashCode());
    }
 
    public static LocalizationPacket createLocalizationPacket(boolean reset, boolean toggle)
@@ -1003,6 +1014,26 @@ public class HumanoidMessageTools
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.getEuclideanTrajectory()
              .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), ReferenceFrame.getWorldFrame()));
+      message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
+      return message;
+   }
+
+   /**
+    * Use this constructor to go straight to the given end point. The trajectory and data frame are set
+    * to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime how long it takes to reach the desired height.
+    * @param desiredHeight  desired pelvis height expressed in world frame.
+    * @param desiredHeightRate the desired rate of change of height when the  desired height is reached.
+    */
+   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, double desiredHeightRate)
+   {
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+      message.getEuclideanTrajectory()
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), new Vector3D(0.0, 0.0, desiredHeightRate), ReferenceFrame.getWorldFrame()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
