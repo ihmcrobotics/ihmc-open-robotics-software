@@ -27,6 +27,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ContinuousDCMPlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
+import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedCoMTrajectoryPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -65,6 +66,7 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedBodyICPBasedTranslationManager bodyICPBasedTranslationManager;
 
+   private final QuadrupedCoMTrajectoryPlannerInterface comPlanner;
    private final DCMPlannerInterface dcmPlanner;
 
    private final YoFramePoint3D yoDesiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
@@ -121,9 +123,18 @@ public class QuadrupedBalanceManager
 
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
-      dcmPlanner = new ContinuousDCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), linearInvertedPendulumModel.getYoNaturalFrequency(),
-                                            runtimeEnvironment.getGravity(), robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
-                                            yoGraphicsListRegistry);
+      if (runtimeEnvironment.getCoMTrajectoryPlanner() == null)
+      {
+         comPlanner = null;
+         dcmPlanner = new ContinuousDCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), linearInvertedPendulumModel.getYoNaturalFrequency(),
+                                               runtimeEnvironment.getGravity(), robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
+                                               yoGraphicsListRegistry);
+      }
+      else
+      {
+         comPlanner = runtimeEnvironment.getCoMTrajectoryPlanner();
+         dcmPlanner = null;
+      }
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
       maxDcmErrorBeforeLiftOffX = new DoubleParameter("maxDcmErrorBeforeLiftOffX", registry, 0.06);
