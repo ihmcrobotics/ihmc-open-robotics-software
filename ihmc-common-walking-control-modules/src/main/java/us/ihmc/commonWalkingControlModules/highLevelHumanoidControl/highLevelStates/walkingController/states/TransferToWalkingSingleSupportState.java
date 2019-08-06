@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -26,6 +27,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private static final int numberOfFootstepsToConsider = 3;
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(numberOfFootstepsToConsider);
 
    private final DoubleProvider minimumTransferTime;
 
@@ -80,8 +82,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)
@@ -92,8 +98,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
+         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
+         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
          if (i == 0)
          {
@@ -101,7 +109,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
-         balanceManager.addFootstepToPlan(footstep, timing);
+         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);
