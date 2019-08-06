@@ -28,6 +28,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanT
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTableEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -37,7 +38,14 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   {
+      @Override
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+      { // FIXME Hack to disable joint damping so it is easier to perform assertions on tracking. It'd be good if that was available at construction of the sim.
+         return createHumanoidFloatingRootJointRobot(createCollisionMeshes, false);
+      };
+   };
 
    @Override
    @Test
@@ -153,6 +161,13 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
 
       double ballHeight = testEnvironment.getBallRobot().getFloatingJoint().getQz().getValue();
       assertEquals(testEnvironment.getBallRadius(), ballHeight, 0.01);
+   }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
    }
 
    @Override

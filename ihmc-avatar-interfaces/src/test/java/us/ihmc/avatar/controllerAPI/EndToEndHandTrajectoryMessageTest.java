@@ -8,7 +8,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -45,6 +44,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -59,14 +59,13 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -1097,7 +1096,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    public static FrameQuaternion computeBestOrientationForDesiredPosition(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
-                                                                          FramePoint3D desiredPosition,
+                                                                          FramePoint3DReadOnly desiredPosition,
                                                                           TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator,
                                                                           int numberOfIterations)
    {
@@ -1219,7 +1218,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      Random random = new Random(54651);
+      Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
@@ -1249,6 +1248,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       SideDependentList<YoFramePose3D> desiredPoses = new SideDependentList<>();
       SideDependentList<YoFixedFrameSpatialVector> desiredVelocities = new SideDependentList<>();
 
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, chestCloned).forEach(joint -> joint.setQ(nextJointConfiguration(random, 0.6, joint)));
+      chestCloned.updateFramesRecursively();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = robotSide.getCamelCaseName();
@@ -1264,9 +1266,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          initialPose.setFromReferenceFrame(hand.getBodyFixedFrame());
-         List<OneDoFJointBasics> clonedJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, chestCloned).collect(Collectors.toList());
-         MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, clonedJoints);
-         chestCloned.updateFramesRecursively();
          finalPose.setFromReferenceFrame(chestCloned.subtreeStream().filter(body -> body.getName().equals(hand.getName() + "Cloned")).findFirst().get()
                                                     .getBodyFixedFrame());
       }
@@ -1353,9 +1352,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: "
-               + robotSide + " position: " + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
-               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 2.0e-2);
+         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
+               + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 0.1);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
@@ -1375,10 +1374,28 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
-         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: "
-               + robotSide + " position: " + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
-               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 3.0e-2);
+         EuclidCoreTestTools.assertTuple3DEquals("Poor position tracking for side: " + robotSide + " error: "
+               + currentPose.getPositionDistance(controllerDesiredPose), controllerDesiredPose.getPosition(), currentPose.getPosition(), 3.0e-2);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))),
+                                                                 controllerDesiredPose.getOrientation(),
+                                                                 currentPose.getOrientation(),
+                                                                 0.3);
       }
+   }
+
+   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
+   {
+      double jointLimitLower = joint.getJointLimitLower();
+      if (Double.isInfinite(jointLimitLower))
+         jointLimitLower = -Math.PI;
+      double jointLimitUpper = joint.getJointLimitUpper();
+      if (Double.isInfinite(jointLimitUpper))
+         jointLimitUpper = -Math.PI;
+      double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
+      jointLimitLower += 0.5 * rangeReduction;
+      jointLimitUpper -= 0.5 * rangeReduction;
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
    public static void assertSingleWaypointExecuted(String bodyName, Pose3DReadOnly desiredPose, SimulationConstructionSet scs)
