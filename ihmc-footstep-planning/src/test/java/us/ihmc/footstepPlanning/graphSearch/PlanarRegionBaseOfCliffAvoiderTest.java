@@ -14,7 +14,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -62,7 +63,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters());
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, parameters);
       parameters.setCliffHeightToAvoid(0.01);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
@@ -118,7 +120,8 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlannerParameters());
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, parameters);
       parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
