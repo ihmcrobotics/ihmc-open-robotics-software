@@ -374,7 +374,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      {
+      }
+
+      @Override
+      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
       {
       }
    };
