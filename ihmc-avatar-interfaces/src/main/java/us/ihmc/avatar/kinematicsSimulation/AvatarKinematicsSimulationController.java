@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -128,7 +129,7 @@ public class AvatarKinematicsSimulationController
 
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, yoGraphicsListRegistry);
+      setupWalkingMessageHandler(walkingControllerParameters, capturePointPlannerParameters, yoGraphicsListRegistry);
       rootJoint = fullRobotModel.getRootJoint();
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
@@ -226,16 +227,24 @@ public class AvatarKinematicsSimulationController
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, ICPPlannerParameters icpPlannerParameters,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
+      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
                                                                               defaultInitialTransferTime,
                                                                               defaultFinalTransferTime,
+                                                                              defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction,
+                                                                              defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction,
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
