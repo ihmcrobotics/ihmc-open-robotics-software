@@ -1099,7 +1099,13 @@ public class ConcaveHullMergerTest
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      {
+         fail("Hull is invalid");
+      }
+
+      @Override
+      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
       {
          fail("Hulls are invalid");
       }

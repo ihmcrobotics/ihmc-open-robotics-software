@@ -167,9 +167,15 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
    @Override
-   public void hullsAreInvalid(ArrayList<Point2D>... invalidHulls)
+   public void hullIsInvalid(ArrayList<Point2D> invalidHull)
    {
-      LogTools.error("Got some invalid hulls.");
+      LogTools.error("Got an invalid hull.");
+   }
+
+   @Override
+   public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+   {
+      LogTools.error("Got two invalid hulls.");
    }
 
 }

@@ -137,19 +137,19 @@ public class ConcaveHullMerger
 
       if ((!hullOneListIsValid) && (!hullTwoListIsValid))
       {
-         listener.hullsAreInvalid(hullOneList, hullTwoList);
+         notifyListenerHullsAreInvalid(listener, hullOneList, hullTwoList);
          return null;
       }
 
       if (!hullTwoListIsValid)
       {
-         listener.hullsAreInvalid(hullTwoList);
+         notifyListenerHullsAreInvalid(listener, hullTwoList);
          return hullOneList;
       }
 
       if (!hullOneListIsValid)
       {
-         listener.hullsAreInvalid(hullOneList);
+         notifyListenerHullsAreInvalid(listener, hullOneList);
          return hullTwoList;
       }
 
@@ -302,6 +302,22 @@ public class ConcaveHullMerger
       }
 
       return mergedVertices;
+   }
+
+   private static void notifyListenerHullsAreInvalid(ConcaveHullMergerListener listener, ArrayList<Point2D> hullList)
+   {
+      if (listener != null)
+      {
+         listener.hullIsInvalid(hullList);
+      }
+   }
+
+   private static void notifyListenerHullsAreInvalid(ConcaveHullMergerListener listener, ArrayList<Point2D> hullListA, ArrayList<Point2D> hullListB)
+   {
+      if (listener != null)
+      {
+         listener.hullsAreInvalid(hullListA, hullListB);
+      }
    }
 
    /**
