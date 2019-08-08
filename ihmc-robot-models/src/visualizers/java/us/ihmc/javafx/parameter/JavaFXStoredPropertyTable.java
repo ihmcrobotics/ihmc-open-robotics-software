@@ -13,7 +13,7 @@ public class JavaFXStoredPropertyTable extends JavaFXParameterTable
 
    public void setup(StoredPropertySet storedPropertySet, StoredPropertyKeyList keys)
    {
-      for (StoredPropertyKey<?> parameterKey : keys.keys())
+      for (StoredPropertyKey parameterKey : keys.keys())
       {
          SpinnerValueFactory spinnerValueFactory = null;
 
