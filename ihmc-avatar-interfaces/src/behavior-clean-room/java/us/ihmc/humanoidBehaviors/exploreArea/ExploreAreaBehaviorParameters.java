@@ -14,10 +14,6 @@ public class ExploreAreaBehaviorParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey chestYawAmount = keys.addDoubleKey("Chest yaw amount");
    public static final DoubleStoredPropertyKey minimumDistanceBetweenObservationPoints = keys.addDoubleKey("Minimum distance between observation points");
    public static final DoubleStoredPropertyKey minDistanceToWalkIfPossible = keys.addDoubleKey("Minimum distance to walk if possible");
-   public static final DoubleStoredPropertyKey minExplorationAreaX = keys.addDoubleKey("Min exploration area X");
-   public static final DoubleStoredPropertyKey minExplorationAreaY = keys.addDoubleKey("Min exploration area Y");
-   public static final DoubleStoredPropertyKey maxExplorationAreaX = keys.addDoubleKey("Max exploration area X");
-   public static final DoubleStoredPropertyKey maxExplorationAreaY = keys.addDoubleKey("Max exploration area Y");
 
    public ExploreAreaBehaviorParameters()
    {

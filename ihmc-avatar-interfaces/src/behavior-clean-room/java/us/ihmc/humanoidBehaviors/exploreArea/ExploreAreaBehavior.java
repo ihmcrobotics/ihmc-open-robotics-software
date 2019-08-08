@@ -85,16 +85,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
 
-   private final double turnChestTrajectoryDuration = 1.0;
-   private final double turnTrajectoryWaitTimeMulitplier = 3.0;
-   private final double perceiveDuration = 28.0; //1.0
-
    private int chestYawForLookingAroundIndex = 0;
 
    private final BoundingBox3D maximumExplorationArea = new BoundingBox3D(-10.0, -10.0, -1.0, 10.0, 10.0, 2.0);
 
-   private double minimumDistanceBetweenObservationPoints = 2.0;
-   private double minDistanceToWalkIfPossible = 3.0;
    private double exploreGridXSteps = 0.5;
    private double exploreGridYSteps = 0.5;
    private int maxNumberOfFeasiblePointsToLookFor = 10; //30;
@@ -171,7 +165,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       factory.setOnEntry(ExploreAreaBehaviorState.WalkToNextLocation, this::onWalkToNextLocationStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.WalkToNextLocation, this::doWalkToNextLocationStateAction);
-      //      factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
+      // factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation, ExploreAreaBehaviorState.Stop, this::readyToTransitionFromWalkToNextLocationToStop);
       factory.addTransition(ExploreAreaBehaviorState.WalkToNextLocation,
                             ExploreAreaBehaviorState.TakeAStep,
                             this::readyToTransitionFromWalkToNextLocationToTakeAStep);
@@ -260,8 +254,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       double chestYaw = Math.toRadians(chestYawsForLookingAround.get(chestYawForLookingAroundIndex));
       double headPitch = Math.toRadians(headPitchForLookingAround.get(chestYawForLookingAroundIndex));
-      turnChestWithRespectToMidFeetZUpFrame(chestYaw, turnChestTrajectoryDuration);
-      pitchHeadWithRespectToChest(headPitch, turnChestTrajectoryDuration);
+      turnChestWithRespectToMidFeetZUpFrame(chestYaw, parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
+      pitchHeadWithRespectToChest(headPitch, parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
 
       chestYawForLookingAroundIndex++;
    }
@@ -272,7 +266,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromLookAroundToPerceive(double timeInState)
    {
-      return (timeInState > turnTrajectoryWaitTimeMulitplier * turnChestTrajectoryDuration);
+      return (timeInState > parameters.get(ExploreAreaBehaviorParameters.turnTrajectoryWaitTimeMulitplier)
+                            * parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
    }
 
    private void onPerceiveStateEntry()
@@ -300,7 +295,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromPerceiveToGrabPlanarRegions(double timeInState)
    {
-      return (timeInState > perceiveDuration);
+      return (timeInState > parameters.get(ExploreAreaBehaviorParameters.perceiveDuration));
    }
 
    private void onGrabPlanarRegionsStateEntry()
@@ -526,7 +521,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onDetermineNextLocationsStateEntry()
    {
-      behaviorHelper.requestChestGoHome(turnChestTrajectoryDuration);
+      behaviorHelper.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
 
       desiredFramePoses = null;
       determinedNextLocations = false;
@@ -586,7 +581,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          distancesFromStart.put(testGoal, midFeetPosition.distanceXY(testGoal));
       }
 
-      sortBasedOnBestDistances(potentialPoints, distancesFromStart, minDistanceToWalkIfPossible);
+      sortBasedOnBestDistances(potentialPoints, distancesFromStart, parameters.get(ExploreAreaBehaviorParameters.minDistanceToWalkIfPossible));
 
       LogTools.info("Sorted the points based on best distances. Now looking for body paths to those potential goal locations.");
 
@@ -682,7 +677,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       for (Point3D observationPoint : pointsObservedFrom)
       {
-         if (pointToCheck.distanceXY(observationPoint) < minimumDistanceBetweenObservationPoints)
+         if (pointToCheck.distanceXY(observationPoint) < parameters.get(ExploreAreaBehaviorParameters.minimumDistanceBetweenObservationPoints))
          {
             return true;
          }
@@ -894,7 +889,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       else
       {
          nextFootstepLocation = null;
-         behaviorHelper.requestChestGoHome(turnChestTrajectoryDuration);
+         behaviorHelper.requestChestGoHome(parameters.get(ExploreAreaBehaviorParameters.turnChestTrajectoryDuration));
       }
 
       footstepIndex++;
@@ -1019,7 +1014,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
       behaviorHelper.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
    }
 
-   private void rotateChestAndPitchHeadToLookAtPointInWorld(double timeInState, RobotSide swingSide, Point3D pointToLookAtInWorld, FullHumanoidRobotModel fullRobotModel,
+   private void rotateChestAndPitchHeadToLookAtPointInWorld(double timeInState,
+                                                            RobotSide swingSide,
+                                                            Point3D pointToLookAtInWorld,
+                                                            FullHumanoidRobotModel fullRobotModel,
                                                             HumanoidReferenceFrames referenceFrames)
    {
       //      ReferenceFrame headBaseFrame = fullRobotModel.getHeadBaseFrame();
