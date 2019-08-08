@@ -31,10 +31,13 @@ public class JavaFXParameterTableEntry<T>
       observableValue = new FunctionalObservableValue<>(this::getSpinner);
 
       spinner = new Spinner<>();
+      spinner.setEditable(true);
       spinner.setValueFactory(spinnerValueFactory);
-      spinner.getValueFactory().valueProperty().addListener((observable, old, newValue) -> setter.accept(newValue));
-//      spinner.getValueFactory().valueProperty().addListener(observable -> setter.accept(spinner.getValue())); // TODO could also use if above doesn't work
-      spinner.getValueFactory().valueProperty().addListener(onUserSpunSpinner);
+      spinner.getValueFactory().valueProperty().addListener((observable, old, newValue) ->
+      {
+         setter.accept(newValue);
+         onUserSpunSpinner.invalidated(observable); // these have to be in this order!
+      });
    }
 
    public void setValue(T value)

@@ -2,6 +2,7 @@ package us.ihmc.javafx.parameter;
 
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableView;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.*;
 
 public class JavaFXStoredPropertyTable extends JavaFXParameterTable
@@ -11,7 +12,7 @@ public class JavaFXStoredPropertyTable extends JavaFXParameterTable
       super(tableView);
    }
 
-   public void setup(StoredPropertySet storedPropertySet, StoredPropertyKeyList keys)
+   public void setup(StoredPropertySet storedPropertySet, StoredPropertyKeyList keys, Runnable parametersUpdated)
    {
       for (StoredPropertyKey parameterKey : keys.keys())
       {
@@ -26,13 +27,25 @@ public class JavaFXStoredPropertyTable extends JavaFXParameterTable
             spinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(-100, 100, storedPropertySet.get((IntegerStoredPropertyKey) parameterKey), 1);
          }
 
-         JavaFXParameterTableEntry javaFXParameterTableEntry = new JavaFXParameterTableEntry<>(parameterKey.getTitleCasedName(),
-                                                                                               () -> storedPropertySet.get(parameterKey),
-                                                                                               newValue -> storedPropertySet.set(parameterKey, newValue),
-                                                                                               observable ->
-                                                                                               {
-                                                                                               },
-                                                                                               spinnerValueFactory);
+         JavaFXParameterTableEntry javaFXParameterTableEntry = new JavaFXParameterTableEntry<>(
+               parameterKey.getTitleCasedName(),
+               () ->
+               {
+                  Object accessedValue = storedPropertySet.get(parameterKey);
+                  LogTools.debug("Accessed {}: {}", parameterKey.getCamelCasedName(), accessedValue);
+                  return accessedValue;
+               },
+               newValue ->
+               {
+                  LogTools.debug("Setting stored value {}: {}", parameterKey.getCamelCasedName(), newValue);
+                  storedPropertySet.set(parameterKey, newValue);
+               },
+               observable ->
+               {
+                  LogTools.debug("Observed: {}", parameterKey.getCamelCasedName());
+                  parametersUpdated.run();
+               },
+               spinnerValueFactory);
          addEntry(javaFXParameterTableEntry);
       }
 
