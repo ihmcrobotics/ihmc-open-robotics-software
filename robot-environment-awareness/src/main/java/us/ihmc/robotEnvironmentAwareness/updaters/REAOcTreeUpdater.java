@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -198,5 +199,10 @@ public class REAOcTreeUpdater
    public void handleLidarScanMessage(LidarScanMessage message)
    {
       latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
+   }
+
+   public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      latestLidarPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 }
