@@ -2,9 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -16,7 +15,7 @@ public class SplinePathPlanner extends AbstractWaypointsForFootstepsPlanner
    private final YoPolynomial yPoly;
    private final YoPolynomial zPoly;
 
-   public SplinePathPlanner(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
+   public SplinePathPlanner(FootstepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry)
    {
       super(parameters, parentRegistry);
 

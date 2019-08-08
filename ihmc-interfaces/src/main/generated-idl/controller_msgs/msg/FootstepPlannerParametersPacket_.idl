@@ -1,7 +1,6 @@
 #ifndef __controller_msgs__msg__FootstepPlannerParametersPacket__idl__
 #define __controller_msgs__msg__FootstepPlannerParametersPacket__idl__
 
-#include "controller_msgs/msg/./FootstepPlannerCostParametersPacket_.idl"
 module controller_msgs
 {
   module msg
@@ -318,9 +317,94 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double min_y_clearance_from_stance;
         /**
-         * When using a cost based planning approach this value defines the weighting parameters to be used
+         * When using a cost based planning approach this value defined how the yaw of a footstep will be
+         * weighted in comparison to its position.
          */
-        controller_msgs::msg::dds::FootstepPlannerCostParametersPacket cost_parameters;
+        @defaultValue(value=-1.0)
+        double yaw_weight;
+        /**
+         * When using a cost based planning approach this value defines how the pitch will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double pitch_weight;
+        /**
+         * When using a cost based planning approach this value defines how the roll will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double roll_weight;
+        /**
+         * When using a cost based planning approach, this value defines how the forward (or backward) displacement
+         * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+         * weight is averaged with the value returned by {@link #getLateralWeight()}
+         */
+        @defaultValue(value=-1.0)
+        double forward_weight;
+        /**
+         * When using a cost based planning approach, this value defines how the lateral displacement
+         * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+         * weight is averaged with the value returned by {@link #getForwardWeight()}
+         */
+        @defaultValue(value=-1.0)
+        double lateral_weight;
+        /**
+         * When using a cost based planning approach this value defines how the height change when stepping up will be
+         * weighted.
+         */
+        @defaultValue(value=-1.0)
+        double step_up_weight;
+        /**
+         * When using a cost based planning approach this value defines how the height change when stepping down will be
+         * weighted.
+         */
+        @defaultValue(value=-1.0)
+        double step_down_weight;
+        /**
+         * When using a cost based planning approach this value defines the cost that is added for each step
+         * taken. Setting this value to a high number will favor plans with less steps.
+         */
+        @defaultValue(value=-1.0)
+        double cost_per_step;
+        /**
+         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+         */
+        boolean use_quadratic_distance_cost;
+        /**
+         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+         */
+        boolean use_quadratic_height_cost;
+        /**
+         * Gets the weight for the heuristics in the A Star planner.
+         */
+        @defaultValue(value=-1.0)
+        double a_star_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Visibility graph with A star planner.
+         */
+        @defaultValue(value=-1.0)
+        double vis_graph_with_a_star_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Depth First planner.
+         */
+        @defaultValue(value=-1.0)
+        double depth_first_heuristics_weight;
+        /**
+         * Gets the weight for the heuristics in the Body path based planner.
+         */
+        @defaultValue(value=-1.0)
+        double body_path_based_heuristics_weight;
+        /**
+         * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+         * @see FootstepPlannerCostParameters#getBoundingBoxCost
+         */
+        @defaultValue(value=-1.0)
+        double maximum_2d_distance_from_bounding_box_to_penalize;
+        /**
+         * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+         * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+         * {@code c * (1 - d / d_max)}, where d_max is this value.
+         */
+        @defaultValue(value=-1.0)
+        double bounding_box_cost;
       };
     };
   };

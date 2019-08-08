@@ -10,8 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -49,7 +48,7 @@ public class FootstepPlannerMessageTools
       return message;
    }
 
-   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
+   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParametersReadOnly parameters)
    {
       if (parameters == null)
       {
@@ -93,26 +92,24 @@ public class FootstepPlannerMessageTools
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
 
-      FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
+      packet.setUseQuadraticDistanceCost(parameters.useQuadraticDistanceCost());
+      packet.setUseQuadraticHeightCost(parameters.useQuadraticHeightCost());
 
-      packet.getCostParameters().setUseQuadraticDistanceCost(costParameters.useQuadraticDistanceCost());
-      packet.getCostParameters().setUseQuadraticHeightCost(costParameters.useQuadraticHeightCost());
+      packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
+      packet.setVisGraphWithAStarHeuristicsWeight(parameters.getVisGraphWithAStarHeuristicsWeight().getValue());
+      packet.setDepthFirstHeuristicsWeight(parameters.getDepthFirstHeuristicsWeight().getValue());
+      packet.setBodyPathBasedHeuristicsWeight(parameters.getBodyPathBasedHeuristicsWeight().getValue());
 
-      packet.getCostParameters().setAStarHeuristicsWeight(costParameters.getAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setVisGraphWithAStarHeuristicsWeight(costParameters.getVisGraphWithAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setDepthFirstHeuristicsWeight(costParameters.getDepthFirstHeuristicsWeight().getValue());
-      packet.getCostParameters().setBodyPathBasedHeuristicsWeight(costParameters.getBodyPathBasedHeuristicsWeight().getValue());
-
-      packet.getCostParameters().setYawWeight(costParameters.getYawWeight());
-      packet.getCostParameters().setPitchWeight(costParameters.getPitchWeight());
-      packet.getCostParameters().setRollWeight(costParameters.getRollWeight());
-      packet.getCostParameters().setStepUpWeight(costParameters.getStepUpWeight());
-      packet.getCostParameters().setStepDownWeight(costParameters.getStepDownWeight());
-      packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
-      packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
-      packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
-      packet.getCostParameters().setBoundingBoxCost(costParameters.getBoundingBoxCost());
-      packet.getCostParameters().setMaximum2dDistanceFromBoundingBoxToPenalize(costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      packet.setYawWeight(parameters.getYawWeight());
+      packet.setPitchWeight(parameters.getPitchWeight());
+      packet.setRollWeight(parameters.getRollWeight());
+      packet.setStepUpWeight(parameters.getStepUpWeight());
+      packet.setStepDownWeight(parameters.getStepDownWeight());
+      packet.setForwardWeight(parameters.getForwardWeight());
+      packet.setLateralWeight(parameters.getLateralWeight());
+      packet.setCostPerStep(parameters.getCostPerStep());
+      packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
+      packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
    }
 
    public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)

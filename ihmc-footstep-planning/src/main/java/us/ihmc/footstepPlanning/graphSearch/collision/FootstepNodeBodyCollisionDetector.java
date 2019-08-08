@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.collision;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.HashMap;
@@ -10,13 +10,13 @@ import java.util.HashMap;
 public class FootstepNodeBodyCollisionDetector
 {
    private final BoundingBoxCollisionDetector collisionDetector;
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final HashMap<LatticeNode, BodyCollisionData> collisionDataHolder = new HashMap<>();
 
-   public FootstepNodeBodyCollisionDetector(FootstepPlannerParameters parameters)
+   public FootstepNodeBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
    {
       this.collisionDetector = new BoundingBoxCollisionDetector(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight(), 
-                                                                parameters.getCostParameters().getMaximum2dDistanceFromBoundingBoxToPenalize());
+                                                                parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       this.parameters = parameters;
    }
 

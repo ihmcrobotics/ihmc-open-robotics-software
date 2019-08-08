@@ -1,15 +1,16 @@
 package us.ihmc.tools.property;
 
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ import java.util.*;
  * - No YoVariableServer required
  * - INI file can be placed in higher level projects to override the defaults
  */
-public class StoredPropertySet implements StoredPropertySetReadOnly
+public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
    private final String saveFileName;
@@ -35,6 +36,8 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    private final Class<?> classForLoading;
    private final String directoryNameToAssumePresent;
    private final String subsequentPathToResourceFolder;
+
+   private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
    public StoredPropertySet(StoredPropertyKeyList keys,
                             Class<?> classForLoading,
@@ -46,9 +49,17 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = keys.getSaveFileName() + ".ini";
+      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + ".ini";
 
       values = new Object[keys.keys().size()];
+
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         if (key.hasDefaultValue())
+         {
+            setForListeners(key, key.getDefaultValue());
+         }
+      }
    }
 
    @Override
@@ -70,29 +81,39 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
    }
 
    @Override
-   public Object get(StoredPropertyKey key)
+   public <T> T get(StoredPropertyKey<T> key)
    {
-      return values[key.getIndex()];
+      return (T) values[key.getIndex()];
    }
 
+   @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
+   @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
+   @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
    }
 
-   public void set(StoredPropertyKey key, Object value)
+   @Override
+   public <T> void set(StoredPropertyKey<T> key, T value)
    {
-      values[key.getIndex()] = value;
+      setForListeners(key, value);
+   }
+
+   @Override
+   public <T> StoredProperty<T> getProperty(StoredPropertyKey<T> key)
+   {
+      return new StoredProperty<>(key, this);
    }
 
    @Override
@@ -101,11 +122,58 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return Arrays.asList(values);
    }
 
+   @Override
    public void setAll(List<Object> newValues)
    {
-      for (int i = 0; i < values.length; i++)
+      for (int i = 0; i < keys.keys().size(); i++)
       {
-         values[i] = newValues.get(i);
+         setForListeners(keys.keys().get(i), newValues.get(i));
+      }
+   }
+
+   private void setForListeners(StoredPropertyKey key, Object newValue)
+   {
+      boolean valueChanged;
+      if (values[key.getIndex()] == null)
+      {
+         valueChanged = newValue != null;
+      }
+      else
+      {
+         valueChanged = !values[key.getIndex()].equals(newValue);
+      }
+
+      if (valueChanged)
+      {
+         values[key.getIndex()] = newValue;
+
+         if (propertyChangedListeners.get(key) != null)
+         {
+            for (Runnable propertyChangedListener : propertyChangedListeners.get(key))
+            {
+               propertyChangedListener.run();
+            }
+         }
+      }
+   }
+
+   @Override
+   public void addPropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged)
+   {
+      if (propertyChangedListeners.get(key) == null)
+      {
+         propertyChangedListeners.put(key, new ArrayList<>());
+      }
+
+      propertyChangedListeners.get(key).add(onPropertyChanged);
+   }
+
+   @Override
+   public void removePropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged)
+   {
+      if (propertyChangedListeners.get(key) != null)
+      {
+         propertyChangedListeners.get(key).remove(onPropertyChanged);
       }
    }
 
@@ -129,6 +197,12 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
             {
                if (!properties.containsKey(key.getCamelCasedName()))
                {
+                  if (key.hasDefaultValue())
+                  {
+                     setForListeners(key, key.getDefaultValue());
+                     continue;
+                  }
+
                   throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
                }
 
@@ -142,15 +216,15 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
                {
                   if (key.getType().equals(Double.class))
                   {
-                     values[key.getIndex()] = Double.valueOf(stringValue);
+                     setForListeners(key, Double.valueOf(stringValue));
                   }
                   else if (key.getType().equals(Integer.class))
                   {
-                     values[key.getIndex()] = Integer.valueOf(stringValue);
+                     setForListeners(key, Integer.valueOf(stringValue));
                   }
                   else if (key.getType().equals(Boolean.class))
                   {
-                     values[key.getIndex()] = Boolean.valueOf(stringValue);
+                     setForListeners(key, Boolean.valueOf(stringValue));
                   }
                   else
                   {
@@ -240,23 +314,49 @@ public class StoredPropertySet implements StoredPropertySetReadOnly
       return findSaveFileDirectory().resolve(saveFileName);
    }
 
-   /**
-    *  find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
-    *  or just save the file in the working directory
-    */
    private Path findSaveFileDirectory()
    {
-      Path defuzzedPath = WorkspacePathTools.handleWorkingDirectoryFuzziness(directoryNameToAssumePresent);
+      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
+      // of just save the file in the working directory
 
-      if (defuzzedPath == null)
+      Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
+
+      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
+      boolean directoryFound = false;
+      for (Path path : absoluteWorkingDirectory)
       {
-         return Paths.get(".").toAbsolutePath().normalize(); // current working directory
+         reworkedPath = reworkedPath.resolve(path); // building up the path
+
+         if (path.toString().equals(directoryNameToAssumePresent))
+         {
+            directoryFound = true;
+            break;
+         }
       }
 
-      String packageWithDots = classForLoading.getPackage().toString();
-      String packageWithSlashes = packageWithDots.split(" ")[1].replaceAll("\\.", "/");
+      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
+      {
+         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
+         directoryFound = true;
+      }
 
-      Path finalPath = defuzzedPath.resolve(subsequentPathToResourceFolder).resolve(packageWithSlashes);
+      if (!directoryFound)
+      {
+         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
+                       directoryNameToAssumePresent,
+                       absoluteWorkingDirectory,
+                       reworkedPath);
+         return absoluteWorkingDirectory;
+      }
+
+      String s = classForLoading.getPackage().toString();
+      LogTools.debug(s);
+      String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
+      LogTools.debug(packagePath);
+
+      Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
+
+      Path finalPath = reworkedPath.resolve(subPath);
 
       FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
