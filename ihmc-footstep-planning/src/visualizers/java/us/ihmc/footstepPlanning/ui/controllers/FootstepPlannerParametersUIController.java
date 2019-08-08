@@ -1,26 +1,20 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import java.io.File;
-import java.io.IOException;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.shape.Rectangle;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private FootstepPlannerParametersBasics planningParameters;
 
    @FXML
    private CheckBox returnBestEffortPlan;
@@ -88,22 +82,9 @@ public class FootstepPlannerParametersUIController
 
    private static final double metersToPixel = 200;
 
-   private FilePropertyHelper filePropertyHelper;
 
    public FootstepPlannerParametersUIController()
    {
-      File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-         filePropertyHelper = new FilePropertyHelper(configurationFile);
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
    }
 
    public void attachMessager(JavaFXMessager messager)
@@ -111,9 +92,9 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
-      parametersProperty.setPlannerParameters(parameters);
+      this.planningParameters = parameters;
    }
 
    public void setupControls()
@@ -140,14 +121,14 @@ public class FootstepPlannerParametersUIController
       maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
       wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
 
-      maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      maxStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      maxStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
-      minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
+      maxStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      maxStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      maxStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minXClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
+      minYClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
       
       cliffHeightSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       cliffClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
@@ -157,37 +138,41 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindReturnBestEffortPlan(returnBestEffortPlan.selectedProperty());
-      parametersProperty.bidirectionalBindPerformHeuristicSearchPolicies(performHeuristicSearchPolicies.selectedProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
+      javaFXStoredPropertyMap.put(performHeuristicSearchPolicies, FootstepPlannerParameterKeys.performHeuristicSearchPolicies);
+      javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
+      javaFXStoredPropertyMap.put(maxStepWidth, FootstepPlannerParameterKeys.maxStepWidth);
+      javaFXStoredPropertyMap.put(minStepWidth, FootstepPlannerParameterKeys.minStepWidth);
+      javaFXStoredPropertyMap.put(minStepLength, FootstepPlannerParameterKeys.minStepLength);
+      javaFXStoredPropertyMap.put(maxStepZ, FootstepPlannerParameterKeys.maxStepZ);
+      javaFXStoredPropertyMap.put(minSurfaceIncline, FootstepPlannerParameterKeys.minSurfaceIncline);
+      javaFXStoredPropertyMap.put(maxStepYaw, FootstepPlannerParameterKeys.maxStepYaw);
+      javaFXStoredPropertyMap.put(minStepYaw, FootstepPlannerParameterKeys.minStepYaw);
+      javaFXStoredPropertyMap.put(minFootholdPercent, FootstepPlannerParameterKeys.minFootholdPercent);
+      javaFXStoredPropertyMap.put(minXClearance, FootstepPlannerParameterKeys.minXClearanceFromStance);
+      javaFXStoredPropertyMap.put(minYClearance, FootstepPlannerParameterKeys.minYClearanceFromStance);
+      javaFXStoredPropertyMap.put(cliffHeightSpinner, FootstepPlannerParameterKeys.cliffHeightToAvoid);
+      javaFXStoredPropertyMap.put(cliffClearance, FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(maxXYWiggleSpinner, FootstepPlannerParameterKeys.maximumXYWiggleDistance);
+      javaFXStoredPropertyMap.put(maxYawWiggleSpinner, FootstepPlannerParameterKeys.maximumYawWiggle);
+      javaFXStoredPropertyMap.put(wiggleInsideDeltaSpinner, FootstepPlannerParameterKeys.wiggleInsideDelta);
+      javaFXStoredPropertyMap.put(maxStepUpX, FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp);
+      javaFXStoredPropertyMap.put(stepUpHeight, FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp);
+      javaFXStoredPropertyMap.put(maxStepDownX, FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown);
+      javaFXStoredPropertyMap.put(stepDownHeight, FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown);
 
-      parametersProperty.bidirectionalBindMaxStepReach(maxStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxStepWidth(maxStepWidth.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinStepWidth(minStepWidth.getValueFactory().valueProperty());
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      {
+         planningParameters.set(parameters);
 
-      parametersProperty.bidirectionalBindMinStepLength(minStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxStepZ(maxStepZ.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinSurfaceIncline(minSurfaceIncline.getValueFactory().valueProperty());
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
 
-      parametersProperty.bidirectionalBindMaxStepYaw(maxStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinStepYaw(minStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinFootholdPercent(minFootholdPercent.getValueFactory().valueProperty());
-
-      parametersProperty.bidirectionalBindMinXClearanceFromStance(minXClearance.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinYClearanceFromStance(minYClearance.getValueFactory().valueProperty());
-      
-      parametersProperty.bidirectionalBindCliffHeight(cliffHeightSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindCliffClearance(cliffClearance.getValueFactory().valueProperty());
-
-      parametersProperty.bidirectionalBindMaxWiggleXY(maxXYWiggleSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaxWiggleYaw(maxYawWiggleSpinner.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindWiggleInsideDelta(wiggleInsideDeltaSpinner.getValueFactory().valueProperty());
-
-      parametersProperty.bidirectionBindMaxXForStepUp(maxStepUpX.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty());
-      parametersProperty.bidirectionBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty());
-
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
 
       // these dimensions work best for valkyrie
       stanceFootShape.setHeight(footLength * metersToPixel);
@@ -202,75 +187,16 @@ public class FootstepPlannerParametersUIController
       updateStepShape();
    }
 
+   private void publishParameters()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+   }
+
+
    @FXML
    public void saveToFile()
    {
-      if (filePropertyHelper == null)
-      {
-         PrintTools.warn("Can not save to file.");
-         return;
-      }
-
-      System.out.println("Saving Parameters to file.");
-
-      filePropertyHelper.saveProperty("maxStepLength", maxStepLength.getValue());
-      filePropertyHelper.saveProperty("maxStepWidth", maxStepWidth.getValue());
-      filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
-      filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
-      filePropertyHelper.saveProperty("maxStepZ", maxStepZ.getValue());
-      filePropertyHelper.saveProperty("minSurfaceIncline", minSurfaceIncline.getValue());
-      filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
-      filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
-      filePropertyHelper.saveProperty("minFootholdPercent", minFootholdPercent.getValue());
-      filePropertyHelper.saveProperty("minXClearance", minXClearance.getValue());
-      filePropertyHelper.saveProperty("minYClearance", minYClearance.getValue());
-      filePropertyHelper.saveProperty("cliffHeightSpinner", cliffHeightSpinner.getValue());
-      filePropertyHelper.saveProperty("cliffClearance", cliffClearance.getValue());
-      filePropertyHelper.saveProperty("maxXYWiggleSpinner", maxXYWiggleSpinner.getValue());
-      filePropertyHelper.saveProperty("maxYawWiggleSpinner", maxYawWiggleSpinner.getValue());
-      filePropertyHelper.saveProperty("wiggleInsideDeltaSpinner", wiggleInsideDeltaSpinner.getValue());
-   }
-
-   public void loadFromFile()
-   {
-      if (filePropertyHelper == null)
-      {
-         return;
-      }
-
-      Double value;
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepLength")) != null)
-         maxStepLength.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepWidth")) != null)
-         maxStepWidth.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepWidth")) != null)
-         minStepWidth.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepLength")) != null)
-         minStepLength.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepZ")) != null)
-         maxStepZ.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minSurfaceIncline")) != null)
-         minSurfaceIncline.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepYaw")) != null)
-         maxStepYaw.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepYaw")) != null)
-         minStepYaw.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minFootholdPercent")) != null)
-         minFootholdPercent.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minXClearance")) != null)
-         minXClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minYClearance")) != null)
-         minYClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner")) != null)
-         cliffHeightSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("cliffClearance")) != null)
-         cliffClearance.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner")) != null)
-         maxXYWiggleSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner")) != null)
-         maxYawWiggleSpinner.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner")) != null)
-         wiggleInsideDeltaSpinner.getValueFactory().setValue(value);
+      planningParameters.save();
    }
 
    private void updateStepShape()
@@ -304,23 +230,5 @@ public class FootstepPlannerParametersUIController
       clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance.getValue()) * metersToPixel);
       clearanceBox.setWidth(metersToPixel * (minYClearance.getValue() * 2.0));
       clearanceBox.setHeight(metersToPixel * (minXClearance.getValue() * 2.0));
-   }
-
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
-   {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
-      {
-         @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
-         {
-            return new SettableFootstepPlannerParameters(messageContent);
-         }
-      };
    }
 }

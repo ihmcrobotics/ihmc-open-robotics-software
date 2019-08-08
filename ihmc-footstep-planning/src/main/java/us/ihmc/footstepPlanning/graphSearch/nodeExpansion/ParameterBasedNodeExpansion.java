@@ -7,7 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -15,9 +15,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    private SideDependentList<FootstepNode> goalNodes;
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
-   public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters)
+   public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }

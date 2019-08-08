@@ -19,8 +19,8 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -112,7 +112,7 @@ public class ControllerBasedBodyPathTest
       private final List<Point3D> waypoints = new ArrayList<>();
       private final WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
 
-      private final FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       private final AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
 
       private static final int stepsPerSide = 10;
@@ -271,7 +271,7 @@ public class ControllerBasedBodyPathTest
          }
       }
 
-      private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
+      private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
                                                               WaypointDefinedBodyPathPlanner bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();

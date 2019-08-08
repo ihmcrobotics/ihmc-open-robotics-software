@@ -4,8 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -18,18 +17,16 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    private static final double deltaYawFromPathTolerance = 0.2;
 
    private final BodyPathPlanner bodyPath;
-   private final FootstepPlannerParameters parameters;
-   private final FootstepPlannerCostParameters costParameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    private double goalAlpha = 1.0;
 
-   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParameters parameters, BodyPathPlanner bodyPath)
+   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, BodyPathPlanner bodyPath)
    {
       super(weight);
 
       this.bodyPath = bodyPath;
       this.parameters = parameters;
-      costParameters = parameters.getCostParameters();
    }
 
    @Override
@@ -57,7 +54,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double yawCost = remainingYawToGoal + yawCropAmount + pathViolationWeight * croppedYawDifferenceFromPathYaw;
 
       double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + costParameters.getYawWeight() * yawCost + costParameters.getCostPerStep() * minSteps;
+      return remainingDistance + parameters.getYawWeight() * yawCost + parameters.getCostPerStep() * minSteps;
    }
 
    public void setGoalAlpha(double alpha)

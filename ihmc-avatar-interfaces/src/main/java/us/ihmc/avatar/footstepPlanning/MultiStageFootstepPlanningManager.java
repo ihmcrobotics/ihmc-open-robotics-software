@@ -21,7 +21,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
@@ -118,7 +120,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private long tickDurationMs;
 
-   private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final FootstepPlannerParametersBasics footstepPlanningParameters;
    private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
@@ -152,7 +154,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
+      this.footstepPlanningParameters = drcRobotModel.getFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, footstepPlanningParameters);
       this.visibilityGraphsParameters = new YoVisibilityGraphParameters(drcRobotModel.getVisibilityGraphsParameters(), registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);

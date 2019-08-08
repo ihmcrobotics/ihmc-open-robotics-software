@@ -14,7 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionF
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,7 +36,7 @@ public class FootstepPlannerStepUpTest
       graph.checkAndSetEdge(node1, node2, 1.0);
       graph.checkAndSetEdge(node2, node3, 1.0);
 
-      FootstepPlannerParameters parameters = new ValkyrieFootstepPlannerParameters();
+      FootstepPlannerParametersReadOnly parameters = new ValkyrieFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygonsFromContactPoints(
             new ValkyrieRobotModel(RobotTarget.SCS, true).getContactPointParameters());
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);

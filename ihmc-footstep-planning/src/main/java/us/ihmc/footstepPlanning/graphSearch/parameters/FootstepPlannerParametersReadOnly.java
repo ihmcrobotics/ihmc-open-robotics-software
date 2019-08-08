@@ -4,9 +4,18 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.StoredPropertySetBasics;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public interface FootstepPlannerParameters
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
+
+public interface FootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
     * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
@@ -14,7 +23,7 @@ public interface FootstepPlannerParameters
     */
    default boolean checkForBodyBoxCollisions()
    {
-      return false;
+      return get(checkForBodyBoxCollisions);
    }
 
    /**
@@ -22,23 +31,29 @@ public interface FootstepPlannerParameters
     */
    default boolean performHeuristicSearchPolicies()
    {
-      return true;
+      return get(performHeuristicSearchPolicies);
    }
 
    /**
     * Returns the ideal step width for walking on flat ground.
     * This is ONLY used when assumed to be walking on flat ground.
     */
-   double getIdealFootstepWidth();
+   default double getIdealFootstepWidth()
+   {
+      return get(idealFootstepWidth);
+   }
 
    /**
     * Returns the ideal step length for walking on flat ground.
     * This is ONLY used when assumed to be walking on flat ground.
     */
-   double getIdealFootstepLength();
+   default double getIdealFootstepLength()
+   {
+      return get(idealFootstepLength);
+   }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
+    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
     * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
     * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
     * to allowing footsteps that partially intersect planar regions.
@@ -54,7 +69,7 @@ public interface FootstepPlannerParameters
     */
    default double getWiggleInsideDelta()
    {
-      return 0.0;
+      return get(wiggleInsideDelta);
    }
 
    /**
@@ -69,7 +84,10 @@ public interface FootstepPlannerParameters
     * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
     * </p>
     */
-   double getMaximumStepReach();
+   default double getMaximumStepReach()
+   {
+      return get(maxStepReach);
+   }
 
    /**
     * Maximum yaw between consecutive footsteps
@@ -84,7 +102,10 @@ public interface FootstepPlannerParameters
     * its maximum reach.
     * </p>
     */
-   double getMaximumStepYaw();
+   default double getMaximumStepYaw()
+   {
+      return get(maxStepYaw);
+   }
 
    /**
     * Minimum step width the planner will consider for candidate steps.
@@ -103,7 +124,10 @@ public interface FootstepPlannerParameters
     *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
-   double getMinimumStepWidth();
+   default double getMinimumStepWidth()
+   {
+      return get(minStepWidth);
+   }
 
    /**
     * Minimum step length the planner will consider for candidate steps.
@@ -120,7 +144,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumStepLength()
    {
-      return -getMaximumStepReach();
+      return get(minStepLength);
    }
 
    /**
@@ -128,7 +152,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumStepYaw()
    {
-      return 0.0;
+      return get(minStepYaw);
    }
 
    /**
@@ -150,7 +174,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumStepReachWhenSteppingUp()
    {
-      return getMaximumStepReach();
+      return get(maximumStepReachWhenSteppingUp);
    }
 
    /**
@@ -172,7 +196,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumStepZWhenSteppingUp()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(maximumStepZWhenSteppingUp);
    }
 
    /**
@@ -194,7 +218,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumStepXWhenForwardAndDown()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(maximumStepXWhenForwardAndDown);
    }
 
    /**
@@ -216,7 +240,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumStepZWhenForwardAndDown()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(maximumStepZWhenForwardAndDown);
    }
 
    /**
@@ -227,7 +251,10 @@ public interface FootstepPlannerParameters
     * z-up sole frame.
     * </p>
     */
-   double getMaximumStepZ();
+   default double getMaximumStepZ()
+   {
+      return get(maxStepZ);
+   }
 
    /**
     * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
@@ -237,7 +264,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumFootholdPercent()
    {
-      return 0.9;
+      return get(minFootholdPercent);
    }
 
    /**
@@ -251,7 +278,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumSurfaceInclineRadians()
    {
-      return Math.toRadians(45.0);
+      return get(minSurfaceIncline);
    }
 
    /**
@@ -267,7 +294,7 @@ public interface FootstepPlannerParameters
     */
    default boolean getWiggleIntoConvexHullOfPlanarRegions()
    {
-      return true;
+      return get(wiggleIntoConvexHullOfPlanarRegions);
    }
 
    /**
@@ -278,7 +305,7 @@ public interface FootstepPlannerParameters
     */
    default boolean getRejectIfCannotFullyWiggleInside()
    {
-      return false;
+      return get(rejectIfCannotFullyWiggleInside);
    }
 
    /**
@@ -287,7 +314,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumXYWiggleDistance()
    {
-      return LatticeNode.gridSizeXY / 2.0;
+      return get(maximumXYWiggleDistance);
    }
 
    /**
@@ -296,7 +323,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumYawWiggle()
    {
-      return LatticeNode.gridSizeYaw / 2.0;
+      return get(maximumYawWiggle);
    }
 
    /**
@@ -307,7 +334,7 @@ public interface FootstepPlannerParameters
     */
    default double getMaximumZPenetrationOnValleyRegions()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(maximumZPenetrationOnValleyRegions);
    }
 
    /**
@@ -326,7 +353,10 @@ public interface FootstepPlannerParameters
     *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
     * </p>
     */
-   double getMaximumStepWidth();
+   default double getMaximumStepWidth()
+   {
+      return get(maxStepWidth);
+   }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
@@ -341,7 +371,7 @@ public interface FootstepPlannerParameters
     */
    default double getCliffHeightToAvoid()
    {
-      return Double.MAX_VALUE;
+      return get(cliffHeightToAvoid);
    }
 
    /**
@@ -357,7 +387,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinimumDistanceFromCliffBottoms()
    {
-      return 0.0;
+      return get(minimumDistanceFromCliffBottoms);
    }
 
    /**
@@ -369,7 +399,7 @@ public interface FootstepPlannerParameters
     */
    default boolean getReturnBestEffortPlan()
    {
-      return false;
+      return get(returnBestEffortPlan);
    }
 
    /**
@@ -378,7 +408,7 @@ public interface FootstepPlannerParameters
     */
    default int getMinimumStepsForBestEffortPlan()
    {
-      return 3;
+      return get(minimumStepsForBestEffortPlan);
    }
 
    /**
@@ -389,7 +419,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyGroundClearance()
    {
-      return 0.25;
+      return get(bodyGroundClearance);
    }
 
    /**
@@ -400,7 +430,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxHeight()
    {
-      return 1.5;
+      return get(bodyBoxHeight);
    }
 
    /**
@@ -410,7 +440,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxDepth()
    {
-      return 0.3;
+      return get(bodyBoxDepth);
    }
 
    /**
@@ -420,7 +450,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxWidth()
    {
-      return 0.7;
+      return get(bodyBoxWidth);
    }
 
    /**
@@ -430,7 +460,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxBaseX()
    {
-      return 0.0;
+      return get(bodyBoxBaseX);
    }
 
    /**
@@ -440,7 +470,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxBaseY()
    {
-      return 0.0;
+      return get(bodyBoxBaseY);
    }
 
    /**
@@ -450,7 +480,7 @@ public interface FootstepPlannerParameters
     */
    default double getBodyBoxBaseZ()
    {
-      return 0.25;
+      return get(bodyBoxBaseZ);
    }
 
    /**
@@ -460,7 +490,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinXClearanceFromStance()
    {
-      return 0.0;
+      return get(minXClearanceFromStance);
    }
 
    /**
@@ -470,7 +500,7 @@ public interface FootstepPlannerParameters
     */
    default double getMinYClearanceFromStance()
    {
-      return 0.0;
+      return get(minYClearanceFromStance);
    }
 
    /**
@@ -478,12 +508,157 @@ public interface FootstepPlannerParameters
     */
    default double getFinalTurnProximity()
    {
-      return 1.0;
+      return get(finalTurnProximity);
    }
 
-   default FootstepPlannerCostParameters getCostParameters()
+   /**
+    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+    */
+   default boolean useQuadraticDistanceCost()
    {
-      return new DefaultFootstepPlannerCostParameters();
+      return get(useQuadraticDistanceCost);
+   }
+
+   /**
+    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+    */
+   default boolean useQuadraticHeightCost()
+   {
+      return get(useQuadraticHeightCost);
+   }
+
+   /**
+    * Gets the weight for the heuristics in the A Star planner.
+    */
+   default DoubleProvider getAStarHeuristicsWeight()
+   {
+      return () -> get(aStarHeuristicsWeight);
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Visibility graph with A star planner.
+    */
+   default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
+   {
+      return () -> get(visGraphWithAStarHeuristicsWeight);
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Depth First planner.
+    */
+   default DoubleProvider getDepthFirstHeuristicsWeight()
+   {
+      return () -> get(depthFirstHeuristicsWeight);
+   }
+
+   /**
+    * Gets the weight for the heuristics in the Body path based planner.
+    */
+   default DoubleProvider getBodyPathBasedHeuristicsWeight()
+   {
+      return () -> get(bodyPathBasedHeuristicsWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defined how the yaw of a footstep will be
+    * weighted in comparison to its position.
+    */
+   default double getYawWeight()
+   {
+      return get(yawWeight);
+   }
+
+   /**
+    * <p>
+    * This value defined how the forward (or backward) displacement of a footstep will be weighted in
+    * comparison to its position.
+    * </p>
+    * <p>
+    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
+    *    {@link #getLateralWeight()}
+    * </p>
+    */
+   default double getForwardWeight()
+   {
+      return get(forwardWeight);
+   }
+
+   /**
+    * <p>
+    * This value defined how the lateral displacement of a footstep will be weighted in comparison to
+    * its position.
+    * </p>
+    * <p>
+    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
+    *    {@link #getForwardWeight()}
+    * </p>
+    */
+   default double getLateralWeight()
+   {
+      return get(lateralWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines the cost that is added for each step
+    * taken. Setting this value to a high number will favor plans with less steps.
+    */
+   default double getCostPerStep()
+   {
+      return get(costPerStep);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines how the height change when stepping
+    * up will be weighted.
+    */
+   default double getStepUpWeight()
+   {
+      return get(stepUpWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines how the height change when stepping
+    * down will be weighted.
+    */
+   default double getStepDownWeight()
+   {
+      return get(stepDownWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines how the roll will be weighted.
+    */
+   default double getRollWeight()
+   {
+      return get(rollWeight);
+   }
+
+   /**
+    * When using a cost based planning approach this value defines how the pitch will be weighted.
+    */
+   default double getPitchWeight()
+   {
+      return get(pitchWeight);
+   }
+
+   /**
+    * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+    * @see FootstepPlannerCostParameters#getBoundingBoxCost
+    */
+   default double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return get(maximum2dDistanceFromBoundingBoxToPenalize);
+
+   }
+
+   /**
+    * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+    * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+    * {@code c * (1 - d / d_max)}, where d_max is this value.
+    */
+   default double getBoundingBoxCost()
+   {
+      return get(boundingBoxCost);
    }
 
    /**
@@ -492,46 +667,5 @@ public interface FootstepPlannerParameters
    default AdaptiveSwingParameters getAdaptiveSwingParameters()
    {
       return null;
-   }
-
-   default void printValues()
-   {
-      LogTools.info("wiggleIntoConvexHullOfPlanarRegions: {}", getWiggleIntoConvexHullOfPlanarRegions ()  );
-      LogTools.info("rejectIfCannotFullyWiggleInside    : {}", getRejectIfCannotFullyWiggleInside     ()  );
-      LogTools.info("returnBestEffortPlan               : {}", getReturnBestEffortPlan                ()  );
-      LogTools.info("checkForBodyBoxCollisions          : {}", checkForBodyBoxCollisions              ()  );
-      LogTools.info("performHeuristicSearchPolicies     : {}", performHeuristicSearchPolicies         ()  );
-      LogTools.info("minimumStepsForBestEffortPlan      : {}", getMinimumStepsForBestEffortPlan       ()  );
-      LogTools.info("idealFootstepWidth                 : {}", getIdealFootstepWidth                  ()  );
-      LogTools.info("idealFootstepLength                : {}", getIdealFootstepLength                 ()  );
-      LogTools.info("wiggleInsideDelta                  : {}", getWiggleInsideDelta                   ()  );
-      LogTools.info("maximumXYWiggleDistance            : {}", getMaximumXYWiggleDistance             ()  );
-      LogTools.info("maximumYawWiggle                   : {}", getMaximumYawWiggle                    ()  );
-      LogTools.info("maxStepReach                       : {}", getMaximumStepReach                    ()  );
-      LogTools.info("maxStepYaw                         : {}", getMaximumStepYaw                      ()  );
-      LogTools.info("minStepWidth                       : {}", getMinimumStepWidth                    ()  );
-      LogTools.info("minStepLength                      : {}", getMinimumStepLength                   ()  );
-      LogTools.info("minStepYaw                         : {}", getMinimumStepYaw                      ()  );
-      LogTools.info("maxStepZ                           : {}", getMaximumStepZ                        ()  );
-      LogTools.info("minFootholdPercent                 : {}", getMinimumFootholdPercent              ()  );
-      LogTools.info("minSurfaceIncline                  : {}", getMinimumSurfaceInclineRadians        ()  );
-      LogTools.info("maxStepWidth                       : {}", getMaximumStepWidth                    ()  );
-      LogTools.info("minXClearanceFromStance            : {}", getMinXClearanceFromStance             ()  );
-      LogTools.info("minYClearanceFromStance            : {}", getMinYClearanceFromStance             ()  );
-      LogTools.info("maximumStepReachWhenSteppingUp     : {}", getMaximumStepReachWhenSteppingUp      ()  );
-      LogTools.info("maximumStepZWhenSteppingUp         : {}", getMaximumStepZWhenSteppingUp          ()  );
-      LogTools.info("maximumStepXWhenForwardAndDown     : {}", getMaximumStepXWhenForwardAndDown      ()  );
-      LogTools.info("maximumStepZWhenForwardAndDown     : {}", getMaximumStepZWhenForwardAndDown      ()  );
-      LogTools.info("maximumZPenetrationOnValleyRegions : {}", getMaximumZPenetrationOnValleyRegions  ()  );
-      LogTools.info("cliffHeightToAvoid                 : {}", getCliffHeightToAvoid                  ()  );
-      LogTools.info("minimumDistanceFromCliffBottoms    : {}", getMinimumDistanceFromCliffBottoms     ()  );
-      LogTools.info("bodyGroundClearance                : {}", getBodyGroundClearance                 ()  );
-      LogTools.info("bodyBoxWidth                       : {}", getBodyBoxWidth                        ()  );
-      LogTools.info("bodyBoxHeight                      : {}", getBodyBoxHeight                       ()  );
-      LogTools.info("bodyBoxDepth                       : {}", getBodyBoxDepth                        ()  );
-      LogTools.info("bodyBoxBaseX                       : {}", getBodyBoxBaseX                        ()  );
-      LogTools.info("bodyBoxBaseY                       : {}", getBodyBoxBaseY                        ()  );
-      LogTools.info("bodyBoxBaseZ                       : {}", getBodyBoxBaseZ                        ()  );
-      LogTools.info("finalTurnProximity                 : {}", getFinalTurnProximity                  ()  );
    }
 }
