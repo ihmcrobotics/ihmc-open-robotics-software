@@ -51,7 +51,6 @@ import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
@@ -120,6 +119,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       this.messager = messager;
 
       explore = messager.createInput(ExploreAreaBehaviorAPI.ExploreArea, false);
+      messager.registerTopicListener(ExploreAreaBehaviorAPI.Parameters, parameters::setAllFromStrings);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.RandomPoseUpdate, this::randomPoseUpdate);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.DoSlam, this::doSlam);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.ClearMap, this::clearMap);
@@ -190,7 +190,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       factory.getFactory().addStateChangedListener((from, to) ->
       {
          messager.submitMessage(ExploreAreaBehaviorAPI.CurrentState, to);
-         LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+         LogTools.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
 
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
@@ -295,7 +295,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromPerceiveToGrabPlanarRegions(double timeInState)
    {
-      return (timeInState > parameters.get(ExploreAreaBehaviorParameters.perceiveDuration));
+      double perceiveDuration = parameters.get(ExploreAreaBehaviorParameters.perceiveDuration);
+      LogTools.info("Perceiving for {} s", perceiveDuration);
+      return (timeInState > perceiveDuration);
    }
 
    private void onGrabPlanarRegionsStateEntry()
@@ -965,7 +967,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       RobotSide swingSide = supportSide.getOppositeSide();
       FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
-      Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
+      us.ihmc.idl.IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
       HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
       ReferenceFrame supportFootFrame = referenceFrames.getSoleFrame(supportSide);
 
@@ -1097,6 +1099,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       public static final Topic<Boolean> ClearPlanarRegions = topic("ClearPlanarRegions");
       public static final Topic<TemporaryPlanarRegionMessage> AddPlanarRegionToMap = topic("AddPlanarRegionToMap");
       public static final Topic<TemporaryConvexPolygon2DMessage> AddPolygonToPlanarRegion = topic("AddPolygonToPlanarRegion");
+      public static final Topic<List<String>> Parameters = topic("Parameters");
       public static final Topic<ExploreAreaBehaviorState> CurrentState = topic("CurrentState");
 
       private static final <T> Topic<T> topic(String name)
