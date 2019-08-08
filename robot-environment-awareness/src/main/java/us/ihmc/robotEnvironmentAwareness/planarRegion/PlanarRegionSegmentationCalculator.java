@@ -35,6 +35,8 @@ public class PlanarRegionSegmentationCalculator
    private PlanarRegionSegmentationParameters parameters;
    private OcTreeBoundingBoxInterface boundingBox;
 
+   private boolean useSurfaceNormalFilter = false;
+
    public void compute(NormalOcTreeNode root)
    {
       allRegionNodes.clear();
@@ -82,9 +84,7 @@ public class PlanarRegionSegmentationCalculator
 
    public List<PlanarRegionSegmentationRawData> getSegmentationRawData()
    {
-      return regionsNodeData.stream()
-                            .map(PlanarRegionSegmentationRawData::new)
-                            .collect(Collectors.toList());
+      return regionsNodeData.stream().map(PlanarRegionSegmentationRawData::new).collect(Collectors.toList());
    }
 
    public void clear()
@@ -117,15 +117,19 @@ public class PlanarRegionSegmentationCalculator
       return node.getNormalX() * referenceNormal.getX() + node.getNormalY() * referenceNormal.getY() + node.getNormalZ() * referenceNormal.getZ() < 0.0;
    }
 
-   public static List<PlanarRegionSegmentationNodeData> mergePlanarRegionsIfPossible(NormalOcTreeNode root, List<PlanarRegionSegmentationNodeData> inputRegions, PlanarRegionSegmentationParameters parameters)
+   public static List<PlanarRegionSegmentationNodeData> mergePlanarRegionsIfPossible(NormalOcTreeNode root, List<PlanarRegionSegmentationNodeData> inputRegions,
+                                                                                     PlanarRegionSegmentationParameters parameters)
    {
       List<PlanarRegionSegmentationNodeData> mergedRegions = new ArrayList<>();
       while (!inputRegions.isEmpty())
       {
          PlanarRegionSegmentationNodeData candidateForMergeOtherRegions = inputRegions.get(0);
          Map<Boolean, List<PlanarRegionSegmentationNodeData>> mergeableAndNonMergeableGroups = inputRegions.subList(1, inputRegions.size()).parallelStream()
-                     // Group each region according to the result of areRegionsMergeable.
-                    .collect(Collectors.groupingBy(other -> areRegionsMergeable(root, candidateForMergeOtherRegions, other, parameters)));
+                                                                                                           // Group each region according to the result of areRegionsMergeable.
+                                                                                                           .collect(Collectors.groupingBy(other -> areRegionsMergeable(root,
+                                                                                                                                                                       candidateForMergeOtherRegions,
+                                                                                                                                                                       other,
+                                                                                                                                                                       parameters)));
 
          // Merge all the mergeable regions onto the candidate.
          mergeableAndNonMergeableGroups.getOrDefault(true, Collections.emptyList()).forEach(candidateForMergeOtherRegions::addNodesFromOtherRegion);
@@ -137,8 +141,8 @@ public class PlanarRegionSegmentationCalculator
       return mergedRegions;
    }
 
-   public static boolean areRegionsMergeable(NormalOcTreeNode root, PlanarRegionSegmentationNodeData currentRegion, PlanarRegionSegmentationNodeData potentialRegionToMerge,
-         PlanarRegionSegmentationParameters parameters)
+   public static boolean areRegionsMergeable(NormalOcTreeNode root, PlanarRegionSegmentationNodeData currentRegion,
+                                             PlanarRegionSegmentationNodeData potentialRegionToMerge, PlanarRegionSegmentationParameters parameters)
    {
       if (currentRegion == potentialRegionToMerge)
          throw new PlanarRegionSegmentationException("Problem Houston.");
@@ -173,14 +177,12 @@ public class PlanarRegionSegmentationCalculator
          otherRegion = potentialRegionToMerge;
       }
 
-      return regionToNavigate.nodeStream()
-                             .filter(node -> otherRegion.distanceFromBoundingBox(node) < searchRadiusSquared)
-                             .filter(node -> isNodeInOtherRegionNeighborhood(root, node, otherRegion, searchRadius))
-                             .findFirst()
-                             .isPresent();
+      return regionToNavigate.nodeStream().filter(node -> otherRegion.distanceFromBoundingBox(node) < searchRadiusSquared)
+                             .filter(node -> isNodeInOtherRegionNeighborhood(root, node, otherRegion, searchRadius)).findFirst().isPresent();
    }
 
-   public static boolean isNodeInOtherRegionNeighborhood(NormalOcTreeNode root, NormalOcTreeNode nodeFromOneRegion, PlanarRegionSegmentationNodeData otherRegion, double searchRadius)
+   public static boolean isNodeInOtherRegionNeighborhood(NormalOcTreeNode root, NormalOcTreeNode nodeFromOneRegion,
+                                                         PlanarRegionSegmentationNodeData otherRegion, double searchRadius)
    {
       MutableBoolean foundNeighborFromOtherRegion = new MutableBoolean(false);
 
@@ -204,7 +206,8 @@ public class PlanarRegionSegmentationCalculator
       return foundNeighborFromOtherRegion.booleanValue();
    }
 
-   public List<PlanarRegionSegmentationNodeData> searchNewPlanarRegions(NormalOcTreeNode root, OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters, Random random)
+   public List<PlanarRegionSegmentationNodeData> searchNewPlanarRegions(NormalOcTreeNode root, OcTreeBoundingBoxInterface boundingBox,
+                                                                        PlanarRegionSegmentationParameters parameters, Random random)
    {
       List<PlanarRegionSegmentationNodeData> newRegions = new ArrayList<>();
 
@@ -227,8 +230,9 @@ public class PlanarRegionSegmentationCalculator
       return newRegions;
    }
 
-   public PlanarRegionSegmentationNodeData createNewOcTreeNodePlanarRegion(NormalOcTreeNode root, NormalOcTreeNode seedNode, int regionId, OcTreeBoundingBoxInterface boundingBox,
-         PlanarRegionSegmentationParameters parameters)
+   public PlanarRegionSegmentationNodeData createNewOcTreeNodePlanarRegion(NormalOcTreeNode root, NormalOcTreeNode seedNode, int regionId,
+                                                                           OcTreeBoundingBoxInterface boundingBox,
+                                                                           PlanarRegionSegmentationParameters parameters)
    {
       PlanarRegionSegmentationNodeData newRegion = new PlanarRegionSegmentationNodeData(regionId);
       newRegion.addNode(seedNode);
@@ -237,17 +241,28 @@ public class PlanarRegionSegmentationCalculator
    }
 
    public void growPlanarRegion(NormalOcTreeNode root, PlanarRegionSegmentationNodeData ocTreeNodePlanarRegion, OcTreeBoundingBoxInterface boundingBox,
-         PlanarRegionSegmentationParameters parameters)
+                                PlanarRegionSegmentationParameters parameters)
    {
+      Vector3D cameraPosition = new Vector3D();
       double searchRadius = parameters.getSearchRadius();
-      
+
       Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>();
       Set<NormalOcTreeNode> newSetToExplore = new HashSet<>();
 
-      NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore, boundingBox, parameters);
-      ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
-                  .filter(node -> isNodeInBoundingBox(node, boundingBox))
-                  .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
+      NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore,
+                                                                                                        boundingBox, parameters);
+      if (useSurfaceNormalFilter)
+      {
+         ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
+                               .filter(node -> isNodeInBoundingBox(node, boundingBox) && isNodeOnSight(node, cameraPosition))
+                               .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
+      }
+      else
+      {
+         ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
+                               .filter(node -> isNodeInBoundingBox(node, boundingBox))
+                               .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
+      }
       nodesToExplore.addAll(newSetToExplore);
 
       while (!nodesToExplore.isEmpty())
@@ -262,7 +277,8 @@ public class PlanarRegionSegmentationCalculator
       }
    }
 
-   public void recordCandidatesForRegion(NormalOcTreeNode neighborNode, PlanarRegionSegmentationNodeData region, Set<NormalOcTreeNode> newSetToExplore, OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters)
+   public void recordCandidatesForRegion(NormalOcTreeNode neighborNode, PlanarRegionSegmentationNodeData region, Set<NormalOcTreeNode> newSetToExplore,
+                                         OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters)
    {
       if (allRegionNodes.contains(neighborNode))
          return;
@@ -272,25 +288,23 @@ public class PlanarRegionSegmentationCalculator
          return;
       if (!neighborNode.isNormalSet() || !neighborNode.isHitLocationSet())
          return;
-      
+
       newSetToExplore.add(neighborNode);
    }
 
    private static void removeBadNodesFromRegion(OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters,
-         PlanarRegionSegmentationNodeData region)
+                                                PlanarRegionSegmentationNodeData region)
    {
-      List<NormalOcTreeNode> nodesToRemove = region.nodeStream()
-            .collect(Collectors.groupingBy(node -> isBadNode(node, region, boundingBox, parameters)))
-            .getOrDefault(true, Collections.emptyList());
+      List<NormalOcTreeNode> nodesToRemove = region.nodeStream().collect(Collectors.groupingBy(node -> isBadNode(node, region, boundingBox, parameters)))
+                                                   .getOrDefault(true, Collections.emptyList());
 
       region.removeNodesAndUpdate(nodesToRemove);
    }
 
    private static void removeDeadNodesFromRegion(PlanarRegionSegmentationNodeData region)
    {
-      List<NormalOcTreeNode> nodesToRemove = region.nodeStream()
-            .collect(Collectors.groupingBy(node -> isNodeDead(node)))
-            .getOrDefault(true, Collections.emptyList());
+      List<NormalOcTreeNode> nodesToRemove = region.nodeStream().collect(Collectors.groupingBy(node -> isNodeDead(node))).getOrDefault(true,
+                                                                                                                                       Collections.emptyList());
 
       region.removeNodesAndUpdate(nodesToRemove);
    }
@@ -300,7 +314,8 @@ public class PlanarRegionSegmentationCalculator
       return boundingBox == null || boundingBox.isInBoundingBox(node.getX(), node.getY(), node.getZ());
    }
 
-   private static boolean isBadNode(NormalOcTreeNode node, PlanarRegionSegmentationNodeData region, OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters)
+   private static boolean isBadNode(NormalOcTreeNode node, PlanarRegionSegmentationNodeData region, OcTreeBoundingBoxInterface boundingBox,
+                                    PlanarRegionSegmentationParameters parameters)
    {
       if (isNodeDead(node))
          return true;
@@ -325,6 +340,25 @@ public class PlanarRegionSegmentationCalculator
       return absoluteDot > dotThreshold;
    }
 
+   //TODO: refactor.
+   private static boolean isNodeOnSight(NormalOcTreeNode node, Vector3D cameraPosition)
+   {
+      double lowerBound = -0.8;  //0.7 = 45deg. 0.8 = 36.86deg
+      double upperBound = 0.8;
+
+      Vector3D cameraToNode = new Vector3D(node.getHitLocationCopy());
+      cameraToNode.add(-cameraPosition.getX(), -cameraPosition.getY(), -cameraPosition.getZ());
+      Vector3D surfaceNormal = new Vector3D(node.getNormalCopy());
+
+      surfaceNormal.normalize();
+      cameraToNode.normalize();
+
+      double dotValue = cameraToNode.dot(surfaceNormal);
+
+      boolean isOutOfSight = lowerBound <= dotValue && dotValue < upperBound;
+      return !isOutOfSight;
+   }
+
    public void setParameters(PlanarRegionSegmentationParameters parameters)
    {
       this.parameters = parameters;
@@ -333,5 +367,10 @@ public class PlanarRegionSegmentationCalculator
    public void setBoundingBox(OcTreeBoundingBoxInterface boundingBox)
    {
       this.boundingBox = boundingBox;
+   }
+
+   public void useSurfaceNormalFilter(boolean value)
+   {
+      useSurfaceNormalFilter = value;
    }
 }

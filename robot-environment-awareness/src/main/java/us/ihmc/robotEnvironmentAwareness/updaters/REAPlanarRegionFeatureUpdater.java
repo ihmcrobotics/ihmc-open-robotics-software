@@ -52,7 +52,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
    private final Messager reaMessager;
-
+   
    public REAPlanarRegionFeatureUpdater(NormalOcTree octree, Messager reaMessager)
    {
       this.octree = octree;
@@ -161,7 +161,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
-
+      
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
@@ -258,5 +258,15 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    public LineSegment3D getIntersection(int index)
    {
       return planarRegionsIntersections.get(index);
+   }
+
+   public void enableSurfaceNormalFilter()
+   {
+      segmentationCalculator.useSurfaceNormalFilter(true);
+   }
+   
+   public void disableSurfaceNormalFilter()
+   {
+      segmentationCalculator.useSurfaceNormalFilter(false);
    }
 }

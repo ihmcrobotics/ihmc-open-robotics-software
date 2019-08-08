@@ -19,8 +19,6 @@ import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -35,7 +33,6 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -214,8 +211,16 @@ public class LIDARBasedREAModule
          else
          {
             long startTime = System.nanoTime();
-            if (bufferType.get() == BufferType.STEREO_BASED)
+            switch (bufferType.get())
+            {
+            case LIDAR_BASED:
+               planarRegionFeatureUpdater.disableSurfaceNormalFilter();
+               break;
+            case STEREO_BASED:
                mainUpdater.clearOcTree();
+               planarRegionFeatureUpdater.enableSurfaceNormalFilter();
+               break;
+            }
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
 
