@@ -21,6 +21,11 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 public class REAOcTreeBuffer
 {
    private static final int NUMBER_OF_SAMPLES = 100000;
+   
+   public enum BufferType
+   {
+      LIDAR_BASED, STEREO_BASED
+   }
 
    private final AtomicReference<LidarScanMessage> latestLidarScanMessage = new AtomicReference<>(null);
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
