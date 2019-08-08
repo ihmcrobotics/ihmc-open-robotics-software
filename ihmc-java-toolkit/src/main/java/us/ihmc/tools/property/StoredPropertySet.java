@@ -57,7 +57,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       {
          if (key.hasDefaultValue())
          {
-            setForListeners(key, key.getDefaultValue());
+            setInternal(key, key.getDefaultValue());
          }
       }
    }
@@ -89,25 +89,25 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void set(DoubleStoredPropertyKey key, double value)
    {
-      setForListeners(key, value);
+      setInternal(key, value);
    }
 
    @Override
    public void set(IntegerStoredPropertyKey key, int value)
    {
-      setForListeners(key, value);
+      setInternal(key, value);
    }
 
    @Override
    public void set(BooleanStoredPropertyKey key, boolean value)
    {
-      setForListeners(key, value);
+      setInternal(key, value);
    }
 
    @Override
    public <T> void set(StoredPropertyKey<T> key, T value)
    {
-      setForListeners(key, value);
+      setInternal(key, value);
    }
 
    @Override
@@ -123,15 +123,36 @@ public class StoredPropertySet implements StoredPropertySetBasics
    }
 
    @Override
+   public List<String> getAllAsStrings()
+   {
+      ArrayList<String> stringValues = new ArrayList<>();
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         stringValues.add(serializeValue(get(key)));
+      }
+
+      return stringValues;
+   }
+
+   @Override
    public void setAll(List<Object> newValues)
    {
       for (int i = 0; i < keys.keys().size(); i++)
       {
-         setForListeners(keys.keys().get(i), newValues.get(i));
+         setInternal(keys.keys().get(i), newValues.get(i));
       }
    }
 
-   private void setForListeners(StoredPropertyKey key, Object newValue)
+   @Override
+   public void setAllFromStrings(List<String> stringValues)
+   {
+      for (int i = 0; i < keys.keys().size(); i++)
+      {
+         setInternal(keys.keys().get(i), deserializeString(keys.keys().get(i), stringValues.get(i)));
+      }
+   }
+
+   private void setInternal(StoredPropertyKey key, Object newValue)
    {
       boolean valueChanged;
       if (values[key.getIndex()] == null)
@@ -199,7 +220,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
                {
                   if (key.hasDefaultValue())
                   {
-                     setForListeners(key, key.getDefaultValue());
+                     setInternal(key, key.getDefaultValue());
                      continue;
                   }
 
@@ -214,24 +235,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
                }
                else
                {
-                  if (key.getType().equals(Double.class))
-                  {
-                     setForListeners(key, Double.valueOf(stringValue));
-                  }
-                  else if (key.getType().equals(Integer.class))
-                  {
-                     setForListeners(key, Integer.valueOf(stringValue));
-                  }
-                  else if (key.getType().equals(Boolean.class))
-                  {
-                     setForListeners(key, Boolean.valueOf(stringValue));
-                  }
-                  else
-                  {
-                     throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
-                  }
+                  setInternal(key, deserializeString(key, stringValue));
                }
-
             }
          }
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -253,14 +258,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            if (values[key.getIndex()] == null)
-            {
-               properties.setProperty(key.getCamelCasedName(), "null");
-            }
-            else
-            {
-               properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
-            }
+            properties.setProperty(key.getCamelCasedName(), serializeValue(values[key.getIndex()]));
          }
 
          Path fileForSaving = findFileForSaving();
@@ -269,6 +267,38 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
          convertLineEndingsToUnix(fileForSaving);
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   private String serializeValue(Object object)
+   {
+      if (object == null)
+      {
+         return "null";
+      }
+      else
+      {
+         return object.toString();
+      }
+   }
+
+   private <T> T deserializeString(StoredPropertyKey<T> key, String serializedValue)
+   {
+      if (key.getType().equals(Double.class))
+      {
+         return (T) Double.valueOf(serializedValue);
+      }
+      else if (key.getType().equals(Integer.class))
+      {
+         return (T) Integer.valueOf(serializedValue);
+      }
+      else if (key.getType().equals(Boolean.class))
+      {
+         return (T) Boolean.valueOf(serializedValue);
+      }
+      else
+      {
+         throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+      }
    }
 
    private int indexOfCamelCaseName(Object camelCaseName)
