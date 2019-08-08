@@ -6,7 +6,7 @@ import us.ihmc.tools.property.StoredPropertySet;
 
 public class ExploreAreaBehaviorParameters extends StoredPropertySet
 {
-   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList(ExploreAreaBehaviorParameters.class);
+   public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey turnChestTrajectoryDuration = keys.addDoubleKey("Turn chest trajectory duration");
    public static final DoubleStoredPropertyKey turnTrajectoryWaitTimeMulitplier = keys.addDoubleKey("Turn trajectory wait time multiplier");
