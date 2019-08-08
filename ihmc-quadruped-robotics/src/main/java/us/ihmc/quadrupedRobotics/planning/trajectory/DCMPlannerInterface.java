@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface DCMPlannerInterface
 {
-   void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
-
    void initialize();
 
    void setNominalCoMHeight(double comHeight);
+
+   void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
 
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 

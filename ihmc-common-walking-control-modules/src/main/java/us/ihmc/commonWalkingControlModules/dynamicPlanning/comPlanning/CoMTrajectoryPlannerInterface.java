@@ -14,6 +14,8 @@ public interface CoMTrajectoryPlannerInterface
     */
    void setNominalCoMHeight(double nominalCoMHeight);
 
+   double getNominalCoMHeight();
+
    /**
     * Solves for the desired center of mass trajectory.
     */

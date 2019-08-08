@@ -128,8 +128,8 @@ public class QuadrupedBalanceManager
       if (runtimeEnvironment.getCoMTrajectoryPlanner() == null)
       {
          comPlanner = null;
-         dcmPlanner = new ContinuousDCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), linearInvertedPendulumModel.getYoNaturalFrequency(),
-                                               runtimeEnvironment.getGravity(), robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
+         dcmPlanner = new ContinuousDCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), linearInvertedPendulumModel.getLipmHeight(),
+                                               runtimeEnvironment.getGravity(), supportFrame, referenceFrames.getSoleFrames(), registry,
                                                yoGraphicsListRegistry);
       }
       else
