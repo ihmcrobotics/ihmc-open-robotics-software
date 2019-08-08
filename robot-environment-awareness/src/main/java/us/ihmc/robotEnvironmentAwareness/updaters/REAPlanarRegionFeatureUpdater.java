@@ -165,7 +165,6 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-
       List<PlanarRegion> unmergedCustomPlanarRegions;
 
       if (clearCustomRegions.getAndSet(false))

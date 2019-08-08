@@ -19,6 +19,9 @@ import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -32,10 +35,12 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -70,6 +75,8 @@ public class LIDARBasedREAModule
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
+
+   private final AtomicReference<BufferType> bufferType;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
@@ -112,6 +119,8 @@ public class LIDARBasedREAModule
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
+
+      bufferType = reaMessager.createInput(REAModuleAPI.UIOcTreeBufferType, BufferType.LIDAR_BASED);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -127,6 +136,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      mainUpdater.handleStereoVisionPointCloudMessage(message);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -203,6 +213,9 @@ public class LIDARBasedREAModule
          }
          else
          {
+            long startTime = System.nanoTime();
+            if (bufferType.get() == BufferType.STEREO_BASED)
+               mainUpdater.clearOcTree();
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
 
@@ -214,6 +227,8 @@ public class LIDARBasedREAModule
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
             planarRegionNetworkProvider.publishCurrentState();
+
+            System.out.println("computing " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
          }
 
          if (isThreadInterrupted())
