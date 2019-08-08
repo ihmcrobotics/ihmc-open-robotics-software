@@ -26,8 +26,8 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -101,7 +101,7 @@ public class SimpleOcclusionTests
       runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
    }
 
-   private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
+   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
    {
       @Override
       public boolean getReturnBestEffortPlan()
@@ -131,7 +131,7 @@ public class SimpleOcclusionTests
       runTest(testInfo, startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
    }
 
-   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters,
+   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
                         VisibilityGraphsParameters visibilityGraphsParameters, double maxAllowedSolveTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
@@ -443,7 +443,7 @@ public class SimpleOcclusionTests
       return goal;
    }
 
-   private RobotSide computeStanceFootPose(FramePose3D startPose, FootstepPlannerParameters parameters, FramePose3D stancePoseToPack)
+   private RobotSide computeStanceFootPose(FramePose3D startPose, FootstepPlannerParametersReadOnly parameters, FramePose3D stancePoseToPack)
    {
       RobotSide side = RobotSide.LEFT;
 
@@ -460,7 +460,7 @@ public class SimpleOcclusionTests
       return side;
    }
 
-   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, FootstepPlannerParameters parameters, double bodyHeight)
+   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, FootstepPlannerParametersReadOnly parameters, double bodyHeight)
    {
       double stanceWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame soleFrame = new PoseReferenceFrame("stanceFrame", solePose);
@@ -586,16 +586,16 @@ public class SimpleOcclusionTests
       return ret;
    }
 
-   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   private FootstepPlanner getPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                       YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
       return new VisibilityGraphWithAStarPlanner(parameters, visibilityGraphsParameters, footPloygons, graphicsListRegistry, registry);
    }
 
-   private FootstepPlannerParameters getParameters()
+   private FootstepPlannerParametersReadOnly getParameters()
    {
-      return new DefaultFootstepPlanningParameters();
+      return new DefaultFootstepPlannerParameters();
    }
 
    private VisibilityGraphsParameters getVisibilityGraphsParameters()

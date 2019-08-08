@@ -29,13 +29,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -270,7 +268,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       drcSimulationTestHelper.getSimulationConstructionSet().addScript(collisionChecker);
 
-      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
+      FootstepPlannerParametersReadOnly parameters = getRobotModel().getFootstepPlannerParameters();
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);

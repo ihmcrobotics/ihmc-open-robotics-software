@@ -7,14 +7,14 @@ import java.util.List;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanState;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 
-public class AtlasFootstepPlanningParameters extends QuadTreeFootstepPlanningParameters
+public class AtlasQuadTreeFootstepPlanningParameters extends QuadTreeFootstepPlanningParameters
 {
    public double maxStepUp = 0.20;
    public double minStepDown = -0.17;
    public double maxStepDistance = 0.6;
    public double dangerDistance = 0.75;
 
-   public AtlasFootstepPlanningParameters()
+   public AtlasQuadTreeFootstepPlanningParameters()
    {
       initialize();
    }
