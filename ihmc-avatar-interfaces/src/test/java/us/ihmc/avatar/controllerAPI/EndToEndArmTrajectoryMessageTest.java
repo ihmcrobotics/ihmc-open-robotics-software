@@ -1003,7 +1003,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertTrue(success);
 
       desiredEpsilon = 1.0e-7;
-      trackingEpsilon = 6.0e-2;
+      trackingEpsilon = 1.0e-2;
 
       for (RobotSide robotSide : RobotSide.values)
       {
