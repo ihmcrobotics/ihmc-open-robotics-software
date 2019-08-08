@@ -445,7 +445,7 @@ public class RigidBodyPositionControlHelper
       if (point == null)
          return false;
 
-      point.set(trajectoryPoint);
+      point.setIncludingFrame(trajectoryPoint);
       return true;
    }
 
