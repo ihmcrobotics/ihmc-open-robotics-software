@@ -16,7 +16,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
+import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
@@ -65,54 +65,57 @@ public class ExploreAreaBehaviorUIController extends Group
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ObservationPosition,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
                                              result -> Platform.runLater(() -> displayObservationPosition(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
                                              result -> Platform.runLater(() -> displayExplorationBoundingBoxes(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PotentialPointsToExplore,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
                                              result -> Platform.runLater(() -> displayPotentialPointsToExplore(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.PlanningToPosition,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PlanningToPosition,
                                              result -> Platform.runLater(() -> displayPlanningToPosition(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.FoundBodyPathTo,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPathTo,
                                              result -> Platform.runLater(() -> displayFoundBodyPathTo(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ClearPlanarRegions,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
                                              result -> Platform.runLater(() -> clearPlanarRegions(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
                                              result -> Platform.runLater(() -> addPlanarRegionToMap(result)));
-
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
                                              result -> Platform.runLater(() -> addPolygonToPlanarRegion(result)));
-
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehavior.ExploreAreaBehaviorAPI.CurrentState,
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap, result -> Platform.runLater(() -> drawMap(result)));
+      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.CurrentState,
                                              state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
-      javaFXStoredPropertyTable.setup(parameters, parameters.keys);
+      javaFXStoredPropertyTable.setup(parameters, parameters.keys, this::publishParameters);
+   }
+
+   private void publishParameters()
+   {
+      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());
    }
 
    @FXML
    public void exploreArea()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
+      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ExploreArea, exploreAreaCheckBox.isSelected());
    }
 
    @FXML
    public void randomPoseUpdate()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
+      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.RandomPoseUpdate, true);
    }
 
    @FXML
    public void doSlamButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.DoSlam, true);
+      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.DoSlam, true);
    }
 
    @FXML
    public void clearMapButtonClicked()
    {
-      behaviorMessager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ClearMap, true);
+      behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.ClearMap, true);
    }
 
    @FXML
@@ -294,5 +297,4 @@ public class ExploreAreaBehaviorUIController extends Group
          group.getChildren().add(boundingBox3DGraphic.getNode());
       }
    }
-
 }
