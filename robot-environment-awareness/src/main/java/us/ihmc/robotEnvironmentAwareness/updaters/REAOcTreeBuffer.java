@@ -45,6 +45,7 @@ public class REAOcTreeBuffer
 
    private final double octreeResolution;
    private int messageCounter = 0;
+   private final AtomicReference<Integer> octreeDepth;
 
    private final Messager reaMessager;
 
@@ -52,6 +53,8 @@ public class REAOcTreeBuffer
    private final Topic<Integer> ocTreeCapacityTopic;
    private final Topic<Integer> messageCapacityTopic;
    private final Topic<NormalOcTreeMessage> stateTopic;
+   
+   private final AtomicReference<Integer> stereoVisionBufferSize;
 
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
@@ -63,6 +66,8 @@ public class REAOcTreeBuffer
       this.ocTreeCapacityTopic = ocTreeCapacityTopic;
       this.messageCapacityTopic = messageCapacityTopic;
       this.stateTopic = stateTopic;
+      
+      octreeDepth = reaMessager.createInput(REAModuleAPI.OcTreeDepth, 15);
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableBuffer = reaMessager.createInput(enableBufferTopic, enableBufferInitialValue);
@@ -72,6 +77,7 @@ public class REAOcTreeBuffer
       isBufferStateRequested = reaMessager.createInput(requestStateTopic, false);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
+      stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, 50000);
    }
 
    private void sendCurrentState()
@@ -209,9 +215,10 @@ public class REAOcTreeBuffer
       {
          ScanCollection scanCollection = new ScanCollection();
          newFullScanReference.set(scanCollection);
-         scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
+         scanCollection.setSubSampleSize(stereoVisionBufferSize.get());
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+         scanCollection.addScan(stereoMessage.getPointCloud().toArray(), stereoMessage.getSensorPosition());
+         // TODO: make NormalOctree constructor with octreeDepth.get().
       }
    }
 

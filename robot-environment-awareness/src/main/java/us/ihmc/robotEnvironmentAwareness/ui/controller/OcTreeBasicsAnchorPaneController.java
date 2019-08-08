@@ -41,11 +41,11 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private ToggleButton showInputLidarScanButton;
    // Stereo vision buffer options
    @FXML
+   private Slider stereoBufferMessageSizeSlider;
+   @FXML
    private Slider stereoBufferSizeSlider;
    @FXML
    private ToggleButton enableStereoBufferButton;
-   @FXML
-   private ToggleButton showStereoBufferButton;
    @FXML
    private ToggleButton showInputStereoPointCloudButton;
 
@@ -88,19 +88,20 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       setupControls();
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeEnable, enableButton.selectedProperty());
-
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.OcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
+      
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferOcTreeCapacity, lidarBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferEnable, enableStereoBufferButton.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(), numberToIntegerConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
 
       load();
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox.valueProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox.valueProperty(), true);
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeBufferType, bufferTypeComboBox.valueProperty(), true);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIOcTreeBufferType, bufferTypeComboBox.valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowStereoVisionBuffer, showStereoBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, showInputStereoPointCloudButton.selectedProperty(), true);
 

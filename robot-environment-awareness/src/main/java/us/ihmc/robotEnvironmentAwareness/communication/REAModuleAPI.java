@@ -77,11 +77,13 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
+   public static final Topic<Integer> OcTreeDepth = OcTreeCategory.topic(Depth);
    public static final Topic<Boolean> LidarBufferEnable = OcTreeCategory.child(Lidar).child(Buffer).topic(Enable);
    public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> LidarBufferMessageCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> StereoVisionBufferEnable = OcTreeCategory.child(StereoVision).child(Buffer).topic(Enable);
    public static final Topic<Integer> StereoVisionBufferOcTreeCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(OcTree).topic(Capacity);
+   public static final Topic<Integer> StereoVisionBufferSize = OcTreeCategory.child(StereoVision).child(Buffer).topic(Size);
    public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);

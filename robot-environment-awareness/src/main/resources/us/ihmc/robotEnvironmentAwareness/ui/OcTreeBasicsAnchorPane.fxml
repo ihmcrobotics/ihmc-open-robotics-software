@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="879.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController">
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController">
    <children>
       <HBox layoutX="14.0" layoutY="14.0" spacing="20.0">
          <children>
@@ -88,13 +88,17 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
+                  <Slider fx:id="stereoBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
+                     <tooltip>
+                        <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
+                     </tooltip>
+                  </Slider>
+                  <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0">
                      <tooltip>
                         <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
                      </tooltip>
                   </Slider>
                   <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" />
-                  <ToggleButton fx:id="showStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show buffer" />
                   <ToggleButton fx:id="showInputStereoPointCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input pointcloud" />
                </children>
             </VBox>
