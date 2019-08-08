@@ -167,6 +167,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
 
       setFirstSplineStartFromCurrentState();
+
+      if (isInitialTransfer.getBooleanValue())
+         isInitialTransfer.set(false);
    }
 
    public void setHoldCurrentDesiredPosition(boolean holdPosition)
@@ -314,9 +317,10 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    {
       timeInState.set(currentTime - timeAtStartOfState.getValue());
 
+      boolean wasStanding = isStanding.getBooleanValue();
       isStanding.set(stepSequence.isEmpty());
-      isInitialTransfer.set(stepSequence.isEmpty());
-      //      isInitialTransfer.set(true);
+      if (!isInitialTransfer.getBooleanValue())
+         isInitialTransfer.set(wasStanding && !isStanding.getBooleanValue());
 
       if (isStanding.getBooleanValue())
       {
