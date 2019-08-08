@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.SplinePathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPlanner;
@@ -58,7 +58,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
 
-   public PathPlanningStage(int stageId, FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public PathPlanningStage(int stageId, FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParameters visibilityGraphsParameters,
                             EnumProvider<FootstepPlannerType> activePlanner)
    {
       this.stageId = stageId;

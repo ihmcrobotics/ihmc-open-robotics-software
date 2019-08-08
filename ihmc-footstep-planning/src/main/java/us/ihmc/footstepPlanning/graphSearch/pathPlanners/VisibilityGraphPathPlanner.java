@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
@@ -27,14 +27,14 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
-   public VisibilityGraphPathPlanner(FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
       super(prefix, footstepPlannerParameters, parentRegistry);

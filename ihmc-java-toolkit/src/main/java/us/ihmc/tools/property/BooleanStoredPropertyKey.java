@@ -6,4 +6,9 @@ public class BooleanStoredPropertyKey extends StoredPropertyKey<Boolean>
    {
       super(Boolean.class, id, titleCasedName);
    }
+
+   public BooleanStoredPropertyKey(int id, String titleCasedName, boolean defaultValue)
+   {
+      super(Boolean.class, id, titleCasedName, defaultValue);
+   }
 }

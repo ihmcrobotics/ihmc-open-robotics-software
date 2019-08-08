@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
@@ -39,7 +39,7 @@ public class PlannerParametersUIController
    @FXML private Spinner<Double> swingTimeFlatUp   ;
    @FXML private Spinner<Double> swingTimeDown     ;
 
-   private FootstepPlannerParameters footstepPlannerParameters;
+   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private Messager messager;
 
    public void init(Messager messager, DRCRobotModel robotModel)

@@ -5,16 +5,16 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
 public class LinearHeightCost implements FootstepCost
 {
-   private final FootstepPlannerCostParameters costParameters;
+   private final FootstepPlannerParametersReadOnly costParameters;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   public LinearHeightCost(FootstepPlannerCostParameters costParameters, FootstepNodeSnapperReadOnly snapper)
+   public LinearHeightCost(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
-      this.costParameters = costParameters;
+      this.costParameters = parameters;
       this.snapper = snapper;
    }
 

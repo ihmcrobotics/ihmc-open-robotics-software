@@ -1,36 +1,28 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import com.google.common.util.concurrent.AtomicDouble;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SimpleNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanBasedCost;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -41,10 +33,16 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class AStarPlanarRegionsPlannerTest
 {
@@ -147,7 +145,7 @@ public class AStarPlanarRegionsPlannerTest
 
       FootstepNode node = new FootstepNode(0.0, 0.0, Math.PI, RobotSide.RIGHT);
 
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
       HashSet<FootstepNode> neighbors = expansion.expandNode(node);
 
@@ -203,21 +201,9 @@ public class AStarPlanarRegionsPlannerTest
 
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getCostPerStep()
-               {
-                  return 0.0;
-               }
-            };
-         }
-      };
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) parameters).setCostPerStep(0.0);
+
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
 
       final AtomicDouble heuristicCost = new AtomicDouble(1.0);
