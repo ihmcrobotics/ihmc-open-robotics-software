@@ -10,14 +10,11 @@ import java.util.List;
 
 public interface DCMPlannerInterface
 {
-//   void initializeForStanding();
-
-//   void initializeForStepping(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
-//                              FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
-
    void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
 
-//   void initialize();
+   void initialize();
+
+   void setNominalCoMHeight(double comHeight);
 
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 

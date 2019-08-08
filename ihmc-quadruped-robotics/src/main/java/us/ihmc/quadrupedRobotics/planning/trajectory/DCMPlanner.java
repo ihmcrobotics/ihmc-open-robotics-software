@@ -53,7 +53,7 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final YoDouble omega;
+   private final YoDouble omega = new YoDouble("omegaForPlanning", registry);
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoFramePoint3D perfectVRPPosition = new YoFramePoint3D("perfectVRPPosition", worldFrame, registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
@@ -76,26 +76,25 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final boolean debug;
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(dcmPlannerParameters, omega, gravity, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+      this(dcmPlannerParameters, nominalHeight, gravity, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
    {
-      this.omega = omega;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      omega.addVariableChangedListener(v ->
-            comHeight.set(gravity / MathTools.square(omega.getDoubleValue()))
-      );
+      comHeight.addVariableChangedListener(v ->
+            omega.set(Math.sqrt(gravity / comHeight.getDoubleValue())));
+      comHeight.set(nominalHeight);
 
 
       DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
@@ -128,6 +127,7 @@ public class DCMPlanner implements DCMPlannerInterface
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   @Override
    public void initialize()
    {
    }
@@ -136,15 +136,10 @@ public class DCMPlanner implements DCMPlannerInterface
    {
    }
 
-   /*
-   public void initializeForStanding()
+   public void setNominalCoMHeight(double comHeight)
    {
-      isStanding.set(true);
-      timedContactSequence.clear();
-      piecewiseConstantCopTrajectory.resetVariables();
-      dcmTrajectory.resetVariables();
+      this.comHeight.set(comHeight);
    }
-   */
 
    public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
    {
@@ -152,27 +147,6 @@ public class DCMPlanner implements DCMPlannerInterface
       dcmPositionAtStartOfState.set(currentDCMPosition);
       dcmVelocityAtStartOfState.set(currentDCMVelocity);
    }
-
-   /*
-   public void initializeForStepping(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence,
-                                     FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
-   {
-      isStanding.set(false);
-
-      boolean isCurrentPlanValid = stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime;
-
-      if (isCurrentPlanValid)
-      {
-         // compute dcm trajectory
-         computeDcmTrajectory(currentTime, currentContactStates, stepSequence);
-
-         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
-         timeAtStartOfState.set(currentTime);
-         computeTransitionTrajectory();
-      }
-   }
-   */
 
    private void computeDcmTrajectory(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
    {
