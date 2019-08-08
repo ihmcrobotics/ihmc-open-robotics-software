@@ -48,7 +48,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final YoDouble omega;
+   private final YoDouble omega = new YoDouble("omegaForPlanning", registry);
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
 
    private final YoBoolean isStanding = new YoBoolean("plannerIsStanding", registry);
@@ -100,22 +100,22 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public ContinuousDCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public ContinuousDCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity,ReferenceFrame supportFrame,
                                QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.omega = omega;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.dcmFirstSpline = new YoFrameTrajectory3D("dcmFirstSpline", 4, supportFrame, registry);
       this.dcmSecondSpline = new YoFrameTrajectory3D("dcmSecondSpline", 4, supportFrame, registry);
 
+      comHeight.addVariableChangedListener(v ->
+                                                 omega.set(Math.sqrt(gravity / comHeight.getDoubleValue())));
+      comHeight.set(nominalHeight);
+
       splineInitialPosition = new FramePoint3D(supportFrame);
       splineInitialVelocity = new FrameVector3D(supportFrame);
       splineFinalPosition = new FramePoint3D(supportFrame);
       splineFinalVelocity = new FrameVector3D(supportFrame);
-
-      omega.addVariableChangedListener(v ->
-            comHeight.set(gravity / MathTools.square(omega.getDoubleValue())));
 
       DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, omega, gravity, registry);
@@ -157,6 +157,17 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+
+   @Override
+   public void initialize()
+   {
+   }
+
+   @Override
+   public void setNominalCoMHeight(double comHeight)
+   {
+      this.comHeight.set(comHeight);
    }
 
    @Override
