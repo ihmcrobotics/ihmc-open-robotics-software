@@ -22,6 +22,8 @@ uint32 sequence_id
 # The controller is expecting a continuous stream of messages sent at high frequency.
 # A trajectory message that is part of a stream is expected to have a single trajectory point with a time set to 0.
 # A stream can be terminated with either an override message or a stream message with a desired velocity of 0.
+# While it is possible to stream messages using the EXECUTION_MODE_OVERRIDE, discontinuities in velocity will be experienced.
+# These discontinuities can be solved by using EXECUTION_MODE_STREAM with stream_integration_duration greater than the time interval between two consecutive messages of a stream.
 byte execution_mode 0
 # Defines a unique ID for this message. Only needed when you want to queue another message to this message.
 int64 message_id -1
