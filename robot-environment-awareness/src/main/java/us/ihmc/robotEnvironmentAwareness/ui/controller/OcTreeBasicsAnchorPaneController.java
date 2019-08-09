@@ -48,6 +48,12 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private ToggleButton enableStereoBufferButton;
    @FXML
    private ToggleButton showInputStereoPointCloudButton;
+   @FXML
+   private Slider surfaceNormalLowerBoundSlider;
+   @FXML
+   private Slider surfaceNormalUpperBoundSlider;
+   @FXML
+   private ToggleButton enableStereoBufferRefreshingButton;
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
    {
