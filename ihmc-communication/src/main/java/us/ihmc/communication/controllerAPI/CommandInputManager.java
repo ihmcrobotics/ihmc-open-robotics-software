@@ -321,7 +321,7 @@ public class CommandInputManager
     * @param commands list of commands to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
-   public <C extends Command<C, ?>> void submitControllerCommands(List<Command<?, ?>> commands)
+   public <C extends Command<C, ?>> void submitCommands(List<? extends Command<?, ?>> commands)
    {
       for (int i = 0; i < commands.size(); i++)
          submitCommand((C) commands.get(i));

@@ -33,6 +33,7 @@ import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -230,6 +231,11 @@ public class MessageTools
       return message;
    }
 
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Pose3DReadOnly desiredPose)
+   {
+      return createKinematicsToolboxRigidBodyMessage(endEffector, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
@@ -287,10 +293,16 @@ public class MessageTools
 
    public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected)
    {
+      return createSelectionMatrix3DMessage(xSelected, ySelected, zSelected, null);
+   }
+
+   public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected, ReferenceFrame selectionFrame)
+   {
       SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
       message.setXSelected(xSelected);
       message.setYSelected(ySelected);
       message.setZSelected(zSelected);
+      message.setSelectionFrameId(toFrameId(selectionFrame));
       return message;
    }
 
