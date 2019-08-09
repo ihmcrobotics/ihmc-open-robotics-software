@@ -316,19 +316,19 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
-      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), controllerToolbox.getContactStates(), stepSequence);
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
+      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
    }
 
    public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
    {
-      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
       stepAdjustmentController.beganStep(robotQuadrant, goalPosition);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
    {
-      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
@@ -343,7 +343,7 @@ public class QuadrupedBalanceManager
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
-      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), controllerToolbox.getContactStates(), stepSequence);
+      dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
 
       yoDesiredDCMPosition.set(dcmPlanner.getDesiredDCMPosition());

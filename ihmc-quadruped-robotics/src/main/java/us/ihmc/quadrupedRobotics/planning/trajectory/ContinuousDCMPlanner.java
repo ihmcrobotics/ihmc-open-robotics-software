@@ -17,6 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
@@ -170,8 +171,12 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       this.comHeight.set(comHeight);
    }
 
+   /**
+    * The current position {@param currentDCMPosition} must be the DCM position and the current velocity {@param currentDCMVelocity} must be the  DCM Velocity
+    */
    @Override
-   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
+   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity,
+                               FramePoint3DReadOnly copPosition)
    {
       timeAtStartOfState.set(initialTime);
       dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
@@ -194,10 +199,10 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    }
 
 
-   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
+   private void computeDcmTrajectory(List<RobotQuadrant> currentFeetInContact, List<? extends QuadrupedTimedStep> stepSequence)
    {
       // compute piecewise constant center of pressure plan
-      timedContactSequence.update(stepSequence, soleFrames, currentContactStates, timeAtStartOfState.getDoubleValue());
+      timedContactSequence.update(stepSequence, soleFrames, currentFeetInContact, timeAtStartOfState.getDoubleValue());
       piecewiseConstantCopTrajectory.initializeTrajectory(timeAtStartOfState.getDoubleValue(), timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
@@ -324,7 +329,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
 
    @Override
-   public void computeSetpoints(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
+   public void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact)
    {
       timeInState.set(currentTime - timeAtStartOfState.getValue());
 
@@ -352,7 +357,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       }
       else
       {
-         computeDcmTrajectory(currentContactStates, stepSequence);
+         computeDcmTrajectory(currentFeetInContact, stepSequence);
 
          if (isInitialTransfer.getBooleanValue())
             computeInitialTransitionTrajectory();

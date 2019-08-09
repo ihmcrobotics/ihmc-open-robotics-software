@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
@@ -14,11 +15,11 @@ public interface DCMPlannerInterface
 
    void setNominalCoMHeight(double comHeight);
 
-   void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity);
-
+   void setInitialState(double initialTime, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity,
+                        FramePoint3DReadOnly copPosition);
    void setHoldCurrentDesiredPosition(boolean holdPosition);
 
-   void computeSetpoints(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence);
+   void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact);
 
    void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack);
 
