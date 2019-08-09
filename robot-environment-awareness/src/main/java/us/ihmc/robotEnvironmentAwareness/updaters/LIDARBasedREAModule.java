@@ -118,6 +118,7 @@ public class LIDARBasedREAModule
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
 
       bufferType = reaMessager.createInput(REAModuleAPI.UIOcTreeBufferType, BufferType.LIDAR_BASED);
+      //TODO: REAModuleAPI.StereoVisionBufferRefreshingEnable
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)

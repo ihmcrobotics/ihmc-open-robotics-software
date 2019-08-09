@@ -81,25 +81,53 @@
                   <ToggleButton fx:id="showInputLidarScanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input scan" />
                </children>
             </VBox>
-            <VBox style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="156.0" prefWidth="298.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stereo vision Buffer" textAlignment="CENTER">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-                  <Slider fx:id="stereoBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
-                     <tooltip>
-                        <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
-                     </tooltip>
-                  </Slider>
-                  <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0">
-                     <tooltip>
-                        <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
-                     </tooltip>
-                  </Slider>
-                  <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" />
-                  <ToggleButton fx:id="showInputStereoPointCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input pointcloud" />
+                  <HBox prefHeight="185.0" prefWidth="300.0">
+                     <children>
+                        <VBox prefHeight="137.0" prefWidth="150.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stereo vision Buffer" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Slider fx:id="stereoBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0">
+                                 <tooltip>
+                                    <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
+                                 </tooltip>
+                              </Slider>
+                              <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0">
+                                 <tooltip>
+                                    <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
+                                 </tooltip>
+                              </Slider>
+                              <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" />
+                              <ToggleButton fx:id="showInputStereoPointCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input pointcloud" />
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="48.0" prefWidth="150.0">
+                           <children>
+                              <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Surface Normal Filter" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <Slider fx:id="surfaceNormalLowerBoundSlider" blockIncrement="1.0" majorTickUnit="5.0" max="0.0" min="-90.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="-45.0">
+                                 <tooltip>
+                                    <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
+                                 </tooltip>
+                              </Slider>
+                              <Slider fx:id="surfaceNormalUpperBoundSlider" blockIncrement="1.0" majorTickUnit="5.0" max="90.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="45.0">
+                                 <tooltip>
+                                    <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
+                                 </tooltip>
+                              </Slider>
+                              <ToggleButton fx:id="enableStereoBufferRefreshingButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Refreshing" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
             </VBox>
          </children>
