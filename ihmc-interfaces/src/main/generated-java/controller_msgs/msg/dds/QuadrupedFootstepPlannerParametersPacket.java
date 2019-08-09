@@ -62,6 +62,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double final_turn_proximity_ = -11.1;
    public double final_slow_down_proximity_ = -11.1;
    public double maximum_deviation_from_x_gait_during_expansion_ = -11.1;
+   public boolean return_best_effort_plan_;
+   public long minimum_steps_for_best_effort_plan_ = 4;
 
    public QuadrupedFootstepPlannerParametersPacket()
    {
@@ -168,6 +170,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       final_slow_down_proximity_ = other.final_slow_down_proximity_;
 
       maximum_deviation_from_x_gait_during_expansion_ = other.maximum_deviation_from_x_gait_during_expansion_;
+
+      return_best_effort_plan_ = other.return_best_effort_plan_;
+
+      minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
 
    }
 
@@ -600,6 +606,24 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return maximum_deviation_from_x_gait_during_expansion_;
    }
 
+   public void setReturnBestEffortPlan(boolean return_best_effort_plan)
+   {
+      return_best_effort_plan_ = return_best_effort_plan;
+   }
+   public boolean getReturnBestEffortPlan()
+   {
+      return return_best_effort_plan_;
+   }
+
+   public void setMinimumStepsForBestEffortPlan(long minimum_steps_for_best_effort_plan)
+   {
+      minimum_steps_for_best_effort_plan_ = minimum_steps_for_best_effort_plan;
+   }
+   public long getMinimumStepsForBestEffortPlan()
+   {
+      return minimum_steps_for_best_effort_plan_;
+   }
+
 
    public static Supplier<QuadrupedFootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -712,6 +736,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_deviation_from_x_gait_during_expansion_, other.maximum_deviation_from_x_gait_during_expansion_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_plan_, other.return_best_effort_plan_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
+
 
       return true;
    }
@@ -819,6 +847,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.maximum_deviation_from_x_gait_during_expansion_ != otherMyClass.maximum_deviation_from_x_gait_during_expansion_) return false;
 
+      if(this.return_best_effort_plan_ != otherMyClass.return_best_effort_plan_) return false;
+
+      if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
+
 
       return true;
    }
@@ -922,7 +954,11 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append("final_slow_down_proximity=");
       builder.append(this.final_slow_down_proximity_);      builder.append(", ");
       builder.append("maximum_deviation_from_x_gait_during_expansion=");
-      builder.append(this.maximum_deviation_from_x_gait_during_expansion_);
+      builder.append(this.maximum_deviation_from_x_gait_during_expansion_);      builder.append(", ");
+      builder.append("return_best_effort_plan=");
+      builder.append(this.return_best_effort_plan_);      builder.append(", ");
+      builder.append("minimum_steps_for_best_effort_plan=");
+      builder.append(this.minimum_steps_for_best_effort_plan_);
       builder.append("}");
       return builder.toString();
    }

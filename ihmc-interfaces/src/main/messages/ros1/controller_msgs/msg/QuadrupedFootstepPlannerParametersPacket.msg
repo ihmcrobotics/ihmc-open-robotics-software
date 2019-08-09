@@ -140,4 +140,9 @@ float64 final_slow_down_proximity
 # Field default value -11.1
 float64 maximum_deviation_from_x_gait_during_expansion
 
+bool return_best_effort_plan
+
+# Field default value 4
+uint32 minimum_steps_for_best_effort_plan
+
 

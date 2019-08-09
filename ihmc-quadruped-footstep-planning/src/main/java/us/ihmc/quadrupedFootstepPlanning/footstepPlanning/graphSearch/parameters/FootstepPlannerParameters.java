@@ -209,6 +209,16 @@ public interface FootstepPlannerParameters
       return 0.1;
    }
 
+   default boolean returnBestEffortPlan()
+   {
+      return false;
+   }
+
+   default int getMinimumStepsForBestEffortPlan()
+   {
+      return 4;
+   }
+
    default QuadrupedFootstepPlannerParametersPacket getAsPacket()
    {
       QuadrupedFootstepPlannerParametersPacket packet = new QuadrupedFootstepPlannerParametersPacket();
@@ -258,6 +268,8 @@ public interface FootstepPlannerParameters
       packet.setFinalTurnProximity(getFinalTurnProximity());
       packet.setFinalSlowDownProximity(getFinalSlowDownProximity());
       packet.setMaximumDeviationFromXGaitDuringExpansion(getMaximumDeviationFromXGaitDuringExpansion());
+      packet.setReturnBestEffortPlan(returnBestEffortPlan());
+      packet.setMinimumStepsForBestEffortPlan(getMinimumStepsForBestEffortPlan());
 
       return packet;
    }
