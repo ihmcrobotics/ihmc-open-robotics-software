@@ -22,6 +22,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private double privilegedWeight = -1.0;
    private double privilegedGain = -1.0;
 
+   private double jointVelocityWeight = -1.0;
+   private double jointAccelerationWeight = -1.0;
+
    @Override
    public void clear()
    {
@@ -32,6 +35,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       privilegedRootJointOrientation.setToNaN();
       privilegedWeight = -1.0;
       privilegedGain = -1.0;
+      jointVelocityWeight = -1.0;
+      jointAccelerationWeight = -1.0;
    }
 
    @Override
@@ -63,19 +68,22 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       privilegedWeight = other.privilegedWeight;
       privilegedGain = other.privilegedGain;
+
+      jointVelocityWeight = other.jointVelocityWeight;
+      jointAccelerationWeight = other.jointAccelerationWeight;
    }
 
    @Override
    public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
       sequenceId = message.getSequenceId();
-      hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
+      hasPrivilegedRootJointPosition = message.getUsePrivilegedRootJointPosition();
       if (hasPrivilegedRootJointPosition)
          privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition());
       else
          privilegedRootJointPosition.setToNaN();
 
-      hasPrivilegedRootJointOrientation = message.getPrivilegedRootJointOrientation() != null;
+      hasPrivilegedRootJointOrientation = message.getUsePrivilegedRootJointOrientation();
       if (hasPrivilegedRootJointOrientation)
          privilegedRootJointOrientation.set(message.getPrivilegedRootJointOrientation());
       else
@@ -96,6 +104,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       privilegedWeight = message.getPrivilegedWeight();
       privilegedGain = message.getPrivilegedGain();
+
+      jointVelocityWeight = message.getJointVelocityWeight();
+      jointAccelerationWeight = message.getJointAccelerationWeight();
    }
 
    public boolean hasPrivilegedRootJointPosition()
@@ -141,6 +152,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public double getPrivilegedGain()
    {
       return privilegedGain;
+   }
+
+   public double getJointVelocityWeight()
+   {
+      return jointVelocityWeight;
+   }
+
+   public double getJointAccelerationWeight()
+   {
+      return jointAccelerationWeight;
    }
 
    @Override

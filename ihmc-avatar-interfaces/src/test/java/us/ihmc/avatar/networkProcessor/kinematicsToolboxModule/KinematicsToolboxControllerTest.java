@@ -101,8 +101,14 @@ public class KinematicsToolboxControllerTest
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
-      toolboxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel.getLeft(),
-                                                          desiredFullRobotModel.getRight(), yoGraphicsListRegistry, mainRegistry);
+      double updateDT = 1.0e-3;
+      toolboxController = new KinematicsToolboxController(commandInputManager,
+                                                          statusOutputManager,
+                                                          desiredFullRobotModel.getLeft(),
+                                                          desiredFullRobotModel.getRight(),
+                                                          updateDT,
+                                                          yoGraphicsListRegistry,
+                                                          mainRegistry);
 
       robot = new RobotFromDescription(robotDescription);
       toolboxUpdater = createToolboxUpdater();
@@ -172,7 +178,8 @@ public class KinematicsToolboxControllerTest
       Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       snapGhostToFullRobotModel(initialFullRobotModel);
 
-      RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(initialFullRobotModel.getRight()), "handLink")[0];
+      RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(initialFullRobotModel.getRight()),
+                                                                 "handLink")[0];
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(hand));
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -183,7 +190,8 @@ public class KinematicsToolboxControllerTest
       runKinematicsToolboxController(numberOfIterations);
 
       assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
-      assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
+      assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4,
+                 "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
    }
 
    @Test
@@ -200,7 +208,8 @@ public class KinematicsToolboxControllerTest
       for (int i = 0; i < 10; i++)
       {
          randomizeJointPositions(random, randomizedFullRobotModel, 0.6);
-         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(randomizedFullRobotModel.getRight()), "handLink")[0];
+         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(randomizedFullRobotModel.getRight()),
+                                                                    "handLink")[0];
          FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
          desiredPosition.changeFrame(worldFrame);
          KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
@@ -242,7 +251,8 @@ public class KinematicsToolboxControllerTest
       for (int i = 0; i < numberOfTests; i++)
       {
          randomizeJointPositions(random, randomizedFullRobotModel, 0.3);
-         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(randomizedFullRobotModel.getRight()), "handLink")[0];
+         RigidBodyBasics hand = ScrewTools.findRigidBodiesWithNames(MultiBodySystemTools.collectSubtreeSuccessors(randomizedFullRobotModel.getRight()),
+                                                                    "handLink")[0];
          KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(hand);
          message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -331,7 +341,8 @@ public class KinematicsToolboxControllerTest
    {
       return new RobotController()
       {
-         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot, toolboxController.getDesiredRootJoint(),
+         private final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot,
+                                                                                   toolboxController.getDesiredRootJoint(),
                                                                                    toolboxController.getDesiredOneDoFJoint());
 
          @Override

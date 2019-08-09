@@ -55,39 +55,39 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    /**
-    * This is the model of the robot that is constantly updated to represent the most recent
-    * solution obtained. The {@link WholeBodyControllerCore} works on this robot to perform the
-    * feedback controllers.
+    * This is the model of the robot that is constantly updated to represent the most recent solution
+    * obtained. The {@link WholeBodyControllerCore} works on this robot to perform the feedback
+    * controllers.
     */
    private final FullHumanoidRobotModel desiredFullRobotModel;
 
    /**
-    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to know
-    * which foot is currently used for support in the walking controller.
+    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to know which
+    * foot is currently used for support in the walking controller.
     */
    private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>();
    /**
-    * Updated during the initialization phase, this is where the poses of the feet are stored so
-    * they can be held in place during the optimization process such that the solution will be
-    * statically reachable.
+    * Updated during the initialization phase, this is where the poses of the feet are stored so they
+    * can be held in place during the optimization process such that the solution will be statically
+    * reachable.
     */
    private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
    /**
     * Updated during the initialization phase, this is where the robot's center of mass position is
-    * stored so it can be held in place during the optimization process such that the solution will
-    * be statically reachable.
+    * stored so it can be held in place during the optimization process such that the solution will be
+    * statically reachable.
     */
    private final YoFramePoint3D initialCenterOfMassPosition = new YoFramePoint3D("initialCenterOfMass", worldFrame, registry);
 
    /**
-    * Indicates whether the support foot/feet should be held in place for this run. It is
-    * {@code true} by default but can be disabled using the message
+    * Indicates whether the support foot/feet should be held in place for this run. It is {@code true}
+    * by default but can be disabled using the message
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoBoolean holdSupportFootPose = new YoBoolean("holdSupportFootPose", registry);
    /**
-    * Indicates whether the center of mass x and y coordinates should be held in place for this run.
-    * It is {@code true} by default but can be disabled using the message
+    * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
+    * is {@code true} by default but can be disabled using the message
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
@@ -103,8 +103,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoDouble footWeight = new YoDouble("footWeight", registry);
    /**
-    * Default weight used when holding the center of mass in place. It is rather high such that it
-    * does not deviate much from its initial position.
+    * Default weight used when holding the center of mass in place. It is rather high such that it does
+    * not deviate much from its initial position.
     */
    private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
    /**
@@ -115,9 +115,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    /**
-    * Reference to the most recent data received from the controller relative to the balance
-    * control. It is used for identifying which foot is in support and thus which foot should be
-    * held in place.
+    * Reference to the most recent data received from the controller relative to the balance control.
+    * It is used for identifying which foot is in support and thus which foot should be held in place.
     */
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
@@ -132,11 +131,19 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final double robotMass;
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              FullHumanoidRobotModel desiredFullRobotModel, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoVariableRegistry parentRegistry)
    {
+      this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), updateDT,
+           yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel, Collection<? extends RigidBodyBasics> controllableRigidBodyies,
+                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   {
       super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
-            createListOfControllableRigidBodies(desiredFullRobotModel), yoGraphicsListRegistry, parentRegistry);
+            controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
 
@@ -165,9 +172,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    /**
-    * Setting up the map holding the joint limit reduction factors. If more reduction is needed, add
-    * it there. If it has to be updated on the fly, it should then be added this toolbox API,
-    * probably added to the message {@link HumanoidKinematicsToolboxConfigurationMessage}.
+    * Setting up the map holding the joint limit reduction factors. If more reduction is needed, add it
+    * there. If it has to be updated on the fly, it should then be added this toolbox API, probably
+    * added to the message {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private void populateJointLimitReductionFactors()
    {
@@ -188,6 +195,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       List<RigidBodyBasics> listOfControllableRigidBodies = new ArrayList<>();
 
+      listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getChest());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
 
@@ -197,8 +205,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
-      
-      listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
 
       return listOfControllableRigidBodies;
    }
@@ -250,8 +256,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    /**
-    * Sets the {@link #initialCenterOfMassPosition} and {@link #initialFootPoses} to match the
-    * current state of {@link #desiredFullRobotModel}.
+    * Sets the {@link #initialCenterOfMassPosition} and {@link #initialFootPoses} to match the current
+    * state of {@link #desiredFullRobotModel}.
     */
    private void updateCoMPositionAndFootPoses()
    {
@@ -267,11 +273,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    /**
-    * Creates and sets up the feedback control commands for holding the support foot/feet in place.
-    * If {@link #holdSupportFootPose} is {@code false}, this methods returns {@code null}.
+    * Creates and sets up the feedback control commands for holding the support foot/feet in place. If
+    * {@link #holdSupportFootPose} is {@code false}, this methods returns {@code null}.
     * <p>
-    * Also note that if a user command has been received for a support foot, the command for this
-    * foot is not created.
+    * Also note that if a user command has been received for a support foot, the command for this foot
+    * is not created.
     * </p>
     *
     * @return the commands for holding the support foot/feet in place.
@@ -311,8 +317,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * coordinates in place. If {@link #holdCenterOfMassXYPosition} is {@code false}, this methods
     * returns {@code null}.
     * <p>
-    * Also note that if a user command has been received for the center of mass, this methods
-    * returns {@code null}.
+    * Also note that if a user command has been received for the center of mass, this methods returns
+    * {@code null}.
     * </p>
     *
     * @return the commands for holding the center of mass x and y coordinates in place.
@@ -408,8 +414,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             Vector2D h1 = command.addLinearMomentumConstraintVertex();
             h0.sub(vertex, centerOfMass);
             h1.sub(nextVertex, centerOfMass);
-            h0.scale(robotMass / KinematicsToolboxController.updateDT);
-            h1.scale(robotMass / KinematicsToolboxController.updateDT);
+            h0.scale(robotMass / updateDT);
+            h1.scale(robotMass / updateDT);
             commandList.addCommand(command);
          }
       }

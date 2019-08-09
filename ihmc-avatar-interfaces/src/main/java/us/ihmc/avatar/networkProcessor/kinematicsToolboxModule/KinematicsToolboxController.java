@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -24,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -45,10 +47,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -60,7 +64,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class KinematicsToolboxController extends ToolboxController
 {
@@ -69,19 +72,15 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
 
    /**
+    * This name is used with the {@code Map} {@link #userFeedbackCommands} to keep track of the active
+    * set of commands provided by the caller.
+    */
+   private static final String centerOfMassName = "CenterOfMass";
+   /**
     * Indicates the duration of a control tick. It should match the thread period in
     * {@link ToolboxModule}.
     */
-   public static final double updateDT = 1.0e-3;
-   /**
-    * Specifies how many control ticks have to be performed before sending a solution to the caller.
-    */
-   private static final int numberOfTicksToSendSolution = 10;
-   /**
-    * This name is used with the {@code Map} {@link #userFeedbackCommands} to keep track of the
-    * active set of commands provided by the caller.
-    */
-   private static final String centerOfMassName = "CenterOfMass";
+   protected final double updateDT;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -90,20 +89,27 @@ public class KinematicsToolboxController extends ToolboxController
    /** Reference to the desired robot's floating joint. */
    protected final FloatingJointBasics rootJoint;
    /**
-    * Array containing all the one degree-of-freedom joints of the desired robot except for the
-    * finger joints that are not handled by this solver.
+    * Array containing all the one degree-of-freedom joints of the desired robot except for the finger
+    * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
    private final Map<Integer, OneDoFJointBasics> jointHashCodeMap = new HashMap<>();
 
    /**
-    * Reference frame centered at the robot's center of mass. It is used to hold the initial center
-    * of mass position when requested.
+    * Reference frame centered at the robot's center of mass. It is used to hold the initial center of
+    * mass position when requested.
     */
    protected final ReferenceFrame centerOfMassFrame;
 
    /** The same set of gains is used for controlling any part of the desired robot body. */
-   private final SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("genericGains", registry);
+   private final YoPIDSE3Gains gains = new DefaultYoPIDSE3Gains("GenericGains", GainCoupling.XYZ, false, registry);
+   /**
+    * Default settings for the solver. The joint velocity/acceleration weights can be modified at
+    * runtime using {@link KinematicsToolboxConfigurationMessage}.
+    */
+   private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+   /** Command carrying the current optimization settings. */
+   private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
    /**
     * The controller core command is the single object used to pass the desired inputs to the
     * controller core.
@@ -113,11 +119,11 @@ public class KinematicsToolboxController extends ToolboxController
     * This is where the magic is happening. The controller is responsible for performing feedback
     * control to reduce the difference between the desireds sent to the
     * {@code KinematicsToolboxController} and the actual robot pose. It is also responsible for
-    * gathering the entire set of desired inputs and formulate the adequate optimization problem to
-    * be solved for every control tick. The output of the controller core provides every tick a new
-    * robot joint configurations and velocities that are one step closer to the desireds. The output
-    * is used to update the state of the {@link #desiredFullRobotModel} such that it progresses
-    * towards the desired user inputs over time.
+    * gathering the entire set of desired inputs and formulate the adequate optimization problem to be
+    * solved for every control tick. The output of the controller core provides every tick a new robot
+    * joint configurations and velocities that are one step closer to the desireds. The output is used
+    * to update the state of the {@link #desiredFullRobotModel} such that it progresses towards the
+    * desired user inputs over time.
     */
    private final WholeBodyControllerCore controllerCore;
    /**
@@ -130,10 +136,13 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
     * configuration obtained from {@link #desiredFullRobotModel} and also with the solution quality
-    * which can be used to quickly see if the solution is viable. It is sent back to the caller
-    * only.
+    * which can be used to quickly see if the solution is viable. It is sent back to the caller only.
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
+   /** Variable to keep track of when the last solution was published. */
+   private final YoDouble timeSinceLastSolutionPublished = new YoDouble("timeSinceLastSolutionPublished", registry);
+   /** Specifies time interval for publishing the solution. */
+   private final YoDouble publishSolutionPeriod = new YoDouble("publishSolutionPeriod", registry);
    /**
     * This is the current estimate of the solution quality that is calculated based on the tracking
     * error for the end-effectors (center of mass included) being actively controlled.
@@ -148,44 +157,37 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
-    * compute for each joint a privileged velocity based on the difference between the privileged
-    * angle and the current angle. These privileged joint velocities are then used to complete the
+    * compute for each joint a privileged velocity based on the difference between the privileged angle
+    * and the current angle. These privileged joint velocities are then used to complete the
     * optimization problem in such way that they don't interfere with the user commands.
     */
    private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
    /**
     * Cap used to limit the magnitude of the privileged joint velocities computed in the controller
-    * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution
-    * converges quicker.
+    * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution converges
+    * quicker.
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    /**
-    * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out
-    * if the current privileged configuration used in the controller core is to be updated or not.
-    * It is usually updated once right after the initialization phase.
+    * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
+    * the current privileged configuration used in the controller core is to be updated or not. It is
+    * usually updated once right after the initialization phase.
     */
    private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<>(null);
    /**
-    * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user
-    * input, this manager automatically copies the data in the corresponding command that can then
-    * be used here safely.
+    * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user input,
+    * this manager automatically copies the data in the corresponding command that can then be used
+    * here safely.
     */
    protected final CommandInputManager commandInputManager;
    /**
-    * Counter used alongside {@link #numberOfTicksToSendSolution} to reduce the frequency at which
-    * the solution is sent back to the caller.
-    */
-   private int tickCount = 0;
-   /**
     * Visualization of the desired end-effector poses seen as coordinate systems in the
-    * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
-    * controlled.
+    * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
    private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
    /**
     * Visualization of the current end-effector poses seen as coordinate systems in the
-    * {@code SCSVisualizer}. They are only visible when the end-effector is being actively
-    * controlled.
+    * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
     */
    private final Map<RigidBodyBasics, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
 
@@ -196,33 +198,39 @@ public class KinematicsToolboxController extends ToolboxController
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
 
    /**
-    * Map of the commands requested during two initialization phases by the user. It used to
-    * memorize active commands such that the caller does not have to send the same commands every
-    * control tick of this solver.
+    * Map of the commands requested during two initialization phases by the user. It used to memorize
+    * active commands such that the caller does not have to send the same commands every control tick
+    * of this solver.
     */
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
 
    /**
-    * This is mostly for visualization to be able to keep track of the number of commands that the
-    * user submitted.
+    * This is mostly for visualization to be able to keep track of the number of commands that the user
+    * submitted.
     */
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
+   /**
+    * When {@code true}, a user command will persist over time until the method {@link #initialize()}
+    * is called.
+    */
+   private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
+                                      OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
-      this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, yoGraphicsListRegistry, parentRegistry);
+      this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, updateDT, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                      FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, Collection<RigidBodyBasics> controllableRigidBodies,
+   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
+                                      OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
+      this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This will find the root body without using rootJoint so it can be null.
@@ -238,20 +246,25 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-      gains.setMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
+      gains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
+      gains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+
+      publishSolutionPeriod.set(0.01);
+      preserveUserCommandHistory.set(true);
    }
 
    /**
-    * This is where the end-effectors needing a visualization are registered, if you need more, add
-    * it there.
+    * This is where the end-effectors needing a visualization are registered, if you need more, add it
+    * there.
     * 
-    * @param rigidBodies all the rigid bodies for which the desired and actual pose will be
-    *           displayed using graphical coordinate systems.
+    * @param rigidBodies all the rigid bodies for which the desired and actual pose will be displayed
+    *                    using graphical coordinate systems.
     */
    public void setupVisualization(RigidBodyBasics... rigidBodies)
    {
@@ -277,10 +290,10 @@ public class KinematicsToolboxController extends ToolboxController
     * Simply creates a graphic coordinate system visualizable in {@code SCSVisualizer}.
     * </p>
     *
-    * @param endEffector used to create a name prefix required for creating a
-    *           {@link YoGraphicCoordinateSystem}.
-    * @param type used to create a name prefix required for creating a
-    *           {@link YoGraphicCoordinateSystem}.
+    * @param endEffector          used to create a name prefix required for creating a
+    *                             {@link YoGraphicCoordinateSystem}.
+    * @param type                 used to create a name prefix required for creating a
+    *                             {@link YoGraphicCoordinateSystem}.
     * @param appearanceDefinition the appearance of the coordinate system's arrows.
     * @return the graphic with a good name for the given end-effector.
     */
@@ -294,13 +307,10 @@ public class KinematicsToolboxController extends ToolboxController
     * Creating the controller core which is the main piece of this solver.
     * 
     * @param controllableRigidBodies
-    *
-    * @return the controller core that will run for the desired robot
-    *         {@link #desiredFullRobotModel}.
+    * @return the controller core that will run for the desired robot {@link #desiredFullRobotModel}.
     */
-   private WholeBodyControllerCore createControllerCore(Collection<RigidBodyBasics> controllableRigidBodies)
+   private WholeBodyControllerCore createControllerCore(Collection<? extends RigidBodyBasics> controllableRigidBodies)
    {
-      KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
       JointBasics[] controlledJoints;
       if (rootJoint != null)
       {
@@ -312,8 +322,14 @@ public class KinematicsToolboxController extends ToolboxController
       {
          controlledJoints = oneDoFJoints;
       }
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
-                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT,
+                                                                            0.0,
+                                                                            rootJoint,
+                                                                            controlledJoints,
+                                                                            centerOfMassFrame,
+                                                                            optimizationSettings,
+                                                                            null,
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate(controllableRigidBodies);
@@ -326,12 +342,12 @@ public class KinematicsToolboxController extends ToolboxController
     * Convenience method to create the template necessary for the controller core to create all the
     * necessary feedback controllers.
     * 
-    * @param controllableRigidBodies the collection of all the rigid-bodies that will be
-    *           controllable by the user. If it is {@code null}, then all the rigid-bodies of the
-    *           robot will be controllable.
+    * @param controllableRigidBodies the collection of all the rigid-bodies that will be controllable
+    *                                by the user. If it is {@code null}, then all the rigid-bodies of
+    *                                the robot will be controllable.
     * @return the template for the controller core.
     */
-   private FeedbackControlCommandList createControllerCoreTemplate(Collection<RigidBodyBasics> controllableRigidBodies)
+   private FeedbackControlCommandList createControllerCoreTemplate(Collection<? extends RigidBodyBasics> controllableRigidBodies)
    {
       FeedbackControlCommandList template = new FeedbackControlCommandList();
       Collection<? extends RigidBodyBasics> rigidBodies;
@@ -357,17 +373,17 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    /**
-    * This marks the initialization phase. It is either called once when this toolbox wakes up or
-    * when it is reinitialized.
+    * This marks the initialization phase. It is either called once when this toolbox wakes up or when
+    * it is reinitialized.
     * <p>
-    * It snaps this {@link #desiredFullRobotModel} to the most recent robot configuration received
-    * from the walking controller. It also initializes the information needed to hold the center of
-    * mass and support foot/feet in place.
+    * It snaps {@code rootJoint} and {@code oneDoFJoints} to the most recent robot configuration
+    * received from the walking controller. It also initializes the information needed to hold the
+    * center of mass and support foot/feet in place.
     * </p>
     *
-    * @return {@code true} if this controller is good to go and solve a new problem. It needs to
-    *         have received at least once a robot configuration from the controller, otherwise this
-    *         will fail and prevent the user from using this toolbox.
+    * @return {@code true} if this controller is good to go and solve a new problem. It needs to have
+    *         received at least once a robot configuration from the controller, otherwise this will
+    *         fail and prevent the user from using this toolbox.
     */
    @Override
    public boolean initialize()
@@ -394,8 +410,7 @@ public class KinematicsToolboxController extends ToolboxController
     * This is the control loop called periodically only when the user requested a solution for a
     * desired set of inputs.
     * <p>
-    * Each time this method is called, the {@link #desiredFullRobotModel} gets closer to the user
-    * inputs.
+    * Each time this method is called, the multi-body system gets closer to the user inputs.
     * </p>
     */
    @Override
@@ -406,11 +421,17 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
+
+      // Clear the map to forget the user commands previously submitted.
+      if (!preserveUserCommandHistory.getValue())
+         userFeedbackCommands.clear();
+
       FeedbackControlCommandList userCommands = consumeCommands();
       numberOfActiveCommands.set(userCommands.getNumberOfCommands());
       controllerCoreCommand.addFeedbackControlCommand(userCommands);
       controllerCoreCommand.addFeedbackControlCommand(getAdditionalFeedbackControlCommands());
 
+      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
 
@@ -418,8 +439,8 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
 
       /*
-       * Submitting and requesting the controller core to run the feedback controllers, formulate
-       * and solve the optimization problem for this control tick.
+       * Submitting and requesting the controller core to run the feedback controllers, formulate and
+       * solve the optimization problem for this control tick.
        */
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -435,16 +456,18 @@ public class KinematicsToolboxController extends ToolboxController
       MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      if (tickCount++ == numberOfTicksToSendSolution)
-      { // Packing and sending the solution every N control ticks, with N = numberOfTicksToSendSolution.
+      timeSinceLastSolutionPublished.add(updateDT);
+
+      if (timeSinceLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
+      {
          reportMessage(inverseKinematicsSolution);
-         tickCount = 0;
+         timeSinceLastSolutionPublished.set(0.0);
       }
    }
 
    /**
-    * Updates all the reference frames and the twist calculator. This method needs to be called at
-    * the beginning of each control tick.
+    * Updates all the reference frames and the twist calculator. This method needs to be called at the
+    * beginning of each control tick.
     */
    protected void updateTools()
    {
@@ -454,8 +477,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Checking if there is any new command available, in which case they polled from the
-    * {@link #commandInputManager} and processed to update the state of the current optimization
-    * run.
+    * {@link #commandInputManager} and processed to update the state of the current optimization run.
     *
     * @return the new list of feedback control command to be executed for this control tick.
     */
@@ -466,9 +488,8 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
 
          /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside
-          * with the privileged configuration and the initial center of mass position and foot
-          * poses.
+          * If there is a new privileged configuration, the desired robot state is updated alongside with the
+          * privileged configuration and the initial center of mass position and foot poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
@@ -483,12 +504,22 @@ public class KinematicsToolboxController extends ToolboxController
             privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
          else
             privilegedConfigurationGain.set(command.getPrivilegedGain());
+
+         if (command.getJointVelocityWeight() <= 0.0)
+            activeOptimizationSettings.setJointVelocityWeight(optimizationSettings.getJointVelocityWeight());
+         else
+            activeOptimizationSettings.setJointVelocityWeight(command.getJointVelocityWeight());
+         if (command.getJointAccelerationWeight() < 0.0)
+            activeOptimizationSettings.setJointAccelerationWeight(optimizationSettings.getJointAccelerationWeight());
+         else
+            activeOptimizationSettings.setJointAccelerationWeight(command.getJointAccelerationWeight());
+
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         userFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains));
+         userFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains()));
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
@@ -504,9 +535,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
       /*
-       * By using the map, we ensure that there is only one command per end-effector (including the
-       * center of mass). The map is also useful for remembering commands received during the
-       * previous control ticks of the same run.
+       * By using the map, we ensure that there is only one command per end-effector (including the center
+       * of mass). The map is also useful for remembering commands received during the previous control
+       * ticks of the same run.
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
@@ -521,8 +552,8 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    /**
-    * Updates the graphic coordinate systems for the end-effectors that are actively controlled
-    * during this control tick.
+    * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
+    * this control tick.
     */
    private void updateVisualization()
    {
@@ -564,8 +595,8 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    /**
-    * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to
-    * match the current state of {@link #desiredFullRobotModel}.
+    * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to match
+    * the current state of {@link #desiredFullRobotModel}.
     */
    private void snapPrivilegedConfigurationToCurrent()
    {
@@ -597,7 +628,7 @@ public class KinematicsToolboxController extends ToolboxController
       return userFeedbackCommands.containsKey(centerOfMassName);
    }
 
-   protected PIDSE3Gains getDefaultGains()
+   public YoPIDSE3Gains getDefaultGains()
    {
       return gains;
    }
@@ -637,5 +668,15 @@ public class KinematicsToolboxController extends ToolboxController
    public FeedbackControllerDataReadOnly getFeedbackControllerDataHolder()
    {
       return feedbackControllerDataHolder;
+   }
+
+   public void setPublishingSolutionPeriod(double periodInSeconds)
+   {
+      publishSolutionPeriod.set(periodInSeconds);
+   }
+
+   public void setPreserveUserCommandHistory(boolean value)
+   {
+      preserveUserCommandHistory.set(value);
    }
 }
