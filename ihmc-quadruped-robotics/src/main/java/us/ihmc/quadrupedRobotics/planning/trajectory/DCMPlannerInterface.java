@@ -21,7 +21,6 @@ public interface DCMPlannerInterface
 
    void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact);
 
-   void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack);
 
    FramePoint3DReadOnly getDesiredDCMPosition();
 
@@ -36,4 +35,6 @@ public interface DCMPlannerInterface
    FramePoint3DReadOnly getDesiredVRPPosition();
 
    FramePoint3DReadOnly getDesiredECMPPosition();
+
+   FramePoint3DReadOnly getFinalDCMPosition();
 }

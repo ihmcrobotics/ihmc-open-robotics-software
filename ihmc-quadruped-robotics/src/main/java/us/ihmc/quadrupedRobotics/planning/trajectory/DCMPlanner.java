@@ -277,9 +277,9 @@ public class DCMPlanner implements DCMPlannerInterface
       finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCMPosition);
    }
 
-   public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   public FramePoint3DReadOnly getFinalDCMPosition()
    {
-      finalDesiredDCMToPack.setMatchingFrame(finalDCM);
+      return finalDCM;
    }
 
    public double getFinalTime()

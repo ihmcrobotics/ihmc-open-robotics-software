@@ -344,7 +344,7 @@ public class QuadrupedBalanceManager
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       dcmPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
-      dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
+      yoFinalDesiredDCM.set(dcmPlanner.getFinalDCMPosition());
 
       yoDesiredDCMPosition.set(dcmPlanner.getDesiredDCMPosition());
       yoDesiredDCMVelocity.set(dcmPlanner.getDesiredDCMVelocity());

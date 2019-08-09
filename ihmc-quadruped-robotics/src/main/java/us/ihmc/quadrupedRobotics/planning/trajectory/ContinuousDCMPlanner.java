@@ -399,9 +399,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    }
 
    @Override
-   public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   public FramePoint3DReadOnly getFinalDCMPosition()
    {
-      finalDesiredDCMToPack.setMatchingFrame(dcmAtEndOfState);
+      return dcmAtEndOfState;
    }
 
    @Override
