@@ -33,9 +33,8 @@ public class PlanarRegionSegmentationCalculator
    private final List<NormalOcTreeNode> nodesWithoutRegion = new ArrayList<>();
 
    private PlanarRegionSegmentationParameters parameters;
+   private SurfaceNormalFilterParameters surfaceNormalFilterParameters;
    private OcTreeBoundingBoxInterface boundingBox;
-
-   private boolean useSurfaceNormalFilter = false;
 
    public void compute(NormalOcTreeNode root)
    {
@@ -251,10 +250,12 @@ public class PlanarRegionSegmentationCalculator
 
       NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore,
                                                                                                         boundingBox, parameters);
-      if (useSurfaceNormalFilter)
+      if (surfaceNormalFilterParameters.isUseSurfaceNormalFilter())
       {
          ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
-                               .filter(node -> isNodeInBoundingBox(node, boundingBox) && isNodeOnSight(node, cameraPosition))
+                               .filter(node -> isNodeInBoundingBox(node, boundingBox)
+                                     && isNodeSurfaceNormalInBoundary(node, cameraPosition, surfaceNormalFilterParameters.getSurfaceNormalUpperBoundDegree(),
+                                                      surfaceNormalFilterParameters.getSurfaceNormalLowerBoundDegree()))
                                .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       }
       else
@@ -341,10 +342,10 @@ public class PlanarRegionSegmentationCalculator
    }
 
    //TODO: refactor.
-   private static boolean isNodeOnSight(NormalOcTreeNode node, Vector3D cameraPosition)
+   private static boolean isNodeSurfaceNormalInBoundary(NormalOcTreeNode node, Vector3D cameraPosition, double upperBoundDegree, double lowerBoundDegree)
    {
-      double lowerBound = -0.8;  //0.7 = 45deg. 0.8 = 36.86deg
-      double upperBound = 0.8;
+      double lowerBound = lowerBoundDegree * Math.PI / 180;
+      double upperBound = upperBoundDegree * Math.PI / 180;
 
       Vector3D cameraToNode = new Vector3D(node.getHitLocationCopy());
       cameraToNode.add(-cameraPosition.getX(), -cameraPosition.getY(), -cameraPosition.getZ());
@@ -364,13 +365,13 @@ public class PlanarRegionSegmentationCalculator
       this.parameters = parameters;
    }
 
+   public void setSurfaceNormalFilterParameters(SurfaceNormalFilterParameters parameters)
+   {
+      this.surfaceNormalFilterParameters = parameters;
+   }
+
    public void setBoundingBox(OcTreeBoundingBoxInterface boundingBox)
    {
       this.boundingBox = boundingBox;
-   }
-
-   public void useSurfaceNormalFilter(boolean value)
-   {
-      useSurfaceNormalFilter = value;
    }
 }

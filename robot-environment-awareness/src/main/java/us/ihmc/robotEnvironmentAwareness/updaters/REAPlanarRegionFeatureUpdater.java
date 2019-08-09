@@ -51,6 +51,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
+   private final AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
    
    public REAPlanarRegionFeatureUpdater(NormalOcTree octree, Messager reaMessager)
@@ -71,6 +72,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       concaveHullFactoryParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsConcaveHullParameters, new ConcaveHullFactoryParameters());
       polygonizerParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerParameters, new PolygonizerParameters());
       intersectionEstimationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionParameters, new IntersectionEstimationParameters());
+      surfaceNormalFilterParameters = reaMessager.createInput(REAModuleAPI.SurfaceNormalFilterParameters, new SurfaceNormalFilterParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
    }
@@ -161,10 +163,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
+      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
       
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
+      
       List<PlanarRegion> unmergedCustomPlanarRegions;
 
       if (clearCustomRegions.getAndSet(false))
@@ -258,15 +262,5 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    public LineSegment3D getIntersection(int index)
    {
       return planarRegionsIntersections.get(index);
-   }
-
-   public void enableSurfaceNormalFilter()
-   {
-      segmentationCalculator.useSurfaceNormalFilter(true);
-   }
-   
-   public void disableSurfaceNormalFilter()
-   {
-      segmentationCalculator.useSurfaceNormalFilter(false);
    }
 }
