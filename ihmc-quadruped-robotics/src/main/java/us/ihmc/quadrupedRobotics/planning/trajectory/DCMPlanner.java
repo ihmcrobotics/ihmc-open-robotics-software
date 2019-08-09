@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -141,17 +142,22 @@ public class DCMPlanner implements DCMPlannerInterface
       this.comHeight.set(comHeight);
    }
 
-   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity)
+   /**
+    * The current position {@param currentDCMPosition} must be the DCM position and the current velocity {@param currentDCMVelocity} must be the  DCM Velocity
+    */
+   @Override
+   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity,
+                               FramePoint3DReadOnly copPosition)
    {
       timeAtStartOfState.set(initialTime);
       dcmPositionAtStartOfState.set(currentDCMPosition);
       dcmVelocityAtStartOfState.set(currentDCMVelocity);
    }
 
-   private void computeDcmTrajectory(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
+   private void computeDcmTrajectory(double currentTime, List<RobotQuadrant> currentFeetInContact, List<? extends QuadrupedTimedStep> stepSequence)
    {
       // compute piecewise constant center of pressure plan
-      timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
+      timedContactSequence.update(stepSequence, soleFrames, currentFeetInContact, currentTime);
       piecewiseConstantCopTrajectory.initializeTrajectory(currentTime, timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
@@ -216,7 +222,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
    @Override
-   public void computeSetpoints(double currentTime, QuadrantDependentList<YoEnum<ContactState>> currentContactStates, List<? extends QuadrupedTimedStep> stepSequence)
+   public void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact)
    {
       isStanding.set(stepSequence.isEmpty());
 
@@ -229,7 +235,7 @@ public class DCMPlanner implements DCMPlannerInterface
       }
       else
       {
-         computeDcmTrajectory(currentTime, currentContactStates, stepSequence);
+         computeDcmTrajectory(currentTime, currentFeetInContact, stepSequence);
 
          dcmTrajectory.computeTrajectory(currentTime);
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())

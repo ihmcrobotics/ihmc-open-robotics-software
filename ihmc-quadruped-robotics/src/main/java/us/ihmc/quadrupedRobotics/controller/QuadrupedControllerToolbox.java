@@ -62,6 +62,7 @@ public class QuadrupedControllerToolbox
 
    private final QuadrantDependentList<YoEnum<ContactState>> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
+   private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final List<ContactablePlaneBody> contactablePlaneBodies;
 
    private final QuadrupedSupportPolygons supportPolygon;
@@ -181,6 +182,13 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
+
+      feetInContact.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footContactStates.get(robotQuadrant).inContact())
+            feetInContact.add(robotQuadrant);
+      }
    }
 
    public void updateSupportPolygon()
@@ -276,6 +284,11 @@ public class QuadrupedControllerToolbox
    public QuadrantDependentList<YoEnum<ContactState>> getContactStates()
    {
       return contactStates;
+   }
+
+   public List<RobotQuadrant> getFeetInContact()
+   {
+      return feetInContact;
    }
 
    public List<ContactablePlaneBody> getContactablePlaneBodies()
