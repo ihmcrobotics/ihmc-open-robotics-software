@@ -211,20 +211,12 @@ public class LIDARBasedREAModule
          }
          else
          {
-            // TODO: remove time measure.
-            long startTime = System.nanoTime();
-            switch (bufferType.get())
+            if (bufferType.get() == BufferType.STEREO_BASED)
             {
-            case STEREO_BASED:
                if (enableRefereshingOctreeBuffer.get())
-               {
-                  System.out.println("clear");
                   mainUpdater.clearOcTree();
-               }
-               break;
-            default:
-               break;
             }
+               
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
 
@@ -236,8 +228,6 @@ public class LIDARBasedREAModule
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
             planarRegionNetworkProvider.publishCurrentState();
-
-            //System.out.println("computing " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
          }
 
          if (isThreadInterrupted())
