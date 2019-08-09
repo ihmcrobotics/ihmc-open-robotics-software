@@ -385,7 +385,7 @@ public class RigidBodyPositionControlHelper
          if (integratedPoint == null)
             return false;
 
-         integratedPoint.set(trajectoryPoint);
+         integratedPoint.setIncludingFrame(trajectoryPoint);
          integratedPosition.scaleAdd(command.getStreamIntegrationDuration(), integratedPoint.getLinearVelocity(), integratedPoint.getPosition());
          integratedPoint.setPosition(integratedPosition);
          integratedPoint.setTime(command.getStreamIntegrationDuration());

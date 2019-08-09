@@ -326,7 +326,7 @@ public class RigidBodyOrientationControlHelper
          if (integratedPoint == null)
             return false;
 
-         integratedPoint.set(trajectoryPoint);
+         integratedPoint.setIncludingFrame(trajectoryPoint);
          integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
          integratedOrientation.setRotationVector(integratedRotationVector);
          integratedOrientation.append(integratedPoint.getOrientation());
