@@ -134,6 +134,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -288,6 +292,12 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -388,6 +398,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMaximumDeviationFromXGaitDuringExpansion());
 
+      cdr.write_type_7(data.getReturnBestEffortPlan());
+
+      cdr.write_type_4(data.getMinimumStepsForBestEffortPlan());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -486,6 +500,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMaximumDeviationFromXGaitDuringExpansion(cdr.read_type_6());
       	
+      data.setReturnBestEffortPlan(cdr.read_type_7());
+      	
+      data.setMinimumStepsForBestEffortPlan(cdr.read_type_4());
+      	
 
    }
 
@@ -539,6 +557,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("final_turn_proximity", data.getFinalTurnProximity());
       ser.write_type_6("final_slow_down_proximity", data.getFinalSlowDownProximity());
       ser.write_type_6("maximum_deviation_from_x_gait_during_expansion", data.getMaximumDeviationFromXGaitDuringExpansion());
+      ser.write_type_7("return_best_effort_plan", data.getReturnBestEffortPlan());
+      ser.write_type_4("minimum_steps_for_best_effort_plan", data.getMinimumStepsForBestEffortPlan());
    }
 
    @Override
@@ -591,6 +611,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setFinalTurnProximity(ser.read_type_6("final_turn_proximity"));
       data.setFinalSlowDownProximity(ser.read_type_6("final_slow_down_proximity"));
       data.setMaximumDeviationFromXGaitDuringExpansion(ser.read_type_6("maximum_deviation_from_x_gait_during_expansion"));
+      data.setReturnBestEffortPlan(ser.read_type_7("return_best_effort_plan"));
+      data.setMinimumStepsForBestEffortPlan(ser.read_type_4("minimum_steps_for_best_effort_plan"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket dest)

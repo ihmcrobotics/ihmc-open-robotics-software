@@ -89,6 +89,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
    private final YoDouble timeout = new YoDouble("footstepPlannerTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("footstepPlannerBestEffortTimeout", registry);
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
    private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
@@ -545,6 +546,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          if (checkAndHandleNodeAtFinalGoal(nodeToExpand))
             break;
 
+         checkAndHandleBestEffortNode(nodeToExpand);
+
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          expandedNodesCount += neighbors.size();
          for (FootstepNode neighbor : neighbors)
@@ -569,7 +572,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             double transitionCost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, transitionCost);
 
-            if (/*!parameters.getReturnBestEffortPlan() || */endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+            if (!parameters.returnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
 
@@ -577,7 +580,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue() || abortPlanning.getBooleanValue())
+         double planningTime = Conversions.nanosecondsToSeconds(timeInNano - planningStartTime);
+         boolean hardTimeout =  planningTime > timeout.getDoubleValue();
+         boolean bestEffortTimedOut = parameters.returnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue() && endNode != null && graph.getPathFromStart(endNode).size() > parameters.getMinimumStepsForBestEffortPlan();
+         if (hardTimeout || bestEffortTimedOut || abortPlanning.getBooleanValue())
          {
             if (abortPlanning.getBooleanValue())
                PrintTools.info("Abort planning requested.");
@@ -610,6 +616,23 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       return false;
    }
 
+   private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
+   {
+      if (!parameters.returnBestEffortPlan())
+         return;
+
+      if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
+         return;
+
+      if (endNode == null || heuristics.compute(nodeToExpand, goalNode) < heuristics.compute(endNode, goalNode))
+      {
+         if (listener != null)
+            listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
+         endNode = nodeToExpand;
+      }
+   }
+
+
    private void addGoalNodesToEnd(List<FootstepNode> nodePathToPack)
    {
       FootstepNode endNode = this.endNode;
@@ -626,25 +649,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          movingQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
       }
    }
-
-   /*
-   private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
-   {
-      if (!parameters.getReturnBestEffortPlan())
-         return;
-
-      if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
-         return;
-
-      if (endNode == null || heuristics.compute(nodeToExpand, goalNode.get(nodeToExpand.getRobotSide())) < heuristics
-            .compute(endNode, goalNode.get(endNode.getRobotSide())))
-      {
-         if (listener != null)
-            listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
-         endNode = nodeToExpand;
-      }
-   }
-   */
 
    private FootstepPlanningResult checkResult()
    {
