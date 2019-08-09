@@ -6,8 +6,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
-import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedCoMTrajectoryPlannerInterface;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -45,7 +45,7 @@ public class QuadrupedRuntimeEnvironment
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches;
 
-   private QuadrupedCoMTrajectoryPlannerInterface comTrajectoryPlanner = null;
+   private DCMPlannerInterface comTrajectoryPlanner = null;
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
@@ -78,7 +78,7 @@ public class QuadrupedRuntimeEnvironment
       this.robotMotionStatusHolder = robotMotionStatusHolder;
    }
 
-   public void setComTrajectoryPlanner(QuadrupedCoMTrajectoryPlannerInterface comTrajectoryPlanner)
+   public void setComTrajectoryPlanner(DCMPlannerInterface comTrajectoryPlanner)
    {
       this.comTrajectoryPlanner = comTrajectoryPlanner;
    }
@@ -178,7 +178,7 @@ public class QuadrupedRuntimeEnvironment
       return robotMotionStatusHolder;
    }
 
-   public QuadrupedCoMTrajectoryPlannerInterface getCoMTrajectoryPlanner()
+   public DCMPlannerInterface getCoMTrajectoryPlanner()
    {
       return comTrajectoryPlanner;
    }
