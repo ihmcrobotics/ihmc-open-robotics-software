@@ -13,6 +13,7 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceNormalFilterParametersProperty;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
 
 public class OcTreeBasicsAnchorPaneController extends REABasicUIController
@@ -54,6 +55,11 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private Slider surfaceNormalUpperBoundSlider;
    @FXML
    private ToggleButton enableStereoBufferRefreshingButton;
+   @FXML
+   private ToggleButton enableSurfaceNormalButton;
+
+   private final SurfaceNormalFilterParametersProperty surfaceNormalFilterParametersProperty = new SurfaceNormalFilterParametersProperty(this,
+                                                                                                                                         "surfaceNormalFilterParametersProperty");
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
    {
@@ -95,12 +101,19 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeEnable, enableButton.selectedProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.OcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
-      
+
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferOcTreeCapacity, lidarBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferEnable, enableStereoBufferButton.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(), numberToIntegerConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(),
+                                         numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferRefreshingEnable, enableStereoBufferRefreshingButton.selectedProperty());
+
+      surfaceNormalFilterParametersProperty.bindBidirectionalBounds(surfaceNormalUpperBoundSlider.valueProperty(),
+                                                                    surfaceNormalLowerBoundSlider.valueProperty());
+      surfaceNormalFilterParametersProperty.bindBidirectionalUseFilter(enableSurfaceNormalButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SurfaceNormalFilterParameters, surfaceNormalFilterParametersProperty);
 
       load();
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);

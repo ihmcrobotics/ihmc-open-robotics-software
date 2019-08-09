@@ -124,6 +124,7 @@
                                  </tooltip>
                               </Slider>
                               <ToggleButton fx:id="enableStereoBufferRefreshingButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Refreshing" />
+                              <ToggleButton fx:id="enableSurfaceNormalButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Filter" />
                            </children>
                         </VBox>
                      </children>

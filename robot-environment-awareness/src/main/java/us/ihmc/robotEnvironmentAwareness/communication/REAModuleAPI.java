@@ -21,6 +21,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameter
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
@@ -50,6 +51,7 @@ public class REAModuleAPI
    private static final CategoryTheme DataExporter = apiFactory.createCategoryTheme("DataExporter");
    private static final CategoryTheme Message = apiFactory.createCategoryTheme("Message");
    private static final CategoryTheme Refreshing = apiFactory.createCategoryTheme("Refreshing");
+   private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -111,6 +113,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> PlanarRegionsIntersectionEnable = PlanarRegionsCategory.child(Intersection).topic(Enable);
    public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = PlanarRegionsCategory.child(Intersection)
                                                                                                                           .topic(Parameters);
+   public static final Topic<SurfaceNormalFilterParameters> SurfaceNormalFilterParameters = OcTreeCategory.child(SurfaceNormal).topic(Parameters);
 
    public static final Topic<Integer> UIOcTreeDepth = Root.child(UI).child(OcTree).topic(Depth);
    public static final Topic<ColoringType> UIOcTreeColoringMode = Root.child(UI).child(OcTree).topic(Color);

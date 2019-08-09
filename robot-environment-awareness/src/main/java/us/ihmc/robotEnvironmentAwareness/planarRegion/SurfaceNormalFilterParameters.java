@@ -25,7 +25,7 @@ public class SurfaceNormalFilterParameters
    
    public void setDefaultParameters()
    {
-      useSurfaceNormalFilter = false;
+      useSurfaceNormalFilter = true;
       surfaceNormalUpperBoundDegree = 45.0;
       surfaceNormalLowerBoundDegree = -45.0;
    }

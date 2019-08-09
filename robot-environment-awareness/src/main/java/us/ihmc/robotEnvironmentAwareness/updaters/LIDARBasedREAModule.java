@@ -19,7 +19,6 @@ import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -74,6 +73,7 @@ public class LIDARBasedREAModule
    private final Messager reaMessager;
 
    private final AtomicReference<BufferType> bufferType;
+   private final AtomicReference<Boolean> enableRefereshingOctreeBuffer;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
@@ -117,8 +117,8 @@ public class LIDARBasedREAModule
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
 
+      enableRefereshingOctreeBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferRefreshingEnable, true);
       bufferType = reaMessager.createInput(REAModuleAPI.UIOcTreeBufferType, BufferType.LIDAR_BASED);
-      //TODO: REAModuleAPI.StereoVisionBufferRefreshingEnable
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -211,15 +211,18 @@ public class LIDARBasedREAModule
          }
          else
          {
+            // TODO: remove time measure.
             long startTime = System.nanoTime();
             switch (bufferType.get())
             {
-            case LIDAR_BASED:
-               planarRegionFeatureUpdater.disableSurfaceNormalFilter();
-               break;
             case STEREO_BASED:
-               mainUpdater.clearOcTree();
-               planarRegionFeatureUpdater.enableSurfaceNormalFilter();
+               if (enableRefereshingOctreeBuffer.get())
+               {
+                  System.out.println("clear");
+                  mainUpdater.clearOcTree();
+               }
+               break;
+            default:
                break;
             }
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
@@ -234,7 +237,7 @@ public class LIDARBasedREAModule
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
             planarRegionNetworkProvider.publishCurrentState();
 
-            System.out.println("computing " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+            //System.out.println("computing " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
          }
 
          if (isThreadInterrupted())
