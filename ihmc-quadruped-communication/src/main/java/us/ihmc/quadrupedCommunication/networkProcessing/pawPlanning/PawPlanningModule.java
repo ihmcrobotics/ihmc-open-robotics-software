@@ -70,10 +70,6 @@ public class PawPlanningModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
 //      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> footstepPlanningController.setPaused(true));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
@@ -96,18 +92,6 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processRobotTimestamp(timestamp);
-   }
-
-   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processHighLevelStateChangeMessage(message);
-   }
-
-   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processSteppingStateChangeMessage(message);
    }
 
    private void processFootstepPlannerParametersPacket(PawStepPlannerParametersPacket packet)
