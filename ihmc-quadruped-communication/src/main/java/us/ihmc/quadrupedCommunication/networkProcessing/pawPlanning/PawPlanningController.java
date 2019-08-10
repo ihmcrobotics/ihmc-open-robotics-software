@@ -94,15 +94,6 @@ public class PawPlanningController extends QuadrupedToolboxController
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
    }
 
-   public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
-   {
-      controllerStateChangeMessage.set(message);
-   }
-
-   public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
-   {
-      steppingStateChangeMessage.set(message);
-   }
 
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {

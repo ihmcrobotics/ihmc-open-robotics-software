@@ -27,6 +27,7 @@ public class QuadrupedNetworkProcessor
    private QuadrupedStepTeleopModule stepTeleopModule;
 
    public static final int footstepPlanningPort = 8007;
+   public static final int continuousPlanningPort = 8007;
 
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
    private QuadrupedSupportPlanarRegionPublisher supportPublisher = null;
