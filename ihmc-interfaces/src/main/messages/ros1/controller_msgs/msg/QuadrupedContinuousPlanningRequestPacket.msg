@@ -18,4 +18,6 @@ int32 planner_request_id
 
 float64 timeout
 
+float64 horizon_length
+
 
