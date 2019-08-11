@@ -2,6 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -54,11 +55,22 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
                                            s -> processSteppingStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
+                                           s -> processFootstepStatusMessage(s.takeNextData()));
+
+      // status messages from the planner
+      MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+                                           s -> processFootstepPlannerOutputMessage(s.takeNextData()));
+
+      // inputs to this module
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> processContinuousPlanningRequest(s.takeNextData()));
    }
 
    private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
@@ -73,6 +85,25 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
          continuousPlanningController.processSteppingStateChangeMessage(message);
    }
 
+   private void processFootstepPlannerOutputMessage(QuadrupedFootstepPlanningToolboxOutputStatus footstepPlannerOutput)
+   {
+      if (continuousPlanningController != null)
+         continuousPlanningController.processFootstepPlannerOutput(footstepPlannerOutput);
+   }
+
+   private void processContinuousPlanningRequest(QuadrupedContinuousPlanningRequestPacket planningRequestPacket)
+   {
+      if (continuousPlanningController != null)
+         continuousPlanningController.processContinuousPlanningRequest(planningRequestPacket);
+   }
+
+   private void processFootstepStatusMessage(QuadrupedFootstepStatusMessage footstepStatusMessage)
+   {
+      if (continuousPlanningController != null)
+         continuousPlanningController.processFootstepStatusMessage(footstepStatusMessage);
+   }
+
+
    @Override
    public QuadrupedToolboxController getToolboxController()
    {
@@ -86,36 +117,26 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, ROS2Tools.MessageTopicNameGenerator> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
       messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
-      messages.put(QuadrupedFootstepPlannerParametersPacket.class, getPublisherTopicNameGenerator());
-      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicNameGenerator());
 
       return messages;
    }
 
    @Override
-   public ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
       return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
-   public ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
       return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-   }
-
-   @Override
-   public void sleep()
-   {
-      //      footstepPlanningController.setPaused(true);
-
-      super.sleep();
    }
 }
