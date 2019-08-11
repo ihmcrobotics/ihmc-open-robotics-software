@@ -45,7 +45,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                                                                               "ContinuousPlanningModule"), updatePeriodMilliseconds,
             pubSubImplementation);
 
-      continuousPlanningController = new QuadrupedContinuousPlanningController(outputManager, robotDataReceiver, registry, yoGraphicsListRegistry);
+      continuousPlanningController = new QuadrupedContinuousPlanningController(outputManager, robotDataReceiver, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
       startYoVariableServer(getClass());
@@ -71,6 +71,22 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
+                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
+   }
+
+   @Override
+   public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
+   {
+      Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
+
+      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
+
+      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      messages.put(QuadrupedFootstepPlanningRequestPacket.class, plannerSubGenerator);
+
+      return messages;
    }
 
    private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
@@ -103,6 +119,12 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
          continuousPlanningController.processFootstepStatusMessage(footstepStatusMessage);
    }
 
+   private void processPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      if (continuousPlanningController != null)
+         continuousPlanningController.processPlanarRegionListMessage(planarRegionsListMessage);
+   }
+
 
    @Override
    public QuadrupedToolboxController getToolboxController()
@@ -116,17 +138,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       return new ArrayList<>();
    }
 
-   @Override
-   public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
-   {
-      Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
-      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
-      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
-
-      return messages;
-   }
 
    @Override
    public MessageTopicNameGenerator getPublisherTopicNameGenerator()
