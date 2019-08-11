@@ -35,6 +35,7 @@ module controller_msgs
         @defaultValue(value=-1)
         long planner_request_id;
         double timeout;
+        double horizon_length;
       };
     };
   };

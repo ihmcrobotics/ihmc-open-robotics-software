@@ -23,6 +23,7 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public int planner_request_id_ = -1;
    public double timeout_;
+   public double horizon_length_;
 
    public QuadrupedContinuousPlanningRequestPacket()
    {
@@ -47,6 +48,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       planner_request_id_ = other.planner_request_id_;
 
       timeout_ = other.timeout_;
+
+      horizon_length_ = other.horizon_length_;
 
    }
 
@@ -104,6 +107,15 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       return timeout_;
    }
 
+   public void setHorizonLength(double horizon_length)
+   {
+      horizon_length_ = horizon_length;
+   }
+   public double getHorizonLength()
+   {
+      return horizon_length_;
+   }
+
 
    public static Supplier<QuadrupedContinuousPlanningRequestPacketPubSubType> getPubSubType()
    {
@@ -132,6 +144,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
+
 
       return true;
    }
@@ -155,6 +169,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
+      if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
+
 
       return true;
    }
@@ -176,7 +192,9 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
       builder.append("timeout=");
-      builder.append(this.timeout_);
+      builder.append(this.timeout_);      builder.append(", ");
+      builder.append("horizon_length=");
+      builder.append(this.horizon_length_);
       builder.append("}");
       return builder.toString();
    }
