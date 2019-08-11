@@ -1,0 +1,43 @@
+#ifndef __controller_msgs__msg__QuadrupedContinuousPlanningRequestPacket__idl__
+#define __controller_msgs__msg__QuadrupedContinuousPlanningRequestPacket__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET =
+      0;
+
+      const octet FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS =
+      1;
+
+      const long UNSET_ID =
+      -1;
+
+
+      /**
+       * This message is part of the IHMC quadruped footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedContinuousPlanningRequestPacket_")
+      struct QuadrupedContinuousPlanningRequestPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        octet start_target_type;
+        geometry_msgs::msg::dds::Point goal_position_in_world;
+        geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        @defaultValue(value=-1)
+        long planner_request_id;
+        double timeout;
+      };
+    };
+  };
+};
+
+#endif

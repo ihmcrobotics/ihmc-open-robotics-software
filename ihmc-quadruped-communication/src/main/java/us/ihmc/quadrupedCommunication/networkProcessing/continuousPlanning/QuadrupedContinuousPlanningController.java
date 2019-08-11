@@ -1,12 +1,10 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -16,6 +14,9 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 {
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedFootstepPlanningToolboxOutputStatus> footstepPlannerOutput = new AtomicReference<>();
+   private final AtomicReference<QuadrupedContinuousPlanningRequestPacket> planningRequestPacket = new AtomicReference<>();
+   private final AtomicReference<QuadrupedFootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
@@ -33,6 +34,21 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
    {
       steppingStateChangeMessage.set(message);
+   }
+
+   public void processFootstepPlannerOutput(QuadrupedFootstepPlanningToolboxOutputStatus message)
+   {
+      footstepPlannerOutput.set(message);
+   }
+
+   public void processContinuousPlanningRequest(QuadrupedContinuousPlanningRequestPacket message)
+   {
+      planningRequestPacket.set(message);
+   }
+
+   public void processFootstepStatusMessage(QuadrupedFootstepStatusMessage message)
+   {
+      footstepStatusMessage.set(message);
    }
 
    @Override
