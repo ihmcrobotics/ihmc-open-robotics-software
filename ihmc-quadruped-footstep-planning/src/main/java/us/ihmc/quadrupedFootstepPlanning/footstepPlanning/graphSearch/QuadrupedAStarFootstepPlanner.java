@@ -53,6 +53,9 @@ import java.util.List;
 public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootstepPlanner
 {
    private static final boolean debug = true;
+   private static final boolean performRepairingStep = false;
+   private static final double repairingScale = 0.5;
+   private static final double minimumInflationReduction = 0.1;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
@@ -100,8 +103,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
 
-   private final QuadrantDependentList<YoBoolean> footReachedTheGoal = new QuadrantDependentList<>();
-   private final YoBoolean centerReachedGoal = new YoBoolean("centerReachedGoal", registry);
+   private final YoBoolean hasReachedFinalGoal = new YoBoolean("hasReachedFinalGoal", registry);
+
+   private final YoDouble heuristicsInflationWeight = new YoDouble("heuristicsInflationWeight", registry);
 
    public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeChecker nodeChecker,
                                         FootstepNodeTransitionChecker nodeTransitionChecker, CostToGoHeuristics heuristics, FootstepNodeExpansion nodeExpansion,
@@ -123,8 +127,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.initialize.set(true);
       highLevelPlanarRegionConstraintDataParameters.enforceTranslationLessThanGridCell = true;
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
+      heuristics.setHeuristicsInflationWeight(heuristicsInflationWeight);
 
       parentRegistry.addChild(registry);
    }
@@ -340,7 +343,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       // checking path
          List<FootstepNode> path = graph.getPathFromStart(endNode);
-         addGoalNodesToEnd(path);
+         if (hasReachedFinalGoal.getBooleanValue())
+            addGoalNodesToEnd(path);
          for (int i = 0; i < path.size(); i++)
          {
             FootstepNode node = path.get(i);
@@ -383,7 +387,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       plan.setLowLevelPlanGoal(goalPose);
 
       List<FootstepNode> path = graph.getPathFromStart(endNode);
-      addGoalNodesToEnd(path);
+      if (hasReachedFinalGoal.getBooleanValue())
+         addGoalNodesToEnd(path);
 
       double lastStepStartTime = 0;
 
@@ -461,9 +466,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       expandedNodes = new HashSet<>();
       endNode = null;
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         footReachedTheGoal.get(robotQuadrant).set(false);
-      centerReachedGoal.set(false);
+      heuristicsInflationWeight.set(parameters.getHeuristicsInflationWeight());
+      hasReachedFinalGoal.set(false);
 
       if (listener != null)
       {
@@ -549,8 +553,19 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
          expandedNodes.add(nodeToExpand);
 
-         if (checkAndHandleNodeAtFinalGoal(nodeToExpand))
-            break;
+         hasReachedFinalGoal.set(checkAndHandleNodeAtFinalGoal(nodeToExpand));
+         if (hasReachedFinalGoal.getBooleanValue())
+         {
+            if (parameters.returnBestEffortPlan())
+            {
+               if (!performRepairingStep())
+                  break;
+            }
+            else
+            {
+               break;
+            }
+         }
 
          checkAndHandleBestEffortNode(nodeToExpand);
 
@@ -578,7 +593,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             double transitionCost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, transitionCost);
 
-            if (!parameters.returnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+//            if (!parameters.returnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
          }
 
@@ -622,6 +637,30 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       return false;
    }
 
+   private boolean performRepairingStep()
+   {
+      if (!performRepairingStep)
+         return false;
+
+      if (heuristicsInflationWeight.getDoubleValue() <= 1.0)
+         return false;
+
+
+      double currentInflationWeight = heuristicsInflationWeight.getDoubleValue();
+      double inflationReduction = (1.0 - repairingScale) * (heuristicsInflationWeight.getDoubleValue() - 1.0);
+      inflationReduction = Math.max(inflationReduction, minimumInflationReduction);
+      double newInflationWeight = Math.max(currentInflationWeight - inflationReduction, 1.0);
+
+      if (debug)
+      {
+         System.out.println("Reducing the inflation weight from " + currentInflationWeight + " to " + newInflationWeight);
+      }
+      heuristicsInflationWeight.set(newInflationWeight);
+
+      return true;
+   }
+
+
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
       if (!parameters.returnBestEffortPlan())
@@ -637,7 +676,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          endNode = nodeToExpand;
       }
    }
-
 
    private void addGoalNodesToEnd(List<FootstepNode> nodePathToPack)
    {
@@ -663,7 +701,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (!graph.doesNodeExist(endNode))
          return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
 
-      if (heuristics.getWeight() <= 1.0)
+      if (heuristicsInflationWeight.getDoubleValue() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
 
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
