@@ -18,8 +18,11 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   private static final double pathViolationWeight = 10.0;
-   private static final double yawViolationWeight = 1.0;
+   private static final double pathViolationWeight = 30.0;
+   private static final double distanceFromPathTolerance = 0.2;
+   private static final double deltaYawFromReferenceTolerance = 0.2;
+   private static final double finalTurnProximity = 0.25;
+
    private final BodyPathPlanner bodyPath;
    private final FootstepNodeSnapper snapper;
 
@@ -48,12 +51,22 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
       double distanceToPath = closestPointOnPath.getPosition().distance(xGaitCenterPoint);
-      double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
-      double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
+      double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
 
-      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, parameters.getFinalTurnProximity());
+      double remainingPathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
+      double remainingDistance = remainingPathLength + distanceToPath - croppedDistanceToPath;
+      double pathDistanceViolationCost = pathViolationWeight * croppedDistanceToPath;
 
-      double yaw = yawViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
+
+      double referenceYaw = computeReferenceGoalYaw(node, goalNode, closestPointOnPath.getYaw());
+
+      double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw));
+      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getStepYaw(), referenceYaw));
+
+      double croppedYawDifferenceFromReference = Math.max(0.0, yawDifferenceFromReference - deltaYawFromReferenceTolerance);
+
+      double remainingYaw = remainingYawToGoal + yawDifferenceFromReference - croppedYawDifferenceFromReference;
+      double pathYawViolationCost = pathViolationWeight * croppedYawDifferenceFromReference;
 
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = 4.0 * remainingDistance / desiredSpeed;
@@ -94,14 +107,33 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       }
 
       double distanceCost = parameters.getDistanceWeight() * remainingDistance;
-      double yawCost = parameters.getYawWeight() * Math.abs(yaw);
+      double yawCost = parameters.getYawWeight() * remainingYaw;
       double stepCost = parameters.getCostPerStep() * minSteps;
 
-      return distanceCost + yawCost + stepCost + heightCost;
+      return distanceCost + yawCost + stepCost + + pathDistanceViolationCost + pathYawViolationCost + heightCost;
    }
 
    public void setGoalAlpha(double alpha)
    {
       goalAlpha = alpha;
+   }
+
+   private double computeReferenceGoalYaw(FootstepNode node, FootstepNode goalNode, double pathHeading)
+   {
+      double distanceToGoal = node.euclideanDistance(goalNode);
+      double finalTurnProximity = this.finalTurnProximity;//parameters.getFinalTurnProximity();
+
+      double minimumBlendDistance = 0.75 * finalTurnProximity;
+      double maximumBlendDistance = 1.25 * finalTurnProximity;
+
+      double yawMultiplier;
+      if(distanceToGoal < minimumBlendDistance)
+         yawMultiplier = 0.0;
+      else if(distanceToGoal > maximumBlendDistance)
+         yawMultiplier = 1.0;
+      else
+         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
+
+      return AngleTools.interpolateAngle(goalNode.getStepYaw(), pathHeading, yawMultiplier);
    }
 }
