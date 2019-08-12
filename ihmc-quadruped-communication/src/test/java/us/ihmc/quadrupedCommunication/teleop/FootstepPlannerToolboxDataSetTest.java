@@ -60,6 +60,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
    private static final double defaultBestEffortTimeout = 1.0;
+//   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = Double.POSITIVE_INFINITY;
 
 

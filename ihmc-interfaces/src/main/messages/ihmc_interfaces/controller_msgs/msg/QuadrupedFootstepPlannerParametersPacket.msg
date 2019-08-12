@@ -53,3 +53,6 @@ float64 final_slow_down_proximity -11.1
 float64 maximum_deviation_from_x_gait_during_expansion -11.1
 bool return_best_effort_plan false
 uint32 minimum_steps_for_best_effort_plan 4
+bool perform_graph_repairing_step false
+float64 repairing_heuristic_weight_scaling -11.1
+float64 minimum_heuristic_weight_reduction -11.1

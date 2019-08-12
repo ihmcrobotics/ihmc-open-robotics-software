@@ -145,4 +145,12 @@ bool return_best_effort_plan
 # Field default value 4
 uint32 minimum_steps_for_best_effort_plan
 
+bool perform_graph_repairing_step
+
+# Field default value -11.1
+float64 repairing_heuristic_weight_scaling
+
+# Field default value -11.1
+float64 minimum_heuristic_weight_reduction
+
 

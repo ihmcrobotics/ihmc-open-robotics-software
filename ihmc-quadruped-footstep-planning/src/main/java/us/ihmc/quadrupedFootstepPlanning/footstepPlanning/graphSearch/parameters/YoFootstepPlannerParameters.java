@@ -57,6 +57,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble maximumDeviationFromXGaitDuringExpansion = new YoDouble("maximumDeviationFromXGaitDuringExpansion", registry);
    private final YoInteger minimumStepsForBestEffortPlan = new YoInteger("minimumStepsForBestEffortPlan", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
+   private final YoBoolean performGraphRepairingStep = new YoBoolean("performGraphRepairingStep", registry);
+   private final YoDouble repairingHeuristicWeightScaling = new YoDouble("repairingHeuristicWeightScaling", registry);
+   private final YoDouble minimumHeuristicWeightReduction = new YoDouble("minimumHeuristicWeightReduction", registry);
+
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -351,6 +355,24 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
    {
       this.returnBestEffortPlan.set(returnBestEffortPlan);
+   }
+
+   @Override
+   public void setPerformGraphRepairingStep(boolean performGraphRepairingStep)
+   {
+      this.performGraphRepairingStep.set(performGraphRepairingStep);
+   }
+
+   @Override
+   public void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling)
+   {
+      this.repairingHeuristicWeightScaling.set(repairingHeuristicWeightScaling);
+   }
+
+   @Override
+   public void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction)
+   {
+      this.minimumHeuristicWeightReduction.set(minimumHeuristicWeightReduction);
    }
 
    /** {@inheritDoc} */
@@ -675,4 +697,21 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
       return returnBestEffortPlan.getBooleanValue();
    }
 
+   @Override
+   public boolean performGraphRepairingStep()
+   {
+      return performGraphRepairingStep.getBooleanValue();
+   }
+
+   @Override
+   public double getRepairingHeuristicWeightScaling()
+   {
+      return repairingHeuristicWeightScaling.getDoubleValue();
+   }
+
+   @Override
+   public double getMinimumHeuristicWeightReduction()
+   {
+      return minimumHeuristicWeightReduction.getDoubleValue();
+   }
 }
