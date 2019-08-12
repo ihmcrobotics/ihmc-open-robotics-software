@@ -34,6 +34,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
    private final CostToGoHeuristics heuristics;
    private final YoDouble planningHorizonLength;
 
+   private QuadrupedFootstepPlannerGoal highLevelGoal;
+
    public QuadrupedBodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
                                              QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
    {
@@ -86,6 +88,7 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
    @Override
    public void setGoal(QuadrupedFootstepPlannerGoal goal)
    {
+      highLevelGoal = goal;
    }
 
    @Override
@@ -142,6 +145,9 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       FramePose3D footstepPlannerGoal = new FramePose3D();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
       footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+
+      if (alpha >= 1.0)
+         footstepPlannerGoal.setOrientation(highLevelGoal.getTargetPose().getOrientation());
 
       lowLevelGoal.set(footstepPlannerGoal);
 
