@@ -211,7 +211,7 @@ public interface FootstepPlannerParameters
 
    default boolean returnBestEffortPlan()
    {
-      return true;
+      return false;
    }
 
    default int getMinimumStepsForBestEffortPlan()

@@ -14,6 +14,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
@@ -26,8 +27,8 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
    private double goalAlpha = 1.0;
 
-   public BodyPathHeuristics(FootstepPlannerParameters parameters, BodyPathPlanner bodyPath, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                             FootstepNodeSnapper snapper)
+   public BodyPathHeuristics(FootstepPlannerParameters parameters, BodyPathPlanner bodyPath,
+                             QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapper snapper)
    {
       super(parameters);
 
