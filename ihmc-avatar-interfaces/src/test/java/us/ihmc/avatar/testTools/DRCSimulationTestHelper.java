@@ -34,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -178,6 +179,12 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         if (!networkProcessorParameters.isLocalControllerCommunicatorEnabled())
+            throw new IllegalArgumentException("Cannot use FAST_RTPS on Bamboo!");
+      }
+
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
       if (initialSetup != null)
@@ -192,7 +199,6 @@ public class DRCSimulationTestHelper
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
 
-      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
@@ -679,6 +685,9 @@ public class DRCSimulationTestHelper
    @SuppressWarnings("unchecked")
    public void publishToController(Object message)
    {
+      if (!networkProcessorParameters.isLocalControllerCommunicatorEnabled())
+         throw new IllegalArgumentException("The ROS2 node used to publish to controller uses INTRAPROCESS but FAST_RTPS is used.");
+
       defaultControllerPublishers.get(message.getClass()).publish(message);
    }
 
