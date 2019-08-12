@@ -54,7 +54,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 {
    private static final boolean debug = true;
    private static final boolean performRepairingStep = false;
-   private static final double repairingScale = 0.5;
+   private static final double repairingScale = 0.9;
    private static final double minimumInflationReduction = 0.1;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -647,8 +647,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
 
       double currentInflationWeight = heuristicsInflationWeight.getDoubleValue();
-      double inflationReduction = (1.0 - repairingScale) * (heuristicsInflationWeight.getDoubleValue() - 1.0);
-      inflationReduction = Math.max(inflationReduction, minimumInflationReduction);
+      double inflationReduction = Math.max((1.0 - repairingScale) * heuristicsInflationWeight.getDoubleValue(), minimumInflationReduction);
       double newInflationWeight = Math.max(currentInflationWeight - inflationReduction, 1.0);
 
       if (debug)

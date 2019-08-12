@@ -131,6 +131,8 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
    {
       waypointPathPlanner.setGoal(goal);
 
+      footstepPlanner.setGoal(goal);
+
       hasPath.set(false);
    }
 

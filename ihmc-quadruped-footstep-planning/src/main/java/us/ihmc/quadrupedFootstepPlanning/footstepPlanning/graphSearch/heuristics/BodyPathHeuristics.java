@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   private static final double pathViolationWeight = 30.0;
+   private static final double pathViolationWeight = 10.0;
    private static final double distanceFromPathTolerance = 0.2;
    private static final double deltaYawFromReferenceTolerance = 0.2;
    private static final double finalTurnProximity = 0.25;
