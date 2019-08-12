@@ -53,9 +53,6 @@ import java.util.List;
 public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootstepPlanner
 {
    private static final boolean debug = true;
-   private static final boolean performRepairingStep = false;
-   private static final double repairingScale = 0.9;
-   private static final double minimumInflationReduction = 0.1;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
@@ -639,7 +636,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
    private boolean performRepairingStep()
    {
-      if (!performRepairingStep)
+      if (!parameters.performGraphRepairingStep())
          return false;
 
       if (heuristicsInflationWeight.getDoubleValue() <= 1.0)
@@ -647,7 +644,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
 
       double currentInflationWeight = heuristicsInflationWeight.getDoubleValue();
-      double inflationReduction = Math.max((1.0 - repairingScale) * heuristicsInflationWeight.getDoubleValue(), minimumInflationReduction);
+      double inflationReduction =(1.0 - parameters.getRepairingHeuristicWeightScaling()) * heuristicsInflationWeight.getDoubleValue();
+      inflationReduction = Math.max(inflationReduction, parameters.getMinimumHeuristicWeightReduction());
       double newInflationWeight = Math.max(currentInflationWeight - inflationReduction, 1.0);
 
       if (debug)

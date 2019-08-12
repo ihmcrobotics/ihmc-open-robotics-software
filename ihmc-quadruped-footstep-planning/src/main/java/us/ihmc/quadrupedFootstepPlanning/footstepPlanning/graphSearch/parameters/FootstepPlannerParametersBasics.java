@@ -101,6 +101,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan);
 
+   void setPerformGraphRepairingStep(boolean performGraphRepairingStep);
+
+   void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling);
+
+   void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction);
+
    default void set(FootstepPlannerParameters other)
    {
       setMaximumFrontStepReach(other.getMaximumFrontStepReach());
@@ -151,6 +157,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaximumDeviationFromXGaitDuringExpansion(other.getMaximumDeviationFromXGaitDuringExpansion());
       setReturnBestEffortPlan(other.returnBestEffortPlan());
       setMinimumStepsForBestEffortPlan(other.getMinimumStepsForBestEffortPlan());
+      setPerformGraphRepairingStep(other.performGraphRepairingStep());
+      setRepairingHeuristicWeightScaling(other.getRepairingHeuristicWeightScaling());
+      setMinimumHeuristicWeightReduction(other.getMinimumHeuristicWeightReduction());
    }
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
@@ -247,8 +256,13 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumDeviationFromXGaitDuringExpansion(other.getMaximumDeviationFromXGaitDuringExpansion());
       if (other.getMinimumStepsForBestEffortPlan() != -1)
          setMinimumStepsForBestEffortPlan((int) other.getMinimumStepsForBestEffortPlan());
+      if (other.getRepairingHeuristicWeightScaling() != -11.1)
+         setRepairingHeuristicWeightScaling(other.getRepairingHeuristicWeightScaling());
+      if (other.getMinimumHeuristicWeightReduction() != -11.1)
+         setMinimumHeuristicWeightReduction(other.getMinimumHeuristicWeightReduction());
 
       setReturnBestEffortPlan(other.getReturnBestEffortPlan());
+      setPerformGraphRepairingStep(other.getPerformGraphRepairingStep());
       setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
    }
 }

@@ -65,6 +65,10 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private boolean returnBestEffortPlan;
    private int minStepsForBestEffort;
 
+   private boolean performGraphRepairingStep;
+   private double repairingHeuristicWeightScaling;
+   private double minimumHeuristicWeightReduction;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
@@ -392,6 +396,24 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
    {
       this.minStepsForBestEffort = minimumStepsForBestEffortPlan;
+   }
+
+   @Override
+   public void setPerformGraphRepairingStep(boolean performGraphRepairingStep)
+   {
+      this.performGraphRepairingStep = performGraphRepairingStep;
+   }
+
+   @Override
+   public void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling)
+   {
+      this.repairingHeuristicWeightScaling = repairingHeuristicWeightScaling;
+   }
+
+   @Override
+   public void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction)
+   {
+      this.minimumHeuristicWeightReduction = minimumHeuristicWeightReduction;
    }
 
    /** {@inheritDoc} */
@@ -723,5 +745,23 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public int getMinimumStepsForBestEffortPlan()
    {
       return minStepsForBestEffort;
+   }
+
+   @Override
+   public boolean performGraphRepairingStep()
+   {
+      return performGraphRepairingStep;
+   }
+
+   @Override
+   public double getRepairingHeuristicWeightScaling()
+   {
+      return repairingHeuristicWeightScaling;
+   }
+
+   @Override
+   public double getMinimumHeuristicWeightReduction()
+   {
+      return minimumHeuristicWeightReduction;
    }
 }

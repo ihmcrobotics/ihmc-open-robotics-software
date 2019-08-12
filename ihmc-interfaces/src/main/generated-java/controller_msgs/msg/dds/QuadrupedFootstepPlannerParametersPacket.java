@@ -64,6 +64,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double maximum_deviation_from_x_gait_during_expansion_ = -11.1;
    public boolean return_best_effort_plan_;
    public long minimum_steps_for_best_effort_plan_ = 4;
+   public boolean perform_graph_repairing_step_;
+   public double repairing_heuristic_weight_scaling_ = -11.1;
+   public double minimum_heuristic_weight_reduction_ = -11.1;
 
    public QuadrupedFootstepPlannerParametersPacket()
    {
@@ -174,6 +177,12 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return_best_effort_plan_ = other.return_best_effort_plan_;
 
       minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
+
+      perform_graph_repairing_step_ = other.perform_graph_repairing_step_;
+
+      repairing_heuristic_weight_scaling_ = other.repairing_heuristic_weight_scaling_;
+
+      minimum_heuristic_weight_reduction_ = other.minimum_heuristic_weight_reduction_;
 
    }
 
@@ -624,6 +633,33 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return minimum_steps_for_best_effort_plan_;
    }
 
+   public void setPerformGraphRepairingStep(boolean perform_graph_repairing_step)
+   {
+      perform_graph_repairing_step_ = perform_graph_repairing_step;
+   }
+   public boolean getPerformGraphRepairingStep()
+   {
+      return perform_graph_repairing_step_;
+   }
+
+   public void setRepairingHeuristicWeightScaling(double repairing_heuristic_weight_scaling)
+   {
+      repairing_heuristic_weight_scaling_ = repairing_heuristic_weight_scaling;
+   }
+   public double getRepairingHeuristicWeightScaling()
+   {
+      return repairing_heuristic_weight_scaling_;
+   }
+
+   public void setMinimumHeuristicWeightReduction(double minimum_heuristic_weight_reduction)
+   {
+      minimum_heuristic_weight_reduction_ = minimum_heuristic_weight_reduction;
+   }
+   public double getMinimumHeuristicWeightReduction()
+   {
+      return minimum_heuristic_weight_reduction_;
+   }
+
 
    public static Supplier<QuadrupedFootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -740,6 +776,12 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_graph_repairing_step_, other.perform_graph_repairing_step_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.repairing_heuristic_weight_scaling_, other.repairing_heuristic_weight_scaling_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_heuristic_weight_reduction_, other.minimum_heuristic_weight_reduction_, epsilon)) return false;
+
 
       return true;
    }
@@ -851,6 +893,12 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
 
+      if(this.perform_graph_repairing_step_ != otherMyClass.perform_graph_repairing_step_) return false;
+
+      if(this.repairing_heuristic_weight_scaling_ != otherMyClass.repairing_heuristic_weight_scaling_) return false;
+
+      if(this.minimum_heuristic_weight_reduction_ != otherMyClass.minimum_heuristic_weight_reduction_) return false;
+
 
       return true;
    }
@@ -958,7 +1006,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append("return_best_effort_plan=");
       builder.append(this.return_best_effort_plan_);      builder.append(", ");
       builder.append("minimum_steps_for_best_effort_plan=");
-      builder.append(this.minimum_steps_for_best_effort_plan_);
+      builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
+      builder.append("perform_graph_repairing_step=");
+      builder.append(this.perform_graph_repairing_step_);      builder.append(", ");
+      builder.append("repairing_heuristic_weight_scaling=");
+      builder.append(this.repairing_heuristic_weight_scaling_);      builder.append(", ");
+      builder.append("minimum_heuristic_weight_reduction=");
+      builder.append(this.minimum_heuristic_weight_reduction_);
       builder.append("}");
       return builder.toString();
    }
