@@ -56,6 +56,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme PoseBetweenFeet = apiFactory.createCategoryTheme("PoseBetweenFeet");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
+   private static final CategoryTheme BestEffort = apiFactory.createCategoryTheme("BestEffort");
 
    private static final CategoryTheme AllNodes = apiFactory.createCategoryTheme("AllFootstepNodes");
    private static final CategoryTheme NodesThisTick = apiFactory.createCategoryTheme("FootstepNodesThisTick");
@@ -122,6 +123,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
+   public static final Topic<Double> PlannerBestEffortTimeoutTopic = Root.child(FootstepPlan).child(BestEffort).topic(PlannerTimeout);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlan).topic(PlannerTimeTaken);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlan).topic(PlannerHorizonLength);
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlan).topic(FootstepPlannerType);

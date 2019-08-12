@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -11,6 +12,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -32,13 +34,15 @@ import java.util.List;
 
 public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFootstepPlanner
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private static final double defaultTimeout = 5.0;
+   private static final double defaultBestEffortTimeout = 0.0;
 
    protected final YoVariableRegistry registry;
 
    private final YoDouble timeout;
+   private final YoDouble bestEffortTimeout;
 
    private final YoBoolean hasPath;
    private final YoDouble timeSpentBeforeFootstepPlanner;
@@ -66,6 +70,7 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
       this.parameters = parameters;
 
       timeout = new YoDouble("timeout", registry);
+      bestEffortTimeout = new YoDouble("bestEffortTimeout", registry);
 
       hasPath = new YoBoolean("hasPath", registry);
       timeSpentBeforeFootstepPlanner = new YoDouble("timeSpentBeforeFootstepPlanner", registry);
@@ -73,6 +78,7 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
       yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
 
       timeout.set(defaultTimeout);
+      bestEffortTimeout.set(defaultBestEffortTimeout);
       visualizing = graphicsListRegistry != null;
       if (visualizing)
       {
@@ -132,6 +138,12 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
    public void setTimeout(double timeout)
    {
       this.timeout.set(timeout);
+   }
+
+   @Override
+   public void setBestEffortTimeout(double timeout)
+   {
+      this.bestEffortTimeout.set(timeout);
    }
 
    @Override
@@ -221,7 +233,9 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
             return pathResult;
       }
 
+      double bestEffortTimeout = this.bestEffortTimeout.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue();
       footstepPlanner.setTimeout(timeout.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
+      footstepPlanner.setBestEffortTimeout(bestEffortTimeout);
 
       long startTime = System.currentTimeMillis();
       yoResult.set(footstepPlanner.plan());
@@ -230,7 +244,9 @@ public class BodyPathAndFootstepPlannerWrapper implements QuadrupedBodyPathAndFo
 
       if (DEBUG)
       {
-         PrintTools.info("Visibility graph with A* planner finished. Result: " + yoResult.getEnumValue());
+         LogTools.info("Visibility graph with A* planner finished. Result: " + yoResult.getEnumValue());
+         System.out.println("   Finished planning body path after " + Precision.round(timeSpentBeforeFootstepPlanner.getDoubleValue(), 2) + " seconds.");
+         System.out.println("   Finished planning footstep path after " + Precision.round(timeSpentInFootstepPlanner.getDoubleValue(), 2) + " seconds.");
       }
 
       return yoResult.getEnumValue();

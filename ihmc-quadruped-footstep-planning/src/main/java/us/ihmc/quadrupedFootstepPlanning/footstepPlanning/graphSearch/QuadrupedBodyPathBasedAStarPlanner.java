@@ -95,6 +95,12 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
    }
 
    @Override
+   public void setBestEffortTimeout(double bestEffortTimeout)
+   {
+      footstepPlanner.setBestEffortTimeout(bestEffortTimeout);
+   }
+
+   @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       footstepPlanner.setPlanarRegionsList(planarRegionsList);
