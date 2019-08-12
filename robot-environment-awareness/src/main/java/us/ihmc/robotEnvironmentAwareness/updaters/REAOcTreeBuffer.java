@@ -66,7 +66,7 @@ public class REAOcTreeBuffer
       this.ocTreeCapacityTopic = ocTreeCapacityTopic;
       this.messageCapacityTopic = messageCapacityTopic;
       this.stateTopic = stateTopic;
-      
+
       octreeDepth = reaMessager.createInput(REAModuleAPI.OcTreeDepth, 15);
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
@@ -147,7 +147,10 @@ public class REAOcTreeBuffer
                if (numberOfLeafNodesInBuffer >= ocTreeCapacity.get().intValue())
                   isBufferFull.set(true);
                else
+               {
                   isBufferFull.set(false);
+                  return;
+               }
             }
 
             if (isBufferRequested.get())

@@ -84,7 +84,7 @@ public class LIDARBasedREAModule
                                                REAModuleAPI.LidarBufferOcTreeCapacity, 10000, REAModuleAPI.LidarBufferMessageCapacity, 500,
                                                REAModuleAPI.RequestLidarBuffer, REAModuleAPI.LidarBufferState);
       stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
-                                                      REAModuleAPI.StereoVisionBufferOcTreeCapacity, 0, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
+                                                      REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
                                                       REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater};
       mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdaters, reaMessager);
