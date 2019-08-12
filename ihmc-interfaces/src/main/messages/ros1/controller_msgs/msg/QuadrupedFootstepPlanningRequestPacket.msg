@@ -50,6 +50,8 @@ int8 requested_footstep_planner_type
 
 float64 timeout
 
+float64 best_effort_timeout
+
 float64 horizon_length
 
 controller_msgs/PlanarRegionsListMessage planar_regions_list_message

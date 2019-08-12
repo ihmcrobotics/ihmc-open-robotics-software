@@ -52,6 +52,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class FootstepPlannerDataSetTest
 {
+   private static final double defaultBestEffortTimeout = 1.0;
    protected static final double bambooTimeScaling = 4.0;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
@@ -195,6 +196,7 @@ public abstract class FootstepPlannerDataSetTest
       planner.setStart(start);
       planner.setGoal(goal);
       planner.setTimeout(20.0);
+      planner.setBestEffortTimeout(defaultBestEffortTimeout);
 
       xGaitSettings.setEndPhaseShift(180.0);
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
@@ -326,6 +328,7 @@ public abstract class FootstepPlannerDataSetTest
       planner.setStart(start);
       planner.setGoal(goal);
       planner.setTimeout(timeout);
+      planner.setBestEffortTimeout(defaultBestEffortTimeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());

@@ -62,6 +62,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private double maximumDeviationFromXGaitDuringExpansion;
 
+   private boolean returnBestEffortPlan;
+   private int minStepsForBestEffort;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
@@ -377,6 +380,18 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
    {
       this.maximumDeviationFromXGaitDuringExpansion = deviationFromXGaitDuringExpansion;
+   }
+
+   @Override
+   public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
+   {
+      this.returnBestEffortPlan = returnBestEffortPlan;
+   }
+
+   @Override
+   public void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
+   {
+      this.minStepsForBestEffort = minimumStepsForBestEffortPlan;
    }
 
    /** {@inheritDoc} */
@@ -696,5 +711,17 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumDeviationFromXGaitDuringExpansion()
    {
       return maximumDeviationFromXGaitDuringExpansion;
+   }
+
+   @Override
+   public boolean returnBestEffortPlan()
+   {
+      return returnBestEffortPlan;
+   }
+
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minStepsForBestEffort;
    }
 }

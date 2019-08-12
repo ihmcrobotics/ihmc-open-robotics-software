@@ -70,6 +70,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -124,6 +126,9 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -155,6 +160,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       cdr.write_type_6(data.getTimeout());
 
+      cdr.write_type_6(data.getBestEffortTimeout());
+
       cdr.write_type_6(data.getHorizonLength());
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
@@ -183,6 +190,8 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       data.setRequestedFootstepPlannerType(cdr.read_type_9());
       	
       data.setTimeout(cdr.read_type_6());
+      	
+      data.setBestEffortTimeout(cdr.read_type_6());
       	
       data.setHorizonLength(cdr.read_type_6());
       	
@@ -217,6 +226,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
       ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
@@ -248,6 +258,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
       data.setTimeout(ser.read_type_6("timeout"));
+      data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 

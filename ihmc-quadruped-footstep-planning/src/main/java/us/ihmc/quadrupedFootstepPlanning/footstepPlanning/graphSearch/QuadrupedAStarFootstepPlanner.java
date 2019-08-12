@@ -163,6 +163,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    }
 
    @Override
+   public void setBestEffortTimeout(double timeoutInSeconds)
+   {
+      bestEffortTimeout.set(timeoutInSeconds);
+   }
+
+   @Override
    public void setStart(QuadrupedFootstepPlannerStart start)
    {
       checkGoalType(start);
