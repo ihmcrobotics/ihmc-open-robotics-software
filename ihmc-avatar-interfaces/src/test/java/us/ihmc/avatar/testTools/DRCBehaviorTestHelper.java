@@ -1,5 +1,11 @@
 package us.ihmc.avatar.testTools;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
+
 import controller_msgs.msg.dds.BehaviorControlModePacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
@@ -21,7 +27,11 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
-import us.ihmc.humanoidBehaviors.utilities.*;
+import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.StopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TimeBasedStopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
+import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -43,12 +53,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
-
-import static us.ihmc.robotics.Assert.*;
 
 /**
  * Do not execute more than one behavior thread at a time. Instead, run multiple behaviors in a
@@ -109,6 +113,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          networkModuleParameters = new DRCNetworkModuleParameters();
          networkModuleParameters.enableNetworkProcessor(false);
+         networkModuleParameters.enableLocalControllerCommunicator(true);
       }
       super.setNetworkProcessorParameters(networkModuleParameters);
       super.createSimulation(name, automaticallySimulate, true);
