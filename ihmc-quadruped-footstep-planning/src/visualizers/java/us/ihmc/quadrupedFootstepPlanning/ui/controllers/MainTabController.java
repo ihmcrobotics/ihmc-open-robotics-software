@@ -487,11 +487,15 @@ public class MainTabController
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
       messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
-      messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
-      messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
-         if (m != null && m == QuadrupedSteppingStateEnum.STAND)
-            clearFootstepPlan();
-      });
+      if (abortWalkingTopic != null)
+         messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
+      if (currentSteppingStateNameTopic != null)
+      {
+         messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
+            if (m != null && m == QuadrupedSteppingStateEnum.STAND)
+               clearFootstepPlan();
+         });
+      }
    }
 
    private boolean isValidPlan(FootstepPlan plan)

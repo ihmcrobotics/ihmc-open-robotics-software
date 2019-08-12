@@ -67,6 +67,7 @@ module controller_msgs
         @defaultValue(value=255)
         octet requested_footstep_planner_type;
         double timeout;
+        double best_effort_timeout;
         double horizon_length;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
         boolean assume_flat_ground;
