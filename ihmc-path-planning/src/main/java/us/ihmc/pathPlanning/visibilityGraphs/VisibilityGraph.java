@@ -114,6 +114,7 @@ public class VisibilityGraph
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
 
+
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
    {
       VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
@@ -376,8 +377,11 @@ public class VisibilityGraph
       Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
 
       RigidBodyTransform transformFromWorldToSource = new RigidBodyTransform();
-      sourceHomeRegion.getTransformToWorld(transformFromWorldToSource);
-      transformFromWorldToSource.invert();
+      if (sourceHomeRegion != null)
+      {
+         sourceHomeRegion.getTransformToWorld(transformFromWorldToSource);
+         transformFromWorldToSource.invert();
+      }
 
       RigidBodyTransform transformFromWorldToTarget = new RigidBodyTransform();
 
@@ -403,18 +407,23 @@ public class VisibilityGraph
 
                Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
 
-               Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+               boolean targetIsVisibleThroughSourceObstacles = true;
+               if (sourceHomeRegion != null)
+               {
+                  Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+                  transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
+                  Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
+                  targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
+                                                                                                              targetInSourceLocal);
+               }
+
                Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
 
-               transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
                transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
 
-               Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
-               boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
-                                                                                                           targetInSourceLocal);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                            sourceInTargetLocal);
 
