@@ -50,13 +50,11 @@ import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
 public class VisibilityGraphsFrameworkTest
 {
-   // Set that to MAX_VALUE when visualizing. Before pushing, it has to be reset to a reasonable value.
-   private static final long TIMEOUT = 100000; // Long.MAX_VALUE; //
    // Threshold used to assert that the body path starts and ends where we asked it to.
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -148,9 +146,11 @@ public class VisibilityGraphsFrameworkTest
    {
       if (VISUALIZE)
       {
-         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, true));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1001000000, true));
    }
 
    private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester)
@@ -321,6 +321,7 @@ public class VisibilityGraphsFrameworkTest
       String errorMessages = dataSetTester.apply(dataset);
 
       Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
+      LogTools.info("Finished testing.");
       ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
 
@@ -418,6 +419,8 @@ public class VisibilityGraphsFrameworkTest
             break;
          }
 
+         if (!errorMessages.isEmpty())
+            LogTools.info(errorMessages);
          walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath));
 
          if (VISUALIZE)
@@ -443,7 +446,7 @@ public class VisibilityGraphsFrameworkTest
             Vector3DBasics segmentDirection = segment.getDirection(true);
             newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
 
-            if (segment.distance(newPosition) < 1.0e-4)
+            if (xyDistance(segment, newPosition) < 1.0e-4)
             {
                return newPosition;
             }
@@ -526,6 +529,8 @@ public class VisibilityGraphsFrameworkTest
          walkerShape.getPosition().set(walkerBody3D);
 
          errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions);
+         if (!errorMessages.isEmpty())
+            LogTools.info(errorMessages);
 
          Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
          Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
@@ -776,9 +781,17 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20190204_155900_CampLejeuneRock4";
+      String dataSetName = "20001201_205060_SeveralSquaresSeveralObstacles";
+
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }
