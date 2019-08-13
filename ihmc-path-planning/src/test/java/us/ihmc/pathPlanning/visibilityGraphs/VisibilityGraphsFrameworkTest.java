@@ -19,8 +19,11 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -53,13 +56,13 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-2;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
 
    // For enabling helpful prints.
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
 
    private static VisibilityGraphsTestVisualizerApplication visualizerApplication = null;
    // Because we use JavaFX, there will be two instance of VisibilityGraphsFrameworkTest, one for running the test and one starting the ui. The messager has to be static so both the ui and test use the same instance.
@@ -131,7 +134,9 @@ public class VisibilityGraphsFrameworkTest
    {
       if (VISUALIZE)
       {
-         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
       runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, false));
    }
@@ -425,7 +430,7 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3D startingPosition, List<Point3DReadOnly> bodyPath)
+   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath)
    {
       Point3D newPosition = new Point3D();
 
@@ -433,7 +438,7 @@ public class VisibilityGraphsFrameworkTest
       {
          LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
 
-         if (segment.distance(startingPosition) < 1.0e-4)
+         if (xyDistance(segment, startingPosition) < 1.0e-4)
          {
             Vector3DBasics segmentDirection = segment.getDirection(true);
             newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
@@ -451,6 +456,13 @@ public class VisibilityGraphsFrameworkTest
       }
 
       return new Point3D(startingPosition);
+   }
+
+   private static double xyDistance(LineSegment3DReadOnly segment, Point3DReadOnly point)
+   {
+      Point3DReadOnly lineSegmentStart = segment.getFirstEndpoint();
+      Point3DReadOnly lineSegmentEnd = segment.getSecondEndpoint();
+      return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point.getX(), point.getY(), lineSegmentStart.getX(), lineSegmentStart.getY(), lineSegmentEnd.getX(), lineSegmentEnd.getY());
    }
 
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList)
