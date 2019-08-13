@@ -55,8 +55,6 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class VisibilityGraphsOcclusionTest
 {
-   private static final int TIMEOUT = 300000; // Integer.MAX_VALUE; //
-
    private static final DefaultVisibilityGraphParameters VISIBILITY_GRAPH_PARAMETERS = new DefaultVisibilityGraphParameters()
    {
       @Override
@@ -68,7 +66,7 @@ public class VisibilityGraphsOcclusionTest
 
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private boolean visualize = true;
+   private boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
@@ -96,7 +94,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testFlatGround(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -106,7 +103,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testFlatGroundWithWall(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -125,7 +121,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testSimpleOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -135,7 +130,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testMazeWithOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -145,7 +139,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testCrazyBridgeEnvironment(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
@@ -309,8 +302,8 @@ public class VisibilityGraphsOcclusionTest
          try
          {
             long startTime = System.currentTimeMillis();
-//            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
-            bodyPath = vizGraphs.calculateBodyPathWithOcclusions(currentPosition, goal);
+            bodyPath = vizGraphs.calculateBodyPath(currentPosition, goal);
+//            bodyPath = vizGraphs.calculateBodyPathWithOcclusions(currentPosition, goal);
 
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);

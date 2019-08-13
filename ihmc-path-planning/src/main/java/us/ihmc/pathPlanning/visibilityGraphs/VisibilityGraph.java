@@ -23,6 +23,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -39,11 +40,18 @@ public class VisibilityGraph
    private VisibilityGraphNode startNode, goalNode;
 
    private final InterRegionConnectionFilter interRegionConnectionFilter;
+   private final InterRegionConnectionFilter goalInterRegionConnectionFilter;
 
    public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter)
    {
+      this(navigableRegions, interRegionConnectionFilter, null);
+   }
+
+   public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter, InterRegionConnectionFilter goalInterRegionConnectionFilter)
+   {
       this.navigableRegions = navigableRegions;
       this.interRegionConnectionFilter = interRegionConnectionFilter;
+      this.goalInterRegionConnectionFilter = goalInterRegionConnectionFilter;
 
       List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
 
@@ -89,10 +97,35 @@ public class VisibilityGraph
       }
    }
 
+   public void computeInterEdgesWhenOnNoRegion(VisibilityGraphNode sourceNode)
+   {
+      for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
+      {
+         NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
+         List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
+
+         List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
+         createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, null, targetObstacleClusters, goalInterRegionConnectionFilter,
+                                                crossRegionEdges);
+      }
+
+      sourceNode.setEdgesHaveBeenDetermined(true);
+   }
+
+
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
    {
       VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
       sourceVisibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode);
+
+      computeInterEdges(sourceNode);
+
+      sourceNode.setEdgesHaveBeenDetermined(true);
+   }
+
+   public void computeInterEdges(VisibilityGraphNode sourceNode)
+   {
+      VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
 
       NavigableRegion sourceNavigableRegion = sourceVisibilityGraphNavigableRegion.getNavigableRegion();
       List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getObstacleClusters();
@@ -127,7 +160,6 @@ public class VisibilityGraph
             visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion);
          }
       }
-
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
 
@@ -142,6 +174,13 @@ public class VisibilityGraph
       navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
 
       return new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion);
+   }
+
+   public static VisibilityGraphNode createNodeWithNoRegion(Point3DReadOnly sourceInWorld)
+   {
+      NavigableRegion navigableRegion = new NavigableRegion(null);
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
+      return new VisibilityGraphNode(sourceInWorld, new Point2D(sourceInWorld), visibilityGraphNavigableRegion, -1);
    }
 
    public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
@@ -181,10 +220,22 @@ public class VisibilityGraph
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
-         return null;
+      {
+         startNode = createNodeWithNoRegion(sourceLocationInWorld);
+         computeInterEdgesWhenOnNoRegion(startNode);
+      }
+      else
+      {
+         startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
+         connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
 
-      startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
-      connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
+         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
+         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
+            computeInterEdges(startNode);
+            if (crossRegionEdges.size() == 0)
+               throw new RuntimeException("we have no where to go.");
+         }
+      }
 
       return startNode;
    }
@@ -194,17 +245,25 @@ public class VisibilityGraph
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
-         return null;
-
-      goalNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
-      connectNodeToInnerRegionNodes(goalNode, visibilityGraphNavigableRegion, startNode);
+      {
+         goalNode = createNodeWithNoRegion(sourceLocationInWorld);
+         computeInterEdgesWhenOnNoRegion(goalNode);
+      }
+      else
+      {
+         goalNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
+         connectNodeToInnerRegionNodes(goalNode, visibilityGraphNavigableRegion, startNode);
+      }
 
       return goalNode;
    }
 
+
+
    private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
    {
-      NavigableRegion hostNavigableRegion = PlanarRegionTools.getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, searchHostEpsilon);
+      NavigableRegion hostNavigableRegion = NavigableRegionTools
+            .getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, searchHostEpsilon);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegion(hostNavigableRegion);
       return visibilityGraphNavigableRegion;
    }
@@ -264,6 +323,7 @@ public class VisibilityGraph
       createInterRegionVisibilityConnections(sourceRegionNodes, targetRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack);
    }
 
+
    public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> sourceNodeList, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack)
@@ -283,8 +343,11 @@ public class VisibilityGraph
       Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
 
       RigidBodyTransform transformFromWorldToSource = new RigidBodyTransform();
-      sourceHomeRegion.getTransformToWorld(transformFromWorldToSource);
-      transformFromWorldToSource.invert();
+      if (sourceHomeRegion != null)
+      {
+         sourceHomeRegion.getTransformToWorld(transformFromWorldToSource);
+         transformFromWorldToSource.invert();
+      }
 
       RigidBodyTransform transformFromWorldToTarget = new RigidBodyTransform();
 
@@ -311,18 +374,23 @@ public class VisibilityGraph
 
                Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
 
-               Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+               boolean targetIsVisibleThroughSourceObstacles = true;
+               if (sourceHomeRegion != null)
+               {
+                  Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+                  transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
+                  Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
+                  targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
+                                                                                                              targetInSourceLocal);
+               }
+
                Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
 
-               transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
                transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
 
-               Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
-               boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
-                                                                                                           targetInSourceLocal);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                            sourceInTargetLocal);
 

@@ -6,10 +6,10 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -37,14 +37,8 @@ public class NavigableRegionToolsTest
 
       double navigableRegionExtrusionDistance = 0.05;
 
-      VisibilityGraphsParameters parameters = new DefaultVisibilityGraphParameters()
-      {
-         @Override
-         public double getNavigableExtrusionDistance()
-         {
-            return navigableRegionExtrusionDistance;
-         }
-      };
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      parameters.setNavigableExtrusionDistance(navigableRegionExtrusionDistance);
 
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();

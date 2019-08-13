@@ -1,20 +1,20 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.util.*;
-
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.*;
 
 public class NavigableRegionsManager
 {
@@ -115,7 +115,7 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions();
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
+      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(), parameters.getGoalInterRegionConnectionFilter());
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
@@ -341,7 +341,7 @@ public class NavigableRegionsManager
             return path;
          }
 
-         NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
+         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0,
