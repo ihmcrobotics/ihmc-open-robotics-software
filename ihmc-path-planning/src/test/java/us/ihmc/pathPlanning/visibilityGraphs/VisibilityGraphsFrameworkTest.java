@@ -347,6 +347,40 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
+   private String runAssertionsWithOcclusions(DataSet dataset)
+   {
+      String datasetName = dataset.getName();
+
+      PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      Point3D start = plannerInput.getStartPosition();
+      Point3D goal = plannerInput.getGoalPosition();
+
+      PlanarRegionsList knownRegions = new PlanarRegionsList();
+
+      Point3D observer = new Point3D();
+      observer.set(start);
+      observer.addZ(0.8);
+      Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, observer, knownRegions);
+
+      knownRegions = result.getKey(); // For next iteration
+      PlanarRegionsList visibleRegions = result.getKey();
+
+      if (VISUALIZE)
+      {
+         visualizerApplication.submitPlanarRegionsListToVisualizer(knownRegions);
+
+         visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
+         visualizerApplication.submitStartToVisualizer(start);
+         visualizerApplication.submitGoalToVisualizer(goal);
+      }
+
+      String errorMessages = calculateAndTestVizGraphsBodyPath(datasetName, start, goal, visibleRegions);
+
+      return addPrefixToErrorMessages(datasetName, errorMessages);
+   }
+
    private String runAssertionsSimulateDynamicReplanning(DataSet dataset, double walkerSpeed, long maxSolveTimeInMilliseconds,
                                                          boolean simulateOcclusions)
    {
@@ -485,6 +519,7 @@ public class VisibilityGraphsFrameworkTest
       try
       {
          path = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+//         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }
       catch (Exception e)
       {
@@ -781,17 +816,17 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20001201_205060_SeveralSquaresSeveralObstacles";
+      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 
       test.setup();
       if (VISUALIZE)
       {
-         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
       test.tearDown();
 
    }
