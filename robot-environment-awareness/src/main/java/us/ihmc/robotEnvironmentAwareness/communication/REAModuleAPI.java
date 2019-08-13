@@ -134,6 +134,8 @@ public class REAModuleAPI
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);
    public static final Topic<Boolean> UIPlanarRegionDataExportRequest = Root.child(UI).child(DataExporter).child(PlanarRegions).topic(Export);
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = Root.child(UI).child(DataExporter).child(PlanarRegions).topic(Path);
+   public static final Topic<Boolean> UIStereoDataExportRequest = Root.child(UI).child(DataExporter).child(StereoVision).topic(Export);
+   public static final Topic<String> UIStereoDataExporterDirectory = Root.child(UI).child(DataExporter).child(StereoVision).topic(Path);
 
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVision).topic(Data);
