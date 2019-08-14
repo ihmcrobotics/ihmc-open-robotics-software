@@ -17,21 +17,29 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -103,6 +111,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
+   private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
+   private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+
+   private final YoDouble centerOfMassSafeDistance = new YoDouble("centerOfMassSafeDistance",
+                                                                  "Describes the minimum distance away from the support polygon's edges.",
+                                                                  registry);
+
+   private final double robotMass;
+
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoVariableRegistry parentRegistry)
@@ -112,8 +130,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       this.desiredFullRobotModel = desiredFullRobotModel;
 
+      robotMass = TotalMassCalculator.computeSubTreeMass(desiredFullRobotModel.getElevator());
+
       footWeight.set(200.0);
-      momentumWeight.set(1.0);
+      momentumWeight.set(1.0e-6);
+      centerOfMassSafeDistance.set(0.04); // Same as the walking controller.
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -327,6 +348,40 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return jointLimitReductionCommand;
    }
 
+   private LinearMomentumConvexConstraint2DCommand createLinearMomentumConvexConstraint2DCommand()
+   {
+      ConvexPolygon2D newSupportPolygon = new ConvexPolygon2D();
+      newSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(latestCapturabilityBasedStatusReference.get().getLeftFootSupportPolygon2d()));
+      newSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(latestCapturabilityBasedStatusReference.get().getRightFootSupportPolygon2d()));
+      newSupportPolygon.update();
+
+      if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
+      { // Update the polygon only if there is an actual update.
+         supportPolygon.set(newSupportPolygon);
+         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeDistance.getValue(), shrunkConvexPolygon);
+      }
+
+      FramePoint2D centerOfMass = new FramePoint2D(centerOfMassFrame);
+      centerOfMass.changeFrame(worldFrame);
+
+      if (shrunkConvexPolygon.signedDistance(centerOfMass) < -0.01)
+      { // Apply the constraint only when getting close to the support polygon's border
+         return null;
+      }
+
+      LinearMomentumConvexConstraint2DCommand command = new LinearMomentumConvexConstraint2DCommand();
+
+      for (int i = 0; i < shrunkConvexPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = shrunkConvexPolygon.getVertex(i);
+         Vector2D momentumVertex = command.addLinearMomentumConstraintVertex();
+         momentumVertex.sub(vertex, centerOfMass);
+         momentumVertex.scale(robotMass / KinematicsToolboxController.updateDT);
+      }
+
+      return command;
+   }
+
    @Override
    protected void robotConfigurationReinitialized()
    {
@@ -362,6 +417,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       InverseKinematicsCommandList commands = new InverseKinematicsCommandList();
       commands.addCommand(createJointLimitReductionCommand());
+      commands.addCommand(createLinearMomentumConvexConstraint2DCommand());
       return commands;
    }
 
