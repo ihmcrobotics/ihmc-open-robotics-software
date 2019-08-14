@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,7 +34,7 @@ public class VisibilityGraph
 {
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
-   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = true;
+   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final ArrayList<VisibilityGraphEdge> crossRegionEdges = new ArrayList<VisibilityGraphEdge>();
@@ -105,8 +107,9 @@ public class VisibilityGraph
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
 
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
-         createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, null, targetObstacleClusters, goalInterRegionConnectionFilter,
-                                                crossRegionEdges);
+         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, visibilityGraphNavigableRegions, targetObstacleClusters, crossRegionEdges);
+//         createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, null, targetObstacleClusters, goalInterRegionConnectionFilter,
+//                                                crossRegionEdges, false);
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -338,6 +341,14 @@ public class VisibilityGraph
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack)
    {
+      createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack, ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE);
+   }
+
+   public static void createInterRegionVisibilityConnections(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodeList,
+                                                             List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
+                                                             InterRegionConnectionFilter filter, ArrayList<VisibilityGraphEdge> edgesToPack,
+                                                             boolean onlyUseShortestEdge)
+   {
       PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
       Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
@@ -403,7 +414,7 @@ public class VisibilityGraph
          }
       }
 
-      if (ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      if (onlyUseShortestEdge)
       {
          VisibilityGraphEdge shortestEdgeXY = findShortestEdgeXY(sourceNode, potentialEdges);
 
@@ -419,6 +430,71 @@ public class VisibilityGraph
       {
          edgesToPack.addAll(potentialEdges);
       }
+
+   }
+
+   public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
+                                                                List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
+                                                                ArrayList<VisibilityGraphEdge> edgesToPack)
+   {
+      ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
+
+
+      RigidBodyTransform transformFromWorldToTarget = new RigidBodyTransform();
+
+      List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
+
+      for (VisibilityGraphNode targetNode : allNavigableNodes)
+      {
+         ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
+         double xyDistance = sourceInWorld.distanceXY(targetInWorld);
+         if (xyDistance < 0.30)
+         {
+            VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+            potentialEdges.add(edge);
+         }
+         else // Check if the edge is visible if it is a long one.
+         {
+            PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+            targetHomeRegion.getTransformToLocal(transformFromWorldToTarget);
+
+            Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
+
+            Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
+
+            transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
+
+            //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
+            boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
+                                                                                                        new Point2D(sourceProjectedVerticallyOntoTarget));
+            boolean sourceIsOnOuterEdge = true;
+            for (NavigableRegion navigableRegion : allNavigableRegions)
+            {
+               Cluster cluster = navigableRegion.getHomeRegionCluster();
+               RigidBodyTransformReadOnly transformFromWorldToLocal = navigableRegion.getHomePlanarRegion().getTransformToLocal();
+               Point2D targetInRegionLocal = new Point2D(targetInWorld);
+               Point2D sourceInRegionLocal = new Point2D(sourceInWorld);
+
+               transformFromWorldToLocal.transform(targetInRegionLocal);
+               transformFromWorldToLocal.transform(sourceInRegionLocal);
+
+               if (!VisibilityTools.isPointVisible(sourceInRegionLocal, targetInRegionLocal, cluster.getNavigableExtrusionsInLocal(), cluster.isClosed()))
+               {
+                  sourceIsOnOuterEdge = false;
+                  break;
+               }
+            }
+
+            if ((sourceIsVisibleThroughTargetObstacles && sourceIsOnOuterEdge))
+            {
+               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+               potentialEdges.add(edge);
+            }
+         }
+      }
+
+      edgesToPack.addAll(potentialEdges);
+
 
    }
 
