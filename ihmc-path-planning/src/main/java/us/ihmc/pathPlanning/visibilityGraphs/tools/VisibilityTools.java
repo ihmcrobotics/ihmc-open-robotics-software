@@ -435,4 +435,19 @@ public class VisibilityTools
 
       return true;
    }
+
+   public static boolean isPointVisibleFromOutsideForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
+   {
+      for (Cluster cluster : clusters)
+      {
+         boolean closed = cluster.isClosed();
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNavigableExtrusionsInLocal(), closed))
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
 }
