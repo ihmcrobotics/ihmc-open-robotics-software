@@ -63,6 +63,7 @@ module controller_msgs
         double distance_weight;
         @defaultValue(value=-1.0)
         double elevation_weight;
+        boolean return_best_effort_solution;
       };
     };
   };

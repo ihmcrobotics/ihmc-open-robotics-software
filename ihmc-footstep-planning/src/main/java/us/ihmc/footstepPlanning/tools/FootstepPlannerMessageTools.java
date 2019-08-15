@@ -143,5 +143,6 @@ public class FootstepPlannerMessageTools
       packet.setHeuristicWeight(parameters.getHeuristicWeight());
       packet.setDistanceWeight(parameters.getDistanceWeight());
       packet.setElevationWeight(parameters.getElevationWeight());
+      packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
    }
 }
