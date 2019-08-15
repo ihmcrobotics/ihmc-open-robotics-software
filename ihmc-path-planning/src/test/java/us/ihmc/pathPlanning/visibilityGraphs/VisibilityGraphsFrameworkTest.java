@@ -825,8 +825,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, true), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
       test.tearDown();
 
    }
