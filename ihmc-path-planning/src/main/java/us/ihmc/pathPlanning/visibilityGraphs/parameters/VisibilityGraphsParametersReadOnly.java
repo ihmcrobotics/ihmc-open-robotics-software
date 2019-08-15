@@ -140,6 +140,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(elevationWeight);
    }
 
+   default boolean returnBestEffortSolution()
+   {
+      return true;
+   }
+
    /**
     * The constant extrusion distance to use when extruding the hull of a navigable region.
     *
@@ -215,24 +220,6 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          public double getMaximumInterRegionConnetionDistance()
          {
             return maxLength;
-         }
-      };
-   }
-
-   default InterRegionConnectionFilter getGoalInterRegionConnectionFilter()
-   {
-      return new InterRegionConnectionFilter()
-      {
-         @Override
-         public double getMaximumInterRegionConnetionDistance()
-         {
-            return Double.POSITIVE_INFINITY;
-         }
-
-         @Override
-         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
-         {
-            return true;
          }
       };
    }
