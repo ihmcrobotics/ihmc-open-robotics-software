@@ -29,6 +29,7 @@ public class NavigableRegionsManager
    private VisibilityGraph visibilityGraph;
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
+   private VisibilityGraphNode endNode;
    private Point3DReadOnly goalInWorld;
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
@@ -115,7 +116,7 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions();
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(), parameters.getGoalInterRegionConnectionFilter());
+      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter());
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
@@ -123,6 +124,7 @@ public class NavigableRegionsManager
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
+      endNode = null;
       this.goalInWorld = goalInWorld;
 
       if ((startNode == null) || (goalNode == null))
@@ -161,6 +163,8 @@ public class NavigableRegionsManager
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
 
+         checkAndHandleBestEffortNode(nodeToExpand);
+
          List<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
          expandedNodesCount += neighboringEdges.size();
 
@@ -197,7 +201,7 @@ public class NavigableRegionsManager
       visibilityMapSolution.setGoalMap(visibilityMapSolutionFromNewVisibilityGraph.getGoalMap());
 
       List<VisibilityGraphNode> nodePath = new ArrayList<>();
-      VisibilityGraphNode nodeWalkingBack = goalNode;
+      VisibilityGraphNode nodeWalkingBack = endNode;
 
       while (nodeWalkingBack != null)
       {
@@ -279,7 +283,27 @@ public class NavigableRegionsManager
 
    private boolean checkAndHandleNodeAtGoal(VisibilityGraphNode nodeToExpand)
    {
-      return nodeToExpand == goalNode;
+      if (nodeToExpand == goalNode)
+      {
+         endNode = nodeToExpand;
+         return true;
+      }
+      return false;
+   }
+
+   private void checkAndHandleBestEffortNode(VisibilityGraphNode nodeToExpand)
+   {
+      if (!parameters.returnBestEffortSolution())
+         return;
+
+      if (nodeToExpand == startNode)
+         return;
+
+      double expandedTotalCost = nodeToExpand.getCostFromStart() + nodeToExpand.getEstimatedCostToGoal();
+      if (endNode == null || expandedTotalCost < endNode.getCostFromStart() + endNode.getEstimatedCostToGoal())
+      {
+         endNode = nodeToExpand;
+      }
    }
 
    private VisibilityGraphNode getNeighborNode(VisibilityGraphNode nodeToExpand, VisibilityGraphEdge neighboringEdge)

@@ -34,7 +34,7 @@ public class VisibilityGraph
 {
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
-   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = true;
+   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final List<VisibilityGraphEdge> crossRegionEdges = new ArrayList<>();
@@ -42,18 +42,11 @@ public class VisibilityGraph
    private VisibilityGraphNode startNode, goalNode;
 
    private final InterRegionConnectionFilter interRegionConnectionFilter;
-   private final InterRegionConnectionFilter goalInterRegionConnectionFilter;
 
    public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter)
    {
-      this(navigableRegions, interRegionConnectionFilter, null);
-   }
-
-   public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter, InterRegionConnectionFilter goalInterRegionConnectionFilter)
-   {
       this.navigableRegions = navigableRegions;
       this.interRegionConnectionFilter = interRegionConnectionFilter;
-      this.goalInterRegionConnectionFilter = goalInterRegionConnectionFilter;
 
       List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
 
