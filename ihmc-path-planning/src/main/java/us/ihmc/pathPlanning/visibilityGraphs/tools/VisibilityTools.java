@@ -42,6 +42,32 @@ public class VisibilityTools
 
          Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
+         if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   public static boolean isPointVisibleInclusive(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                        boolean closed)
+   {
+      int size = listOfPointsInCluster.size();
+      int endIndex = size - 1;
+      if (closed)
+         endIndex++;
+
+      for (int i = 0; i < endIndex; i++)
+      {
+         Point2DReadOnly first = listOfPointsInCluster.get(i);
+
+         int nextIndex = i + 1;
+         if (nextIndex == size)
+            nextIndex = 0;
+
+         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
+
          // this will return true if they share a point, which isn't always a good thing
          boolean sharesAPoint = first.geometricallyEquals(targetPoint, 1.0e-10);
          sharesAPoint |= first.geometricallyEquals(observer, 1.0e-10);

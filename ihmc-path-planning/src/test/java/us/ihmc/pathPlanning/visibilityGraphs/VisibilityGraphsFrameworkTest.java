@@ -51,7 +51,7 @@ import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 public class VisibilityGraphsFrameworkTest
 {
    // Threshold used to assert that the body path starts and ends where we asked it to.
-   private static final double START_GOAL_EPSILON = 1.0e-2;
+   private static final double START_GOAL_EPSILON = 1.0e-3;
 
    // Whether to start the UI or not.
    private static boolean VISUALIZE = true;
@@ -444,7 +444,7 @@ public class VisibilityGraphsFrameworkTest
 
          if (VISUALIZE)
          {
-            messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, new Point3D(walkerPosition));
+            messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, walkerPosition);
          }
 
          if (stopWalkerRequest != null && stopWalkerRequest.get())
@@ -453,9 +453,7 @@ public class VisibilityGraphsFrameworkTest
             break;
          }
 
-         if (!errorMessages.isEmpty())
-            LogTools.info(errorMessages);
-         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath));
+         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath, knownRegions));
 
          if (VISUALIZE)
          {
@@ -467,32 +465,43 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private static Point3D travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath)
+   private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath,
+                                                      PlanarRegionsList knownRegions)
    {
-      Point3D newPosition = new Point3D();
+      Point3D initialPosition = new Point3D(bodyPath.get(0));
+
+//      if (startingPosition.distance(initialPosition) > 5.0e-2)
+//         throw new RuntimeException("For some reason we're starting really far from the path.");
+
+      Point3D positionWithShift = new Point3D();
 
       for (int i = 0; i < bodyPath.size() - 1; i++)
       {
          LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
 
-         if (xyDistance(segment, startingPosition) < 1.0e-4)
+         if (xyDistance(segment, initialPosition) < 1.0e-3)
          {
             Vector3DBasics segmentDirection = segment.getDirection(true);
-            newPosition.scaleAdd(distanceToTravel, segmentDirection, startingPosition);
+            positionWithShift.scaleAdd(distanceToTravel, segmentDirection, initialPosition);
 
-            if (xyDistance(segment, newPosition) < 1.0e-4)
+            if (xyDistance(segment, positionWithShift) < 1.0e-3)
             {
-               return newPosition;
+               initialPosition = new Point3D(positionWithShift);
+               break;
             }
             else
             {
-               distanceToTravel -= startingPosition.distance(segment.getSecondEndpoint());
-               startingPosition = new Point3D(segment.getSecondEndpoint());
+               distanceToTravel -= initialPosition.distance(segment.getSecondEndpoint());
+               initialPosition = new Point3D(segment.getSecondEndpoint());
             }
          }
       }
 
-      return new Point3D(startingPosition);
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(initialPosition, knownRegions);
+      if (projectedPoint == null)
+         return initialPosition;
+      else
+         return projectedPoint;
    }
 
    private static double xyDistance(LineSegment3DReadOnly segment, Point3DReadOnly point)
@@ -557,16 +566,15 @@ public class VisibilityGraphsFrameworkTest
       Ellipsoid3D walkerShape = new Ellipsoid3D();
       walkerShape.setRadii(walkerRadii);
 
-      while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-3))
+      while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-2))
       {
          Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
          walkerBody3D.addZ(walkerOffsetHeight);
          walkerShape.getPosition().set(walkerBody3D);
 
          errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions);
-         if (!errorMessages.isEmpty())
-            LogTools.info(errorMessages);
 
+//         walkerCurrentPosition.set(travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path));
          Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
          Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
          Vector3D segmentDirection = new Vector3D();
@@ -816,7 +824,8 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+      String dataSetName = "20171215_214730_CinderBlockField";
 
       test.setup();
       if (VISUALIZE)
@@ -825,8 +834,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, true), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }
