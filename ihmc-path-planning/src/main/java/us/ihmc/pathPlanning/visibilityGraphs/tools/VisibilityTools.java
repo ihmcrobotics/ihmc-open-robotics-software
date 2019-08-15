@@ -42,7 +42,13 @@ public class VisibilityTools
 
          Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
-         if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
+         // this will return true if they share a point, which isn't always a good thing
+         boolean sharesAPoint = first.geometricallyEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= first.geometricallyEquals(observer, 1.0e-10);
+         sharesAPoint |= second.geometricallyEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= second.geometricallyEquals(observer, 1.0e-10);
+
+         if (!sharesAPoint && EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
             return false;
          }
@@ -435,19 +441,4 @@ public class VisibilityTools
 
       return true;
    }
-
-   public static boolean isPointVisibleFromOutsideForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
-   {
-      for (Cluster cluster : clusters)
-      {
-         boolean closed = cluster.isClosed();
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNavigableExtrusionsInLocal(), closed))
-         {
-            return false;
-         }
-      }
-
-      return true;
-   }
-
 }
