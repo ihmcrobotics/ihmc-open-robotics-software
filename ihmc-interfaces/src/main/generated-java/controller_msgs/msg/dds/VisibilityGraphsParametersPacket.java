@@ -44,6 +44,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
+   public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
    {
@@ -94,6 +95,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       distance_weight_ = other.distance_weight_;
 
       elevation_weight_ = other.elevation_weight_;
+
+      return_best_effort_solution_ = other.return_best_effort_solution_;
 
    }
 
@@ -296,6 +299,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return elevation_weight_;
    }
 
+   public void setReturnBestEffortSolution(boolean return_best_effort_solution)
+   {
+      return_best_effort_solution_ = return_best_effort_solution;
+   }
+   public boolean getReturnBestEffortSolution()
+   {
+      return return_best_effort_solution_;
+   }
+
 
    public static Supplier<VisibilityGraphsParametersPacketPubSubType> getPubSubType()
    {
@@ -352,6 +364,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elevation_weight_, other.elevation_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
+
 
       return true;
    }
@@ -403,6 +417,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.elevation_weight_ != otherMyClass.elevation_weight_) return false;
 
+      if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
+
 
       return true;
    }
@@ -450,7 +466,9 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append("distance_weight=");
       builder.append(this.distance_weight_);      builder.append(", ");
       builder.append("elevation_weight=");
-      builder.append(this.elevation_weight_);
+      builder.append(this.elevation_weight_);      builder.append(", ");
+      builder.append("return_best_effort_solution=");
+      builder.append(this.return_best_effort_solution_);
       builder.append("}");
       return builder.toString();
    }

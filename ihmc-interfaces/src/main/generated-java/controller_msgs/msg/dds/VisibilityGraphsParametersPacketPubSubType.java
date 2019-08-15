@@ -78,6 +78,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -148,6 +150,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -192,6 +197,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getElevationWeight());
 
+      cdr.write_type_7(data.getReturnBestEffortSolution());
+
    }
 
    public static void read(controller_msgs.msg.dds.VisibilityGraphsParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -234,6 +241,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setElevationWeight(cdr.read_type_6());
       	
+      data.setReturnBestEffortSolution(cdr.read_type_7());
+      	
 
    }
 
@@ -259,6 +268,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("elevation_weight", data.getElevationWeight());
+      ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
    @Override
@@ -283,6 +293,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setElevationWeight(ser.read_type_6("elevation_weight"));
+      data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.VisibilityGraphsParametersPacket src, controller_msgs.msg.dds.VisibilityGraphsParametersPacket dest)
