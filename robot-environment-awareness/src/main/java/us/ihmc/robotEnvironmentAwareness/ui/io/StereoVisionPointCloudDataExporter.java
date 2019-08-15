@@ -20,7 +20,7 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class StereoVisionPointCloudDataExporter
 {
-   private static final long recodingFrequency = 50;
+   private static final long recodingFrequency = 500;
    private static final int numberOfPointsToSave = 200000;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -45,8 +45,6 @@ public class StereoVisionPointCloudDataExporter
       if (enableRecoding.get())
       {
          StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
-         System.out.println("saving " + " " + message.getPointCloud().size() + " " + message.getRobotTimestamp());
-
          int numberOfPoints = message.getColors().size();
 
          Point3D[] pointCloud = new Point3D[numberOfPoints];
