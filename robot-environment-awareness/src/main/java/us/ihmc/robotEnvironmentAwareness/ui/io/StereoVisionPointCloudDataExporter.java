@@ -20,7 +20,7 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class StereoVisionPointCloudDataExporter
 {
-   private static final long recodingFrequency = 1000;
+   private static final long recodingFrequency = 50;
    private static final int numberOfPointsToSave = 200000;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
