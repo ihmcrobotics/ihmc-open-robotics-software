@@ -35,8 +35,8 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
     * Edge cases:
     * <ul>
     * <li>This command is ignored when there is less than 2 vertices.
-    * <li>When there is only 2 vertices, a line constraint is applied, i.e. the linear momentum is
-    * constrained to remain on the right side of the line.
+    * <li>When there is only 2 vertices, a single line constraint is applied, i.e. the linear momentum
+    * is constrained to remain on the right side of the line.
     * </ul>
     * </p>
     * <p>
