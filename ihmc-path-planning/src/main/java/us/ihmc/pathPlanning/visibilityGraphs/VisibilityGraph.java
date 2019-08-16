@@ -21,21 +21,37 @@ public class VisibilityGraph
 {
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
-   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = true;
+   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final List<VisibilityGraphEdge> crossRegionEdges = new ArrayList<>();
 
    private VisibilityGraphNode startNode, goalNode;
 
-   private static final double unseenNodeEdgeWeight = 2.0;
+   private static final double unseenNodeEdgeWeight = 50.0;
 
    private final InterRegionConnectionFilter interRegionConnectionFilter;
+   private final InterRegionConnectionFilter allPassFilter;
 
    public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter)
    {
       this.navigableRegions = navigableRegions;
       this.interRegionConnectionFilter = interRegionConnectionFilter;
+
+      allPassFilter = new InterRegionConnectionFilter()
+      {
+         @Override
+         public double getMaximumInterRegionConnetionDistance()
+         {
+            return Double.POSITIVE_INFINITY;
+         }
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            return true;
+         }
+      };
 
       List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
 
@@ -81,7 +97,7 @@ public class VisibilityGraph
       }
    }
 
-   public void computeInterEdgesWhenOnNoRegion(VisibilityGraphNode sourceNode)
+   public void computeInterEdgesWhenOnNoRegion(VisibilityGraphNode sourceNode, InterRegionConnectionFilter filter)
    {
       for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
@@ -89,7 +105,7 @@ public class VisibilityGraph
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(), targetObstacleClusters,
-                                                   crossRegionEdges);
+                                                   crossRegionEdges, filter);
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -198,39 +214,39 @@ public class VisibilityGraph
       return goalNode.getEdges();
    }
 
-   public VisibilityGraphNode setStart(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
+   public VisibilityGraphNode setStart(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
    {
       //TODO: Need a fallback map if start is not connectable...
 
-      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld, ceilingHeight,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
       {
          startNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(startNode);
+         computeInterEdgesWhenOnNoRegion(startNode, interRegionConnectionFilter);
       }
       else
       {
          startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
          connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
 
-         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
-         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
-            computeInterEdges(startNode);
-         }
+//         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
+//         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
+//            computeInterEdges(startNode);
+//         }
       }
 
       return startNode;
    }
 
-   public VisibilityGraphNode setGoal(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
+   public VisibilityGraphNode setGoal(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
    {
-      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld,
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld, ceilingHeight,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
       {
          goalNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(goalNode);
+         computeInterEdgesWhenOnNoRegion(goalNode, allPassFilter);
       }
       else
       {
@@ -243,10 +259,10 @@ public class VisibilityGraph
 
 
 
-   private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double searchHostEpsilon)
+   private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
    {
       NavigableRegion hostNavigableRegion = NavigableRegionTools
-            .getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, searchHostEpsilon);
+            .getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, ceilingHeight, searchHostEpsilon);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegion(hostNavigableRegion);
       return visibilityGraphNavigableRegion;
    }
@@ -409,15 +425,15 @@ public class VisibilityGraph
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
-                                                                List<VisibilityGraphEdge> edgesToPack)
+                                                                List<VisibilityGraphEdge> edgesToPack, InterRegionConnectionFilter filter)
    {
       createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, allNavigableRegions, targetObstacleClusters, edgesToPack,
-                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE);
+                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, filter);
    }
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
-                                                                List<VisibilityGraphEdge> edgesToPack, boolean useOnlyShortestEdge)
+                                                                List<VisibilityGraphEdge> edgesToPack, boolean useOnlyShortestEdge, InterRegionConnectionFilter filter)
    {
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
 
@@ -428,6 +444,9 @@ public class VisibilityGraph
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
+         if (!filter.isConnectionValid(sourceNode.getPointInWorld(), targetNode.getPointInWorld()))
+            continue;
+
          ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
          double xyDistance = sourceInWorld.distanceXY(targetInWorld);
          if (xyDistance < 0.30)
