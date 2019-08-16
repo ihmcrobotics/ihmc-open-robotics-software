@@ -595,7 +595,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelWithArmsAtMidRange();
       whik.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
-      whik.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(true, true));
+      whik.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, getRobotModel(), true, true));
 
       for (RobotSide robotSide : RobotSide.values)
       {

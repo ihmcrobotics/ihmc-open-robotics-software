@@ -16,11 +16,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -60,11 +62,13 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
-   private final DenseMatrix64F tempTaskJacobian2 = new DenseMatrix64F(SpatialVector.SIZE, 12);
    private final DenseMatrix64F projectedTaskJacobian = new DenseMatrix64F(SpatialVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
+
+   private final DenseMatrix64F lineConstraintSelection = new DenseMatrix64F(1, 2);
+   private final DenseMatrix64F lineConstraintJacobian = new DenseMatrix64F(1, 12);
 
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
 
@@ -525,6 +529,20 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   /**
+    * Converts a {@link LinearMomentumConvexConstraint2DCommand} into a {@link QPInput} intended to be
+    * consumed by {@link InverseKinematicsQPSolver}.
+    * <p>
+    * The resulting output is an {@link ConstraintType#LEQ_INEQUALITY} constraining the x and y
+    * components of the linear momentum to remain on the right side of a set of 2D lines defined by
+    * each pair of consecutive vertices given by
+    * {@link LinearMomentumConvexConstraint2DCommand#getLinearMomentumConstraintVertices()}.
+    * </p>
+    * 
+    * @param command       the command to be converted. Not modified.
+    * @param qpInputToPack the result of the conversion. Modified.
+    * @return {@code true} if the command was successfully converted, {@code false} otherwise.
+    */
    public boolean convertLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand command, QPInput qpInputToPack)
    {
       List<Vector2D> vertices = command.getLinearMomentumConstraintVertices();
@@ -546,6 +564,12 @@ public class MotionQPInputCalculator
       {
          return false;
       }
+      else if (vertices.size() == 2)
+      {
+         qpInputToPack.reshape(1);
+         qpInputToPack.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+         setupLineConstraint(0, vertices.get(0), vertices.get(1), tempTaskJacobian, qpInputToPack);
+      }
       else
       {
          qpInputToPack.reshape(vertices.size());
@@ -556,26 +580,57 @@ public class MotionQPInputCalculator
          for (int i = 0; i < vertices.size(); i++)
          {
             Vector2D v1 = vertices.get(i);
-            double dx = v1.getX() - v0.getX();
-            double dy = v1.getY() - v0.getY();
-            double norm = Math.sqrt(EuclidCoreTools.normSquared(dx, dy));
-            dx /= norm;
-            dy /= norm;
-
-            tempSelectionMatrix.reshape(1, 2);
-            tempSelectionMatrix.set(0, -dy);
-            tempSelectionMatrix.set(1, dx);
-            tempTaskJacobian2.reshape(1, numberOfDoFs);
-            CommonOps.mult(tempSelectionMatrix, tempTaskJacobian, tempTaskJacobian2);
-            CommonOps.insert(tempTaskJacobian2, qpInputToPack.taskJacobian, i, 0);
-
-            qpInputToPack.taskObjective.set(i, dx * v0.getY() - dy * v0.getX());
-
+            setupLineConstraint(i, v0, v1, tempTaskJacobian, qpInputToPack);
             v0 = v1;
          }
       }
 
       return true;
+   }
+
+   /**
+    * Sets up the {@link QPInput#taskJacobian} and {@link QPInput#taskObjective} to formulate a
+    * constraint with respect to 2D line going through {@code firstPointOnLine} and
+    * {@code secondPointOnLine}.
+    * <p>
+    * This method can be used for three applications:
+    * <ul>
+    * <li>If {@link ConstraintType#LEQ_INEQUALITY}: constrains the momentum to remain of the right side
+    * of the line.
+    * <li>If {@link ConstraintType#GEQ_INEQUALITY}: constrains the momentum to remain of the left side
+    * of the line.
+    * <li>If {@link ConstraintType#EQUALITY}: constrains the momentum to remain on the line.
+    * </ul>
+    * It is up to the caller of this method to set the type of constraint of the given
+    * {@code qoInputToPack}.
+    * </p>
+    * 
+    * @param constraintIndex                  the index in {@code qpInputToPack} where to put the new
+    *                                         constraint.
+    * @param firstPointOnLine                 the first point the line is going through. Not modified.
+    * @param secondPointOnLine                the second point the line is going through. Not modified.
+    * @param centroidalMomemtumMatrixLinearXY the x and y components of the linear part of the
+    *                                         centroidal momentum matrix. Not modified.
+    * @param qpInputToPack                    the result is stored in
+    *                                         {@code qpInputToPack.taskJacobian} and
+    *                                         {@code qpInputToPack.taskObjective}. Modified.
+    */
+   private void setupLineConstraint(int constraintIndex, Tuple2DReadOnly firstPointOnLine, Tuple2DReadOnly secondPointOnLine,
+                                    DenseMatrix64F centroidalMomemtumMatrixLinearXY, QPInput qpInputToPack)
+   {
+      double directionX = secondPointOnLine.getX() - firstPointOnLine.getX();
+      double directionY = secondPointOnLine.getY() - firstPointOnLine.getY();
+      double norm = Math.sqrt(EuclidCoreTools.normSquared(directionX, directionY));
+      directionX /= norm;
+      directionY /= norm;
+
+      lineConstraintSelection.set(0, -directionY);
+      lineConstraintSelection.set(1, directionX);
+      lineConstraintJacobian.reshape(1, numberOfDoFs);
+      CommonOps.mult(lineConstraintSelection, centroidalMomemtumMatrixLinearXY, lineConstraintJacobian);
+      CommonOps.insert(lineConstraintJacobian, qpInputToPack.taskJacobian, constraintIndex, 0);
+
+      qpInputToPack.taskObjective.set(constraintIndex, directionX * firstPointOnLine.getY() - directionY * firstPointOnLine.getX());
    }
 
    /**
