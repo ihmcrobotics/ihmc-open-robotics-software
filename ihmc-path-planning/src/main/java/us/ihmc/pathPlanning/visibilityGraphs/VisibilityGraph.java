@@ -1,34 +1,21 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.util.*;
-
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class VisibilityGraph
 {
@@ -40,6 +27,8 @@ public class VisibilityGraph
    private final List<VisibilityGraphEdge> crossRegionEdges = new ArrayList<>();
 
    private VisibilityGraphNode startNode, goalNode;
+
+   private static final double unseenNodeEdgeWeight = 2.0;
 
    private final InterRegionConnectionFilter interRegionConnectionFilter;
 
@@ -98,17 +87,13 @@ public class VisibilityGraph
       {
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
-
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(), targetObstacleClusters,
                                                    crossRegionEdges);
-//         createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, null, targetObstacleClusters, goalInterRegionConnectionFilter,
-//                                                crossRegionEdges, false);
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
-
 
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
    {
@@ -464,6 +449,12 @@ public class VisibilityGraph
             //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
             boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                         new Point2D(sourceProjectedVerticallyOntoTarget));
+
+            if (!sourceIsVisibleThroughTargetObstacles)
+            {
+               continue;
+            }
+
             boolean sourceIsOnOuterEdge = true;
             for (NavigableRegion navigableRegion : allNavigableRegions)
             {
@@ -478,8 +469,10 @@ public class VisibilityGraph
                transformFromWorldToLocal.transform(targetInRegionLocal);
                transformFromWorldToLocal.transform(sourceInRegionLocal);
 
-               boolean isPointVisible = VisibilityTools.isPointVisibleInclusive(new Point2D(sourceInRegionLocal), new Point2D(targetInRegionLocal),
-                                                                               cluster.getNavigableExtrusionsInLocal(), cluster.isClosed());
+               Point2D sourceInRegionLocal2D = new Point2D(sourceInRegionLocal);
+               Point2D targetInRegionLocal2D = new Point2D(targetInRegionLocal);
+               boolean isPointVisible = VisibilityTools.isPointVisibleInclusive(sourceInRegionLocal2D, targetInRegionLocal2D,
+                                                                                cluster.getNavigableExtrusionsInLocal(), cluster.isClosed());
 
                if (!isPointVisible)
                {
@@ -488,7 +481,7 @@ public class VisibilityGraph
                }
             }
 
-            if ((sourceIsVisibleThroughTargetObstacles && sourceIsOnOuterEdge))
+            if (sourceIsOnOuterEdge)
             {
                VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
                potentialEdges.add(edge);
@@ -496,6 +489,7 @@ public class VisibilityGraph
          }
       }
 
+      // using an inflated unseen node edge weight encourages exploration of visible areas
       if (useOnlyShortestEdge)
       {
          VisibilityGraphEdge shortestEdgeXY = findShortestEdgeXY(sourceNode, potentialEdges);
@@ -503,6 +497,7 @@ public class VisibilityGraph
          if (shortestEdgeXY != null)
          {
             shortestEdgeXY.registerEdgeWithNodes();
+            shortestEdgeXY.setEdgeWeight(unseenNodeEdgeWeight);
             edgesToPack.add(shortestEdgeXY);
          }
       }
@@ -511,6 +506,7 @@ public class VisibilityGraph
          for (VisibilityGraphEdge edge : potentialEdges)
          {
             edge.registerEdgeWithNodes();
+            edge.setEdgeWeight(unseenNodeEdgeWeight);
          }
          edgesToPack.addAll(potentialEdges);
       }
