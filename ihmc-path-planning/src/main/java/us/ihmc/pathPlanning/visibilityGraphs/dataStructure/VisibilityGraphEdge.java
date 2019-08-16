@@ -8,13 +8,18 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdge>, LineSegment3DReadOnly
 {
+   private static final double defaultEdgeWeight = 1.0;
+
    private final VisibilityGraphNode sourceNode;
    private final VisibilityGraphNode targetNode;
+
+   private double edgeWeight;
 
    public VisibilityGraphEdge(VisibilityGraphNode source, VisibilityGraphNode target)
    {
       this.sourceNode = source;
       this.targetNode = target;
+      this.edgeWeight = defaultEdgeWeight;
    }
 
    public VisibilityGraphNode getSourceNode()
@@ -41,6 +46,16 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    {
       sourceNode.addEdge(this);
       targetNode.addEdge(this);
+   }
+
+   public void setEdgeWeight(double edgeWeight)
+   {
+      this.edgeWeight = edgeWeight;
+   }
+
+   public double getEdgeWeight()
+   {
+      return edgeWeight;
    }
 
    public double percentageAlongConnection(Point3DReadOnly query)

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -85,6 +86,7 @@ public class VisibilityGraphsOcclusionTest
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
    }
 
    @AfterEach
@@ -498,8 +500,8 @@ public class VisibilityGraphsOcclusionTest
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null || intersection.distanceSquared(observer) > rayLengthSquared)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersectionPair == null || intersectionPair.getLeft().distanceSquared(observer) > rayLengthSquared)
          {
             if (rayPointsToPack != null)
             {
@@ -507,6 +509,8 @@ public class VisibilityGraphsOcclusionTest
             }
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
 
          if (rayPointsToPack != null)
          {

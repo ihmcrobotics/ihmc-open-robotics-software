@@ -11,13 +11,13 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class NavigableRegionsFactoryTest
@@ -117,7 +117,7 @@ public class NavigableRegionsFactoryTest
       planarRegionsList.addPlanarRegion(groundRegion);
       planarRegionsList.addPlanarRegion(aboveRegion);
 
-      VisibilityGraphsParameters visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
       List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegionsList.getPlanarRegionsAsList(), visibilityGraphsParameters);
 
       List<VisibilityMapWithNavigableRegion> visibilityMapWithNavigableRegions = new ArrayList<>();

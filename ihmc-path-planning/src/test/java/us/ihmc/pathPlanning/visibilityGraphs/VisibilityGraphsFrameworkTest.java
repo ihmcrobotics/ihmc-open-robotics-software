@@ -1,31 +1,20 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
+import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import javafx.util.Pair;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -38,26 +27,42 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class VisibilityGraphsFrameworkTest
 {
    // Threshold used to assert that the body path starts and ends where we asked it to.
-   private static final double START_GOAL_EPSILON = 1.0e-3;
+   private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
+
+   private static final int maxPointsInRegion = 25000;
+
 
    // For enabling helpful prints.
    private static boolean DEBUG = true;
@@ -75,16 +80,16 @@ public class VisibilityGraphsFrameworkTest
    private static final int rays = 5000;
    private static final double rayLengthSquared = MathTools.square(5.0);
 
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+
+   private VisibilityGraphsParametersReadOnly parameters;
+
    private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
-      return new DefaultVisibilityGraphParameters()
-      {
-         @Override
-         public double getNormalZThresholdForAccessibleRegions()
-         {
-            return Math.cos(Math.toRadians(30.0));
-         }
-      };
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
+      return parameters;
    }
 
    @BeforeEach
@@ -100,6 +105,8 @@ public class VisibilityGraphsFrameworkTest
 
          messager = visualizerApplication.getMessager();
       }
+
+      parameters = createTestParameters();
    }
 
    @AfterEach
@@ -111,6 +118,8 @@ public class VisibilityGraphsFrameworkTest
          visualizerApplication = null;
          messager = null;
       }
+
+      parameters = null;
    }
 
    @Test
@@ -353,23 +362,25 @@ public class VisibilityGraphsFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
 
+      HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
+      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+         pointsInRegions.put(planarRegion, new ArrayList<>());
+
+
       PlannerInput plannerInput = dataset.getPlannerInput();
       Point3D start = plannerInput.getStartPosition();
       Point3D goal = plannerInput.getGoalPosition();
 
-      PlanarRegionsList knownRegions = new PlanarRegionsList();
-
       Point3D observer = new Point3D();
       observer.set(start);
       observer.addZ(0.8);
-      Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, observer, knownRegions);
+      Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, pointsInRegions, observer);
 
-      knownRegions = result.getKey(); // For next iteration
       PlanarRegionsList visibleRegions = result.getKey();
 
       if (VISUALIZE)
       {
-         visualizerApplication.submitPlanarRegionsListToVisualizer(knownRegions);
+         visualizerApplication.submitPlanarRegionsListToVisualizer(visibleRegions);
 
          visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
          visualizerApplication.submitStartToVisualizer(start);
@@ -387,6 +398,9 @@ public class VisibilityGraphsFrameworkTest
       String datasetName = dataset.getName();
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+      HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
+      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+         pointsInRegions.put(planarRegion, new ArrayList<>());
 
       PlannerInput plannerInput = dataset.getPlannerInput();
       Point3D start = plannerInput.getStartPosition();
@@ -396,9 +410,9 @@ public class VisibilityGraphsFrameworkTest
       if (VISUALIZE)
       {
          stopWalkerRequest = messager.createInput(UIVisibilityGraphsTopics.StopWalker, false);
-         if (simulateOcclusions)
-            visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
-         else
+//         if (simulateOcclusions)
+//            visualizerApplication.submitShadowPlanarRegionsListToVisualizer(planarRegionsList);
+         if (!simulateOcclusions)
             visualizerApplication.submitPlanarRegionsListToVisualizer(planarRegionsList);
 
          visualizerApplication.submitStartToVisualizer(start);
@@ -411,8 +425,6 @@ public class VisibilityGraphsFrameworkTest
 
       Point3D walkerPosition = new Point3D(start);
 
-      PlanarRegionsList knownRegions = new PlanarRegionsList();
-
       while (!walkerPosition.geometricallyEquals(goal, 1.0e-3))
       {
          PlanarRegionsList visibleRegions = planarRegionsList;
@@ -422,19 +434,18 @@ public class VisibilityGraphsFrameworkTest
             Point3D observer = new Point3D();
             observer.set(walkerPosition);
             observer.addZ(0.8);
-            Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, observer, knownRegions);
-            knownRegions = result.getKey(); // For next iteration
+            Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, pointsInRegions, observer);
             visibleRegions = result.getKey();
          }
 
          if (VISUALIZE)
          {
             if (simulateOcclusions)
-               visualizerApplication.submitPlanarRegionsListToVisualizer(knownRegions);
+               visualizerApplication.submitPlanarRegionsListToVisualizer(visibleRegions);
          }
 
          long startTime = System.currentTimeMillis();
-         errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath);
+         errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath, simulateOcclusions);
          long endTime = System.currentTimeMillis();
          if (endTime - startTime > maxSolveTimeInMilliseconds)
             errorMessages += fail(datasetName, "Took too long to compute a new body path.");
@@ -453,7 +464,7 @@ public class VisibilityGraphsFrameworkTest
             break;
          }
 
-         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath, knownRegions));
+         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath, visibleRegions));
 
          if (VISUALIZE)
          {
@@ -469,9 +480,6 @@ public class VisibilityGraphsFrameworkTest
                                                       PlanarRegionsList knownRegions)
    {
       Point3D initialPosition = new Point3D(bodyPath.get(0));
-
-//      if (startingPosition.distance(initialPosition) > 5.0e-2)
-//         throw new RuntimeException("For some reason we're starting really far from the path.");
 
       Point3D positionWithShift = new Point3D();
 
@@ -519,7 +527,12 @@ public class VisibilityGraphsFrameworkTest
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
                                                     List<Point3DReadOnly> bodyPathToPack)
    {
-      VisibilityGraphsParametersReadOnly parameters = createTestParameters();
+      return calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList, bodyPathToPack, false);
+   }
+
+   private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
+                                                    List<Point3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
+   {
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -566,13 +579,15 @@ public class VisibilityGraphsFrameworkTest
       Ellipsoid3D walkerShape = new Ellipsoid3D();
       walkerShape.setRadii(walkerRadii);
 
+      errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions, parameters, true);
+
       while (!walkerCurrentPosition.geometricallyEquals(pathEnd, 1.0e-2))
       {
          Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
          walkerBody3D.addZ(walkerOffsetHeight);
          walkerShape.getPosition().set(walkerBody3D);
 
-         errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions);
+         errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions, parameters, !simulateOcclusions);
 
 //         walkerCurrentPosition.set(travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path));
          Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
@@ -596,12 +611,18 @@ public class VisibilityGraphsFrameworkTest
       return errorMessages;
    }
 
-   private String walkerCollisionChecks(String datasetName, Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
+   private String walkerCollisionChecks(String datasetName, Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack,
+                                        VisibilityGraphsParametersReadOnly visibilityGraphsParameters, boolean checkForShapeCollision)
    {
       String errorMessages = "";
       walkerShapeWorld = new Ellipsoid3D(walkerShapeWorld); // Make a copy to ensure we are not modifying the argument
 
-      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      NavigableRegionFilter navigableFilter = visibilityGraphsParameters.getNavigableRegionFilter();
+      PlanarRegionFilter planarRegionFilter = visibilityGraphsParameters.getPlanarRegionFilter();
+      List<PlanarRegion> regionsToCheck = planarRegionsList.getPlanarRegionsAsList().stream().filter(query -> navigableFilter.isPlanarRegionNavigable(query, planarRegionsList.getPlanarRegionsAsList())).collect(Collectors.toList());
+      regionsToCheck = regionsToCheck.stream().filter(planarRegionFilter::isPlanarRegionRelevant).collect(Collectors.toList());
+
+      for (PlanarRegion planarRegion : regionsToCheck)
       {
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 
@@ -642,7 +663,7 @@ public class VisibilityGraphsFrameworkTest
             }
             closestPoint = new Point3D(closestPoint2D);
 
-            if (walkerShapeLocal.isPointInside(closestPoint))
+            if (walkerShapeLocal.isPointInside(closestPoint) && checkForShapeCollision)
             {
                Point2DBasics intersectionLocal = closestPoint2D;
                Point3D intersectionWorld = new Point3D(intersectionLocal);
@@ -684,119 +705,63 @@ public class VisibilityGraphsFrameworkTest
       return errorMessages;
    }
 
+
    // TODO See if possible to support concave hulls instead of convex. It changes the shape of the regions quite some sometimes.
-   private Pair<PlanarRegionsList, List<Point3D>> createVisibleRegions(PlanarRegionsList regions, Point3D observer, PlanarRegionsList knownRegions)
+   private Pair<PlanarRegionsList, List<Point3D>> createVisibleRegions(PlanarRegionsList regions, HashMap<PlanarRegion, List<Point3D>> pointsInRegions,
+                                                                       Point3D observer)
    {
       List<Point3D> rayImpactLocations = new ArrayList<>();
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(observer, 1.0, rays);
 
-      List<ConvexPolygon2D> visiblePolygons = new ArrayList<>();
-      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
-      {
-         visiblePolygons.add(new ConvexPolygon2D());
-      }
 
-      RigidBodyTransform transform = new RigidBodyTransform();
+      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
+
       for (int rayIndex = 0; rayIndex < rays; rayIndex++)
       {
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null || intersection.distanceSquared(observer) > rayLengthSquared)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(filteredRegions, observer, rayDirection);
+         if (intersectionPair == null || intersectionPair.getLeft().distanceSquared(observer) > rayLengthSquared)
          {
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
+         PlanarRegion region = intersectionPair.getRight();
 
          rayImpactLocations.add(intersection);
 
-         for (int regionIdx = 0; regionIdx < regions.getNumberOfPlanarRegions(); regionIdx++)
-         {
-            PlanarRegion region = regions.getPlanarRegion(regionIdx);
-            if (PlanarRegionTools.isPointOnRegion(region, intersection, 0.01))
-            {
-               region.getTransformToWorld(transform);
-               Point3D pointOnPlane = new Point3D(intersection);
-               pointOnPlane.applyInverseTransform(transform);
+         Point3D pointOnPlane = new Point3D(intersection);
+         region.transformFromWorldToLocal(pointOnPlane);
 
-               Point2D newVertex = new Point2D();
-               newVertex.set(pointOnPlane);
-
-               visiblePolygons.get(regionIdx).addVertex(newVertex);
-            }
-         }
+         pointsInRegions.get(region).add(intersection);
       }
 
-      PlanarRegionsList visible = new PlanarRegionsList();
-      for (int i = 0; i < visiblePolygons.size(); i++)
+      for (PlanarRegion region : regions.getPlanarRegionsAsList())
       {
-         ConvexPolygon2D polygon = visiblePolygons.get(i);
-         polygon.update();
-         if (polygon.getNumberOfVertices() < 2)
-         {
-            continue;
-         }
-
-         PlanarRegion originalRegion = regions.getPlanarRegion(i);
-         originalRegion.getTransformToWorld(transform);
-         PlanarRegion newRegion = new PlanarRegion(transform, polygon);
-         newRegion.setRegionId(regions.getPlanarRegion(i).getRegionId());
-         visible.addPlanarRegion(newRegion);
+         List<Point3D> pointsInRegion = pointsInRegions.get(region);
+         while (pointsInRegion.size() > maxPointsInRegion)
+            pointsInRegion.remove(0);
       }
 
-      return new Pair<>(combine(knownRegions, visible), rayImpactLocations);
+
+      List<PlanarRegionSegmentationRawData> segmentationRawData = new ArrayList<>();
+      for (PlanarRegion originalRegion : filteredRegions)
+      {
+         List<Point3D> points = pointsInRegions.get(originalRegion);
+         Point3D center = new Point3D();
+         originalRegion.getBoundingBox3dInWorld().getCenterPoint(center);
+         PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(originalRegion.getRegionId(), originalRegion.getNormal(),
+                                                                                       center, points);
+         segmentationRawData.add(rawData);
+      }
+
+      PlanarRegionsList visibleRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData, concaveHullFactoryParameters, polygonizerParameters);
+
+      return new Pair<>(visibleRegionsList, rayImpactLocations);
    }
 
-   private PlanarRegionsList combine(PlanarRegionsList regionsA, PlanarRegionsList regionsB)
-   {
-      PlanarRegionsList ret = new PlanarRegionsList();
-
-      boolean[] added = new boolean[regionsB.getNumberOfPlanarRegions()];
-      for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
-      {
-         added[regionBIdx] = false;
-      }
-
-      for (PlanarRegion regionA : regionsA.getPlanarRegionsAsList())
-      {
-         RigidBodyTransform transformA = new RigidBodyTransform();
-         regionA.getTransformToWorld(transformA);
-         boolean foundMatchingRegion = false;
-
-         for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
-         {
-            PlanarRegion regionB = regionsB.getPlanarRegion(regionBIdx);
-            RigidBodyTransform transformB = new RigidBodyTransform();
-            regionB.getTransformToWorld(transformB);
-            if (transformA.epsilonEquals(transformB, 0.01))
-            {
-               ConvexPolygon2D newHull = new ConvexPolygon2D(regionA.getConvexHull(), regionB.getConvexHull());
-               PlanarRegion combinedRegion = new PlanarRegion(transformA, newHull);
-               combinedRegion.setRegionId(regionA.getRegionId());
-               ret.addPlanarRegion(combinedRegion);
-               foundMatchingRegion = true;
-               added[regionBIdx] = true;
-            }
-         }
-
-         if (!foundMatchingRegion)
-         {
-            PlanarRegion region = new PlanarRegion(transformA, new ConvexPolygon2D(regionA.getConvexHull()));
-            region.setRegionId(regionA.getRegionId());
-            ret.addPlanarRegion(region);
-         }
-      }
-
-      for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
-      {
-         if (!added[regionBIdx])
-         {
-            ret.addPlanarRegion(regionsB.getPlanarRegion(regionBIdx));
-         }
-      }
-
-      return ret;
-   }
 
    private static String addPrefixToErrorMessages(String datasetName, String errorMessages)
    {
@@ -825,6 +790,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171215_220523_SteppingStones";
       String dataSetName = "20171215_214730_CinderBlockField";
 
       test.setup();
@@ -834,8 +800,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, true), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
       test.tearDown();
 
    }
