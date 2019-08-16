@@ -114,7 +114,6 @@ public class VisibilityGraph
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
 
-
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
    {
       VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
