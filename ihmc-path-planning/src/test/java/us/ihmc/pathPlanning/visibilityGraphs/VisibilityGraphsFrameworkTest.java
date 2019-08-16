@@ -60,7 +60,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -149,6 +149,7 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
       }
       runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), false);
    }
@@ -845,6 +846,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
+
       }
       test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
