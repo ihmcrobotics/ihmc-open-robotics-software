@@ -56,7 +56,7 @@ public class NavigableRegionToolsTest
          Point2D pointToCheck = new Point2D();
          pointToCheck.interpolate(scaledRegion.getVertex(startIndex), scaledRegion.getNextVertex(startIndex), alpha);
 
-         NavigableRegion containingRegion = NavigableRegionTools.getNavigableRegionContainingThisPoint(new Point3D(pointToCheck), navigableRegions);
+         NavigableRegion containingRegion = NavigableRegionTools.getNavigableRegionContainingThisPoint(new Point3D(pointToCheck), navigableRegions, parameters.getCanDuckUnderHeight());
          assertTrue("Should be no region, since we're outside the navigable region", containingRegion == null);
       }
    }

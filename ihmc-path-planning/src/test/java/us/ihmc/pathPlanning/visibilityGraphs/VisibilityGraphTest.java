@@ -166,7 +166,8 @@ public class VisibilityGraphTest
       assertTrue(interRegionVisibilityMap.getVisibilityMapInWorld().isEmpty());
 
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+      double ceilingHeight = 2.0;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon, ceilingHeight);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(97, startNode.getRegionId());
@@ -180,7 +181,7 @@ public class VisibilityGraphTest
 
       assertEquals(8, startEdges.size());
 
-      visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon, ceilingHeight);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(97, goalNode.getRegionId());
@@ -354,7 +355,8 @@ public class VisibilityGraphTest
       assertTrue(connectionsContain(connections, connectionD, connectionE));
 
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+      double ceilingHeight = 2.0;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
@@ -368,7 +370,7 @@ public class VisibilityGraphTest
 
       assertEquals(8, startEdges.size());
 
-      visibilityGraph.setGoal(new Point3D(1.5, 0.55, 0.003), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(1.5, 0.55, 0.003), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());
@@ -762,8 +764,9 @@ public class VisibilityGraphTest
       assertTrue(connectionsContain(interRegionConnections, connectionBC, connectionFG));
       assertFalse(connectionsContain(interRegionConnections, connectionBC, connectionG));
 
+      double ceilingHeight = 2.0;
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), searchHostEpsilon);
+      visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
@@ -785,7 +788,7 @@ public class VisibilityGraphTest
       assertTrue(edgeListContains(startEdges, startInWorld, connectionEF0));
       assertTrue(edgeListContains(startEdges, startInWorld, connectionF0));
 
-      visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());

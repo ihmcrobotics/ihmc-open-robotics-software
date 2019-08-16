@@ -122,8 +122,8 @@ public class NavigableRegionsManager
          visibilityGraph.fullyExpandVisibilityGraph();
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-      startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
-      goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
+      startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
+      goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       endNode = null;
       this.goalInWorld = goalInWorld;
 
@@ -365,7 +365,7 @@ public class NavigableRegionsManager
             return path;
          }
 
-         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
+         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions, parameters.getCanDuckUnderHeight());
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0,

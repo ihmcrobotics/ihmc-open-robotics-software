@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -23,12 +22,12 @@ import static us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools.isPo
 
 public class NavigableRegionTools
 {
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double ceilingHeight)
    {
-      return getNavigableRegionContainingThisPoint(point, navigableRegions, 0.0);
+      return getNavigableRegionContainingThisPoint(point, navigableRegions, ceilingHeight, 0.0);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double epsilon)
+   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double ceilingHeight, double epsilon)
    {
       List<NavigableRegion> containers = new ArrayList<>();
 
@@ -38,6 +37,9 @@ public class NavigableRegionTools
 
       for (NavigableRegion navigableRegion : navigableRegionsList)
       {
+         if (computeMinHeightOfNavigableRegionAbovePoint(navigableRegion, point) > ceilingHeight)
+            continue;
+
          if (isPointInWorldInsideNavigableRegion(navigableRegion, point, epsilon))
          {
             containers.add(navigableRegion);
@@ -70,7 +72,21 @@ public class NavigableRegionTools
          }
       }
 
+
       return closestContainer;
+   }
+
+   private static double computeMinHeightOfNavigableRegionAbovePoint(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck)
+   {
+      double minHeight = Double.POSITIVE_INFINITY;
+      for (Point2DReadOnly convexHullVertex : navigableRegion.getHomePlanarRegion().getConvexHull().getVertexBufferView())
+      {
+         Point3D convexHullVertexInWorld = new Point3D(convexHullVertex);
+         navigableRegion.getHomePlanarRegion().transformFromLocalToWorld(convexHullVertexInWorld);
+         minHeight = Math.min(convexHullVertexInWorld.getZ() - pointInWorldToCheck.getZ(), minHeight);
+      }
+
+      return minHeight;
    }
 
    public static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
