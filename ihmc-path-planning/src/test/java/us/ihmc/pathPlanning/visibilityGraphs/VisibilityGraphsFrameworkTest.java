@@ -60,7 +60,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -95,6 +95,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
+
       return parameters;
    }
 
@@ -554,6 +555,7 @@ public class VisibilityGraphsFrameworkTest
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
                                                     List<Pose3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
    {
+      VisibilityGraphsParametersReadOnly parameters = createTestParameters();
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
