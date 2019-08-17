@@ -4,7 +4,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -91,9 +90,8 @@ public class NavigableRegionTools
 
    public static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
-      RigidBodyTransform transformToWorld = navigableRegion.getTransformToWorld();
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
-      pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
+      pointInLocalToCheck.applyTransform(navigableRegion.getTransformFromWorldToLocal(), false);
       return isPointInLocalInsideNavigableRegion(navigableRegion, pointInLocalToCheck, epsilon);
    }
 
