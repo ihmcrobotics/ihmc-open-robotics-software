@@ -35,7 +35,9 @@ public class VisibilityGraphOcclusionTest
    private boolean visualize = true;
    private PlanarRegionsList occludedEnvironmentWithAGoalPlane;
    private PlanarRegionsList occludedEnvironmentWithoutAGoalPlane;
-   private PlanarRegionsList wallWithNoGoalGround;
+   private PlanarRegionsList smallWallWithNoGround;
+   private PlanarRegionsList tinyWallWithNoGround;
+   private PlanarRegionsList largeWallWithNoGround;
 
    // For enabling helpful prints.
    private static boolean DEBUG = true;
@@ -58,7 +60,9 @@ public class VisibilityGraphOcclusionTest
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       occludedEnvironmentWithAGoalPlane = simpleOccludedEnvironment(true);
       occludedEnvironmentWithoutAGoalPlane = simpleOccludedEnvironment(false);
-      wallWithNoGoalGround = wallWithNoGoalGroundEnvironment();
+      smallWallWithNoGround = smallWallWithNoGoalGroundEnvironment();
+      tinyWallWithNoGround = tinyWallWithNoGoalGroundEnvironment();
+      largeWallWithNoGround = largeWallWithNoGoalGroundEnvironment();
 
       if (visualize)
       {
@@ -102,7 +106,23 @@ public class VisibilityGraphOcclusionTest
    {
       Point3D goal = new Point3D(3.0, 0.0, 0.0);
 
-      runTest(wallWithNoGoalGround, goal);
+      runTest(smallWallWithNoGround, goal);
+   }
+
+   @Test
+   public void testTinyWallWithNoGoalPlane()
+   {
+      Point3D goal = new Point3D(3.0, 0.0, 0.0);
+
+      runTest(tinyWallWithNoGround, goal);
+   }
+
+   @Test
+   public void testLargeWallWithNoGoalPlane()
+   {
+      Point3D goal = new Point3D(3.0, 0.0, 0.0);
+
+      runTest(largeWallWithNoGround, goal);
    }
 
 
@@ -279,7 +299,7 @@ public class VisibilityGraphOcclusionTest
       return generator.getPlanarRegionsList();
    }
 
-   private static PlanarRegionsList wallWithNoGoalGroundEnvironment()
+   private static PlanarRegionsList smallWallWithNoGoalGroundEnvironment()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(2.0, 4.0);
@@ -288,6 +308,36 @@ public class VisibilityGraphOcclusionTest
       generator.rotate(0.5 * Math.PI, Axis.Y);
 
       generator.addRectangle(0.2, 0.5);
+
+      generator.identity();
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static PlanarRegionsList tinyWallWithNoGoalGroundEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(2.0, 4.0);
+
+      generator.translate(2.0, 0.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+
+      generator.addRectangle(0.05, 0.05);
+
+      generator.identity();
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static PlanarRegionsList largeWallWithNoGoalGroundEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(2.0, 4.0);
+
+      generator.translate(2.0, 0.0, 0.5);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+
+      generator.addRectangle(1.0, 0.6);
 
       generator.identity();
 

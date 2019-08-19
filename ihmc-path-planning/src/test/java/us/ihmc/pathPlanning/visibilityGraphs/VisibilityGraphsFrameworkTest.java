@@ -74,10 +74,11 @@ public class VisibilityGraphsFrameworkTest
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
    private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
-   private static final double walkerMarchingSpeed = 0.2;
+   private static final double walkerMarchingSpeed = 0.05;
+   private static final double lidarObserverHeight = 1.25;
 
    // For the occlusion test
-   private static final int rays = 5000;
+   private static final int rays = 7500;
    private static final double rayLengthSquared = MathTools.square(5.0);
 
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
@@ -374,7 +375,7 @@ public class VisibilityGraphsFrameworkTest
 
       Point3D observer = new Point3D();
       observer.set(start);
-      observer.addZ(0.8);
+      observer.addZ(lidarObserverHeight);
       Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, pointsInRegions, observer);
 
       PlanarRegionsList visibleRegions = result.getKey();
@@ -434,7 +435,7 @@ public class VisibilityGraphsFrameworkTest
          {
             Point3D observer = new Point3D();
             observer.set(walkerPosition);
-            observer.addZ(0.8);
+            observer.addZ(lidarObserverHeight);
             Pair<PlanarRegionsList, List<Point3D>> result = createVisibleRegions(planarRegionsList, pointsInRegions, observer);
             visibleRegions = result.getKey();
          }
@@ -666,6 +667,7 @@ public class VisibilityGraphsFrameworkTest
             {
                if (convexPolygon.isPointInside(walkerPosition2D))
                {
+                  collisionsToPack.add(walkerPosition3D);
                   errorMessages += fail(datasetName, "Body path is going through a region."); // TODO figure out the proper intersection
                   break;
                }
@@ -802,11 +804,13 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171218_205040_SimpleMaze";
+//      String dataSetName = "20171218_204953_FlatGroundWithWall";
 //      String dataSetName = "20171218_204953_FlatGroundWithWall";
 //      String dataSetName = "20171215_220523_SteppingStones";
 //      String dataSetName = "20171218_204917_FlatGround";
+      String dataSetName = "20171215_214730_CinderBlockField";
 
       test.setup();
       if (VISUALIZE)
@@ -817,8 +821,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, false), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithOcclusions(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, true), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }
