@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -104,8 +105,8 @@ public class VisibilityGraph
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
-         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(), targetObstacleClusters,
-                                                   crossRegionEdges, filter);
+         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(),
+                                                   targetObstacleClusters, crossRegionEdges, filter);
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -179,9 +180,24 @@ public class VisibilityGraph
 
    public static VisibilityGraphNode createNodeWithNoRegion(Point3DReadOnly sourceInWorld)
    {
-      NavigableRegion navigableRegion = new NavigableRegion(null);
+      RigidBodyTransform sourceSpoofTransform = new RigidBodyTransform();
+      sourceSpoofTransform.setTranslation(sourceInWorld);
+
+      ConvexPolygon2D sourceSpoof = new ConvexPolygon2D();
+      sourceSpoof.addVertex(0.0, 0.0);
+      sourceSpoof.update();
+      PlanarRegion sourceRegion = new PlanarRegion(sourceSpoofTransform, sourceSpoof);
+      NavigableRegion navigableRegion = new NavigableRegion(sourceRegion);
+
+      Point3D sourceInLocal3D = new Point3D(sourceInWorld);
+      navigableRegion.transformFromWorldToLocal(sourceInLocal3D);
+      Point2D sourceInLocal = new Point2D(sourceInLocal3D);
+
+      Point3D projectedSourceInWorld = new Point3D(sourceInLocal);
+      navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
+
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
-      return new VisibilityGraphNode(sourceInWorld, new Point2D(sourceInWorld), visibilityGraphNavigableRegion, -1);
+      return new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion, -1);
    }
 
    public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
@@ -230,10 +246,10 @@ public class VisibilityGraph
          startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
          connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
 
-//         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
-//         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
-//            computeInterEdges(startNode);
-//         }
+         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
+         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
+            computeInterEdges(startNode);
+         }
       }
 
       return startNode;
@@ -438,8 +454,6 @@ public class VisibilityGraph
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
 
 
-      RigidBodyTransform transformFromWorldToTarget = new RigidBodyTransform();
-
       List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
@@ -456,16 +470,20 @@ public class VisibilityGraph
          }
          else // Check if the edge is visible if it is a long one.
          {
+//            PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
             PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
-            targetHomeRegion.getTransformToLocal(transformFromWorldToTarget);
 
             Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
+//            Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
 
             Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
+//            Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, targetHomeRegion);
 
-            transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
+            targetHomeRegion.transformFromWorldToLocal(sourceProjectedVerticallyOntoTarget);
+//            sourceHomeRegion.transformFromWorldToLocal(targetProjectedVerticallyOntoSource);
 
-            //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
+
+               //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
             boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                         new Point2D(sourceProjectedVerticallyOntoTarget));
 
