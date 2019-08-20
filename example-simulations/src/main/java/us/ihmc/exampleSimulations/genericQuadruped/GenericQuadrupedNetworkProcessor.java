@@ -7,7 +7,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPa
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
@@ -31,7 +31,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    }
 
    public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                           PawPlannerParameters pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                           PawPlannerParametersReadOnly pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                            PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation,
                                            QuadrupedNetworkModuleParameters networkModuleParameters)
    {

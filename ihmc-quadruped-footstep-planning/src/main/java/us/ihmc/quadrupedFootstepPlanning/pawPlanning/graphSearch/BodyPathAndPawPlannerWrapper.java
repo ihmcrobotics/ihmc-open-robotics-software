@@ -13,11 +13,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
-import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -56,7 +55,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
-   public BodyPathAndPawPlannerWrapper(String prefix, PawPlannerParameters parameters, YoVariableRegistry parentRegistry,
+   public BodyPathAndPawPlannerWrapper(String prefix, PawPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());

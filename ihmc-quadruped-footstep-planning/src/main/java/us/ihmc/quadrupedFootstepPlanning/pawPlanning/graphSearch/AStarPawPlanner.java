@@ -31,7 +31,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.Start
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
@@ -63,7 +63,7 @@ public class AStarPawPlanner implements BodyPathAndPawPlanner
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final PlanarRegionPawConstraintDataHolder highLevelConstraintDataHolder = new PlanarRegionPawConstraintDataHolder();
    private final PlanarRegionPawConstraintDataParameters highLevelPlanarRegionConstraintDataParameters = new PlanarRegionPawConstraintDataParameters();
-   private final PawPlannerParameters parameters;
+   private final PawPlannerParametersReadOnly parameters;
 
    private HashSet<PawNode> expandedNodes;
    private PriorityQueue<PawNode> stack;
@@ -104,7 +104,7 @@ public class AStarPawPlanner implements BodyPathAndPawPlanner
 
    private final YoDouble heuristicsInflationWeight = new YoDouble("heuristicsInflationWeight", registry);
 
-   public AStarPawPlanner(PawPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeChecker nodeChecker,
+   public AStarPawPlanner(PawPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeChecker nodeChecker,
                           PawNodeTransitionChecker nodeTransitionChecker, PawPlanningCostToGoHeuristics heuristics, PawNodeExpansion nodeExpansion,
                           PawNodeCost stepCostCalculator, PawNodeSnapper snapper, PawNodeSnapper postProcessingSnapper,
                           PawPlannerListener listener, YoVariableRegistry parentRegistry)
@@ -712,7 +712,7 @@ public class AStarPawPlanner implements BodyPathAndPawPlanner
          throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
    }
 
-   public static AStarPawPlanner createPlanner(PawPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+   public static AStarPawPlanner createPlanner(PawPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                PawPlannerListener listener, YoVariableRegistry registry)
    {
       PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,

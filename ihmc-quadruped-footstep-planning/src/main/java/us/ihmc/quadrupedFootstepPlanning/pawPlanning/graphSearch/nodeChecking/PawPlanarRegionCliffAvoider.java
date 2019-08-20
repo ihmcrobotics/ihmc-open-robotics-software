@@ -7,18 +7,18 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPla
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawPlanarRegionCliffAvoider extends PawNodeChecker
 {
-   private final PawPlannerParameters parameters;
+   private final PawPlannerParametersReadOnly parameters;
    private final PawNodeSnapperReadOnly snapper;
 
    private PawNode startNode;
 
-   public PawPlanarRegionCliffAvoider(PawPlannerParameters parameters, PawNodeSnapperReadOnly snapper)
+   public PawPlanarRegionCliffAvoider(PawPlannerParametersReadOnly parameters, PawNodeSnapperReadOnly snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

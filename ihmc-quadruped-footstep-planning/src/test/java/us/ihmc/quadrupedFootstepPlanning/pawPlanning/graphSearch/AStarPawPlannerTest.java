@@ -23,7 +23,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerGoal;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerStart;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.visualization.QuadrupedAStarPawPlannerVisualizer;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -241,7 +241,7 @@ public class AStarPawPlannerTest
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       xGaitSettings.getAmbleMediumTimings().setStepDuration(0.4);
       xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.35);
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters();
       QuadrupedAStarPawPlannerVisualizer visualizer;
       if (activelyVisualize)
          visualizer = new QuadrupedAStarPawPlannerVisualizer(planarRegionsList);

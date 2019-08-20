@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.HashMap;
@@ -11,14 +11,14 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
    private final HashMap<SnapKey, PawNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
 
-   protected final PawPlannerParameters parameters;
+   protected final PawPlannerParametersReadOnly parameters;
 
    public PawNodeSnapper()
    {
       this(null);
    }
 
-   public PawNodeSnapper(PawPlannerParameters parameters)
+   public PawNodeSnapper(PawPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }

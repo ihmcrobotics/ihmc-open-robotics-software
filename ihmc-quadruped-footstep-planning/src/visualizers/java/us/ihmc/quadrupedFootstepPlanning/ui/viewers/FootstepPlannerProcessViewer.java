@@ -14,7 +14,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Sim
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawStepGraph;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
@@ -54,7 +54,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
 
    public FootstepPlannerProcessViewer(Messager messager)
    {
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);

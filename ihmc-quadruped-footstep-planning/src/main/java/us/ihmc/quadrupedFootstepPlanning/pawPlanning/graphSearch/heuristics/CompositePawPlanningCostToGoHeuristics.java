@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +10,14 @@ public class CompositePawPlanningCostToGoHeuristics extends PawPlanningCostToGoH
 {
    private final List<PawPlanningCostToGoHeuristics> costToGoHeuristics;
 
-   public CompositePawPlanningCostToGoHeuristics(PawPlannerParameters parameters)
+   public CompositePawPlanningCostToGoHeuristics(PawPlannerParametersReadOnly parameters)
    {
       super(parameters);
 
       this.costToGoHeuristics = new ArrayList<>();
    }
 
-   public CompositePawPlanningCostToGoHeuristics(PawPlannerParameters parameters, List<PawPlanningCostToGoHeuristics> costToGoHeuristics)
+   public CompositePawPlanningCostToGoHeuristics(PawPlannerParametersReadOnly parameters, List<PawPlanningCostToGoHeuristics> costToGoHeuristics)
    {
       super(parameters);
 

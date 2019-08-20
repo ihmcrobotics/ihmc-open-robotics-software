@@ -1,132 +1,201 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedPawPlannerParametersPacket;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-public interface PawPlannerParameters
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameterKeys.*;
+
+public interface PawPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
     * The total maximum Euclidean distance length.
     */
-   double getMaximumFrontStepReach();
+   default double getMaximumFrontStepReach()
+   {
+      return get(maximumFrontStepReach);
+   }
 
-   double getMaximumFrontStepLength();
+   default double getMaximumFrontStepLength()
+   {
+      return get(maximumFrontStepLength);
+   }
 
-   double getMinimumFrontStepLength();
+   default double getMinimumFrontStepLength()
+   {
+      return get(minimumFrontStepLength);
+   }
 
    default double getMaximumHindStepReach()
    {
-      return getMaximumFrontStepReach();
+      return get(maximumHindStepReach);
    }
 
    default double getMaximumHindStepLength()
    {
-      return getMaximumFrontStepLength();
+      return get(maximumHindStepLength);
    }
 
    default double getMinimumHindStepLength()
    {
-      return getMinimumFrontStepLength();
+      return get(minimumHindStepLength);
    }
 
-   double getMaximumStepOutward();
+   default double getMaximumStepOutward()
+   {
+      return get(maximumStepOutward);
+   }
 
-   double getMaximumStepInward();
+   default double getMaximumStepInward()
+   {
+      return get(maximumStepInward);
+   }
 
    default double getMaximumFrontStepLengthWhenSteppingUp()
    {
-      return getMaximumFrontStepLength();
+      return get(maximumFrontStepLengthWhenSteppingUp);
    }
 
    default double getMinimumFrontStepLengthWhenSteppingUp()
    {
-      return getMinimumFrontStepLength();
+      return get(minimumFrontStepLengthWhenSteppingUp);
    }
 
    default double getMaximumHindStepLengthWhenSteppingUp()
    {
-      return getMaximumHindStepLength();
+      return get(maximumHindStepLengthWhenSteppingUp);
    }
 
    default double getMinimumHindStepLengthWhenSteppingUp()
    {
-      return getMinimumHindStepLength();
+      return get(minimumHindStepLengthWhenSteppingUp);
    }
 
    default double getStepZForSteppingUp()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(stepZForSteppingUp);
    }
 
    default double getMaximumFrontStepLengthWhenSteppingDown()
    {
-      return getMaximumFrontStepLength();
+      return get(maximumFrontStepLengthWhenSteppingDown);
    }
 
    default double getMinimumFrontStepLengthWhenSteppingDown()
    {
-      return getMinimumFrontStepLength();
+      return get(minimumFrontStepLengthWhenSteppingDown);
    }
 
    default double getMaximumHindStepLengthWhenSteppingDown()
    {
-      return getMaximumHindStepLength();
+      return get(maximumHindStepLengthWhenSteppingDown);
    }
 
    default double getMinimumHindStepLengthWhenSteppingDown()
    {
-      return getMinimumHindStepLength();
+      return get(minimumHindStepLengthWhenSteppingDown);
    }
 
    default double getStepZForSteppingDown()
    {
-      return Double.NEGATIVE_INFINITY;
+      return get(stepZForSteppingDown);
    }
 
-   double getMaximumStepYawInward();
+   default double getMaximumStepYawInward()
+   {
+      return get(maximumStepYawInward);
+   }
 
-   double getMaximumStepYawOutward();
+   default double getMaximumStepYawOutward()
+   {
+      return get(maximumStepYawOutward);
+   }
 
-   double getMaximumStepChangeZ();
+   default double getMaximumStepChangeZ()
+   {
+      return get(maximumStepChangeZ);
+   }
 
-   double getBodyGroundClearance();
+   default double getBodyGroundClearance()
+   {
+      return get(bodyGroundClearance);
+   }
 
-   double getDistanceWeight();
+   default double getDistanceWeight()
+   {
+      return get(distanceWeight);
+   }
 
-   double getYawWeight();
+   default double getYawWeight()
+   {
+      return get(yawWeight);
+   }
 
-   double getXGaitWeight();
+   default double getXGaitWeight()
+   {
+      return get(xGaitWeight);
+   }
 
-   double getDesiredVelocityWeight();
+   default double getDesiredVelocityWeight()
+   {
+      return get(desiredVelocityWeight);
+   }
 
-   double getCostPerStep();
+   default double getCostPerStep()
+   {
+      return get(costPerStep);
+   }
 
-   double getStepUpWeight();
+   default double getStepUpWeight()
+   {
+      return get(stepUpWeight);
+   }
 
-   double getStepDownWeight();
+   default double getStepDownWeight()
+   {
+      return get(stepDownWeight);
+   }
 
-   double getHeuristicsInflationWeight();
+   default double getHeuristicsInflationWeight()
+   {
+      return get(heuristicsInflationWeight);
+   }
 
-   double getMinXClearanceFromPaw();
+   default double getMinXClearanceFromPaw()
+   {
+      return get(minXClearanceFromPaw);
+   }
 
-   double getMinYClearanceFromPaw();
+   default double getMinYClearanceFromPaw()
+   {
+      return get(minYClearanceFromPaw);
+   }
 
    default double getMaxWalkingSpeedMultiplier()
    {
-      return 0.8;
+      return get(maxWalkingSpeedMultiplier);
    }
 
    /**
     * Distance which a foothold is projected into planar region during expansion and node checking. Should be a positive value,
     * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
     */
-   double getProjectInsideDistance();
+   default double getProjectInsideDistance()
+   {
+      return get(projectInsideDistance);
+   }
 
-   boolean getProjectInsideUsingConvexHull();
+   default boolean getProjectInsideUsingConvexHull()
+   {
+      return get(projectInsideUsingConvexHull);
+   }
 
    /***
     * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
     */
-   double getMaximumXYWiggleDistance();
+   default double getMaximumXYWiggleDistance()
+   {
+      return get(maximumXYWiggleDistance);
+   }
 
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
@@ -139,7 +208,7 @@ public interface PawPlannerParameters
     */
    default double getMinimumSurfaceInclineRadians()
    {
-      return Math.toRadians(45.0);
+      return get(minimumSurfaceInclineRadians);
    }
 
    /**
@@ -155,7 +224,7 @@ public interface PawPlannerParameters
     */
    default double getCliffHeightToAvoid()
    {
-      return 0.15;
+      return get(cliffHeightToAvoid);
    }
 
    /**
@@ -171,67 +240,67 @@ public interface PawPlannerParameters
     */
    default double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
-      return 0.1;
+      return get(minimumFrontEndForwardDistanceFromCliffBottoms);
    }
 
    default double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return 0.1;
+      return get(minimumFrontEndBackwardDistanceFromCliffBottoms);
    }
 
    default double getMinimumHindEndForwardDistanceFromCliffBottoms()
    {
-      return 0.1;
+      return get(minimumHindEndForwardDistanceFromCliffBottoms);
    }
 
    default double getMinimumHindEndBackwardDistanceFromCliffBottoms()
    {
-      return 0.1;
+      return get(minimumHindEndBackwardDistanceFromCliffBottoms);
    }
 
    default double getMinimumLateralDistanceFromCliffBottoms()
    {
-      return 0.1;
+      return get(minimumLateralDistanceFromCliffBottoms);
    }
 
    default double getFinalTurnProximity()
    {
-      return 1.0;
+      return get(finalTurnProximity);
    }
 
    default double getFinalSlowDownProximity()
    {
-      return 0.5;
+      return get(finalSlowDownProximity);
    }
 
    default double getMaximumDeviationFromXGaitDuringExpansion()
    {
-      return 0.1;
+      return get(maximumDeviationFromXGaitDuringExpansion);
    }
 
    default boolean returnBestEffortPlan()
    {
-      return false;
+      return get(returnBestEffortPlan);
    }
 
    default int getMinimumStepsForBestEffortPlan()
    {
-      return 4;
+      return get(minStepsForBestEffortPlan);
    }
 
    default boolean performGraphRepairingStep()
    {
-      return false;
+      return get(performGraphRepairingStep);
    }
 
    default double getRepairingHeuristicWeightScaling()
    {
-      return 0.9;
+      return get(repairingHeuristicWeightScaling);
    }
 
    default double getMinimumHeuristicWeightReduction()
    {
-      return 0.2;
+      return get(minHeuristicWeightReduction);
    }
 
    default QuadrupedPawPlannerParametersPacket getAsPacket()

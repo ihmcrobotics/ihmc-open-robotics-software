@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -21,10 +21,10 @@ import java.util.HashSet;
 
 public class ParameterBasedPawNodeExpansion implements PawNodeExpansion
 {
-   protected final PawPlannerParameters parameters;
+   protected final PawPlannerParametersReadOnly parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   public ParameterBasedPawNodeExpansion(PawPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public ParameterBasedPawNodeExpansion(PawPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;

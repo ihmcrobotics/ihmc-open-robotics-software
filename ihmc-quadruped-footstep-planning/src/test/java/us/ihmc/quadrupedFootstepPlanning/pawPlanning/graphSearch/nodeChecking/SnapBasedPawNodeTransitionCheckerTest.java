@@ -14,7 +14,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Sim
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -31,7 +31,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
    @Test
    public void testStepInPlace()
    {
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters()
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
       {
          @Override
          public double getMinimumFrontStepLength()
@@ -184,7 +184,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParameters parameters = new TestParameters();
+      PawPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -291,7 +291,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
    {
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParameters parameters = new TestParameters();
+      PawPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -400,7 +400,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParameters parameters = new TestParameters();
+      PawPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -510,7 +510,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParameters parameters = new TestParameters();
+      PawPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);

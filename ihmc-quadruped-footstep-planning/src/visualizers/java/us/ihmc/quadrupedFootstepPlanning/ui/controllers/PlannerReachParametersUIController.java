@@ -7,7 +7,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -73,7 +73,7 @@ public class PlannerReachParametersUIController
    private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
-   private Topic<PawPlannerParameters> plannerParametersTopic;
+   private Topic<PawPlannerParametersReadOnly> plannerParametersTopic;
 
    public PlannerReachParametersUIController()
    {
@@ -96,13 +96,13 @@ public class PlannerReachParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParametersTopic(Topic<PawPlannerParameters> plannerParametersTopic)
+   public void setPlannerParametersTopic(Topic<PawPlannerParametersReadOnly> plannerParametersTopic)
    {
       this.plannerParametersTopic = plannerParametersTopic;
    }
 
 
-   public void setPlannerParameters(PawPlannerParameters parameters)
+   public void setPlannerParameters(PawPlannerParametersReadOnly parameters)
    {
       parametersProperty.setPlannerParameters(parameters);
    }
@@ -265,18 +265,18 @@ public class PlannerReachParametersUIController
 
 
 
-   private PropertyToMessageTypeConverter<PawPlannerParameters, SettablePawPlannerParameters> createConverter()
+   private PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<PawPlannerParameters, SettablePawPlannerParameters>()
+      return new PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters>()
       {
          @Override
-         public PawPlannerParameters convert(SettablePawPlannerParameters propertyValue)
+         public PawPlannerParametersReadOnly convert(SettablePawPlannerParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettablePawPlannerParameters interpret(PawPlannerParameters messageContent)
+         public SettablePawPlannerParameters interpret(PawPlannerParametersReadOnly messageContent)
          {
             return new SettablePawPlannerParameters(messageContent);
          }

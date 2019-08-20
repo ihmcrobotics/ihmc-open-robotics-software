@@ -5,15 +5,15 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Paw
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawLinearHeightCost implements PawNodeCost
 {
-   private final PawPlannerParameters parameters;
+   private final PawPlannerParametersReadOnly parameters;
    private final PawNodeSnapperReadOnly snapper;
 
-   public PawLinearHeightCost(PawPlannerParameters parameters, PawNodeSnapperReadOnly snapper)
+   public PawLinearHeightCost(PawPlannerParametersReadOnly parameters, PawNodeSnapperReadOnly snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

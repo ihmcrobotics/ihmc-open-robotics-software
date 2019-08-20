@@ -6,7 +6,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPla
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -15,10 +15,10 @@ public class SnapBasedPawNodeChecker extends PawNodeChecker
 {
    private static final boolean DEBUG = false;
 
-   private final PawPlannerParameters parameters;
+   private final PawPlannerParametersReadOnly parameters;
    private final PawNodeSnapper snapper;
 
-   public SnapBasedPawNodeChecker(PawPlannerParameters parameters, PawNodeSnapper snapper)
+   public SnapBasedPawNodeChecker(PawPlannerParametersReadOnly parameters, PawNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

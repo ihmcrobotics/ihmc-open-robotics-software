@@ -5,7 +5,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.visualization.PawAStarMessagerListener;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
@@ -34,7 +34,7 @@ public class AStarPawPlannerDataSetTest extends PawPlannerDataSetTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       xGaitSettings = getXGaitSettings();
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters()
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
       {
          @Override
          public double getXGaitWeight()

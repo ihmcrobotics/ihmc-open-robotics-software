@@ -14,7 +14,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -83,7 +83,7 @@ public class PawPlannerMessagerAPI
    private static final TypedTopicTheme<PawPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<PawPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<PawPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
-   private static final TypedTopicTheme<PawPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
+   private static final TypedTopicTheme<PawPlannerParametersReadOnly> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
    private static final TypedTopicTheme<QuadrupedTimedStepListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
    private static final TypedTopicTheme<QuadrupedPawPlannerNodeRejectionReason> RejectionReason = apiFactory.createTypedTopicTheme("RejectionReason");
@@ -117,7 +117,7 @@ public class PawPlannerMessagerAPI
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlan).topic(AbortPlanning);
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(FlatGround).topic(Enable);
-   public static final Topic<PawPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
+   public static final Topic<PawPlannerParametersReadOnly> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Parameters).topic(XGaitSettings);
    public static final Topic<QuadrupedTimedStepListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
 

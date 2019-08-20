@@ -10,7 +10,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -35,7 +35,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
    private final PawPlanningController footstepPlanningController;
 
-   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParameters defaultPawPlannerParameters,
+   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersReadOnly defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
@@ -44,7 +44,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
            pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
-   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawPlannerParameters defaultPawPlannerParameters,
+   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawPlannerParametersReadOnly defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
