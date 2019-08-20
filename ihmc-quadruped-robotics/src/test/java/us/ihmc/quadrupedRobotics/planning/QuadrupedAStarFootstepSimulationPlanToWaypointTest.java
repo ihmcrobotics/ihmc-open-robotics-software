@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Tag;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -100,7 +98,7 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
-      planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+      planningRequestPacket.setRequestedFootstepPlannerType(PawPlannerType.A_STAR.toByte());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 

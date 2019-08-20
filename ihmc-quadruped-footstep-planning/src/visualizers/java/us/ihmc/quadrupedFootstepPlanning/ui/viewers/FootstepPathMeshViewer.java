@@ -18,7 +18,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlan;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -64,7 +64,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private QuadrantDependentList<Color> solutionFootstepColors = defaultSolutionFootstepColors;
    private double footstepRadius = DEFAULT_RADIUS;
 
-   public FootstepPathMeshViewer(Messager messager, Topic<FootstepPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
+   public FootstepPathMeshViewer(Messager messager, Topic<PawPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
                                  Topic<Boolean> showFootstepPreviewTopic)
    {
       this.messager = messager;
@@ -131,7 +131,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    }
 
 
-   private synchronized void processFootstepPath(FootstepPlan plan)
+   private synchronized void processFootstepPath(PawPlan plan)
    {
       meshBuilder.clear();
       QuadrantDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
@@ -145,7 +145,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         QuadrupedTimedStep footstep = plan.getFootstep(i);
+         QuadrupedTimedStep footstep = plan.getPawStep(i);
          Color regionColor = colors.get(footstep.getRobotQuadrant());
 
          footPosition.set(footstep.getGoalPosition());

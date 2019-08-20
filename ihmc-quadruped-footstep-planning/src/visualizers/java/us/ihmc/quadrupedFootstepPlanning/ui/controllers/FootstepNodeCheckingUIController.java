@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 
 public class FootstepNodeCheckingUIController
 {
@@ -46,17 +46,17 @@ public class FootstepNodeCheckingUIController
    {
       setupControls();
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.EnableNodeChecking, enableNodeChecking.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.EnableNodeChecking, enableNodeChecking.selectedProperty(), false);
 
       nodeCheckerFootPosition.bindBidirectionalX(nodeCheckerFootXSpinner.getValueFactory().valueProperty());
       nodeCheckerFootPosition.bindBidirectionalY(nodeCheckerFootYSpinner.getValueFactory().valueProperty());
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.NodeCheckingPosition, nodeCheckerFootPosition, false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.EnableNodeCheckingPositionEditing, nodeCheckerPositionToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, checkNodesUsingPoseBetweenFeet.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.EnableNodeCheckingPositionEditing, nodeCheckerPositionToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, checkNodesUsingPoseBetweenFeet.selectedProperty(), false);
 
       nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createPositionValueFactory()

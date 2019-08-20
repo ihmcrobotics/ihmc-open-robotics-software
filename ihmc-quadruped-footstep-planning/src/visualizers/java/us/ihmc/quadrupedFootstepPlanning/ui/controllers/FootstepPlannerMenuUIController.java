@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.stage.Window;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -36,8 +36,8 @@ public class FootstepPlannerMenuUIController
       {
          if (VERBOSE)
             PrintTools.info(this, "Loaded planar regions, broadcasting data.");
-         messager.submitMessage(FootstepPlannerMessagerAPI.GlobalResetTopic, true);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, loadedPlanarRegions);
+         messager.submitMessage(PawPlannerMessagerAPI.GlobalResetTopic, true);
+         messager.submitMessage(PawPlannerMessagerAPI.PlanarRegionDataTopic, loadedPlanarRegions);
       }
       else
       {

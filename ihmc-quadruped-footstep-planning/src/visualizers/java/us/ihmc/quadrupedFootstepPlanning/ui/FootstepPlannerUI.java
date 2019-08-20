@@ -15,17 +15,17 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools.PawPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
-import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI.*;
 
 /**
  * This class is the visualization element of the footstep planner. It also contains a graphical interface for
@@ -48,7 +48,7 @@ public class FootstepPlannerUI
    private final FootstepPathMeshViewer pathViewer;
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
-   private final FootstepPlannerDataExporter dataExporter;
+   private final PawPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
 //   private final NodeOccupancyMapRenderer graphRenderer;
@@ -75,24 +75,24 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsVizController;
 
-   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, PawPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null);
+      this(primaryStage, new SharedMemoryJavaFXMessager(PawPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null);
       messager.startMessager();
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      this(primaryStage, messager, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), null);
+      this(primaryStage, messager, new DefaultPawPlannerParameters(), new DefaultVisibilityGraphParameters(), null);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory) throws Exception
    {
       this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullQuadrupedRobotModelFactory, null);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
                             FullQuadrupedRobotModelFactory previewModelFactory) throws Exception
    {
@@ -120,9 +120,9 @@ public class FootstepPlannerUI
       visibilityGraphsVizController.attachMessager(messager);
 
       setMainTabTopics();
-      footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
-      plannerReachParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
-      visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
+      footstepPlannerParametersUIController.setPlannerParametersTopic(PawPlannerMessagerAPI.PlannerParametersTopic);
+      plannerReachParametersUIController.setPlannerParametersTopic(PawPlannerMessagerAPI.PlannerParametersTopic);
+      visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(PawPlannerMessagerAPI.VisibilityGraphsParametersTopic);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -158,7 +158,7 @@ public class FootstepPlannerUI
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.pathViewer = new FootstepPathMeshViewer(messager, FootstepPlanTopic, ComputePathTopic, ShowFootstepPlanTopic, ShowFootstepPreviewTopic);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
-      this.dataExporter = new FootstepPlannerDataExporter(messager);
+      this.dataExporter = new PawPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, ShowBodyPathTopic, ComputePathTopic, BodyPathDataTopic);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
 //      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
@@ -261,30 +261,30 @@ public class FootstepPlannerUI
 
    private void setMainTabTopics()
    {
-      mainTabController.setPlannerTypeTopic(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      mainTabController.setPlannerRequestIdTopic(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
-      mainTabController.setReceivedPlanIdTopic(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
-      mainTabController.setFootstepPlanTopic(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, FootstepPlannerMessagerAPI.FootstepPlanTopic);
-      mainTabController.setPlanarRegionDataTopic(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      mainTabController.setPlannerTimeTakenTopic(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
-      mainTabController.setPlannerTimeoutTopic(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
-      mainTabController.setComputePathTopic(FootstepPlannerMessagerAPI.ComputePathTopic);
-      mainTabController.setAbortPlanningTopic(FootstepPlannerMessagerAPI.AbortPlanningTopic);
-      mainTabController.setAcceptNewPlanarRegionsTopic(FootstepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
-      mainTabController.setPlanningResultTopic(FootstepPlannerMessagerAPI.PlanningResultTopic);
-      mainTabController.setPlannerStatusTopic(FootstepPlannerMessagerAPI.PlannerStatusTopic);
-      mainTabController.setPlannerHorizonLengthTopic(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
-      mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
-                                           FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
-                                           FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
-                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic,
-                                           FootstepPlannerMessagerAPI.StartTargetTypeTopic, FootstepPlannerMessagerAPI.StartFeetPositionTopic);
-      mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
-      mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
-      mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
-      mainTabController.setXGaitSettingsTopic(FootstepPlannerMessagerAPI.XGaitSettingsTopic);
-      mainTabController.setShowFootstepPreviewTopic(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic);
-      mainTabController.setStepListMessageTopic(FootstepPlannerMessagerAPI.FootstepDataListTopic);
+      mainTabController.setPlannerTypeTopic(PawPlannerMessagerAPI.PlannerTypeTopic);
+      mainTabController.setPlannerRequestIdTopic(PawPlannerMessagerAPI.PlannerRequestIdTopic);
+      mainTabController.setReceivedPlanIdTopic(PawPlannerMessagerAPI.ReceivedPlanIdTopic);
+      mainTabController.setFootstepPlanTopic(PawPlannerMessagerAPI.ShowFootstepPlanTopic, PawPlannerMessagerAPI.FootstepPlanTopic);
+      mainTabController.setPlanarRegionDataTopic(PawPlannerMessagerAPI.PlanarRegionDataTopic);
+      mainTabController.setPlannerTimeTakenTopic(PawPlannerMessagerAPI.PlannerTimeTakenTopic);
+      mainTabController.setPlannerTimeoutTopic(PawPlannerMessagerAPI.PlannerTimeoutTopic);
+      mainTabController.setComputePathTopic(PawPlannerMessagerAPI.ComputePathTopic);
+      mainTabController.setAbortPlanningTopic(PawPlannerMessagerAPI.AbortPlanningTopic);
+      mainTabController.setAcceptNewPlanarRegionsTopic(PawPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
+      mainTabController.setPlanningResultTopic(PawPlannerMessagerAPI.PlanningResultTopic);
+      mainTabController.setPlannerStatusTopic(PawPlannerMessagerAPI.PlannerStatusTopic);
+      mainTabController.setPlannerHorizonLengthTopic(PawPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      mainTabController.setStartGoalTopics(PawPlannerMessagerAPI.EditModeEnabledTopic, PawPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
+                                           PawPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, PawPlannerMessagerAPI.InitialSupportQuadrantTopic,
+                                           PawPlannerMessagerAPI.StartPositionTopic, PawPlannerMessagerAPI.StartOrientationTopic,
+                                           PawPlannerMessagerAPI.GoalPositionTopic, PawPlannerMessagerAPI.GoalOrientationTopic,
+                                           PawPlannerMessagerAPI.StartTargetTypeTopic, PawPlannerMessagerAPI.StartFeetPositionTopic);
+      mainTabController.setAssumeFlatGroundTopic(PawPlannerMessagerAPI.AssumeFlatGroundTopic);
+      mainTabController.setGlobalResetTopic(PawPlannerMessagerAPI.GlobalResetTopic);
+      mainTabController.setPlannerPlaybackFractionTopic(PawPlannerMessagerAPI.PlannerPlaybackFractionTopic);
+      mainTabController.setXGaitSettingsTopic(PawPlannerMessagerAPI.XGaitSettingsTopic);
+      mainTabController.setShowFootstepPreviewTopic(PawPlannerMessagerAPI.ShowFootstepPreviewTopic);
+      mainTabController.setStepListMessageTopic(PawPlannerMessagerAPI.FootstepDataListTopic);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
@@ -292,7 +292,7 @@ public class FootstepPlannerUI
       return new FootstepPlannerUI(primaryStage, messager);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters,
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
                                                     VisibilityGraphsParameters visibilityGraphsParameters,
                                                     FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
                                                     FullQuadrupedRobotModelFactory previewModelFactory)

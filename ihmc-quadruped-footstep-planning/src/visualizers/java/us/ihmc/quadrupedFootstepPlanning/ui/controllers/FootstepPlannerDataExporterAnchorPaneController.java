@@ -7,7 +7,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 
 import java.io.File;
 
@@ -45,14 +45,14 @@ public class FootstepPlannerDataExporterAnchorPaneController
       if (result == null)
          return;
       String newPath = result.getAbsolutePath();
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, newPath);
+      messager.submitMessage(PawPlannerMessagerAPI.exportUnitTestPath, newPath);
       Platform.runLater(() -> currentPlanarRegionDataFolderTextField.setText(newPath));
    }
 
    @FXML
    private void exportPlanarRegion()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestDataFile, true);
+      messager.submitMessage(PawPlannerMessagerAPI.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
+      messager.submitMessage(PawPlannerMessagerAPI.exportUnitTestDataFile, true);
    }
 }

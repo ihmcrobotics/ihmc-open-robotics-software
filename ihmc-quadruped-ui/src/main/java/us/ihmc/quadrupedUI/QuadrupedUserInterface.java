@@ -29,7 +29,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
@@ -99,7 +99,7 @@ public class QuadrupedUserInterface
    private ManualStepTabController manualStepTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
-                                 FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                 PawPlannerParameters pawPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                  QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
@@ -112,8 +112,8 @@ public class QuadrupedUserInterface
 
       mainPane = loader.load();
 
-      footstepPlannerParametersUIController.setPlannerParameters(footstepPlannerParameters);
-      plannerReachParametersUIController.setPlannerParameters(footstepPlannerParameters);
+      footstepPlannerParametersUIController.setPlannerParameters(pawPlannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(pawPlannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       plannerTabController.attachMessager(messager);
@@ -358,11 +358,11 @@ public class QuadrupedUserInterface
    }
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                                            FootstepPlannerParameters footstepPlannerParameters,
+                                                            PawPlannerParameters pawPlannerParameters,
                                                             VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
                                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {
-      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, footstepPlannerParameters, visibilityGraphsParameters,
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, pawPlannerParameters, visibilityGraphsParameters,
                                         xGaitSettings, graphicsMutator);
    }
 }

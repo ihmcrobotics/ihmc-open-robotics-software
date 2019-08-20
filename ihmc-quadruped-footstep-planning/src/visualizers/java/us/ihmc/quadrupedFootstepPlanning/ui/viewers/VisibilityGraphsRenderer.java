@@ -9,7 +9,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityMapHolderViewer;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.concurrent.ExecutorService;
@@ -35,30 +35,30 @@ public class VisibilityGraphsRenderer
 
    public VisibilityGraphsRenderer(Messager messager)
    {
-      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      planarRegionsReference = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);
+      startPositionReference = messager.createInput(PawPlannerMessagerAPI.StartPositionTopic);
+      goalPositionReference = messager.createInput(PawPlannerMessagerAPI.GoalPositionTopic);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(FootstepPlannerMessagerAPI.GlobalResetTopic, FootstepPlannerMessagerAPI.ShowClusterRawPoints,
-                                  FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions,
-                                  FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData);
+      clusterMeshViewer.setTopics(PawPlannerMessagerAPI.GlobalResetTopic, PawPlannerMessagerAPI.ShowClusterRawPoints,
+                                  PawPlannerMessagerAPI.ShowClusterNavigableExtrusions, PawPlannerMessagerAPI.ShowClusterNonNavigableExtrusions,
+                                  PawPlannerMessagerAPI.VisibilityMapWithNavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       startMapViewer.setCustomColor(Color.YELLOW);
-      startMapViewer.setTopics(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, FootstepPlannerMessagerAPI.StartVisibilityMap);
+      startMapViewer.setTopics(PawPlannerMessagerAPI.ShowStartVisibilityMap, PawPlannerMessagerAPI.StartVisibilityMap);
 
       goalMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       goalMapViewer.setCustomColor(Color.CORNFLOWERBLUE);
-      goalMapViewer.setTopics(FootstepPlannerMessagerAPI.ShowGoalVisibilityMap, FootstepPlannerMessagerAPI.GoalVisibilityMap);
+      goalMapViewer.setTopics(PawPlannerMessagerAPI.ShowGoalVisibilityMap, PawPlannerMessagerAPI.GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(FootstepPlannerMessagerAPI.GlobalResetTopic, FootstepPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps,
-                                      FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData);
+      navigableRegionViewer.setTopics(PawPlannerMessagerAPI.GlobalResetTopic, PawPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps,
+                                      PawPlannerMessagerAPI.VisibilityMapWithNavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);
-      interRegionConnectionsViewer.setTopics(FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap, FootstepPlannerMessagerAPI.InterRegionVisibilityMap);
+      interRegionConnectionsViewer.setTopics(PawPlannerMessagerAPI.ShowInterRegionVisibilityMap, PawPlannerMessagerAPI.InterRegionVisibilityMap);
 
       root.getChildren().addAll(clusterMeshViewer.getRoot(), startMapViewer.getRoot(), goalMapViewer.getRoot(), navigableRegionViewer.getRoot(),
                                 interRegionConnectionsViewer.getRoot());

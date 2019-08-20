@@ -4,10 +4,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerTargetType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -20,7 +19,7 @@ public class VisibilityGraphPathPlannerTest
    public void testStartingOffPlanarRegion()
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
-      VisibilityGraphPathPlanner planner = new VisibilityGraphPathPlanner(new DefaultVisibilityGraphParameters(), testRegistry);
+      VisibilityGraphPawPathPlanner planner = new VisibilityGraphPawPathPlanner(new DefaultVisibilityGraphParameters(), testRegistry);
 
       ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
       planarRegionPolygon.addVertex(-5.0, 5.0);
@@ -34,8 +33,8 @@ public class VisibilityGraphPathPlannerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
 
 
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      goal.setGoalType(FootstepPlannerTargetType.POSE_BETWEEN_FEET);
+      PawPlannerGoal goal = new PawPlannerGoal();
+      goal.setGoalType(PawPlannerTargetType.POSE_BETWEEN_FEET);
       goal.setGoalPose(new FramePose3D());
 
       // try within the region

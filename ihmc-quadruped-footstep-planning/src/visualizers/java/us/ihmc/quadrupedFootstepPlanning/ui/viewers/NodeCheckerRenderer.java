@@ -3,7 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -15,15 +15,15 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeTransitionChecker;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeTransitionCheckerOfCheckers;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -40,11 +40,11 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Quaternion> footOrientationReference;
    private final AtomicReference<RobotQuadrant> initialSupportQuadrantReference;
 
-   private final SettableFootstepPlannerParameters parameters = new SettableFootstepPlannerParameters(new DefaultFootstepPlannerParameters());
+   private final SettablePawPlannerParameters parameters = new SettablePawPlannerParameters(new DefaultPawPlannerParameters());
    private final QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-   private final SimplePlanarRegionFootstepNodeSnapper snapper;
+   private final SimplePlanarRegionPawNodeSnapper snapper;
 
-   private final FootstepNodeTransitionChecker nodeChecker;
+   private final PawNodeTransitionChecker nodeChecker;
 
    private final MeshView meshView = new MeshView();
    private final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -53,25 +53,25 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    public NodeCheckerRenderer(Messager messager)
    {
-      nodeCheckerEnabled = messager.createInput(FootstepPlannerMessagerAPI.EnableNodeChecking, false);
-      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      footPositionReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPosition);
-      footOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
-      initialSupportQuadrantReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
-      checkNodeUsingPoseBetweenFeet = messager.createInput(FootstepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, false);
+      nodeCheckerEnabled = messager.createInput(PawPlannerMessagerAPI.EnableNodeChecking, false);
+      planarRegionsReference = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);
+      footPositionReference = messager.createInput(PawPlannerMessagerAPI.NodeCheckingPosition);
+      footOrientationReference = messager.createInput(PawPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
+      initialSupportQuadrantReference = messager.createInput(PawPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
+      checkNodeUsingPoseBetweenFeet = messager.createInput(PawPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, false);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
 
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                          parameters::getProjectInsideUsingConvexHull, true);
+      snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                     parameters::getProjectInsideUsingConvexHull, true);
 
-      SnapBasedNodeTransitionChecker snapBasedNodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
-      nodeChecker = new FootstepNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
+      SnapBasedPawNodeTransitionChecker snapBasedNodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
+      nodeChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
+      messager.registerTopicListener(PawPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
+      messager.registerTopicListener(PawPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
    }
 
    @Override
@@ -194,31 +194,31 @@ public class NodeCheckerRenderer extends AnimationTimer
          hindRightPosition.add(-toFoot.getX(), -toFoot.getY());
       }
 
-      double yaw = FootstepNode.computeNominalYaw(frontLeftPosition.getX(), frontLeftPosition.getY(), frontRightPosition.getX(), frontRightPosition.getY(),
-                                                  hindLeftPosition.getX(), hindLeftPosition.getY(), hindRightPosition.getX(), hindRightPosition.getY());
-      FootstepNode node = new FootstepNode(initialSupportQuadrantReference.get(), frontLeftPosition, frontRightPosition, hindLeftPosition, hindRightPosition,
-                                           yaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+      double yaw = PawNode.computeNominalYaw(frontLeftPosition.getX(), frontLeftPosition.getY(), frontRightPosition.getX(), frontRightPosition.getY(),
+                                             hindLeftPosition.getX(), hindLeftPosition.getY(), hindRightPosition.getX(), hindRightPosition.getY());
+      PawNode node = new PawNode(initialSupportQuadrantReference.get(), frontLeftPosition, frontRightPosition, hindLeftPosition, hindRightPosition,
+                                 yaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       snapper.setPlanarRegions(planarRegionsList);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
+      PawNodeSnapData snapData = snapper.snapPawNode(node);
       boolean isValid = nodeChecker.isNodeValid(node, null);
 
       processFootMesh(node, snapData, isValid);
    }
 
-   private void processFootMesh(FootstepNode node, FootstepNodeSnapData snapData, boolean valid)
+   private void processFootMesh(PawNode node, PawNodeSnapData snapData, boolean valid)
    {
       meshBuilder.clear();
 
       RigidBodyTransform planarTransformToWorld = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransformToWorld(node.getMovingQuadrant(), node, planarTransformToWorld);
+      PawNodeTools.getNodeTransformToWorld(node.getMovingQuadrant(), node, planarTransformToWorld);
 
       RigidBodyTransform snappedTransformToWorld = new RigidBodyTransform();
 
       try
       {
-         FootstepNodeTools.getSnappedNodeTransformToWorld(node.getMovingQuadrant(), node, snapData.getSnapTransform(), snappedTransformToWorld);
+         PawNodeTools.getSnappedNodeTransformToWorld(node.getMovingQuadrant(), node, snapData.getSnapTransform(), snappedTransformToWorld);
       }
       catch(NotARotationMatrixException e)
       {

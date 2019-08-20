@@ -7,8 +7,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +23,7 @@ public class FootstepPlannerVisualizationController
    @FXML
    private CheckBox showNodesRejectedByReason;
    @FXML
-   private ComboBox<QuadrupedFootstepPlannerNodeRejectionReason> rejectionReasonToShow;
+   private ComboBox<QuadrupedPawPlannerNodeRejectionReason> rejectionReasonToShow;
    @FXML
    private Slider plannerPlaybackSlider;
    //   @FXML
@@ -47,27 +47,27 @@ public class FootstepPlannerVisualizationController
 
    public void setupControls()
    {
-      ObservableList<QuadrupedFootstepPlannerNodeRejectionReason> plannerTypeOptions = FXCollections
-            .observableArrayList(QuadrupedFootstepPlannerNodeRejectionReason.values);
+      ObservableList<QuadrupedPawPlannerNodeRejectionReason> plannerTypeOptions = FXCollections
+            .observableArrayList(QuadrupedPawPlannerNodeRejectionReason.values);
       rejectionReasonToShow.setItems(plannerTypeOptions);
-      rejectionReasonToShow.setValue(QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
+      rejectionReasonToShow.setValue(QuadrupedPawPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
    }
 
    public void bindControls()
    {
       setupControls();
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllValidNodesTopic, showAllValidNodes.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowAllInvalidNodesTopic, showAllInvalidNodes.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesThisTickTopic, showNodesThisTick.selectedProperty(), false);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, showNodesRejectedByReason.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowAllValidNodesTopic, showAllValidNodes.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowAllInvalidNodesTopic, showAllInvalidNodes.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowNodesThisTickTopic, showNodesThisTick.selectedProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, showNodesRejectedByReason.selectedProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.RejectionReasonToShowTopic, rejectionReasonToShow.valueProperty(), false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
+      messager.bindBidirectional(PawPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, plannerPlaybackSlider.valueProperty(), false);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesThisTickTopic,
+      messager.registerTopicListener(PawPlannerMessagerAPI.NodesThisTickTopic,
                                      nodes -> plannerPlaybackSlider.setBlockIncrement(1.0 / bufferSize.incrementAndGet()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> bufferSize.set(0));
+      messager.registerTopicListener(PawPlannerMessagerAPI.ComputePathTopic, data -> bufferSize.set(0));
    }
 }
