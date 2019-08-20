@@ -257,6 +257,10 @@ float64 min_y_clearance_from_stance
 # Field default value -1.0
 float64 final_turn_proximity
 
+# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+# Field default value -1.0
+float64 final_turn_body_path_proximity
+
 # Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
 # final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
 # the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
@@ -344,5 +348,14 @@ float64 maximum_2d_distance_from_bounding_box_to_penalize
 # {@code c * (1 - d / d_max)}, where d_max is this value.
 # Field default value -1.0
 float64 bounding_box_cost
+
+# Field default value -1.0
+float64 body_path_violation_weight
+
+# Field default value -1.0
+float64 distance_from_path_tolerance
+
+# Field default value -1.0
+float64 delta_yaw_from_reference_tolerance
 
 

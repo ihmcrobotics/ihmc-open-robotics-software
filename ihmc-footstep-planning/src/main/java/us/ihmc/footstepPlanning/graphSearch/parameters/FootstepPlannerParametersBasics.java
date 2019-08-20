@@ -3,6 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
+
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
    default void set(FootstepPlannerParametersReadOnly footstepPlannerParameters)
@@ -275,6 +279,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
+   default void setFinalTurnBodyPathProximity(double finalTurnProximity)
+   {
+      set(FootstepPlannerParameterKeys.finalTurnBodyPathProximity, finalTurnProximity);
+   }
+
    default void setFinalTurnProximityBlendFactor(double finalTurnProximityBlendFactor)
    {
       set(FootstepPlannerParameterKeys.finalTurnProximityBlendFactor, finalTurnProximityBlendFactor);
@@ -288,6 +297,21 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setLongStepWeight(double weight)
    {
       set(FootstepPlannerParameterKeys.longStepWeight, weight);
+   }
+
+   default void setBodyPathViolationWeight(double weight)
+   {
+      set(FootstepPlannerParameterKeys.bodyPathViolationWeight, weight);
+   }
+
+   default void setDistanceFromPathTolerance(double tolerance)
+   {
+      set(distanceFromPathTolerance, tolerance);
+   }
+
+   default void setDeltaYawFromReferenceTolerance(double tolerance)
+   {
+      set(deltaYawFromReferenceTolerance, tolerance);
    }
 
    default void set(FootstepPlannerParametersPacket parametersPacket)
@@ -361,6 +385,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != -1.0)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
+      if (parametersPacket.getFinalTurnBodyPathProximity() != -1.0)
+         setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
       if (parametersPacket.getFinalTurnProximityBlendFactor() != -1.0)
          setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
 
@@ -401,5 +427,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
       if (parametersPacket.getLongStepWeight() != -1.0)
          setLongStepWeight(parametersPacket.getLongStepWeight());
+      if (parametersPacket.getBodyPathViolationWeight() != -1.0)
+         setBodyPathViolationWeight(parametersPacket.getBodyPathViolationWeight());
+      if (parametersPacket.getDistanceFromPathTolerance() != -1.0)
+         setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
+      if (parametersPacket.getDeltaYawFromReferenceTolerance() != -1.0)
+         setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
    }
 }
