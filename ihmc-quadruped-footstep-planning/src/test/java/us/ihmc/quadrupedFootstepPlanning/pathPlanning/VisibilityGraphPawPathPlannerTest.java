@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-public class VisibilityGraphPathPlannerTest
+public class VisibilityGraphPawPathPlannerTest
 {
    @Test
    public void testStartingOffPlanarRegion()
