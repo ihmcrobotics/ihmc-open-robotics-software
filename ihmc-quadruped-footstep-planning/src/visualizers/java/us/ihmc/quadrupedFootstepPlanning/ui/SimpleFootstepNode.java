@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class SimpleFootstepNode
@@ -11,14 +11,14 @@ public class SimpleFootstepNode
 
    private final int hashCode;
 
-   public SimpleFootstepNode(FootstepNode node)
+   public SimpleFootstepNode(PawNode node)
    {
       this(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
    }
 
    public SimpleFootstepNode(RobotQuadrant movingQuadrant, double xPosition, double yPosition)
    {
-      this(movingQuadrant, FootstepNode.snapToGrid(xPosition), FootstepNode.snapToGrid(yPosition));
+      this(movingQuadrant, PawNode.snapToGrid(xPosition), PawNode.snapToGrid(yPosition));
    }
 
    public SimpleFootstepNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)

@@ -3,7 +3,7 @@ package us.ihmc.quadrupedCommunication.teleop;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pathPlanning.DataSetName;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerType;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -11,11 +11,11 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
+public class QuadrupedAStarToolboxDataSetTest extends PawPlannerToolboxDataSetTest
 {
-   public FootstepPlannerType getPlannerType()
+   public PawPlannerType getPlannerType()
    {
-      return FootstepPlannerType.A_STAR;
+      return PawPlannerType.A_STAR;
    }
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()

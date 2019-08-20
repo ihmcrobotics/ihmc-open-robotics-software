@@ -13,11 +13,11 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessage> implements Settable<FootstepPlannerCellMessage>, EpsilonComparable<FootstepPlannerCellMessage>
 {
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * X index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int x_index_;
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * Y index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int y_index_;
    public boolean node_is_valid_ = true;
@@ -43,14 +43,14 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
    }
 
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * X index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public void setXIndex(int x_index)
    {
       x_index_ = x_index;
    }
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * X index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int getXIndex()
    {
@@ -58,14 +58,14 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
    }
 
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * Y index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public void setYIndex(int y_index)
    {
       y_index_ = y_index;
    }
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+            * Y index of the cell. See us.ihmc.pawPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int getYIndex()
    {

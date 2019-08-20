@@ -2,14 +2,14 @@ package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 import java.io.File;
@@ -70,7 +70,7 @@ public class FootstepPlannerParametersUIController
    private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
-   private Topic<FootstepPlannerParameters> plannerParametersTopic;
+   private Topic<PawPlannerParameters> plannerParametersTopic;
 
    public FootstepPlannerParametersUIController()
    {
@@ -93,13 +93,13 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParametersTopic(Topic<FootstepPlannerParameters> plannerParametersTopic)
+   public void setPlannerParametersTopic(Topic<PawPlannerParameters> plannerParametersTopic)
    {
       this.plannerParametersTopic = plannerParametersTopic;
    }
 
 
-   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   public void setPlannerParameters(PawPlannerParameters parameters)
    {
       parametersProperty.setPlannerParameters(parameters);
    }
@@ -259,20 +259,20 @@ public class FootstepPlannerParametersUIController
 
 
 
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
+   private PropertyToMessageTypeConverter<PawPlannerParameters, SettablePawPlannerParameters> createConverter()
    {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
+      return new PropertyToMessageTypeConverter<PawPlannerParameters, SettablePawPlannerParameters>()
       {
          @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
+         public PawPlannerParameters convert(SettablePawPlannerParameters propertyValue)
          {
             return propertyValue;
          }
 
          @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
+         public SettablePawPlannerParameters interpret(PawPlannerParameters messageContent)
          {
-            return new SettableFootstepPlannerParameters(messageContent);
+            return new SettablePawPlannerParameters(messageContent);
          }
       };
    }

@@ -4,8 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,7 +13,7 @@ public class VisualizationController
 {
    private static final boolean verbose = false;
 
-   private AtomicReference<FootstepPlan> footstepPlanReference;
+   private AtomicReference<PawPlan> footstepPlanReference;
 
    @FXML
    private CheckBox showBodyPathToggleButton;
@@ -41,7 +41,7 @@ public class VisualizationController
       if (verbose)
          PrintTools.info(this, "Clicked request statistics...");
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.RequestPlannerStatistics, true);
+      messager.submitMessage(PawPlannerMessagerAPI.RequestPlannerStatistics, true);
    }
 
    private JavaFXMessager messager;
@@ -50,22 +50,22 @@ public class VisualizationController
    {
       this.messager = messager;
 
-      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
+      footstepPlanReference = messager.createInput(PawPlannerMessagerAPI.FootstepPlanTopic);
    }
 
    public void bindControls()
    {
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyPathTopic, showBodyPathToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowBodyPathTopic, showBodyPathToggleButton.selectedProperty(), true);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowPlanarRegionsTopic, showPlanarRegionsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowPlanarRegionsTopic, showPlanarRegionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(PawPlannerMessagerAPI.ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
    }
 }
