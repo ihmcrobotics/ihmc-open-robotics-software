@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -56,12 +57,13 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
 
    private static final int maxPointsInRegion = 25000;
+   private static final double walkerTotalTime = 60.0;
 
 
    // For enabling helpful prints.
@@ -74,7 +76,7 @@ public class VisibilityGraphsFrameworkTest
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
    private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
-   private static final double walkerMarchingSpeed = 0.05;
+   protected static final double walkerMarchingSpeed = 0.2;
    private static final double lidarObserverHeight = 1.25;
 
    // For the occlusion test
@@ -132,11 +134,9 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset), false);
    }
 
-   //TODO: Fix and make this pass.
-   @Disabled("This needs to be fixed for when start and goal are invalid.")
    @Test
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
@@ -145,9 +145,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1000, false));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000, false), false);
    }
 
    //TODO: Fix and make this pass.
@@ -161,14 +160,16 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, 0.20, 1001000000, true));
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true), true);
    }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester)
+   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, boolean testWithOcclusions)
    {
       Predicate<DataSet> dataSetFilter = dataSet ->
       {
          if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphRequiresOcclusion())
             return false;
          else
             return dataSet.getPlannerInput().getVisGraphIsTestable();
@@ -178,6 +179,8 @@ public class VisibilityGraphsFrameworkTest
       if (DEBUG)
       {
          LogTools.info("Unit test files found: " + allDatasets.size());
+         for (int i = 0; i < allDatasets.size(); i++)
+            System.out.println("\t" + allDatasets.get(i).getName());
       }
 
       AtomicReference<Boolean> previousDatasetRequested = null;
@@ -227,6 +230,12 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
+
+
+         if (DEBUG)
+         {
+            LogTools.info("Finished processing file: " + dataset.getName());
+         }
 
          if (VISUALIZE)
          {
@@ -284,6 +293,8 @@ public class VisibilityGraphsFrameworkTest
             else
                dataset = null;
          }
+
+
 
          ThreadTools.sleep(100); // Apparently need to give some time for the prints to appear in the right order.
       }
@@ -427,7 +438,9 @@ public class VisibilityGraphsFrameworkTest
 
       Point3D walkerPosition = new Point3D(start);
 
-      while (!walkerPosition.geometricallyEquals(goal, 1.0e-3))
+      long totalStartTime = System.currentTimeMillis();
+
+      while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
       {
          PlanarRegionsList visibleRegions = planarRegionsList;
 
@@ -452,6 +465,9 @@ public class VisibilityGraphsFrameworkTest
          if (endTime - startTime > maxSolveTimeInMilliseconds)
             errorMessages += fail(datasetName, "Took too long to compute a new body path.");
 
+         if (endTime - totalStartTime > Conversions.secondsToMilliseconds(walkerTotalTime))
+            errorMessages += fail(datasetName, "Took too long to make it through the body path. Made it to " + walkerPosition + ", while the goal was " + goal);
+
          if (!errorMessages.isEmpty())
             return addPrefixToErrorMessages(datasetName, errorMessages);
 
@@ -466,7 +482,7 @@ public class VisibilityGraphsFrameworkTest
             break;
          }
 
-         walkerPosition.set(travelAlongBodyPath(walkerSpeed, walkerPosition, latestBodyPath, visibleRegions));
+         walkerPosition.set(travelAlongBodyPath(walkerSpeed, latestBodyPath));
 
          if (VISUALIZE)
          {
@@ -478,8 +494,7 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, Point3DReadOnly startingPosition, List<Point3DReadOnly> bodyPath,
-                                                      PlanarRegionsList knownRegions)
+   private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, List<Point3DReadOnly> bodyPath)
    {
       Point3D initialPosition = new Point3D(bodyPath.get(0));
 
@@ -491,19 +506,19 @@ public class VisibilityGraphsFrameworkTest
          if (segment.length() < 5e-3)
             continue;
 
-         if (xyDistance(segment, initialPosition) < 1.0e-3)
+         if (xyDistance(segment, initialPosition) < 1.0e-2)
          {
             Vector3DBasics segmentDirection = segment.getDirection(true);
             positionWithShift.scaleAdd(distanceToTravel, segmentDirection, initialPosition);
 
-            if (xyDistance(segment, positionWithShift) < 1.0e-3)
+            if (xyDistance(segment, positionWithShift) < 1.0e-2)
             {
                initialPosition = new Point3D(positionWithShift);
                break;
             }
             else
             {
-               distanceToTravel -= initialPosition.distance(segment.getSecondEndpoint());
+               distanceToTravel -= initialPosition.distanceXY(segment.getSecondEndpoint());
                initialPosition = new Point3D(segment.getSecondEndpoint());
             }
          }
@@ -562,7 +577,7 @@ public class VisibilityGraphsFrameworkTest
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
       }
 
-      String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
+      String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path, !simulateOcclusions);
 
       if (!errorMessages.isEmpty())
          return errorMessages; // Cannot test anything else when path does not pass the basic sanity checks.
@@ -691,7 +706,7 @@ public class VisibilityGraphsFrameworkTest
       return errorMessages;
    }
 
-   private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Point3DReadOnly> path)
+   private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Point3DReadOnly> path, boolean checkEnds)
    {
       String errorMessages = "";
       errorMessages += assertTrue(datasetName, "Path is null!", path != null);
@@ -712,8 +727,11 @@ public class VisibilityGraphsFrameworkTest
       Point2DReadOnly goal2D = new Point2D(goal);
       Point2DReadOnly start2D = new Point2D(start);
 
-//      errorMessages += assertTrue(datasetName, "Body path does not end at desired goal position: desired = " + goal + ", actual = " + pathEnd,
-//                                  pathEnd2D.geometricallyEquals(goal2D, START_GOAL_EPSILON));
+      if (checkEnds)
+      {
+               errorMessages += assertTrue(datasetName, "Body path does not end at desired goal position: desired = " + goal + ", actual = " + pathEnd,
+                                           pathEnd2D.geometricallyEquals(goal2D, START_GOAL_EPSILON));
+      }
       errorMessages += assertTrue(datasetName, "Body path does not start from desired start position: desired = " + start + ", actual = " + pathStart,
                                   pathStart2D.geometricallyEquals(start2D, START_GOAL_EPSILON));
 
@@ -753,7 +771,7 @@ public class VisibilityGraphsFrameworkTest
          pointsInRegions.get(region).add(intersection);
       }
 
-      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      for (PlanarRegion region : pointsInRegions.keySet())
       {
          List<Point3D> pointsInRegion = pointsInRegions.get(region);
          while (pointsInRegion.size() > maxPointsInRegion)
@@ -762,7 +780,7 @@ public class VisibilityGraphsFrameworkTest
 
 
       List<PlanarRegionSegmentationRawData> segmentationRawData = new ArrayList<>();
-      for (PlanarRegion originalRegion : filteredRegions)
+      for (PlanarRegion originalRegion : pointsInRegions.keySet())
       {
          List<Point3D> points = pointsInRegions.get(originalRegion);
          Point3D center = new Point3D();
@@ -805,12 +823,13 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-//      String dataSetName = "20171218_205040_SimpleMaze";
-//      String dataSetName = "20171218_204953_FlatGroundWithWall";
+      String dataSetName = "20171215_211034_DoorwayNoCeiling";
 //      String dataSetName = "20171218_204953_FlatGroundWithWall";
 //      String dataSetName = "20171215_220523_SteppingStones";
 //      String dataSetName = "20171218_204917_FlatGround";
-      String dataSetName = "20171215_214730_CinderBlockField";
+//      String dataSetName = "20171215_214730_CinderBlockField";
+//      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
+//      String dataSetName = "20171215_210811_DoorwayWithCeiling";
 
       test.setup();
       if (VISUALIZE)
@@ -818,10 +837,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
-
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, 0.20, 100000000, true), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 

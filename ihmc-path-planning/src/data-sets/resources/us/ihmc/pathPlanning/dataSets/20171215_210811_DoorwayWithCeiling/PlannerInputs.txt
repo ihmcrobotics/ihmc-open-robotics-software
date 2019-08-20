@@ -9,3 +9,4 @@ simple_body_path_timeout 5.0
 vis_graph_with_a_star_timeout 5.0
 quadruped_planner_status dev
 quadruped_timeout 50.0
+requires_occlusion true

@@ -18,7 +18,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
@@ -29,15 +32,17 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VisibilityGraphOcclusionTest
 {
-   private boolean visualize = true;
+   private boolean visualize = false;
    private PlanarRegionsList occludedEnvironmentWithAGoalPlane;
    private PlanarRegionsList occludedEnvironmentWithoutAGoalPlane;
    private PlanarRegionsList smallWallWithNoGround;
    private PlanarRegionsList tinyWallWithNoGround;
    private PlanarRegionsList largeWallWithNoGround;
+   private VisibilityGraphsParametersReadOnly visibilityGraphsParameters;
 
    // For enabling helpful prints.
    private static boolean DEBUG = true;
@@ -63,6 +68,7 @@ public class VisibilityGraphOcclusionTest
       smallWallWithNoGround = smallWallWithNoGoalGroundEnvironment();
       tinyWallWithNoGround = tinyWallWithNoGoalGroundEnvironment();
       largeWallWithNoGround = largeWallWithNoGoalGroundEnvironment();
+      visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
 
       if (visualize)
       {
@@ -76,6 +82,13 @@ public class VisibilityGraphOcclusionTest
    @AfterEach
    public void tearDown() throws Exception
    {
+      occludedEnvironmentWithAGoalPlane = null;
+      occludedEnvironmentWithoutAGoalPlane = null;
+      smallWallWithNoGround = null;
+      tinyWallWithNoGround = null;
+      largeWallWithNoGround = null;
+      visibilityGraphsParameters = null;
+
       if (visualize)
       {
          visualizerApplication.stop();
@@ -209,7 +222,12 @@ public class VisibilityGraphOcclusionTest
    private String walkerCollisionChecks(Ellipsoid3DReadOnly walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
    {
       String errorMessages = "";
-      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      NavigableRegionFilter navigableFilter = visibilityGraphsParameters.getNavigableRegionFilter();
+      PlanarRegionFilter planarRegionFilter = visibilityGraphsParameters.getPlanarRegionFilter();
+      List<PlanarRegion> regionsToCheck = planarRegionsList.getPlanarRegionsAsList().stream().filter(query -> navigableFilter.isPlanarRegionNavigable(query, planarRegionsList.getPlanarRegionsAsList())).collect(
+            Collectors.toList());
+      regionsToCheck = regionsToCheck.stream().filter(planarRegionFilter::isPlanarRegionRelevant).collect(Collectors.toList());
+      for (PlanarRegion planarRegion : regionsToCheck)
       {
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 

@@ -40,6 +40,11 @@ public class PlannerInput
       return flagEquals(DataSetIOTools.VIS_GRAPH_TAG, DataSetIOTools.TESTABLE_FLAG);
    }
 
+   public boolean getVisGraphRequiresOcclusion()
+   {
+      return getBooleanFlag(DataSetIOTools.REQUIRES_OCCLUSION);
+   }
+
    public boolean getStepPlannerIsTestable()
    {
       return flagEquals(DataSetIOTools.STEP_PLANNERS_TAG, DataSetIOTools.TESTABLE_FLAG);
@@ -143,6 +148,13 @@ public class PlannerInput
          return null;
       List<String> values = additionalData.get(key);
       return new Point3D(Double.parseDouble(values.get(0)), Double.parseDouble(values.get(1)), Double.parseDouble(values.get(2)));
+   }
+
+   public boolean getBooleanFlag(String key)
+   {
+      if (!additionalData.containsKey(key))
+         return false;
+      return Boolean.parseBoolean(additionalData.get(key).get(0));
    }
 
    public boolean hasStartOrientation()
