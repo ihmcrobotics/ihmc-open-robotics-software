@@ -59,6 +59,9 @@ import java.util.function.Function;
 public abstract class FootstepPlannerToolboxDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
+   private static final double defaultBestEffortTimeout = 1.0;
+//   private static final double defaultHorizonLength = 1.0;
+   private static final double defaultHorizonLength = Double.POSITIVE_INFINITY;
 
 
    // Whether to start the UI or not.
@@ -324,6 +327,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeoutTopic, defaultBestEffortTimeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
@@ -331,11 +335,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.POSITIVE_INFINITY);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, defaultHorizonLength);
 
       ThreadTools.sleep(1000);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+
 
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 

@@ -19,6 +19,10 @@ public interface QuadrupedFootstepPlanner
 
    void setTimeout(double timeout);
 
+   default void setBestEffortTimeout(double timeout)
+   {
+   }
+
    FootstepPlanningResult plan();
 
    void cancelPlanning();

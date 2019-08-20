@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristic
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ZeroHeuristics extends CostToGoHeuristics

@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameter
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
@@ -54,6 +55,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble finalTurnProximity = new YoDouble("finalTurnProximity", registry);
    private final YoDouble finalSlowDownProximity = new YoDouble("finalSlowDownProximity", registry);
    private final YoDouble maximumDeviationFromXGaitDuringExpansion = new YoDouble("maximumDeviationFromXGaitDuringExpansion", registry);
+   private final YoInteger minimumStepsForBestEffortPlan = new YoInteger("minimumStepsForBestEffortPlan", registry);
+   private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
+   private final YoBoolean performGraphRepairingStep = new YoBoolean("performGraphRepairingStep", registry);
+   private final YoDouble repairingHeuristicWeightScaling = new YoDouble("repairingHeuristicWeightScaling", registry);
+   private final YoDouble minimumHeuristicWeightReduction = new YoDouble("minimumHeuristicWeightReduction", registry);
+
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -336,6 +343,36 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
    {
       this.maximumDeviationFromXGaitDuringExpansion.set(deviationFromXGaitDuringExpansion);
+   }
+
+   @Override
+   public void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
+   {
+      this.minimumStepsForBestEffortPlan.set(minimumStepsForBestEffortPlan);
+   }
+
+   @Override
+   public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
+   {
+      this.returnBestEffortPlan.set(returnBestEffortPlan);
+   }
+
+   @Override
+   public void setPerformGraphRepairingStep(boolean performGraphRepairingStep)
+   {
+      this.performGraphRepairingStep.set(performGraphRepairingStep);
+   }
+
+   @Override
+   public void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling)
+   {
+      this.repairingHeuristicWeightScaling.set(repairingHeuristicWeightScaling);
+   }
+
+   @Override
+   public void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction)
+   {
+      this.minimumHeuristicWeightReduction.set(minimumHeuristicWeightReduction);
    }
 
    /** {@inheritDoc} */
@@ -648,4 +685,33 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
       return maximumDeviationFromXGaitDuringExpansion.getDoubleValue();
    }
 
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minimumStepsForBestEffortPlan.getIntegerValue();
+   }
+
+   @Override
+   public boolean returnBestEffortPlan()
+   {
+      return returnBestEffortPlan.getBooleanValue();
+   }
+
+   @Override
+   public boolean performGraphRepairingStep()
+   {
+      return performGraphRepairingStep.getBooleanValue();
+   }
+
+   @Override
+   public double getRepairingHeuristicWeightScaling()
+   {
+      return repairingHeuristicWeightScaling.getDoubleValue();
+   }
+
+   @Override
+   public double getMinimumHeuristicWeightReduction()
+   {
+      return minimumHeuristicWeightReduction.getDoubleValue();
+   }
 }
