@@ -359,6 +359,16 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double step_down_weight;
         /**
+         * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double long_step_weight;
+        /**
+         * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+         */
+        @defaultValue(value=-1.0)
+        double foothold_area_weight;
+        /**
          * When using a cost based planning approach this value defines the cost that is added for each step
          * taken. Setting this value to a high number will favor plans with less steps.
          */
