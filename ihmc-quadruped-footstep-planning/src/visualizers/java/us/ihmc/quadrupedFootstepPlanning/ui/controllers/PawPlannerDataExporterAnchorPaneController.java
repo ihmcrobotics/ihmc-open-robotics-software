@@ -11,7 +11,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMes
 
 import java.io.File;
 
-public class FootstepPlannerDataExporterAnchorPaneController
+public class PawPlannerDataExporterAnchorPaneController
 {
    private final DirectoryChooser directoryChooser = new DirectoryChooser();
    private final File defaultDataFolder;
@@ -21,7 +21,7 @@ public class FootstepPlannerDataExporterAnchorPaneController
    @FXML
    private TextField currentPlanarRegionDataFolderTextField;
 
-   public FootstepPlannerDataExporterAnchorPaneController()
+   public PawPlannerDataExporterAnchorPaneController()
    {
       this.defaultDataFolder = new File(DataSetIOTools.RESOURCES_DIRECTORY + File.separator + DataSetIOTools.DATA_SET_DIRECTORY_PATH);
    }

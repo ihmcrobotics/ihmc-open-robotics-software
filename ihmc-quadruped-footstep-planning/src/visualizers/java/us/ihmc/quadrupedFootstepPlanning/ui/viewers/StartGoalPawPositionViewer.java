@@ -26,7 +26,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class StartGoalPositionViewer extends AnimationTimer
+public class StartGoalPawPositionViewer extends AnimationTimer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -68,7 +68,7 @@ public class StartGoalPositionViewer extends AnimationTimer
 
    private final Messager messager;
 
-   public StartGoalPositionViewer(Messager messager)
+   public StartGoalPawPositionViewer(Messager messager)
    {
       this.messager = messager;
 
@@ -101,10 +101,10 @@ public class StartGoalPositionViewer extends AnimationTimer
       showLowLevelGoal(true);
    }
 
-   public StartGoalPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
-                                  Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
-                                  Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
-                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic, Topic<PlanarRegionsList> planarRegionDataTopic)
+   public StartGoalPawPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
+                                     Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
+                                     Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
+                                     Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic, Topic<PlanarRegionsList> planarRegionDataTopic)
    {
       this(messager);
 

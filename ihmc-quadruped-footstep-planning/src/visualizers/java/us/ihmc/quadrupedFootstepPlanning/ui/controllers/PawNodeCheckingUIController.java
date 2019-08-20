@@ -13,7 +13,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 
-public class FootstepNodeCheckingUIController
+public class PawNodeCheckingUIController
 {
    @FXML
    private ToggleButton enableNodeChecking;

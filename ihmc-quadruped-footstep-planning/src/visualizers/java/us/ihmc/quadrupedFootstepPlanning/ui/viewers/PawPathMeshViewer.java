@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-public class FootstepPathMeshViewer extends AnimationTimer
+public class PawPathMeshViewer extends AnimationTimer
 {
    private static final double DEFAULT_RADIUS = 0.05;
    private static final double zOffset = 0.01;
@@ -64,8 +64,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private QuadrantDependentList<Color> solutionFootstepColors = defaultSolutionFootstepColors;
    private double footstepRadius = DEFAULT_RADIUS;
 
-   public FootstepPathMeshViewer(Messager messager, Topic<PawPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
-                                 Topic<Boolean> showFootstepPreviewTopic)
+   public PawPathMeshViewer(Messager messager, Topic<PawPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
+                            Topic<Boolean> showFootstepPreviewTopic)
    {
       this.messager = messager;
       this.showFootstepPlanTopic = showFootstepPlanTopic;

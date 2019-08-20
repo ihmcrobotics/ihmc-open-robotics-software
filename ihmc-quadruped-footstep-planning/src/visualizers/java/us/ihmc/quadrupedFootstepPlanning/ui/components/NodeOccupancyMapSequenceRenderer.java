@@ -31,7 +31,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -165,7 +165,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       {
          for (PawNode node : nodesBeingExpanded)
          {
-            parentNodeColor = FootstepPathMeshViewer.defaultSolutionFootstepColors.get(node.getMovingQuadrant());
+            parentNodeColor = PawPathMeshViewer.defaultSolutionFootstepColors.get(node.getMovingQuadrant());
             break;
          }
       }

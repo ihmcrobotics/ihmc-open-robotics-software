@@ -1,8 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameterKeys;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -11,14 +12,15 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 import java.io.File;
 import java.io.IOException;
 
-public class FootstepPlannerParametersUIController
+public class PawPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private PawPlannerParametersBasics planningParameters;
 
    @FXML
    private Spinner<Double> maxWalkingSpeedMultiplier;
@@ -72,7 +74,7 @@ public class FootstepPlannerParametersUIController
 
    private Topic<PawPlannerParametersReadOnly> plannerParametersTopic;
 
-   public FootstepPlannerParametersUIController()
+   public PawPlannerParametersUIController()
    {
       File configurationFile = new File(CONFIGURATION_FILE_NAME);
       try
@@ -99,9 +101,9 @@ public class FootstepPlannerParametersUIController
    }
 
 
-   public void setPlannerParameters(PawPlannerParametersReadOnly parameters)
+   public void setPlannerParameters(PawPlannerParametersBasics parameters)
    {
-      parametersProperty.setPlannerParameters(parameters);
+      planningParameters = parameters;
    }
 
    public void setupControls()
@@ -136,35 +138,51 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindMaxWalkingSpeedMultiplier(maxWalkingSpeedMultiplier.getValueFactory().valueProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
 
-      parametersProperty.bidirectionalBindBodyGroundClearance(bodyGroundClearance.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinXClearanceFromFoot(minXClearanceFromFoot.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinYClearanceFromFoot(minYClearanceFromFoot.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumSurfaceInclineRadians(minSurfaceIncline.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(maxWalkingSpeedMultiplier, PawPlannerParameterKeys.maxWalkingSpeedMultiplier);
 
-      parametersProperty.bidirectionalBindProjectInsideDistance(projectInsideDistance.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumXYWiggleDistance(maximumXYWiggleDistance.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(bodyGroundClearance, PawPlannerParameterKeys.bodyGroundClearance);
+      javaFXStoredPropertyMap.put(minXClearanceFromFoot, PawPlannerParameterKeys.minXClearanceFromPaw);
+      javaFXStoredPropertyMap.put(minYClearanceFromFoot, PawPlannerParameterKeys.minYClearanceFromPaw);
+      javaFXStoredPropertyMap.put(minSurfaceIncline, PawPlannerParameterKeys.minimumSurfaceInclineRadians);
 
-      parametersProperty.bidirectionalBindCliffHeightToAvoid(cliffHeightToAvoid.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinFrontEndForwardDistanceFromCliffBottoms(minFrontEndForwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinFrontEndBackwardDistanceFromCliffBottoms(minFrontEndBackwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinHindEndForwardDistanceFromCliffBottoms(minHindEndForwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinHindEndBackwardDistanceFromCliffBottoms(minHindEndBackwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinLateralDistanceFromCliffBottoms(minLateralDistanceFromCliffBottoms.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(projectInsideDistance, PawPlannerParameterKeys.projectInsideDistance);
+      javaFXStoredPropertyMap.put(maximumXYWiggleDistance, PawPlannerParameterKeys.maximumXYWiggleDistance);
 
-      parametersProperty.bidirectionalBindDistanceWeight(distanceWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindXGaitWeight(xGaitWeight.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(cliffHeightToAvoid, PawPlannerParameterKeys.cliffHeightToAvoid);
+      javaFXStoredPropertyMap.put(minFrontEndForwardDistanceFromCliffBottoms, PawPlannerParameterKeys.minimumFrontEndForwardDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(minFrontEndBackwardDistanceFromCliffBottoms, PawPlannerParameterKeys.minimumFrontEndBackwardDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(minHindEndForwardDistanceFromCliffBottoms, PawPlannerParameterKeys.minimumHindEndForwardDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(minHindEndBackwardDistanceFromCliffBottoms, PawPlannerParameterKeys.minimumHindEndBackwardDistanceFromCliffBottoms);
+      javaFXStoredPropertyMap.put(minLateralDistanceFromCliffBottoms, PawPlannerParameterKeys.minimumLateralDistanceFromCliffBottoms);
 
-      parametersProperty.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindHeuristicsWeight(heuristicsWeight.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(distanceWeight, PawPlannerParameterKeys.distanceWeight);
+      javaFXStoredPropertyMap.put(yawWeight, PawPlannerParameterKeys.yawWeight);
+      javaFXStoredPropertyMap.put(xGaitWeight, PawPlannerParameterKeys.xGaitWeight);
+
+      javaFXStoredPropertyMap.put(stepUpWeight, PawPlannerParameterKeys.stepUpWeight);
+      javaFXStoredPropertyMap.put(stepDownWeight, PawPlannerParameterKeys.stepDownWeight);
+      javaFXStoredPropertyMap.put(costPerStep, PawPlannerParameterKeys.costPerStep);
+      javaFXStoredPropertyMap.put(heuristicsWeight, PawPlannerParameterKeys.heuristicsInflationWeight);
 
 
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(PawPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      {
+         planningParameters.set(parameters);
 
-      messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
+
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+   }
+
+   private void publishParameters()
+   {
+      messager.submitMessage(PawPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
    }
 
    @FXML
@@ -254,26 +272,5 @@ public class FootstepPlannerParametersUIController
          stepDownWeight.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("heuristicsWeight")) != null)
          heuristicsWeight.getValueFactory().setValue(value);
-   }
-
-
-
-
-   private PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters> createConverter()
-   {
-      return new PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters>()
-      {
-         @Override
-         public PawPlannerParametersReadOnly convert(SettablePawPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettablePawPlannerParameters interpret(PawPlannerParametersReadOnly messageContent)
-         {
-            return new SettablePawPlannerParameters(messageContent);
-         }
-      };
    }
 }

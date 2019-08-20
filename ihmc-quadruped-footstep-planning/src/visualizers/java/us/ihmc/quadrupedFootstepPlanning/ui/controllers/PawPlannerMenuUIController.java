@@ -8,7 +8,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMes
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class FootstepPlannerMenuUIController
+public class PawPlannerMenuUIController
 {
    private static final boolean VERBOSE = true;
 

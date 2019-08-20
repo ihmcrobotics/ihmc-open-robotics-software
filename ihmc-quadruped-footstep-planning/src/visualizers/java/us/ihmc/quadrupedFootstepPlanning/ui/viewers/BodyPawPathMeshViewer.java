@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters.BODYPATH_LINE_THICKNESS;
 
-public class BodyPathMeshViewer extends AnimationTimer
+public class BodyPawPathMeshViewer extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
 
@@ -52,7 +52,7 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
-   public BodyPathMeshViewer(Messager messager, Topic<Boolean> showPathPathTopic, Topic<Boolean> computePathTopic, Topic<List<? extends Point3DReadOnly>> bodyPathDataTopic)
+   public BodyPawPathMeshViewer(Messager messager, Topic<Boolean> showPathPathTopic, Topic<Boolean> computePathTopic, Topic<List<? extends Point3DReadOnly>> bodyPathDataTopic)
    {
       isExecutorServiceProvided = executorService == null;
 

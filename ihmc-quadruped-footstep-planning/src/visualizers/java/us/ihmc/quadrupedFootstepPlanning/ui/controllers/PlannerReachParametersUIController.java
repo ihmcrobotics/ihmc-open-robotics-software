@@ -7,10 +7,12 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameterKeys;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +20,7 @@ import java.io.IOException;
 public class PlannerReachParametersUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
+   private PawPlannerParametersBasics planningParameters;
 
 
    @FXML
@@ -102,9 +104,9 @@ public class PlannerReachParametersUIController
    }
 
 
-   public void setPlannerParameters(PawPlannerParametersReadOnly parameters)
+   public void setPlannerParameters(PawPlannerParametersBasics parameters)
    {
-      parametersProperty.setPlannerParameters(parameters);
+      planningParameters = parameters;
    }
 
    public void setupControls()
@@ -140,33 +142,49 @@ public class PlannerReachParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindMaximumFrontStepReach(maxFrontStepReach.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumFrontStepLength(maxFrontStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumFrontStepLength(minFrontStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumHindStepReach(maxHindStepReach.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumHindStepLength(maxHindStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumHindStepLength(minHindStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumStepWidth(maxStepWidth.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumStepWidth(minStepWidth.getValueFactory().valueProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
 
-      parametersProperty.bidirectionalBindMaximumFrontStepLengthWhenSteppingUp(maxFrontStepLengthWhenSteppingUp.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumFrontStepLengthWhenSteppingUp(minFrontStepLengthWhenSteppingUp.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumHindStepLengthWhenSteppingUp(maxHindStepLengthWhenSteppingUp.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumHindStepLengthWhenSteppingUp(minHindStepLengthWhenSteppingUp.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindStepZForSteppingUp(stepZForSteppingUp.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(maxFrontStepReach, PawPlannerParameterKeys.maximumFrontStepReach);
+      javaFXStoredPropertyMap.put(maxFrontStepLength, PawPlannerParameterKeys.maximumFrontStepLength);
+      javaFXStoredPropertyMap.put(minFrontStepLength, PawPlannerParameterKeys.minimumFrontStepLength);
+      javaFXStoredPropertyMap.put(maxHindStepReach, PawPlannerParameterKeys.maximumHindStepReach);
+      javaFXStoredPropertyMap.put(maxHindStepLength, PawPlannerParameterKeys.maximumHindStepLength);
+      javaFXStoredPropertyMap.put(minHindStepLength, PawPlannerParameterKeys.minimumHindStepLength);
+      javaFXStoredPropertyMap.put(maxStepWidth, PawPlannerParameterKeys.maximumStepOutward);
+      javaFXStoredPropertyMap.put(minStepWidth, PawPlannerParameterKeys.maximumStepInward);
 
-      parametersProperty.bidirectionalBindMaximumFrontStepLengthWhenSteppingDown(maxFrontStepLengthWhenSteppingDown.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumFrontStepLengthWhenSteppingDown(minFrontStepLengthWhenSteppingDown.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumHindStepLengthWhenSteppingDown(maxHindStepLengthWhenSteppingDown.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumHindStepLengthWhenSteppingDown(minHindStepLengthWhenSteppingDown.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindStepZForSteppingDown(stepZForSteppingDown.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingUp, PawPlannerParameterKeys.maximumFrontStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingUp, PawPlannerParameterKeys.minimumFrontStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingUp, PawPlannerParameterKeys.maximumHindStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingUp, PawPlannerParameterKeys.minimumHindStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(stepZForSteppingUp, PawPlannerParameterKeys.stepZForSteppingUp);
 
-      parametersProperty.bidirectionalBindMaximumStepYaw(maxStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumStepYaw(minStepYaw.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumStepChangeZ(maxStepChangeZ.getValueFactory().valueProperty());
+      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingDown, PawPlannerParameterKeys.maximumFrontStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingDown, PawPlannerParameterKeys.minimumFrontStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingDown, PawPlannerParameterKeys.maximumHindStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingDown, PawPlannerParameterKeys.minimumHindStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(stepZForSteppingDown, PawPlannerParameterKeys.stepZForSteppingDown);
 
+      javaFXStoredPropertyMap.put(maxStepYaw, PawPlannerParameterKeys.maximumStepYawOutward);
+      javaFXStoredPropertyMap.put(minStepYaw, PawPlannerParameterKeys.maximumStepYawInward);
+      javaFXStoredPropertyMap.put(maxStepChangeZ, PawPlannerParameterKeys.maximumStepChangeZ);
 
-      messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(PawPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      {
+         planningParameters.set(parameters);
+
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
+
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+   }
+
+   private void publishParameters()
+   {
+      messager.submitMessage(PawPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
    }
 
    @FXML
@@ -260,26 +278,5 @@ public class PlannerReachParametersUIController
          minStepYaw.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("maxStepChangeZ")) != null)
          maxStepChangeZ.getValueFactory().setValue(value);
-   }
-
-
-
-
-   private PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters> createConverter()
-   {
-      return new PropertyToMessageTypeConverter<PawPlannerParametersReadOnly, SettablePawPlannerParameters>()
-      {
-         @Override
-         public PawPlannerParametersReadOnly convert(SettablePawPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettablePawPlannerParameters interpret(PawPlannerParametersReadOnly messageContent)
-         {
-            return new SettablePawPlannerParameters(messageContent);
-         }
-      };
    }
 }

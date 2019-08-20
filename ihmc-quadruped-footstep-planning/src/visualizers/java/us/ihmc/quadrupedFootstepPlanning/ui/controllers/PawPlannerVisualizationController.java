@@ -12,7 +12,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPla
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class FootstepPlannerVisualizationController
+public class PawPlannerVisualizationController
 {
    @FXML
    private CheckBox showAllValidNodes;

@@ -18,7 +18,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.VisibilityGraphWithAStarPawPlanner;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.YoPawPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
@@ -54,7 +54,7 @@ public class PawPlanningController extends QuadrupedToolboxController
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoVisibilityGraphParameters visibilityGraphParameters;
-   private final YoPawPlannerParameters footstepPlannerParameters;
+   private final PawPlannerParametersBasics pawPlannerParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
    private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -63,15 +63,16 @@ public class PawPlanningController extends QuadrupedToolboxController
 
 
    public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
-                                PawPlannerParametersReadOnly defaultPawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
+                                PawPlannerParametersBasics pawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
+      this.pawPlannerParameters = pawPlannerParameters;
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
-      footstepPlannerParameters = new YoPawPlannerParameters(defaultPawPlannerParameters, registry);
+      new YoPawPlannerParameters(pawPlannerParameters, registry);
 
       if (robotDataReceiver != null)
       {
@@ -82,8 +83,8 @@ public class PawPlanningController extends QuadrupedToolboxController
                                                                      robotDataReceiver.getReferenceFrames(), null, registry));
       }
       plannerMap.put(PawPlannerType.A_STAR,
-                     AStarPawPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, registry));
-      plannerMap.put(PawPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPawPlanner(footstepPlannerParameters, xGaitSettings,
+                     AStarPawPlanner.createPlanner(this.pawPlannerParameters, xGaitSettings, null, registry));
+      plannerMap.put(PawPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPawPlanner(this.pawPlannerParameters, xGaitSettings,
                                                                                                   visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(PawPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
@@ -121,7 +122,7 @@ public class PawPlanningController extends QuadrupedToolboxController
 
    public void processFootstepPlannerParametersPacket(QuadrupedPawPlannerParametersPacket packet)
    {
-      footstepPlannerParameters.set(packet);
+      pawPlannerParameters.set(packet);
    }
 
    public void processVisibilityGraphParametersPacket(VisibilityGraphsParametersPacket packet)

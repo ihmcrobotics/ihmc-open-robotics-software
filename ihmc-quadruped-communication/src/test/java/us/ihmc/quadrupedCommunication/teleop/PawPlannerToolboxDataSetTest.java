@@ -38,9 +38,10 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerCom
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
-import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedFootstepPlanning.ui.PawPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
@@ -69,7 +70,7 @@ public abstract class PawPlannerToolboxDataSetTest
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = true;
 
-   private FootstepPlannerUI ui = null;
+   private PawPlannerUI ui = null;
    protected Messager messager = null;
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
@@ -107,20 +108,9 @@ public abstract class PawPlannerToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
-      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
-      {
-         @Override
-         public double getXGaitWeight()
-         {
-            return 0.0;
-         }
-
-         @Override
-         public double getDesiredVelocityWeight()
-         {
-            return 0.0;
-         }
-      };
+      PawPlannerParametersBasics parameters = new DefaultPawPlannerParameters();
+      parameters.setXGaitWeight(0.0);
+      parameters.setDesiredVelocityWeight(0.0);
 
       footstepPlanningModule = new PawPlanningModule(robotName, null, parameters, xGaitSettings,
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
@@ -192,7 +182,7 @@ public abstract class PawPlannerToolboxDataSetTest
          @Override
          public void start(Stage stage) throws Exception
          {
-            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            ui = PawPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
             ui.show();
          }
 
