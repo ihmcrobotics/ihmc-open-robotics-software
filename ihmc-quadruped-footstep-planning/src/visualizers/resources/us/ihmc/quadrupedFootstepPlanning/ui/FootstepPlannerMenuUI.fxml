@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<MenuBar xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController">
+<MenuBar xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawPlannerMenuUIController">
   <menus>
     <Menu mnemonicParsing="false" text="File">
       <items>

@@ -3,7 +3,6 @@ package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.SettablePawPlannerParameters;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -16,6 +15,8 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
@@ -31,7 +32,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class NodeCheckerRenderer extends AnimationTimer
+public class PawNodeCheckerRenderer extends AnimationTimer
 {
    private final AtomicReference<Boolean> nodeCheckerEnabled;
    private final AtomicReference<Boolean> checkNodeUsingPoseBetweenFeet;
@@ -40,7 +41,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Quaternion> footOrientationReference;
    private final AtomicReference<RobotQuadrant> initialSupportQuadrantReference;
 
-   private final SettablePawPlannerParameters parameters = new SettablePawPlannerParameters(new DefaultPawPlannerParameters());
+   private final PawPlannerParametersBasics parameters = new DefaultPawPlannerParameters();
    private final QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
    private final SimplePlanarRegionPawNodeSnapper snapper;
 
@@ -51,7 +52,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
    private static final Color ghostFootstepColor = Color.color(0.2, 0.2, 0.2, 0.2);
 
-   public NodeCheckerRenderer(Messager messager)
+   public PawNodeCheckerRenderer(Messager messager)
    {
       nodeCheckerEnabled = messager.createInput(PawPlannerMessagerAPI.EnableNodeChecking, false);
       planarRegionsReference = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);

@@ -24,7 +24,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 
-public class StartGoalOrientationViewer extends AnimationTimer
+public class StartGoalPawOrientationViewer extends AnimationTimer
 {
    private final Group root = new Group();
 
@@ -48,9 +48,9 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
    private final AtomicReference<Quaternion> goalQuaternionReference;
 
-   public StartGoalOrientationViewer(Messager messager, Topic<Boolean> startOrientationEditModeEnabledTopic, Topic<Boolean> goalOrientationEditModeEnabledTopic,
-                                     Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
-                                     Topic<Quaternion> lowLevelGoalOrientationTopic, Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
+   public StartGoalPawOrientationViewer(Messager messager, Topic<Boolean> startOrientationEditModeEnabledTopic, Topic<Boolean> goalOrientationEditModeEnabledTopic,
+                                        Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
+                                        Topic<Quaternion> lowLevelGoalOrientationTopic, Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
    {
       lowLevelGoalArrow.setMouseTransparent(true);
 

@@ -30,7 +30,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
-import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedFootstepPlanning.ui.PawPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.Assert;
@@ -61,7 +61,7 @@ public abstract class PawPlannerDataSetTest
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = false;
 
-   private FootstepPlannerUI ui = null;
+   private PawPlannerUI ui = null;
    protected Messager messager = null;
 
    protected QuadrupedXGaitSettings xGaitSettings = null;
@@ -123,7 +123,7 @@ public abstract class PawPlannerDataSetTest
          @Override
          public void start(Stage stage) throws Exception
          {
-            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            ui = PawPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
             ui.show();
          }
 

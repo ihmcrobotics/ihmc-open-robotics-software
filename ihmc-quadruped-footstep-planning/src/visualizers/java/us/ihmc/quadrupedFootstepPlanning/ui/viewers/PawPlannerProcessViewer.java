@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class FootstepPlannerProcessViewer extends AnimationTimer
+public class PawPlannerProcessViewer extends AnimationTimer
 {
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -52,7 +52,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    private final PawNodeCost costCalculator;
    private final PawStepGraph graph = new PawStepGraph();
 
-   public FootstepPlannerProcessViewer(Messager messager)
+   public PawPlannerProcessViewer(Messager messager)
    {
       PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,

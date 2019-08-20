@@ -10,6 +10,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -35,7 +36,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
    private final PawPlanningController footstepPlanningController;
 
-   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersReadOnly defaultPawPlannerParameters,
+   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersBasics defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
@@ -44,7 +45,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
            pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
-   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawPlannerParametersReadOnly defaultPawPlannerParameters,
+   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawPlannerParametersBasics defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)

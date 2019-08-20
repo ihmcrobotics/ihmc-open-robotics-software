@@ -3,7 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.ui;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class SimpleFootstepNode
+public class SimplePawNode
 {
    private final RobotQuadrant movingQuadrant;
    private final int xIndex;
@@ -11,17 +11,17 @@ public class SimpleFootstepNode
 
    private final int hashCode;
 
-   public SimpleFootstepNode(PawNode node)
+   public SimplePawNode(PawNode node)
    {
       this(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
    }
 
-   public SimpleFootstepNode(RobotQuadrant movingQuadrant, double xPosition, double yPosition)
+   public SimplePawNode(RobotQuadrant movingQuadrant, double xPosition, double yPosition)
    {
       this(movingQuadrant, PawNode.snapToGrid(xPosition), PawNode.snapToGrid(yPosition));
    }
 
-   public SimpleFootstepNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
+   public SimplePawNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
    {
       this.movingQuadrant = movingQuadrant;
       this.xIndex = xIndex;
@@ -30,7 +30,7 @@ public class SimpleFootstepNode
       hashCode = computeHashCode(this);
    }
 
-   private static int computeHashCode(SimpleFootstepNode node)
+   private static int computeHashCode(SimplePawNode node)
    {
       final int prime = 31;
       int result = 1;
