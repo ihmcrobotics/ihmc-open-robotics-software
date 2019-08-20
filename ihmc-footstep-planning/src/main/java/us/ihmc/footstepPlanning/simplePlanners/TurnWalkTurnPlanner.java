@@ -287,7 +287,6 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
    }
 
-
    private static class DefaultTurnWalkTurnPlannerParameters extends DefaultFootstepPlannerParameters
    {
       public DefaultTurnWalkTurnPlannerParameters()

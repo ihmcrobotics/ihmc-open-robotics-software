@@ -512,9 +512,11 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setFootPolygons(footPolygons);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludeBoundingBoxCost(true);
+      costBuilder.setIncludeAreaCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
       costBuilder.setCollisionDetector(collisionDetector);
 

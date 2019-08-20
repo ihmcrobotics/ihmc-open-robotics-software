@@ -374,8 +374,10 @@ public class FootstepPathCalculatorModule
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
       costBuilder.setSnapper(snapper);
+      costBuilder.setFootPolygons(footPolygons);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
+      costBuilder.setIncludeAreaCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
