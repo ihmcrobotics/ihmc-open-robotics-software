@@ -316,7 +316,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    private Path findSaveFileDirectory()
    {
-      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/pawPlanning/graphSearch/parameters
+      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory
 
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();

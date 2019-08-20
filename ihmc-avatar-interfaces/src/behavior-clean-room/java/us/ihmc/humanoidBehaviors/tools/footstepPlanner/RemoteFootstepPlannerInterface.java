@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Taken mostly from us.ihmc.pawPlanning.ui.RemoteUIMessageConverter
+ * Taken mostly from us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter
  */
 public class RemoteFootstepPlannerInterface
 {
