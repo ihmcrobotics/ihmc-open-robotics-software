@@ -130,6 +130,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -241,6 +245,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -412,6 +422,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getStepDownWeight());
 
+      cdr.write_type_6(data.getLongStepWeight());
+
+      cdr.write_type_6(data.getFootholdAreaWeight());
+
       cdr.write_type_6(data.getCostPerStep());
 
       cdr.write_type_7(data.getUseQuadraticDistanceCost());
@@ -522,6 +536,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setStepDownWeight(cdr.read_type_6());
       	
+      data.setLongStepWeight(cdr.read_type_6());
+      	
+      data.setFootholdAreaWeight(cdr.read_type_6());
+      	
       data.setCostPerStep(cdr.read_type_6());
       	
       data.setUseQuadraticDistanceCost(cdr.read_type_7());
@@ -590,6 +608,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("lateral_weight", data.getLateralWeight());
       ser.write_type_6("step_up_weight", data.getStepUpWeight());
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
+      ser.write_type_6("long_step_weight", data.getLongStepWeight());
+      ser.write_type_6("foothold_area_weight", data.getFootholdAreaWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_7("use_quadratic_distance_cost", data.getUseQuadraticDistanceCost());
       ser.write_type_7("use_quadratic_height_cost", data.getUseQuadraticHeightCost());
@@ -648,6 +668,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setLateralWeight(ser.read_type_6("lateral_weight"));
       data.setStepUpWeight(ser.read_type_6("step_up_weight"));
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
+      data.setLongStepWeight(ser.read_type_6("long_step_weight"));
+      data.setFootholdAreaWeight(ser.read_type_6("foothold_area_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setUseQuadraticDistanceCost(ser.read_type_7("use_quadratic_distance_cost"));
       data.setUseQuadraticHeightCost(ser.read_type_7("use_quadratic_height_cost"));

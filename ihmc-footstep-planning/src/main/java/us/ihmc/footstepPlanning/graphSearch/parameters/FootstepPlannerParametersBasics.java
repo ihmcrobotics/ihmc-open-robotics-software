@@ -275,6 +275,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
+   default void setFootholdAreaWeight(double footholdAreaWeight)
+   {
+      set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
+   }
+
+   default void setLongStepWeight(double weight)
+   {
+      set(FootstepPlannerParameterKeys.longStepWeight, weight);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
@@ -377,5 +387,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
       if (parametersPacket.getBoundingBoxCost() != -1.0)
          setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
+
+      if (parametersPacket.getFootholdAreaWeight() != -1.0)
+         setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
+      if (parametersPacket.getLongStepWeight() != -1.0)
+         setLongStepWeight(parametersPacket.getLongStepWeight());
    }
 }

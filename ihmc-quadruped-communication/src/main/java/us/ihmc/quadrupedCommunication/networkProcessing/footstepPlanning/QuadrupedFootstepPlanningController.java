@@ -223,6 +223,16 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          planner.setTimeout(Double.POSITIVE_INFINITY);
       }
 
+      double bestEffortTimeout = request.getBestEffortTimeout();
+      if (bestEffortTimeout > 0.0 && Double.isFinite(bestEffortTimeout))
+      {
+         planner.setBestEffortTimeout(bestEffortTimeout);
+      }
+      else
+      {
+         planner.setBestEffortTimeout(0.0);
+      }
+
       planner.setStart(start);
       planner.setGoal(goal);
 

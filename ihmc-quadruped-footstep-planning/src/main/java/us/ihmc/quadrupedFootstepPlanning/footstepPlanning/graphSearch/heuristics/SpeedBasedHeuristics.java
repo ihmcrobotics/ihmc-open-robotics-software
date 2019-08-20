@@ -4,6 +4,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SpeedBasedHeuristics extends CostToGoHeuristics
 {

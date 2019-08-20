@@ -10,6 +10,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
 {
