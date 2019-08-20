@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__QuadrupedFootstepPlanningRequestPacket__idl__
-#define __controller_msgs__msg__QuadrupedFootstepPlanningRequestPacket__idl__
+#ifndef __controller_msgs__msg__PawPlanningRequestPacket__idl__
+#define __controller_msgs__msg__PawPlanningRequestPacket__idl__
 
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
@@ -22,30 +22,30 @@ module controller_msgs
       const octet ROBOT_QUADRANT_HIND_RIGHT =
       3;
 
-      const octet FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET =
+      const octet PAW_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET =
       0;
 
-      const octet FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS =
+      const octet PAW_PLANNER_TARGET_TYPE_FOOTSTEPS =
       1;
 
       const long NO_PLAN_ID =
       -1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN =
+      const octet PAW_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN =
       0;
 
-      const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN =
+      const octet PAW_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
+      const octet PAW_PLANNER_TYPE_A_STAR =
       2;
 
 
       /**
        * This message is part of the IHMC quadruped footstep planning module.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedFootstepPlanningRequestPacket_")
-      struct QuadrupedFootstepPlanningRequestPacket
+      @TypeCode(type="controller_msgs::msg::dds_::PawPlanningRequestPacket_")
+      struct PawPlanningRequestPacket
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -65,7 +65,7 @@ module controller_msgs
         @defaultValue(value=-1)
         long planner_request_id;
         @defaultValue(value=255)
-        octet requested_footstep_planner_type;
+        octet requested_paw_planner_type;
         double timeout;
         double best_effort_timeout;
         double horizon_length;

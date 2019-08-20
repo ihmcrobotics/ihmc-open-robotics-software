@@ -9,18 +9,18 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC quadruped footstep planning module.
        */
-public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFootstepPlanningRequestPacket> implements Settable<QuadrupedFootstepPlanningRequestPacket>, EpsilonComparable<QuadrupedFootstepPlanningRequestPacket>
+public class PawPlanningRequestPacket extends Packet<PawPlanningRequestPacket> implements Settable<PawPlanningRequestPacket>, EpsilonComparable<PawPlanningRequestPacket>
 {
    public static final byte ROBOT_QUADRANT_FRONT_LEFT = (byte) 0;
    public static final byte ROBOT_QUADRANT_FRONT_RIGHT = (byte) 1;
    public static final byte ROBOT_QUADRANT_HIND_LEFT = (byte) 2;
    public static final byte ROBOT_QUADRANT_HIND_RIGHT = (byte) 3;
-   public static final byte FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET = (byte) 0;
-   public static final byte FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS = (byte) 1;
+   public static final byte PAW_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET = (byte) 0;
+   public static final byte PAW_PLANNER_TARGET_TYPE_FOOTSTEPS = (byte) 1;
    public static final int NO_PLAN_ID = -1;
-   public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN = (byte) 0;
-   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN = (byte) 1;
-   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 2;
+   public static final byte PAW_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN = (byte) 0;
+   public static final byte PAW_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN = (byte) 1;
+   public static final byte PAW_PLANNER_TYPE_A_STAR = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -36,14 +36,14 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public int planner_request_id_ = -1;
-   public byte requested_footstep_planner_type_ = (byte) 255;
+   public byte requested_paw_planner_type_ = (byte) 255;
    public double timeout_;
    public double best_effort_timeout_;
    public double horizon_length_;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    public boolean assume_flat_ground_;
 
-   public QuadrupedFootstepPlanningRequestPacket()
+   public PawPlanningRequestPacket()
    {
       body_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       body_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
@@ -56,13 +56,13 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
    }
 
-   public QuadrupedFootstepPlanningRequestPacket(QuadrupedFootstepPlanningRequestPacket other)
+   public PawPlanningRequestPacket(PawPlanningRequestPacket other)
    {
       this();
       set(other);
    }
 
-   public void set(QuadrupedFootstepPlanningRequestPacket other)
+   public void set(PawPlanningRequestPacket other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -80,7 +80,7 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       planner_request_id_ = other.planner_request_id_;
 
-      requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
+      requested_paw_planner_type_ = other.requested_paw_planner_type_;
 
       timeout_ = other.timeout_;
 
@@ -183,13 +183,13 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       return planner_request_id_;
    }
 
-   public void setRequestedFootstepPlannerType(byte requested_footstep_planner_type)
+   public void setRequestedPawPlannerType(byte requested_paw_planner_type)
    {
-      requested_footstep_planner_type_ = requested_footstep_planner_type;
+      requested_paw_planner_type_ = requested_paw_planner_type;
    }
-   public byte getRequestedFootstepPlannerType()
+   public byte getRequestedPawPlannerType()
    {
-      return requested_footstep_planner_type_;
+      return requested_paw_planner_type_;
    }
 
    public void setTimeout(double timeout)
@@ -235,19 +235,19 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    }
 
 
-   public static Supplier<QuadrupedFootstepPlanningRequestPacketPubSubType> getPubSubType()
+   public static Supplier<PawPlanningRequestPacketPubSubType> getPubSubType()
    {
-      return QuadrupedFootstepPlanningRequestPacketPubSubType::new;
+      return PawPlanningRequestPacketPubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return QuadrupedFootstepPlanningRequestPacketPubSubType::new;
+      return PawPlanningRequestPacketPubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(QuadrupedFootstepPlanningRequestPacket other, double epsilon)
+   public boolean epsilonEquals(PawPlanningRequestPacket other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -268,7 +268,7 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_paw_planner_type_, other.requested_paw_planner_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
@@ -288,9 +288,9 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof QuadrupedFootstepPlanningRequestPacket)) return false;
+      if(!(other instanceof PawPlanningRequestPacket)) return false;
 
-      QuadrupedFootstepPlanningRequestPacket otherMyClass = (QuadrupedFootstepPlanningRequestPacket) other;
+      PawPlanningRequestPacket otherMyClass = (PawPlanningRequestPacket) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -308,7 +308,7 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
-      if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
+      if(this.requested_paw_planner_type_ != otherMyClass.requested_paw_planner_type_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
@@ -328,7 +328,7 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("QuadrupedFootstepPlanningRequestPacket {");
+      builder.append("PawPlanningRequestPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("initial_step_robot_quadrant=");
@@ -353,8 +353,8 @@ public class QuadrupedFootstepPlanningRequestPacket extends Packet<QuadrupedFoot
       builder.append(this.goal_orientation_in_world_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
-      builder.append("requested_footstep_planner_type=");
-      builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
+      builder.append("requested_paw_planner_type=");
+      builder.append(this.requested_paw_planner_type_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("best_effort_timeout=");

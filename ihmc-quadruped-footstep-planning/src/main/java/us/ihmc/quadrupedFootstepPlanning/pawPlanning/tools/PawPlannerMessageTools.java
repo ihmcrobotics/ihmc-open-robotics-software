@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools;
 
-import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.PawPlanningRequestPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,16 +14,16 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawPlannerMessageTools
 {
-   public static QuadrupedFootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialBodyPose, RobotQuadrant initialStanceQuadrant,
-                                                                                              FramePose3D goalPose)
+   public static PawPlanningRequestPacket createPawPlanningRequestPacket(FramePose3D initialBodyPose, RobotQuadrant initialStanceQuadrant,
+                                                                         FramePose3D goalPose)
    {
-      return createFootstepPlanningRequestPacket(initialBodyPose, initialStanceQuadrant, goalPose, PawPlannerType.A_STAR);
+      return createPawPlanningRequestPacket(initialBodyPose, initialStanceQuadrant, goalPose, PawPlannerType.A_STAR);
    }
 
-   public static QuadrupedFootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialBodyPose, RobotQuadrant initialStanceQuadrant,
-                                                                                            FramePose3D goalPose, PawPlannerType requestedPlannerType)
+   public static PawPlanningRequestPacket createPawPlanningRequestPacket(FramePose3D initialBodyPose, RobotQuadrant initialStanceQuadrant,
+                                                                         FramePose3D goalPose, PawPlannerType requestedPlannerType)
    {
-      QuadrupedFootstepPlanningRequestPacket message = new QuadrupedFootstepPlanningRequestPacket();
+      PawPlanningRequestPacket message = new PawPlanningRequestPacket();
       message.setInitialStepRobotQuadrant(initialStanceQuadrant.toByte());
 
       FramePoint3D initialFramePoint = new FramePoint3D(initialBodyPose.getPosition());
@@ -42,7 +42,7 @@ public class PawPlannerMessageTools
       goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       message.getGoalOrientationInWorld().set(new Quaternion32(goalFrameOrientation));
 
-      message.setRequestedFootstepPlannerType(requestedPlannerType.toByte());
+      message.setRequestedPawPlannerType(requestedPlannerType.toByte());
       return message;
    }
 

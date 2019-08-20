@@ -82,8 +82,8 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> processFootstepPlanningRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> processPawPlanningRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedPawPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
@@ -134,10 +134,10 @@ public class PawPlanningModule extends QuadrupedToolboxModule
          footstepPlanningController.processSupportRegionParameters(message);
    }
 
-   private void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
+   private void processPawPlanningRequest(PawPlanningRequestPacket packet)
    {
       if (footstepPlanningController != null)
-         footstepPlanningController.processFootstepPlanningRequest(packet);
+         footstepPlanningController.processPawPlanningRequest(packet);
    }
 
    private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)

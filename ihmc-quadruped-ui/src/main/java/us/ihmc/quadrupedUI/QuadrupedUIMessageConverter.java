@@ -81,7 +81,7 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<QuadrupedPawPlannerParametersPacket> footstepPlannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private IHMCRealtimeROS2Publisher<PawPlanningRequestPacket> pawPlanningRequestPublisher;
 
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
    private IHMCRealtimeROS2Publisher<SoleTrajectoryMessage> soleTrajectoryMessagePublisher;
@@ -144,8 +144,8 @@ public class QuadrupedUIMessageConverter
                                            s -> messager.submitMessage(QuadrupedUIMessagerAPI.FootstepStatusMessageTopic, s.takeNextData()));
 
       // we want to listen to the incoming request to the planning toolbox
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, footstepPlannerInputTopicGenerator,
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, PawPlanningRequestPacket.class, footstepPlannerInputTopicGenerator,
+                                           s -> processPawPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanMessage.class, footstepPlannerPubGenerator,
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
@@ -203,7 +203,7 @@ public class QuadrupedUIMessageConverter
       footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedPawPlannerParametersPacket.class, footstepPlannerInputTopicGenerator);
       visibilityGraphsParametersPublisher = ROS2Tools.createPublisher(ros2Node, VisibilityGraphsParametersPacket.class, footstepPlannerInputTopicGenerator);
       plannerStatisticsRequestPublisher = ROS2Tools.createPublisher(ros2Node, PlanningStatisticsRequestMessage.class, footstepPlannerInputTopicGenerator);
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, footstepPlannerInputTopicGenerator);
+      pawPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, PawPlanningRequestPacket.class, footstepPlannerInputTopicGenerator);
 
       stepListMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
 
@@ -264,7 +264,7 @@ public class QuadrupedUIMessageConverter
       messager.submitMessage(QuadrupedUIMessagerAPI.CurrentSteppingStateNameTopic, currentState);
    }
 
-   private void processFootstepPlanningRequestPacket(QuadrupedFootstepPlanningRequestPacket packet)
+   private void processPawPlanningRequestPacket(PawPlanningRequestPacket packet)
    {
       if (verbose)
          PrintTools.info("Received a planning request.");
@@ -273,7 +273,7 @@ public class QuadrupedUIMessageConverter
       Quaternion goalOrientation = packet.getGoalOrientationInWorld();
       Point3D startPosition = packet.getBodyPositionInWorld();
       Quaternion startOrientation = packet.getBodyOrientationInWorld();
-      PawPlannerType plannerType = PawPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
+      PawPlannerType plannerType = PawPlannerType.fromByte(packet.getRequestedPawPlannerType());
       RobotQuadrant initialSupportSide = RobotQuadrant.fromByte(packet.getInitialStepRobotQuadrant());
       int plannerRequestId = packet.getPlannerRequestId();
 
@@ -476,7 +476,7 @@ public class QuadrupedUIMessageConverter
 
    private void submitFootstepPlanningRequestPacket()
    {
-      QuadrupedFootstepPlanningRequestPacket packet = new QuadrupedFootstepPlanningRequestPacket();
+      PawPlanningRequestPacket packet = new PawPlanningRequestPacket();
       if (plannerStartTargetTypeReference.get() == PawPlannerTargetType.POSE_BETWEEN_FEET)
       {
          packet.getBodyPositionInWorld().set(plannerStartPositionReference.get());
@@ -497,7 +497,7 @@ public class QuadrupedUIMessageConverter
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
       if (plannerTypeReference.get() != null)
-         packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
+         packet.setRequestedPawPlannerType(plannerTypeReference.get().toByte());
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)
@@ -506,7 +506,7 @@ public class QuadrupedUIMessageConverter
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       packet.setAssumeFlatGround(assumeFlatGround.get());
 
-      footstepPlanningRequestPublisher.publish(packet);
+      pawPlanningRequestPublisher.publish(packet);
    }
 
    private void requestAbortPlanning()

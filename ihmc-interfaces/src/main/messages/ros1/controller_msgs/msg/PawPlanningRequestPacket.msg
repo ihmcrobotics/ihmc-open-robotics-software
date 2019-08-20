@@ -6,17 +6,17 @@ int8 ROBOT_QUADRANT_HIND_LEFT=2
 
 int8 ROBOT_QUADRANT_HIND_RIGHT=3
 
-int8 FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET=0
+int8 PAW_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET=0
 
-int8 FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS=1
+int8 PAW_PLANNER_TARGET_TYPE_FOOTSTEPS=1
 
 int32 NO_PLAN_ID=-1
 
-int8 FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN=0
+int8 PAW_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN=0
 
-int8 FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN=1
+int8 PAW_PLANNER_TYPE_VIS_GRAPH_WITH_TURN_WALK_TURN=1
 
-int8 FOOTSTEP_PLANNER_TYPE_A_STAR=2
+int8 PAW_PLANNER_TYPE_A_STAR=2
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -46,7 +46,7 @@ geometry_msgs/Quaternion goal_orientation_in_world
 int32 planner_request_id
 
 # Field default value 255
-int8 requested_footstep_planner_type
+int8 requested_paw_planner_type
 
 float64 timeout
 

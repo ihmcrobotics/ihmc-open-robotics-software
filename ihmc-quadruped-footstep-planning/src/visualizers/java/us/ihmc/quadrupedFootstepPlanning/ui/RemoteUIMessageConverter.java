@@ -80,7 +80,7 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedPawPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private IHMCRealtimeROS2Publisher<PawPlanningRequestPacket> pawPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> footstepDataListPublisher;
 //   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
@@ -141,9 +141,9 @@ public class RemoteUIMessageConverter
    {
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningRequestPacket.class,
+      ROS2Tools.createCallbackSubscription(ros2Node, PawPlanningRequestPacket.class,
                                            PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+                                           s -> processPawPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanMessage.class, PawPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
@@ -185,8 +185,8 @@ public class RemoteUIMessageConverter
             .createPublisher(ros2Node, VisibilityGraphsParametersPacket.class, PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class,
                                                         PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
+      pawPlanningRequestPublisher = ROS2Tools
+            .createPublisher(ros2Node, PawPlanningRequestPacket.class, PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       plannerStatisticsRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, PlanningStatisticsRequestMessage.class, PawPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
@@ -210,7 +210,7 @@ public class RemoteUIMessageConverter
       */
    }
 
-   private void processFootstepPlanningRequestPacket(QuadrupedFootstepPlanningRequestPacket packet)
+   private void processPawPlanningRequestPacket(PawPlanningRequestPacket packet)
    {
       if (verbose)
          PrintTools.info("Received a planning request.");
@@ -219,7 +219,7 @@ public class RemoteUIMessageConverter
       Quaternion goalOrientation = packet.getGoalOrientationInWorld();
       Point3D startPosition = packet.getBodyPositionInWorld();
       Quaternion startOrientation = packet.getBodyOrientationInWorld();
-      PawPlannerType plannerType = PawPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
+      PawPlannerType plannerType = PawPlannerType.fromByte(packet.getRequestedPawPlannerType());
       RobotQuadrant initialSupportSide = RobotQuadrant.fromByte(packet.getInitialStepRobotQuadrant());
       int plannerRequestId = packet.getPlannerRequestId();
 
@@ -376,7 +376,7 @@ public class RemoteUIMessageConverter
 
    private void submitFootstepPlanningRequestPacket()
    {
-      QuadrupedFootstepPlanningRequestPacket packet = new QuadrupedFootstepPlanningRequestPacket();
+      PawPlanningRequestPacket packet = new PawPlanningRequestPacket();
       if (plannerStartTargetTypeReference.get() == PawPlannerTargetType.POSE_BETWEEN_FEET)
       {
          packet.getBodyPositionInWorld().set(plannerStartPositionReference.get());
@@ -399,7 +399,7 @@ public class RemoteUIMessageConverter
       if (plannerBestEffortTimeoutReference.get() != null)
          packet.setBestEffortTimeout(plannerBestEffortTimeoutReference.get());
       if (plannerTypeReference.get() != null)
-         packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
+         packet.setRequestedPawPlannerType(plannerTypeReference.get().toByte());
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)
@@ -408,7 +408,7 @@ public class RemoteUIMessageConverter
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       packet.setAssumeFlatGround(assumeFlatGround.get());
 
-      footstepPlanningRequestPublisher.publish(packet);
+      pawPlanningRequestPublisher.publish(packet);
    }
 
    private static PawPlan convertToFootstepPlan(QuadrupedTimedStepListMessage footstepDataListMessage)

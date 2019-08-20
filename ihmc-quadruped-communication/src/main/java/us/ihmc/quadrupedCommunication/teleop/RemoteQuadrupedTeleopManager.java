@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
@@ -55,14 +54,14 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> stepTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> footstepPlannerStatePublisher;
+   private final IHMCROS2Publisher<ToolboxStateMessage> pawPlannerStatePublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListTeleopPublisher;
    private final IHMCROS2Publisher<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
-   private final IHMCROS2Publisher<QuadrupedFootstepPlanningRequestPacket> planningRequestPublisher;
+   private final IHMCROS2Publisher<PawPlanningRequestPacket> planningRequestPublisher;
 
    private final AtomicDouble timestamp = new AtomicDouble();
    private final QuadrupedRobotDataReceiver robotDataReceiver;
@@ -103,14 +102,14 @@ public class RemoteQuadrupedTeleopManager
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
-      footstepPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
+      pawPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
       planarRegionsListTeleopPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
       stepXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubGenerator);
       bodyPathPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopSubGenerator);
 
       plannerXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, footstepPlannerSubGenerator);
-      planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, footstepPlannerSubGenerator);
+      planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, PawPlanningRequestPacket.class, footstepPlannerSubGenerator);
 
       robotDataReceiver = new QuadrupedRobotDataReceiver(robotModel, null);
 
@@ -138,9 +137,9 @@ public class RemoteQuadrupedTeleopManager
       plannerXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
    }
 
-   public void publishPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
+   public void publishPlanningRequest(PawPlanningRequestPacket packet)
    {
-      footstepPlannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+      pawPlannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
       planningRequestPublisher.publish(packet);
    }
 
