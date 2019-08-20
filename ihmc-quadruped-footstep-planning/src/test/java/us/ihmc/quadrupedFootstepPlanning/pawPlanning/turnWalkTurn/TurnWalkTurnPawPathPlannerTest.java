@@ -8,7 +8,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-public class QuadrupedTurnWalkTurnPathPlannerTest
+public class TurnWalkTurnPawPathPlannerTest
 {
    private static final double epsilon = 1e-10;
    private static final int iters = 1000;
