@@ -13,7 +13,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -36,7 +36,7 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
 
    private PawPlannerGoal highLevelGoal;
 
-   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawPlannerParameters parameters,
+   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawPlannerParametersReadOnly parameters,
                                        QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;

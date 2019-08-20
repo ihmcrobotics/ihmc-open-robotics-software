@@ -2,164 +2,270 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedPawPlannerParametersPacket;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
-public interface PawPlannerParametersBasics extends PawPlannerParameters
+import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameterKeys.*;
+
+public interface PawPlannerParametersBasics extends PawPlannerParametersReadOnly, StoredPropertySetBasics
 {
-   void setMaximumFrontStepReach(double maximumStepReach);
-
-   void setMaximumFrontStepLength(double maximumStepLength);
-
-   void setMinimumFrontStepLength(double minimumStepLength);
-
-   void setMaximumHindStepReach(double maximumStepReach);
-
-   void setMaximumHindStepLength(double maximumStepLength);
-
-   void setMinimumHindStepLength(double minimumStepLength);
-
-   void setMaximumStepOutward(double maximumStepOutward);
-
-   void setMaximumStepInward(double maximumStepInward);
-
-   void setMaximumFrontStepLengthWhenSteppingUp(double maximumStepLength);
-
-   void setMinimumFrontStepLengthWhenSteppingUp(double minimumStepLength);
-
-   void setMaximumHindStepLengthWhenSteppingUp(double maximumStepLength);
-
-   void setMinimumHindStepLengthWhenSteppingUp(double minimumStepLength);
-
-   void setStepZForSteppingUp(double stepZ);
-
-   void setMaximumFrontStepLengthWhenSteppingDown(double maximumStepLength);
-
-   void setMinimumFrontStepLengthWhenSteppingDown(double minimumStepLength);
-
-   void setMaximumHindStepLengthWhenSteppingDown(double maximumStepLength);
-
-   void setMinimumHindStepLengthWhenSteppingDown(double minimumStepLength);
-
-   void setStepZForSteppingDown(double stepZ);
-
-   void setMaximumStepYawInward(double maximumStepYawInward);
-
-   void setMaximumStepYawOutward(double maximumStepYawOutward);
-
-   void setMaximumStepChangeZ(double maximumStepChangeZ);
-
-   void setBodyGroundClearance(double bodyGroundClearance);
-
-   void setDistanceWeight(double distanceHeuristicWeight);
-
-   void setYawWeight(double yawWeight);
-
-   void setXGaitWeight(double xGaitWeight);
-
-   void setDesiredVelocityWeight(double desiredVelocityWeight);
-
-   void setCostPerStep(double costPerStep);
-
-   void setStepUpWeight(double stepUpWeight);
-
-   void setStepDownWeight(double stepDownWeight);
-
-   void setHeuristicsInflationWeight(double heuristicsInflationWeight);
-
-   void setMinXClearanceFromFoot(double minXClearanceFromFoot);
-
-   void setMinYClearanceFromFoot(double minYClearanceFromFoot);
-
-   void setMaxWalkingSpeedMultiplier(double multiplier);
-
-   void setProjectInsideDistance(double projectionInsideDistanceForExpansion);
-
-   void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull);
-
-   void setMaximumXYWiggleDistance(double wiggleDistance);
-
-   void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
-
-   void setCliffHeightToAvoid(double cliffHeightToAvoid);
-
-   void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance);
-
-   void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance);
-
-   void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance);
-
-   void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance);
-
-   void setMinimumLateralDistanceFromCliffBottoms(double distance);
-
-   void setFinalTurnProximity(double proximity);
-
-   void setFinalSlowDownProximity(double proximity);
-
-   void setMaximumDeviationFromXGaitDuringExpansion(double deviation);
-
-   void setReturnBestEffortPlan(boolean returnBestEffortPlan);
-
-   void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan);
-
-   void setPerformGraphRepairingStep(boolean performGraphRepairingStep);
-
-   void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling);
-
-   void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction);
-
-   default void set(PawPlannerParameters other)
+   default void set(PawPlannerParametersReadOnly other)
    {
-      setMaximumFrontStepReach(other.getMaximumFrontStepReach());
-      setMaximumFrontStepLength(other.getMaximumFrontStepLength());
-      setMinimumFrontStepLength(other.getMinimumFrontStepLength());
-      setMaximumHindStepReach(other.getMaximumHindStepReach());
-      setMaximumHindStepLength(other.getMaximumHindStepLength());
-      setMinimumHindStepLength(other.getMinimumHindStepLength());
-      setMaximumFrontStepLengthWhenSteppingUp(other.getMaximumFrontStepLengthWhenSteppingUp());
-      setMinimumFrontStepLengthWhenSteppingUp(other.getMinimumFrontStepLengthWhenSteppingUp());
-      setMaximumHindStepLengthWhenSteppingUp(other.getMaximumHindStepLengthWhenSteppingUp());
-      setMinimumHindStepLengthWhenSteppingUp(other.getMinimumHindStepLengthWhenSteppingUp());
-      setStepZForSteppingUp(other.getStepZForSteppingUp());
-      setMaximumFrontStepLengthWhenSteppingDown(other.getMaximumFrontStepLengthWhenSteppingDown());
-      setMinimumFrontStepLengthWhenSteppingDown(other.getMinimumFrontStepLengthWhenSteppingDown());
-      setMaximumHindStepLengthWhenSteppingDown(other.getMaximumHindStepLengthWhenSteppingDown());
-      setMinimumHindStepLengthWhenSteppingDown(other.getMinimumHindStepLengthWhenSteppingDown());
-      setStepZForSteppingDown(other.getStepZForSteppingDown());
-      setMaximumStepOutward(other.getMaximumStepOutward());
-      setMaximumStepInward(other.getMaximumStepInward());
-      setMaximumStepYawInward(other.getMaximumStepYawInward());
-      setMaximumStepYawOutward(other.getMaximumStepYawOutward());
-      setMaximumStepChangeZ(other.getMaximumStepChangeZ());
-      setBodyGroundClearance(other.getBodyGroundClearance());
-      setDistanceWeight(other.getDistanceWeight());
-      setYawWeight(other.getYawWeight());
-      setXGaitWeight(other.getXGaitWeight());
-      setDesiredVelocityWeight(other.getDesiredVelocityWeight());
-      setCostPerStep(other.getCostPerStep());
-      setStepUpWeight(other.getStepUpWeight());
-      setStepDownWeight(other.getStepDownWeight());
-      setHeuristicsInflationWeight(other.getHeuristicsInflationWeight());
-      setMinXClearanceFromFoot(other.getMinXClearanceFromPaw());
-      setMinYClearanceFromFoot(other.getMinYClearanceFromPaw());
-      setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
-      setProjectInsideDistance(other.getProjectInsideDistance());
-      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
-      setMaximumXYWiggleDistance(other.getMaximumXYWiggleDistance());
-      setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
-      setCliffHeightToAvoid(other.getCliffHeightToAvoid());
-      setMinimumFrontEndForwardDistanceFromCliffBottoms(other.getMinimumFrontEndForwardDistanceFromCliffBottoms());
-      setMinimumFrontEndBackwardDistanceFromCliffBottoms(other.getMinimumFrontEndBackwardDistanceFromCliffBottoms());
-      setMinimumHindEndForwardDistanceFromCliffBottoms(other.getMinimumHindEndForwardDistanceFromCliffBottoms());
-      setMinimumHindEndBackwardDistanceFromCliffBottoms(other.getMinimumHindEndBackwardDistanceFromCliffBottoms());
-      setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
-      setFinalTurnProximity(other.getFinalTurnProximity());
-      setFinalSlowDownProximity(other.getFinalSlowDownProximity());
-      setMaximumDeviationFromXGaitDuringExpansion(other.getMaximumDeviationFromXGaitDuringExpansion());
-      setReturnBestEffortPlan(other.returnBestEffortPlan());
-      setMinimumStepsForBestEffortPlan(other.getMinimumStepsForBestEffortPlan());
-      setPerformGraphRepairingStep(other.performGraphRepairingStep());
-      setRepairingHeuristicWeightScaling(other.getRepairingHeuristicWeightScaling());
-      setMinimumHeuristicWeightReduction(other.getMinimumHeuristicWeightReduction());
+      setAll(other.getAll());
+   }
+
+   default void setMaximumFrontStepReach(double maximumStepReach)
+   {
+      set(maximumFrontStepReach, maximumStepReach);
+   }
+
+   default void setMaximumFrontStepLength(double maximumStepLength)
+   {
+      set(maximumFrontStepLength, maximumStepLength);
+   }
+
+   default void setMinimumFrontStepLength(double minimumStepLength)
+   {
+      set(minimumFrontStepLength, minimumStepLength);
+   }
+
+   default void setMaximumHindStepReach(double maximumStepReach)
+   {
+      set(maximumHindStepReach, maximumStepReach);
+   }
+
+   default void setMaximumHindStepLength(double maximumStepLength)
+   {
+      set(maximumHindStepLength, maximumStepLength);
+   }
+
+   default void setMinimumHindStepLength(double minimumStepLength)
+   {
+      set(minimumHindStepLength, minimumStepLength);
+   }
+
+   default void setMaximumStepOutward(double maximumStepOutward)
+   {
+      set(PawPlannerParameterKeys.maximumStepOutward, maximumStepOutward);
+   }
+
+   default void setMaximumStepInward(double maximumStepInward)
+   {
+      set(PawPlannerParameterKeys.maximumStepInward, maximumStepInward);
+   }
+
+   default void setMaximumFrontStepLengthWhenSteppingUp(double maximumStepLength)
+   {
+      set(maximumFrontStepLengthWhenSteppingUp, maximumStepLength);
+   }
+
+   default void setMinimumFrontStepLengthWhenSteppingUp(double minimumStepLength)
+   {
+      set(minimumFrontStepLengthWhenSteppingUp, minimumStepLength);
+   }
+
+   default void setMaximumHindStepLengthWhenSteppingUp(double maximumStepLength)
+   {
+      set(maximumHindStepLengthWhenSteppingUp, maximumStepLength);
+   }
+
+   default void setMinimumHindStepLengthWhenSteppingUp(double minimumStepLength)
+   {
+      set(minimumHindStepLengthWhenSteppingUp, minimumStepLength);
+   }
+
+   default void setStepZForSteppingUp(double stepZ)
+   {
+      set(stepZForSteppingUp, stepZ);
+   }
+
+   default void setMaximumFrontStepLengthWhenSteppingDown(double maximumStepLength)
+   {
+      set(maximumFrontStepLengthWhenSteppingDown, maximumStepLength);
+   }
+
+   default void setMinimumFrontStepLengthWhenSteppingDown(double minimumStepLength)
+   {
+      set(minimumFrontStepLengthWhenSteppingDown, minimumStepLength);
+   }
+
+   default void setMaximumHindStepLengthWhenSteppingDown(double maximumStepLength)
+   {
+      set(maximumHindStepLengthWhenSteppingDown, maximumStepLength);
+   }
+
+   default void setMinimumHindStepLengthWhenSteppingDown(double minimumStepLength)
+   {
+      set(minimumHindStepLengthWhenSteppingDown, minimumStepLength);
+   }
+
+   default void setStepZForSteppingDown(double stepZ)
+   {
+      set(stepZForSteppingDown, stepZ);
+   }
+
+   default void setMaximumStepYawInward(double maximumStepYawInward)
+   {
+      set(PawPlannerParameterKeys.maximumStepYawInward, maximumStepYawInward);
+   }
+
+   default void setMaximumStepYawOutward(double maximumStepYawOutward)
+   {
+      set(PawPlannerParameterKeys.maximumStepYawOutward, maximumStepYawOutward);
+   }
+
+   default void setMaximumStepChangeZ(double maximumStepChangeZ)
+   {
+      set(PawPlannerParameterKeys.maximumStepChangeZ, maximumStepChangeZ);
+   }
+
+   default void setBodyGroundClearance(double bodyGroundClearance)
+   {
+      set(PawPlannerParameterKeys.bodyGroundClearance, bodyGroundClearance);
+   }
+
+   default void setDistanceWeight(double distanceHeuristicWeight)
+   {
+      set(distanceWeight, distanceHeuristicWeight);
+   }
+
+   default void setYawWeight(double yawWeight)
+   {
+      set(PawPlannerParameterKeys.yawWeight, yawWeight);
+   }
+
+   default void setXGaitWeight(double xGaitWeight)
+   {
+      set(PawPlannerParameterKeys.xGaitWeight, xGaitWeight);
+   }
+
+   default void setDesiredVelocityWeight(double desiredVelocityWeight)
+   {
+      set(PawPlannerParameterKeys.desiredVelocityWeight, desiredVelocityWeight);
+   }
+
+   default void setCostPerStep(double costPerStep)
+   {
+      set(PawPlannerParameterKeys.costPerStep, costPerStep);
+   }
+
+   default void setStepUpWeight(double stepUpWeight)
+   {
+      set(PawPlannerParameterKeys.stepUpWeight, stepUpWeight);
+   }
+
+   default void setStepDownWeight(double stepDownWeight)
+   {
+      set(PawPlannerParameterKeys.stepDownWeight, stepDownWeight);
+   }
+
+   default void setHeuristicsInflationWeight(double heuristicsInflationWeight)
+   {
+      set(PawPlannerParameterKeys.heuristicsInflationWeight, heuristicsInflationWeight);
+   }
+
+   default void setMinXClearanceFromPaw(double minXClearanceFromFoot)
+   {
+      set(minXClearanceFromPaw, minXClearanceFromFoot);
+   }
+
+   default void setMinYClearanceFromPaw(double minYClearanceFromFoot)
+   {
+      set(minYClearanceFromPaw, minYClearanceFromFoot);
+   }
+
+   default void setMaxWalkingSpeedMultiplier(double multiplier)
+   {
+      set(maxWalkingSpeedMultiplier, multiplier);
+   }
+
+   default void setProjectInsideDistance(double projectionInsideDistanceForExpansion)
+   {
+      set(projectInsideDistance, projectionInsideDistanceForExpansion);
+   }
+
+   default void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
+   {
+      set(PawPlannerParameterKeys.projectInsideUsingConvexHull, projectInsideUsingConvexHull);
+   }
+
+   default void setMaximumXYWiggleDistance(double wiggleDistance)
+   {
+      set(maximumXYWiggleDistance, wiggleDistance);
+   }
+
+   default void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline)
+   {
+      set(minimumSurfaceInclineRadians, minimumSurfaceIncline);
+   }
+
+   default void setCliffHeightToAvoid(double cliffHeightToAvoid)
+   {
+      set(PawPlannerParameterKeys.cliffHeightToAvoid, cliffHeightToAvoid);
+   }
+
+   default void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance)
+   {
+      set(minimumFrontEndForwardDistanceFromCliffBottoms, distance);
+   }
+
+   default void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance)
+   {
+      set(minimumFrontEndBackwardDistanceFromCliffBottoms, distance);
+   }
+
+   default void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
+   {
+      set(minimumHindEndForwardDistanceFromCliffBottoms, distance);
+   }
+
+   default void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance)
+   {
+      set(minimumHindEndBackwardDistanceFromCliffBottoms, distance);
+   }
+
+   default void setMinimumLateralDistanceFromCliffBottoms(double distance)
+   {
+      set(minimumLateralDistanceFromCliffBottoms, distance);
+   }
+
+   default void setFinalTurnProximity(double proximity)
+   {
+      set(finalTurnProximity, proximity);
+   }
+
+   default void setFinalSlowDownProximity(double proximity)
+   {
+      set(finalSlowDownProximity, proximity);
+   }
+
+   default void setMaximumDeviationFromXGaitDuringExpansion(double deviation)
+   {
+      set(maximumDeviationFromXGaitDuringExpansion, deviation);
+   }
+
+   default void setReturnBestEffortPlan(boolean returnBestEffortPlan)
+   {
+      set(PawPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
+   }
+
+   default void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
+   {
+      set(PawPlannerParameterKeys.minStepsForBestEffortPlan, minimumStepsForBestEffortPlan);
+   }
+
+   default void setPerformGraphRepairingStep(boolean performGraphRepairingStep)
+   {
+      set(PawPlannerParameterKeys.performGraphRepairingStep, performGraphRepairingStep);
+   }
+
+   default void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling)
+   {
+      set(PawPlannerParameterKeys.repairingHeuristicWeightScaling, repairingHeuristicWeightScaling);
+   }
+
+   default void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction)
+   {
+      set(minHeuristicWeightReduction, minimumHeuristicWeightReduction);
    }
 
    default void set(QuadrupedPawPlannerParametersPacket other)
@@ -227,9 +333,9 @@ public interface PawPlannerParametersBasics extends PawPlannerParameters
       if (other.getHeuristicsWeight() != other.NO_VALUE_DOUBLE)
          setHeuristicsInflationWeight(other.getHeuristicsWeight());
       if (other.getMinXClearanceFromPaw() != other.NO_VALUE_DOUBLE)
-         setMinXClearanceFromFoot(other.getMinXClearanceFromPaw());
+         setMinXClearanceFromPaw(other.getMinXClearanceFromPaw());
       if (other.getMinYClearanceFromPaw() != other.NO_VALUE_DOUBLE)
-         setMinYClearanceFromFoot(other.getMinYClearanceFromPaw());
+         setMinYClearanceFromPaw(other.getMinYClearanceFromPaw());
       if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
          setProjectInsideDistance(other.getProjectionInsideDistance());
       if (other.getMaximumXyWiggleDistance() != other.NO_VALUE_DOUBLE)

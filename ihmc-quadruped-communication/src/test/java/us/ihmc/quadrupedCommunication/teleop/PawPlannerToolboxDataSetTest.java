@@ -38,7 +38,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerCom
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
@@ -107,7 +107,7 @@ public abstract class PawPlannerToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters()
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
       {
          @Override
          public double getXGaitWeight()

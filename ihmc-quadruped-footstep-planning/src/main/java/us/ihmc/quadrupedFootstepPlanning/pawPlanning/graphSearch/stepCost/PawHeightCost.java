@@ -2,13 +2,13 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 
 public class PawHeightCost implements PawNodeCost
 {
    private final PawLinearHeightCost linearHeightCost;
 
-   public PawHeightCost(PawPlannerParameters parameters, PawNodeSnapperReadOnly snapper)
+   public PawHeightCost(PawPlannerParametersReadOnly parameters, PawNodeSnapperReadOnly snapper)
    {
       linearHeightCost = new PawLinearHeightCost(parameters, snapper);
    }

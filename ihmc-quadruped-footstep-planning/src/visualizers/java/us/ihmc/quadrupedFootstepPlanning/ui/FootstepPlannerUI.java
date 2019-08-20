@@ -17,7 +17,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools.PawPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
@@ -75,7 +75,7 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsVizController;
 
-   public FootstepPlannerUI(Stage primaryStage, PawPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, PawPlannerParametersReadOnly plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
    {
       this(primaryStage, new SharedMemoryJavaFXMessager(PawPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null);
       messager.startMessager();
@@ -86,13 +86,13 @@ public class FootstepPlannerUI
       this(primaryStage, messager, new DefaultPawPlannerParameters(), new DefaultVisibilityGraphParameters(), null);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParametersReadOnly plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory) throws Exception
    {
       this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullQuadrupedRobotModelFactory, null);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParametersReadOnly plannerParameters,
                             VisibilityGraphsParameters visibilityGraphsParameters, FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
                             FullQuadrupedRobotModelFactory previewModelFactory) throws Exception
    {
@@ -292,7 +292,7 @@ public class FootstepPlannerUI
       return new FootstepPlannerUI(primaryStage, messager);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParameters plannerParameters,
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, PawPlannerParametersReadOnly plannerParameters,
                                                     VisibilityGraphsParameters visibilityGraphsParameters,
                                                     FullQuadrupedRobotModelFactory fullQuadrupedRobotModelFactory,
                                                     FullQuadrupedRobotModelFactory previewModelFactory)

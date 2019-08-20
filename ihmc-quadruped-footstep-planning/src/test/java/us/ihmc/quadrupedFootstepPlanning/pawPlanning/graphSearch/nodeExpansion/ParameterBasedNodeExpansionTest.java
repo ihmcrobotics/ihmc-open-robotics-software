@@ -22,7 +22,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Sim
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
@@ -54,7 +54,7 @@ public class ParameterBasedNodeExpansionTest
    @Test
    public void testExpandNodeWithBaseAtOrigin()
    {
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters();
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       xGaitSettings.setStanceWidth(stanceWidth);
@@ -110,7 +110,7 @@ public class ParameterBasedNodeExpansionTest
    @Test
    public void testExpandNodeWithTranslatedAndRotated()
    {
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters();
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       xGaitSettings.setStanceLength(stanceLength);
@@ -163,7 +163,7 @@ public class ParameterBasedNodeExpansionTest
    @Test
    public void testWeirdFeet()
    {
-      PawPlannerParameters parameters = new DefaultPawPlannerParameters()
+      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
       {
          @Override
          public double getMaximumFrontStepReach()
@@ -305,7 +305,7 @@ public class ParameterBasedNodeExpansionTest
    }
 
 
-   private void visualizeNodes(PawPlannerParameters parameters, HashSet<PawNode> neighboringNodes, PawNode baseNode)
+   private void visualizeNodes(PawPlannerParametersReadOnly parameters, HashSet<PawNode> neighboringNodes, PawNode baseNode)
    {
       if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;

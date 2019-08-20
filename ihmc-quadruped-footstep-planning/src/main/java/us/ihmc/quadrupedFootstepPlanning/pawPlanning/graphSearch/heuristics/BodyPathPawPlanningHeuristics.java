@@ -9,7 +9,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Paw
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -28,7 +28,7 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
 
    private double goalAlpha = 1.0;
 
-   public BodyPathPawPlanningHeuristics(PawPlannerParameters parameters, BodyPathPlanner bodyPath,
+   public BodyPathPawPlanningHeuristics(PawPlannerParametersReadOnly parameters, BodyPathPlanner bodyPath,
                                         QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeSnapper snapper)
    {
       super(parameters);

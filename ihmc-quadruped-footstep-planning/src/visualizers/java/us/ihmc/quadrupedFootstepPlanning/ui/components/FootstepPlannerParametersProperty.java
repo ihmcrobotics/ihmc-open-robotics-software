@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
 import javafx.beans.property.Property;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettablePawPlannerParameters>
@@ -67,12 +67,12 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       this(bean, name, new DefaultPawPlannerParameters());
    }
 
-   public FootstepPlannerParametersProperty(Object bean, String name, PawPlannerParameters pawPlannerParameters)
+   public FootstepPlannerParametersProperty(Object bean, String name, PawPlannerParametersReadOnly pawPlannerParameters)
    {
       super(bean, name, new SettablePawPlannerParameters(pawPlannerParameters));
    }
 
-   public void setPlannerParameters(PawPlannerParameters parameters)
+   public void setPlannerParameters(PawPlannerParametersReadOnly parameters)
    {
       setValue(new SettablePawPlannerParameters(parameters));
    }

@@ -18,7 +18,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.VisibilityGraphWithAStarPawPlanner;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.YoPawPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
@@ -63,7 +63,7 @@ public class PawPlanningController extends QuadrupedToolboxController
 
 
    public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
-                                PawPlannerParameters defaultPawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
+                                PawPlannerParametersReadOnly defaultPawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {

@@ -6,7 +6,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -33,7 +33,7 @@ public class QuadrupedNetworkProcessor
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params,
                                     QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                    PawPlannerParameters pawPlannerParameters, QuadrupedXGaitSettings xGaitSettings,
+                                    PawPlannerParametersReadOnly pawPlannerParameters, QuadrupedXGaitSettings xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters)
    {
       this(robotModel, params, groundContactPoints, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
@@ -42,7 +42,7 @@ public class QuadrupedNetworkProcessor
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params,
                                     QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                    PawPlannerParameters pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                    PawPlannerParametersReadOnly pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       this(robotModel, null, params, groundContactPoints, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
@@ -50,7 +50,7 @@ public class QuadrupedNetworkProcessor
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
                                     QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                    PawPlannerParameters pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                    PawPlannerParametersReadOnly pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       tryToStartModule(() -> setupFootstepPlanningModule(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
@@ -97,7 +97,7 @@ public class QuadrupedNetworkProcessor
       modules.add(stepTeleopModule);
    }
 
-   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParameters pawPlannerParameters,
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersReadOnly pawPlannerParameters,
                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                             LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
                                             DomainFactory.PubSubImplementation pubSubImplementation)

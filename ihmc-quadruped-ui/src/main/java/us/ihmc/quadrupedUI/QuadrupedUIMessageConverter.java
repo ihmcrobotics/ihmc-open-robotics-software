@@ -27,7 +27,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerCommunicationProperties;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools.PawPlannerMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -50,7 +50,7 @@ public class QuadrupedUIMessageConverter
    private final Messager messager;
    private final String robotName;
 
-   private final AtomicReference<PawPlannerParameters> footstepPlannerParametersReference;
+   private final AtomicReference<PawPlannerParametersReadOnly> footstepPlannerParametersReference;
    private final AtomicReference<VisibilityGraphsParameters> visibilityGraphParametersReference;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;

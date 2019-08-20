@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 
 public class PawZeroHeuristics extends PawPlanningCostToGoHeuristics
 {
-   public PawZeroHeuristics(PawPlannerParameters parameters)
+   public PawZeroHeuristics(PawPlannerParametersReadOnly parameters)
    {
       super(parameters);
    }

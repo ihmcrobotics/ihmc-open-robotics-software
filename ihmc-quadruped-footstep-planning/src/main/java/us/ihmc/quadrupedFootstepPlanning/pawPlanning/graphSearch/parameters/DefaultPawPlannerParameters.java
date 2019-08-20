@@ -1,147 +1,44 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters;
 
-public class DefaultPawPlannerParameters implements PawPlannerParameters
+import us.ihmc.tools.property.StoredPropertySet;
+
+public class DefaultPawPlannerParameters extends StoredPropertySet implements PawPlannerParametersBasics
 {
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumFrontStepReach()
+   public DefaultPawPlannerParameters() // for tests and stuff that's probably not gonna save
    {
-      return 0.5;
+      this(null);
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumFrontStepLength()
+   public DefaultPawPlannerParameters(String projectName, String pathToResources) // for robots and UIs that want their own defaults and saves
    {
-      return 0.45;
+      this(projectName, pathToResources, null);
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumStepOutward()
+   public DefaultPawPlannerParameters(PawPlannerParametersReadOnly pawPlannerParameters) // for message passing or temp access
    {
-      return 0.3;
+      this("ihmc-open-robotics-software", "ihmc-quadruped-footstep-planning/src/main/resources", pawPlannerParameters);
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumFrontStepLength()
+   private DefaultPawPlannerParameters(String projectName, String pathToResources, PawPlannerParametersReadOnly pawPlannerParameters)
    {
-      return -getMaximumFrontStepLength();
+      super(PawPlannerParameterKeys.keys, DefaultPawPlannerParameters.class, projectName, pathToResources);
+
+      if (pawPlannerParameters != null)
+      {
+         set(pawPlannerParameters);
+      }
+      else
+      {
+         load();
+      }
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumStepInward()
+   /**
+    * Run to update file with new parameters.
+    */
+   public static void main(String[] args)
    {
-      return -0.15;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumStepYawOutward()
-   {
-      return 0.5;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumStepYawInward()
-   {
-      return -0.2;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumStepChangeZ()
-   {
-      return 0.35;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getBodyGroundClearance()
-   {
-      return 0.35;
-   }
-
-   @Override
-   public double getDistanceWeight()
-   {
-      return 1.0;
-   }
-
-   @Override
-   public double getXGaitWeight()
-   {
-      return 7.5;
-   }
-
-   @Override
-   public double getDesiredVelocityWeight()
-   {
-      return 1.0;
-   }
-
-   @Override
-   public double getYawWeight()
-   {
-      return 2.5;
-   }
-
-   @Override
-   public double getCostPerStep()
-   {
-      return 0.25;
-   }
-
-   @Override
-   public double getStepUpWeight()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getStepDownWeight()
-   {
-      return 0.0;
-   }
-
-   @Override
-   public double getHeuristicsInflationWeight()
-   {
-      return 1.75;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getProjectInsideDistance()
-   {
-      return 0.02;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHull()
-   {
-      return true;
-   }
-
-   @Override
-   public double getMaximumXYWiggleDistance()
-   {
-      return 0.03;
-   }
-
-   @Override
-   public double getMinXClearanceFromPaw()
-   {
-      return 0.05;
-   }
-
-   @Override
-   public double getMinYClearanceFromPaw()
-   {
-      return 0.05;
+      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      parameters.save();
    }
 }

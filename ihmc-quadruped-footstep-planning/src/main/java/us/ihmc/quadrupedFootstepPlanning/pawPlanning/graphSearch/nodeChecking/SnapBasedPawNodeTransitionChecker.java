@@ -17,7 +17,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPla
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -35,10 +35,10 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
    static boolean checkAllXGaits = false;
    private final static boolean allowStepInPlace = false;
 
-   private final PawPlannerParameters parameters;
+   private final PawPlannerParametersReadOnly parameters;
    private final PawNodeSnapper snapper;
 
-   public SnapBasedPawNodeTransitionChecker(PawPlannerParameters parameters, PawNodeSnapper snapper)
+   public SnapBasedPawNodeTransitionChecker(PawPlannerParametersReadOnly parameters, PawNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

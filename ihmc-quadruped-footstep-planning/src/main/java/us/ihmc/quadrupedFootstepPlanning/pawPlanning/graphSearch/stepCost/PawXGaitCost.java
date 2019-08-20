@@ -3,7 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -11,12 +11,12 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawXGaitCost implements PawNodeCost
 {
-   private final PawPlannerParameters plannerParameters;
+   private final PawPlannerParametersReadOnly plannerParameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    private final Point2D endXGaitInStartFrame = new Point2D();
 
-   public PawXGaitCost(PawPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public PawXGaitCost(PawPlannerParametersReadOnly plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.plannerParameters = plannerParameters;
       this.xGaitSettings = xGaitSettings;

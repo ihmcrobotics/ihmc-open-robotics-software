@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
 
 public class SettablePawPlannerParameters implements PawPlannerParametersBasics
@@ -69,7 +69,7 @@ public class SettablePawPlannerParameters implements PawPlannerParametersBasics
    private double repairingHeuristicWeightScaling;
    private double minimumHeuristicWeightReduction;
 
-   public SettablePawPlannerParameters(PawPlannerParameters pawPlannerParameters)
+   public SettablePawPlannerParameters(PawPlannerParametersReadOnly pawPlannerParameters)
    {
       set(pawPlannerParameters);
    }
