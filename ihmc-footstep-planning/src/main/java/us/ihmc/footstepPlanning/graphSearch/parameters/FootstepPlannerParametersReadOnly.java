@@ -510,6 +510,16 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the final orientation should occur.
+    * That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the desired heading,
+    * and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the final orientation.
+    */
+   default double getFinalTurnProximityBlendFactor()
+   {
+      return get(finalTurnProximityBlendFactor);
+   }
+
+   /**
     * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
     */
    default boolean useQuadraticDistanceCost()

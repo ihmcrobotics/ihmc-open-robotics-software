@@ -284,6 +284,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double min_y_clearance_from_stance_ = -1.0;
    /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public double final_turn_proximity_ = -1.0;
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double final_turn_proximity_blend_factor_ = -1.0;
+   /**
             * When using a cost based planning approach this value defined how the yaw of a footstep will be
             * weighted in comparison to its position.
             */
@@ -452,6 +463,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       min_x_clearance_from_stance_ = other.min_x_clearance_from_stance_;
 
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
+
+      final_turn_proximity_ = other.final_turn_proximity_;
+
+      final_turn_proximity_blend_factor_ = other.final_turn_proximity_blend_factor_;
 
       yaw_weight_ = other.yaw_weight_;
 
@@ -1275,6 +1290,42 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public void setFinalTurnProximity(double final_turn_proximity)
+   {
+      final_turn_proximity_ = final_turn_proximity;
+   }
+   /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public double getFinalTurnProximity()
+   {
+      return final_turn_proximity_;
+   }
+
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public void setFinalTurnProximityBlendFactor(double final_turn_proximity_blend_factor)
+   {
+      final_turn_proximity_blend_factor_ = final_turn_proximity_blend_factor;
+   }
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double getFinalTurnProximityBlendFactor()
+   {
+      return final_turn_proximity_blend_factor_;
+   }
+
+   /**
             * When using a cost based planning approach this value defined how the yaw of a footstep will be
             * weighted in comparison to its position.
             */
@@ -1658,6 +1709,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_, other.final_turn_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_blend_factor_, other.final_turn_proximity_blend_factor_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pitch_weight_, other.pitch_weight_, epsilon)) return false;
@@ -1781,6 +1836,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
+      if(this.final_turn_proximity_ != otherMyClass.final_turn_proximity_) return false;
+
+      if(this.final_turn_proximity_blend_factor_ != otherMyClass.final_turn_proximity_blend_factor_) return false;
+
       if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
 
       if(this.pitch_weight_ != otherMyClass.pitch_weight_) return false;
@@ -1901,6 +1960,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");
       builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
+      builder.append("final_turn_proximity=");
+      builder.append(this.final_turn_proximity_);      builder.append(", ");
+      builder.append("final_turn_proximity_blend_factor=");
+      builder.append(this.final_turn_proximity_blend_factor_);      builder.append(", ");
       builder.append("yaw_weight=");
       builder.append(this.yaw_weight_);      builder.append(", ");
       builder.append("pitch_weight=");
