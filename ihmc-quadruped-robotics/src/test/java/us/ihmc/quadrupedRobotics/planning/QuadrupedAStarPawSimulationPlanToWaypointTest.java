@@ -22,7 +22,7 @@ import us.ihmc.tools.MemoryTools;
 import java.io.IOException;
 
 @Tag("quadruped-planning")
-public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest implements QuadrupedMultiRobotTestInterface
+public abstract class QuadrupedAStarPawSimulationPlanToWaypointTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedTestYoVariables variables;
@@ -90,7 +90,7 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
                                                                            ROS2TopicQualifier.OUTPUT),
                                            s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
-      QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
+      PawPlanningRequestPacket planningRequestPacket = new PawPlanningRequestPacket();
       planningRequestPacket.getBodyPositionInWorld().set(variables.getRobotBodyX().getDoubleValue(), variables.getRobotBodyY().getDoubleValue(),
                                                          variables.getRobotBodyZ().getDoubleValue());
       planningRequestPacket.getBodyOrientationInWorld().setYawPitchRoll(variables.getBodyEstimateYaw(), variables.getBodyEstimatePitch(),
@@ -98,7 +98,7 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
-      planningRequestPacket.setRequestedFootstepPlannerType(PawPlannerType.A_STAR.toByte());
+      planningRequestPacket.setRequestedPawPlannerType(PawPlannerType.A_STAR.toByte());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 

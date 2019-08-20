@@ -2,21 +2,21 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "QuadrupedFootstepPlanningRequestPacket" defined in "QuadrupedFootstepPlanningRequestPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "PawPlanningRequestPacket" defined in "PawPlanningRequestPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from QuadrupedFootstepPlanningRequestPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit QuadrupedFootstepPlanningRequestPacket_.idl instead.
+* This file was automatically generated from PawPlanningRequestPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PawPlanningRequestPacket_.idl instead.
 *
 */
-public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket>
+public class PawPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PawPlanningRequestPacket>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedFootstepPlanningRequestPacket_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::PawPlanningRequestPacket_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PawPlanningRequestPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -80,12 +80,12 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PawPlanningRequestPacket data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PawPlanningRequestPacket data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -138,7 +138,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -156,7 +156,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
       cdr.write_type_2(data.getPlannerRequestId());
 
-      cdr.write_type_9(data.getRequestedFootstepPlannerType());
+      cdr.write_type_9(data.getRequestedPawPlannerType());
 
       cdr.write_type_6(data.getTimeout());
 
@@ -169,7 +169,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
    }
 
-   public static void read(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -187,7 +187,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
       data.setPlannerRequestId(cdr.read_type_2());
       	
-      data.setRequestedFootstepPlannerType(cdr.read_type_9());
+      data.setRequestedPawPlannerType(cdr.read_type_9());
       	
       data.setTimeout(cdr.read_type_6());
       	
@@ -202,7 +202,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("initial_step_robot_quadrant", data.getInitialStepRobotQuadrant());
@@ -224,7 +224,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       ser.write_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
-      ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
+      ser.write_type_9("requested_paw_planner_type", data.getRequestedPawPlannerType());
       ser.write_type_6("timeout", data.getTimeout());
       ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
@@ -234,7 +234,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PawPlanningRequestPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setInitialStepRobotQuadrant(ser.read_type_9("initial_step_robot_quadrant"));
@@ -256,7 +256,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       ser.read_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
-      data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
+      data.setRequestedPawPlannerType(ser.read_type_9("requested_paw_planner_type"));
       data.setTimeout(ser.read_type_6("timeout"));
       data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
@@ -265,15 +265,15 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket dest)
+   public static void staticCopy(controller_msgs.msg.dds.PawPlanningRequestPacket src, controller_msgs.msg.dds.PawPlanningRequestPacket dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket createData()
+   public controller_msgs.msg.dds.PawPlanningRequestPacket createData()
    {
-      return new controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket();
+      return new controller_msgs.msg.dds.PawPlanningRequestPacket();
    }
    @Override
    public int getTypeSize()
@@ -287,24 +287,24 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.PawPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket dest)
+   public void copy(controller_msgs.msg.dds.PawPlanningRequestPacket src, controller_msgs.msg.dds.PawPlanningRequestPacket dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public QuadrupedFootstepPlanningRequestPacketPubSubType newInstance()
+   public PawPlanningRequestPacketPubSubType newInstance()
    {
-      return new QuadrupedFootstepPlanningRequestPacketPubSubType();
+      return new PawPlanningRequestPacketPubSubType();
    }
 }

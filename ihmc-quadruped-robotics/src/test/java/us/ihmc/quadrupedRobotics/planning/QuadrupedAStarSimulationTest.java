@@ -138,7 +138,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       stepTeleopManager.submitPlanarRegionsList(planarRegionsList);
 
       // construct planning request
-      QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
+      PawPlanningRequestPacket planningRequestPacket = new PawPlanningRequestPacket();
       planningRequestPacket.getBodyPositionInWorld().set(variables.getRobotBodyX().getDoubleValue(), variables.getRobotBodyY().getDoubleValue(),
                                                          variables.getRobotBodyZ().getDoubleValue());
       planningRequestPacket.getBodyOrientationInWorld().setYawPitchRoll(variables.getBodyEstimateYaw(), variables.getBodyEstimatePitch(),
@@ -146,7 +146,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
 
       planningRequestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(plannerInput.getGoalYaw());
-      planningRequestPacket.setRequestedFootstepPlannerType(PawPlannerType.A_STAR.toByte());
+      planningRequestPacket.setRequestedPawPlannerType(PawPlannerType.A_STAR.toByte());
       planningRequestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       planningRequestPacket.setTimeout(plannerInput.getQuadrupedTimeout());
 

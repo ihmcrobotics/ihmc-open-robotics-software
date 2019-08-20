@@ -49,7 +49,7 @@ public class PawPlanningController extends QuadrupedToolboxController
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   private final AtomicReference<QuadrupedFootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
+   private final AtomicReference<PawPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
@@ -139,7 +139,7 @@ public class PawPlanningController extends QuadrupedToolboxController
       this.robotTimestampNanos.set(timestampInNanos);
    }
 
-   public void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket footstepPlanningRequestPacket)
+   public void processPawPlanningRequest(PawPlanningRequestPacket footstepPlanningRequestPacket)
    {
       latestRequestReference.set(footstepPlanningRequestPacket);
    }
@@ -151,13 +151,13 @@ public class PawPlanningController extends QuadrupedToolboxController
 
       isDone.set(false);
 
-      QuadrupedFootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      PawPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
 
       planId.set(request.getPlannerRequestId());
-      if (request.getRequestedFootstepPlannerType() >= 0)
-         activePlanner.set(PawPlannerType.fromByte(request.getRequestedFootstepPlannerType()));
+      if (request.getRequestedPawPlannerType() >= 0)
+         activePlanner.set(PawPlannerType.fromByte(request.getRequestedPawPlannerType()));
 
       PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
