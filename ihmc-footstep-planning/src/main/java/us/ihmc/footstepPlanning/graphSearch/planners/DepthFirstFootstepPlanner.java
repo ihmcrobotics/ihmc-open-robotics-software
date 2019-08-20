@@ -77,7 +77,7 @@ public class DepthFirstFootstepPlanner implements BodyPathAndFootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 
-      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(parameters.getDepthFirstHeuristicsWeight(),
+      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(snapper, parameters.getDepthFirstHeuristicsWeight(),
                                                                                            parameters);
       this.nodeComparator = (node1, node2) -> {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
