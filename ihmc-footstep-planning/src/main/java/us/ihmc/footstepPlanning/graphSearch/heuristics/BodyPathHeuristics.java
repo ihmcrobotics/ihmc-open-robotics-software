@@ -67,8 +67,8 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double distanceToGoal = node.euclideanDistance(goalNode);
       double finalTurnProximity = this.finalTurnProximity;//parameters.getFinalTurnProximity();
 
-      double minimumBlendDistance = 0.75 * finalTurnProximity;
-      double maximumBlendDistance = 1.25 * finalTurnProximity;
+      double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
+      double maximumBlendDistance = (1.0 + parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
 
       double yawMultiplier;
       if(distanceToGoal < minimumBlendDistance)
