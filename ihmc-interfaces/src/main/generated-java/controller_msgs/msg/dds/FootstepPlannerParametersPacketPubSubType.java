@@ -134,6 +134,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -304,6 +308,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -407,6 +417,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getMinXClearanceFromStance());
 
       cdr.write_type_6(data.getMinYClearanceFromStance());
+
+      cdr.write_type_6(data.getFinalTurnProximity());
+
+      cdr.write_type_6(data.getFinalTurnProximityBlendFactor());
 
       cdr.write_type_6(data.getYawWeight());
 
@@ -522,6 +536,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMinYClearanceFromStance(cdr.read_type_6());
       	
+      data.setFinalTurnProximity(cdr.read_type_6());
+      	
+      data.setFinalTurnProximityBlendFactor(cdr.read_type_6());
+      	
       data.setYawWeight(cdr.read_type_6());
       	
       data.setPitchWeight(cdr.read_type_6());
@@ -601,6 +619,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("body_box_base_z", data.getBodyBoxBaseZ());
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
+      ser.write_type_6("final_turn_proximity", data.getFinalTurnProximity());
+      ser.write_type_6("final_turn_proximity_blend_factor", data.getFinalTurnProximityBlendFactor());
       ser.write_type_6("yaw_weight", data.getYawWeight());
       ser.write_type_6("pitch_weight", data.getPitchWeight());
       ser.write_type_6("roll_weight", data.getRollWeight());
@@ -661,6 +681,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setBodyBoxBaseZ(ser.read_type_6("body_box_base_z"));
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
+      data.setFinalTurnProximity(ser.read_type_6("final_turn_proximity"));
+      data.setFinalTurnProximityBlendFactor(ser.read_type_6("final_turn_proximity_blend_factor"));
       data.setYawWeight(ser.read_type_6("yaw_weight"));
       data.setPitchWeight(ser.read_type_6("pitch_weight"));
       data.setRollWeight(ser.read_type_6("roll_weight"));

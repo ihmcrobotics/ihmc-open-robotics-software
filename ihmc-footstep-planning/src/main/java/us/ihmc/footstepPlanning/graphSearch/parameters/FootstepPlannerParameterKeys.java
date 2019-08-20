@@ -47,6 +47,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  bodyBoxBaseY                               = keys.addDoubleKey ("Body box base Y", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseZ                               = keys.addDoubleKey ("Body box base Z", 0.25);
    public static final DoubleStoredPropertyKey  finalTurnProximity                         = keys.addDoubleKey ("Final turn proximity", 1.0);
+   public static final DoubleStoredPropertyKey  finalTurnProximityBlendFactor              = keys.addDoubleKey ("Final turn proximity blend factor", 0.25);
 
    // cost parameters
    public static final BooleanStoredPropertyKey useQuadraticDistanceCost                   = keys.addBooleanKey("Use quadratic distance cost", false);
