@@ -6,8 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.apache.commons.lang.NullArgumentException;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
 
@@ -16,7 +14,7 @@ public class StereoVisionPointCloudDataLoader
    public static StereoVisionPointCloudMessage getMessageFromFile(File dataFile)
    {
       if (!dataFile.canRead())
-         new NullArgumentException("No dataFile");
+         new NullPointerException("No dataFile");
 
       int maximumNumberOfPoints = 200000;
       double[] pointCloudBuffer = new double[maximumNumberOfPoints * 3];
