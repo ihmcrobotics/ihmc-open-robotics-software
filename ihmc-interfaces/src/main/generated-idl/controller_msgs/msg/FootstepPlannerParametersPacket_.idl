@@ -322,6 +322,11 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double final_turn_proximity;
         /**
+         * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+         */
+        @defaultValue(value=-1.0)
+        double final_turn_body_path_proximity;
+        /**
          * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
          * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
          * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
@@ -428,6 +433,12 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double bounding_box_cost;
+        @defaultValue(value=-1.0)
+        double body_path_violation_weight;
+        @defaultValue(value=-1.0)
+        double distance_from_path_tolerance;
+        @defaultValue(value=-1.0)
+        double delta_yaw_from_reference_tolerance;
       };
     };
   };

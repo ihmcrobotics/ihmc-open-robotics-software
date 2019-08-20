@@ -138,9 +138,17 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -314,10 +322,22 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -420,6 +440,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getFinalTurnProximity());
 
+      cdr.write_type_6(data.getFinalTurnBodyPathProximity());
+
       cdr.write_type_6(data.getFinalTurnProximityBlendFactor());
 
       cdr.write_type_6(data.getYawWeight());
@@ -457,6 +479,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getMaximum2dDistanceFromBoundingBoxToPenalize());
 
       cdr.write_type_6(data.getBoundingBoxCost());
+
+      cdr.write_type_6(data.getBodyPathViolationWeight());
+
+      cdr.write_type_6(data.getDistanceFromPathTolerance());
+
+      cdr.write_type_6(data.getDeltaYawFromReferenceTolerance());
 
    }
 
@@ -538,6 +566,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setFinalTurnProximity(cdr.read_type_6());
       	
+      data.setFinalTurnBodyPathProximity(cdr.read_type_6());
+      	
       data.setFinalTurnProximityBlendFactor(cdr.read_type_6());
       	
       data.setYawWeight(cdr.read_type_6());
@@ -575,6 +605,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximum2dDistanceFromBoundingBoxToPenalize(cdr.read_type_6());
       	
       data.setBoundingBoxCost(cdr.read_type_6());
+      	
+      data.setBodyPathViolationWeight(cdr.read_type_6());
+      	
+      data.setDistanceFromPathTolerance(cdr.read_type_6());
+      	
+      data.setDeltaYawFromReferenceTolerance(cdr.read_type_6());
       	
 
    }
@@ -620,6 +656,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
       ser.write_type_6("final_turn_proximity", data.getFinalTurnProximity());
+      ser.write_type_6("final_turn_body_path_proximity", data.getFinalTurnBodyPathProximity());
       ser.write_type_6("final_turn_proximity_blend_factor", data.getFinalTurnProximityBlendFactor());
       ser.write_type_6("yaw_weight", data.getYawWeight());
       ser.write_type_6("pitch_weight", data.getPitchWeight());
@@ -639,6 +676,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("body_path_based_heuristics_weight", data.getBodyPathBasedHeuristicsWeight());
       ser.write_type_6("maximum_2d_distance_from_bounding_box_to_penalize", data.getMaximum2dDistanceFromBoundingBoxToPenalize());
       ser.write_type_6("bounding_box_cost", data.getBoundingBoxCost());
+      ser.write_type_6("body_path_violation_weight", data.getBodyPathViolationWeight());
+      ser.write_type_6("distance_from_path_tolerance", data.getDistanceFromPathTolerance());
+      ser.write_type_6("delta_yaw_from_reference_tolerance", data.getDeltaYawFromReferenceTolerance());
    }
 
    @Override
@@ -682,6 +722,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
       data.setFinalTurnProximity(ser.read_type_6("final_turn_proximity"));
+      data.setFinalTurnBodyPathProximity(ser.read_type_6("final_turn_body_path_proximity"));
       data.setFinalTurnProximityBlendFactor(ser.read_type_6("final_turn_proximity_blend_factor"));
       data.setYawWeight(ser.read_type_6("yaw_weight"));
       data.setPitchWeight(ser.read_type_6("pitch_weight"));
@@ -701,6 +742,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setBodyPathBasedHeuristicsWeight(ser.read_type_6("body_path_based_heuristics_weight"));
       data.setMaximum2dDistanceFromBoundingBoxToPenalize(ser.read_type_6("maximum_2d_distance_from_bounding_box_to_penalize"));
       data.setBoundingBoxCost(ser.read_type_6("bounding_box_cost"));
+      data.setBodyPathViolationWeight(ser.read_type_6("body_path_violation_weight"));
+      data.setDistanceFromPathTolerance(ser.read_type_6("distance_from_path_tolerance"));
+      data.setDeltaYawFromReferenceTolerance(ser.read_type_6("delta_yaw_from_reference_tolerance"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)
