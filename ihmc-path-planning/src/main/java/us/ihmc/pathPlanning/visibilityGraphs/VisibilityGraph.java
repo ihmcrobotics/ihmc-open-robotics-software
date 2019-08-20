@@ -98,7 +98,7 @@ public class VisibilityGraph
       }
    }
 
-   public void computeInterEdgesWhenOnNoRegion(VisibilityGraphNode sourceNode, InterRegionConnectionFilter filter)
+   public void computeInterEdgesWhenOnNoRegion(VisibilityGraphNode sourceNode, InterRegionConnectionFilter filter, double edgeWeight)
    {
       for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
@@ -106,7 +106,7 @@ public class VisibilityGraph
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(),
-                                                   targetObstacleClusters, crossRegionEdges, filter);
+                                                   targetObstacleClusters, crossRegionEdges, filter, edgeWeight);
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -239,7 +239,7 @@ public class VisibilityGraph
       if (visibilityGraphNavigableRegion == null)
       {
          startNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(startNode, interRegionConnectionFilter);
+         computeInterEdgesWhenOnNoRegion(startNode, interRegionConnectionFilter, 1.0);
       }
       else
       {
@@ -262,7 +262,7 @@ public class VisibilityGraph
       if (visibilityGraphNavigableRegion == null)
       {
          goalNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(goalNode, allPassFilter);
+         computeInterEdgesWhenOnNoRegion(goalNode, allPassFilter, unseenNodeEdgeWeight);
       }
       else
       {
@@ -441,15 +441,16 @@ public class VisibilityGraph
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
-                                                                List<VisibilityGraphEdge> edgesToPack, InterRegionConnectionFilter filter)
+                                                                List<VisibilityGraphEdge> edgesToPack, InterRegionConnectionFilter filter, double edgeWeight)
    {
       createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, allNavigableRegions, targetObstacleClusters, edgesToPack,
-                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, filter);
+                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, filter, edgeWeight);
    }
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
-                                                                List<VisibilityGraphEdge> edgesToPack, boolean useOnlyShortestEdge, InterRegionConnectionFilter filter)
+                                                                List<VisibilityGraphEdge> edgesToPack, boolean useOnlyShortestEdge,
+                                                                InterRegionConnectionFilter filter, double edgeWeight)
    {
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
 
@@ -534,7 +535,7 @@ public class VisibilityGraph
          if (shortestEdgeXY != null)
          {
             shortestEdgeXY.registerEdgeWithNodes();
-            shortestEdgeXY.setEdgeWeight(unseenNodeEdgeWeight);
+            shortestEdgeXY.setEdgeWeight(edgeWeight);
             edgesToPack.add(shortestEdgeXY);
          }
       }
@@ -543,7 +544,7 @@ public class VisibilityGraph
          for (VisibilityGraphEdge edge : potentialEdges)
          {
             edge.registerEdgeWithNodes();
-            edge.setEdgeWeight(unseenNodeEdgeWeight);
+            edge.setEdgeWeight(edgeWeight);
          }
          edgesToPack.addAll(potentialEdges);
       }

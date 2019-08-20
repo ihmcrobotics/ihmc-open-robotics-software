@@ -11,3 +11,4 @@ quadruped_planner_status test
 quadruped_start_position -3.700 4.136 -0.000
 quadruped_goal_position 3.140 -2.879 0.000
 quadruped_timeout 5.0
+requires_occlusion true

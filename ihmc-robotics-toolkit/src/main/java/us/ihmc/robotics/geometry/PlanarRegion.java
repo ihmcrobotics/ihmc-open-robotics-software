@@ -770,6 +770,9 @@ public class PlanarRegion implements SupportingVertexHolder
 
    private void checkConcaveHullRepeatVertices(boolean throwException)
    {
+      if (concaveHullsVertices.length < 2)
+         return;
+
       for (int i=0; i<concaveHullsVertices.length; i++)
       {
          int nextIndex = (i + 1) % concaveHullsVertices.length;
