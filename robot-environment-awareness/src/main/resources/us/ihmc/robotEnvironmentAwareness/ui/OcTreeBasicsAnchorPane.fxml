@@ -54,8 +54,6 @@
                         <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="2" />
                         <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label maxWidth="1.7976931348623157E308" text="Buffer Type:" GridPane.rowIndex="3" />
-                        <ComboBox fx:id="bufferTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                      </children>
                   </GridPane>
                </children>

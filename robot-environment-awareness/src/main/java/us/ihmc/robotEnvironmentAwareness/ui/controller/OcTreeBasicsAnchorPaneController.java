@@ -14,7 +14,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceNormalFilterParametersProperty;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
 
 public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 {
@@ -29,8 +28,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private ComboBox<DisplayType> displayTypeComboBox;
    @FXML
    private ComboBox<ColoringType> coloringTypeComboBox;
-   @FXML
-   private ComboBox<BufferType> bufferTypeComboBox;
    // Lidar buffer options
    @FXML
    private Slider lidarBufferSizeSlider;
@@ -88,9 +85,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       ObservableList<ColoringType> coloringTypeOptions = FXCollections.observableArrayList(ColoringType.values());
       coloringTypeComboBox.setItems(coloringTypeOptions);
       coloringTypeComboBox.setValue(ColoringType.REGION);
-      ObservableList<BufferType> BufferTypeOptions = FXCollections.observableArrayList(BufferType.values());
-      bufferTypeComboBox.setItems(BufferTypeOptions);
-      bufferTypeComboBox.setValue(BufferType.LIDAR_BASED);
       lidarBufferSizeSlider.setLabelFormatter(StringConverterTools.thousandRounding(true));
    }
 
@@ -119,7 +113,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox.valueProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox.valueProperty(), true);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIOcTreeBufferType, bufferTypeComboBox.valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, showInputStereoPointCloudButton.selectedProperty(), true);
@@ -150,7 +143,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UIOcTreeDepth, depthSlider);
       saveUIControlProperty(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox);
       saveUIControlProperty(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox);
-      saveUIControlProperty(REAModuleAPI.UIOcTreeBufferType, bufferTypeComboBox);
       saveUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
@@ -160,7 +152,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIOcTreeDepth, depthSlider);
       loadUIControlProperty(REAModuleAPI.UIOcTreeDisplayType, displayTypeComboBox);
       loadUIControlProperty(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox);
-      loadUIControlProperty(REAModuleAPI.UIOcTreeBufferType, bufferTypeComboBox);
       loadUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
