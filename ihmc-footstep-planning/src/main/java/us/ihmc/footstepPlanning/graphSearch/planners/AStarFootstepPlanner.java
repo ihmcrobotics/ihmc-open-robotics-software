@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -43,6 +44,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,12 +64,20 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    private final FootstepPlannerParametersReadOnly parameters;
 
-   private SideDependentList<FootstepNode> goalNodes;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
+
+   /** Holds user-specified goal information */
+   private FootstepPlannerGoal goal;
+
+   /** Goal nodes, calculated from {@link #goal}. Used to indicate planner completion and compute heuristics */
+   private SideDependentList<FootstepNode> goalNodes;
+
+   /** The final node of the planned path. Used to call {@link FootstepGraph#getPathFromStart} and as a helper object for best-effort mode*/
    private FootstepNode endNode;
 
+   /** Nominal mid-foot goal pose, used to call {@link FootstepPlan#setLowLevelPlanGoal} */
    private final FramePose3D goalPoseInWorld = new FramePose3D();
 
    private final FootstepGraph graph;
@@ -85,7 +95,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
    private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
-   private final YoLong itarationCount = new YoLong("ItarationCount", registry);
+   private final YoLong iterationCount = new YoLong("IterationCount", registry);
 
    private final YoBoolean initialize = new YoBoolean("initialize", registry);
 
@@ -150,6 +160,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      this.goal = goal;
       goalNodes = new SideDependentList<>();
 
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
@@ -169,6 +180,8 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
             goalPoses.put(side, goalNodePose);
          }
+
+         goalPoseInWorld.set(goalPose);
       }
       else if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.DOUBLE_FOOTSTEP))
       {
@@ -183,9 +196,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
             goalPoses.put(side, goalNodePose);
          }
+
+         goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
       }
 
-      goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
@@ -228,7 +242,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          LogTools.info("A* Footstep planning statistics for " + result);
          System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
          System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
-         System.out.println("   Planning took a total of " + itarationCount.getLongValue() + " iterations.");
+         System.out.println("   Planning took a total of " + iterationCount.getLongValue() + " iterations.");
          System.out.println("   During the planning " + percentRejectedNodes.getDoubleValue() + "% of nodes were rejected as invalid.");
          System.out.println("   Goal was : " + goalPoseInWorld);
       }
@@ -421,7 +435,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       long timeInNano = System.nanoTime();
       planningTime.set(Conversions.nanosecondsToSeconds(timeInNano - planningStartTime));
       percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
-      itarationCount.set(iterations);
+      iterationCount.set(iterations);
       numberOfExpandedNodes.set(expandedNodesCount / Math.max(iterations, 1));
 
       return true;
@@ -430,17 +444,46 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private boolean checkAndHandleNodeAtGoal(FootstepNode nodeToExpand)
    {
       if (!validGoalNode.getBooleanValue())
-         return false;
-
-      RobotSide nodeSide = nodeToExpand.getRobotSide();
-      if (goalNodes.get(nodeSide).equals(nodeToExpand))
       {
-         endNode = goalNodes.get(nodeSide.getOppositeSide());
-         graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
-         return true;
+         return false;
       }
 
-      return false;
+      if (goal.getDistanceProximity() <= 0.0 && goal.getYawProximity() <= 0.0)
+      {
+         RobotSide nodeSide = nodeToExpand.getRobotSide();
+         if (goalNodes.get(nodeSide).equals(nodeToExpand))
+         {
+            endNode = goalNodes.get(nodeSide.getOppositeSide());
+            graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
+            return true;
+         }
+
+         return false;
+      }
+      else
+      {
+         if (!isNodeWithinProximityOfGoal(nodeToExpand))
+            return false;
+         FootstepNode parentNode = graph.getParentNode(nodeToExpand);
+
+         if (isNodeWithinProximityOfGoal(parentNode))
+         {
+            endNode = nodeToExpand;
+            return true;
+         }
+
+         return false;
+      }
+   }
+
+   private boolean isNodeWithinProximityOfGoal(FootstepNode node)
+   {
+      FootstepNode nominalGoalNode = goalNodes.get(node.getRobotSide());
+      if (goal.getDistanceProximity() > 0.0 && nominalGoalNode.euclideanDistanceSquared(node) > MathTools.square(goal.getDistanceProximity()))
+      {
+         return false;
+      }
+      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(nominalGoalNode.getYaw(), node.getYaw())) > goal.getYawProximity();
    }
 
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
@@ -472,7 +515,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
-   
+
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)

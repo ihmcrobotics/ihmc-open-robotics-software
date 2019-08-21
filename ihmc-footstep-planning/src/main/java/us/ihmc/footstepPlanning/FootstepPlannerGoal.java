@@ -10,7 +10,7 @@ public class FootstepPlannerGoal
    private FramePose3D goalPoseBetweenFeet;
    private SideDependentList<SimpleFootstep> doubleFootstepGoal;
 
-   private double xyProximity;
+   private double distanceProximity;
    private double yawProximity;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
@@ -29,7 +29,7 @@ public class FootstepPlannerGoal
             doubleFootstepGoal.put(robotSide, other.doubleFootstepGoal.get(robotSide));
       }
 
-      this.xyProximity = other.xyProximity;
+      this.distanceProximity = other.distanceProximity;
       this.yawProximity = other.yawProximity;
 
       if (other.footstepPlannerGoalType != null)
@@ -63,9 +63,9 @@ public class FootstepPlannerGoal
       return footstepPlannerGoalType;
    }
 
-   public double getXyProximity()
+   public double getDistanceProximity()
    {
-      return xyProximity;
+      return distanceProximity;
    }
 
    public double getYawProximity()
@@ -73,9 +73,9 @@ public class FootstepPlannerGoal
       return yawProximity;
    }
 
-   public void setXyProximity(double xyProximity)
+   public void setDistanceProximity(double distanceProximity)
    {
-      this.xyProximity = xyProximity;
+      this.distanceProximity = distanceProximity;
    }
 
    public void setYawProximity(double yawProximity)
