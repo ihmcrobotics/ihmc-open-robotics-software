@@ -13,7 +13,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
@@ -64,7 +64,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -84,11 +84,11 @@ public class IHMCHumanoidBehaviorManager
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
-   private FootstepPlannerParameters footstepPlannerParameters;
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParameters footstepPlannerParameters,
+   public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
                                       WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
-                                      LogModelProvider modelProvider, boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo)
+                                      LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo)
          throws IOException
    {
       this(robotName, footstepPlannerParameters, wholeBodyControllerParameters, robotModelFactory, modelProvider, startYoVariableServer, sensorInfo, false);
@@ -99,9 +99,9 @@ public class IHMCHumanoidBehaviorManager
       runAutomaticDiagnosticTimeToWait = timeToWait;
    }
 
-   private IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParameters footstepPlannerParameters,
+   private IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
                                        WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
-                                       LogModelProvider modelProvider, boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo,
+                                       LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo,
                                        boolean runAutomaticDiagnostic)
          throws IOException
    {
@@ -207,7 +207,7 @@ public class IHMCHumanoidBehaviorManager
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
                                            YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                           FootstepPlannerParameters footstepPlannerParameters)
+                                           FootstepPlannerParametersBasics footstepPlannerParameters)
    {
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
@@ -279,7 +279,7 @@ public class IHMCHumanoidBehaviorManager
                              new TestSmoothICPPlannerBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                               wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      DRCRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
       dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK,
                              new CollaborativeBehavior(robotName, ros2Node, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters,
                                                        yoGraphicsListRegistry));
@@ -343,7 +343,7 @@ public class IHMCHumanoidBehaviorManager
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
                                                      Ros2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
                                                      WholeBodyControllerParameters wholeBodyControllerParameters,
-                                                     FootstepPlannerParameters footstepPlannerParameters, double timeToWait,
+                                                     FootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -358,11 +358,11 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
    }
 
-   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName, FootstepPlannerParameters footstepPlannerParameters,
+   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
                                                                                         LogModelProvider modelProvider, boolean startYoVariableServer,
-                                                                                        DRCRobotSensorInformation sensorInfo, double timeToWait)
+                                                                                        HumanoidRobotSensorInformation sensorInfo, double timeToWait)
          throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);

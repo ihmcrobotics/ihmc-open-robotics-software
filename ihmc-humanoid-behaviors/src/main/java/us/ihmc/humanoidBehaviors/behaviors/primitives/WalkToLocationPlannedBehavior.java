@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -52,7 +52,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
 
    public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        WalkingControllerParameters walkingControllerParameters,FootstepPlannerParameters footstepPlannerParameters, YoDouble yoTime)
+                                        WalkingControllerParameters walkingControllerParameters,FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, "WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
 
