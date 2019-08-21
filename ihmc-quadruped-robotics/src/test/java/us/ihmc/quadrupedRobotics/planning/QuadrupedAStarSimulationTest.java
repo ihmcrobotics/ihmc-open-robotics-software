@@ -3,16 +3,10 @@ package us.ihmc.quadrupedRobotics.planning;
 import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -24,11 +18,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -40,14 +33,13 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
-import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
-   protected QuadrupedForceTestYoVariables variables;
+   protected QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
@@ -123,10 +115,8 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
       quadrupedTestFactory.setTerrainObject3D(simulationEnvironment);
       quadrupedTestFactory.setInitialOffset(offset);
-      quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
-      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
-      variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 

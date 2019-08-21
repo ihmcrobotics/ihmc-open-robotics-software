@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -25,11 +26,10 @@ public class ExceptionHandlingThreadScheduler
       LogTools.error("{} is terminating due to an exception.", Thread.currentThread().getName());
    };
 
-   private final ScheduledExecutorService executorService;
+   private volatile ScheduledExecutorService executorService;
    private final ExceptionHandler exceptionHandler;
    private final Long crashesBeforeGivingUp;
    private long crashCount = 0;
-   private boolean running = false;
    private Runnable runnable;
    private ScheduledFuture<?> scheduledFuture;
 
@@ -42,6 +42,8 @@ public class ExceptionHandlingThreadScheduler
    {
       this(name, DEFAULT_HANDLER, 0);
    }
+
+   /** TODO: Add constructor with Exception handler that print only the message N-1 times and print the stack trace when it finally crashes */
 
    /**
     * Handle the exceptions yourself and recover. Always resume running.
@@ -63,23 +65,21 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String name, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
    {
-      this.executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+      executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
       this.exceptionHandler = exceptionHandler;
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
    }
 
+   public ScheduledFuture<?> schedule(Runnable runnable, double period)
+   {
+      return schedule(runnable, Conversions.secondsToNanoseconds(period), TimeUnit.NANOSECONDS);
+   }
+
    public ScheduledFuture<?> schedule(Runnable runnable, long period, TimeUnit timeunit)
    {
-      if (!running)
-      {
-         this.runnable = runnable;
-         scheduledFuture = executorService.scheduleAtFixedRate(this::printingRunnableWrapper, 0, period, timeunit);
-         running = true;
-      }
-      else
-      {
-         LogTools.warn("Thread has already been scheduled");
-      }
+      this.runnable = runnable;
+      ExceptionTools.handle(() -> scheduledFuture = executorService.scheduleAtFixedRate(this::printingRunnableWrapper, 0, period, timeunit),
+                            exception -> LogTools.error(exception.getMessage()));  // reduce error output to just a message
 
       return scheduledFuture;
    }
@@ -87,8 +87,8 @@ public class ExceptionHandlingThreadScheduler
    public ScheduledFuture<?> scheduleOnce(Runnable runnable)
    {
       this.runnable = runnable;
-      scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS);
-      running = true;
+      ExceptionTools.handle(() -> scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS),
+                            exception -> LogTools.error(exception.getMessage()));  // reduce error output to just a message
 
       return scheduledFuture;
    }
@@ -115,17 +115,5 @@ public class ExceptionHandlingThreadScheduler
    public void shutdown()
    {
       executorService.shutdown();
-
-      new Thread(() ->  // start a thread to wait for termination to set running to false to prevent double starting
-                 {
-                    ExceptionTools.handle(() -> awaitTermination(10, TimeUnit.SECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
-                    running = false;
-                 }).start();
-   }
-
-   public void awaitTermination(long timeout, TimeUnit timeUnit) throws InterruptedException
-   {
-      executorService.awaitTermination(timeout, timeUnit);
-      running = false;
    }
 }

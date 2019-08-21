@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
@@ -15,6 +14,7 @@ import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.SimulatedContactBasedFootSwitch;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -71,7 +71,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContextToSet)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          otherFootSwitches.get(robotQuadrant).updateMeasurement();
@@ -83,6 +83,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
 
       super.read();
+      return getMonotonicTime();
    }
 
    @Override
@@ -156,12 +157,6 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
          }
       }
       return false;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
    }
 
    @Override

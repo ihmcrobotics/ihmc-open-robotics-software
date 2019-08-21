@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -41,6 +44,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -246,9 +250,9 @@ public class BalanceManager
       parentRegistry.addChild(registry);
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
-      icpPlanner.addFootstepToPlan(footstep, timing);
+      icpPlanner.addFootstepToPlan(footstep, timing, shiftFractions);
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
    }
@@ -295,11 +299,6 @@ public class BalanceManager
    public double getNextTransferDurationAdjustedForReachability()
    {
       return icpPlanner.getTransferDuration(1);
-   }
-
-   public double getCurrentTouchdownDuration()
-   {
-      return icpPlanner.getTouchdownDuration(0);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -539,6 +538,8 @@ public class BalanceManager
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
       initializeForStanding = true;
+
+      endTick();
    }
 
    public void prepareForDoubleSupportPushRecovery()
@@ -744,6 +745,16 @@ public class BalanceManager
 
       centerOfMassPosition.changeFrame(worldFrame);
       icpPlanner.holdCurrentICP(centerOfMassPosition);
+   }
+
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      icpPlanner.setFinalTransferWeightDistribution(weightDistribution);
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      icpPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
    }
 
    public void setFinalTransferTime(double finalTransferDuration)

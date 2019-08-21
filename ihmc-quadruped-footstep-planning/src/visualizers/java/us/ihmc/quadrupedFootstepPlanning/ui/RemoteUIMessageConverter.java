@@ -68,6 +68,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
+   private final AtomicReference<Double> plannerBestEffortTimeoutReference;
    private final AtomicReference<RobotQuadrant> plannerInitialSupportQuadrantReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
@@ -118,6 +119,7 @@ public class RemoteUIMessageConverter
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, 5.0);
+      plannerBestEffortTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerBestEffortTimeoutTopic, 1.0);
       plannerInitialSupportQuadrantReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
@@ -393,6 +395,8 @@ public class RemoteUIMessageConverter
          packet.setInitialStepRobotQuadrant(plannerInitialSupportQuadrantReference.get().toByte());
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
+      if (plannerBestEffortTimeoutReference.get() != null)
+         packet.setBestEffortTimeout(plannerBestEffortTimeoutReference.get());
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
       if (plannerRequestIdReference.get() != null)

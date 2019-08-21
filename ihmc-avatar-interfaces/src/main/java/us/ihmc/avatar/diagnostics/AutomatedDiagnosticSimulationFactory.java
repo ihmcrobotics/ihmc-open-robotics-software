@@ -37,8 +37,9 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -80,6 +81,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private StateEstimatorController stateEstimator;
    private ForceSensorStateUpdater forceSensorStateUpdater;
+
+   private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public AutomatedDiagnosticSimulationFactory(DRCRobotModel robotModel)
    {
@@ -154,7 +157,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
       SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
       double gravitationalAcceleration = 9.81;
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravitationalAcceleration;
@@ -269,7 +272,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       long startTime = System.nanoTime();
 
       lowLevelOutputWriter.writeBefore(startTime);
-      sensorReader.read();
+      long timestamp = sensorReader.read(sensorDataContext);
+      sensorReader.compute(timestamp, sensorDataContext);
       humanoidReferenceFrames.updateFrames();
 
       if (firstControlTick)

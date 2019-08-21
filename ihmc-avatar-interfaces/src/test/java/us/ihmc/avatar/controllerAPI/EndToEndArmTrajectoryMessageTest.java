@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -677,7 +679,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       SideDependentList<ArmTrajectoryMessage> overridingMessages = new SideDependentList<>();
 
-      double overrideTrajectoryTime = 0.5;
+      double overrideTrajectoryTime = 2.0;
 
       for (RobotSide robotSide : RobotSide.values)
       {

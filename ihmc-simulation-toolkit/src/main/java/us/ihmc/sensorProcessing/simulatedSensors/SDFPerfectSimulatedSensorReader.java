@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -42,7 +41,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
-   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
+   private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
@@ -127,7 +126,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
-      this.visionSensorTimestamp.set(timestamp);
+      this.controllerTimestamp.set(timestamp);
       this.sensorHeadPPSTimetamp.set(timestamp);
 
       if (forceSensorDataHolderToUpdate != null)
@@ -202,19 +201,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
       return timestamp.getLongValue();
    }
 
    @Override
-   public long getVisionSensorTimestamp()
+   public long getMonotonicTime()
    {
-      return visionSensorTimestamp.getLongValue();
+      return controllerTimestamp.getLongValue();
    }
 
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getSyncTimestamp()
    {
       return sensorHeadPPSTimetamp.getLongValue();
    }
@@ -295,11 +294,5 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
       return forceSensorDataHolderToUpdate;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
-   {
-      return null;
    }
 }

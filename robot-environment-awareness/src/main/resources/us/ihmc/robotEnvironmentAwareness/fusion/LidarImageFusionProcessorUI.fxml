@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <bottom>
+      <TabPane prefHeight="300.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="PointCloud">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                 <children>
+                    <fx:include fx:id="pointCloudAnchorPane" source="../ui/PointCloudAnchorPane.fxml" />
+                 </children>
+              </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="ImageProc">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+              	 <children>
+                    <fx:include fx:id="imageProcessingAnchorPane" source="ImageProcessingAnchorPane.fxml" />
+                 </children>
+            </content>
+          </Tab>
+          <Tab text="ObjectDetection">
+             <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+                <children>
+                  <fx:include fx:id="objectDetectionAnchorPane" source="ObjectDetectionAnchorPane.fxml" />
+               </children>
+             </content>
+          </Tab>
+          <Tab text="StereoREA">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
+                 <children>
+                    <fx:include fx:id="stereoREAAnchorPane" source="StereoREAAnchorPane.fxml" />
+                 </children>
+              </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="CustomRegionMerge">
+          <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                 <children>
+                    <fx:include fx:id="customRegionMergeAnchorPane" source="../ui/CustomRegionMergeAnchorPane.fxml" />
+                 </children>
+              </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </bottom>
+</BorderPane>

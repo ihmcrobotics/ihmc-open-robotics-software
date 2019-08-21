@@ -6,6 +6,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class CostToGoHeuristicsBuilder
 {

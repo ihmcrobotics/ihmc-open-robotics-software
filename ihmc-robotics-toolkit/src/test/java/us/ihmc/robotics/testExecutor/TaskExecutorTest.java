@@ -8,8 +8,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.taskExecutor.NullTask;
-import us.ihmc.robotics.taskExecutor.TaskExecutor;
+import us.ihmc.robotics.taskExecutor.NullState;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
 
 public class TaskExecutorTest
 {
@@ -17,7 +17,7 @@ public class TaskExecutorTest
    @Test
    public void testEmptyExecutor()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       assertTrue(taskExecutor.isDone());
       State currentTask = taskExecutor.getCurrentTask();
@@ -34,10 +34,10 @@ public class TaskExecutorTest
    @Test
    public void testWithOneNullTask()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
       assertTrue(taskExecutor.isDone());
 
-      NullTask nullTask0 = new NullTask();
+      NullState nullTask0 = new NullState();
       taskExecutor.submit(nullTask0);
 
       assertFalse(taskExecutor.isDone());
@@ -51,7 +51,7 @@ public class TaskExecutorTest
       assertFalse(taskExecutor.isDone());
 
       taskExecutor.doControl();
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
       assertNull(taskExecutor.getNextTask());
       assertNull(taskExecutor.getLastTask());
       assertTrue(taskExecutor.isDone());
@@ -60,13 +60,13 @@ public class TaskExecutorTest
    @Test
    public void testWithSeveralNullTasks()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
-      NullTask nullTask0 = new NullTask();
-      NullTask nullTask1 = new NullTask();
-      NullTask nullTask2 = new NullTask();
-      NullTask nullTask3 = new NullTask();
-      NullTask nullTask4 = new NullTask();
+      NullState nullTask0 = new NullState();
+      NullState nullTask1 = new NullState();
+      NullState nullTask2 = new NullState();
+      NullState nullTask3 = new NullState();
+      NullState nullTask4 = new NullState();
       taskExecutor.submit(nullTask0);
       taskExecutor.submit(nullTask1);
       taskExecutor.submit(nullTask2);
@@ -74,7 +74,7 @@ public class TaskExecutorTest
       taskExecutor.submit(nullTask4);
 
       assertFalse(taskExecutor.isDone());
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
       assertTrue(nullTask0 == taskExecutor.getNextTask());
       assertTrue(nullTask4 == taskExecutor.getLastTask());
 
@@ -114,7 +114,7 @@ public class TaskExecutorTest
       assertNull(taskExecutor.getNextTask());
       assertNull(taskExecutor.getLastTask());
 
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
    }
 
    @Test
@@ -140,7 +140,7 @@ public class TaskExecutorTest
    @Test
    public void testAddingTasksOnTheFly()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       CountActionsTask exampleTask0 = new CountActionsTask(2);
 
@@ -209,7 +209,7 @@ public class TaskExecutorTest
 
    private void runATest(int[] doActionsPerTask)
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       CountActionsTask[] exampleTasks = new CountActionsTask[doActionsPerTask.length];
 

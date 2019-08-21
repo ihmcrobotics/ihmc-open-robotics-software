@@ -5,17 +5,16 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
 public class PitchAndRollBasedCost implements FootstepCost
 {
-   private final FootstepPlannerCostParameters costParameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   public PitchAndRollBasedCost(FootstepPlannerCostParameters costParameters, FootstepNodeSnapperReadOnly snapper)
+   public PitchAndRollBasedCost(FootstepPlannerParametersReadOnly costParameters, FootstepNodeSnapperReadOnly snapper)
    {
-      this.costParameters = costParameters;
+      this.parameters = costParameters;
       this.snapper = snapper;
    }
 
@@ -34,6 +33,6 @@ public class PitchAndRollBasedCost implements FootstepCost
       double pitch = yawPitchRoll[1];
       double roll = yawPitchRoll[2];
 
-      return costParameters.getPitchWeight() * Math.abs(pitch) + costParameters.getRollWeight() * Math.abs(roll);
+      return parameters.getPitchWeight() * Math.abs(pitch) + parameters.getRollWeight() * Math.abs(roll);
    }
 }

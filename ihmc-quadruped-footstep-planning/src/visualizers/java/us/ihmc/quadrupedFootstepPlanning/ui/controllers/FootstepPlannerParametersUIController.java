@@ -20,7 +20,6 @@ public class FootstepPlannerParametersUIController
    private JavaFXMessager messager;
    private final FootstepPlannerParametersProperty parametersProperty = new FootstepPlannerParametersProperty(this, "footstepPlannerParametersProperty");
 
-
    @FXML
    private Spinner<Double> maxWalkingSpeedMultiplier;
 
@@ -34,9 +33,7 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minSurfaceIncline;
 
    @FXML
-   private Spinner<Double> projectInsideDistanceForExpansion;
-   @FXML
-   private Spinner<Double> projectInsideDistanceForPostProcessing;
+   private Spinner<Double> projectInsideDistance;
    @FXML
    private Spinner<Double> maximumXYWiggleDistance;
    @FXML
@@ -51,6 +48,7 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minHindEndBackwardDistanceFromCliffBottoms;
    @FXML
    private Spinner<Double> minLateralDistanceFromCliffBottoms;
+
 
    @FXML
    private Spinner<Double> distanceWeight;
@@ -115,8 +113,7 @@ public class FootstepPlannerParametersUIController
       minYClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.8, 0.0, 0.05));
 
-      projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
-      projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      projectInsideDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       maximumXYWiggleDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.01));
       cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
       minFrontEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
@@ -146,8 +143,7 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMinYClearanceFromFoot(minYClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumSurfaceInclineRadians(minSurfaceIncline.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindProjectInsideDistanceForExpansion(projectInsideDistanceForExpansion.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindProjectInsideDistanceForPostProcessing(projectInsideDistanceForPostProcessing.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindProjectInsideDistance(projectInsideDistance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumXYWiggleDistance(maximumXYWiggleDistance.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindCliffHeightToAvoid(cliffHeightToAvoid.getValueFactory().valueProperty());
@@ -165,6 +161,8 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindHeuristicsWeight(heuristicsWeight.getValueFactory().valueProperty());
+
+
 
       messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
    }
@@ -187,8 +185,7 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("minYClearanceFromFoot", minYClearanceFromFoot.getValue());
       filePropertyHelper.saveProperty("minSurfaceIncline", minSurfaceIncline.getValue());
 
-      filePropertyHelper.saveProperty("projectInsideDistanceForExpansion", projectInsideDistanceForExpansion.getValue());
-      filePropertyHelper.saveProperty("projectInsideDistanceForPostProcessing", projectInsideDistanceForPostProcessing.getValue());
+      filePropertyHelper.saveProperty("projectInsideDistance", projectInsideDistance.getValue());
       filePropertyHelper.saveProperty("cliffHeightToAvoid", cliffHeightToAvoid.getValue());
       filePropertyHelper.saveProperty("minFrontEndForwardDistanceFromCliffBottoms", minFrontEndForwardDistanceFromCliffBottoms.getValue());
       filePropertyHelper.saveProperty("minFrontEndBackwardDistanceFromCliffBottoms", minFrontEndBackwardDistanceFromCliffBottoms.getValue());
@@ -227,10 +224,8 @@ public class FootstepPlannerParametersUIController
       if ((value = filePropertyHelper.loadDoubleProperty("minSurfaceIncline")) != null)
          minSurfaceIncline.getValueFactory().setValue(value);
 
-      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistanceForExpansion")) != null)
-         projectInsideDistanceForExpansion.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistanceForPostProcessing")) != null)
-         projectInsideDistanceForPostProcessing.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistance")) != null)
+         projectInsideDistance.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightToAvoid")) != null)
          cliffHeightToAvoid.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("minFrontEndForwardDistanceFromCliffBottoms")) != null)

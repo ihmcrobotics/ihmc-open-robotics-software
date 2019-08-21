@@ -52,16 +52,16 @@ float64 minimum_hind_step_length_when_stepping_down
 float64 step_z_for_stepping_down
 
 # Field default value -11.1
-float64 maximum_step_width
+float64 maximum_step_outward
 
 # Field default value -11.1
-float64 minimum_step_width
+float64 maximum_step_inward
 
 # Field default value -11.1
-float64 minimum_step_yaw
+float64 maximum_step_yaw_outward
 
 # Field default value -11.1
-float64 maximum_step_yaw
+float64 maximum_step_yaw_inward
 
 # Field default value -11.1
 float64 maximum_step_change_z
@@ -70,13 +70,16 @@ float64 maximum_step_change_z
 float64 body_ground_clearance
 
 # Field default value -11.1
-float64 distance_heuristic_weight
+float64 distance_weight
 
 # Field default value -11.1
 float64 yaw_weight
 
 # Field default value -11.1
 float64 x_gait_weight
+
+# Field default value -11.1
+float64 desired_velocity_weight
 
 # Field default value -11.1
 float64 cost_per_step
@@ -99,15 +102,10 @@ float64 min_y_clearance_from_foot
 # Field default value -11.1
 float64 max_walking_speed_multiplier
 
-bool project_inside_using_convex_hull_during_expansion
-
-bool project_inside_using_convex_hull_during_post_processing
+bool project_inside_using_convex_hull
 
 # Field default value -11.1
-float64 projection_inside_distance_for_expansion
-
-# Field default value -11.1
-float64 projection_inside_distance_for_post_processing
+float64 projection_inside_distance
 
 # Field default value -11.1
 float64 maximum_xy_wiggle_distance
@@ -132,5 +130,27 @@ float64 minimum_hind_end_backward_distance_from_cliff_bottoms
 
 # Field default value -11.1
 float64 minimum_lateral_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 final_turn_proximity
+
+# Field default value -11.1
+float64 final_slow_down_proximity
+
+# Field default value -11.1
+float64 maximum_deviation_from_x_gait_during_expansion
+
+bool return_best_effort_plan
+
+# Field default value 4
+uint32 minimum_steps_for_best_effort_plan
+
+bool perform_graph_repairing_step
+
+# Field default value -11.1
+float64 repairing_heuristic_weight_scaling
+
+# Field default value -11.1
+float64 minimum_heuristic_weight_reduction
 
 

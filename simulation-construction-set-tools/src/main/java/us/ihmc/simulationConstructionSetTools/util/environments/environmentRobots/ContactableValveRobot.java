@@ -147,7 +147,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       invertTransform.set(transform);
       invertTransform.invert();
 
-      valveTorus = new FrameTorus3d(valveFrame, transform, valveRadius - valveThickness / 2.0, valveThickness / 2.0);
+      valveTorus = new FrameTorus3d(valveFrame, valveRadius - valveThickness / 2.0, valveThickness / 2.0);
+      valveTorus.applyTransform(transform);
       valveLinkGraphics.transform(transform);
       valveLinkGraphics.addArcTorus(0.0, 2 * Math.PI, valveRadius - valveThickness / 2.0, valveThickness / 2.0, YoAppearance.DarkRed());
       valveLinkGraphics.addCylinder(valveOffsetFromWall, spokesThickness / 2.0, YoAppearance.DarkRed());
@@ -165,7 +166,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
          RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
          yoGraphicTransform.multiply(transform);
 
-         FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, transform, spokeLength, spokesThickness / 2.0);
+         FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, spokeLength, spokesThickness / 2.0);
+         spokeCylinder.getCylinder3d().applyTransform(transform);
          spokesCylinders.add(spokeCylinder);
 
          valveLinkGraphics.transform(transform);

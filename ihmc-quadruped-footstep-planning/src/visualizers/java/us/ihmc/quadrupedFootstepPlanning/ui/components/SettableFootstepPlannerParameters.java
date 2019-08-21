@@ -24,10 +24,10 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumHindStepLengthWhenSteppingDown;
    private double stepZForSteppingDown;
 
-   private double maximumStepWidth;
-   private double minimumStepWidth;
-   private double minimumStepYaw;
-   private double maximumStepYaw;
+   private double maximumStepOutward;
+   private double maximumStepInward;
+   private double maximumStepYawInward;
+   private double maximumStepYawOutward;
 
    private double maximumStepChangeZ;
    private double bodyGroundClearance;
@@ -40,12 +40,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double distanceWeight;
    private double heuristicsWeight;
    private double xGaitWeight;
+   private double desiredVelocityWeight;
 
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
    private double minimumSurfaceInclineRadians;
-   private double projectInsideDistanceForExpansion;
-   private double projectInsideDistanceForPostProcessing;
+   private double projectInsideDistance;
    private double maximumXYWiggleDistance;
 
    private double cliffHeightToAvoid;
@@ -55,8 +55,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumHindEndBackwardDistanceFromCliffBottoms;
    private double minimumLateralDistanceFromCliffBottoms;
 
-   private boolean projectInsideUsingConvexHullDuringExpansion;
-   private boolean projectInsideUsingConvexHullDuringPostProcessing;
+   private boolean projectInsideUsingConvexHull;
+
+   private double finalTurnProximity;
+   private double finalSlowDownProximity;
+
+   private double maximumDeviationFromXGaitDuringExpansion;
+
+   private boolean returnBestEffortPlan;
+   private int minStepsForBestEffort;
+
+   private boolean performGraphRepairingStep;
+   private double repairingHeuristicWeightScaling;
+   private double minimumHeuristicWeightReduction;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -177,30 +188,30 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepWidth(double maximumStepWidth)
+   public void setMaximumStepOutward(double maximumStepOutward)
    {
-      this.maximumStepWidth = maximumStepWidth;
+      this.maximumStepOutward = maximumStepOutward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMinimumStepWidth(double minimumStepWidth)
+   public void setMaximumStepInward(double maximumStepInward)
    {
-      this.minimumStepWidth = minimumStepWidth;
+      this.maximumStepInward = maximumStepInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMinimumStepYaw(double minimumStepYaw)
+   public void setMaximumStepYawInward(double maximumStepYawInward)
    {
-      this.minimumStepYaw = minimumStepYaw;
+      this.maximumStepYawInward = maximumStepYawInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepYaw(double maximumStepYaw)
+   public void setMaximumStepYawOutward(double maximumStepYawOutward)
    {
-      this.maximumStepYaw = maximumStepYaw;
+      this.maximumStepYawOutward = maximumStepYawOutward;
    }
 
    /** {@inheritDoc} */
@@ -225,7 +236,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public void setDistanceHeuristicWeight(double distanceHeuristicWeight)
+   public void setDistanceWeight(double distanceHeuristicWeight)
    {
       this.distanceWeight = distanceHeuristicWeight;
    }
@@ -242,6 +253,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setXGaitWeight(double xGaitWeight)
    {
       this.xGaitWeight = xGaitWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setDesiredVelocityWeight(double desiredVelocityWeight)
+   {
+      this.desiredVelocityWeight = desiredVelocityWeight;
    }
 
    /** {@inheritDoc} */
@@ -311,7 +329,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minimumFrontEndBackwardDistanceFromCliffBottoms = distance;
    }
 
-
    @Override
    public void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
    {
@@ -330,32 +347,30 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minimumLateralDistanceFromCliffBottoms = distance;
    }
 
-   /** {@inheritDoc} */
    @Override
-   public void setProjectInsideDistanceForExpansion(double projectInsideDistance)
+   public void setFinalTurnProximity(double proximity)
    {
-      this.projectInsideDistanceForExpansion = projectInsideDistance;
+      this.finalTurnProximity = proximity;
+   }
+
+   @Override
+   public void setFinalSlowDownProximity(double proximity)
+   {
+      this.finalSlowDownProximity = proximity;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideDistanceForPostProcessing(double projectInsideDistance)
+   public void setProjectInsideDistance(double projectInsideDistance)
    {
-      this.projectInsideDistanceForPostProcessing = projectInsideDistance;
+      this.projectInsideDistance = projectInsideDistance;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
+   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
    {
-      this.projectInsideUsingConvexHullDuringExpansion = projectInsideUsingConvexHull;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
-   {
-      this.projectInsideUsingConvexHullDuringPostProcessing = projectInsideUsingConvexHull;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
@@ -363,6 +378,42 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMaximumXYWiggleDistance(double maximumWiggleDistance)
    {
       this.maximumXYWiggleDistance = maximumWiggleDistance;
+   }
+
+   @Override
+   public void setMaximumDeviationFromXGaitDuringExpansion(double deviationFromXGaitDuringExpansion)
+   {
+      this.maximumDeviationFromXGaitDuringExpansion = deviationFromXGaitDuringExpansion;
+   }
+
+   @Override
+   public void setReturnBestEffortPlan(boolean returnBestEffortPlan)
+   {
+      this.returnBestEffortPlan = returnBestEffortPlan;
+   }
+
+   @Override
+   public void setMinimumStepsForBestEffortPlan(int minimumStepsForBestEffortPlan)
+   {
+      this.minStepsForBestEffort = minimumStepsForBestEffortPlan;
+   }
+
+   @Override
+   public void setPerformGraphRepairingStep(boolean performGraphRepairingStep)
+   {
+      this.performGraphRepairingStep = performGraphRepairingStep;
+   }
+
+   @Override
+   public void setRepairingHeuristicWeightScaling(double repairingHeuristicWeightScaling)
+   {
+      this.repairingHeuristicWeightScaling = repairingHeuristicWeightScaling;
+   }
+
+   @Override
+   public void setMinimumHeuristicWeightReduction(double minimumHeuristicWeightReduction)
+   {
+      this.minimumHeuristicWeightReduction = minimumHeuristicWeightReduction;
    }
 
    /** {@inheritDoc} */
@@ -479,29 +530,29 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
-      return maximumStepWidth;
+      return maximumStepOutward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
-      return minimumStepWidth;
+      return maximumStepInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
-      return minimumStepYaw;
+      return maximumStepYawInward;
    }
 
    /** {@inheritDoc} */
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return maximumStepYaw;
+      return maximumStepYawOutward;
    }
 
    /** {@inheritDoc} */
@@ -526,7 +577,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
       return distanceWeight;
    }
@@ -536,6 +587,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getXGaitWeight()
    {
       return xGaitWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getDesiredVelocityWeight()
+   {
+      return desiredVelocityWeight;
    }
 
    /** {@inheritDoc} */
@@ -596,30 +654,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForExpansion()
+   public double getProjectInsideDistance()
    {
-      return projectInsideDistanceForExpansion;
+      return projectInsideDistance;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistanceForPostProcessing()
+   public boolean getProjectInsideUsingConvexHull()
    {
-      return projectInsideDistanceForPostProcessing;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringExpansion()
-   {
-      return projectInsideUsingConvexHullDuringExpansion;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
-   {
-      return projectInsideUsingConvexHullDuringPostProcessing;
+      return projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
@@ -663,10 +707,61 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    {
       return minimumHindEndBackwardDistanceFromCliffBottoms;
    }
+
    /** {@inheritDoc} */
    @Override
    public double getMinimumLateralDistanceFromCliffBottoms()
    {
       return minimumLateralDistanceFromCliffBottoms;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFinalTurnProximity()
+   {
+      return finalTurnProximity;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFinalSlowDownProximity()
+   {
+      return finalSlowDownProximity;
+   }
+
+   @Override
+   public double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return maximumDeviationFromXGaitDuringExpansion;
+   }
+
+   @Override
+   public boolean returnBestEffortPlan()
+   {
+      return returnBestEffortPlan;
+   }
+
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minStepsForBestEffort;
+   }
+
+   @Override
+   public boolean performGraphRepairingStep()
+   {
+      return performGraphRepairingStep;
+   }
+
+   @Override
+   public double getRepairingHeuristicWeightScaling()
+   {
+      return repairingHeuristicWeightScaling;
+   }
+
+   @Override
+   public double getMinimumHeuristicWeightReduction()
+   {
+      return minimumHeuristicWeightReduction;
    }
 }

@@ -13,7 +13,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
-import us.ihmc.robotics.taskExecutor.TaskExecutor;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -74,8 +74,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       }
    }
 
-   private final StateMachineClock clock;
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final StateExecutor taskExecutor;
    private final List<EventTask> eventList;
 
    /**
@@ -94,7 +93,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       if (parameters == null)
          parameters = new HeadingAndVelocityEvaluationScriptParameters();
 
-      clock = StateMachineClock.yoClock(timeProvider, "headingAndVelocity", registry);
+      taskExecutor = new StateExecutor(StateMachineClock.yoClock(timeProvider, "headingAndVelocity", registry));
 
       acceleration.set(parameters.getAcceleration());
       maxVelocity.set(parameters.getMaxVelocity());
@@ -157,15 +156,11 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       public void onEntry()
       {
          currentScriptEvent.set(evaluationEvent);
-         clock.notifyStateChanged();
       }
-
-      public abstract void doAction(double timeInState);
 
       @Override
       public void onExit()
       {
-
       }
 
       @Override

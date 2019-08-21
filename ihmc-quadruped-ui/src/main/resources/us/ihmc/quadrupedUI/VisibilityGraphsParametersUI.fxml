@@ -1,61 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController">
     <children>
-        <GridPane layoutX="15.0" >
+        <GridPane hgap="5.0" layoutX="15.0" vgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columnConstraints>
-                <ColumnConstraints minWidth="20.0" prefWidth="200.0"/>
+            <ColumnConstraints halignment="RIGHT" />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="40.0" />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
             </rowConstraints>
             <children>
                 <!-- path tuning -->
-                <Label text="Cluster Resolution" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="150"/>
-                <Label text="Max Inter Region Connection Length" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="250"/>
-                <Label text="Exploration Distance from Start and Goal" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="300"/>
+                <Label text="Cluster Resolution" textAlignment="RIGHT" wrapText="true" GridPane.halignment="RIGHT" />
+                <Label prefWidth="140.0" text="Max Inter Region Connection Length" textAlignment="RIGHT" wrapText="true" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label prefWidth="140.0" text="Exploration Distance from Start and Goal" textAlignment="RIGHT" wrapText="true" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
 
                 <!-- obstacle -->
-                <Label text="Extrusion Distance For Obstacles" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <Label text="Extrusion Distance For All Regions" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Label text="Obstacle Height Definition" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                <Label prefWidth="135.0" text="Extrusion Distance For Obstacles" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
+                <Label prefWidth="135.0" text="Extrusion Distance For All Regions" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label prefWidth="135.0" text="Obstacle Height Definition" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
 
                 <!-- planar region -->
-                <Label text="Planar Region Min Size" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
-                <Label text="Planar Region Min Size" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="2"/>
-                <Label text="Region Orthogonal Angle" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="3"/>
+                <Label text="Planar Region Min Size" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="4" GridPane.halignment="RIGHT" />
+                <Label text="Planar Region Min Size" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label text="Region Orthogonal Angle" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
 
-                <Label text="Search Host Region Epsilon" GridPane.halignment="RIGHT" GridPane.columnIndex="7" GridPane.rowIndex="1"/>
-                <Label text="Normal Z Threshold for Navigable" GridPane.halignment="RIGHT" GridPane.columnIndex="7" GridPane.rowIndex="2"/>
+                <Label prefWidth="135.0" text="Search Host Region Epsilon" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" />
+                <Label prefWidth="135.0" text="Normal Z Threshold for Navigable" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
 
-                <Slider fx:id="clusterResolution" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.2" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                <Slider fx:id="maxInterRegionConnectionLength" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.55" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <Spinner fx:id="explorationDistanceFromStartGoal" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="100"/>
+                <Slider fx:id="clusterResolution" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.2" GridPane.columnIndex="1" />
+                <Slider fx:id="maxInterRegionConnectionLength" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.55" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Spinner fx:id="explorationDistanceFromStartGoal" editable="true" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Slider fx:id="extrusionDistance" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
-                <Slider fx:id="extrusionDistanceIfNotTooHighToStep" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
-                <Slider fx:id="tooHighToStepDistance" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+                <Slider fx:id="extrusionDistance" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" GridPane.columnIndex="3" />
+                <Slider fx:id="extrusionDistanceIfNotTooHighToStep" blockIncrement="0.05" majorTickUnit="0.05" max="0.25" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                <Slider fx:id="tooHighToStepDistance" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
-                <Slider fx:id="planarRegionMinArea" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="6" GridPane.rowIndex="1"/>
-                <Spinner fx:id="planarRegionMinSize" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" prefWidth="100.0"/>
-                <Slider fx:id="regionOrthogonalAngle" blockIncrement="0.05" majorTickUnit="0.05" min="0.78539816339" max="1.57079632679" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.3" GridPane.columnIndex="6" GridPane.rowIndex="3"/>
+                <Slider fx:id="planarRegionMinArea" blockIncrement="0.05" majorTickUnit="0.05" max="0.5" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" GridPane.columnIndex="5" />
+                <Spinner fx:id="planarRegionMinSize" editable="true" prefWidth="100.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                <Slider fx:id="regionOrthogonalAngle" blockIncrement="0.05" majorTickUnit="0.05" max="1.57079632679" min="0.78539816339" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.3" GridPane.columnIndex="5" GridPane.rowIndex="2" />
 
 
-                <Slider fx:id="searchHostRegionEpsilon" blockIncrement="0.05" majorTickUnit="0.05" min="-0.1" max="0.15" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.03" GridPane.columnIndex="8" GridPane.rowIndex="1"/>
-                <Slider fx:id="normalZThresholdForAccessibleRegions" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="100.0"
-                        showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.6" GridPane.columnIndex="8" GridPane.rowIndex="2"/>
+                <Slider fx:id="searchHostRegionEpsilon" blockIncrement="0.05" majorTickUnit="0.05" max="0.15" min="-0.1" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.03" GridPane.columnIndex="7" />
+                <Slider fx:id="normalZThresholdForAccessibleRegions" blockIncrement="0.05" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefWidth="100.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.6" GridPane.columnIndex="7" GridPane.rowIndex="1" />
             </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
         </GridPane>
     </children>
 </AnchorPane>

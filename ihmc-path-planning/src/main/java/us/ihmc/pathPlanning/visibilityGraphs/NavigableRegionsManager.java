@@ -131,6 +131,12 @@ public class NavigableRegionsManager
       goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
       this.goalInWorld = goalInWorld;
 
+      if ((startNode == null) || (goalNode == null))
+      {
+         LogTools.info("startNode or goalNode are null. startNode = {}. goalNode = {}", startNode, goalNode);
+         return false;
+      }
+
       PathNodeComparator comparator = new PathNodeComparator();
       stack = new PriorityQueue<>(comparator);
 
@@ -221,7 +227,6 @@ public class NavigableRegionsManager
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
       return path;
    }
-
 
    private List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
    {
@@ -345,7 +350,10 @@ public class NavigableRegionsManager
          NavigableRegion regionContainingPoint = PlanarRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions);
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
-         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0, start, goal, closestCluster.getNavigableExtrusionsInWorld(),
+         Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0,
+                                                                                    start,
+                                                                                    goal,
+                                                                                    closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomePlanarRegion());
 
          path = calculateBodyPath(start, closestExtrusion);

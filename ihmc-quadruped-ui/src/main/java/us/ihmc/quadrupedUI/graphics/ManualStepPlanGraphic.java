@@ -13,6 +13,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
+import us.ihmc.quadrupedUI.QuadrupedUserInterface;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -23,7 +24,6 @@ public class ManualStepPlanGraphic extends Group
 {
    private static final double RADIUS = 0.02;
    private static final double zOffset = 0.01;
-   private static final QuadrantDependentList<Color> solutionFootstepColors = new QuadrantDependentList<>(Color.BLUE, Color.ORANGE, Color.DARKBLUE, Color.DARKORANGE);
 
    private final MeshView meshView = new MeshView();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
@@ -55,7 +55,7 @@ public class ManualStepPlanGraphic extends Group
    {
       meshBuilder.clear();
 
-      QuadrantDependentList<Color> colors = solutionFootstepColors;
+      QuadrantDependentList<Color> colors = QuadrupedUserInterface.feetColors;
 
       FramePoint3D footPosition = new FramePoint3D();
 
@@ -98,5 +98,11 @@ public class ManualStepPlanGraphic extends Group
          meshView.setMesh(mesh);
          meshView.setMaterial(material);
       }
+   }
+
+   public void stop()
+   {
+      executorService.shutdown();
+      animationTimer.stop();
    }
 }

@@ -45,6 +45,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider minSwingTimeForDisturbanceRecovery = new DoubleParameter("minSwingTimeForDisturbanceRecovery", finalRegistry, 0.2);
    private final DoubleProvider minRequiredSpeedUpFactor = new DoubleParameter("minRequiredSpeedUpFactor", finalRegistry, 1.05);
 
+   private final DoubleProvider flatWaypointProportion = new DoubleParameter("swingFlatWaypointProportion", finalRegistry, 0.5);
    private final DoubleProvider waypointProportion0 = new DoubleParameter("swingWaypointProportion0", finalRegistry, 0.33);
    private final DoubleProvider waypointProportion1 = new DoubleParameter("swingWaypointProportion1", finalRegistry, 0.66);
    private final DoubleProvider obstacleClearanceWaypointProportion0 = new DoubleParameter("swingObstacleClearanceWaypointProportion0", finalRegistry, 0.25);
@@ -66,6 +67,10 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider coefficientOfFrictionWhenSlipping = new DoubleParameter("coefficientOfFrictionWhenSlipping", finalRegistry, 0.6);
    private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 0.9);
 
+   private final DoubleProvider touchdownDuration = new DoubleParameter("touchdownDuration", finalRegistry, 0.15);
+   private final DoubleProvider rhoClampingDuration = new DoubleParameter("rhoClampingDuration", finalRegistry, 0.05);
+   private final DoubleProvider loadingMinMagnitude = new DoubleParameter("loadingMinMagnitude", finalRegistry, 10.0);
+   private final DoubleProvider loadingMaxMagnitude = new DoubleParameter("loadingMaxMagnitude", finalRegistry, 500.0);
 
 
    public QuadrupedFootControlModuleParameters()
@@ -82,8 +87,8 @@ public class QuadrupedFootControlModuleParameters
       holdPositionDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
       holdPositionGains = new ParameterizedPID3DGains("_holdPosition", GainCoupling.NONE, false, holdPositionDefaultGains, finalRegistry);
    }
-   
-   
+
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return finalRegistry;
@@ -147,6 +152,11 @@ public class QuadrupedFootControlModuleParameters
    public double getMinRequiredSpeedUpFactor()
    {
       return minRequiredSpeedUpFactor.getValue();
+   }
+
+   public double getFlatSwingWaypointProportion()
+   {
+      return flatWaypointProportion.getValue();
    }
 
    public double getSwingWaypointProportion0()
@@ -238,4 +248,25 @@ public class QuadrupedFootControlModuleParameters
    {
       return defaultTouchdownTriggerWindow;
    }
+
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration.getValue();
+   }
+
+   public double getRhoClampingDuration()
+   {
+      return rhoClampingDuration.getValue();
+   }
+
+   public double getLoadingMinMagnitude()
+   {
+      return loadingMinMagnitude.getValue();
+   }
+
+   public double getLoadingMaxMagnitude()
+   {
+      return loadingMaxMagnitude.getValue();
+   }
+
 }

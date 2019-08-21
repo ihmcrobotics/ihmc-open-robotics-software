@@ -1,0 +1,32 @@
+#ifndef __controller_msgs__msg__DoorParameterPacket__idl__
+#define __controller_msgs__msg__DoorParameterPacket__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::DoorParameterPacket_")
+      struct DoorParameterPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        geometry_msgs::msg::dds::Point hinged_point_on_ground;
+        geometry_msgs::msg::dds::Point end_point_on_ground;
+        double door_height;
+        geometry_msgs::msg::dds::Pose door_handle_transform_to_world;
+      };
+    };
+  };
+};
+
+#endif

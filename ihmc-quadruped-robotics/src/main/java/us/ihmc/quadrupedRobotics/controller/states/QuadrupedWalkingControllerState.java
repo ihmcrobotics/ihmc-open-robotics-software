@@ -1,5 +1,10 @@
 package us.ihmc.quadrupedRobotics.controller.states;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
@@ -38,7 +43,6 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallb
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -56,15 +60,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.EnumProvider;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.yoVariables.variable.*;
 
 public class QuadrupedWalkingControllerState extends HighLevelControllerState implements QuadrupedStepTransitionCallback
 {
@@ -205,6 +201,9 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.STEP, QuadrupedSteppingStateEnum.STAND);
 
+      // Clear step queue when stand is requested
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepMessageHandler::clearUpcomingSteps);
+
       // Sole Waypoint events
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
       factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
@@ -212,9 +211,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       // Manually triggered events to transition to main controllers.
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
-
-      Runnable stepToStandCallback = stepController::halt;
-      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
 
       factory.addStateChangedListener(new StateChangedListener<QuadrupedSteppingStateEnum>()
       {
@@ -290,7 +286,10 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
       stepMessageHandler.onTouchDown(thisStepQuadrant);
-      stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
+      stepMessageHandler.shiftPlanPositionBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
+      stepMessageHandler.shiftPlanTimeBasedOnTouchdown(thisStepQuadrant, currentTime);
+      tempVector.sub(footstepStatusMessage.getActualTouchdownPositionInWorld(), footstepStatusMessage.getDesiredTouchdownPositionInWorld());
+      stepMessageHandler.addOffsetVectorOnTouchdown(tempVector);
 
       balanceManager.completedStep(thisStepQuadrant);
 

@@ -51,6 +51,6 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    @Override
    public double getWalkingSpeedWhileTurning()
    {
-      return 0.6;
+      return 0.4;
    }
 }
