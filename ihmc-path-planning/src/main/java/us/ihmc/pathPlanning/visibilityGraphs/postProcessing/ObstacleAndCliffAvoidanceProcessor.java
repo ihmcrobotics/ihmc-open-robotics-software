@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -62,7 +63,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       waypointResolution = 0.1;
    }
 
-   public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
+   public List<Pose3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
    {
       List<Point3D> newPathPositions = nodePath.parallelStream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
@@ -169,7 +170,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       newPathPoses.add(new Pose3D(newPathPositions.get(size - 1), new Quaternion(endHeading, 0.0, 0.0)));
 
 
-      return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
+      return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
    }
 
    private void adjustGoalNodePositionToAvoidObstaclesAndCliffs(Point3D nodeLocationToPack, NavigableRegion startRegion, NavigableRegion endRegion,
