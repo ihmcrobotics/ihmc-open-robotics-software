@@ -36,7 +36,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -67,12 +66,12 @@ public class LIDARBasedREAModule
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
 
    private final AtomicReference<Boolean> clearOcTree;
-
+   private final AtomicReference<Boolean> enableStereoBuffer;
+   
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private final AtomicReference<BufferType> bufferType;
    private final AtomicReference<Boolean> enableRefereshingOctreeBuffer;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
@@ -118,7 +117,7 @@ public class LIDARBasedREAModule
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
 
       enableRefereshingOctreeBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferRefreshingEnable, true);
-      bufferType = reaMessager.createInput(REAModuleAPI.UIOcTreeBufferType, BufferType.LIDAR_BASED);
+      enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -211,11 +210,8 @@ public class LIDARBasedREAModule
          }
          else
          {
-            if (bufferType.get() == BufferType.STEREO_BASED)
-            {
-               if (enableRefereshingOctreeBuffer.get())
+            if (enableStereoBuffer.get() && enableRefereshingOctreeBuffer.get())
                   mainUpdater.clearOcTree();
-            }
                
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);

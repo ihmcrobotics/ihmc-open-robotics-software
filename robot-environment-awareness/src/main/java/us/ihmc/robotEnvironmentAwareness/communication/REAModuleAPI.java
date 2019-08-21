@@ -24,7 +24,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.BufferType;
 
 public class REAModuleAPI
 {
@@ -70,7 +69,6 @@ public class REAModuleAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
-   private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
@@ -118,7 +116,6 @@ public class REAModuleAPI
    public static final Topic<Integer> UIOcTreeDepth = Root.child(UI).child(OcTree).topic(Depth);
    public static final Topic<ColoringType> UIOcTreeColoringMode = Root.child(UI).child(OcTree).topic(Color);
    public static final Topic<DisplayType> UIOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
-   public static final Topic<BufferType> UIOcTreeBufferType = Root.child(UI).child(OcTree).child(Buffer).topic(Type);
    public static final Topic<Boolean> UIPlanarRegionHideNodes = Root.child(UI).child(PlanarRegions).child(Node).topic(Hide);
    public static final Topic<Boolean> UIOcTreeBoundingBoxShow = Root.child(UI).child(OcTree).child(BoundingBox).topic(Show);
    public static final Topic<Boolean> UIOcTreeShowLidarBuffer = Root.child(UI).child(OcTree).child(Lidar).child(Buffer).topic(Show);
