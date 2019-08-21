@@ -155,4 +155,12 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
+   
+   public void setParametersForStereo()
+   {
+      uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
+      uiMessager.submitMessageInternal(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+   }
 }
