@@ -68,8 +68,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private FootstepNode startNode;
    private FootstepNode endNode;
 
-   private PlanarRegionsList planarRegionsList;
-
    private final FramePose3D goalPoseInWorld = new FramePose3D();
 
    private final FootstepGraph graph;
@@ -198,7 +196,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    {
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      this.planarRegionsList = planarRegionsList;
    }
 
    @Override
