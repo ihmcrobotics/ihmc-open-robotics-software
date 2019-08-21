@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -42,7 +42,7 @@ public class AtlasPrimitiveActions
 
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node, FootstepPlannerParameters footstepPlannerParameters,
+   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters,
                                 FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames,
                                 YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {

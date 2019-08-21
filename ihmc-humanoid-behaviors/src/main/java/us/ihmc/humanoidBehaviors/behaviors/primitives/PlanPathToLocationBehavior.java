@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -61,9 +61,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
 
    private boolean assumeFlatGround = false;
-   private FootstepPlannerParameters footstepPlannerParameters;
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParameters footstepPlannerParameters, YoDouble yoTime)
+   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);

@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -30,7 +30,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final  WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
 
    public TurnInPlaceBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
-                              HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,FootstepPlannerParameters footstepPlannerParameters, YoDouble yoTime )
+                              HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime )
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
