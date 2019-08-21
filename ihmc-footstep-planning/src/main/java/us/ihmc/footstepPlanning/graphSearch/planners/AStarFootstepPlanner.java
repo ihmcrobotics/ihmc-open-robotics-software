@@ -150,8 +150,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
-      checkGoalType(goal);
-
       goalNodes = new SideDependentList<>();
 
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
@@ -474,15 +472,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
-
-   public static void checkGoalType(FootstepPlannerGoal goal)
-   {
-      FootstepPlannerGoalType supportedGoalType1 = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
-      FootstepPlannerGoalType supportedGoalType2 = FootstepPlannerGoalType.DOUBLE_FOOTSTEP;
-      if (!goal.getFootstepPlannerGoalType().equals(supportedGoalType1) && !goal.getFootstepPlannerGoalType().equals(supportedGoalType2))
-         throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
-   }
-
+   
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,
                                                     SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion,
                                                     YoVariableRegistry registry)
