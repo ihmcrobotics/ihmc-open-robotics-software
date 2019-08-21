@@ -64,7 +64,8 @@ public class StereoVisionPointCloudDataExporter
             for (int i = 0; i < numberOfPoints; i++)
             {
                Point3D scanPoint = pointCloud[i];
-               builder.append(i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + 0 + "\n");
+               int color =  message.getColors().get(i);
+               builder.append(i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + color + "\n");
             }
             fileWriter.write(builder.toString());
             fileWriter.close();
