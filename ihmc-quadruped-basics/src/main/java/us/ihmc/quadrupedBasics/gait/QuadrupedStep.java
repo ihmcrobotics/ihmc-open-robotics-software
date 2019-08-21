@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedStepCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class QuadrupedStep
 {
@@ -16,6 +17,7 @@ public class QuadrupedStep
    private RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_RIGHT;
    private Point3D goalPosition = new Point3D(0.0, 0.0, 0.0);
    private double groundClearance = 0.0;
+   private TrajectoryType trajectoryType = null;
 
    public QuadrupedStep()
    {
@@ -65,8 +67,16 @@ public class QuadrupedStep
    {
       this.robotQuadrant = robotQuadrant;
    }
+   
+   public TrajectoryType getTrajectoryType()
+   {
+      return trajectoryType;
+   }
 
-
+   public void setTrajectoryType(TrajectoryType trajectoryType)
+   {
+      this.trajectoryType = trajectoryType;
+   }
 
    public void setGoalPosition(Point3DReadOnly goalPosition)
    {
@@ -96,6 +106,7 @@ public class QuadrupedStep
       setRobotQuadrant(other.getRobotQuadrant());
       setGoalPosition(other.getGoalPositionInternal());
       setGroundClearance(other.getGroundClearance());
+      setTrajectoryType(other.getTrajectoryType());
    }
 
    public void set(QuadrupedStepCommand command)
@@ -103,6 +114,7 @@ public class QuadrupedStep
       setRobotQuadrant(command.getRobotQuadrant());
       setGoalPosition(command.getGoalPosition());
       setGroundClearance(command.getGroundClearance());
+      setTrajectoryType(command.getTrajectoryType());
    }
 
    public void get(QuadrupedTimedStep other)
@@ -110,14 +122,37 @@ public class QuadrupedStep
       other.setRobotQuadrant(getRobotQuadrant());
       other.setGoalPosition(getGoalPositionInternal());
       other.setGroundClearance(getGroundClearance());
+      other.setTrajectoryType(getTrajectoryType());
    }
 
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
       return getRobotQuadrant() == other.getRobotQuadrant() &&
              getGoalPositionInternal().epsilonEquals(other.getGoalPositionInternal(), epsilon) &&
-             MathTools.epsilonEquals(getGroundClearance(), other.getGroundClearance(), epsilon);
+             MathTools.epsilonEquals(getGroundClearance(), other.getGroundClearance(), epsilon) && 
+             (getTrajectoryType() == other.getTrajectoryType());
 
+   }
+
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      QuadrupedStep other = (QuadrupedStep) obj;
+
+      if (getRobotQuadrant() != other.getRobotQuadrant())
+         return false;
+      if (getGroundClearance() != other.getGroundClearance())
+         return false;
+      
+      if (trajectoryType != other.trajectoryType)
+         return false;
+
+      return getGoalPosition().geometricallyEquals(other.getGoalPosition(), 0.0);
    }
 
    @Override public String toString()
@@ -126,6 +161,7 @@ public class QuadrupedStep
       string += "\nrobotQuadrant: " + getRobotQuadrant();
       string += "\ngoalPosition:" + getGoalPositionInternal();
       string += "\ngroundClearance: " + getGroundClearance();
+      string += "\ntrajectoryType: " + getTrajectoryType();
       return string;
    }
 }

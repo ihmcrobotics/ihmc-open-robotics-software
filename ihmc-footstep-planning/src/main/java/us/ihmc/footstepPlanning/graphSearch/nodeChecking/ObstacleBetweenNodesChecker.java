@@ -11,7 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -22,12 +22,12 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    private static final boolean DEBUG = false;
 
    private PlanarRegionsList planarRegionsList;
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public ObstacleBetweenNodesChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
+   public ObstacleBetweenNodesChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

@@ -76,9 +76,13 @@ public class TransferToStandingState extends WalkingState
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
 
-      feetManager.initializeContactStatesForDoubleSupport(null);
-
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+
+      // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
+      // restore the full foot contact.
+      if (previousStateEnum != null && previousStateEnum.isDoubleSupport())
+         feetManager.initializeContactStatesForDoubleSupport(null);
+
       RobotSide previousSupportSide = null;
       if (previousStateEnum != null)
       {
@@ -106,6 +110,8 @@ public class TransferToStandingState extends WalkingState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
       Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
@@ -113,6 +119,8 @@ public class TransferToStandingState extends WalkingState
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
 

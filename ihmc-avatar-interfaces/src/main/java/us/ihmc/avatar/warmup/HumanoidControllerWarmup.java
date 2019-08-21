@@ -266,15 +266,19 @@ public abstract class HumanoidControllerWarmup
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
-                                                                              defaultInitialTransferTime, defaultFinalTransferTime, feet, statusOutputManager,
+      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
+      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction, feet, statusOutputManager,
                                                                               yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerFactoryParent);
+      managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);

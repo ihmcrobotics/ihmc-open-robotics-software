@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
@@ -24,11 +26,11 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node)
    {
-      for(FootstepNodeChecker checker : nodeCheckers)
+      for (FootstepNodeChecker checker : nodeCheckers)
       {
-         if(!checker.isNodeValid(node, previousNode))
+         if (!checker.isNodeValid(node))
             return false;
       }
       return true;

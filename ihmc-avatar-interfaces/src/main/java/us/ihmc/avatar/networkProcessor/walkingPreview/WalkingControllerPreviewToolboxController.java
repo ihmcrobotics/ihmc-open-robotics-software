@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -54,7 +55,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.taskExecutor.TaskExecutor;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -93,7 +94,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final StateExecutor taskExecutor = new StateExecutor();
 
    private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -140,13 +141,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       controllerToolbox.attachControllerFailureListener(fallingDirection -> hasControllerFailed.set(true));
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, yoGraphicsListRegistry);
+      setupWalkingMessageHandler(walkingControllerParameters, capturePointPlannerParameters, yoGraphicsListRegistry);
       rootJoint = fullRobotModel.getRootJoint();
       allOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      managerFactory = new HighLevelControlManagerFactory(statusOutputManager, managerParentRegistry);
+      managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
@@ -232,18 +233,24 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, ICPPlannerParameters icpPlannerParameters,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
+      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
                                                                               defaultSwingTime,
-                                                                              defaultTouchdownTime,
                                                                               defaultInitialTransferTime,
                                                                               defaultFinalTransferTime,
+                                                                              defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction,
+                                                                              defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction,
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               previewTime,

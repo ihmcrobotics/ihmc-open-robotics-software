@@ -26,9 +26,9 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
  */
 public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfectSensorOutputMapReadOnly
 {
-   private long timestamp;
-   private long visionSensorTimestamp;
-   private long sensorHeadPPSTimestamp;
+   private long wallTime;
+   private long monotonicTime;
+   private long syncTimestamp;
    private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
    private final TObjectDoubleMap<OneDoFJointBasics> jointVelocity = new TObjectDoubleHashMap<>();
    private final TObjectDoubleMap<OneDoFJointBasics> jointAcceleration = new TObjectDoubleHashMap<>();
@@ -72,36 +72,36 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
-      return timestamp;
+      return wallTime;
    }
 
-   public void setTimestamp(long timestamp)
+   public void setWallTime(long wallTime)
    {
-      this.timestamp = timestamp;
+      this.wallTime = wallTime;
    }
 
-   @Override
-   public long getVisionSensorTimestamp()
+   public void setMonotonicTime(long monotonicTime)
    {
-      return visionSensorTimestamp;
-   }
-
-   public void setVisionSensorTimestamp(long visionSensorTimestamp)
-   {
-      this.visionSensorTimestamp = visionSensorTimestamp;
+      this.monotonicTime = monotonicTime;
    }
 
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getMonotonicTime()
    {
-      return sensorHeadPPSTimestamp;
+      return monotonicTime;
    }
 
-   public void setSensorHeadPPSTimetamp(long sensorHeadPPSTimestamp)
+   @Override
+   public long getSyncTimestamp()
    {
-      this.sensorHeadPPSTimestamp = sensorHeadPPSTimestamp;
+      return syncTimestamp;
+   }
+
+   public void setSyncTimestamp(long syncTimestamp)
+   {
+      this.syncTimestamp = syncTimestamp;
    }
 
    @Override

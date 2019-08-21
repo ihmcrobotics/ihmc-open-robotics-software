@@ -1,27 +1,7 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
@@ -38,16 +18,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerObjective;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
@@ -69,6 +45,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
@@ -137,7 +120,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private long tickDurationMs;
 
-   private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final FootstepPlannerParametersBasics footstepPlanningParameters;
    private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
@@ -171,7 +154,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
+      this.footstepPlanningParameters = drcRobotModel.getFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, footstepPlanningParameters);
       this.visibilityGraphsParameters = new YoVisibilityGraphParameters(drcRobotModel.getVisibilityGraphsParameters(), registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
@@ -188,7 +172,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       maxNumberOfPathPlanners = Math.max(initialNumberOfPathStages, absoluteMaxNumberOfPathStages);
 
       long updateFrequency = 1000;
-      plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
+      plannerListener = new MultiStagePlannerListener(updateFrequency);
 
       for (int i = 0; i < Math.min(initialNumberOfStepStages, absoluteMaxNumberOfStepStages); i++)
       {
@@ -546,6 +530,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
+
+      plannerListener.reset();
 
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
@@ -1024,7 +1010,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private FootstepPlanningToolboxOutputStatus packStepResult(FootstepPlan footstepPlan, BodyPathPlan bodyPathPlan, FootstepPlanningResult status,
                                                               double timeTaken)
    {
-      return FootstepPlanningMessageReporter.packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList.get(), planId.getIntegerValue());
+      FootstepPlanningToolboxOutputStatus outputStatus = FootstepPlanningMessageReporter
+            .packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList.get(), planId.getIntegerValue());
+      plannerListener.packPlannerStatistics(outputStatus.getFootstepPlanningStatistics());
+      return outputStatus;
    }
 
    private void concatenateStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId, PlannerStatistics<?> plannerStatistics)

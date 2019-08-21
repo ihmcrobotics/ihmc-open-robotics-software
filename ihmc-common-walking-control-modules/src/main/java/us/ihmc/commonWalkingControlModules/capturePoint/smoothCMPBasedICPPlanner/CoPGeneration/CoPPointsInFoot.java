@@ -201,7 +201,7 @@ public class CoPPointsInFoot
    @Override
    public String toString()
    {
-      String string = name;
+      String string = name + "\n";
       for (int i = 0; i < getNumberOfCoPPoints(); i++)
       {
          string += getCoPPointList().get(i).toString() + ": " + get(i).toString() + "\n";

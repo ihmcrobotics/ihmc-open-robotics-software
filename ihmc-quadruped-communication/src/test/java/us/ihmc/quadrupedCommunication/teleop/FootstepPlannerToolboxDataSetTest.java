@@ -59,13 +59,16 @@ import java.util.function.Function;
 public abstract class FootstepPlannerToolboxDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
+   private static final double defaultBestEffortTimeout = 1.0;
+//   private static final double defaultHorizonLength = 1.0;
+   private static final double defaultHorizonLength = Double.POSITIVE_INFINITY;
 
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
-   protected static boolean VERBOSE = false;
+   protected static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
@@ -108,33 +111,15 @@ public abstract class FootstepPlannerToolboxDataSetTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumFrontStepReach()
+         public double getXGaitWeight()
          {
-            return 0.7;
+            return 0.0;
          }
 
          @Override
-         public double getMaximumFrontStepLength()
+         public double getDesiredVelocityWeight()
          {
-            return 0.6;
-         }
-
-         @Override
-         public double getMinimumFrontStepLength()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMinimumStepWidth()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMaximumStepWidth()
-         {
-            return 0.35;
+            return 0.0;
          }
       };
 
@@ -322,13 +307,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
    {
       resetAllAtomics();
       ThreadTools.sleep(1000);
-      packPlanningRequest(dataset);
-      String errorMessage = findPlanAndAssertGoodResult(dataset);
-
-      return errorMessage;
+      double timeout = packPlanningRequest(dataset);
+      return findPlanAndAssertGoodResult(timeout);
    }
 
-   protected void packPlanningRequest(DataSet dataset)
+   protected double packPlanningRequest(DataSet dataset)
    {
       Quaternion startOrientation = new Quaternion();
       Quaternion goalOrientation = new Quaternion();
@@ -344,6 +327,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeoutTopic, defaultBestEffortTimeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
@@ -351,16 +335,19 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.POSITIVE_INFINITY);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, defaultHorizonLength);
 
       ThreadTools.sleep(1000);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
+
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)
          LogTools.info("Sending out planning request.");
+
+      return timeout;
    }
 
    private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
@@ -394,11 +381,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return footstepPlan;
    }
 
-   private String findPlanAndAssertGoodResult(DataSet dataset)
+   private String findPlanAndAssertGoodResult(double timeout)
    {
       totalTimeTaken = 0.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double maxTimeToWait = 2.0 * timeoutMultiplier * 60.0;
+      double maxTimeToWait = 2.0 * timeout;
       String datasetName = "";
 
       queryPlannerResults();
@@ -408,6 +394,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
          PrintTools.info("Waiting for result.");
 
       errorMessage += waitForResult(() -> resultReference.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a result (actual = " + resultReference.get() + ", checking it's validity.");
@@ -549,6 +537,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
+      errorMessage += checkStepOrder(datasetName, plannedSteps);
+
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
 
@@ -568,5 +558,20 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       return finalSteps;
+   }
+
+   private static String checkStepOrder(String datasetName, FootstepPlan plannedSteps)
+   {
+      String errorMessage = "";
+      RobotQuadrant previousMovingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
+      {
+         RobotQuadrant movingQuadrant = plannedSteps.getFootstep(i).getRobotQuadrant();
+         if (previousMovingQuadrant.getNextRegularGaitSwingQuadrant() != movingQuadrant)
+            errorMessage += datasetName + " step " + i + " in the plan is out of order.\n";
+         previousMovingQuadrant = movingQuadrant;
+      }
+
+      return errorMessage;
    }
 }

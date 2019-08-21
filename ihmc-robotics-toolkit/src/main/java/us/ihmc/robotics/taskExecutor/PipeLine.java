@@ -61,8 +61,8 @@ public class PipeLine<T>
 {
    private static final boolean DEBUG = false;
    /** The master TaskExecutor is used to execute the different stages sequentially. */
-   private final TaskExecutor masterTaskExecutor;
-   private final NullTask nullTask = new NullTask();
+   private final StateExecutor masterTaskExecutor;
+   private final NullState nullTask = new NullState();
    private final StateMachineClock clock;
    private final YoDouble yoTime;
 
@@ -70,7 +70,7 @@ public class PipeLine<T>
    {
       this.yoTime = yoTime;
       clock = StateMachineClock.clock(yoTime);
-      masterTaskExecutor = new TaskExecutor(clock);
+      masterTaskExecutor = new StateExecutor(clock);
    }
 
    @Deprecated
@@ -78,7 +78,7 @@ public class PipeLine<T>
    {
       yoTime = null;
       clock = StateMachineClock.dummyClock();
-      masterTaskExecutor = new TaskExecutor(clock);
+      masterTaskExecutor = new StateExecutor(clock);
    }
 
    /**
@@ -117,13 +117,13 @@ public class PipeLine<T>
    @SuppressWarnings("unchecked")
    public void submitTaskForPallelPipesStage(T executorKey, State taskToParallelize)
    {
-      ParallelTask<T> lastParallelTask;
-      if (masterTaskExecutor.getLastTask() instanceof ParallelTask)
+      ParallelState<T> lastParallelTask;
+      if (masterTaskExecutor.getLastTask() instanceof ParallelState)
       {
          // In that case:
          // - the last stage of the master TaskExecutor is a stage of parallel tasks.
          // Thus, insert the new task to be parallelized in the last stage.
-         lastParallelTask = (ParallelTask<T>) masterTaskExecutor.getLastTask();
+         lastParallelTask = (ParallelState<T>) masterTaskExecutor.getLastTask();
       }
       else
       {
@@ -133,9 +133,9 @@ public class PipeLine<T>
 
          // Create a new stage of parallel tasks.
          if (yoTime != null)
-            lastParallelTask = new ParallelTask<T>(yoTime); //generates garbage, be careful when using in a realtime setting
+            lastParallelTask = new ParallelState<T>(yoTime); //generates garbage, be careful when using in a realtime setting
          else
-            lastParallelTask = new ParallelTask<T>(); //generates garbage, be careful when using in a realtime setting
+            lastParallelTask = new ParallelState<T>(); //generates garbage, be careful when using in a realtime setting
 
          // Submit a new stage to the master TaskExecutor
          submitSingleTaskStage(lastParallelTask);
@@ -194,10 +194,10 @@ public class PipeLine<T>
    public void clear(T executorKey)
    {
       State currentStage = masterTaskExecutor.getCurrentTask();
-      if (currentStage instanceof ParallelTask<?>)
+      if (currentStage instanceof ParallelState<?>)
       {
          @SuppressWarnings("unchecked")
-         ParallelTask<T> stageOfParallelTasks = (ParallelTask<T>) currentStage;
+         ParallelState<T> stageOfParallelTasks = (ParallelState<T>) currentStage;
          stageOfParallelTasks.clear(executorKey);
       }
    }

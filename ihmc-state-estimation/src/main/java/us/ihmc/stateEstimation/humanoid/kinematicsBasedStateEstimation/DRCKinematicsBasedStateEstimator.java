@@ -38,7 +38,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class DRCKinematicsBasedStateEstimator implements StateEstimatorController
 {
-   public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
@@ -224,6 +223,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       pelvisLinearStateUpdater.initialize();
 
       imuBiasStateEstimator.initialize();
+      imuYawDriftEstimator.initialize();
    }
 
    @Override
@@ -234,7 +234,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp()));
+      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getWallTime()));
 
 
       if (fusedIMUSensor != null)
@@ -274,7 +274,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
-         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getVisionSensorTimestamp());
+         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getWallTime());
       }
 
       updateVisualizers();

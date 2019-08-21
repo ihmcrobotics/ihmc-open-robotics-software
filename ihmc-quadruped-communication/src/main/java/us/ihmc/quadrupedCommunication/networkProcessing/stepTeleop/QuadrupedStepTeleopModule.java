@@ -50,7 +50,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> processTimestamp(s.takeNextData().getTimestamp()));
+                                           s -> processTimestamp(s.takeNextData().getMonotonicTime()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
@@ -152,6 +152,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
+      messages.put(AbortWalkingMessage.class, controllerSubGenerator);
 
       return messages;
    }
@@ -172,7 +173,6 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void sleep()
    {
       stepTeleopController.setPaused(true);
-
       super.sleep();
    }
 

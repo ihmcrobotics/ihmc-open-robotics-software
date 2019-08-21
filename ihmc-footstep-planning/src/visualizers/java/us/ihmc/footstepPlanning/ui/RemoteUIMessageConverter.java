@@ -20,9 +20,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
@@ -56,7 +55,7 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
+   private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<VisibilityGraphsParameters> visibilityGraphParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
@@ -297,13 +296,15 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getTimeTaken());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic, packet.getFootstepPlanningStatistics().getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, bodyPath);
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, lowLevelGoal.getOrientation());
       }
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatisticsTopic, packet.getFootstepPlanningStatistics());
 
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");
@@ -333,7 +334,7 @@ public class RemoteUIMessageConverter
          LogTools.info("Told the toolbox to wake up.");
       
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
+      FootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
 
       FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
       plannerParametersPublisher.publish(plannerParametersPacket);

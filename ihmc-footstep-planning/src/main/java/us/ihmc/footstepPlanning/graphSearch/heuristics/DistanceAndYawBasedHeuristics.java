@@ -2,21 +2,18 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-   private final FootstepPlannerParameters parameters;
-   private final FootstepPlannerCostParameters costParameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
-   public DistanceAndYawBasedHeuristics(DoubleProvider weight, FootstepPlannerParameters parameters)
+   public DistanceAndYawBasedHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
    {
       super(weight);
       this.parameters = parameters;
-      this.costParameters = parameters.getCostParameters();
    }
 
    @Override
@@ -29,8 +26,8 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double referenceYaw = computeReferenceYaw(node, goalNode);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw);
 
-      double minSteps = euclideanDistance / parameters.getMaximumStepReach() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
-      return euclideanDistance + costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep() * minSteps;
+      double minSteps = euclideanDistance / parameters.getIdealFootstepLength() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
+      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep() * minSteps;
    }
 
    private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode)

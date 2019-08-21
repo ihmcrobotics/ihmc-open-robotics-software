@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -74,11 +74,12 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerType> FootstepPlannerType = apiFactory.createTypedTopicTheme("FootstepPlannerType");
    private static final TypedTopicTheme<FootstepPlanningResult> FootstepPlannerResult = apiFactory.createTypedTopicTheme("FootstepPlannerResult");
    private static final TypedTopicTheme<FootstepPlannerStatus> FootstepPlannerStatus = apiFactory.createTypedTopicTheme("FootstepPlannerStatus");
-   private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
+   private static final TypedTopicTheme<FootstepPlannerParametersReadOnly> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
    private static final TypedTopicTheme<FootstepDataListMessage> FootstepDataListMessage = apiFactory.createTypedTopicTheme("FootstepDataListMessage");
    private static final TypedTopicTheme<GoHomeMessage> GoHomeMessage = apiFactory.createTypedTopicTheme("GoHomeMessage");
    private static final TypedTopicTheme<Boolean> IgnorePartialFootholds = apiFactory.createTypedTopicTheme("IgnorePartialFootholds");
    private static final TypedTopicTheme<Boolean> RenderShiftedWaypoints = apiFactory.createTypedTopicTheme("RenderShiftedWaypoints");
+   private static final TypedTopicTheme<FootstepPlanningStatistics> PlannerStatistics = apiFactory.createTypedTopicTheme("PlannerStatistics");
 
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
@@ -111,7 +112,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlan).topic(AbortPlanning);
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
    public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
-   public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
+   public static final Topic<FootstepPlannerParametersReadOnly> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
 
    public static final Topic<GoHomeMessage> GoHomeTopic = Root.child(GoHome).topic(GoHomeMessage);
    public static final Topic<Boolean> IgnorePartialFootholdsTopic = Root.topic(IgnorePartialFootholds);
@@ -179,6 +180,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowNodeDataTopic = Root.child(PlannerData).topic(Show);
    public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = Root.child(OccupancyMap).topic(OccupancyMapData);
    public static final Topic<Boolean> ShowOccupancyMap = Root.child(OccupancyMap).topic(Show);
+   public static final Topic<FootstepPlanningStatistics> PlannerStatisticsTopic = Root.topic(PlannerStatistics);
 
    public static final Topic<Boolean> RenderShiftedWaypointsTopic = Root.topic(RenderShiftedWaypoints);
 

@@ -196,13 +196,6 @@ public class PlanarRegionSnapTools
          return projectionTranslation;
       }
 
-      if (parameters.enforceTranslationLessThanGridCell && signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
-      {
-         // Projection distance is too big. Must be smaller than half of the grid size
-         projectionTranslation.setToNaN();
-         return projectionTranslation;
-      }
-
       boolean successfulProjection = scaledRegionPolygon.orthogonalProjection(projectedPoint);
       if(!successfulProjection)
       {
@@ -215,9 +208,29 @@ public class PlanarRegionSnapTools
       region.transformFromLocalToWorld(projectionTranslation);
       projectionTranslation.setZ(0.0);
 
+      if (!isTranslationInGrid(parameters, projectionTranslation))
+      {
+         // Projection distance is too big. Must be smaller than half of the grid size
+         projectionTranslation.setToNaN();
+         return projectionTranslation;
+      }
+
       return projectionTranslation;
    }
 
+   private static boolean isTranslationInGrid(PlanarRegionConstraintDataParameters parameters, Vector3D projectionTranslation)
+   {
+      if(!parameters.enforceTranslationLessThanGridCell)
+      {
+         return true;
+      }
+      else
+      {
+         double epsilon = 1e-8;
+         double maximumTranslationOnAxis = 0.5 * FootstepNode.gridSizeXY + epsilon;
+         return Math.abs(projectionTranslation.getX()) < maximumTranslationOnAxis && Math.abs(projectionTranslation.getY()) < maximumTranslationOnAxis;
+      }
+   }
 
    public static RigidBodyTransform getSnapTransformToRegion(Point2DReadOnly pointToSnap, PlanarRegion planarRegionToSnapTo)
    {

@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -52,7 +51,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -62,8 +61,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
-   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("ihmc_controller", ROS2Tools.HUMANOID_CONTROL_MODULE);
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -134,7 +131,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       }
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-      managerFactory = new HighLevelControlManagerFactory(statusMessageOutputManager, registry);
+      managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
@@ -350,7 +347,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry, HumanoidRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                         JointDesiredOutputListBasics lowLevelControllerOutput, JointBasics... jointsToIgnore)
    {
@@ -392,12 +389,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
-                                                                              defaultInitialTransferTime, defaultFinalTransferTime, feet,
-                                                                              statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
+      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction, feet, statusMessageOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);

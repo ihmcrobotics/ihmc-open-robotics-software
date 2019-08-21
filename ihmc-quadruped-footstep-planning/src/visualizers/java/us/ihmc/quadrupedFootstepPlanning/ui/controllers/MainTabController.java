@@ -1,15 +1,26 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,7 +40,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
@@ -38,15 +53,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MainTabController
 {
@@ -59,6 +66,8 @@ public class MainTabController
    private CheckBox acceptNewRegions;
    @FXML
    private CheckBox isPlanAdjustable;
+   @FXML
+   private CheckBox correctStepHeightError;
    @FXML
    private CheckBox assumeFlatGround;
    @FXML
@@ -110,10 +119,10 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
-
    @FXML
    private Slider previewSlider;
-
+   @FXML
+   private Button sendPlanButton;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -121,7 +130,7 @@ public class MainTabController
    public void computePath()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked compute path...");
+         LogTools.info("Clicked compute path...");
 
       if (quadrupedReferenceFrames != null)
          setStartFromRobot();
@@ -135,7 +144,7 @@ public class MainTabController
    public void abortPlanning()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked abort planning...");
+         LogTools.info("Clicked abort planning...");
 
       messager.submitMessage(abortPlanningTopic, true);
    }
@@ -162,23 +171,31 @@ public class MainTabController
 
       stepMessages.setIsExpressedInAbsoluteTime(false);
       stepMessages.setAreStepsAdjustable(isPlanAdjustable.isSelected());
+      stepMessages.setOffsetStepsHeightWithExecutionError(correctStepHeightError.isSelected());
 
       if (verbose)
-         PrintTools.info(this, "Sending step list...");
+         LogTools.info("Sending step list...");
       messager.submitMessage(stepListMessageTopic, stepMessages);
    }
 
    @FXML
    public void requestStopWalking()
    {
-      messager.submitMessage(stepListMessageTopic, new QuadrupedTimedStepListMessage());
-      requestStanding();
+      if (abortWalkingTopic != null)
+      {
+         messager.submitMessage(abortWalkingTopic, true);
+      }
+
+      if (enableStepTeleopTopic != null)
+      {
+         messager.submitMessage(enableStepTeleopTopic, false);
+      }
    }
 
-   private void requestStanding()
+   @FXML
+   public void clearFootstepPlan()
    {
-      if (desiredSteppingStateNameTopic != null)
-         messager.submitMessage(desiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
+      messager.submitMessage(footstepPlanTopic, null);
    }
 
    @FXML
@@ -187,6 +204,12 @@ public class MainTabController
       acceptNewRegions.setSelected(false);
       assumeFlatGround.setSelected(true);
       messager.submitMessage(planarRegionDataTopic, buildFlatGround());
+   }
+
+   @FXML
+   public void requestClearREA()
+   {
+      messager.submitMessage(planarRegionDataClearTopic, true);
    }
 
    private PlanarRegionsList buildFlatGround()
@@ -232,6 +255,7 @@ public class MainTabController
    private Topic<Integer> receivedPlanIdTopic;
    private Topic<Boolean> showFootstepPlanTopic;
    private Topic<FootstepPlan> footstepPlanTopic;
+   private Topic<Boolean> planarRegionDataClearTopic;
    private Topic<PlanarRegionsList> planarRegionDataTopic;
    private Topic<Double> plannerTimeTakenTopic;
    private Topic<Double> plannerTimeoutTopic;
@@ -258,6 +282,9 @@ public class MainTabController
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
    private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
+   private Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic;
+   private Topic<Boolean> abortWalkingTopic;
+   private Topic<Boolean> enableStepTeleopTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -283,6 +310,21 @@ public class MainTabController
    {
       this.showFootstepPlanTopic = showFootstepPlanTopic;
       this.footstepPlanTopic = footstepPlanTopic;
+   }
+
+   public void setPlanarRegionDataClearTopic(Topic<Boolean> planarRegionDataClearTopic)
+   {
+      this.planarRegionDataClearTopic = planarRegionDataClearTopic;
+   }
+
+   public void setAbortWalkingTopic(Topic<Boolean> abortWalkingTopic)
+   {
+      this.abortWalkingTopic = abortWalkingTopic;
+   }
+
+   public void setEnableStepTeleopTopic(Topic<Boolean> enableStepTeleopTopic)
+   {
+      this.enableStepTeleopTopic = enableStepTeleopTopic;
    }
 
    public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)
@@ -378,9 +420,10 @@ public class MainTabController
       this.stepListMessageTopic = stepListMessageTopic;
    }
 
-   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic)
+   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic, Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic)
    {
       this.desiredSteppingStateNameTopic = desiredSteppingStateNameTopic;
+      this.currentSteppingStateNameTopic = currentSteppingStateNameTopic;
    }
 
    public void bindControls()
@@ -442,6 +485,47 @@ public class MainTabController
       footstepPlanPreviewPlaybackManager = new FootstepPlanPreviewPlaybackManager(messager);
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+
+      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
+      if (abortWalkingTopic != null)
+         messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
+      if (currentSteppingStateNameTopic != null)
+      {
+         messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
+            if (m != null && m == QuadrupedSteppingStateEnum.STAND)
+               clearFootstepPlan();
+         });
+      }
+   }
+
+   private boolean isValidPlan(FootstepPlan plan)
+   {
+      if (quadrupedReferenceFrames == null)
+         return true;
+      double maximumStepTranslation = 1.0;
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         FramePoint3D startPosition = new FramePoint3D();
+         Point3DReadOnly goalPosition = plan.getFootstep(i).getGoalPosition();
+
+         if(i < 4)
+         {
+            startPosition.setToZero(quadrupedReferenceFrames.getSoleFrame(plan.getFootstep(i).getRobotQuadrant()));
+            startPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+         {
+            QuadrupedTimedStep previousStep = plan.getFootstep(i - 4);
+            startPosition.set(previousStep.getGoalPosition());
+         }
+
+         if(startPosition.distance(goalPosition) > maximumStepTranslation)
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    private void setupControls()
@@ -820,5 +904,9 @@ public class MainTabController
       }
    }
 
-
+   public void stop()
+   {
+      footstepPlanPreviewPlaybackManager.stop();
+      executorService.shutdown();
+   }
 }

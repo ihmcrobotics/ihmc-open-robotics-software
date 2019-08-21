@@ -717,15 +717,20 @@ public class SwingState extends AbstractFootControlState
          lastPoint.getPositionIncludingFrame(finalPosition);
          lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
          lastPoint.getOrientationIncludingFrame(finalOrientation);
+         lastPoint.getAngularVelocity(finalAngularVelocity);
       }
 
       // Setup touchdown trajectory.
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
-      touchdownTrajectory.setOrientation(finalOrientation);
+      touchdownTrajectory.setOrientation(finalOrientation, finalAngularVelocity);
 
       blendedSwingTrajectory.initializeTrajectory();
       fillAndInitializeBlendedTrajectories();
    }
+
+   private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("FootstepFrame", worldFrame);
+   private final PoseReferenceFrame adjustedFootstepFrame = new PoseReferenceFrame("AdjustedFootstepFrame", worldFrame);
+   private final FramePose3D adjustedWaypoint = new FramePose3D();
 
    private void fillAndInitializeBlendedTrajectories()
    {
@@ -738,10 +743,26 @@ public class SwingState extends AbstractFootControlState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
-         touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
-
-         blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+         // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
+         // any touchdown trajectory when doing step adjustment.
+         if (activeTrajectoryType.getValue() == TrajectoryType.WAYPOINTS && Precision.equals(swingWaypoints.getLast().getTime(), swingDuration))
+         {
+            footstepFrame.setPoseAndUpdate(footstepPose);
+            adjustedFootstepFrame.setPoseAndUpdate(rateLimitedAdjustedPose);
+            swingWaypoints.getLast().getPose(adjustedWaypoint);
+            adjustedWaypoint.changeFrame(footstepFrame);
+            adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
+            adjustedWaypoint.changeFrame(worldFrame);
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, adjustedWaypoint.getPosition(), finalLinearVelocity, touchdownAcceleration);
+            touchdownTrajectory.setOrientation(adjustedWaypoint.getOrientation());
+         }
+         else
+         {
+            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
+            touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
+         }
       }
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();

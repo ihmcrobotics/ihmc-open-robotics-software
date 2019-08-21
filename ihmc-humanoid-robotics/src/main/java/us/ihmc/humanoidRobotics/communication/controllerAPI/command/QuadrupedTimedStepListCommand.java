@@ -13,6 +13,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    private boolean isExpressedInAbsoluteTime;
    private boolean isStepPlanAdjustable;
    private final RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = new RecyclingArrayList<>(30, QuadrupedTimedStepCommand.class);
+   private boolean offsetStepsHeightWithExecutionError;
 
    public QuadrupedTimedStepListCommand()
    {
@@ -43,6 +44,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
          for (int i = 0; i < stepList.size(); i++)
             stepCommands.add().setFromMessage(stepList.get(i));
       }
+      offsetStepsHeightWithExecutionError = message.getOffsetStepsHeightWithExecutionError();
 
       setQueueableCommandVariables(message.getQueueingProperties());
    }
@@ -61,6 +63,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
          for (int i = 0; i < otherFootsteps.size(); i++)
             stepCommands.add().set(otherFootsteps.get(i));
       }
+      offsetStepsHeightWithExecutionError = other.offsetStepsHeightWithExecutionError;
       setQueueableCommandVariables(other);
    }
 
@@ -82,6 +85,11 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    public int getNumberOfSteps()
    {
       return stepCommands.size();
+   }
+
+   public boolean getOffsetStepsHeightWithExecutionError()
+   {
+      return offsetStepsHeightWithExecutionError;
    }
 
    @Override

@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
-   id("us.ihmc.ihmc-ci") version "4.23"
+   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -21,12 +22,12 @@ mainDependencies {
    compile group: "net.java.dev.jna", name: "jna", version: "4.1.0"
    compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
 
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.5"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
    compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "ihmc-trajectory-optimization", version: "source"
@@ -39,9 +40,9 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
@@ -50,5 +51,5 @@ testDependencies {
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
 }

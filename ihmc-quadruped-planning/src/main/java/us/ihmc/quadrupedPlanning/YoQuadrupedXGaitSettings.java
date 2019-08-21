@@ -12,6 +12,8 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    private final YoDouble stanceLength = new YoDouble("stanceLength", registry);
    private final YoDouble stanceWidth = new YoDouble("stanceWidth", registry);
    private final YoDouble stepGroundClearance = new YoDouble("stepGroundClearance", registry);
+   private final YoDouble maxHorizontalSpeedFraction = new YoDouble("maxHorizontalSpeedFraction", registry);
+   private final YoDouble maxYawSpeedFraction = new YoDouble("maxYawSpeedFraction", registry);
    private final YoEnum<QuadrupedSpeed> quadrupedSpeed = YoEnum.create("quadrupedSpeed", QuadrupedSpeed.class, registry);
 
    private final QuadrupedGaitTimingsBasics paceSlowSettings;
@@ -71,6 +73,20 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 
    /** {@inheritDoc} */
    @Override
+   public double getMaxHorizontalSpeedFraction()
+   {
+      return maxHorizontalSpeedFraction.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxYawSpeedFraction()
+   {
+      return maxYawSpeedFraction.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public QuadrupedSpeed getQuadrupedSpeed()
    {
       return quadrupedSpeed.getEnumValue();
@@ -102,6 +118,20 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    public void setStepGroundClearance(double stepGroundClearance)
    {
       this.stepGroundClearance.set(stepGroundClearance);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaxHorizontalSpeedFraction(double fraction)
+   {
+      this.maxHorizontalSpeedFraction.set(fraction);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaxYawSpeedFraction(double fraction)
+   {
+      this.maxYawSpeedFraction.set(fraction);
    }
 
    /** {@inheritDoc} */

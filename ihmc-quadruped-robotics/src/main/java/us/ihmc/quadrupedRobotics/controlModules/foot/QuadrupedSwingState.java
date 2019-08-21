@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
@@ -19,8 +20,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.commonWalkingControlModules.trajectories.OneWaypointSwingGenerator;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -39,9 +42,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
+   
+   private static final double minSwingHeight = 0.04;
+   private static final double maxSwingHeight = 0.3;
 
-   //   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
-   private final TwoWaypointSwingGenerator swingTrajectoryWaypointCalculator;
+   private static final double defaultSwingHeight = 0.08;
+   private static final double obstacleClearanceSwingHeight = 0.1;
+
+   private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
+   private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
    private final MultipleWaypointsBlendedPositionTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPositionTrajectoryGenerator touchdownTrajectory;
 
@@ -97,7 +106,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final FootSwitchInterface footSwitch;
 
+   private final YoDouble speedUpFactorRateLimit;
    private final YoDouble swingTimeSpeedUpFactor;
+   private final RateLimitedYoVariable limitedSwingTimeSpeedUpFactor;
    private final YoDouble maxSwingTimeSpeedUpFactor;
    private final BooleanProvider isSwingSpeedUpEnabled;
 
@@ -123,7 +134,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
       hasMinimumTimePassed = new YoBoolean(namePrefix + "HasMinimumTimePassed", registry);
 
+      speedUpFactorRateLimit = new YoDouble(namePrefix + "SpeedUpFactorRateLimit", registry);
+      speedUpFactorRateLimit.set(10.0);
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
+      limitedSwingTimeSpeedUpFactor = new RateLimitedYoVariable(namePrefix + "LimitedTimeSpeedUpFactor", registry, speedUpFactorRateLimit, swingTimeSpeedUpFactor, controlDT);
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
 
       isSwingPastDone = new YoBoolean(namePrefix + "IsSwingPastDone", registry);
@@ -141,20 +155,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
       lastStepPosition.setToNaN();
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
 
-
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
-
-      //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-
-      double minSwingHeight = 0.04;
-      double maxSwingHeight = 0.3;
-      double defaultSwingHeight = 0.04;
-
-      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
-                                                                        graphicsListRegistry);
+      
+      oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix + "1", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
+                                                                           graphicsListRegistry);
+      twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
+                                                                           graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
-      swingTrajectoryWaypointCalculator.setStanceFootPosition(dummyPoint);
+      twoWaypointSwingTrajectoryCalculator.setStanceFootPosition(dummyPoint);
 
       MultipleWaypointsPositionTrajectoryGenerator baseTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(this.robotQuadrant.getPascalCaseName(),
                                                                                                                      worldFrame, registry);
@@ -196,6 +205,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       timeInState.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
+      limitedSwingTimeSpeedUpFactor.set(1.0);
       timeInStateWithSwingSpeedUp.setToNaN();
       timeRemainingInState.setToNaN();
       timeRemainingInStateWithSwingSpeedUp.setToNaN();
@@ -222,14 +232,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
-      double swingDuration = Math.max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
+      double swingDuration = Math
+            .max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
       setFootstepDurationInternal(swingDuration);
-
-      activeTrajectoryType.set(TrajectoryType.DEFAULT);
-
-      if (checkStepUpOrDown(finalPosition))
-         activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
-
+      
+      activeTrajectoryType.set(getTrajectoryType());
       fillAndInitializeTrajectories(true);
 
       touchdownTrigger.set(false);
@@ -237,8 +244,28 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (debug)
       {
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " +
-                                currentStepCommand.getGroundClearance() + ", " + currentStepCommand.getTimeInterval());
+         PrintTools.debug(
+               currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance()
+                     + ", " + currentStepCommand.getTimeInterval());
+      }
+   }
+
+   private TrajectoryType getTrajectoryType()
+   {
+      if (currentStepCommand.getTrajectoryType() != null)
+      {
+         return currentStepCommand.getTrajectoryType();
+      }
+      else
+      {
+         if (checkStepUpOrDown(finalPosition))
+         {
+            return TrajectoryType.OBSTACLE_CLEARANCE;
+         }
+         else
+         {
+            return TrajectoryType.DEFAULT;
+         }
       }
    }
 
@@ -264,6 +291,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       blendForStepAdjustment();
 
+      limitedSwingTimeSpeedUpFactor.update();
+      
       double time;
       if (!isSwingSpeedUpEnabled.getValue() || timeInStateWithSwingSpeedUp.isNaN())
       {
@@ -271,21 +300,22 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         timeInStateWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         timeInStateWithSwingSpeedUp.add(limitedSwingTimeSpeedUpFactor.getDoubleValue() * controlDT);
          time = timeInStateWithSwingSpeedUp.getDoubleValue();
          timeRemainingInStateWithSwingSpeedUp.set(swingDuration.getDoubleValue() - time);
       }
 
       PositionTrajectoryGenerator activeTrajectory;
       if (!timeRemainingInStateWithSwingSpeedUp.isNaN() && timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
-            activeTrajectory = touchdownTrajectory;
+         activeTrajectory = touchdownTrajectory;
       else if (timeRemainingInState.getValue() < 0.0)
-            activeTrajectory = touchdownTrajectory;
+         activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
 
-      if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryWaypointCalculator
-            .doOptimizationUpdate()) // haven't finished original planning
+      SwingGenerator waypointGenerator =
+            activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT ? oneWaypointSwingTrajectoryCalculator : twoWaypointSwingTrajectoryCalculator;
+      if (activeTrajectoryType.getEnumValue() != TrajectoryType.DEFAULT && waypointGenerator.doOptimizationUpdate()) // haven't finished original planning
          fillAndInitializeTrajectories(false);
 
       activeTrajectory.compute(time);
@@ -295,9 +325,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (isSwingSpeedUpEnabled.getValue() && !timeInStateWithSwingSpeedUp.isNaN())
       {
-         desiredVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
 
-         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
+         double speedUpFactorSquared = limitedSwingTimeSpeedUpFactor.getDoubleValue() * limitedSwingTimeSpeedUpFactor.getDoubleValue();
          desiredAcceleration.scale(speedUpFactorSquared);
       }
 
@@ -350,23 +380,41 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       finalLinearVelocity.setIncludingFrame(touchdownVelocity);
 
+      SwingGenerator waypointCalculator;
+      if (activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT)
+         waypointCalculator = oneWaypointSwingTrajectoryCalculator;
+      else
+         waypointCalculator = twoWaypointSwingTrajectoryCalculator;
+
       if (initializeOptimizer)
       {
-         swingTrajectoryWaypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
-         swingTrajectoryWaypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
-         swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
-         swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
-         swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
-         if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
-            swingTrajectoryWaypointCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+         waypointCalculator.setInitialConditions(initialPosition, initialLinearVelocity);
+         waypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
+         waypointCalculator.setStepTime(swingDuration.getDoubleValue());
+         waypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
+         if (activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT)
+         {
+            oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
+         else if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+            double swingHeight = Math.max(obstacleClearanceSwingHeight, currentStepCommand.getGroundClearance());
+            waypointCalculator.setSwingHeight(swingHeight);
+         }
          else
-            swingTrajectoryWaypointCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());
-         swingTrajectoryWaypointCalculator.initialize();
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
+         
+         waypointCalculator.initialize();
       }
 
-      for (int i = 0; i < swingTrajectoryWaypointCalculator.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < waypointCalculator.getNumberOfWaypoints(); i++)
       {
-         swingTrajectoryWaypointCalculator.getWaypointData(i, tempPositionTrajectoryPoint);
+         waypointCalculator.getWaypointData(i, tempPositionTrajectoryPoint);
          blendedSwingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
@@ -415,13 +463,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         speedUpFactor = Double.POSITIVE_INFINITY;
+         speedUpFactor = 1.0;
       }
 
-      if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > parameters.getMinRequiredSpeedUpFactor() && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
+      if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > parameters.getMinRequiredSpeedUpFactor() && speedUpFactor > swingTimeSpeedUpFactor
+            .getDoubleValue()))
       {
          speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
-
          swingTimeSpeedUpFactor.set(speedUpFactor);
          if (timeInStateWithSwingSpeedUp.isNaN())
             timeInStateWithSwingSpeedUp.set(timeInState.getDoubleValue());
@@ -435,7 +483,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double swingDuration = this.swingDuration.getDoubleValue();
       if (!timeInStateWithSwingSpeedUp.isNaN())
       {
-         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / limitedSwingTimeSpeedUpFactor.getDoubleValue();
          return swingTimeRemaining;
       }
       else
@@ -502,12 +550,14 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration.setToNaN();
       timeInState.setToNaN();
       swingTimeSpeedUpFactor.setToNaN();
+      limitedSwingTimeSpeedUpFactor.setToNaN();
       timeRemainingInState.setToNaN();
       timeInStateWithSwingSpeedUp.setToNaN();
 
       desiredSolePosition.setToNaN();
       desiredSoleLinearVelocity.setToNaN();
-      swingTrajectoryWaypointCalculator.hideVisualization();
+      oneWaypointSwingTrajectoryCalculator.hideVisualization();
+      twoWaypointSwingTrajectoryCalculator.hideVisualization();
    }
 
    @Override

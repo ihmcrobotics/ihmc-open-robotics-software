@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -153,7 +155,7 @@ public class DRCSimulationTestHelper
 
       defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
       defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
-      
+
       defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class, createPublisherForController(ValkyrieHandFingerTrajectoryMessage.class));
    }
 
@@ -365,6 +367,9 @@ public class DRCSimulationTestHelper
 
    public void destroySimulation()
    {
+      if (simulationTestingParameters.getKeepSCSUp())
+         ThreadTools.sleepForever();
+
       if (blockingSimulationRunner != null)
       {
          blockingSimulationRunner.destroySimulation();

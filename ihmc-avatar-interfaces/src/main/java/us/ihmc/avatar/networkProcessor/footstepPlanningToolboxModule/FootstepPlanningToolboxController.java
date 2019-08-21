@@ -37,8 +37,10 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuris
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.SplinePathWithAStarPlanner;
@@ -62,6 +64,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.property.YoVariablesForStoredProperties;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -89,11 +92,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private double dt;
 
-   private final YoFootstepPlannerParameters footstepPlanningParameters;
+   private final FootstepPlannerParametersBasics footstepPlanningParameters;
    private final YoVisibilityGraphParameters visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
+   public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                                             VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
@@ -107,7 +110,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
-      footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
+      footstepPlanningParameters = footstepPlannerParameters;
+      new YoVariablesForFootstepPlannerParameters(parentRegistry, footstepPlannerParameters);
       this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
 
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
@@ -137,7 +141,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlanningParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(), footstepPlanningParameters);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getAStarHeuristicsWeight(), footstepPlanningParameters);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
 //      nodeChecker.addPlannerListener(nu);
@@ -145,9 +149,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
       costBuilder.setSnapper(snapper);
+      costBuilder.setFootPolygons(footPolygons);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
+      costBuilder.setIncludeAreaCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
@@ -393,7 +399,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setPlanId(planId.getIntegerValue());
       result.setFootstepPlanningResult(status.toByte());
-      result.setTimeTaken(plannerMap.get(activePlanner.getEnumValue()).getPlanningDuration());
+      result.getFootstepPlanningStatistics().setTimeTaken(plannerMap.get(activePlanner.getEnumValue()).getPlanningDuration());
       return result;
    }
 

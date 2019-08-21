@@ -1,9 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
-import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface FootstepPlannerParameters
 {
@@ -31,9 +28,9 @@ public interface FootstepPlannerParameters
       return getMinimumFrontStepLength();
    }
 
-   double getMaximumStepWidth();
+   double getMaximumStepOutward();
 
-   double getMinimumStepWidth();
+   double getMaximumStepInward();
 
    default double getMaximumFrontStepLengthWhenSteppingUp()
    {
@@ -85,19 +82,21 @@ public interface FootstepPlannerParameters
       return Double.NEGATIVE_INFINITY;
    }
 
-   double getMinimumStepYaw();
+   double getMaximumStepYawInward();
 
-   double getMaximumStepYaw();
+   double getMaximumStepYawOutward();
 
    double getMaximumStepChangeZ();
 
    double getBodyGroundClearance();
 
-   double getDistanceHeuristicWeight();
+   double getDistanceWeight();
 
    double getYawWeight();
 
    double getXGaitWeight();
+
+   double getDesiredVelocityWeight();
 
    double getCostPerStep();
 
@@ -120,17 +119,9 @@ public interface FootstepPlannerParameters
     * Distance which a foothold is projected into planar region during expansion and node checking. Should be a positive value,
     * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
     */
-   double getProjectInsideDistanceForExpansion();
+   double getProjectInsideDistance();
 
-   /**
-    * Distance which a foothold is projected into planar region during post processing. Should be a positive value,
-    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
-    */
-   double getProjectInsideDistanceForPostProcessing();
-
-   boolean getProjectInsideUsingConvexHullDuringExpansion();
-
-   boolean getProjectInsideUsingConvexHullDuringPostProcessing();
+   boolean getProjectInsideUsingConvexHull();
 
    /***
     * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
@@ -203,6 +194,45 @@ public interface FootstepPlannerParameters
       return 0.1;
    }
 
+   default double getFinalTurnProximity()
+   {
+      return 1.0;
+   }
+
+   default double getFinalSlowDownProximity()
+   {
+      return 0.5;
+   }
+
+   default double getMaximumDeviationFromXGaitDuringExpansion()
+   {
+      return 0.1;
+   }
+
+   default boolean returnBestEffortPlan()
+   {
+      return false;
+   }
+
+   default int getMinimumStepsForBestEffortPlan()
+   {
+      return 4;
+   }
+
+   default boolean performGraphRepairingStep()
+   {
+      return false;
+   }
+
+   default double getRepairingHeuristicWeightScaling()
+   {
+      return 0.9;
+   }
+
+   default double getMinimumHeuristicWeightReduction()
+   {
+      return 0.2;
+   }
 
    default QuadrupedFootstepPlannerParametersPacket getAsPacket()
    {
@@ -223,26 +253,25 @@ public interface FootstepPlannerParameters
       packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
       packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
       packet.setStepZForSteppingDown(getStepZForSteppingDown());
-      packet.setMaximumStepWidth(getMaximumStepWidth());
-      packet.setMinimumStepWidth(getMinimumStepWidth());
-      packet.setMinimumStepYaw(getMinimumStepYaw());
-      packet.setMaximumStepYaw(getMaximumStepYaw());
+      packet.setMaximumStepOutward(getMaximumStepOutward());
+      packet.setMaximumStepInward(getMaximumStepInward());
+      packet.setMaximumStepYawInward(getMaximumStepYawInward());
+      packet.setMaximumStepYawOutward(getMaximumStepYawOutward());
       packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
       packet.setBodyGroundClearance(getBodyGroundClearance());
       packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
-      packet.setDistanceHeuristicWeight(getDistanceHeuristicWeight());
+      packet.setDistanceWeight(getDistanceWeight());
       packet.setYawWeight(getYawWeight());
       packet.setXGaitWeight(getXGaitWeight());
+      packet.setDesiredVelocityWeight(getDesiredVelocityWeight());
       packet.setCostPerStep(getCostPerStep());
       packet.setStepUpWeight(getStepUpWeight());
       packet.setStepDownWeight(getStepDownWeight());
       packet.setHeuristicsWeight(getHeuristicsInflationWeight());
       packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
-      packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
-      packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
-      packet.setProjectInsideUsingConvexHullDuringExpansion(getProjectInsideUsingConvexHullDuringExpansion());
-      packet.setProjectInsideUsingConvexHullDuringPostProcessing(getProjectInsideUsingConvexHullDuringPostProcessing());
+      packet.setProjectionInsideDistance(getProjectInsideDistance());
+      packet.setProjectInsideUsingConvexHull(getProjectInsideUsingConvexHull());
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
@@ -251,6 +280,14 @@ public interface FootstepPlannerParameters
       packet.setMinimumHindEndForwardDistanceFromCliffBottoms(getMinimumHindEndForwardDistanceFromCliffBottoms());
       packet.setMinimumHindEndBackwardDistanceFromCliffBottoms(getMinimumHindEndBackwardDistanceFromCliffBottoms());
       packet.setMinimumLateralDistanceFromCliffBottoms(getMinimumLateralDistanceFromCliffBottoms());
+      packet.setFinalTurnProximity(getFinalTurnProximity());
+      packet.setFinalSlowDownProximity(getFinalSlowDownProximity());
+      packet.setMaximumDeviationFromXGaitDuringExpansion(getMaximumDeviationFromXGaitDuringExpansion());
+      packet.setReturnBestEffortPlan(returnBestEffortPlan());
+      packet.setMinimumStepsForBestEffortPlan(getMinimumStepsForBestEffortPlan());
+      packet.setPerformGraphRepairingStep(performGraphRepairingStep());
+      packet.setRepairingHeuristicWeightScaling(getRepairingHeuristicWeightScaling());
+      packet.setMinimumHeuristicWeightReduction(getMinimumHeuristicWeightReduction());
 
       return packet;
    }

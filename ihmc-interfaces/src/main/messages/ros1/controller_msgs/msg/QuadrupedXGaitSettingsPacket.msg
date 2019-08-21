@@ -19,6 +19,12 @@ float64 stance_width
 # Field default value -1.0
 float64 step_ground_clearance
 
+# Field default value -1.0
+float64 max_horizontal_speed_fraction
+
+# Field default value -1.0
+float64 max_yaw_speed_fraction
+
 int8 quadruped_speed
 
 controller_msgs/QuadrupedGaitTimingsPacket pace_slow_settings_packet

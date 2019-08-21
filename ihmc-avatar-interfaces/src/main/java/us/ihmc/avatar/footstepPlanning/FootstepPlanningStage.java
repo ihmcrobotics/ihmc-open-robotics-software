@@ -27,7 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPo
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.BodyPathBasedAStarPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -82,13 +82,13 @@ public class FootstepPlanningStage implements FootstepPlanner
 
    private final List<PlannerCompletionCallback> completionCallbackList = new ArrayList<>();
 
-   private final FootstepPlannerParameters footstepPlanningParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlanningParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
-   public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener plannerListener,
+   public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener multiStageListener,
                                 IntegerProvider planId, long tickDurationMs)
 
    {
@@ -115,16 +115,33 @@ public class FootstepPlanningStage implements FootstepPlanner
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(footstepPlannerParameters), contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, plannerListener));
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new BodyPathBasedAStarPlanner("simple_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
-                                                                                         footstepPlannerParameters.getCostParameters()
-                                                                                                                  .getBodyPathBasedHeuristicsWeight(),
-                                                                                         registry));
+      plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, multiStageListener));
+      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH,
+                     new BodyPathBasedAStarPlanner("simple_",
+                                                   bodyPathPlanner,
+                                                   footstepPlannerParameters,
+                                                   contactPointsInSoleFrame,
+                                                   footstepPlannerParameters.getBodyPathBasedHeuristicsWeight(),
+                                                   registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new BodyPathBasedAStarPlanner("visGraph_", bodyPathPlanner, footstepPlannerParameters, contactPointsInSoleFrame,
-                                                   footstepPlannerParameters.getCostParameters().getAStarHeuristicsWeight(), registry));
+                     createBodyPathBasedAStarPlanner(footstepPlannerParameters, bodyPathPlanner, multiStageListener, contactPointsInSoleFrame));
 
       initialize.set(true);
+   }
+
+   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, BodyPathPlanner bodyPathPlanner,
+                                                                     MultiStagePlannerListener multiStageListener,
+                                                                     SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
+   {
+      StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
+      multiStageListener.addStagePlannerListener(plannerListener);
+      return new BodyPathBasedAStarPlanner("visGraph_",
+                                           bodyPathPlanner,
+                                           footstepPlannerParameters,
+                                           contactPointsInSoleFrame,
+                                           footstepPlannerParameters.getAStarHeuristicsWeight(),
+                                           registry,
+                                           plannerListener);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -149,7 +166,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlanningParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlanningParameters, snapper, footPolygons);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getCostParameters().getAStarHeuristicsWeight(),
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(footstepPlanningParameters.getAStarHeuristicsWeight(),
                                                                                    footstepPlanningParameters);
 
       StagePlannerListener plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
