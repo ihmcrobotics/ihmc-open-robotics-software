@@ -230,7 +230,6 @@ public class ControllerBasedBodyPathTest
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
             goal.setGoalPoseBetweenFeet(goalPose);
-            goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
             planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
             planner.setGoal(goal);
