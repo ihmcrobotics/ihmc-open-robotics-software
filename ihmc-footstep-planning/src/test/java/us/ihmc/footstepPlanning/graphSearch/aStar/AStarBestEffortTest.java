@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,8 +26,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.AfterEach;
 
@@ -88,7 +87,7 @@ public class AStarBestEffortTest
          FramePose3D pose = new FramePose3D();
          footstep.getSoleFramePose(pose);
          pose.changeFrame(ReferenceFrame.getWorldFrame());
-         assertTrue(pose.getPosition().epsilonEquals(new Point3D(1.0, 0.0, 0.0), 0.15));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(1.0, 0.0, 0.0), pose.getPosition(), 0.15);
       }
    }
 
