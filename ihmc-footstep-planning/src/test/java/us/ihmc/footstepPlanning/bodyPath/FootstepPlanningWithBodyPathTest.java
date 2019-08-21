@@ -76,7 +76,6 @@ public class FootstepPlanningWithBodyPathTest
       waypoints.add(new Point3D(goalDistance, 0.0, 0.0));
 
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute();
 
       FootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
       FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, null, true);
@@ -105,7 +104,6 @@ public class FootstepPlanningWithBodyPathTest
          waypoints.add(new Point3D(waypoint3d));
       }
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute();
 
       Pose2D startPose = new Pose2D();
       bodyPath.getPointAlongPath(0.0, startPose);

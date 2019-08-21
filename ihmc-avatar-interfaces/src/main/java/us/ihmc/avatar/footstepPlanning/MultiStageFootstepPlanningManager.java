@@ -919,7 +919,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       bodyPathPlanner.setWaypoints(waypoints);
       waypoints.clear();
 
-      bodyPathPlan.set(bodyPathPlanner.compute());
+      bodyPathPlan.set(bodyPathPlanner.getPlan());
       return true;
    }
 

@@ -196,7 +196,6 @@ public class ControllerBasedBodyPathTest
             }
 
             bodyPath.setWaypoints(waypoints);
-            bodyPath.compute();
 
             Pose2D pose = new Pose2D();
             for (int i = 0; i < numberOfPoints; i++)

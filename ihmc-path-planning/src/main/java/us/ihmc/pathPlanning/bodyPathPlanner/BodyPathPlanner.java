@@ -3,45 +3,51 @@ package us.ihmc.pathPlanning.bodyPathPlanner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public interface BodyPathPlanner
 {
-   /** Adds the waypoints used by the body path planner. **/
-   void setWaypoints(List<? extends Point3DReadOnly> waypoints);
+   /** Adds the position waypoints used by the body path planner, and automatically computes the heading waypoints. **/
+   default void setWaypoints(List<? extends Point3DReadOnly> positionWaypoints)
+   {
+      int numberOfSegments = positionWaypoints.size() - 1;
+      List<MutableDouble> headingWaypoints = new ArrayList<>();
+      double startingHeading = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(0), positionWaypoints.get(1));
+      headingWaypoints.add(new MutableDouble(startingHeading));
+
+      for (int i = 0; i < numberOfSegments - 1; i++)
+      {
+         double headingBefore = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(i), positionWaypoints.get(i + 1));
+         double headingAfter = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(i + 1), positionWaypoints.get(i + 2));
+         double heading = AngleTools.interpolateAngle(headingBefore, headingAfter, 0.5);
+         headingWaypoints.add(new MutableDouble(heading));
+      }
+
+      double endingHeading = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(numberOfSegments - 1), positionWaypoints.get(numberOfSegments));
+      headingWaypoints.add(new MutableDouble(endingHeading));
+
+      setWaypoints(positionWaypoints, headingWaypoints);
+   }
+
+   /** Adds the position and heading waypoints used by the body path planner. **/
+   void setWaypoints(List<? extends Point3DReadOnly> positionWaypoints, List<MutableDouble> headingWaypoints);
 
    /** This method is now completely unused. **/
    @Deprecated
    default void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
    }
-
-   /**
-    * Computes a new body path plan given a start and goal point.
-    * Precondition: {@link #setPlanarRegionsList(PlanarRegionsList)} has been called.
-    * This has been deprecated. Use {@link #compute()} along with {@link #setWaypoints(List)} instead
-    */
-   @Deprecated
-   default void compute(Point2D startPoint, Point2D goalPoint)
-   {
-      List<Point3DReadOnly> waypoints = new ArrayList<>();
-      waypoints.add(new Point3D(startPoint));
-      waypoints.add(new Point3D(goalPoint));
-      setWaypoints(waypoints);
-      compute();
-   }
-
-   /**
-    * Computes a new body path plan given a start and goal point.
-    * Precondition: {@link #setPlanarRegionsList(PlanarRegionsList)} has been called
-    */
-   BodyPathPlan compute();
 
    /**
     * Gets the computed body path plan.

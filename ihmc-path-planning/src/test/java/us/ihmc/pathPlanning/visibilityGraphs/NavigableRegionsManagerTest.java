@@ -559,9 +559,6 @@ public class NavigableRegionsManagerTest
       WaypointDefinedBodyPathPlanner expectedPathNoAvoidance = new WaypointDefinedBodyPathPlanner();
       expectedPathNoAvoidance.setWaypoints(originalPath);
 
-      calculatedPath.compute();
-      expectedPathNoAvoidance.compute();
-
       double distanceAlongExpectedPath = 0.0;
 
       for (double alpha = 0.05; alpha < 1.0; alpha += 0.05)

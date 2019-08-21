@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -59,8 +60,8 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
 
    private final ListOfStatistics listOfStatistics = new ListOfStatistics();
 
-   public BodyPathAndFootstepPlannerWrapper(String prefix, FootstepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry)
+   public BodyPathAndFootstepPlannerWrapper(String prefix, FootstepPlannerParametersReadOnly parameters,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
       this.parameters = parameters;
@@ -189,7 +190,6 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
       }
 
       bodyPathPlanner.setWaypoints(waypoints);
-      bodyPathPlanner.compute();
 
       if (visualizing)
       {
