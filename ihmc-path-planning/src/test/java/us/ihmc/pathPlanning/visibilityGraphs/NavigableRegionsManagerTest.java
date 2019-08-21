@@ -1,8 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import org.junit.jupiter.api.*;
-import us.ihmc.commons.thread.ThreadTools;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -48,7 +50,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class NavigableRegionsManagerTest
 {
@@ -65,6 +66,8 @@ public class NavigableRegionsManagerTest
 
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
+
+//   private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
 
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
