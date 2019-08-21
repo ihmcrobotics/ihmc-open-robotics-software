@@ -200,7 +200,6 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
       }
 
       bodyPathPlanner.setWaypoints(waypoints);
-      bodyPathPlanner.compute();
 
       if (visualizing)
       {

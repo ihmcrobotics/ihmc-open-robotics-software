@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterShowHideMenu;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -48,13 +50,20 @@ public class WaypointDefinedBodyPathPlanTest
    public void testSimpleBodyPath(TestInfo testInfo)
    {
       WaypointDefinedBodyPathPlanner plan = new WaypointDefinedBodyPathPlanner();
-      List<Point3D> waypoints = new ArrayList<Point3D>();
-      waypoints.add(new Point3D(0.0, 0.0, 0.0));
-      waypoints.add(new Point3D(0.5, 0.0, 0.0));
-      waypoints.add(new Point3D(1.0, 1.0, 0.0));
+      List<Point3D> positionWaypoints = new ArrayList<Point3D>();
+      positionWaypoints.add(new Point3D(0.0, 0.0, 0.0));
+      positionWaypoints.add(new Point3D(0.5, 0.0, 0.0));
+      positionWaypoints.add(new Point3D(1.0, 1.0, 0.0));
 
-      plan.setWaypoints(waypoints);
-      plan.compute();
+      double startHeading = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(0), positionWaypoints.get(1));
+      double endHeading = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(1), positionWaypoints.get(2));
+
+      List<MutableDouble> headingWaypoints = new ArrayList<>();
+      headingWaypoints.add(new MutableDouble(startHeading));
+      headingWaypoints.add(new MutableDouble(AngleTools.interpolateAngle(startHeading, endHeading, 0.5)));
+      headingWaypoints.add(new MutableDouble(endHeading));
+
+      plan.setWaypoints(positionWaypoints, headingWaypoints);
 
       // test path length method
       double segmentLength1 = 0.5;
@@ -69,21 +78,21 @@ public class WaypointDefinedBodyPathPlanTest
       // test point along path method
       Pose2D testPose = new Pose2D();
       plan.getPointAlongPath(0.0, testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(0)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(0)), testPose.getPosition(), epsilon);
       plan.getPointAlongPath(segmentLength1 / toalLength, testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(1)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(1)), testPose.getPosition(), epsilon);
       plan.getPointAlongPath(1.0, testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(2)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(2)), testPose.getPosition(), epsilon);
 
       // test get closest point method
       double d1 = plan.getClosestPoint(new Point2D(-1.0, 0.0), testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(0)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(0)), testPose.getPosition(), epsilon);
       Assert.assertEquals(0.0, d1, epsilon);
       double d2 = plan.getClosestPoint(new Point2D(10.0, 0.0), testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(2)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(2)), testPose.getPosition(), epsilon);
       Assert.assertEquals(1.0, d2, epsilon);
       double d3 = plan.getClosestPoint(new Point2D(10.0, -10.0), testPose);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(waypoints.get(1)), testPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(positionWaypoints.get(1)), testPose.getPosition(), epsilon);
       Assert.assertEquals(segmentLength1 / toalLength, d3, epsilon);
       double d4 = plan.getClosestPoint(new Point2D(0.25, 0.1), testPose);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.25, 0.0), testPose.getPosition(), epsilon);
