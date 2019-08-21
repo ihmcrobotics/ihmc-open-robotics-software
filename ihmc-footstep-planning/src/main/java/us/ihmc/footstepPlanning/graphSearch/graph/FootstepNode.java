@@ -75,9 +75,14 @@ public class FootstepNode
 
    public double euclideanDistance(FootstepNode other)
    {
+      return Math.sqrt(euclideanDistanceSquared(other));
+   }
+
+   public double euclideanDistanceSquared(FootstepNode other)
+   {
       double dx = getX() - other.getX();
       double dy = getY() - other.getY();
-      return Math.sqrt(dx * dx + dy * dy);
+      return dx * dx + dy * dy;
    }
 
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
