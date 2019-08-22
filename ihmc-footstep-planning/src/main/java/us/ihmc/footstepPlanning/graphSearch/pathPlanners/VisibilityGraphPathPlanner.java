@@ -37,7 +37,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
-   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      ObstacleAndCliffAvoidanceProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
    {
       this("", footstepPlannerParameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
@@ -49,7 +49,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
    }
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry parentRegistry)
    {
       super(prefix, footstepPlannerParameters, parentRegistry);
