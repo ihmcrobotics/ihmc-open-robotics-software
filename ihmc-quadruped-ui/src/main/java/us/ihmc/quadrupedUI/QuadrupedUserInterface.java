@@ -26,7 +26,8 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
@@ -99,7 +100,7 @@ public class QuadrupedUserInterface
    private ManualStepTabController manualStepTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
-                                 PawStepPlannerParametersBasics pawPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                 PawStepPlannerParametersBasics pawPlannerParameters, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                  QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
@@ -359,7 +360,7 @@ public class QuadrupedUserInterface
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                                             PawStepPlannerParametersBasics pawPlannerParameters,
-                                                            VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
+                                                            VisibilityGraphsParametersBasics visibilityGraphsParameters, double nominalBodyHeight,
                                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {
       return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, pawPlannerParameters, visibilityGraphsParameters,

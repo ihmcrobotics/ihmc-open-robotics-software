@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
@@ -58,7 +58,7 @@ public class RemoteUIMessageConverter
    private final String robotName;
 
    private final AtomicReference<PawStepPlannerParametersReadOnly> plannerParametersReference;
-   private final AtomicReference<VisibilityGraphsParameters> visibilityGraphParametersReference;
+   private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
@@ -287,7 +287,7 @@ public class RemoteUIMessageConverter
 
       if (plannerRequestId > currentPlanRequestId.get())
          messager.submitMessage(PawStepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-     
+
       ThreadTools.sleep(100);
 
       messager.submitMessage(PawStepPlannerMessagerAPI.FootstepPlanTopic, pawStepPlan);
@@ -327,15 +327,15 @@ public class RemoteUIMessageConverter
 
       if (verbose)
          PrintTools.info("Told the toolbox to wake up.");
-      
+
       plannerParametersPublisher.publish(plannerParametersReference.get().getAsPacket());
 
       VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
-      VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();
+      VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
 
       PawStepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
       visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
-      
+
       if (verbose)
          PrintTools.info("Sent out some parameters");
 

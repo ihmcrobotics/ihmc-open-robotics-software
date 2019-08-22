@@ -2,6 +2,8 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.VisibilityGraphPawPathPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -12,7 +14,7 @@ public class VisibilityGraphWithAStarPawPlanner extends BodyPathAndPawPlannerWra
    private static final String prefix = "VisGraph";
 
    public VisibilityGraphWithAStarPawPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettingsReadOnly,
-                                             VisibilityGraphsParameters visibilityGraphsParameters, YoGraphicsListRegistry graphicsListRegistry,
+                                             VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoGraphicsListRegistry graphicsListRegistry,
                                              YoVariableRegistry parentRegistry)
    {
       super(prefix, parameters, parentRegistry, graphicsListRegistry);

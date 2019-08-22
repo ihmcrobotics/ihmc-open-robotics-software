@@ -37,9 +37,7 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuris
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
@@ -57,14 +55,14 @@ import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
-import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.property.YoVariablesForStoredProperties;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -93,11 +91,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private double dt;
 
    private final FootstepPlannerParametersBasics footstepPlanningParameters;
-   private final YoVisibilityGraphParameters visibilityGraphsParameters;
+   private final VisibilityGraphsParametersBasics visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
-                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+                                            VisibilityGraphsParametersBasics visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
@@ -110,9 +108,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
          contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
-      footstepPlanningParameters = footstepPlannerParameters;
-      new YoVariablesForFootstepPlannerParameters(parentRegistry, footstepPlannerParameters);
-      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
+      this.footstepPlanningParameters = footstepPlannerParameters;
+      this.visibilityGraphsParameters = visibilityGraphsParameters;
+      new YoVariablesForFootstepPlannerParameters(registry, footstepPlannerParameters);
+      new YoVisibilityGraphParameters(registry, visibilityGraphsParameters);
 
       plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(footstepPlanningParameters), contactPointsInSoleFrame));
