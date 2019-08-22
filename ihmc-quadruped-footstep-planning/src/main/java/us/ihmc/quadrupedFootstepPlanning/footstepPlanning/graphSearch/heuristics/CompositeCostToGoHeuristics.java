@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristic
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;

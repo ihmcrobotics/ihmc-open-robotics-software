@@ -112,6 +112,14 @@ module controller_msgs
         double final_slow_down_proximity;
         @defaultValue(value=-11.1)
         double maximum_deviation_from_x_gait_during_expansion;
+        boolean return_best_effort_plan;
+        @defaultValue(value=4)
+        unsigned long minimum_steps_for_best_effort_plan;
+        boolean perform_graph_repairing_step;
+        @defaultValue(value=-11.1)
+        double repairing_heuristic_weight_scaling;
+        @defaultValue(value=-11.1)
+        double minimum_heuristic_weight_reduction;
       };
     };
   };
