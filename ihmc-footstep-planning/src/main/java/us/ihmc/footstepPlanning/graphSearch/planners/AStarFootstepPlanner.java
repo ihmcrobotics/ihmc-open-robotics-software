@@ -200,6 +200,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
       }
 
+      heuristics.setGoalPose(goalPoseInWorld);
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
    }
 
@@ -316,7 +317,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       abortPlanning.set(false);
 
       graph.initialize(startNode);
-      NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
+      NodeComparator nodeComparator = new NodeComparator(graph, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
       validGoalNode.set(true);
@@ -501,8 +502,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
          return;
 
-      if (endNode == null || heuristics.compute(nodeToExpand, goalNodes.get(nodeToExpand.getRobotSide())) < heuristics
-            .compute(endNode, goalNodes.get(endNode.getRobotSide())))
+      if (endNode == null || heuristics.compute(nodeToExpand) < heuristics.compute(endNode))
       {
          if (listener != null)
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));

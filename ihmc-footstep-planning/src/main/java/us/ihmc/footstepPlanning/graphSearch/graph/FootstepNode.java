@@ -100,7 +100,7 @@ public class FootstepNode
       return midFootPoint;
    }
 
-   public static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
+   private static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
    {
       double w = idealStepWidth / 2.0;
       double vx = node.getRobotSide().negateIfRightSide(Math.sin(node.getYaw()) * w);

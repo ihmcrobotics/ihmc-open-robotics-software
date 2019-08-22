@@ -274,12 +274,13 @@ public class ControllerBasedBodyPathTest
                                                               WaypointDefinedBodyPathPlanner bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, bodyPath);
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 //         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
          FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, snapper, bodyPath);
+
          AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
          return planner;
       }
