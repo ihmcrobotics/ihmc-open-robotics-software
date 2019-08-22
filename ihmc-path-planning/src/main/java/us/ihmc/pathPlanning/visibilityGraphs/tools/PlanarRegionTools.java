@@ -30,8 +30,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
@@ -266,55 +264,7 @@ public class PlanarRegionTools
       return closestPoint.epsilonEquals(point, epsilon);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions)
-   {
-      return getNavigableRegionContainingThisPoint(point, navigableRegions, 0.0);
-   }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double epsilon)
-   {
-      List<NavigableRegion> containers = new ArrayList<>();
-
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
-      if (naviableRegionsList == null)
-         return null;
-
-      for (NavigableRegion navigableRegion : naviableRegionsList)
-      {
-         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), point, epsilon))
-         {
-            containers.add(navigableRegion);
-         }
-      }
-
-      if (containers.isEmpty())
-         return null;
-      if (containers.size() == 1)
-         return containers.get(0);
-
-      Point3D pointOnRegion = new Point3D();
-      Vector3D regionNormal = new Vector3D();
-
-      NavigableRegion closestContainer = containers.get(0);
-      closestContainer.getHomePlanarRegion().getNormal(regionNormal);
-      closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
-      double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
-
-      for (int i = 1; i < containers.size(); i++)
-      {
-         NavigableRegion candidate = containers.get(i);
-         candidate.getHomePlanarRegion().getNormal(regionNormal);
-         candidate.getHomePlanarRegion().getPointInRegion(pointOnRegion);
-         double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
-         if (distance < minDistance)
-         {
-            closestContainer = candidate;
-            minDistance = distance;
-         }
-      }
-
-      return closestContainer;
-   }
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck)
    {
