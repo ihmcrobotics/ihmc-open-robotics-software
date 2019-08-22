@@ -103,13 +103,13 @@
                         <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="7" GridPane.halignment="CENTER" />
                         <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                         <Spinner fx:id="startXPosition" GridPane.columnIndex="2" />
-                        <Spinner fx:id="goalXPosition" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalXPosition" layoutX="243.0" layoutY="11.0" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                         <Spinner fx:id="startYPosition" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="4" />
-                        <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                         <Spinner fx:id="startZPosition" layoutX="409.0" layoutY="11.0" GridPane.columnIndex="6" />
-                        <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                         <Spinner fx:id="startYaw" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="8" />
-                        <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="1" />
                         <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                     </children>
                 </GridPane>
