@@ -1,8 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerObjective;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -34,7 +33,7 @@ public interface WaypointsForFootstepsPlanner
 
    void computeBestEffortPlan(double horizonLength);
 
-   List<Pose3D> getWaypoints();
+   List<Pose3DReadOnly> getWaypoints();
 
    FootstepPlanningResult planWaypoints();
 

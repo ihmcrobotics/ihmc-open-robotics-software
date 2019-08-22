@@ -5,9 +5,8 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -43,7 +42,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    private final EnumMap<FootstepPlannerType, WaypointsForFootstepsPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
 
-   private final AtomicReference<List<Pose3D>> waypoints = new AtomicReference<>();
+   private final AtomicReference<List<Pose3DReadOnly>> waypoints = new AtomicReference<>();
 
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
@@ -145,7 +144,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    }
 
    @Override
-   public List<Pose3D> getWaypoints()
+   public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints.getAndSet(null);
    }
