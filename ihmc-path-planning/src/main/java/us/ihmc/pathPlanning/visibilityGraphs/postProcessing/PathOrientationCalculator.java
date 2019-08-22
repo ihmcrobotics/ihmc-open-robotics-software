@@ -70,6 +70,7 @@ public class PathOrientationCalculator
          Vector2D vectorToObstacle = new Vector2D();
          vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
 
+         // FIXME this logic isn't quite right
          if (previousPosition.distanceXY(currentPosition) < 2.0 * parameters.getPreferredObstacleExtrusionDistance())
             desiredOrientation = newPathPoses.get(i - 1).getOrientation().getYaw();
 

@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class NavigableRegionsManagerTest
 {
    private static boolean visualize = true;
@@ -685,6 +688,33 @@ public class NavigableRegionsManagerTest
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
+   @Test
+   public void testFlatGroundBetweenBoxInMiddleButExtraSupportToTheLeft()
+   {
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxInMiddleEnvironmentButIslandToTheLeft());
+
+      // test aligned with the edge of the wall, requiring slight offset
+      Point3D start = new Point3D(-15.0, 0.0, 0.0);
+      Point3D goal = new Point3D(-5.0, 0.0, 0.0);
+
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
+      List<Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+
+      if (visualize)
+      {
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+      }
+
+      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+   }
+
+
    private static void checkPath(List<Pose3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
                                  PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)
    {
@@ -726,6 +756,8 @@ public class NavigableRegionsManagerTest
          if (visualize)
          {
             Point3DReadOnly position3D = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(actualPose.getPosition()), planarRegionsList);
+            if (position3D == null)
+               position3D = new Point3D(actualPose.getPosition());
             Quaternion orientation = new Quaternion(actualPose.getYaw(), 0.0, 0.0);
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, new Point3D(position3D));
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerOrientation, orientation);
@@ -995,6 +1027,72 @@ public class NavigableRegionsManagerTest
       return planarRegions;
    }
 
+   private static List<PlanarRegion> createFlatGroundWithBoxInMiddleEnvironmentButIslandToTheLeft()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      // set up ground plane, 20 x 10
+      Point2D groundPlanePointA = new Point2D(10.0, -5.0);
+      Point2D groundPlanePointB = new Point2D(10.0, 5.0);
+      Point2D groundPlanePointC = new Point2D(-10.0, 5.0);
+      Point2D groundPlanePointD = new Point2D(-10.0, -5.0);
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      groundTransform.setTranslation(-10.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      // set up island plane, 20 x 10
+      RigidBodyTransform islandTransform = new RigidBodyTransform();
+      islandTransform.setTranslation(-10.0, 10.2, 0.0);
+      PlanarRegion islandPlaneRegion = new PlanarRegion(islandTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      // set up wall, 5x2
+      Point2D frontWallPointA = new Point2D(2.0, 0.0);
+      Point2D frontWallPointB = new Point2D(0.0, 0.0);
+      Point2D frontWallPointC = new Point2D(2.0, 9.0);
+      Point2D frontWallPointD = new Point2D(0.0, 9.0);
+
+      RigidBodyTransform frontWallTransform = new RigidBodyTransform();
+      frontWallTransform.setTranslation(-11.5, -4.5, 0.0);
+      frontWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion frontWallRegion = new PlanarRegion(frontWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+
+      RigidBodyTransform backWallTransform = new RigidBodyTransform();
+      backWallTransform.setTranslation(-8.5, -4.5, 0.0);
+      backWallTransform.setRotationPitch(-Math.PI / 2.0);
+      PlanarRegion backWallRegion = new PlanarRegion(backWallTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(frontWallPointA, frontWallPointB, frontWallPointC, frontWallPointD)));
+
+      Point2D sideWallPointA = new Point2D(2.0, 0.0);
+      Point2D sideWallPointB = new Point2D(0.0, 0.0);
+      Point2D sideWallPointC = new Point2D(2.0, 3.0);
+      Point2D sideWallPointD = new Point2D(0.0, 3.0);
+
+      RigidBodyTransform leftSideWall = new RigidBodyTransform();
+      leftSideWall.setTranslation(-11.5, 4.5, 0.0);
+      leftSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      PlanarRegion leftSideWallRegion = new PlanarRegion(leftSideWall, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+
+      RigidBodyTransform rightSideWall = new RigidBodyTransform();
+      rightSideWall.setTranslation(-11.5, -4.5, 0.0);
+      rightSideWall.setRotationYawPitchRoll(-Math.PI / 2.0, -Math.PI / 2.0, 0.0);
+      PlanarRegion rightSideWallRegion = new PlanarRegion(rightSideWall, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(sideWallPointA, sideWallPointB, sideWallPointC, sideWallPointD)));
+
+      planarRegions.add(groundPlaneRegion);
+      planarRegions.add(islandPlaneRegion);
+      planarRegions.add(frontWallRegion);
+      planarRegions.add(backWallRegion);
+      planarRegions.add(leftSideWallRegion);
+      planarRegions.add(rightSideWallRegion);
+
+      return planarRegions;
+   }
+
    private static List<PlanarRegion> createFlatGroundWithBoxesEnvironment()
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
@@ -1113,7 +1211,7 @@ public class NavigableRegionsManagerTest
    }
 
 
-   private static void visualize(List<Pose3DReadOnly> path, VisibilityGraphsParameters parameters, PlanarRegionsList planarRegionsList, Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions)
+   private static void visualize(List<Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList, Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions)
    {
       Random random = new Random(324);
       planarRegionsList.getPlanarRegionsAsList().forEach(region -> region.setRegionId(random.nextInt()));
