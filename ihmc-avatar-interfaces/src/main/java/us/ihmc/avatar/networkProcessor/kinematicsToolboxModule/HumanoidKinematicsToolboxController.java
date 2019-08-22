@@ -7,7 +7,9 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -63,6 +65,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * controllers.
     */
    private final FullHumanoidRobotModel desiredFullRobotModel;
+
+   private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
 
    /**
     * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to know which
@@ -169,6 +173,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getChest(), desiredFullRobotModel.getHand(robotSide));
+         endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
       populateJointLimitReductionFactors();
@@ -318,6 +328,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
+         feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
          feedbackControlCommand.setGains(getDefaultGains());
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.setInverseKinematics(poseToHold, KinematicsToolboxHelper.zeroVector6D);
@@ -456,6 +467,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
+   }
+
+   @Override
+   protected RigidBodyBasics getEndEffectorPrimaryBase(RigidBodyBasics endEffector)
+   {
+      return endEffectorToPrimaryBaseMap.get(endEffector);
    }
 
    @Override
