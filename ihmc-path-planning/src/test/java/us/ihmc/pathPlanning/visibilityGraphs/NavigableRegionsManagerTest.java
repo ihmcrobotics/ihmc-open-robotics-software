@@ -40,6 +40,7 @@ public class NavigableRegionsManagerTest
 {
    private static boolean visualize = true;
    private static final double epsilon = 1e-4;
+   private static final double proximityEpsilon = 5e-2;
    private static final long timeout = 30000 * 100;
 
    // For enabling helpful prints.
@@ -51,10 +52,10 @@ public class NavigableRegionsManagerTest
 
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
-//   private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
 
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
+   private static final Vector3D walkerRadii = new Vector3D(obstacleExtrusionDistance, preferredObstacleExtrusionDistance, 0.5);
    private static final Vector3D walkerBox = new Vector3D(2.0 * obstacleExtrusionDistance, 2.0 * preferredObstacleExtrusionDistance, 1.0);
 
 
@@ -73,8 +74,8 @@ public class NavigableRegionsManagerTest
 
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
-         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, new Vector3D());
-         messager.submitMessage(UIVisibilityGraphsTopics.WalkerBoxSize, walkerBox);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+//         messager.submitMessage(UIVisibilityGraphsTopics.WalkerBoxSize, walkerBox);
       }
    }
 
@@ -733,10 +734,10 @@ public class NavigableRegionsManagerTest
          }
 
          // check that it's always moving along
-//         Point2D pointAlongExpectedPath = new Point2D();
-//         double newDistanceAlongExpectedPath = expectedPathNoAvoidance.getClosestPoint(pointAlongExpectedPath, actualPose);
-//         assertTrue(newDistanceAlongExpectedPath >= distanceAlongExpectedPath);
-//         distanceAlongExpectedPath = newDistanceAlongExpectedPath;
+         Point2D pointAlongExpectedPath = new Point2D();
+         double newDistanceAlongExpectedPath = expectedPathNoAvoidance.getClosestPoint(pointAlongExpectedPath, actualPose);
+         assertTrue(newDistanceAlongExpectedPath >= distanceAlongExpectedPath);
+         distanceAlongExpectedPath = newDistanceAlongExpectedPath;
 
          // check that it doesn't get too close to an obstacle
          double distanceToObstacles = Double.MAX_VALUE;
@@ -756,14 +757,16 @@ public class NavigableRegionsManagerTest
             }
          }
 
-         if (visualize && distanceToObstacles < 0.95 * preferredObstacleExtrusionDistance)
+         distanceToObstacles += parameters.getObstacleExtrusionDistance();
+
+         if (visualize && distanceToObstacles < preferredObstacleExtrusionDistance + proximityEpsilon)
          {
             Point3DReadOnly collision = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(closestPointOverall), planarRegionsList);
             List<Point3D> collisions = new ArrayList<>();
             collisions.add(new Point3D(collision));
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
          }
-//         assertTrue(distanceToObstacles > 0.95 * preferredObstacleExtrusionDistance);
+         assertTrue(distanceToObstacles > preferredObstacleExtrusionDistance - proximityEpsilon);
       }
    }
 

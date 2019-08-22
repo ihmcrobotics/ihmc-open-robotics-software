@@ -208,6 +208,7 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private void setWalkerOrientation(QuaternionReadOnly orientation)
    {
+      walker.setRotate(Math.toDegrees(orientation.getYaw()));
       walkerBox.setRotate(Math.toDegrees(orientation.getYaw()));
    }
 

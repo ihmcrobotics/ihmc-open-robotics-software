@@ -8,7 +8,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
@@ -24,6 +23,8 @@ import java.util.stream.Collectors;
 
 public class PathOrientationCalculator
 {
+   private static final double epsilon = 5e-2;
+
    private final VisibilityGraphsParameters parameters;
 
    public PathOrientationCalculator(VisibilityGraphsParameters parameters)
@@ -86,16 +87,13 @@ public class PathOrientationCalculator
    private double getHeadingToAvoidObstacles(double nominalHeading, Vector2DReadOnly headingToClosestObstacle)
    {
       double headingToObstacle = BodyPathPlannerTools.calculateHeading(headingToClosestObstacle);
-      double distanceToObstacle = headingToClosestObstacle.length();
+      double distanceToObstacle = headingToClosestObstacle.length() + parameters.getObstacleExtrusionDistance();
 
-      if (distanceToObstacle > parameters.getPreferredObstacleExtrusionDistance())
+      if (distanceToObstacle > parameters.getPreferredObstacleExtrusionDistance() - epsilon)
          return nominalHeading;
 
-      double rotationForAvoidance;
-      if (distanceToObstacle < parameters.getObstacleExtrusionDistance())
-         rotationForAvoidance = Math.PI / 2.0;
-      else
-         rotationForAvoidance = Math.asin(parameters.getObstacleExtrusionDistance() / distanceToObstacle);
+//      double rotationForAvoidance = computeRotationForAvoidanceUsingBox(distanceToObstacle, parameters.getObstacleExtrusionDistance());
+      double rotationForAvoidance = computeRotationForAvoidanceUsingEllipse(distanceToObstacle, parameters.getObstacleExtrusionDistance(), parameters.getPreferredObstacleExtrusionDistance());
 
       TDoubleArrayList possibleHeadings = new TDoubleArrayList();
       possibleHeadings.add(AngleTools.trimAngleMinusPiToPi(headingToObstacle + rotationForAvoidance));
@@ -117,5 +115,26 @@ public class PathOrientationCalculator
       }
 
       return bestHeading;
+   }
+
+   // assume a simple box
+   private static double computeRotationForAvoidanceUsingBox(double distanceToObstacle, double minimumDistanceFromObstacle)
+   {
+      if (distanceToObstacle < minimumDistanceFromObstacle)
+         return Math.PI / 2.0;
+      else
+         return Math.asin(minimumDistanceFromObstacle / distanceToObstacle);
+   }
+
+   private static double computeRotationForAvoidanceUsingEllipse(double distanceToObstacle, double minimumDistanceFromObstacle, double largerDistanceFromObstacle)
+   {
+      if (distanceToObstacle < minimumDistanceFromObstacle)
+         return Math.PI / 2.0;
+      else
+      {
+         double height = MathTools.square(minimumDistanceFromObstacle) * (MathTools.square(largerDistanceFromObstacle) - MathTools.square(distanceToObstacle));
+         height /= (MathTools.square(largerDistanceFromObstacle) - MathTools.square(minimumDistanceFromObstacle));
+         return Math.asin(height / distanceToObstacle);
+      }
    }
 }
