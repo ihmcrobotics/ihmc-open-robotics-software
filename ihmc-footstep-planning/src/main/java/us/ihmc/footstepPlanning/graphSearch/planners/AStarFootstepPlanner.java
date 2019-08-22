@@ -338,10 +338,12 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             if (debug)
                LogTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
 
-            return false;
+            if(goal.getDistanceProximity() <= 0.0 && goal.getYawProximity() <= 0.0)
+            {
+               this.validGoalNode.set(false);
+               return false;
+            }
          }
-
-         this.validGoalNode.set(validGoalNode && this.validGoalNode.getBooleanValue());
       }
 
       stack.add(startNode);
