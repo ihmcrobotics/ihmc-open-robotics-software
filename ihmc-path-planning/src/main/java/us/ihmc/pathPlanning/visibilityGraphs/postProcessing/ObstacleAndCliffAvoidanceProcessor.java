@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class ObstacleAndCliffAvoidanceProcessor
 {
    private static final boolean includeMidpoints = true;
-   private static final boolean adjustWaypoints = true;
    private static final boolean adjustMidpoints = true;
 
    private static final double minDistanceToMove = 0.01;
@@ -62,7 +61,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       int pathNodeIndex = 0;
       int waypointIndex = 0;
       // don't do the goal node
-      while (pathNodeIndex < nodePath.size() - 1)
+      while (pathNodeIndex < nodePath.size() - 1 && parameters.getPerformPostProcessingNodeShifting())
       {
          int nextPathNodeIndex = pathNodeIndex + 1;
          int nextWaypointIndex = waypointIndex + 1;
@@ -79,12 +78,12 @@ public class ObstacleAndCliffAvoidanceProcessor
          NavigableRegion endingRegion = endVisGraphNode.getVisibilityGraphNavigableRegion().getNavigableRegion();
          NavigableRegions allNavigableRegions = visibilityMapSolution.getNavigableRegions();
 
-         if (!isGoalNode && adjustWaypoints)
+         if (!isGoalNode)
          {
             adjustNodePositionToAvoidObstaclesAndCliffs(endPointInWorld, startingRegion, endingRegion, allNavigableRegions);
          }
 
-         if (includeMidpoints)
+         if (parameters.getIntroduceMidpointsInPostProcessing())
          {
             List<Point3D> intermediateWaypointsToAdd = computeIntermediateWaypointsToAddToAvoidObstacles(new Point2D(startPointInWorld),
                                                                                                          new Point2D(endPointInWorld), startVisGraphNode,
@@ -93,12 +92,9 @@ public class ObstacleAndCliffAvoidanceProcessor
             removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, waypointResolution);
 
             // shift all the points around
-            if (adjustMidpoints)
+            for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
             {
-               for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
-               {
-                  adjustNodePositionToAvoidObstaclesAndCliffs(intermediateWaypointToAdd, startingRegion, endingRegion, allNavigableRegions);
-               }
+               adjustNodePositionToAvoidObstaclesAndCliffs(intermediateWaypointToAdd, startingRegion, endingRegion, allNavigableRegions);
             }
 
             // prune duplicated points

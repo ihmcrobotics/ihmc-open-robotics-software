@@ -54,26 +54,30 @@ public class PathOrientationCalculator
          double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
          double desiredOrientation = InterpolationTools.linearInterpolate(previousHeading, nextHeading, 0.5);
 
-         Point2D closestObstaclePoint = new Point2D();
-         double distanceToClosestPoint = Double.POSITIVE_INFINITY;
-         for (Cluster cluster : allObstacleClusters)
+         if (parameters.getComputeOrientationsToAvoidObstacles())
          {
-            Point2D closestPointInCluster = new Point2D();
-            double distance = VisibilityTools.distanceToCluster(currentPosition2D, cluster.getNonNavigableExtrusionsInWorld2D(), closestPointInCluster, null);
-            if (distance < distanceToClosestPoint)
+            Point2D closestObstaclePoint = new Point2D();
+            double distanceToClosestPoint = Double.POSITIVE_INFINITY;
+            for (Cluster cluster : allObstacleClusters)
             {
-               distanceToClosestPoint = distance;
-               closestObstaclePoint = closestPointInCluster;
+               Point2D closestPointInCluster = new Point2D();
+               double distance = VisibilityTools.distanceToCluster(currentPosition2D, cluster.getNonNavigableExtrusionsInWorld2D(), closestPointInCluster, null);
+               if (distance < distanceToClosestPoint)
+               {
+                  distanceToClosestPoint = distance;
+                  closestObstaclePoint = closestPointInCluster;
+               }
             }
+
+            Vector2D vectorToObstacle = new Vector2D();
+            vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
+
+            if (previousPosition.distanceXY(currentPosition) < 2.0 * parameters.getPreferredObstacleExtrusionDistance())
+               previousHeading = newPathPoses.get(i - 1).getOrientation().getYaw();
+
+            desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousHeading, vectorToObstacle);
          }
 
-         Vector2D vectorToObstacle = new Vector2D();
-         vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
-
-         if (previousPosition.distanceXY(currentPosition) < 2.0 * parameters.getPreferredObstacleExtrusionDistance())
-            previousHeading = newPathPoses.get(i - 1).getOrientation().getYaw();
-
-         desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousHeading, vectorToObstacle);
          newPathPoses.add(new Pose3D(path.get(i), new Quaternion(desiredOrientation, 0.0, 0.0)));
       }
 
