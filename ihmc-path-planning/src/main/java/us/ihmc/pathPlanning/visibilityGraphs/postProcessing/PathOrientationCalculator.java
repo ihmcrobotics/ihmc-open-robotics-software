@@ -24,6 +24,8 @@ import us.ihmc.robotics.geometry.AngleTools;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.stream.Collectors;
+
 public class PathOrientationCalculator
 {
    private static final double epsilon = 5e-2;
