@@ -42,6 +42,12 @@ float64 can_easily_step_over_height -1.0
 
 float64 length_for_long_inter_region_edge -1.0
 
+bool perform_post_processing_node_shifting false
+
+bool introduce_midpoints_in_post_processing true
+
+bool compute_orientations_to_avoid_obstacles true
+
 float64 heuristic_weight -1.0
 
 float64 distance_weight -1.0
