@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.AngleTools;
 
@@ -25,9 +25,9 @@ public class PathOrientationCalculator
 {
    private static final double epsilon = 5e-2;
 
-   private final VisibilityGraphsParameters parameters;
+   private final VisibilityGraphsParametersReadOnly parameters;
 
-   public PathOrientationCalculator(VisibilityGraphsParameters parameters)
+   public PathOrientationCalculator(VisibilityGraphsParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }
