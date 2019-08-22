@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
+package us.ihmc.pathPlanning.visibilityGraphs.parameters;
 
 import java.util.List;
 
@@ -8,46 +8,71 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-public interface VisibilityGraphsParameters
+import static us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys.*;
+
+public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetReadOnly
 {
    //TODO: JEP: JavaDoc all the methods to make them more clear.
 
-   double getMaxInterRegionConnectionLength();
+   default double getMaxInterRegionConnectionLength()
+   {
+      return get(maxInterRegionConnectionLength);
+   }
 
-   double getNormalZThresholdForAccessibleRegions();
+   default double getNormalZThresholdForAccessibleRegions()
+   {
+      return get(normalZThresholdForAccessibleRegions);
+   }
 
    default double getNavigableExtrusionDistance()
    {
-      return 0.02;
+      return get(navigableExtrusionDistance);
    }
 
-   double getObstacleExtrusionDistance();
+   default double getObstacleExtrusionDistance()
+   {
+      return get(obstacleExtrusionDistance);
+   }
 
-   double getPreferredObstacleExtrusionDistance();
+   default double getPreferredObstacleExtrusionDistance()
+   {
+      return get(preferredObstacleExtrusionDistance);
+   }
 
-   double getObstacleExtrusionDistanceIfNotTooHighToStep();
+   default double getObstacleExtrusionDistanceIfNotTooHighToStep()
+   {
+      return get(obstacleExtrusionDistanceIfNotTooHighToStep);
+   }
 
-   double getTooHighToStepDistance();
+   default double getTooHighToStepDistance()
+   {
+      return get(tooHighToStepDistance);
+   }
 
-   double getClusterResolution();
+   default double getClusterResolution()
+   {
+      return get(clusterResolution);
+   }
 
    default double getExplorationDistanceFromStartGoal()
    {
-      return Double.POSITIVE_INFINITY;
+      return get(explorationDistanceFromStartGoal);
    }
 
    default double getPlanarRegionMinArea()
    {
-      return 0.0;
+      return get(planarRegionMinArea);
    }
 
    default int getPlanarRegionMinSize()
    {
-      return 0;
+      return get(planarRegionMinSize);
    }
 
    /**
@@ -64,7 +89,7 @@ public interface VisibilityGraphsParameters
     */
    default double getRegionOrthogonalAngle()
    {
-      return Math.toRadians(75.0);
+      return get(regionOrthogonalAngle);
    }
 
    /**
@@ -78,7 +103,41 @@ public interface VisibilityGraphsParameters
     */
    default double getSearchHostRegionEpsilon()
    {
-      return 0.03;
+      return get(searchHostRegionEpsilon);
+   }
+
+
+   /**
+    * Returns the height at which the robot can duck under an obstacle. Any obstacles that are higher than that height above a navigable planar reigon will be ignored.
+    * @return height at which the robot can duck under an obstacle.
+    */
+   default double getCanDuckUnderHeight()
+   {
+      return get(canDuckUnderHeight);
+   }
+
+   /**
+    * Returns the height at which an obstacle can be easily stepped over. Any obstacles that are lower than that height above a navigable planar region will be ignored.
+    * @return height at which the robot can easily step over an object.
+    */
+   default double getCanEasilyStepOverHeight()
+   {
+      return get(canEasilyStepOverHeight);
+   }
+
+   default double getHeuristicWeight()
+   {
+      return get(heuristicWeight);
+   }
+
+   default double getDistanceWeight()
+   {
+      return get(distanceWeight);
+   }
+
+   default double getElevationWeight()
+   {
+      return get(elevationWeight);
    }
 
    /**
@@ -176,23 +235,6 @@ public interface VisibilityGraphsParameters
       };
    }
 
-   /**
-    * Returns the height at which the robot can duck under an obstacle. Any obstacles that are higher than that height above a navigable planar reigon will be ignored.
-    * @return height at which the robot can duck under an obstacle.
-    */
-   default double getCanDuckUnderHeight()
-   {
-      return 2.0;
-   }
-
-   /**
-    * Returns the height at which an obstacle can be easily stepped over. Any obstacles that are lower than that height above a navigable planar region will be ignored.
-    * @return height at which the robot can easily step over an object.
-    */
-   default double getCanEasilyStepOverHeight()
-   {
-      return 0.03;
-   }
 
    default ObstacleRegionFilter getObstacleRegionFilter()
    {

@@ -19,7 +19,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -84,7 +84,7 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
 
-   private static final TypedTopicTheme<VisibilityGraphsParameters> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
+   private static final TypedTopicTheme<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
 
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
@@ -117,7 +117,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<GoHomeMessage> GoHomeTopic = Root.child(GoHome).topic(GoHomeMessage);
    public static final Topic<Boolean> IgnorePartialFootholdsTopic = Root.topic(IgnorePartialFootholds);
 
-   public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParametersTopic = Root.child(Parameters).topic(VisibilityGraphsParameters);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlan).topic(PlannerTimeout);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlan).topic(PlannerTimeTaken);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlan).topic(PlannerHorizonLength);

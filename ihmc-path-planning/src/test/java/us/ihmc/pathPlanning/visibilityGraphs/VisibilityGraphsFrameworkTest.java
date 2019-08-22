@@ -35,7 +35,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -73,7 +74,7 @@ public class VisibilityGraphsFrameworkTest
    private static final int rays = 5000;
    private static final double rayLengthSquared = MathTools.square(5.0);
 
-   private static VisibilityGraphsParameters createTestParameters()
+   private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
       return new DefaultVisibilityGraphParameters()
       {
@@ -460,7 +461,7 @@ public class VisibilityGraphsFrameworkTest
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
                                                     List<Point3DReadOnly> bodyPathToPack)
    {
-      VisibilityGraphsParameters parameters = createTestParameters();
+      VisibilityGraphsParametersReadOnly parameters = createTestParameters();
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 

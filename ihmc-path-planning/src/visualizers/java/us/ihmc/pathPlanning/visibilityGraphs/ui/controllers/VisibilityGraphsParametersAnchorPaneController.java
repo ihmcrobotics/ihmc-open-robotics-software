@@ -5,11 +5,12 @@ import javafx.scene.control.Slider;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.SettableVisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersAnchorPaneController
 {
@@ -34,7 +35,8 @@ public class VisibilityGraphsParametersAnchorPaneController
    @FXML
    private Slider planarRegionMinSizeSlider;
 
-   private final VisibilityGraphsParametersProperty property = new VisibilityGraphsParametersProperty(this, "visibilityGraphsParameters");
+   private final VisibilityGraphsParametersBasics planningParameters = new DefaultVisibilityGraphParameters();
+
    private JavaFXMessager messager;
 
    public VisibilityGraphsParametersAnchorPaneController()
@@ -46,42 +48,39 @@ public class VisibilityGraphsParametersAnchorPaneController
       this.messager = messager;
    }
 
+
    public void bindControls()
    {
       maxInterRegionConnectionLengthSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
       regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
-      property.bidirectionalBindMaxInterRegionConnectionLength(maxInterRegionConnectionLengthSlider.valueProperty());
-      property.bidirectionalBindNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegionsSlider.valueProperty());
-      property.bidirectionalBindRegionOrthogonalAngle(regionOrthogonalAngleSlider.valueProperty());
-      property.bidirectionalBindExtrusionDistance(extrusionDistanceSlider.valueProperty());
-      property.bidirectionalBindExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStepSlider.valueProperty());
-      property.bidirectionalBindTooHighToStepDistance(tooHighToStepDistanceSlider.valueProperty());
-      property.bidirectionalBindClusterResolution(clusterResolutionSlider.valueProperty());
-      property.bidirectionalBindExplorationDistanceFromStartGoal(explorationDistanceFromStartGoalSlider.valueProperty());
-      property.bidirectionalBindPlanarRegionMinArea(planarRegionMinAreaSlider.valueProperty());
-      property.bidirectionalBindPlanarRegionMinSize(planarRegionMinSizeSlider.valueProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap.put(maxInterRegionConnectionLengthSlider.valueProperty(), VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
+      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegionsSlider.valueProperty(), VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
+      javaFXStoredPropertyMap.put(extrusionDistanceSlider.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistance);
+      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStepSlider.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
+      javaFXStoredPropertyMap.put(tooHighToStepDistanceSlider.valueProperty(), VisibilityGraphParametersKeys.tooHighToStepDistance);
+      javaFXStoredPropertyMap.put(clusterResolutionSlider.valueProperty(), VisibilityGraphParametersKeys.clusterResolution);
+      javaFXStoredPropertyMap.put(explorationDistanceFromStartGoalSlider.valueProperty(), VisibilityGraphParametersKeys.explorationDistanceFromStartGoal);
+      javaFXStoredPropertyMap.put(planarRegionMinAreaSlider.valueProperty(), VisibilityGraphParametersKeys.planarRegionMinArea);
+      javaFXStoredPropertyMap.put(planarRegionMinSizeSlider, VisibilityGraphParametersKeys.planarRegionMinSize);
+      javaFXStoredPropertyMap.put(regionOrthogonalAngleSlider.valueProperty(), VisibilityGraphParametersKeys.regionOrthogonalAngle);
 
-      property.set(new SettableVisibilityGraphsParameters(new DefaultVisibilityGraphParameters())); // Make sure the sliders are to the default values
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsParameters, parameters ->
+      {
+         planningParameters.set(parameters);
 
-      messager.bindBidirectional(UIVisibilityGraphsTopics.VisibilityGraphsParameters, property, createConverter(), true);
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
+
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
    }
 
-   private PropertyToMessageTypeConverter<VisibilityGraphsParameters, SettableVisibilityGraphsParameters> createConverter()
+   private void publishParameters()
    {
-      return new PropertyToMessageTypeConverter<VisibilityGraphsParameters, SettableVisibilityGraphsParameters>()
-      {
-         @Override
-         public VisibilityGraphsParameters convert(SettableVisibilityGraphsParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableVisibilityGraphsParameters interpret(VisibilityGraphsParameters messageContent)
-         {
-            return new SettableVisibilityGraphsParameters(messageContent);
-         }
-      };
+      messager.submitMessage(UIVisibilityGraphsTopics.VisibilityGraphsParameters, planningParameters);
    }
 }
