@@ -218,7 +218,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          boolean success = initialize();
          initialize.set(false);
          if (!success)
-            return FootstepPlanningResult.PLANNER_FAILED;
+            return FootstepPlanningResult.INVALID_GOAL;
       }
 
       if (debug)
@@ -298,6 +298,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    {
    }
 
+   /**
+    * Initializes planner. Precondition: setInitialStanceFoot, setGoal, setTimeout and (optional) setPlanarRegions should be called before this.
+    * Returns false if unable to snap goal nodes to world
+    */
    private boolean initialize()
    {
       if (debug)
