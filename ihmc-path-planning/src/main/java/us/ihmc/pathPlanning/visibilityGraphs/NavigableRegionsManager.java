@@ -342,6 +342,7 @@ public class NavigableRegionsManager
       }
    }
 
+   @Deprecated
    public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
    {
       List<Point3DReadOnly> path = calculateBodyPath(start, goal);
