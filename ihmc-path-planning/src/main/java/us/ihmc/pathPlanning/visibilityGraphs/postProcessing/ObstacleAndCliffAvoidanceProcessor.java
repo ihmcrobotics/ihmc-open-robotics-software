@@ -53,7 +53,6 @@ public class ObstacleAndCliffAvoidanceProcessor
    public ObstacleAndCliffAvoidanceProcessor(VisibilityGraphsParametersReadOnly parameters)
    {
       this.parameters = parameters;
-
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
       maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
       desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance() - parameters.getNavigableExtrusionDistance();
@@ -63,7 +62,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       waypointResolution = 0.1;
    }
 
-   public List<Pose3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
+   public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
    {
       List<Point3D> newPathPositions = nodePath.parallelStream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
@@ -124,53 +123,7 @@ public class ObstacleAndCliffAvoidanceProcessor
          pathNodeIndex++;
       }
 
-
-      List<Pose3D> newPathPoses = new ArrayList<>();
-      List<Cluster> allObstacleClusters = new ArrayList<>();
-      visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
-
-      int size = newPathPositions.size();
-      double startHeading = BodyPathPlannerTools.calculateHeading(newPathPositions.get(0), newPathPositions.get(1));
-
-      newPathPoses.add(new Pose3D(newPathPositions.get(0), new Quaternion(startHeading, 0.0, 0.0)));
-      for (int i = 1; i < newPathPositions.size() - 1; i++)
-      {
-         Point3D previousPosition = newPathPositions.get(i - 1);
-         Point3D currentPosition = newPathPositions.get(i);
-         Point3D nextPosition = newPathPositions.get(i + 1);
-
-         Point2D currentPosition2D = new Point2D(currentPosition);
-
-         double previousHeading = BodyPathPlannerTools.calculateHeading(previousPosition, currentPosition);
-         double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
-         double desiredOrientation = InterpolationTools.linearInterpolate(previousHeading, nextHeading, 0.5);
-
-         Point2D closestObstaclePoint = new Point2D();
-         double distanceToClosestPoint = Double.POSITIVE_INFINITY;
-         for (Cluster cluster : allObstacleClusters)
-         {
-            Point2D closestPointInCluster = new Point2D();
-            double distance = VisibilityTools.distanceToCluster(currentPosition2D, cluster.getNonNavigableExtrusionsInLocal(), closestPointInCluster, null);
-            if (distance < distanceToClosestPoint)
-            {
-               distanceToClosestPoint = distance;
-               closestObstaclePoint = closestPointInCluster;
-            }
-         }
-
-         Vector2D vectorToObstacle = new Vector2D();
-         vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
-
-         desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, vectorToObstacle);
-         newPathPoses.add(new Pose3D(newPathPositions.get(i), new Quaternion(desiredOrientation, 0.0, 0.0)));
-      }
-
-      double endHeading = BodyPathPlannerTools.calculateHeading(newPathPositions.get(size - 2), newPathPositions.get(size - 1));
-
-      newPathPoses.add(new Pose3D(newPathPositions.get(size - 1), new Quaternion(endHeading, 0.0, 0.0)));
-
-
-      return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
+      return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
    }
 
    private void adjustGoalNodePositionToAvoidObstaclesAndCliffs(Point3D nodeLocationToPack, NavigableRegion startRegion, NavigableRegion endRegion,
@@ -357,29 +310,6 @@ public class ObstacleAndCliffAvoidanceProcessor
          else
             pointIndex++;
       }
-   }
-
-   private double getHeadingToAvoidObstacles(double nominalHeading, Vector2DReadOnly headingToClosestObstacle)
-   {
-      double headingToObstacle = BodyPathPlannerTools.calculateHeading(headingToClosestObstacle);
-      double distanceToObstacle = headingToClosestObstacle.length();
-
-      if (distanceToObstacle > parameters.getPreferredObstacleExtrusionDistance())
-         return nominalHeading;
-
-      double rotationForAvoidance;
-      if (distanceToObstacle < parameters.getObstacleExtrusionDistance())
-         rotationForAvoidance = Math.PI / 2.0;
-      else
-         rotationForAvoidance = Math.asin(parameters.getObstacleExtrusionDistance() / distanceToObstacle);
-
-      double obstaclePlusRotation = headingToObstacle + rotationForAvoidance;
-      double obstacleMinusRotation = headingToObstacle - rotationForAvoidance;
-
-      if (AngleTools.computeAngleDifferenceMinusPiToPi(nominalHeading, obstaclePlusRotation) < AngleTools.computeAngleDifferenceMinusPiToPi(nominalHeading, obstacleMinusRotation))
-         return obstaclePlusRotation;
-      else
-         return obstacleMinusRotation;
    }
 
    private static double findHeightOfPoint(Point2DReadOnly pointInWorld, List<NavigableRegion> navigableRegions)

@@ -2,9 +2,11 @@ package us.ihmc.pathPlanning.bodyPathPlanner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -37,6 +39,15 @@ public interface BodyPathPlanner
       double endingHeading = BodyPathPlannerTools.calculateHeading(positionWaypoints.get(numberOfSegments - 1), positionWaypoints.get(numberOfSegments));
       headingWaypoints.add(new MutableDouble(endingHeading));
 
+      setWaypoints(positionWaypoints, headingWaypoints);
+   }
+
+
+   /** Adds the position and heading waypoints used by the body path planner. **/
+   default void setPoseWaypoints(List<? extends Pose3DReadOnly> poseWaypoints)
+   {
+      List<Point3DReadOnly> positionWaypoints = poseWaypoints.stream().map(pose -> ((Pose3DReadOnly) pose).getPosition()).collect(Collectors.toList());
+      List<MutableDouble> headingWaypoints = poseWaypoints.stream().map(pose -> new MutableDouble(((Pose3DReadOnly) pose).getOrientation().getYaw())).collect(Collectors.toList());
       setWaypoints(positionWaypoints, headingWaypoints);
    }
 
