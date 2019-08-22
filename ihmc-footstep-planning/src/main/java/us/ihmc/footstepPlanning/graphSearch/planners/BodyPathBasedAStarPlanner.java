@@ -47,9 +47,6 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-
-      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, this.bodyPathPlanner);
-
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
@@ -62,6 +59,8 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       costBuilder.setIncludePitchAndRollCost(false);
 
       FootstepCost footstepCost = costBuilder.buildCost();
+
+      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, snapper, this.bodyPathPlanner);
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
