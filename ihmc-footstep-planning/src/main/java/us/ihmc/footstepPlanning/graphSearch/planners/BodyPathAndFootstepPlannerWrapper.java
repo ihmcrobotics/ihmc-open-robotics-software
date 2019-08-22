@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.planners;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +18,7 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -171,7 +173,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
          return yoResult.getEnumValue();
       }
 
-      List<Point3D> waypoints = waypointPathPlanner.getWaypoints();
+      List<Pose3D> waypoints = waypointPathPlanner.getWaypoints();
 
       if (waypoints.size() < 2)
       {
@@ -189,7 +191,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
          }
       }
 
-      bodyPathPlanner.setWaypoints(waypoints);
+      bodyPathPlanner.setPoseWaypoints(waypoints);
 
       if (visualizing)
       {

@@ -26,6 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPla
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
@@ -69,7 +70,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
    private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
 
-   private final AtomicReference<List<Point3D>> waypointPlan = new AtomicReference<>(null);
+   private final AtomicReference<List<Pose3D>> waypointPlan = new AtomicReference<>(null);
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
@@ -99,7 +100,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final ConcurrentMap<PathPlanningStage, ScheduledFuture<?>> pathPlanningTasks = new ConcurrentMap<>();
 
    private final ConcurrentList<FootstepPlanningResult> completedPathResults = new ConcurrentList<>();
-   private final ConcurrentPairList<Integer, List<Point3D>> completedPathWaypoints = new ConcurrentPairList<>();
+   private final ConcurrentPairList<Integer, List<Pose3D>> completedPathWaypoints = new ConcurrentPairList<>();
 
    private final ConcurrentPairList<Integer, PlannerStatistics<?>> completedPathPlanStatistics = new ConcurrentPairList<>();
 
@@ -872,11 +873,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
-      PairList<Integer, List<Point3D>> completedPathWaypoints = this.completedPathWaypoints.getCopyForReading();
-      completedPathWaypoints.sort(Comparator.comparingInt(ImmutablePair<Integer, List<Point3D>>::getLeft));
+      PairList<Integer, List<Pose3D>> completedPathWaypoints = this.completedPathWaypoints.getCopyForReading();
+      completedPathWaypoints.sort(Comparator.comparingInt(ImmutablePair<Integer, List<Pose3D>>::getLeft));
 
-      List<Point3D> allWaypoints = new ArrayList<>();
-      for (ImmutablePair<Integer, List<Point3D>> completedWaypoints : completedPathWaypoints)
+      List<Pose3D> allWaypoints = new ArrayList<>();
+      for (ImmutablePair<Integer, List<Pose3D>> completedWaypoints : completedPathWaypoints)
       {
          allWaypoints.addAll(completedWaypoints.getRight());
       }
@@ -915,8 +916,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
       }
 
-      List<Point3D> waypoints = waypointPlan.getAndSet(null);
-      bodyPathPlanner.setWaypoints(waypoints);
+      List<Pose3D> waypoints = waypointPlan.getAndSet(null);
+      bodyPathPlanner.setPoseWaypoints(waypoints);
       waypoints.clear();
 
       bodyPathPlan.set(bodyPathPlanner.getPlan());
@@ -945,7 +946,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       goalDirection.scale(horizonLength / goalDirection.length());
       Point3D waypoint = new Point3D(bodyStartPose.getPosition());
       waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
-      waypointPlan.get().add(waypoint);
+      Quaternion orientation = new Quaternion(BodyPathPlannerTools.calculateHeading(goalDirection), 0.0, 0.0);
+      waypointPlan.get().add(new Pose3D(waypoint, orientation));
    }
 
    private void concatenateFootstepPlans()
