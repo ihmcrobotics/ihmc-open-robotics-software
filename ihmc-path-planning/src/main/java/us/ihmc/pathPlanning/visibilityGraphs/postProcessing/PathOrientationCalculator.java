@@ -123,7 +123,6 @@ public class PathOrientationCalculator
             nominalPathPoses.add(pathIndex, new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
             pathIndex++;
          }
-
       }
 
       int endingSize = path.size();
