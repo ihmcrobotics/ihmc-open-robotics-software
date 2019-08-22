@@ -114,7 +114,7 @@
                         <Spinner fx:id="goalZPosition" editable="true" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                         <Spinner fx:id="startYaw" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="8" />
                         <Spinner fx:id="goalYaw" editable="true" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
-                        <Spinner fx:id="distanceProximity" layoutX="243.0" layoutY="11.0" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                        <Spinner fx:id="distanceProximity" editable="true" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
                         <Spinner fx:id="yawProximity" editable="true" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="2" />
 
                         <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
@@ -143,8 +143,8 @@
                 <HBox alignment="TOP_CENTER">
                     <GridPane alignment="TOP_CENTER">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="150.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="50.0" prefWidth="125.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="50.0" prefWidth="150.0" />
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -156,10 +156,10 @@
                             <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <children>
-                            <Label text="Sent Request ID" GridPane.halignment="RIGHT" />
-                            <Label text="Received Request ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Sent ID" GridPane.halignment="RIGHT" />
+                            <Label text="Received ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                             <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                            <Label text="Planning Result" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Result" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                             <Label text="Time Taken" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                             <Label text="Rejection %" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
 
