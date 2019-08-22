@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -19,6 +18,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -37,13 +37,24 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
+   {
+      this("", footstepPlannerParameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
+   }
 
    public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
+      this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
+   }
+
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry parentRegistry)
+   {
       super(prefix, footstepPlannerParameters, parentRegistry);
 
-      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
+      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);
       this.pathOrientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
 
@@ -87,10 +98,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
             List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
             List<Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
 
-            for (Pose3DReadOnly pose : posePath)
-            {
-               waypoints.add(new Pose3D(pose));
-            }
+            waypoints.addAll(posePath);
          }
          catch (Exception e)
          {

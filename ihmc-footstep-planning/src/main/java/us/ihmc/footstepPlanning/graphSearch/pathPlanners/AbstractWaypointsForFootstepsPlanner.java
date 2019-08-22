@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +34,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 
-   protected final List<Pose3D> waypoints = new ArrayList<>();
+   protected final List<Pose3DReadOnly> waypoints = new ArrayList<>();
 
    protected PlanarRegionsList planarRegionsList;
 
@@ -92,7 +93,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       waypoints.add(new Pose3D(waypointPosition, waypointOrientation));
    }
 
-   public List<Pose3D> getWaypoints()
+   public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints;
    }
