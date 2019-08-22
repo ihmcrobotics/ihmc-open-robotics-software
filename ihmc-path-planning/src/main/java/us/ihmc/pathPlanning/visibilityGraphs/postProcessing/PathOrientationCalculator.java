@@ -70,11 +70,10 @@ public class PathOrientationCalculator
          Vector2D vectorToObstacle = new Vector2D();
          vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
 
-         // FIXME this logic isn't quite right
          if (previousPosition.distanceXY(currentPosition) < 2.0 * parameters.getPreferredObstacleExtrusionDistance())
-            desiredOrientation = newPathPoses.get(i - 1).getOrientation().getYaw();
+            previousHeading = newPathPoses.get(i - 1).getOrientation().getYaw();
 
-         desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, vectorToObstacle);
+         desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousHeading, vectorToObstacle);
          newPathPoses.add(new Pose3D(path.get(i), new Quaternion(desiredOrientation, 0.0, 0.0)));
       }
 
@@ -85,7 +84,7 @@ public class PathOrientationCalculator
       return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
    }
 
-   private double getHeadingToAvoidObstacles(double nominalHeading, Vector2DReadOnly headingToClosestObstacle)
+   private double getHeadingToAvoidObstacles(double nominalHeading, double previousHeading, Vector2DReadOnly headingToClosestObstacle)
    {
       double headingToObstacle = BodyPathPlannerTools.calculateHeading(headingToClosestObstacle);
       double distanceToObstacle = headingToClosestObstacle.length() + parameters.getObstacleExtrusionDistance();
@@ -102,12 +101,12 @@ public class PathOrientationCalculator
       possibleHeadings.add(AngleTools.trimAngleMinusPiToPi(headingToObstacle - rotationForAvoidance));
       possibleHeadings.add(AngleTools.trimAngleMinusPiToPi(headingToObstacle - rotationForAvoidance + Math.PI));
 
-      double bestHeading = nominalHeading;
+      double bestHeading = previousHeading;
       double smallestAngleDifference = Double.POSITIVE_INFINITY;
       for (int i = 0; i < possibleHeadings.size(); i++)
       {
          double heading = possibleHeadings.get(i);
-         double angleDifference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(heading, nominalHeading));
+         double angleDifference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(heading, previousHeading));
          if (angleDifference < smallestAngleDifference)
          {
             bestHeading = heading;
