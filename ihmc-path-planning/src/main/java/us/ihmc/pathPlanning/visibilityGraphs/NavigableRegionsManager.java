@@ -1,8 +1,16 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+<<<<<<< HEAD
+=======
+import java.util.*;
+import java.util.stream.Collectors;
+
+import us.ihmc.euclid.geometry.Pose3D;
+>>>>>>> added the rotation calculation, highlighting a bug in something else
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
@@ -30,8 +38,12 @@ public class NavigableRegionsManager
    private VisibilityGraph visibilityGraph;
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
+<<<<<<< HEAD
    private VisibilityGraphNode endNode;
    private Pose3DReadOnly goalInWorld;
+=======
+   private Point3DReadOnly goalInWorld;
+>>>>>>> added the rotation calculation, highlighting a bug in something else
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
@@ -87,18 +99,18 @@ public class NavigableRegionsManager
       visibilityMapSolution.getNavigableRegions().setPlanarRegions(planarRegions);
    }
 
-   public List<Pose3DReadOnly> calculateBodyPath(final Pose3DReadOnly start, final Pose3DReadOnly goal)
+   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
       boolean fullyExpandVisibilityGraph = false;
       return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
    }
 
-   public List<Pose3DReadOnly> calculateBodyPath(final Pose3DReadOnly start, final Pose3DReadOnly goal, boolean fullyExpandVisibilityGraph)
+   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal, boolean fullyExpandVisibilityGraph)
    {
       return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph);
    }
 
-   private List<Pose3DReadOnly> calculateVisibilityMapWhileFindingPath(Pose3DReadOnly startInWorld, Pose3DReadOnly goalInWorld,
+   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
                                                                         boolean fullyExpandVisibilityGraph)
    {
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
@@ -107,13 +119,13 @@ public class NavigableRegionsManager
       return planInternal();
    }
 
-   private boolean initialize(Pose3DReadOnly startInWorld, Pose3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
    {
-      if (!checkIfStartAndGoalAreValid(startInWorld.getPosition(), goalInWorld.getPosition()))
+      if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
          return false;
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-      navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld.getPosition(), goalInWorld.getPosition(), parameters.getExplorationDistanceFromStartGoal());
+      navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
 
       navigableRegions.createNavigableRegions();
 
@@ -123,9 +135,14 @@ public class NavigableRegionsManager
          visibilityGraph.fullyExpandVisibilityGraph();
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
+<<<<<<< HEAD
       startNode = visibilityGraph.setStart(startInWorld.getPosition(), parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld.getPosition(), parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       endNode = null;
+=======
+      startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
+      goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
+>>>>>>> added the rotation calculation, highlighting a bug in something else
       this.goalInWorld = goalInWorld;
 
       if ((startNode == null) || (goalNode == null))
@@ -139,14 +156,14 @@ public class NavigableRegionsManager
 
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(startInWorld.getPosition().distanceXY(goalInWorld.getPosition()));
+      startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
 
       return true;
    }
 
-   private List<Pose3DReadOnly> planInternal()
+   private List<Point3DReadOnly> planInternal()
    {
       long startBodyPathComputation = System.currentTimeMillis();
       long expandedNodesCount = 0;
@@ -182,7 +199,7 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld.getPosition());
+               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
                stack.remove(neighbor);
@@ -209,20 +226,14 @@ public class NavigableRegionsManager
       }
       Collections.reverse(nodePath);
 
-      List<Pose3DReadOnly> path;
+      List<Point3DReadOnly> path;
       if (postProcessor != null)
       {
          path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
       }
       else
       {
-         path = new ArrayList<>();
-
-         for (int i = 0; i < nodePath.size(); i++)
-         {
-         }
-//         for (VisibilityGraphNode node : nodePath)
-//            path.add(node.getPointInWorld());
+         path = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
       }
 
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
@@ -330,7 +341,7 @@ public class NavigableRegionsManager
       return nextNode;
    }
 
-   private void printResults(long startBodyPathComputation, long expandedNodesCount, long iterationCount, List<? extends Pose3DReadOnly> path)
+   private void printResults(long startBodyPathComputation, long expandedNodesCount, long iterationCount, List<? extends Point3DReadOnly> path)
    {
       if (debug)
       {
@@ -350,14 +361,14 @@ public class NavigableRegionsManager
    @Deprecated
    public List<Pose3DReadOnly> calculateBodyPathWithOcclusions(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
-      List<Pose3DReadOnly> path = calculateBodyPath(start, goal);
+      List<Point3DReadOnly> path = calculateBodyPath(start, goal);
 
       if (path == null)
       {
          NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
          ArrayList<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = createListOfVisibilityMapsWithNavigableRegions(navigableRegions);
 
-         if (!OcclusionTools.isTheGoalIntersectingAnyObstacles(visibilityMapsWithNavigableRegions.get(0), start.getPosition(), goal.getPosition()))
+         if (!OcclusionTools.isTheGoalIntersectingAnyObstacles(visibilityMapsWithNavigableRegions.get(0), start, goal))
          {
             if (debug)
             {
@@ -371,7 +382,7 @@ public class NavigableRegionsManager
             return path;
          }
 
-         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions, parameters.getCanDuckUnderHeight());
+         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start.getPosition(), navigableRegions, parameters.getCanDuckUnderHeight());
          List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start.getPosition(), goal.getPosition()););
          Cluster closestCluster = ClusterTools.getTheClosestCluster(start.getPosition(), intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0,
