@@ -923,6 +923,7 @@ public class NavigableRegionsManagerTest
       return !condition ? "\n" + message : "";
    }
 
+
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
