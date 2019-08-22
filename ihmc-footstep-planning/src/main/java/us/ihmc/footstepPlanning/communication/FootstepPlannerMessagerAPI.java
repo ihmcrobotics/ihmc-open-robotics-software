@@ -55,6 +55,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme PlannerData = apiFactory.createCategoryTheme("PlannerData");
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
    private static final CategoryTheme Preview = apiFactory.createCategoryTheme("Preview");
+   private static final CategoryTheme Proximity = apiFactory.createCategoryTheme("Proximity");
 
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
@@ -80,6 +81,8 @@ public class FootstepPlannerMessagerAPI
    private static final TypedTopicTheme<Boolean> IgnorePartialFootholds = apiFactory.createTypedTopicTheme("IgnorePartialFootholds");
    private static final TypedTopicTheme<Boolean> RenderShiftedWaypoints = apiFactory.createTypedTopicTheme("RenderShiftedWaypoints");
    private static final TypedTopicTheme<FootstepPlanningStatistics> PlannerStatistics = apiFactory.createTypedTopicTheme("PlannerStatistics");
+   private static final TypedTopicTheme<Double> Distance = apiFactory.createTypedTopicTheme("Distance");
+   private static final TypedTopicTheme<Double> Yaw = apiFactory.createTypedTopicTheme("Yaw");
 
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
@@ -143,6 +146,9 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Quaternion> GoalOrientationTopic = Root.child(FootstepPlan).child(Goal).topic(Orientation);
    public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlan).child(Intermediate).topic(Orientation);
 
+   public static final Topic<Double> GoalDistanceProximity = Root.child(Goal).child(Proximity).topic(Distance);
+   public static final Topic<Double> GoalYawProximity = Root.child(Goal).child(Proximity).topic(Yaw);
+
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParametersTopic = Root.topic(BipedalSupportRegionsParameters);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
@@ -164,7 +170,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = Root.child(VisibilityGraphs).child(Start).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> GoalVisibilityMap = Root.child(VisibilityGraphs).child(Goal).child(Map).topic(Data);
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
-
 
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(Raw).topic(Show);
    public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Navigable).topic(Show);
