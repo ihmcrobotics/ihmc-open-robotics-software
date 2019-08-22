@@ -476,16 +476,19 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       }
    }
 
+   /**
+    * Checks node is in proximity to goal. Assumes that one or both of distance and yaw proximity values are positive
+    */
    private boolean isNodeWithinProximityOfGoal(FootstepNode node)
    {
       FootstepNode nominalGoalNode = goalNodes.get(node.getRobotSide());
       if (goal.getDistanceProximity() > 0.0 && nominalGoalNode.euclideanDistanceSquared(node) > MathTools.square(goal.getDistanceProximity()))
-      {
          return false;
-      }
-      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(nominalGoalNode.getYaw(), node.getYaw())) > goal.getYawProximity();
+      if (goal.getYawProximity() > 0.0 && Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(nominalGoalNode.getYaw(), node.getYaw())) > goal.getYawProximity())
+         return false;
+      return true;
    }
-
+   
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
       if (!parameters.getReturnBestEffortPlan())
