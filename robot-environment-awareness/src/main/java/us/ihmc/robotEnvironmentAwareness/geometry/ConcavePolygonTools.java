@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -144,23 +145,72 @@ public class ConcavePolygonTools
          double angle = EuclidGeometryTools.angleFromFirstToSecondVector2D(0.0, 1.0, upDirection.getX(), upDirection.getY()); // angle from yUp
          cuttingLineFrame.setPoseAndUpdate(cuttingLine.getPoint(), angle);
 
-         TreeSet<Point2D> intersectionsFromLeftToRight = new TreeSet<>(Comparator.comparingDouble(Point2D::getX));
+         List<FramePoint2D> intersectionsFromLeftToRight = new ArrayList<>();
          for (int i = 0; i < intersections.size(); i++)
          {
             FramePoint2D frameIntersection = new FramePoint2D(ReferenceFrame.getWorldFrame(), intersections.get(i));
             frameIntersection.changeFrame(cuttingLineFrame);
-            intersectionsFromLeftToRight.add(new Point2D(frameIntersection.getX(), frameIntersection.getY()));
+            intersectionsFromLeftToRight.add(frameIntersection);
+         }
+         intersectionsFromLeftToRight.sort(Comparator.comparingDouble(FramePoint2D::getX));
+         for (FramePoint2D framePoint2D : intersectionsFromLeftToRight)
+         {
+            framePoint2D.changeFrame(ReferenceFrame.getWorldFrame()); // change back to world frame
          }
 
+         // build visitation map of intersections from left to right
+         HashMap<Tuple2DReadOnly, Boolean> intersectionVisitedMap = new HashMap<>();
+         for (Tuple2DReadOnly point2D : intersectionsFromLeftToRight)
+         {
+            intersectionVisitedMap.put(point2D, false);
+         }
+
+         // build vertex list with intersections included
+         ArrayList<Point2D> verticesAndIntersections = new ArrayList<>();
+         for (int i = 0; i < concaveHullVertices.size(); i++)
+         {
+            verticesAndIntersections.add(concaveHullVertices.get(i));
+
+            int nextVertex = EuclidGeometryPolygonTools.next(i, concaveHullVertices.size());
+            if (intersections.containsKey(nextVertex))
+            {
+               verticesAndIntersections.add(intersections.get(nextVertex));
+            }
+         }
+
+         // reorder vertex-intersection list to start at leftmost intersection
+         ArrayList<Point2D> orderedVerticesAndIntersections = new ArrayList<>();
+         int unorderedListIndex = 0;
+         boolean startAdding = false;
+         while (orderedVerticesAndIntersections.size() < verticesAndIntersections.size())
+         {
+            Point2D point = verticesAndIntersections.get(unorderedListIndex);
+            if (!startAdding && point.epsilonEquals(intersectionsFromLeftToRight.get(0), 1e-7))
+            {
+               startAdding = true;
+            }
+
+            if (startAdding)
+            {
+               orderedVerticesAndIntersections.add(point);
+            }
+
+            unorderedListIndex = EuclidGeometryPolygonTools.next(unorderedListIndex, verticesAndIntersections.size());
+         }
+
+         //
+
+         // get started on drawing:
 
          if (vertex0IsAbove)
          {
             currentResultingConcaveHull.addVertex(concaveHullToCrop.getVertex(0));
          }
 
-         boolean isDrawingConcaveHull = vertex0IsAbove;
 
-         // visit all vertices above cutting line
+
+
+
 
          List<Integer> aboveVertices = new ArrayList<>();
          Map<Integer, Boolean> visitedMap = new HashMap<>();
