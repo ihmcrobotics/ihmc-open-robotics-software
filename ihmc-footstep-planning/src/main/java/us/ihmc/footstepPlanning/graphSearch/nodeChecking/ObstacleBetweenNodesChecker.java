@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -62,12 +61,12 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
 
       Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-      snapTransform.transform(nodePosition);
       Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-      previousSnapTransform.transform(previousNodePosition);
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList(),
-                                                        parameters.getBodyGroundClearance()))
+      nodePosition.addZ(snapTransform.getTranslationZ());
+      previousNodePosition.addZ(previousSnapTransform.getTranslationZ());
+
+      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
       {
          if (DEBUG)
          {
@@ -83,9 +82,11 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private static boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions, double groundClearance)
+   private boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions)
    {
-      PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, 2.0);
+      double groundClearance = parameters.getBodyBoxBaseZ();
+      double regionHeight = parameters.getBodyBoxHeight();
+      PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, regionHeight);
 
       for (PlanarRegion region : planarRegions)
       {
@@ -107,10 +108,12 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    public static PlanarRegion createBodyRegionFromNodes(Point3D nodeA, Point3D nodeB, double clearance, double height)
    {
       double lowerZ = Math.max(nodeA.getZ(), nodeB.getZ()) + clearance;
+      double higherZ = lowerZ + height;
+
       Point3D point0 = new Point3D(nodeA.getX(), nodeA.getY(), lowerZ);
-      Point3D point1 = new Point3D(nodeA.getX(), nodeA.getY(), lowerZ + height);
+      Point3D point1 = new Point3D(nodeA.getX(), nodeA.getY(), higherZ);
       Point3D point2 = new Point3D(nodeB.getX(), nodeB.getY(), lowerZ);
-      Point3D point3 = new Point3D(nodeB.getX(), nodeB.getY(), lowerZ + height);
+      Point3D point3 = new Point3D(nodeB.getX(), nodeB.getY(), higherZ);
 
       Vector3D xAxisInPlane = new Vector3D();
       xAxisInPlane.sub(point2, point0);
