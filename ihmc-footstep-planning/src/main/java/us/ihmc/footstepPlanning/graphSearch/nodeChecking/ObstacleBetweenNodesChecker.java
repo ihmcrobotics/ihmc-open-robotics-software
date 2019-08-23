@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -24,8 +25,6 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    private PlanarRegionsList planarRegionsList;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
-
-   private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
    public ObstacleBetweenNodesChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
@@ -72,13 +71,11 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       {
          if (DEBUG)
          {
-            PrintTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
+            LogTools.debug("Found a obstacle between the nodes " + node + " and " + previousNode);
          }
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY;
          return false;
       }
 
-      rejectionReason = null;
       return true;
    }
 
@@ -146,6 +143,6 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    @Override
    public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
    {
-      return rejectionReason;
+      return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY;
    }
 }
