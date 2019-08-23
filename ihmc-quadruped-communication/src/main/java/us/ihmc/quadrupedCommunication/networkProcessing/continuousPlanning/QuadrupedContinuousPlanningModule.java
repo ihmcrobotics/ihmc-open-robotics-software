@@ -110,7 +110,10 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    private void processContinuousPlanningRequest(QuadrupedContinuousPlanningRequestPacket planningRequestPacket)
    {
       if (continuousPlanningController != null)
+      {
          continuousPlanningController.processContinuousPlanningRequest(planningRequestPacket);
+         wakeUp();
+      }
    }
 
    private void processFootstepStatusMessage(QuadrupedFootstepStatusMessage footstepStatusMessage)
