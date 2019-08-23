@@ -11,11 +11,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   //TODO: Make these parameters or something, rather than hardcoded here.
-   private static final double pathViolationWeight = 30.0;
-   private static final double distanceFromPathTolerance = 0.2;
-   private static final double deltaYawFromPathTolerance = 0.2;
-
    private final BodyPathPlanner bodyPath;
    private final FootstepPlannerParametersReadOnly parameters;
 
@@ -40,21 +35,44 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
       double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
-      double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
-      double pathCropAmount = distanceToPath - croppedDistanceToPath;
+      double croppedDistanceToPath = Math.max(0.0, distanceToPath - parameters.getDistanceFromPathTolerance());
 
-      double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
-      double remainingDistance = pathLength + pathCropAmount + pathViolationWeight * croppedDistanceToPath;
+      double remainingPathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
+      double remainingDistance = remainingPathLength + distanceToPath - croppedDistanceToPath;
+      double pathDistanceViolationCost = parameters.getBodyPathViolationWeight() * croppedDistanceToPath;
 
-      double yawDifferenceFromPathYaw = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw()));
-      double remainingYawToGoal =  Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), closestPointOnPath.getYaw()));
-      double croppedYawDifferenceFromPathYaw = Math.max(0.0, yawDifferenceFromPathYaw - deltaYawFromPathTolerance);
-      double yawCropAmount = yawDifferenceFromPathYaw - croppedYawDifferenceFromPathYaw;
+      double referenceYaw = computeReferenceGoalYaw(node, goalNode, closestPointOnPath.getYaw());
 
-      double yawCost = remainingYawToGoal + yawCropAmount + pathViolationWeight * croppedYawDifferenceFromPathYaw;
+      double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw));
+      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), referenceYaw));
 
-      double minSteps = remainingDistance / parameters.getMaximumStepReach();
-      return remainingDistance + parameters.getYawWeight() * yawCost + parameters.getCostPerStep() * minSteps;
+      double croppedYawDifferenceFromReference = Math.max(0.0, yawDifferenceFromReference - parameters.getDeltaYawFromReferenceTolerance());
+
+      double remainingYaw = remainingYawToGoal + yawDifferenceFromReference - croppedYawDifferenceFromReference;
+      double pathYawViolationCost = parameters.getBodyPathViolationWeight() * croppedYawDifferenceFromReference;
+
+      double minSteps = remainingDistance / parameters.getMaximumStepReach() + Math.abs(remainingYaw) / (0.5 * parameters.getMaximumStepYaw());
+      return remainingDistance + pathDistanceViolationCost + pathYawViolationCost + parameters.getYawWeight() * remainingYaw + parameters.getCostPerStep() * minSteps;
+   }
+
+
+   private double computeReferenceGoalYaw(FootstepNode node, FootstepNode goalNode, double pathHeading)
+   {
+      double distanceToGoal = node.euclideanDistance(goalNode);
+      double finalTurnProximity = parameters.getFinalTurnBodyPathProximity();
+
+      double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
+      double maximumBlendDistance = (1.0 + parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
+
+      double yawMultiplier;
+      if(distanceToGoal < minimumBlendDistance)
+         yawMultiplier = 0.0;
+      else if(distanceToGoal > maximumBlendDistance)
+         yawMultiplier = 1.0;
+      else
+         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
+
+      return AngleTools.interpolateAngle(goalNode.getYaw(), pathHeading, yawMultiplier);
    }
 
    public void setGoalAlpha(double alpha)

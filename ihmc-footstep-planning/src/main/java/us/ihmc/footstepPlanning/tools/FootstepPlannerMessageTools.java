@@ -91,6 +91,9 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+      packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
+      packet.setFinalTurnBodyPathProximity(parameters.getFinalTurnBodyPathProximity());
+      packet.setFinalTurnProximityBlendFactor(parameters.getFinalTurnProximityBlendFactor());
 
       packet.setUseQuadraticDistanceCost(parameters.useQuadraticDistanceCost());
       packet.setUseQuadraticHeightCost(parameters.useQuadraticHeightCost());
@@ -111,7 +114,10 @@ public class FootstepPlannerMessageTools
       packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
       packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       packet.setLongStepWeight(parameters.getLongStepWeight());
-      packet.setFootholdAreaWeight(packet.getFootholdAreaWeight());
+      packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
+      packet.setBodyPathViolationWeight(parameters.getBodyPathViolationWeight());
+      packet.setDistanceFromPathTolerance(parameters.getDistanceFromPathTolerance());
+      packet.setDeltaYawFromReferenceTolerance(parameters.getDeltaYawFromReferenceTolerance());
    }
 
    public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
