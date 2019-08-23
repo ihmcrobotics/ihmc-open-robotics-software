@@ -4,7 +4,11 @@ import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -13,10 +17,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -108,7 +115,32 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    @Override
    public void setStart(PawStepPlannerStart start)
    {
-      waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
+      if (start.getTargetType() == PawStepPlannerTargetType.POSE_BETWEEN_FEET)
+      {
+         waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
+      }
+      else
+      {
+         int feetInContact = 0;
+         FramePoint3D startPosition = new FramePoint3D();
+         QuadrantDependentList<FramePoint3D> startPositions = new QuadrantDependentList<>();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            Point3DReadOnly position = start.getPawGoalPosition(robotQuadrant);
+            if (!position.containsNaN())
+            {
+               startPosition.add(position);
+               startPositions.put(robotQuadrant, new FramePoint3D(ReferenceFrame.getWorldFrame(), startPosition));
+               feetInContact++;
+            }
+         }
+
+         startPosition.scale(1.0 / feetInContact);
+         double nominalYaw = QuadrupedSupportPolygon.getNominalYaw(startPositions, feetInContact);
+         FrameQuaternion startOrientation = new FrameQuaternion();
+         startOrientation.setToYawQuaternion(nominalYaw);
+         waypointPathPlanner.setInitialBodyPose(new FramePose3D(startPosition, startOrientation));
+      }
 
       pawStepPlanner.setStart(start);
 

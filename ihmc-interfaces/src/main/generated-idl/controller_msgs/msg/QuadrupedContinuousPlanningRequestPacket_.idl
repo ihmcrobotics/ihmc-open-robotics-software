@@ -30,6 +30,10 @@ module controller_msgs
          */
         unsigned long sequence_id;
         octet start_target_type;
+        geometry_msgs::msg::dds::Point front_left_start_position_in_world;
+        geometry_msgs::msg::dds::Point front_right_start_position_in_world;
+        geometry_msgs::msg::dds::Point hind_left_start_position_in_world;
+        geometry_msgs::msg::dds::Point hind_right_start_position_in_world;
         geometry_msgs::msg::dds::Point goal_position_in_world;
         geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
         @defaultValue(value=-1)

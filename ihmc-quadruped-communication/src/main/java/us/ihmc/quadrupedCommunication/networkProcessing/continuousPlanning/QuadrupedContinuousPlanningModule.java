@@ -65,7 +65,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
       // status messages from the planner
       MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module
@@ -80,11 +80,12 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
 
       MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      messages.put(QuadrupedFootstepPlanningRequestPacket.class, plannerSubGenerator);
+      messages.put(PawStepPlanningRequestPacket.class, plannerSubGenerator);
+      messages.put(ToolboxStateMessage.class, plannerSubGenerator);
 
       return messages;
    }
@@ -101,7 +102,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
          continuousPlanningController.processSteppingStateChangeMessage(message);
    }
 
-   private void processFootstepPlannerOutputMessage(QuadrupedFootstepPlanningToolboxOutputStatus footstepPlannerOutput)
+   private void processFootstepPlannerOutputMessage(PawStepPlanningToolboxOutputStatus footstepPlannerOutput)
    {
       if (continuousPlanningController != null)
          continuousPlanningController.processFootstepPlannerOutput(footstepPlannerOutput);
@@ -113,6 +114,11 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       {
          continuousPlanningController.processContinuousPlanningRequest(planningRequestPacket);
          wakeUp();
+
+         ToolboxStateMessage plannerState = new ToolboxStateMessage();
+         plannerState.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
+
+         outputManager.reportMessage(plannerState);
       }
    }
 
@@ -127,7 +133,6 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       if (continuousPlanningController != null)
          continuousPlanningController.processPlanarRegionListMessage(planarRegionsListMessage);
    }
-
 
    @Override
    public QuadrupedToolboxController getToolboxController()
@@ -153,5 +158,14 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
       return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void sleep()
+   {
+      ToolboxStateMessage plannerState = new ToolboxStateMessage();
+      plannerState.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
+
+      outputManager.reportMessage(plannerState);
    }
 }

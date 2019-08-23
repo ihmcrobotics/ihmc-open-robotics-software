@@ -9,6 +9,14 @@ uint32 sequence_id
 
 int8 start_target_type
 
+geometry_msgs/Point front_left_start_position_in_world
+
+geometry_msgs/Point front_right_start_position_in_world
+
+geometry_msgs/Point hind_left_start_position_in_world
+
+geometry_msgs/Point hind_right_start_position_in_world
+
 geometry_msgs/Point goal_position_in_world
 
 geometry_msgs/Quaternion goal_orientation_in_world
