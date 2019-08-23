@@ -86,12 +86,12 @@ public class QuadrupedStepTeleopManager
    {
       if (message.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
       {
-         RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) message.getFootstepQuadrant());
+         RobotQuadrant quadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
          bodyPathMultiplexer.startedFootstep(quadrant, message);
       }
       else if (message.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
-         RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) message.getFootstepQuadrant());
+         RobotQuadrant quadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
          bodyPathMultiplexer.completedFootstep(quadrant, message);
       }
    }
