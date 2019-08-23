@@ -215,7 +215,7 @@ public class REAOcTreeBuffer
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(stereoVisionBufferSize.get());
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(stereoMessage.getPointCloud().toArray(), stereoMessage.getSensorPosition());
+         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
          // TODO: make NormalOctree constructor with octreeDepth.get().
       }
    }
