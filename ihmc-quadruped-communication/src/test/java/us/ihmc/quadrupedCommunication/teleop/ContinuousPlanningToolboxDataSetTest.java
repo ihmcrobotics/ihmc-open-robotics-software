@@ -38,18 +38,15 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning.QuadrupedContinuousPlanningModule;
-import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerCommunicationProperties;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
-import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
+import us.ihmc.quadrupedFootstepPlanning.ui.PawStepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -57,7 +54,6 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.quadTree.QuadTreeForGround;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -66,7 +62,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
@@ -87,11 +82,11 @@ public class ContinuousPlanningToolboxDataSetTest
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = true;
 
-   private FootstepPlannerUI ui = null;
+   private PawStepPlannerUI ui = null;
    protected Messager messager = null;
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
-   private QuadrupedFootstepPlanningModule footstepPlanningModule = null;
+   private PawPlanningModule footstepPlanningModule = null;
    private QuadrupedContinuousPlanningModule continuousPlanningModule = null;
 
    private RealtimeRos2Node ros2Node;
@@ -127,37 +122,26 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
       if (VISUALIZE)
-         messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
+         messager = new SharedMemoryJavaFXMessager(PawStepPlannerMessagerAPI.API);
       else
-         messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
+         messager = new SharedMemoryMessager(PawStepPlannerMessagerAPI.API);
 
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
-      {
-         @Override
-         public double getXGaitWeight()
-         {
-            return 0.0;
-         }
+      PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
+      parameters.setXGaitWeight(0.0);
+      parameters.setDesiredVelocityWeight(0.0);
 
-         @Override
-         public double getDesiredVelocityWeight()
-         {
-            return 0.0;
-         }
-      };
-
-      footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, parameters, xGaitSettings,
+      footstepPlanningModule = new PawPlanningModule(robotName, null, parameters, xGaitSettings,
                                                                    new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
       continuousPlanningModule = new QuadrupedContinuousPlanningModule(robotName, null, null, false, false, pubSubImplementation);
 
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, PawStepPlanningToolboxOutputStatus.class,
+                                           PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedTimedStepListMessage.class,
                                            getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2TopicQualifier.OUTPUT),
@@ -188,8 +172,8 @@ public class ContinuousPlanningToolboxDataSetTest
          createUI(messager);
       }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+      messager.submitMessage(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters);
 
 
       ThreadTools.sleep(1000);
@@ -226,7 +210,7 @@ public class ContinuousPlanningToolboxDataSetTest
          @Override
          public void start(Stage stage) throws Exception
          {
-            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            ui = PawStepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
             ui.show();
          }
 
@@ -355,30 +339,59 @@ public class ContinuousPlanningToolboxDataSetTest
 
       PlannerInput plannerInput = dataset.getPlannerInput();
 
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataset.getPlanarRegionsList());
+
+      planarRegionsPublisher.publish(planarRegionsListMessage);
+
+      ThreadTools.sleep(10);
+
       QuadrupedContinuousPlanningRequestPacket requestPacket = new QuadrupedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
       requestPacket.setTimeout(defaultBestEffortTimeout);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getQuadrupedGoalPosition());
 
+      QuadrantDependentList<Point3D> feetPositions = new QuadrantDependentList<>();
+      PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
+      startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataset.getPlannerInput().getQuadrupedStartPosition()));
+      startFrame.setOrientationAndUpdate(startOrientation);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint3D footPosition = new FramePoint3D(startFrame);
+         footPosition.setX(robotQuadrant.getEnd().negateIfHindEnd(0.5 * xGaitSettings.getStanceLength()));
+         footPosition.setY(robotQuadrant.getSide().negateIfRightSide(0.5 * xGaitSettings.getStanceWidth()));
+         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         feetPositions.put(robotQuadrant, new Point3D(footPosition));
+      }
+
+      requestPacket.getFrontLeftStartPositionInWorld().set(feetPositions.get(RobotQuadrant.FRONT_LEFT));
+      requestPacket.getFrontRightStartPositionInWorld().set(feetPositions.get(RobotQuadrant.FRONT_RIGHT));
+      requestPacket.getHindLeftStartPositionInWorld().set(feetPositions.get(RobotQuadrant.HIND_LEFT));
+      requestPacket.getHindRightStartPositionInWorld().set(feetPositions.get(RobotQuadrant.HIND_RIGHT));
+
       requestPublisher.publish(requestPacket);
 
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataset.getPlanarRegionsList());
+      messager.submitMessage(PawStepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getQuadrupedGoalPosition());
+      messager.submitMessage(PawStepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
+      messager.submitMessage(PawStepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getQuadrupedStartPosition());
+      messager.submitMessage(PawStepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(PawStepPlannerMessagerAPI.StartFeetPositionTopic, feetPositions);
 
-      planarRegionsPublisher.publish(planarRegionsListMessage);
 
       if (DEBUG)
          LogTools.info("Sending out planning request.");
    }
 
-   private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
+   private void processFootstepPlanningOutputStatus(PawStepPlanningToolboxOutputStatus packet)
    {
       if (DEBUG)
          PrintTools.info("Processed an output from a remote planner.");
 
-      FootstepPlan footstepPlan = convertToFootstepPlan(packet);
+      PawStepPlan footstepPlan = convertToFootstepPlan(packet);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(PawStepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList()));
    }
 
    private void processTimedStepListMessage(QuadrupedTimedStepListMessage packet)
@@ -401,10 +414,10 @@ public class ContinuousPlanningToolboxDataSetTest
       receivedStepList.set(true);
    }
 
-   private static FootstepPlan convertToFootstepPlan(QuadrupedFootstepPlanningToolboxOutputStatus packet)
+   private static PawStepPlan convertToFootstepPlan(PawStepPlanningToolboxOutputStatus packet)
    {
       QuadrupedTimedStepListMessage footstepDataListMessage = packet.getFootstepDataList();
-      FootstepPlan footstepPlan = new FootstepPlan();
+      PawStepPlan footstepPlan = new PawStepPlan();
 
       for (QuadrupedTimedStepMessage footstepMessage : footstepDataListMessage.getQuadrupedStepList())
       {
@@ -414,7 +427,7 @@ public class ContinuousPlanningToolboxDataSetTest
          step.setGroundClearance(footstepMessage.getQuadrupedStepMessage().getGroundClearance());
          step.setRobotQuadrant(RobotQuadrant.fromByte(footstepMessage.getQuadrupedStepMessage().getRobotQuadrant()));
 
-         footstepPlan.addFootstep(step);
+         footstepPlan.addPawStep(step);
       }
       footstepPlan.setLowLevelPlanGoal(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getLowLevelPlannerGoal()));
 
@@ -508,7 +521,7 @@ public class ContinuousPlanningToolboxDataSetTest
             feetPositions.put(stepJustFinished.getRobotQuadrant(), new Point3D(stepJustFinished.getGoalPosition()));
          }
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartFeetPositionTopic, feetPositions);
+         messager.submitMessage(PawStepPlannerMessagerAPI.StartFeetPositionTopic, feetPositions);
 
 
          stepsCurrentlyInProgress.clear();
@@ -539,20 +552,20 @@ public class ContinuousPlanningToolboxDataSetTest
          centerPoint.add(finalSteps.get(robotQuadrant));
       }
 
-      double nominalYaw = FootstepNode.computeNominalYaw(finalSteps.get(RobotQuadrant.FRONT_LEFT).getX(), finalSteps.get(RobotQuadrant.FRONT_LEFT).getY(),
-                                                         finalSteps.get(RobotQuadrant.FRONT_RIGHT).getX(), finalSteps.get(RobotQuadrant.FRONT_RIGHT).getY(),
-                                                         finalSteps.get(RobotQuadrant.HIND_LEFT).getX(), finalSteps.get(RobotQuadrant.HIND_LEFT).getY(),
-                                                         finalSteps.get(RobotQuadrant.HIND_RIGHT).getX(), finalSteps.get(RobotQuadrant.HIND_RIGHT).getY());
+      double nominalYaw = PawNode.computeNominalYaw(finalSteps.get(RobotQuadrant.FRONT_LEFT).getX(), finalSteps.get(RobotQuadrant.FRONT_LEFT).getY(),
+                                                    finalSteps.get(RobotQuadrant.FRONT_RIGHT).getX(), finalSteps.get(RobotQuadrant.FRONT_RIGHT).getY(),
+                                                    finalSteps.get(RobotQuadrant.HIND_LEFT).getX(), finalSteps.get(RobotQuadrant.HIND_LEFT).getY(),
+                                                    finalSteps.get(RobotQuadrant.HIND_RIGHT).getX(), finalSteps.get(RobotQuadrant.HIND_RIGHT).getY());
 
       centerPoint.scale(0.25);
 
       Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
       double goalYaw = dataSet.getPlannerInput().getQuadrupedGoalYaw();
-      if (goalPosition.distanceXY(centerPoint) > 3.0 * FootstepNode.gridSizeXY)
+      if (goalPosition.distanceXY(centerPoint) > 3.0 * PawNode.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
       {
-         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > FootstepNode.gridSizeYaw)
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > PawNode.gridSizeYaw)
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 

@@ -19,6 +19,10 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
             */
    public long sequence_id_;
    public byte start_target_type_;
+   public us.ihmc.euclid.tuple3D.Point3D front_left_start_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D front_right_start_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D hind_left_start_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D hind_right_start_position_in_world_;
    public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public int planner_request_id_ = -1;
@@ -27,6 +31,10 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
    public QuadrupedContinuousPlanningRequestPacket()
    {
+      front_left_start_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      front_right_start_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      hind_left_start_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      hind_right_start_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
@@ -43,6 +51,10 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       start_target_type_ = other.start_target_type_;
 
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.front_left_start_position_in_world_, front_left_start_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.front_right_start_position_in_world_, front_right_start_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.hind_left_start_position_in_world_, hind_left_start_position_in_world_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.hind_right_start_position_in_world_, hind_right_start_position_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_position_in_world_, goal_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       planner_request_id_ = other.planner_request_id_;
@@ -75,6 +87,30 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
    public byte getStartTargetType()
    {
       return start_target_type_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getFrontLeftStartPositionInWorld()
+   {
+      return front_left_start_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getFrontRightStartPositionInWorld()
+   {
+      return front_right_start_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getHindLeftStartPositionInWorld()
+   {
+      return hind_left_start_position_in_world_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getHindRightStartPositionInWorld()
+   {
+      return hind_right_start_position_in_world_;
    }
 
 
@@ -138,6 +174,10 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_target_type_, other.start_target_type_, epsilon)) return false;
 
+      if (!this.front_left_start_position_in_world_.epsilonEquals(other.front_left_start_position_in_world_, epsilon)) return false;
+      if (!this.front_right_start_position_in_world_.epsilonEquals(other.front_right_start_position_in_world_, epsilon)) return false;
+      if (!this.hind_left_start_position_in_world_.epsilonEquals(other.hind_left_start_position_in_world_, epsilon)) return false;
+      if (!this.hind_right_start_position_in_world_.epsilonEquals(other.hind_right_start_position_in_world_, epsilon)) return false;
       if (!this.goal_position_in_world_.epsilonEquals(other.goal_position_in_world_, epsilon)) return false;
       if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
@@ -163,6 +203,10 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       if(this.start_target_type_ != otherMyClass.start_target_type_) return false;
 
+      if (!this.front_left_start_position_in_world_.equals(otherMyClass.front_left_start_position_in_world_)) return false;
+      if (!this.front_right_start_position_in_world_.equals(otherMyClass.front_right_start_position_in_world_)) return false;
+      if (!this.hind_left_start_position_in_world_.equals(otherMyClass.hind_left_start_position_in_world_)) return false;
+      if (!this.hind_right_start_position_in_world_.equals(otherMyClass.hind_right_start_position_in_world_)) return false;
       if (!this.goal_position_in_world_.equals(otherMyClass.goal_position_in_world_)) return false;
       if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
@@ -185,6 +229,14 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("start_target_type=");
       builder.append(this.start_target_type_);      builder.append(", ");
+      builder.append("front_left_start_position_in_world=");
+      builder.append(this.front_left_start_position_in_world_);      builder.append(", ");
+      builder.append("front_right_start_position_in_world=");
+      builder.append(this.front_right_start_position_in_world_);      builder.append(", ");
+      builder.append("hind_left_start_position_in_world=");
+      builder.append(this.hind_left_start_position_in_world_);      builder.append(", ");
+      builder.append("hind_right_start_position_in_world=");
+      builder.append(this.hind_right_start_position_in_world_);      builder.append(", ");
       builder.append("goal_position_in_world=");
       builder.append(this.goal_position_in_world_);      builder.append(", ");
       builder.append("goal_orientation_in_world=");

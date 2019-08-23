@@ -1,20 +1,14 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
-import boofcv.struct.image.Planar;
 import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -34,7 +28,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
-   private final AtomicReference<QuadrupedFootstepPlanningToolboxOutputStatus> footstepPlannerOutput = new AtomicReference<>();
+   private final AtomicReference<PawStepPlanningToolboxOutputStatus> footstepPlannerOutput = new AtomicReference<>();
    private final AtomicReference<QuadrupedContinuousPlanningRequestPacket> planningRequestPacket = new AtomicReference<>();
    private final AtomicReference<QuadrupedFootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegions = new AtomicReference<>();
@@ -52,6 +46,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private final YoInteger broadcastPlanId = new YoInteger("broadcastPlanId", registry);
    private final YoInteger receivedPlanId = new YoInteger("receivedPlanId", registry);
+
 
    public QuadrupedContinuousPlanningController(OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                               YoVariableRegistry parentRegistry)
@@ -76,7 +71,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       steppingStateChangeMessage.set(message);
    }
 
-   public void processFootstepPlannerOutput(QuadrupedFootstepPlanningToolboxOutputStatus message)
+   public void processFootstepPlannerOutput(PawStepPlanningToolboxOutputStatus message)
    {
       footstepPlannerOutput.set(message);
    }
@@ -104,6 +99,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    public boolean initializeInternal()
    {
       isInitialSegmentOfPlan.set(true);
+
+      computeAndSendLatestPlanningRequest();
 
       return true;
    }
@@ -140,7 +137,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private void checkIfLastPlanFulfilledRequest()
    {
-      QuadrupedFootstepPlanningToolboxOutputStatus plannerOutput = footstepPlannerOutput.get();
+      PawStepPlanningToolboxOutputStatus plannerOutput = footstepPlannerOutput.get();
       if (plannerOutput == null)
       {
          receivedPlanForLastRequest.set(false);
@@ -154,7 +151,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private void updateStepQueueFromNewPlan()
    {
-      QuadrupedFootstepPlanningToolboxOutputStatus plannerOutput = footstepPlannerOutput.get();
+      PawStepPlanningToolboxOutputStatus plannerOutput = footstepPlannerOutput.get();
       IDLSequence.Object<QuadrupedTimedStepMessage> stepList = plannerOutput.getFootstepDataList().getQuadrupedStepList();
       stepQueue.clear();
       stepQueue.addAll(stepList);
@@ -191,17 +188,29 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private void computeAndSendLatestPlanningRequest()
    {
-      QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
+      PawStepPlanningRequestPacket planningRequestPacket = new PawStepPlanningRequestPacket();
+      QuadrupedContinuousPlanningRequestPacket continuousPlanningRequestPacket = this.planningRequestPacket.get();
+
 
       QuadrantDependentList<Point3DReadOnly> startPositions = new QuadrantDependentList<>();
       if (isInitialSegmentOfPlan.getBooleanValue())
       {
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         if (robotDataReceiver != null)
          {
-            FramePoint3D position = new FramePoint3D(robotDataReceiver.getReferenceFrames().getSoleFrame(robotQuadrant));
-            position.changeFrame(ReferenceFrame.getWorldFrame());
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            {
+               FramePoint3D position = new FramePoint3D(robotDataReceiver.getReferenceFrames().getSoleFrame(robotQuadrant));
+               position.changeFrame(ReferenceFrame.getWorldFrame());
 
-            startPositions.put(robotQuadrant, position);
+               startPositions.put(robotQuadrant, position);
+            }
+         }
+         else
+         {
+            startPositions.put(RobotQuadrant.FRONT_LEFT, continuousPlanningRequestPacket.getFrontLeftStartPositionInWorld());
+            startPositions.put(RobotQuadrant.FRONT_RIGHT, continuousPlanningRequestPacket.getFrontLeftStartPositionInWorld());
+            startPositions.put(RobotQuadrant.HIND_LEFT, continuousPlanningRequestPacket.getHindLeftStartPositionInWorld());
+            startPositions.put(RobotQuadrant.HIND_RIGHT, continuousPlanningRequestPacket.getHindRightStartPositionInWorld());
          }
       }
       else
@@ -217,11 +226,10 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       planningRequestPacket.getHindLeftPositionInWorld().set(startPositions.get(RobotQuadrant.HIND_LEFT));
       planningRequestPacket.getHindRightPositionInWorld().set(startPositions.get(RobotQuadrant.HIND_RIGHT));
 
-      QuadrupedContinuousPlanningRequestPacket continuousPlanningRequestPacket = this.planningRequestPacket.get();
 
       planningRequestPacket.setHorizonLength(horizonLength.getDoubleValue());
-      planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
-      planningRequestPacket.setStartTargetType(QuadrupedFootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS);
+      planningRequestPacket.setRequestedPawPlannerType(PawStepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
+      planningRequestPacket.setStartTargetType(PawStepPlanningRequestPacket.PAW_PLANNER_TARGET_TYPE_FOOTSTEPS);
       planningRequestPacket.setTimeout(timeout.getDoubleValue());
       planningRequestPacket.getGoalPositionInWorld().set(continuousPlanningRequestPacket.getGoalPositionInWorld());
       planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
