@@ -15,6 +15,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -55,6 +57,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.quadTree.QuadTreeForGround;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -93,10 +96,8 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private RealtimeRos2Node ros2Node;
 
-   private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
-   private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
-   private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
-   private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
+   private final AtomicReference<List<QuadrupedTimedStep>> stepListReference = new AtomicReference<>(null);
+   private final AtomicReference<Boolean> receivedStepList = new AtomicReference<>(false);
 
    private static final String robotName = "testBot";
    public static final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
@@ -158,6 +159,10 @@ public class ContinuousPlanningToolboxDataSetTest
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedTimedStepListMessage.class,
+                                           getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2TopicQualifier.OUTPUT),
+                                           s -> processTimedStepListMessage(s.takeNextData()));
+
       requestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedContinuousPlanningRequestPacket.class,
                                                    getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
@@ -210,10 +215,8 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private void resetAllAtomics()
    {
-      plannerPlanReference.set(null);
-      plannerResultReference.set(null);
-      plannerReceivedPlan.set(false);
-      plannerReceivedResult.set(false);
+      stepListReference.set(null);
+      receivedStepList.set(false);
    }
 
    private void createUI(Messager messager)
@@ -376,11 +379,26 @@ public class ContinuousPlanningToolboxDataSetTest
       FootstepPlan footstepPlan = convertToFootstepPlan(packet);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan);
+   }
 
-      plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
-      plannerPlanReference.set(footstepPlan);
-      plannerReceivedPlan.set(true);
-      plannerReceivedResult.set(true);
+   private void processTimedStepListMessage(QuadrupedTimedStepListMessage packet)
+   {
+      if (DEBUG)
+         PrintTools.info("Processed an output from a remote planner.");
+
+      QuadrupedTimedStepListCommand stepListCommand = new QuadrupedTimedStepListCommand();
+      stepListCommand.setFromMessage(packet);
+
+      List<QuadrupedTimedStep> stepList = new ArrayList<>();
+      for (int i = 0; i < stepListCommand.getNumberOfSteps(); i++)
+      {
+         QuadrupedTimedStep step = new QuadrupedTimedStep();
+         step.set(stepListCommand.getStepCommands().get(i));
+         stepList.add(step);
+      }
+
+      stepListReference.set(stepList);
+      receivedStepList.set(true);
    }
 
    private static FootstepPlan convertToFootstepPlan(QuadrupedFootstepPlanningToolboxOutputStatus packet)
@@ -434,24 +452,23 @@ public class ContinuousPlanningToolboxDataSetTest
          if (!firstTick && (currentTime - tickStartTime < dt))
             ThreadTools.sleep(10);
 
-         if (!plannerReceivedPlan.get())
+         if (!receivedStepList.get())
             continue;
 
 
-         FootstepPlan footstepPlan = plannerPlanReference.get();
+         List<QuadrupedTimedStep> stepList = stepListReference.get();
          List<QuadrupedTimedStep> stepsInProgress = new ArrayList<>();
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         for (int i = 0; i < stepList.size(); i++)
          {
-            if (footstepPlan.getFootstep(i).getTimeInterval().intervalContains(time))
-               stepsInProgress.add(footstepPlan.getFootstep(i));
+            if (stepList.get(i).getTimeInterval().intervalContains(time))
+               stepsInProgress.add(stepList.get(i));
          }
 
-         if (plannerReceivedPlan.get() && plannerReceivedResult.get())
+         if (receivedStepList.get())
          {
-            plannerReceivedPlan.set(false);
-            plannerReceivedResult.set(false);
+            receivedStepList.set(false);
 
-            String errorMessage = assertPlanIsValid(dataSet.getName(), plannerResultReference.get(), footstepPlan);
+            String errorMessage = assertPlanIsValid(dataSet, stepList);
             if (!errorMessage.isEmpty())
                return errorMessage;
          }
@@ -508,13 +525,12 @@ public class ContinuousPlanningToolboxDataSetTest
 
 
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps)
+   private static String assertPlanIsValid(DataSet dataSet, List<QuadrupedTimedStep> plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
+      String datasetName = dataSet.getName();
       String errorMessage = "";
-      if (!result.validForExecution())
-         errorMessage = datasetName + " was not valid for execution " + result + ".\n";
 
 
       Point3D centerPoint = new Point3D();
@@ -530,8 +546,8 @@ public class ContinuousPlanningToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
-      double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
+      Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
+      double goalYaw = dataSet.getPlannerInput().getQuadrupedGoalYaw();
       if (goalPosition.distanceXY(centerPoint) > 3.0 * FootstepNode.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
@@ -548,12 +564,12 @@ public class ContinuousPlanningToolboxDataSetTest
       return errorMessage;
    }
 
-   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)
+   private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(List<QuadrupedTimedStep> plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = new QuadrantDependentList<>();
-      for (int i = plannedSteps.getNumberOfSteps() - 1; i >= 0; i--)
+      for (int i = plannedSteps.size() - 1; i >= 0; i--)
       {
-         QuadrupedTimedStep step = plannedSteps.getFootstep(i);
+         QuadrupedTimedStep step = plannedSteps.get(i);
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
@@ -563,13 +579,13 @@ public class ContinuousPlanningToolboxDataSetTest
       return finalSteps;
    }
 
-   private static String checkStepOrder(String datasetName, FootstepPlan plannedSteps)
+   private static String checkStepOrder(String datasetName, List<QuadrupedTimedStep> plannedSteps)
    {
       String errorMessage = "";
-      RobotQuadrant previousMovingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
-      for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
+      RobotQuadrant previousMovingQuadrant = plannedSteps.get(0).getRobotQuadrant();
+      for (int i = 1; i < plannedSteps.size(); i++)
       {
-         RobotQuadrant movingQuadrant = plannedSteps.getFootstep(i).getRobotQuadrant();
+         RobotQuadrant movingQuadrant = plannedSteps.get(i).getRobotQuadrant();
          if (previousMovingQuadrant.getNextRegularGaitSwingQuadrant() != movingQuadrant)
             errorMessage += datasetName + " step " + i + " in the plan is out of order.\n";
          previousMovingQuadrant = movingQuadrant;
