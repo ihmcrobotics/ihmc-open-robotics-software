@@ -35,7 +35,7 @@ import java.util.List;
 
 public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final double defaultTimeout = 5.0;
    private static final double defaultBestEffortTimeout = 0.0;
