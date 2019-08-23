@@ -72,7 +72,7 @@ public class REAOcTreeBuffer
       isBufferStateRequested = reaMessager.createInput(requestStateTopic, false);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
-      stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, 50000);
+      stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, NUMBER_OF_SAMPLES);
    }
 
    private void sendCurrentState()
