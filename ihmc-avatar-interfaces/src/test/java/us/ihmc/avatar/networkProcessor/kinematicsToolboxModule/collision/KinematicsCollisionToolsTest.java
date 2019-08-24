@@ -165,7 +165,7 @@ class KinematicsCollisionToolsTest
          ReferenceFrame frameA = worldFrame;
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = worldFrame;
-         EuclidShape3DCollisionFrameResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
          EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeA, shapeB);
@@ -193,7 +193,7 @@ class KinematicsCollisionToolsTest
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("aFrame", random, worldFrame);
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = frameA;
-         EuclidShape3DCollisionFrameResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
          EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
@@ -228,7 +228,7 @@ class KinematicsCollisionToolsTest
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("frameA", random, worldFrame);
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = EuclidFrameRandomTools.nextReferenceFrame("frameB", random, worldFrame);
-         EuclidShape3DCollisionFrameResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
          EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
