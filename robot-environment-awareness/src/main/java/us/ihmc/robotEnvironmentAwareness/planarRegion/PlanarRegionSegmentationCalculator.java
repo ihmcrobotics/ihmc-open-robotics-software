@@ -345,9 +345,8 @@ public class PlanarRegionSegmentationCalculator
    {
       Vector3D cameraToNode = new Vector3D(node.getHitLocationCopy());
       cameraToNode.add(-cameraPosition.getX(), -cameraPosition.getY(), -cameraPosition.getZ());
-      Vector3D surfaceNormal = new Vector3D(node.getNormalCopy());
+      Vector3D surfaceNormal = node.getNormalCopy();
 
-      surfaceNormal.normalize();
       cameraToNode.normalize();
 
       double dotValue = cameraToNode.dot(surfaceNormal);
