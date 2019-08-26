@@ -10,6 +10,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
@@ -27,6 +28,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 {
    private static final boolean debug = false;
 
+   private static final double proximityGoal = 1.0e-2;
+
    private static final int defaultNumberOfStepsToLeaveUnchanged = 4;
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
@@ -42,6 +45,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    private final YoBoolean isInitialSegmentOfPlan = new YoBoolean("isInitialSegmentOfPlan", registry);
    private final YoInteger numberOfStepsToLeaveUnchanged = new YoInteger("numberOfStepsToLeaveUnchanged", registry);
    private final YoBoolean hasReachedGoal = new YoBoolean("hasReachedGoal", registry);
+   private final YoBoolean planningFailed = new YoBoolean("planningFailed", registry);
    private final YoBoolean receivedPlanForLastRequest = new YoBoolean("receivedPlanForLastRequest", registry);
 
    private final YoInteger broadcastPlanId = new YoInteger("broadcastPlanId", registry);
@@ -75,6 +79,12 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    public void processFootstepPlannerOutput(PawStepPlanningToolboxOutputStatus message)
    {
+      PawStepPlanningResult result = PawStepPlanningResult.fromByte(message.getFootstepPlanningResult());
+      if (!result.validForExecution())
+      {
+         LogTools.info("Planner result failed. Terminating because of " + result);
+         planningFailed.getBooleanValue();
+      }
       footstepPlannerOutput.set(message);
       receivedPlanId.set(message.getPlanId());
 
@@ -85,6 +95,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    public void processContinuousPlanningRequest(QuadrupedContinuousPlanningRequestPacket message)
    {
       planningRequestPacket.set(message);
+      planningFailed.set(false);
       hasReachedGoal.set(false);
    }
 
@@ -119,8 +130,6 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       clearCompletedSteps();
 //      updateFixedStepQueue();
 
-      updateHasReachedGoal();
-
       checkIfLastPlanFulfilledRequest();
 
       if (receivedPlanForLastRequest.getBooleanValue())
@@ -131,7 +140,9 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
          if (fixedStepsWereUpdated)
          {
-            if (!stepQueue.isEmpty())
+            updateFixedStepQueue();
+
+            if (!hasReachedGoal.getBooleanValue())
             {
                broadcastLatestPlan();
 
@@ -147,7 +158,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    @Override
    public boolean isDone()
    {
-      return hasReachedGoal.getBooleanValue();
+      return hasReachedGoal.getBooleanValue() || planningFailed.getBooleanValue();
    }
 
 
@@ -323,7 +334,12 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private void updateHasReachedGoal()
    {
-      hasReachedGoal.set(!isInitialSegmentOfPlan.getBooleanValue() && stepQueue.isEmpty());
+      boolean isGoalTheFinalGoal = false;
+      if (footstepPlannerOutput.get() != null)
+      {
+         isGoalTheFinalGoal = footstepPlannerOutput.get().getLowLevelPlannerGoal().getPosition().epsilonEquals(planningRequestPacket.get().getGoalPositionInWorld(), proximityGoal);
+      }
+      hasReachedGoal.set(!isInitialSegmentOfPlan.getBooleanValue() && isGoalTheFinalGoal && stepQueue.isEmpty());
    }
 
    private void broadcastLatestPlan()
