@@ -49,7 +49,7 @@ public class REAModuleAPI
    private static final CategoryTheme Request = apiFactory.createCategoryTheme("Request");
    private static final CategoryTheme DataExporter = apiFactory.createCategoryTheme("DataExporter");
    private static final CategoryTheme Message = apiFactory.createCategoryTheme("Message");
-   private static final CategoryTheme Refreshing = apiFactory.createCategoryTheme("Refreshing");
+   private static final CategoryTheme Preserve = apiFactory.createCategoryTheme("Preserve");
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
@@ -85,7 +85,7 @@ public class REAModuleAPI
    public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> LidarBufferMessageCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> StereoVisionBufferEnable = OcTreeCategory.child(StereoVision).child(Buffer).topic(Enable);
-   public static final Topic<Boolean> StereoVisionBufferRefreshingEnable = OcTreeCategory.child(StereoVision).child(Buffer).child(Refreshing).topic(Enable);
+   public static final Topic<Boolean> StereoVisionBufferPreservingEnable = OcTreeCategory.child(StereoVision).child(Buffer).child(Preserve).topic(Enable);
    public static final Topic<Integer> StereoVisionBufferOcTreeCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> StereoVisionBufferSize = OcTreeCategory.child(StereoVision).child(Buffer).topic(Size);
    public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
