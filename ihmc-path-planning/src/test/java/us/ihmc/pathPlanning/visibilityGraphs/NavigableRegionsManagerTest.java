@@ -22,6 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
@@ -1231,7 +1232,7 @@ public class NavigableRegionsManagerTest
 
    private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
-      return new DefaultVisibilityGraphParameters()
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters()
       {
          @Override
          public PlanarRegionFilter getPlanarRegionFilter()
@@ -1244,40 +1245,30 @@ public class NavigableRegionsManagerTest
                   return true;
                }
             };
-
          }
 
-         @Override
-         public double getObstacleExtrusionDistance()
-         {
-            return obstacleExtrusionDistance;
-         }
 
-         @Override
-         public double getPreferredObstacleExtrusionDistance()
-         {
-            return preferredObstacleExtrusionDistance;
-         }
-
-         @Override
-         public double getClusterResolution()
-         {
-            return 0.501;
-         }
 
          @Override
          public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
-         {
-            return new NavigableExtrusionDistanceCalculator()
             {
-               @Override
-               public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+               return new NavigableExtrusionDistanceCalculator()
                {
-                  return 0.01;
-               }
-            };
-         }
-      };
+                  @Override
+                  public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+                  {
+                     return 0.01;
+                  }
+               };
+            }
+         };
+      parameters.setObstacleExtrusionDistance(obstacleExtrusionDistance);
+      parameters.setPreferredObstacleExtrusionDistance(preferredObstacleExtrusionDistance);
+      parameters.setClusterResolution(0.501);
+      parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setComputeOrientationsToAvoidObstacles(true);
+
+      return parameters;
    }
 
 }
