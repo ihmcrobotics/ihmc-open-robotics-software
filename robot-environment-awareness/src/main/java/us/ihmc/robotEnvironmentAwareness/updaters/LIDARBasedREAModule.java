@@ -74,7 +74,7 @@ public class LIDARBasedREAModule
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private final AtomicReference<Boolean> enableRefereshingOctreeBuffer;
+   private final AtomicReference<Boolean> preserveOcTreeHistory;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
@@ -118,7 +118,7 @@ public class LIDARBasedREAModule
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
 
-      enableRefereshingOctreeBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferRefreshingEnable, true);
+      preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainOctree.getResolution());
    }
@@ -220,7 +220,7 @@ public class LIDARBasedREAModule
          }
          else
          {
-            if (enableStereoBuffer.get() && enableRefereshingOctreeBuffer.get())
+            if (enableStereoBuffer.get() && !preserveOcTreeHistory.get())
                mainUpdater.clearOcTree();
 
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);

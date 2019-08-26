@@ -53,7 +53,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    @FXML
    private Slider surfaceNormalUpperBoundSlider;
    @FXML
-   private ToggleButton enableStereoBufferRefreshingButton;
+   private ToggleButton preserveOcTreeHistoryButton;
    @FXML
    private ToggleButton enableSurfaceNormalButton;
 
@@ -123,7 +123,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(),
                                          numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferRefreshingEnable, enableStereoBufferRefreshingButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferPreservingEnable, preserveOcTreeHistoryButton.selectedProperty());
 
       surfaceNormalFilterParametersProperty.bindBidirectionalBounds(surfaceNormalUpperBoundSlider.valueProperty(),
                                                                     surfaceNormalLowerBoundSlider.valueProperty());
