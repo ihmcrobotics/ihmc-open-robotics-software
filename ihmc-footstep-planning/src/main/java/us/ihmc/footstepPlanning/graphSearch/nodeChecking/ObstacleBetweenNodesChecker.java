@@ -51,7 +51,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null)
+      if (previousNode == null || !parameters.checkForPathCollisions())
          return true;
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);

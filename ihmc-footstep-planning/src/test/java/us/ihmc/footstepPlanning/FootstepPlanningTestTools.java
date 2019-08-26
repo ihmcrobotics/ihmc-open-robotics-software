@@ -39,6 +39,7 @@ public class FootstepPlanningTestTools
    public static void assertParametersEqual(FootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersReadOnly other)
    {
       assertEquals(parameters.checkForBodyBoxCollisions(), other.checkForBodyBoxCollisions());
+      assertEquals(parameters.checkForPathCollisions(), other.checkForPathCollisions());
       assertEquals(parameters.performHeuristicSearchPolicies(), other.performHeuristicSearchPolicies());
       assertEquals(parameters.getIdealFootstepWidth(), other.getIdealFootstepWidth(), epsilon);
       assertEquals(parameters.getIdealFootstepLength(), other.getIdealFootstepLength(), epsilon);
@@ -65,7 +66,6 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMinimumDistanceFromCliffBottoms(), other.getMinimumDistanceFromCliffBottoms(), epsilon);
       assertEquals(parameters.getReturnBestEffortPlan(), other.getReturnBestEffortPlan());
       assertEquals(parameters.getMinimumStepsForBestEffortPlan(), other.getMinimumStepsForBestEffortPlan());
-      assertEquals(parameters.getBodyGroundClearance(), other.getBodyGroundClearance(), epsilon);
       assertEquals(parameters.getBodyBoxHeight(), other.getBodyBoxHeight(), epsilon);
       assertEquals(parameters.getBodyBoxDepth(), other.getBodyBoxDepth(), epsilon);
       assertEquals(parameters.getBodyBoxWidth(), other.getBodyBoxWidth(), epsilon);
