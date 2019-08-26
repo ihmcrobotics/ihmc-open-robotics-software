@@ -369,6 +369,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double body_path_based_heuristics_weight_ = -1.0;
    /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public long number_of_bounding_box_checks_ = 1;
+   /**
             * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
             * @see FootstepPlannerCostParameters#getBoundingBoxCost
             */
@@ -506,6 +511,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
 
       body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
+
+      number_of_bounding_box_checks_ = other.number_of_bounding_box_checks_;
 
       maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
 
@@ -1606,6 +1613,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public void setNumberOfBoundingBoxChecks(long number_of_bounding_box_checks)
+   {
+      number_of_bounding_box_checks_ = number_of_bounding_box_checks;
+   }
+   /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public long getNumberOfBoundingBoxChecks()
+   {
+      return number_of_bounding_box_checks_;
+   }
+
+   /**
             * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
             * @see FootstepPlannerCostParameters#getBoundingBoxCost
             */
@@ -1798,6 +1822,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_bounding_box_checks_, other.number_of_bounding_box_checks_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
@@ -1933,6 +1959,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
 
+      if(this.number_of_bounding_box_checks_ != otherMyClass.number_of_bounding_box_checks_) return false;
+
       if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
 
       if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
@@ -2065,6 +2093,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
       builder.append("body_path_based_heuristics_weight=");
       builder.append(this.body_path_based_heuristics_weight_);      builder.append(", ");
+      builder.append("number_of_bounding_box_checks=");
+      builder.append(this.number_of_bounding_box_checks_);      builder.append(", ");
       builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
       builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
       builder.append("bounding_box_cost=");

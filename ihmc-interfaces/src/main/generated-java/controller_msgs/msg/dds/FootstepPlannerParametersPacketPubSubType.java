@@ -152,6 +152,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -343,6 +345,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -476,6 +481,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getBodyPathBasedHeuristicsWeight());
 
+      cdr.write_type_4(data.getNumberOfBoundingBoxChecks());
+
       cdr.write_type_6(data.getMaximum2dDistanceFromBoundingBoxToPenalize());
 
       cdr.write_type_6(data.getBoundingBoxCost());
@@ -602,6 +609,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setBodyPathBasedHeuristicsWeight(cdr.read_type_6());
       	
+      data.setNumberOfBoundingBoxChecks(cdr.read_type_4());
+      	
       data.setMaximum2dDistanceFromBoundingBoxToPenalize(cdr.read_type_6());
       	
       data.setBoundingBoxCost(cdr.read_type_6());
@@ -674,6 +683,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("vis_graph_with_a_star_heuristics_weight", data.getVisGraphWithAStarHeuristicsWeight());
       ser.write_type_6("depth_first_heuristics_weight", data.getDepthFirstHeuristicsWeight());
       ser.write_type_6("body_path_based_heuristics_weight", data.getBodyPathBasedHeuristicsWeight());
+      ser.write_type_4("number_of_bounding_box_checks", data.getNumberOfBoundingBoxChecks());
       ser.write_type_6("maximum_2d_distance_from_bounding_box_to_penalize", data.getMaximum2dDistanceFromBoundingBoxToPenalize());
       ser.write_type_6("bounding_box_cost", data.getBoundingBoxCost());
       ser.write_type_6("body_path_violation_weight", data.getBodyPathViolationWeight());
@@ -740,6 +750,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setVisGraphWithAStarHeuristicsWeight(ser.read_type_6("vis_graph_with_a_star_heuristics_weight"));
       data.setDepthFirstHeuristicsWeight(ser.read_type_6("depth_first_heuristics_weight"));
       data.setBodyPathBasedHeuristicsWeight(ser.read_type_6("body_path_based_heuristics_weight"));
+      data.setNumberOfBoundingBoxChecks(ser.read_type_4("number_of_bounding_box_checks"));
       data.setMaximum2dDistanceFromBoundingBoxToPenalize(ser.read_type_6("maximum_2d_distance_from_bounding_box_to_penalize"));
       data.setBoundingBoxCost(ser.read_type_6("bounding_box_cost"));
       data.setBodyPathViolationWeight(ser.read_type_6("body_path_violation_weight"));

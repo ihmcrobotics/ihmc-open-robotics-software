@@ -652,6 +652,16 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
+    * between the start and end steps.
+    */
+   default int getNumberOfBoundingBoxChecks()
+   {
+      return get(numberOfBoundingBoxChecks);
+   }
+
+   /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
     * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */

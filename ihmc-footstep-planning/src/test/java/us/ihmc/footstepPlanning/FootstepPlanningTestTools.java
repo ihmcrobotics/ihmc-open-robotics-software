@@ -74,6 +74,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getBodyBoxBaseZ(), other.getBodyBoxBaseZ(), epsilon);
       assertEquals(parameters.getMinXClearanceFromStance(), other.getMinXClearanceFromStance(), epsilon);
       assertEquals(parameters.getMinYClearanceFromStance(), other.getMinYClearanceFromStance(), epsilon);
+      assertEquals(parameters.getNumberOfBoundingBoxChecks(), other.getNumberOfBoundingBoxChecks());
 
       assertEquals(parameters.useQuadraticDistanceCost(), other.useQuadraticDistanceCost());
       assertEquals(parameters.useQuadraticHeightCost(), other.useQuadraticHeightCost());
