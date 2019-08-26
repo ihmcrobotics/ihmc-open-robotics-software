@@ -716,6 +716,7 @@ public class RemoteFootstepPlannerUIMessagingTest
                    packet.getDepthFirstHeuristicsWeight(), epsilon);
       assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
                    packet.getBodyPathBasedHeuristicsWeight(), epsilon);
+      assertEquals("Number of bounding box checks weren't equal", parameters.getNumberOfBoundingBoxChecks(), packet.getNumberOfBoundingBoxChecks());
 
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);

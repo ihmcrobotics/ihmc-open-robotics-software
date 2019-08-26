@@ -335,6 +335,11 @@ float64 depth_first_heuristics_weight
 # Field default value -1.0
 float64 body_path_based_heuristics_weight
 
+# This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+# Additional checks are done by interpolating between the start and end steps
+# Field default value 1
+uint32 number_of_bounding_box_checks
+
 # If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
 # Field default value -1.0

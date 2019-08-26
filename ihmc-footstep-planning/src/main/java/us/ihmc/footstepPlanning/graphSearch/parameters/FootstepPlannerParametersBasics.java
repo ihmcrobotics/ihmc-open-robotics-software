@@ -269,6 +269,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
    }
 
+   default void setNumberOfBoundingBoxChecks(int numberOfBoundingBoxChecks)
+   {
+      set(FootstepPlannerParameterKeys.numberOfBoundingBoxChecks, numberOfBoundingBoxChecks);
+   }
+
    default void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
       set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);

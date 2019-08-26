@@ -112,6 +112,7 @@ public class FootstepPlannerMessageTools
       packet.setLateralWeight(parameters.getLateralWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
       packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
+      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
       packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       packet.setLongStepWeight(parameters.getLongStepWeight());
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
