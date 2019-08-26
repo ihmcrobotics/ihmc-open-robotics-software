@@ -27,6 +27,7 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
    public int planner_request_id_ = -1;
    public double timeout_;
+   public double best_effort_timeout_;
    public double horizon_length_;
 
    public QuadrupedContinuousPlanningRequestPacket()
@@ -60,6 +61,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       planner_request_id_ = other.planner_request_id_;
 
       timeout_ = other.timeout_;
+
+      best_effort_timeout_ = other.best_effort_timeout_;
 
       horizon_length_ = other.horizon_length_;
 
@@ -143,6 +146,15 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       return timeout_;
    }
 
+   public void setBestEffortTimeout(double best_effort_timeout)
+   {
+      best_effort_timeout_ = best_effort_timeout;
+   }
+   public double getBestEffortTimeout()
+   {
+      return best_effort_timeout_;
+   }
+
    public void setHorizonLength(double horizon_length)
    {
       horizon_length_ = horizon_length;
@@ -184,6 +196,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.best_effort_timeout_, other.best_effort_timeout_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
 
@@ -212,6 +226,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.best_effort_timeout_ != otherMyClass.best_effort_timeout_) return false;
 
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
@@ -245,6 +261,8 @@ public class QuadrupedContinuousPlanningRequestPacket extends Packet<QuadrupedCo
       builder.append(this.planner_request_id_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
+      builder.append("best_effort_timeout=");
+      builder.append(this.best_effort_timeout_);      builder.append(", ");
       builder.append("horizon_length=");
       builder.append(this.horizon_length_);
       builder.append("}");

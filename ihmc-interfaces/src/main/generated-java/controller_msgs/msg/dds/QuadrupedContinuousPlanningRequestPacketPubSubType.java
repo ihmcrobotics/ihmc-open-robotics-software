@@ -62,6 +62,8 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -102,6 +104,9 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -122,6 +127,8 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getTimeout());
 
+      cdr.write_type_6(data.getBestEffortTimeout());
+
       cdr.write_type_6(data.getHorizonLength());
 
    }
@@ -141,6 +148,8 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
       data.setPlannerRequestId(cdr.read_type_2());
       	
       data.setTimeout(cdr.read_type_6());
+      	
+      data.setBestEffortTimeout(cdr.read_type_6());
       	
       data.setHorizonLength(cdr.read_type_6());
       	
@@ -166,6 +175,7 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
 
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
    }
 
@@ -188,6 +198,7 @@ public class QuadrupedContinuousPlanningRequestPacketPubSubType implements us.ih
 
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setTimeout(ser.read_type_6("timeout"));
+      data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
    }
 

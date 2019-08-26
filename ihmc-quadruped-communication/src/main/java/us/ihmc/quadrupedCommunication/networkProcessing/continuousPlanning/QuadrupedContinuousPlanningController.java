@@ -17,7 +17,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -26,11 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedContinuousPlanningController extends QuadrupedToolboxController
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private static final int defaultNumberOfStepsToLeaveUnchanged = 4;
-   private static final double defaultHorizonLength = 1.0;
-   private static final double defaultTimeout = 1.0;
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
@@ -46,9 +43,6 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    private final YoInteger numberOfStepsToLeaveUnchanged = new YoInteger("numberOfStepsToLeaveUnchanged", registry);
    private final YoBoolean hasReachedGoal = new YoBoolean("hasReachedGoal", registry);
    private final YoBoolean receivedPlanForLastRequest = new YoBoolean("receivedPlanForLastRequest", registry);
-
-   private final YoDouble horizonLength = new YoDouble("horizonLength", registry);
-   private final YoDouble timeout = new YoDouble("timeout", registry);
 
    private final YoInteger broadcastPlanId = new YoInteger("broadcastPlanId", registry);
    private final YoInteger receivedPlanId = new YoInteger("receivedPlanId", registry);
@@ -67,8 +61,6 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
 
       numberOfStepsToLeaveUnchanged.set(defaultNumberOfStepsToLeaveUnchanged);
-      horizonLength.set(defaultHorizonLength);
-      timeout.set(defaultTimeout);
    }
 
    public void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
@@ -139,14 +131,12 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
          if (fixedStepsWereUpdated)
          {
-            if (stepQueue.isEmpty())
-               LogTools.info("Somehow the step queue is empty.");
-            else
+            if (!stepQueue.isEmpty())
             {
-               LogTools.info("Should be broadcasting the newer plan.");
                broadcastLatestPlan();
 
-               LogTools.info("Sending a new planning request.");
+               if (debug)
+                  LogTools.info("Sending a new planning request.");
                computeAndSendLatestPlanningRequest();
             }
          }
@@ -243,12 +233,16 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       {
          if (footstepStatusMessage.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
          {
+            boolean success = removeQuadrantFromFixedStepQueue(RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant()));
+
             if (debug)
-               LogTools.info("Started step " + RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant()) + " : " + footstepStatusMessage.getActualTouchdownPositionInWorld() );
-            if (removeQuadrantFromFixedStepQueue(RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant())))
-               LogTools.info("Successfully removed.");
-            else
-               LogTools.info("Failed to remove.");
+            {
+               LogTools.info("Started step " + RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant()) + " : " + footstepStatusMessage.getActualTouchdownPositionInWorld());
+               if (success)
+                  LogTools.info("Successfully removed.");
+               else
+                  LogTools.info("Failed to remove.");
+            }
          }
       }
 
@@ -287,8 +281,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
       QuadrupedTimedStepMessage firstStep = getFirstStepFromList(fixedStepQueue);
       double timeShift = -firstStep.getTimeInterval().getStartTime();
-      shiftSteps(timeShift, fixedStepQueue);
-      shiftSteps(timeShift, stepQueue);
+      shiftStepsInTime(timeShift, fixedStepQueue);
+      shiftStepsInTime(timeShift, stepQueue);
 
       if (debug)
       {
@@ -317,7 +311,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       }
    }
 
-   private static void shiftSteps(double timeShift, List<QuadrupedTimedStepMessage> stepList)
+   private static void shiftStepsInTime(double timeShift, List<QuadrupedTimedStepMessage> stepList)
    {
       for (QuadrupedTimedStepMessage step : stepList)
       {
@@ -329,7 +323,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private void updateHasReachedGoal()
    {
-      hasReachedGoal.set(!isInitialSegmentOfPlan.getBooleanValue() && fixedStepQueue.isEmpty());
+      hasReachedGoal.set(!isInitialSegmentOfPlan.getBooleanValue() && stepQueue.isEmpty());
    }
 
    private void broadcastLatestPlan()
@@ -410,11 +404,11 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          planningRequestPacket.setInitialStepRobotQuadrant(nextQuadrant.toByte());
       }
 
-      planningRequestPacket.setHorizonLength(horizonLength.getDoubleValue());
+      planningRequestPacket.setHorizonLength(continuousPlanningRequestPacket.getHorizonLength());
       planningRequestPacket.setRequestedPawPlannerType(PawStepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
       planningRequestPacket.setStartTargetType(PawStepPlanningRequestPacket.PAW_PLANNER_TARGET_TYPE_FOOTSTEPS);
       planningRequestPacket.setTimeout(continuousPlanningRequestPacket.getTimeout());
-      planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getTimeout());
+      planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getBestEffortTimeout());
       planningRequestPacket.getGoalPositionInWorld().set(continuousPlanningRequestPacket.getGoalPositionInWorld());
       planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());

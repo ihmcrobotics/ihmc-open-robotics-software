@@ -170,6 +170,8 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    @Override
    public void sleep()
    {
+      super.sleep();
+
       ToolboxStateMessage plannerState = new ToolboxStateMessage();
       plannerState.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
 
