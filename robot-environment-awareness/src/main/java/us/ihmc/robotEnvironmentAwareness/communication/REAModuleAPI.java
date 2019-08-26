@@ -60,6 +60,7 @@ public class REAModuleAPI
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<Integer> Depth = apiFactory.createTypedTopicTheme("Depth");
+   private static final TypedTopicTheme<Double> Resolution = apiFactory.createTypedTopicTheme("Resolution");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
    private static final TypedTopicTheme<Integer> Capacity = apiFactory.createTypedTopicTheme("Capacity");
 
@@ -79,6 +80,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
    public static final Topic<Integer> OcTreeDepth = OcTreeCategory.topic(Depth);
+   public static final Topic<Double> OcTreeResolution = OcTreeCategory.topic(Resolution);
    public static final Topic<Boolean> LidarBufferEnable = OcTreeCategory.child(Lidar).child(Buffer).topic(Enable);
    public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);
    public static final Topic<Integer> LidarBufferMessageCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(Message).topic(Capacity);
