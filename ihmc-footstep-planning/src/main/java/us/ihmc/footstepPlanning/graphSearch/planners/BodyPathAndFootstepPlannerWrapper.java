@@ -121,6 +121,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
    public void setGoal(FootstepPlannerGoal goal)
    {
       waypointPathPlanner.setGoal(goal);
+      footstepPlanner.setGoal(goal);
 
       hasPath.set(false);
    }
