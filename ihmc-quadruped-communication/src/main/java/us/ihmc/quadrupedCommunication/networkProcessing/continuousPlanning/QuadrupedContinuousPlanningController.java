@@ -187,7 +187,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          QuadrupedTimedStepMessage firstFromNewQueue = getFirstStepFromStepQueue();
          double desiredTimeDifference = QuadrupedXGaitTools
                .computeTimeDeltaBetweenSteps(RobotQuadrant.fromByte(lastFromFixedQueue.getQuadrupedStepMessage().getRobotQuadrant()), xGaitSettings);
-         double actualTimeDifference = firstFromNewQueue.getTimeInterval().getStartTime() - lastFromFixedQueue.getTimeInterval().getEndTime();
+         double actualTimeDifference = firstFromNewQueue.getTimeInterval().getStartTime() - lastFromFixedQueue.getTimeInterval().getStartTime();
          double timeShift = desiredTimeDifference - actualTimeDifference;
          for (int i = 0; i < stepQueue.size(); i++)
          {
@@ -219,11 +219,16 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
    private final QuadrupedTimedStepMessage getFirstStepFromStepQueue()
    {
-      QuadrupedTimedStepMessage firstStep = stepQueue.get(0);
-      for (int i = 1; i < stepQueue.size(); i++)
+      return getFirstStepFromList(stepQueue);
+   }
+
+   private static final QuadrupedTimedStepMessage getFirstStepFromList(List<QuadrupedTimedStepMessage> stepList)
+   {
+      QuadrupedTimedStepMessage firstStep = stepList.get(0);
+      for (int i = 1; i < stepList.size(); i++)
       {
-         if (firstStep.getTimeInterval().getStartTime() > stepQueue.get(i).getTimeInterval().getStartTime())
-            firstStep = stepQueue.get(i);
+         if (firstStep.getTimeInterval().getStartTime() > stepList.get(i).getTimeInterval().getStartTime())
+            firstStep = stepList.get(i);
       }
 
       return firstStep;
@@ -239,7 +244,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          if (footstepStatusMessage.getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
          {
             if (debug)
-               LogTools.info("Started step " + RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant()) + " : " + footstepStatusMessage.getActualTouchdownPositionInWorld());
+               LogTools.info("Started step " + RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant()) + " : " + footstepStatusMessage.getActualTouchdownPositionInWorld() );
             if (removeQuadrantFromFixedStepQueue(RobotQuadrant.fromByte(footstepStatusMessage.getRobotQuadrant())))
                LogTools.info("Successfully removed.");
             else
@@ -261,8 +266,29 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       while (fixedStepQueue.size() < numberOfStepsToLeaveUnchanged.getIntegerValue() && stepQueue.size() > 0)
       {
          numberAdded++;
-         fixedStepQueue.add(stepQueue.remove(0));
+
+         QuadrupedTimedStepMessage stepToAdd = stepQueue.remove(0);
+         if (fixedStepQueue.size() > 0)
+         {
+            RobotQuadrant lastQuadrant = RobotQuadrant.fromByte(fixedStepQueue.get(fixedStepQueue.size() - 1).getQuadrupedStepMessage().getRobotQuadrant());
+            RobotQuadrant nextQuadrant = RobotQuadrant.fromByte(stepToAdd.getQuadrupedStepMessage().getRobotQuadrant());
+
+            if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
+            {
+               LogTools.error("Had a bug and the exception gets swallowed.");
+               throw new RuntimeException("This is out of order.");
+            }
+         }
+         fixedStepQueue.add(stepToAdd);
       }
+
+      checkStepOrders(fixedStepQueue);
+      checkStepOrders(stepQueue);
+
+      QuadrupedTimedStepMessage firstStep = getFirstStepFromList(fixedStepQueue);
+      double timeShift = -firstStep.getTimeInterval().getStartTime();
+      shiftSteps(timeShift, fixedStepQueue);
+      shiftSteps(timeShift, stepQueue);
 
       if (debug)
       {
@@ -274,6 +300,31 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       }
 
       return true;
+   }
+
+   private static void checkStepOrders(List<QuadrupedTimedStepMessage> stepList)
+   {
+      for (int i = 0; i < stepList.size() - 1; i++)
+      {
+         RobotQuadrant lastQuadrant = RobotQuadrant.fromByte(stepList.get(i).getQuadrupedStepMessage().getRobotQuadrant());
+         RobotQuadrant nextQuadrant = RobotQuadrant.fromByte(stepList.get(i + 1).getQuadrupedStepMessage().getRobotQuadrant());
+
+         if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
+         {
+            LogTools.error("Had a bug and the exception gets swallowed.");
+            throw new RuntimeException("This is out of order.");
+         }
+      }
+   }
+
+   private static void shiftSteps(double timeShift, List<QuadrupedTimedStepMessage> stepList)
+   {
+      for (QuadrupedTimedStepMessage step : stepList)
+      {
+         TimeIntervalMessage timeInterval = step.getTimeInterval();
+         timeInterval.setStartTime(timeInterval.getStartTime() + timeShift);
+         timeInterval.setEndTime(timeInterval.getEndTime() + timeShift);
+      }
    }
 
    private void updateHasReachedGoal()
@@ -289,6 +340,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          stepListMessage.getQuadrupedStepList().add().set(fixedStepQueue.get(i));
       for (int i = 0; i < stepQueue.size(); i++)
          stepListMessage.getQuadrupedStepList().add().set(stepQueue.get(i));
+
+      stepListMessage.setIsExpressedInAbsoluteTime(false);
 
       reportMessage(stepListMessage);
    }

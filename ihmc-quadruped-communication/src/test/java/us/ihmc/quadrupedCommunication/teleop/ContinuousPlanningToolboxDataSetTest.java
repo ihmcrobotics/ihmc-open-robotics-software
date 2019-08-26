@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -53,8 +55,8 @@ import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
+import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -70,9 +72,9 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ContinuousPlanningToolboxDataSetTest
 {
-   private static final double defaultBestEffortTimeout = 100.0;
-//   private static final double defaultHorizonLength = 1.0;
-   private static final double defaultHorizonLength = Double.POSITIVE_INFINITY;
+   private static final double defaultBestEffortTimeout = 0.5;
+   //   private static final double defaultHorizonLength = 1.0;
+   private static final double defaultHorizonLength = 1.0;
 
    private static final double dt = 0.01;
    private static double timeScaleFactor;
@@ -89,12 +91,14 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
    private PawPlanningModule footstepPlanningModule = null;
+   private PawStepPlannerParametersBasics footstepPlannerParameters = null;
    private QuadrupedContinuousPlanningModule continuousPlanningModule = null;
 
    private RealtimeRos2Node ros2Node;
 
    private final AtomicReference<List<QuadrupedTimedStep>> stepListReference = new AtomicReference<>(null);
    private final AtomicReference<Boolean> receivedStepList = new AtomicReference<>(false);
+   private final AtomicDouble timeReference = new AtomicDouble();
 
    private static final String robotName = "testBot";
    public static final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
@@ -102,6 +106,7 @@ public class ContinuousPlanningToolboxDataSetTest
    private IHMCRealtimeROS2Publisher<QuadrupedContinuousPlanningRequestPacket> requestPublisher;
    private IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> planarRegionsPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedFootstepStatusMessage> footstepStatusPublisher;
+   private IHMCRealtimeROS2Publisher<PawStepPlannerParametersPacket> plannerParametersPublisher;
 
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
@@ -118,6 +123,17 @@ public class ContinuousPlanningToolboxDataSetTest
       return settings;
    }
 
+   public PawStepPlannerParametersBasics getFootstepPlannerParameters()
+   {
+      PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
+      parameters.setXGaitWeight(10.0);
+      parameters.setDesiredVelocityWeight(0.0);
+      parameters.setReturnBestEffortPlan(true);
+      parameters.setPerformGraphRepairingStep(false);
+
+      return parameters;
+   }
+
    @BeforeEach
    public void setup()
    {
@@ -132,11 +148,10 @@ public class ContinuousPlanningToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
-      PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
-      parameters.setXGaitWeight(0.0);
-      parameters.setDesiredVelocityWeight(0.0);
+      if (footstepPlannerParameters == null)
+         footstepPlannerParameters = getFootstepPlannerParameters();
 
-      footstepPlanningModule = new PawPlanningModule(robotName, null, parameters, xGaitSettings,
+      footstepPlanningModule = new PawPlanningModule(robotName, null, footstepPlannerParameters, xGaitSettings,
                                                                    new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
       continuousPlanningModule = new QuadrupedContinuousPlanningModule(robotName, null, xGaitSettings, null, false, false, pubSubImplementation);
 
@@ -154,6 +169,8 @@ public class ContinuousPlanningToolboxDataSetTest
                                                    getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                    getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, PawStepPlannerParametersPacket.class,
+                                                         getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator);
@@ -176,7 +193,7 @@ public class ContinuousPlanningToolboxDataSetTest
       }
 
       messager.submitMessage(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
-      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, footstepPlannerParameters);
 
 
       ThreadTools.sleep(1000);
@@ -196,6 +213,7 @@ public class ContinuousPlanningToolboxDataSetTest
       requestPublisher = null;
       planarRegionsPublisher = null;
       footstepStatusPublisher = null;
+      plannerParametersPublisher = null;
       ui = null;
       messager = null;
    }
@@ -345,6 +363,7 @@ public class ContinuousPlanningToolboxDataSetTest
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataset.getPlanarRegionsList());
 
       planarRegionsPublisher.publish(planarRegionsListMessage);
+      plannerParametersPublisher.publish(footstepPlannerParameters.getAsPacket());
 
       ThreadTools.sleep(10);
 
@@ -414,6 +433,8 @@ public class ContinuousPlanningToolboxDataSetTest
       {
          QuadrupedTimedStep step = new QuadrupedTimedStep();
          step.set(stepListCommand.getStepCommands().get(i));
+         if (!packet.getIsExpressedInAbsoluteTime())
+            step.getTimeInterval().shiftInterval(timeReference.get());
          stepList.add(step);
       }
 
@@ -464,7 +485,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
       double tickStartTime = Conversions.nanosecondsToSeconds(System.nanoTime());
       boolean firstTick = true;
-      double time = 0.0;
+      timeReference.set(0.0);
       while (!continuousPlanningModule.getToolboxController().isDone())
       {
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
@@ -483,11 +504,12 @@ public class ContinuousPlanningToolboxDataSetTest
          List<QuadrupedTimedStep> stepsInProgress = new ArrayList<>();
          for (int i = 0; i < stepList.size(); i++)
          {
-            if (stepList.get(i).getTimeInterval().intervalContains(time))
+            if (stepList.get(i).getTimeInterval().intervalContains(timeReference.get()))
                stepsInProgress.add(stepList.get(i));
          }
 
 
+         assertPlanIsValid(dataSet, stepList, xGaitSettings);
 
          List<QuadrupedTimedStep> stepsJustStarted = stepsInProgress.stream().filter(step -> !hasQuadrantInProgress(step.getRobotQuadrant(), stepsCurrentlyInProgress)).collect(Collectors.toList());
          List<QuadrupedTimedStep> stepsJustFinished = stepsCurrentlyInProgress.stream().filter(step -> !hasQuadrantInProgress(step.getRobotQuadrant(), stepsInProgress)).collect(Collectors.toList());
@@ -501,7 +523,7 @@ public class ContinuousPlanningToolboxDataSetTest
             statusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
             statusMessage.getDesiredTouchdownPositionInWorld().set(stepJustStarted.getGoalPosition());
 
-            LogTools.info("Just started at t = " + time + " step " + stepJustStarted.getRobotQuadrant() + " : " + stepJustStarted.getGoalPosition() + " Time: " + stepJustStarted.getTimeInterval());
+            LogTools.info("Just started at t = " + timeReference.get() + " step " + stepJustStarted.getRobotQuadrant() + " : " + stepJustStarted.getGoalPosition() + " Time: " + stepJustStarted.getTimeInterval());
 
             footstepStatusPublisher.publish(statusMessage);
 
@@ -520,6 +542,8 @@ public class ContinuousPlanningToolboxDataSetTest
             statusMessage.getActualStepInterval().setEndTime(stepJustFinished.getTimeInterval().getEndTime());
             statusMessage.getActualTouchdownPositionInWorld().set(stepJustFinished.getGoalPosition());
 
+            LogTools.info("Just finished at t = " + timeReference.get() + " step " + stepJustFinished.getRobotQuadrant() + " : " + stepJustFinished.getGoalPosition() + " Time: " + stepJustFinished.getTimeInterval());
+
             footstepStatusPublisher.publish(statusMessage);
 
             feetPositions.put(stepJustFinished.getRobotQuadrant(), new Point3D(stepJustFinished.getGoalPosition()));
@@ -533,7 +557,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
          firstTick = false;
          tickStartTime = currentTime;
-         time += dt;
+         timeReference.addAndGet(dt);
       }
 
       return "";
@@ -553,7 +577,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
 
 
-   private static String assertPlanIsValid(DataSet dataSet, List<QuadrupedTimedStep> plannedSteps)
+   private static String assertPlanIsValid(DataSet dataSet, List<QuadrupedTimedStep> plannedSteps, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -576,14 +600,16 @@ public class ContinuousPlanningToolboxDataSetTest
 
       Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
       double goalYaw = dataSet.getPlannerInput().getQuadrupedGoalYaw();
-      if (goalPosition.distanceXY(centerPoint) > 3.0 * PawNode.gridSizeXY)
-         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
-      if (Double.isFinite(goalYaw))
-      {
-         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > PawNode.gridSizeYaw)
-            errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
-      }
 
+//      if (goalPosition.distanceXY(centerPoint) > 3.0 * FootstepNode.gridSizeXY)
+//         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
+//      if (Double.isFinite(goalYaw))
+//      {
+//         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > FootstepNode.gridSizeYaw)
+//            errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
+//      }
+
+      errorMessage += checkStepTiming(datasetName, plannedSteps, xGaitSettings);
       errorMessage += checkStepOrder(datasetName, plannedSteps);
 
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
@@ -617,6 +643,27 @@ public class ContinuousPlanningToolboxDataSetTest
          if (previousMovingQuadrant.getNextRegularGaitSwingQuadrant() != movingQuadrant)
             errorMessage += datasetName + " step " + i + " in the plan is out of order.\n";
          previousMovingQuadrant = movingQuadrant;
+      }
+
+      return errorMessage;
+   }
+
+   private static String checkStepTiming(String datasetName, List<QuadrupedTimedStep> plannedSteps, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   {
+      String errorMessage = "";
+      RobotQuadrant previousMovingQuadrant = plannedSteps.get(0).getRobotQuadrant();
+      double previousStartTime = plannedSteps.get(0).getTimeInterval().getStartTime();
+      for (int i = 1; i < plannedSteps.size(); i++)
+      {
+         RobotQuadrant movingQuadrant = plannedSteps.get(i).getRobotQuadrant();
+         double startTime = plannedSteps.get(i).getTimeInterval().getStartTime();
+         double timeBetweenSteps = startTime - previousStartTime;
+         double expectedTimeBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousMovingQuadrant, xGaitSettings);
+         if (!MathTools.epsilonEquals(startTime - previousStartTime, expectedTimeBetweenSteps, 1e-3))
+            errorMessage += datasetName + " step " + i + " is improperly timed. Should start at " + (previousStartTime + expectedTimeBetweenSteps)
+                  + " but starts at " + startTime + ". This leads to a time difference of " + timeBetweenSteps + ", when it should be " + expectedTimeBetweenSteps + "\n";
+         previousMovingQuadrant = movingQuadrant;
+         previousStartTime = startTime;
       }
 
       return errorMessage;
