@@ -173,9 +173,13 @@ public class PawStepPlannerProcessViewer extends AnimationTimer
             if (node != null)
                invalidNodesToRender.add(node);
          }
-         parentNodes.add(parentNode);
 
-         optimalPaths.add(graph.getPathFromStart(parentNode));
+         if (validNodes.size() > 0)
+         {
+            parentNodes.add(parentNode);
+
+            optimalPaths.add(graph.getPathFromStart(parentNode));
+         }
       }
 
       if (validNodesToRender.size() > 0)

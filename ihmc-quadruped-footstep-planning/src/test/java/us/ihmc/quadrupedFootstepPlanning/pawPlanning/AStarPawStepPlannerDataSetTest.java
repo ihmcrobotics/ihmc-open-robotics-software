@@ -5,6 +5,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.visualization.PawStepAStarMessagerListener;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
@@ -29,32 +30,31 @@ public class AStarPawStepPlannerDataSetTest extends PawStepPlannerDataSetTest
       return settings;
    }
 
+   public PawStepPlannerParametersBasics getPlannerParameters()
+   {
+      PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
+      parameters.setXGaitWeight(0.0);
+      parameters.setDesiredVelocityWeight(0.0);
+
+      return parameters;
+   }
+
    @Override
    public BodyPathAndPawPlanner createPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      xGaitSettings = getXGaitSettings();
-      PawStepPlannerParametersReadOnly parameters = new DefaultPawStepPlannerParameters()
-      {
-         @Override
-         public double getXGaitWeight()
-         {
-            return 0.0;
-         }
+      if (xGaitSettings == null)
+         xGaitSettings = getXGaitSettings();
+      if (plannerParameters == null)
+         plannerParameters = getPlannerParameters();
 
-         @Override
-         public double getDesiredVelocityWeight()
-         {
-            return 0.0;
-         }
-      };
       PawStepAStarMessagerListener listener;
       if (VISUALIZE)
          listener = new PawStepAStarMessagerListener(messager);
       else
          listener = null;
 
-      return AStarPawStepPlanner.createPlanner(parameters, xGaitSettings, listener, registry);
+      return AStarPawStepPlanner.createPlanner(plannerParameters, xGaitSettings, listener, registry);
    }
 
    @Override
