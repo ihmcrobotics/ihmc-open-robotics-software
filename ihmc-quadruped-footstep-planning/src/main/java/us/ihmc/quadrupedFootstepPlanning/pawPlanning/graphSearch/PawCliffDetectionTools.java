@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class PawCliffDetectionTools
 {
-   public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw, PawPlannerParametersReadOnly parameters,
+   public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw, PawStepPlannerParametersReadOnly parameters,
                                      double forward, double backward, double left, double right)
    {
       return isNearCliff(planarRegionsList, pawInWorld, pawYaw, parameters.getCliffHeightToAvoid(), forward, backward, left, right);

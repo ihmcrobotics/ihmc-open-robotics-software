@@ -14,9 +14,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
@@ -24,7 +23,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTo
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.PawNodeTransitionCheckerOfCheckers;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.SnapBasedPawNodeTransitionChecker;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -41,7 +40,7 @@ public class PawNodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<Quaternion> footOrientationReference;
    private final AtomicReference<RobotQuadrant> initialSupportQuadrantReference;
 
-   private final PawPlannerParametersBasics parameters = new DefaultPawPlannerParameters();
+   private final PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
    private final QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
    private final SimplePlanarRegionPawNodeSnapper snapper;
 
@@ -54,12 +53,12 @@ public class PawNodeCheckerRenderer extends AnimationTimer
 
    public PawNodeCheckerRenderer(Messager messager)
    {
-      nodeCheckerEnabled = messager.createInput(PawPlannerMessagerAPI.EnableNodeChecking, false);
-      planarRegionsReference = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);
-      footPositionReference = messager.createInput(PawPlannerMessagerAPI.NodeCheckingPosition);
-      footOrientationReference = messager.createInput(PawPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
-      initialSupportQuadrantReference = messager.createInput(PawPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
-      checkNodeUsingPoseBetweenFeet = messager.createInput(PawPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, false);
+      nodeCheckerEnabled = messager.createInput(PawStepPlannerMessagerAPI.EnableNodeChecking, false);
+      planarRegionsReference = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
+      footPositionReference = messager.createInput(PawStepPlannerMessagerAPI.NodeCheckingPosition);
+      footOrientationReference = messager.createInput(PawStepPlannerMessagerAPI.NodeCheckingOrientation, new Quaternion());
+      initialSupportQuadrantReference = messager.createInput(PawStepPlannerMessagerAPI.InitialSupportQuadrantTopic, RobotQuadrant.FRONT_LEFT);
+      checkNodeUsingPoseBetweenFeet = messager.createInput(PawStepPlannerMessagerAPI.NodeCheckingPoseBetweenFeetTopic, false);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
@@ -71,8 +70,8 @@ public class PawNodeCheckerRenderer extends AnimationTimer
       SnapBasedPawNodeTransitionChecker snapBasedNodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
       nodeChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
 
-      messager.registerTopicListener(PawPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
-      messager.registerTopicListener(PawPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
+      messager.registerTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
+      messager.registerTopicListener(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
    }
 
    @Override

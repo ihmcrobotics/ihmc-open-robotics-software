@@ -6,7 +6,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.Paw
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -14,7 +14,7 @@ public class PawDistanceAndYawBasedHeuristics extends PawPlanningCostToGoHeurist
 {
    private final PawNodeSnapper snapper;
 
-   public PawDistanceAndYawBasedHeuristics(PawNodeSnapper snapper, PawPlannerParametersReadOnly parameters)
+   public PawDistanceAndYawBasedHeuristics(PawNodeSnapper snapper, PawStepPlannerParametersReadOnly parameters)
    {
       super(parameters);
 

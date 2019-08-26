@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 
-public class GenericQuadrupedPawPlannerParameters extends DefaultPawPlannerParameters
+public class GenericQuadrupedPawPlannerParameters extends DefaultPawStepPlannerParameters
 {
 
    /** {@inheritDoc} */

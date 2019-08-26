@@ -29,7 +29,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -99,7 +99,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       this.invalidChildNodeRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       this.parentMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
 
-      planarRegionsList = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);
+      planarRegionsList = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       root.getChildren().addAll(validChildNodeRenderer.getRoot(), invalidChildNodeRenderer.getRoot(), parentMapRenderer.getRoot());
 

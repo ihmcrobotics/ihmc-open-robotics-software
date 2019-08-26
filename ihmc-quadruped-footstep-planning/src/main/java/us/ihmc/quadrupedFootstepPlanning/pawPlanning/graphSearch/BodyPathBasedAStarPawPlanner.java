@@ -13,7 +13,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.PawNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeExpansion.ParameterBasedPawNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCost;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -23,10 +23,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Arrays;
 
-public class BodyPathBasedAStarPawPlanner implements PawPlanner
+public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 {
    private final BodyPathPlanner bodyPathPlanner;
-   private final PawPlanner pawPlanner;
+   private final PawStepPlanner pawStepPlanner;
 
    private final FramePose3D lowLevelGoal = new FramePose3D();
 
@@ -34,9 +34,9 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
    private final PawPlanningCostToGoHeuristics heuristics;
    private final YoDouble planningHorizonLength;
 
-   private PawPlannerGoal highLevelGoal;
+   private PawStepPlannerGoal highLevelGoal;
 
-   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawPlannerParametersReadOnly parameters,
+   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
                                        QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
@@ -73,20 +73,20 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
-      pawPlanner = new AStarPawPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics, expansion, pawNodeCost,
-                                       snapper, snapper, null, registry);
+      pawStepPlanner = new AStarPawStepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics, expansion, pawNodeCost,
+                                               snapper, snapper, null, registry);
 
       parentRegistry.addChild(registry);
    }
 
    @Override
-   public void setStart(PawPlannerStart start)
+   public void setStart(PawStepPlannerStart start)
    {
-      pawPlanner.setStart(start);
+      pawStepPlanner.setStart(start);
    }
 
    @Override
-   public void setGoal(PawPlannerGoal goal)
+   public void setGoal(PawStepPlannerGoal goal)
    {
       highLevelGoal = goal;
    }
@@ -94,19 +94,19 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
    @Override
    public void setTimeout(double timeout)
    {
-      pawPlanner.setTimeout(timeout);
+      pawStepPlanner.setTimeout(timeout);
    }
 
    @Override
    public void setBestEffortTimeout(double bestEffortTimeout)
    {
-      pawPlanner.setBestEffortTimeout(bestEffortTimeout);
+      pawStepPlanner.setBestEffortTimeout(bestEffortTimeout);
    }
 
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      pawPlanner.setPlanarRegionsList(planarRegionsList);
+      pawStepPlanner.setPlanarRegionsList(planarRegionsList);
    }
 
    @Override
@@ -118,7 +118,7 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
    @Override
    public double getPlanningDuration()
    {
-      return pawPlanner.getPlanningDuration();
+      return pawStepPlanner.getPlanningDuration();
    }
 
    @Override
@@ -134,7 +134,7 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
    }
 
    @Override
-   public PawPlanningResult plan()
+   public PawStepPlanningResult plan()
    {
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPathPlanner.computePathLength(0.0);
@@ -151,27 +151,27 @@ public class BodyPathBasedAStarPawPlanner implements PawPlanner
 
       lowLevelGoal.set(pawPlannerGoal);
 
-      PawPlannerGoal goal = new PawPlannerGoal();
+      PawStepPlannerGoal goal = new PawStepPlannerGoal();
       goal.setGoalPose(pawPlannerGoal);
-      goal.setGoalType(PawPlannerTargetType.POSE_BETWEEN_FEET);
-      pawPlanner.setGoal(goal);
+      goal.setGoalType(PawStepPlannerTargetType.POSE_BETWEEN_FEET);
+      pawStepPlanner.setGoal(goal);
 
-      return pawPlanner.plan();
+      return pawStepPlanner.plan();
    }
 
    @Override
    public void cancelPlanning()
    {
-      pawPlanner.cancelPlanning();
+      pawStepPlanner.cancelPlanning();
    }
 
    @Override
-   public PawPlan getPlan()
+   public PawStepPlan getPlan()
    {
-      PawPlan pawPlan = pawPlanner.getPlan();
-      if (pawPlan != null)
-         pawPlan.setLowLevelPlanGoal(lowLevelGoal);
+      PawStepPlan pawStepPlan = pawStepPlanner.getPlan();
+      if (pawStepPlan != null)
+         pawStepPlan.setLowLevelPlanGoal(lowLevelGoal);
 
-      return pawPlan;
+      return pawStepPlan;
    }
 }

@@ -5,16 +5,16 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawDistanceAndYawBasedCost implements PawNodeCost
 {
-   private final PawPlannerParametersReadOnly plannerParameters;
+   private final PawStepPlannerParametersReadOnly plannerParameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   public PawDistanceAndYawBasedCost(PawPlannerParametersReadOnly plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public PawDistanceAndYawBasedCost(PawStepPlannerParametersReadOnly plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.plannerParameters = plannerParameters;
       this.xGaitSettings = xGaitSettings;

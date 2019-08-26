@@ -16,13 +16,13 @@ import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.AStarPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.VisibilityGraphWithAStarPawPlanner;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.YoPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.YoPawStepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -43,18 +43,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PawPlanningController extends QuadrupedToolboxController
 {
-   private final YoEnum<PawPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, PawPlannerType.class);
-   private final EnumMap<PawPlannerType, BodyPathAndPawPlanner> plannerMap = new EnumMap<>(PawPlannerType.class);
+   private final YoEnum<PawStepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, PawStepPlannerType.class);
+   private final EnumMap<PawStepPlannerType, BodyPathAndPawPlanner> plannerMap = new EnumMap<>(PawStepPlannerType.class);
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
-   private final AtomicReference<PawPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
+   private final AtomicReference<PawStepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoVisibilityGraphParameters visibilityGraphParameters;
-   private final PawPlannerParametersBasics pawPlannerParameters;
+   private final PawStepPlannerParametersBasics pawPlannerParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
    private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -63,7 +63,7 @@ public class PawPlanningController extends QuadrupedToolboxController
 
 
    public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
-                                PawPlannerParametersBasics pawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
+                                PawStepPlannerParametersBasics pawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
@@ -72,21 +72,21 @@ public class PawPlanningController extends QuadrupedToolboxController
       this.pawPlannerParameters = pawPlannerParameters;
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
-      new YoPawPlannerParameters(pawPlannerParameters, registry);
+      new YoPawStepPlannerParameters(pawPlannerParameters, registry);
 
       if (robotDataReceiver != null)
       {
-         plannerMap.put(PawPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
+         plannerMap.put(PawStepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
                         new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(), null, registry));
-         plannerMap.put(PawPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
+         plannerMap.put(PawStepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
                         new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
                                                                      robotDataReceiver.getReferenceFrames(), null, registry));
       }
-      plannerMap.put(PawPlannerType.A_STAR,
-                     AStarPawPlanner.createPlanner(this.pawPlannerParameters, xGaitSettings, null, registry));
-      plannerMap.put(PawPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPawPlanner(this.pawPlannerParameters, xGaitSettings,
-                                                                                                  visibilityGraphParameters, graphicsListRegistry, registry));
-      activePlanner.set(PawPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
+      plannerMap.put(PawStepPlannerType.A_STAR,
+                     AStarPawStepPlanner.createPlanner(this.pawPlannerParameters, xGaitSettings, null, registry));
+      plannerMap.put(PawStepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPawPlanner(this.pawPlannerParameters, xGaitSettings,
+                                                                                                      visibilityGraphParameters, graphicsListRegistry, registry));
+      activePlanner.set(PawStepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
    }
@@ -103,7 +103,7 @@ public class PawPlanningController extends QuadrupedToolboxController
 
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
-      for (PawPlannerType plannerKey : plannerMap.keySet())
+      for (PawStepPlannerType plannerKey : plannerMap.keySet())
       {
          BodyPathAndPawPlanner planner = plannerMap.get(plannerKey);
          planner.setGroundPlane(message);
@@ -112,15 +112,15 @@ public class PawPlanningController extends QuadrupedToolboxController
 
    public void processSupportRegionParameters(QuadrupedSupportPlanarRegionParametersMessage message)
    {
-      for (PawPlannerType plannerKey : plannerMap.keySet())
+      for (PawStepPlannerType plannerKey : plannerMap.keySet())
       {
-         WaypointsForPawPlanner planner = plannerMap.get(plannerKey).getWaypointPathPlanner();
+         WaypointsForPawStepPlanner planner = plannerMap.get(plannerKey).getWaypointPathPlanner();
          if (planner != null)
             planner.setFallbackRegionSize(message.getInsideSupportRegionSize());
       }
    }
 
-   public void processFootstepPlannerParametersPacket(QuadrupedPawPlannerParametersPacket packet)
+   public void processFootstepPlannerParametersPacket(PawStepPlannerParametersPacket packet)
    {
       pawPlannerParameters.set(packet);
    }
@@ -140,7 +140,7 @@ public class PawPlanningController extends QuadrupedToolboxController
       this.robotTimestampNanos.set(timestampInNanos);
    }
 
-   public void processPawPlanningRequest(PawPlanningRequestPacket footstepPlanningRequestPacket)
+   public void processPawPlanningRequest(PawStepPlanningRequestPacket footstepPlanningRequestPacket)
    {
       latestRequestReference.set(footstepPlanningRequestPacket);
    }
@@ -152,13 +152,13 @@ public class PawPlanningController extends QuadrupedToolboxController
 
       isDone.set(false);
 
-      PawPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      PawStepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
 
       planId.set(request.getPlannerRequestId());
       if (request.getRequestedPawPlannerType() >= 0)
-         activePlanner.set(PawPlannerType.fromByte(request.getRequestedPawPlannerType()));
+         activePlanner.set(PawStepPlannerType.fromByte(request.getRequestedPawPlannerType()));
 
       PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
@@ -187,11 +187,11 @@ public class PawPlanningController extends QuadrupedToolboxController
 
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
-      PawPlannerStart start = new PawPlannerStart();
-      PawPlannerGoal goal = new PawPlannerGoal();
+      PawStepPlannerStart start = new PawStepPlannerStart();
+      PawStepPlannerGoal goal = new PawStepPlannerGoal();
 
-      PawPlannerTargetType targetType = PawPlannerTargetType.fromByte(request.getStartTargetType());
-      if (targetType == PawPlannerTargetType.POSE_BETWEEN_FEET)
+      PawStepPlannerTargetType targetType = PawStepPlannerTargetType.fromByte(request.getStartTargetType());
+      if (targetType == PawStepPlannerTargetType.POSE_BETWEEN_FEET)
       {
          FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getBodyPositionInWorld(), request.getBodyOrientationInWorld());
          start.setStartPose(initialPose);
@@ -203,7 +203,7 @@ public class PawPlanningController extends QuadrupedToolboxController
          start.setPawStartPosition(RobotQuadrant.FRONT_RIGHT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getFrontRightPositionInWorld()));
          start.setPawStartPosition(RobotQuadrant.HIND_LEFT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getHindLeftPositionInWorld()));
          start.setPawStartPosition(RobotQuadrant.HIND_RIGHT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getHindRightPositionInWorld()));
-         start.setStartType(PawPlannerTargetType.FOOTSTEPS);
+         start.setStartType(PawStepPlannerTargetType.FOOTSTEPS);
       }
 
       start.setInitialQuadrant(RobotQuadrant.fromByte(request.getInitialStepRobotQuadrant()));
@@ -247,27 +247,27 @@ public class PawPlanningController extends QuadrupedToolboxController
 
       BodyPathAndPawPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
-      reportMessage(packStatus(PawPlannerStatus.PLANNING_PATH));
+      reportMessage(packStatus(PawStepPlannerStatus.PLANNING_PATH));
 
-      PawPlanningResult status = planner.planPath();
+      PawStepPlanningResult status = planner.planPath();
 
       BodyPathPlan bodyPathPlan = null;
       if (status.validForExecution())
       {
          bodyPathPlan = planner.getPathPlan();
-         reportMessage(packStatus(PawPlannerStatus.PLANNING_STEPS));
+         reportMessage(packStatus(PawStepPlannerStatus.PLANNING_STEPS));
          reportMessage(packPathResult(bodyPathPlan, status));
 
          status = planner.plan();
       }
 
-      PawPlan pawPlan;
+      PawStepPlan pawStepPlan;
       if (status.validForExecution())
-         pawPlan = planner.getPlan();
+         pawStepPlan = planner.getPlan();
       else
-         pawPlan = null;
+         pawStepPlan = null;
 
-      reportMessage(packStepResult(pawPlan, bodyPathPlan, status));
+      reportMessage(packStepResult(pawStepPlan, bodyPathPlan, status));
 
       finishUp();
    }
@@ -277,7 +277,7 @@ public class PawPlanningController extends QuadrupedToolboxController
       if (DEBUG)
          PrintTools.info("Finishing up the planner");
       plannerMap.get(activePlanner.getEnumValue()).cancelPlanning();
-      reportMessage(packStatus(PawPlannerStatus.IDLE));
+      reportMessage(packStatus(PawStepPlannerStatus.IDLE));
       isDone.set(true);
    }
 
@@ -287,7 +287,7 @@ public class PawPlanningController extends QuadrupedToolboxController
       return isDone.getBooleanValue();
    }
 
-   private FootstepPlannerStatusMessage packStatus(PawPlannerStatus status)
+   private FootstepPlannerStatusMessage packStatus(PawStepPlannerStatus status)
    {
       FootstepPlannerStatusMessage message = new FootstepPlannerStatusMessage();
       message.setFootstepPlannerStatus(status.toByte());
@@ -295,7 +295,7 @@ public class PawPlanningController extends QuadrupedToolboxController
       return message;
    }
 
-   private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, PawPlanningResult status)
+   private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, PawStepPlanningResult status)
    {
       if (DEBUG)
       {
@@ -318,17 +318,17 @@ public class PawPlanningController extends QuadrupedToolboxController
       return result;
    }
 
-   private QuadrupedFootstepPlanningToolboxOutputStatus packStepResult(PawPlan pawPlan, BodyPathPlan bodyPathPlan, PawPlanningResult status)
+   private PawStepPlanningToolboxOutputStatus packStepResult(PawStepPlan pawStepPlan, BodyPathPlan bodyPathPlan, PawStepPlanningResult status)
    {
-      QuadrupedFootstepPlanningToolboxOutputStatus result = new QuadrupedFootstepPlanningToolboxOutputStatus();
-      if (pawPlan == null)
+      PawStepPlanningToolboxOutputStatus result = new PawStepPlanningToolboxOutputStatus();
+      if (pawStepPlan == null)
       {
          result.getFootstepDataList().set(new QuadrupedTimedStepListMessage());
       }
       else
       {
-         result.getFootstepDataList().set(convertToTimedStepListMessage(pawPlan));
-         result.getLowLevelPlannerGoal().set(pawPlan.getLowLevelPlanGoal());
+         result.getFootstepDataList().set(convertToTimedStepListMessage(pawStepPlan));
+         result.getLowLevelPlannerGoal().set(pawStepPlan.getLowLevelPlanGoal());
       }
 
       if (bodyPathPlan != null)
@@ -345,15 +345,15 @@ public class PawPlanningController extends QuadrupedToolboxController
       return result;
    }
 
-   private static QuadrupedTimedStepListMessage convertToTimedStepListMessage(PawPlan pawPlan)
+   private static QuadrupedTimedStepListMessage convertToTimedStepListMessage(PawStepPlan pawStepPlan)
    {
-      if (pawPlan == null)
+      if (pawStepPlan == null)
          return null;
 
       List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
-      for (int i = 0; i < pawPlan.getNumberOfSteps(); i++)
+      for (int i = 0; i < pawStepPlan.getNumberOfSteps(); i++)
       {
-         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(pawPlan.getPawStep(i)));
+         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(pawStepPlan.getPawStep(i)));
       }
 
       return QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, false);

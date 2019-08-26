@@ -5,8 +5,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerTargetType;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -33,8 +33,8 @@ public class VisibilityGraphPawPathPlannerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
 
 
-      PawPlannerGoal goal = new PawPlannerGoal();
-      goal.setGoalType(PawPlannerTargetType.POSE_BETWEEN_FEET);
+      PawStepPlannerGoal goal = new PawStepPlannerGoal();
+      goal.setGoalType(PawStepPlannerTargetType.POSE_BETWEEN_FEET);
       goal.setGoalPose(new FramePose3D());
 
       // try within the region

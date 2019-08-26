@@ -28,7 +28,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.manual.QuadrupedManualPawPlanGenerator;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.manual.ManualPawPlanGenerator;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 import us.ihmc.quadrupedUI.graphics.ManualStepPlanGraphic;
@@ -47,7 +47,7 @@ public class ManualStepTabController extends Group
    private static final String NO_FLAMINGO_QUADRANT_SELECTED = "None";
 
    private final AtomicBoolean useTrotOverCrawl = new AtomicBoolean(false);
-   private final QuadrupedManualPawPlanGenerator manualPlanGenerator = new QuadrupedManualPawPlanGenerator();
+   private final ManualPawPlanGenerator manualPlanGenerator = new ManualPawPlanGenerator();
    private final ManualStepPlanGraphic manualStepPlanGraphic = new ManualStepPlanGraphic();
 
    private JavaFXMessager messager;

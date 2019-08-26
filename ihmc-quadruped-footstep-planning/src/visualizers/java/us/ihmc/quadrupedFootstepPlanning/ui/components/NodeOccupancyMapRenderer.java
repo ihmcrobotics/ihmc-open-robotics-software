@@ -14,7 +14,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -54,8 +54,8 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      messager.registerTopicListener(PawPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
-      planarRegionsList = messager.createInput(PawPlannerMessagerAPI.PlanarRegionDataTopic);
+      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      planarRegionsList = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       cellPolygon.addVertex(cellWidth, 0.0);
       cellPolygon.addVertex(0.5 * cellWidth, 0.5 * Math.sqrt(3.0) * cellWidth);

@@ -16,8 +16,8 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,11 +43,11 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private final YoBoolean hasPath;
    private final YoDouble timeSpentBeforePawPlanner;
    private final YoDouble timeSpentInPawPlanner;
-   private final YoEnum<PawPlanningResult> yoResult;
+   private final YoEnum<PawStepPlanningResult> yoResult;
 
    protected final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
-   protected WaypointsForPawPlanner waypointPathPlanner;
-   protected PawPlanner pawPlanner;
+   protected WaypointsForPawStepPlanner waypointPathPlanner;
+   protected PawStepPlanner pawStepPlanner;
 
    private PlanarRegionsList planarRegionsList;
 
@@ -55,7 +55,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
-   public BodyPathAndPawPlannerWrapper(String prefix, PawPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
+   public BodyPathAndPawPlannerWrapper(String prefix, PawStepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
@@ -66,7 +66,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
       hasPath = new YoBoolean("hasPath", registry);
       timeSpentBeforePawPlanner = new YoDouble("timeSpentBeforePawPlanner", registry);
       timeSpentInPawPlanner = new YoDouble("timeSpentInPawPlanner", registry);
-      yoResult = new YoEnum<>("planningResult", registry, PawPlanningResult.class);
+      yoResult = new YoEnum<>("planningResult", registry, PawStepPlanningResult.class);
 
       timeout.set(defaultTimeout);
       bestEffortTimeout.set(defaultBestEffortTimeout);
@@ -96,33 +96,33 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    }
 
    @Override
-   public WaypointsForPawPlanner getWaypointPathPlanner()
+   public WaypointsForPawStepPlanner getWaypointPathPlanner()
    {
       return waypointPathPlanner;
    }
 
    @Override
-   public PawPlanner getPawPlanner()
+   public PawStepPlanner getPawStepPlanner()
    {
-      return pawPlanner;
+      return pawStepPlanner;
    }
 
    @Override
-   public void setStart(PawPlannerStart start)
+   public void setStart(PawStepPlannerStart start)
    {
       waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
 
-      pawPlanner.setStart(start);
+      pawStepPlanner.setStart(start);
 
       hasPath.set(false);
    }
 
    @Override
-   public void setGoal(PawPlannerGoal goal)
+   public void setGoal(PawStepPlannerGoal goal)
    {
       waypointPathPlanner.setGoal(goal);
 
-      pawPlanner.setGoal(goal);
+      pawStepPlanner.setGoal(goal);
 
       hasPath.set(false);
    }
@@ -148,7 +148,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       waypointPathPlanner.setPlanarRegionsList(planarRegionsList);
-      pawPlanner.setPlanarRegionsList(planarRegionsList);
+      pawStepPlanner.setPlanarRegionsList(planarRegionsList);
       this.planarRegionsList = planarRegionsList;
    }
 
@@ -161,18 +161,18 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    @Override
    public void setPlanningHorizonLength(double planningHorizon)
    {
-      pawPlanner.setPlanningHorizonLength(planningHorizon);
+      pawStepPlanner.setPlanningHorizonLength(planningHorizon);
       hasPath.set(false);
    }
 
    @Override
-   public PawPlanningResult planPath()
+   public PawStepPlanningResult planPath()
    {
       long startTime = System.currentTimeMillis();
 
-      PawPlanningResult pathResult = waypointPathPlanner.planWaypoints();
+      PawStepPlanningResult pathResult = waypointPathPlanner.planWaypoints();
 
-      if (pathResult == PawPlanningResult.PLANNER_FAILED)
+      if (pathResult == PawStepPlanningResult.PLANNER_FAILED)
       {
          double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
          timeSpentBeforePawPlanner.set(seconds);
@@ -194,7 +194,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             timeSpentBeforePawPlanner.set(seconds);
             timeSpentInPawPlanner.set(0.0);
-            yoResult.set(PawPlanningResult.PLANNER_FAILED);
+            yoResult.set(PawStepPlanningResult.PLANNER_FAILED);
             return yoResult.getEnumValue();
 //         }
       }
@@ -212,26 +212,26 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 
       hasPath.set(true);
 
-      yoResult.set(PawPlanningResult.SUB_OPTIMAL_SOLUTION);
+      yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
    }
 
    @Override
-   public PawPlanningResult plan()
+   public PawStepPlanningResult plan()
    {
       if (!hasPath.getBooleanValue())
       {
-         PawPlanningResult pathResult = planPath();
+         PawStepPlanningResult pathResult = planPath();
          if (!pathResult.validForExecution())
             return pathResult;
       }
 
       double bestEffortTimeout = this.bestEffortTimeout.getDoubleValue() - timeSpentBeforePawPlanner.getDoubleValue();
-      pawPlanner.setTimeout(timeout.getDoubleValue() - timeSpentBeforePawPlanner.getDoubleValue());
-      pawPlanner.setBestEffortTimeout(bestEffortTimeout);
+      pawStepPlanner.setTimeout(timeout.getDoubleValue() - timeSpentBeforePawPlanner.getDoubleValue());
+      pawStepPlanner.setBestEffortTimeout(bestEffortTimeout);
 
       long startTime = System.currentTimeMillis();
-      yoResult.set(pawPlanner.plan());
+      yoResult.set(pawStepPlanner.plan());
       double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
       timeSpentInPawPlanner.set(seconds);
 
@@ -269,13 +269,13 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    @Override
    public void cancelPlanning()
    {
-      pawPlanner.cancelPlanning();
+      pawStepPlanner.cancelPlanning();
    }
 
    @Override
-   public PawPlan getPlan()
+   public PawStepPlan getPlan()
    {
-      return pawPlanner.getPlan();
+      return pawStepPlanner.getPlan();
    }
 
    @Override

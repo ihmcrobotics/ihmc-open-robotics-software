@@ -13,11 +13,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -35,10 +35,10 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
    static boolean checkAllXGaits = false;
    private final static boolean allowStepInPlace = false;
 
-   private final PawPlannerParametersReadOnly parameters;
+   private final PawStepPlannerParametersReadOnly parameters;
    private final PawNodeSnapper snapper;
 
-   public SnapBasedPawNodeTransitionChecker(PawPlannerParametersReadOnly parameters, PawNodeSnapper snapper)
+   public SnapBasedPawNodeTransitionChecker(PawStepPlannerParametersReadOnly parameters, PawNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -81,7 +81,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
             {
                PrintTools.info("The node " + nodeToCheck + " is trying to step in place.");
             }
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_IN_PLACE);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_IN_PLACE);
             return false;
          }
       }
@@ -101,7 +101,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
             {
                PrintTools.info("The node " + nodeToCheck + " is stepping on another paw.");
             }
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_ON_OTHER_PAW);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_ON_OTHER_PAW);
             return false;
          }
       }
@@ -113,7 +113,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
          {
             PrintTools.info("The node " + nodeToCheck + " results in too much yaw.");
          }
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_YAWING_TOO_MUCH);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_YAWING_TOO_MUCH);
          return false;
       }
 
@@ -123,7 +123,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
       QuadrantDependentList<Point3D> previousSnappedStepPositions = getSnappedStepPositions(previousNode);
       if (!previousSnappedStepPositions.containsKey(movingQuadrant))
       {
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
       }
 
@@ -137,7 +137,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
                   .round(100.0 * Math.abs(newStepPosition.getZ() - previousSnappedStepPositions.get(movingQuadrant).getZ())) + "cm) to previous node:\n"
                                    + nodeToCheck);
          }
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
       }
 
@@ -165,7 +165,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
          {
             PrintTools.debug("Found an obstacle between the nodes " + nodeToCheck + " and " + previousNode);
          }
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
          return false;
       }
 
@@ -176,7 +176,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
          {
             PrintTools.debug("Found an obstacle between the nodes " + nodeToCheck + " and " + previousNode);
          }
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
          return false;
       }
 
@@ -267,7 +267,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR);
          return false;
       }
 
@@ -276,14 +276,14 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far forward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
          return false;
       }
       else if (newStepPosition.getX() - nominalPreviousStepFromXGait.getX() < minLength)
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far backward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
          return false;
       }
 
@@ -292,14 +292,14 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far outward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
          return false;
       }
       if (newStepPosition.getY() - nominalPreviousStepFromXGait.getY() < minWidth)
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far inward.");
-         rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
+         rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
          return false;
       }
 
@@ -388,21 +388,21 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR);
             return false;
          }
 
          // check forward/backward
          if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > maxLength)
          {
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
             return false;
          }
          else if (newStepPosition.getX() - expectedXGaitPoint.getX() < minLength)
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far backward.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
             return false;
          }
 
@@ -411,14 +411,14 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far outward.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
             return false;
          }
          if (newStepPosition.getY() - expectedXGaitPoint.getY() < minWidth)
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far inward.");
-            rejectNode(nodeToCheck, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
+            rejectNode(nodeToCheck, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
             return false;
          }
       }

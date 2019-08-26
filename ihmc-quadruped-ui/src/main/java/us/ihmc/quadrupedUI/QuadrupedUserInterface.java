@@ -29,11 +29,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawPlannerMenuUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawPlannerParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerMenuUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
@@ -83,7 +82,7 @@ public class QuadrupedUserInterface
    private Label lastControllerTimeLabel;
 
    @FXML
-   private PawPlannerMenuUIController pawPlannerMenuUIController;
+   private PawStepPlannerMenuUIController pawStepPlannerMenuUIController;
    @FXML
    private MainTabController plannerTabController;
    @FXML
@@ -91,7 +90,7 @@ public class QuadrupedUserInterface
    @FXML
    private XGaitSettingsController xGaitSettingsController;
    @FXML
-   private PawPlannerParametersUIController pawPlannerParametersUIController;
+   private PawStepPlannerParametersUIController pawPlannerParametersUIController;
    @FXML
    private PlannerReachParametersUIController plannerReachParametersUIController;
    @FXML
@@ -100,7 +99,7 @@ public class QuadrupedUserInterface
    private ManualStepTabController manualStepTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
-                                 PawPlannerParametersBasics pawPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                 PawStepPlannerParametersBasics pawPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                  QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
@@ -359,7 +358,7 @@ public class QuadrupedUserInterface
    }
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                                            PawPlannerParametersBasics pawPlannerParameters,
+                                                            PawStepPlannerParametersBasics pawPlannerParameters,
                                                             VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
                                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {

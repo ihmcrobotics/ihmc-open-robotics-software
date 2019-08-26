@@ -9,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawPlannerListener;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -31,7 +31,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
    @Test
    public void testStepInPlace()
    {
-      PawPlannerParametersReadOnly parameters = new DefaultPawPlannerParameters()
+      PawStepPlannerParametersReadOnly parameters = new DefaultPawStepPlannerParameters()
       {
          @Override
          public double getMinimumFrontStepLength()
@@ -115,7 +115,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          message = "iter = " + iter + ". Stepping from " + previousNode + "\nTo " + newNode + "\n, clearance amount in the moving foot is only " + offsetVector
                + "\n clearance required is " + clearanceVector;
          assertFalse(nodeChecker.isNodeValid(newNode, previousNode), message);
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_IN_PLACE);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_IN_PLACE);
       }
 
       // check stepping near the edge of the clearance vector
@@ -138,7 +138,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          message = "Stepping from " + previousNode + "\n To " + newNode + "\n, clearance amount in the moving foot is only " + offsetVector + "\n";
 
          assertFalse(nodeChecker.isNodeValid(newNode, previousNode));
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_IN_PLACE);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_IN_PLACE);
       }
 
       // check stepping with enough clearance
@@ -184,7 +184,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParametersReadOnly parameters = new TestParameters();
+      PawStepPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -281,7 +281,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          offsetVector.changeFrame(previousNodeXGaitFrame);
          String message = "\nIteration " + iter + ".\nStepping from " + previousNode + " to " + newNode + "\n";
          boolean isValid = nodeChecker.isNodeValid(newNode, previousNode);
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_RIGHT);
          assertFalse(isValid);
       }
    }
@@ -291,7 +291,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
    {
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParametersReadOnly parameters = new TestParameters();
+      PawStepPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -388,7 +388,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          offsetVector.changeFrame(previousNodeXGaitFrame);
          String message = "Stepping from " + previousNode + " to " + newNode + "\n";
          boolean isValid = nodeChecker.isNodeValid(newNode, previousNode);
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_LEFT);
          assertFalse(isValid);
       }
    }
@@ -400,7 +400,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParametersReadOnly parameters = new TestParameters();
+      PawStepPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -498,7 +498,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          offsetVector.changeFrame(previousNodeXGaitFrame);
          String message = "\nIteration " + iter + ".\nStepping from " + previousNode + " to " + newNode + "\n";
          boolean isValid = nodeChecker.isNodeValid(newNode, previousNode);
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
          assertFalse(isValid);
       }
    }
@@ -510,7 +510,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
 
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
-      PawPlannerParametersReadOnly parameters = new TestParameters();
+      PawStepPlannerParametersReadOnly parameters = new TestParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull,
                                                                                       true);
@@ -608,15 +608,15 @@ public class SnapBasedPawNodeTransitionCheckerTest
          offsetVector.changeFrame(previousNodeXGaitFrame);
          String message = "\nIteration " + iter + ".\nStepping from " + previousNode + " to " + newNode + "\n";
          boolean isValid = nodeChecker.isNodeValid(newNode, previousNode);
-         testListener.assertCorrectRejection(message, newNode, previousNode, QuadrupedPawPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
+         testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD);
          assertFalse(isValid);
       }
    }
 
 
-   private class TestListener implements PawPlannerListener
+   private class TestListener implements PawStepPlannerListener
    {
-      private final AtomicReference<QuadrupedPawPlannerNodeRejectionReason> reason = new AtomicReference<>();
+      private final AtomicReference<PawStepPlannerNodeRejectionReason> reason = new AtomicReference<>();
       private final AtomicReference<PawNode> rejectedNode = new AtomicReference<>();
       private final AtomicReference<PawNode> rejectedParentNode = new AtomicReference<>();
 
@@ -627,7 +627,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       }
 
       public void assertCorrectRejection(String message, PawNode node, PawNode parentNode,
-                                         QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+                                         PawStepPlannerNodeRejectionReason rejectionReason)
       {
          assertEquals(rejectionReason, reason.getAndSet(null), message);
          assertEquals(node, rejectedNode.getAndSet(null), message);
@@ -635,7 +635,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       }
 
       @Override
-      public void rejectNode(PawNode node, PawNode parentNode, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+      public void rejectNode(PawNode node, PawNode parentNode, PawStepPlannerNodeRejectionReason rejectionReason)
       {
          rejectedNode.set(node);
          rejectedParentNode.set(parentNode);
@@ -643,7 +643,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       }
 
       @Override
-      public void rejectNode(PawNode node, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+      public void rejectNode(PawNode node, PawStepPlannerNodeRejectionReason rejectionReason)
       {
          rejectedNode.set(node);
          reason.set(rejectionReason);
@@ -668,7 +668,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       }
    }
 
-   private class TestParameters extends DefaultPawPlannerParameters
+   private class TestParameters extends DefaultPawStepPlannerParameters
    {
       @Override
       public double getMinXClearanceFromPaw()

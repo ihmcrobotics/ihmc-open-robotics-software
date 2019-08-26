@@ -7,8 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -28,14 +27,14 @@ public class QuadrupedStandaloneFootstepPlanner
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
    private QuadrupedSupportPlanarRegionPublisher supportPublisher = null;
 
-   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawPlannerParametersBasics pawPlannerParameters,
+   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawStepPlannerParametersBasics pawPlannerParameters,
                                              QuadrupedXGaitSettings xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters)
    {
       this(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
            DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawPlannerParametersBasics pawPlannerParameters,
+   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawStepPlannerParametersBasics pawPlannerParameters,
                                              QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                              DomainFactory.PubSubImplementation pubSubImplementation)
    {
@@ -43,7 +42,7 @@ public class QuadrupedStandaloneFootstepPlanner
    }
 
    public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, LogModelProvider logModelProvider,
-                                             PawPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                             PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                              PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       tryToStartModule(() -> setupFootstepPlanningModule(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
@@ -72,7 +71,7 @@ public class QuadrupedStandaloneFootstepPlanner
 
 
 
-   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersBasics pawPlannerParameters,
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawStepPlannerParametersBasics pawPlannerParameters,
                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                             LogModelProvider logModelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
    {
