@@ -11,22 +11,22 @@ public class PawStepPlannerParameterKeys
 
    public static final DoubleStoredPropertyKey maximumFrontStepReach                   = keys.addDoubleKey("Maximum front step reach", 0.5);
    public static final DoubleStoredPropertyKey maximumFrontStepLength                  = keys.addDoubleKey("Maximum front step length", 0.45);
-   public static final DoubleStoredPropertyKey minimumFrontStepLength                  = keys.addDoubleKey("Minimum front step length", 0.3);
+   public static final DoubleStoredPropertyKey minimumFrontStepLength                  = keys.addDoubleKey("Minimum front step length", -0.45);
    public static final DoubleStoredPropertyKey maximumHindStepReach                    = keys.addDoubleKey("Maximum hind step reach", 0.5);
    public static final DoubleStoredPropertyKey maximumHindStepLength                   = keys.addDoubleKey("Maximum hind step length", 0.45);
-   public static final DoubleStoredPropertyKey minimumHindStepLength                   = keys.addDoubleKey("Minimum hind step length", -0.3);
+   public static final DoubleStoredPropertyKey minimumHindStepLength                   = keys.addDoubleKey("Minimum hind step length", -0.45);
    public static final DoubleStoredPropertyKey maximumStepOutward                      = keys.addDoubleKey("Maximum step outward", 0.3);
    public static final DoubleStoredPropertyKey maximumStepInward                       = keys.addDoubleKey("Maximum step inward", -0.15);
 
    public static final DoubleStoredPropertyKey maximumFrontStepLengthWhenSteppingUp    = keys.addDoubleKey("Maximum front step length when stepping up", 0.45);
-   public static final DoubleStoredPropertyKey minimumFrontStepLengthWhenSteppingUp    = keys.addDoubleKey("Minimum front step length when stepping up", 0.3);
+   public static final DoubleStoredPropertyKey minimumFrontStepLengthWhenSteppingUp    = keys.addDoubleKey("Minimum front step length when stepping up", -0.45);
    public static final DoubleStoredPropertyKey maximumHindStepLengthWhenSteppingUp     = keys.addDoubleKey("Maximum hind step length when stepping up", 0.45);
-   public static final DoubleStoredPropertyKey minimumHindStepLengthWhenSteppingUp     = keys.addDoubleKey("Minimum hind step length when stepping up", -0.3);
+   public static final DoubleStoredPropertyKey minimumHindStepLengthWhenSteppingUp     = keys.addDoubleKey("Minimum hind step length when stepping up", -0.45);
    public static final DoubleStoredPropertyKey stepZForSteppingUp                      = keys.addDoubleKey("Step Z for stepping up", Double.POSITIVE_INFINITY);
    public static final DoubleStoredPropertyKey maximumFrontStepLengthWhenSteppingDown  = keys.addDoubleKey("Maximum front step length when stepping down", 0.45);
-   public static final DoubleStoredPropertyKey minimumFrontStepLengthWhenSteppingDown  = keys.addDoubleKey("Minimum front step length when stepping down", 0.3);
+   public static final DoubleStoredPropertyKey minimumFrontStepLengthWhenSteppingDown  = keys.addDoubleKey("Minimum front step length when stepping down", -0.45);
    public static final DoubleStoredPropertyKey maximumHindStepLengthWhenSteppingDown   = keys.addDoubleKey("Maximum hind step length when stepping down", 0.45);
-   public static final DoubleStoredPropertyKey minimumHindStepLengthWhenSteppingDown   = keys.addDoubleKey("Minimum hind step length when stepping down", -0.3);
+   public static final DoubleStoredPropertyKey minimumHindStepLengthWhenSteppingDown   = keys.addDoubleKey("Minimum hind step length when stepping down", -0.45);
    public static final DoubleStoredPropertyKey stepZForSteppingDown                    = keys.addDoubleKey("Step Z for stepping down", Double.NEGATIVE_INFINITY);
 
    public static final DoubleStoredPropertyKey maximumStepYawInward                    = keys.addDoubleKey("Maximum step yaw inward", -0.2);

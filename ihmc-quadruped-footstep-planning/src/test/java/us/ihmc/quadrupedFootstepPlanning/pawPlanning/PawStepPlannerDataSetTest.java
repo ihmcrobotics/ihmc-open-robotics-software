@@ -29,6 +29,7 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.PawStepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
@@ -65,9 +66,11 @@ public abstract class PawStepPlannerDataSetTest
    protected Messager messager = null;
 
    protected QuadrupedXGaitSettings xGaitSettings = null;
+   protected PawStepPlannerParametersBasics plannerParameters = null;
    private BodyPathAndPawPlanner planner = null;
 
    protected abstract QuadrupedXGaitSettings getXGaitSettings();
+   protected abstract PawStepPlannerParametersBasics getPlannerParameters();
 
    protected abstract BodyPathAndPawPlanner createPlanner();
 
@@ -84,6 +87,8 @@ public abstract class PawStepPlannerDataSetTest
       planner = createPlanner();
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
+      if (plannerParameters == null)
+         plannerParameters = getPlannerParameters();
 
       try
       {
@@ -327,6 +332,7 @@ public abstract class PawStepPlannerDataSetTest
       planner.setBestEffortTimeout(defaultBestEffortTimeout);
 
       messager.submitMessage(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, plannerParameters);
       messager.submitMessage(PawStepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(PawStepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
       messager.submitMessage(PawStepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
