@@ -158,6 +158,11 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    
    public void setParametersForStereo()
    {
+      uiMessager.submitMessageToModule(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.submitMessageToModule(REAModuleAPI.StereoVisionBufferEnable, true);
+      uiMessager.submitMessageToModule(REAModuleAPI.OcTreeBoundingBoxEnable, false);
+      uiMessager.submitMessageToModule(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      
       uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
