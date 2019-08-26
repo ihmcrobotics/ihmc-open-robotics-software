@@ -65,6 +65,13 @@ public class REAOcTreeUpdater
 
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
    }
+   
+   public void initializeReferenceOctree()
+   {
+      referenceOctree.enableParallelComputationForNormals(true);
+      referenceOctree.enableParallelInsertionOfMisses(true);
+      referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+   }
 
    private void sendCurrentState()
    {
