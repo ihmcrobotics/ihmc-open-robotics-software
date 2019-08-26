@@ -1,20 +1,15 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonCropResult;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 
 import java.util.*;
 
@@ -53,7 +48,6 @@ public class ConcavePolygonTools
          throw new RuntimeException("This polygon must be convex and shouldn't have gotten this far.");
 
       // find intersections (number of intersections can be as high as n-1)
-//      ArrayList<Pair<Integer, Point2D>> intersections = new ArrayList<>(); // index after intersection; intersection point
       Map<Integer, Point2D> intersections = new HashMap<>(); // index after intersection; intersection point
       List<Point2D> concaveHullVertices = concaveHullToCrop.getConcaveHullVertices();
       for (int i = 0; i < concaveHullVertices.size(); i++)
@@ -86,7 +80,6 @@ public class ConcavePolygonTools
          else // normal intersection
          {
             Point2D intersection = new Point2D();
-//            intersections.add(Pair.of(nextVertex, intersection));
             intersections.put(nextVertex, intersection);
          }
       }
@@ -133,155 +126,58 @@ public class ConcavePolygonTools
       }
       else
       {
-         // must handle and colinear intersections
+         // TODO handle colinear intersections
 
-         ConcaveHull currentResultingConcaveHull = new ConcaveHull();
-         resultingConcaveHulls.add(currentResultingConcaveHull);
+         ConcaveHullCutModel model = new ConcaveHullCutModel(concaveHullVertices, cuttingLine, upDirection, intersections);
 
-         // build ordered list of intersections along cutting line
-         // start from left of up direction
-
-         Pose2dReferenceFrame cuttingLineFrame = new Pose2dReferenceFrame("cuttingLineFrame", ReferenceFrame.getWorldFrame());
-         double angle = EuclidGeometryTools.angleFromFirstToSecondVector2D(0.0, 1.0, upDirection.getX(), upDirection.getY()); // angle from yUp
-         cuttingLineFrame.setPoseAndUpdate(cuttingLine.getPoint(), angle);
-
-         List<FramePoint2D> intersectionsFromLeftToRight = new ArrayList<>();
-         for (int i = 0; i < intersections.size(); i++)
+         // while all intersections not visited
+         while (!model.allIntersectionsVisited())
          {
-            FramePoint2D frameIntersection = new FramePoint2D(ReferenceFrame.getWorldFrame(), intersections.get(i));
-            frameIntersection.changeFrame(cuttingLineFrame);
-            intersectionsFromLeftToRight.add(frameIntersection);
-         }
-         intersectionsFromLeftToRight.sort(Comparator.comparingDouble(FramePoint2D::getX));
-         for (FramePoint2D framePoint2D : intersectionsFromLeftToRight)
-         {
-            framePoint2D.changeFrame(ReferenceFrame.getWorldFrame()); // change back to world frame
-         }
+            // find intersection to start at; find first unvisited intersection
+            int firstUnvisitedVertex = model.indexOfFirstUnvisitedIntersection();
 
-         // build visitation map of intersections from left to right
-         HashMap<Tuple2DReadOnly, Boolean> intersectionVisitedMap = new HashMap<>();
-         for (Tuple2DReadOnly point2D : intersectionsFromLeftToRight)
-         {
-            intersectionVisitedMap.put(point2D, false);
-         }
+            ConcaveHull currentResultingConcaveHull = new ConcaveHull();
+            // always add the first point
+            currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(firstUnvisitedVertex).getPoint()));
 
-         // build vertex list with intersections included
-         ArrayList<Point2D> verticesAndIntersections = new ArrayList<>();
-         for (int i = 0; i < concaveHullVertices.size(); i++)
-         {
-            verticesAndIntersections.add(concaveHullVertices.get(i));
+            int travellingIndex = firstUnvisitedVertex;
 
-            int nextVertex = EuclidGeometryPolygonTools.next(i, concaveHullVertices.size());
-            if (intersections.containsKey(nextVertex))
+            final int ALONG_HULL = 5;
+            final int TRAVERSE_CUT_LINE = 6;
+
+            int drawState = ALONG_HULL;
+
+            // while it's not back to the start
+            do
             {
-               verticesAndIntersections.add(intersections.get(nextVertex));
-            }
-         }
-
-         // reorder vertex-intersection list to start at leftmost intersection
-         ArrayList<Point2D> orderedVerticesAndIntersections = new ArrayList<>();
-         int unorderedListIndex = 0;
-         boolean startAdding = false;
-         while (orderedVerticesAndIntersections.size() < verticesAndIntersections.size())
-         {
-            Point2D point = verticesAndIntersections.get(unorderedListIndex);
-            if (!startAdding && point.epsilonEquals(intersectionsFromLeftToRight.get(0), 1e-7))
-            {
-               startAdding = true;
-            }
-
-            if (startAdding)
-            {
-               orderedVerticesAndIntersections.add(point);
-            }
-
-            unorderedListIndex = EuclidGeometryPolygonTools.next(unorderedListIndex, verticesAndIntersections.size());
-         }
-
-         //
-
-         // get started on drawing:
-
-         if (vertex0IsAbove)
-         {
-            currentResultingConcaveHull.addVertex(concaveHullToCrop.getVertex(0));
-         }
-
-
-
-
-
-
-         List<Integer> aboveVertices = new ArrayList<>();
-         Map<Integer, Boolean> visitedMap = new HashMap<>();
-         for (int i = 0; i < concaveHullToCrop.getNumberOfVertices(); i++)
-         {
-            Point2D concaveHullVertex = concaveHullToCrop.getVertex(i);
-            if (EuclidGeometryTools.isPoint2DInFrontOfRay2D(concaveHullVertex, cuttingLine.getPoint(), upDirection))
-            {
-               aboveVertices.add(i);
-               visitedMap.put(i, false);
-            }
-         }
-
-
-         // get above
-
-//         int firstVertexAbove
-         if (!vertex0IsAbove)
-         {
-            for (int i = 1; i < concaveHullToCrop.getNumberOfVertices(); i++) // loop over rest of vertices
-            {
-               boolean interruptedByIntersection = intersections.containsKey(i);
-               if (interruptedByIntersection)
+               if (drawState == ALONG_HULL) // if we are along hull, is next point intersection?
                {
+                  boolean nextPointIsIntersection = model.getPoints().getNext(travellingIndex).isIntersection();
 
+                  if (nextPointIsIntersection)
+                  {
+                     drawState = TRAVERSE_CUT_LINE;
+                  }
+
+                  travellingIndex = model.getPoints().getNextIndex(travellingIndex);
                }
+               else if (drawState == TRAVERSE_CUT_LINE)
+               {
+                  travellingIndex = model.indexOfIntersectionToLeft(travellingIndex);
+
+                  drawState = ALONG_HULL;
+               }
+
+               currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(travellingIndex).getPoint()));
             }
+            while (travellingIndex != firstUnvisitedVertex);
+
+            // finish up current resulting concave hull
+            resultingConcaveHulls.add(currentResultingConcaveHull);
          }
 
-
-
-
-         // until all above vertices are visited
-
-//         while (!allVisited)
-         {
-            // where will we start drawing?
-            // two cases:
-
-
-            // draw a loop
-
-
-
-         }
-
-
-
-         // iterate over vertices and intersections
-
-         for (int i = 1; i < concaveHullToCrop.getNumberOfVertices(); i++) // loop over rest of vertices
-         {
-            Point2D concaveHullVertex = concaveHullToCrop.getVertex(i);
-
-            boolean interruptedByIntersection = intersections.containsKey(i);
-            if (interruptedByIntersection)
-            {
-
-            }
-
-//            if (isDrawingConcaveHull && )
-
-
-            // access current concave polygon
-
-         }
-
-
+         // number of returned hulls may be as high as (n-1)/2
+         return resultingConcaveHulls;
       }
-
-      // number of returned hulls may be as high as (n-1)/2
-      return resultingConcaveHulls;
    }
 }
