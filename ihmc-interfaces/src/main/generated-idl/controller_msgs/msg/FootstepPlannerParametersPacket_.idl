@@ -34,6 +34,11 @@ module controller_msgs
          */
         boolean check_for_body_box_collisions;
         /**
+         * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+         * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+         */
+        boolean check_for_path_collisions;
+        /**
          * Sets whether or not to perform the defined heuristic search policies.
          */
         boolean perform_heuristic_search_policies;
@@ -252,14 +257,6 @@ module controller_msgs
          * contains at least this many footsteps.
          */
         unsigned long minimum_steps_for_best_effort_plan;
-        /**
-         * Some node checkers will check if the body of the robot will move through a higher planar region
-         * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-         * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-         * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-         */
-        @defaultValue(value=-1.0)
-        double body_ground_clearance;
         /**
          * Some node checkers will check if a bounding box that describes the body of the robot will move
          * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these

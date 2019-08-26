@@ -31,6 +31,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public boolean check_for_body_box_collisions_;
    /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public boolean check_for_path_collisions_;
+   /**
             * Sets whether or not to perform the defined heuristic search policies.
             */
    public boolean perform_heuristic_search_policies_;
@@ -229,13 +234,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long minimum_steps_for_best_effort_plan_;
    /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public double body_ground_clearance_ = -1.0;
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -401,6 +399,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
 
+      check_for_path_collisions_ = other.check_for_path_collisions_;
+
       perform_heuristic_search_policies_ = other.perform_heuristic_search_policies_;
 
       ideal_footstep_width_ = other.ideal_footstep_width_;
@@ -452,8 +452,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return_best_effort_plan_ = other.return_best_effort_plan_;
 
       minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
-
-      body_ground_clearance_ = other.body_ground_clearance_;
 
       body_box_height_ = other.body_box_height_;
 
@@ -551,6 +549,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getCheckForBodyBoxCollisions()
    {
       return check_for_body_box_collisions_;
+   }
+
+   /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public void setCheckForPathCollisions(boolean check_for_path_collisions)
+   {
+      check_for_path_collisions_ = check_for_path_collisions;
+   }
+   /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public boolean getCheckForPathCollisions()
+   {
+      return check_for_path_collisions_;
    }
 
    /**
@@ -1132,27 +1147,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public void setBodyGroundClearance(double body_ground_clearance)
-   {
-      body_ground_clearance_ = body_ground_clearance;
-   }
-   /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public double getBodyGroundClearance()
-   {
-      return body_ground_clearance_;
-   }
-
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -1696,6 +1690,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_path_collisions_, other.check_for_path_collisions_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_heuristic_search_policies_, other.perform_heuristic_search_policies_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_width_, other.ideal_footstep_width_, epsilon)) return false;
@@ -1747,8 +1743,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_plan_, other.return_best_effort_plan_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_ground_clearance_, other.body_ground_clearance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
 
@@ -1831,6 +1825,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
 
+      if(this.check_for_path_collisions_ != otherMyClass.check_for_path_collisions_) return false;
+
       if(this.perform_heuristic_search_policies_ != otherMyClass.perform_heuristic_search_policies_) return false;
 
       if(this.ideal_footstep_width_ != otherMyClass.ideal_footstep_width_) return false;
@@ -1882,8 +1878,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.return_best_effort_plan_ != otherMyClass.return_best_effort_plan_) return false;
 
       if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
-
-      if(this.body_ground_clearance_ != otherMyClass.body_ground_clearance_) return false;
 
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
 
@@ -1963,6 +1957,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
+      builder.append("check_for_path_collisions=");
+      builder.append(this.check_for_path_collisions_);      builder.append(", ");
       builder.append("perform_heuristic_search_policies=");
       builder.append(this.perform_heuristic_search_policies_);      builder.append(", ");
       builder.append("ideal_footstep_width=");
@@ -2015,8 +2011,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.return_best_effort_plan_);      builder.append(", ");
       builder.append("minimum_steps_for_best_effort_plan=");
       builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
-      builder.append("body_ground_clearance=");
-      builder.append(this.body_ground_clearance_);      builder.append(", ");
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
       builder.append("body_box_depth=");

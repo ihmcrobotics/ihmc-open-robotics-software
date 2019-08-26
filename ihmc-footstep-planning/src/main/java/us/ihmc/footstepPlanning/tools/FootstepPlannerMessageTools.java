@@ -56,6 +56,7 @@ public class FootstepPlannerMessageTools
       }
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+      packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
@@ -82,7 +83,6 @@ public class FootstepPlannerMessageTools
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
