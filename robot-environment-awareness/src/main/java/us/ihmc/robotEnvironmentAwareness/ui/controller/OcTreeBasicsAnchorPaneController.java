@@ -103,6 +103,9 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       coloringTypeComboBox.setItems(coloringTypeOptions);
       coloringTypeComboBox.setValue(ColoringType.REGION);
       lidarBufferSizeSlider.setLabelFormatter(StringConverterTools.thousandRounding(true));
+      
+      surfaceNormalUpperBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
+      surfaceNormalLowerBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
    }
 
    @Override

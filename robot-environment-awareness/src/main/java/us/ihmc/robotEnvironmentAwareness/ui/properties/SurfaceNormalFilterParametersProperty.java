@@ -7,10 +7,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParamet
 public class SurfaceNormalFilterParametersProperty extends ParametersProperty<SurfaceNormalFilterParameters>
 {
    private final BooleanField useFilter = new BooleanField(SurfaceNormalFilterParameters::isUseSurfaceNormalFilter, (p, v) -> p.setUseSurfaceNormalFilter(v));
-   private final DoubleField upperBound = new DoubleField(SurfaceNormalFilterParameters::getSurfaceNormalUpperBoundDegree,
-                                                          (p, v) -> p.setSurfaceNormalUpperBoundDegree(v));
-   private final DoubleField lowerBound = new DoubleField(SurfaceNormalFilterParameters::getSurfaceNormalLowerBoundDegree,
-                                                          (p, v) -> p.setSurfaceNormalLowerBoundDegree(v));
+   private final DoubleField upperBound = new DoubleField(SurfaceNormalFilterParameters::getSurfaceNormalUpperBound,
+                                                          (p, v) -> p.setSurfaceNormalUpperBound(v));
+   private final DoubleField lowerBound = new DoubleField(SurfaceNormalFilterParameters::getSurfaceNormalLowerBound,
+                                                          (p, v) -> p.setSurfaceNormalLowerBound(v));
 
    public SurfaceNormalFilterParametersProperty(Object bean, String name)
    {

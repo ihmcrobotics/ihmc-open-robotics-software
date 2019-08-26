@@ -3,8 +3,8 @@ package us.ihmc.robotEnvironmentAwareness.planarRegion;
 public class SurfaceNormalFilterParameters
 {
    private boolean useSurfaceNormalFilter;
-   private double surfaceNormalUpperBoundDegree;
-   private double surfaceNormalLowerBoundDegree;
+   private double surfaceNormalUpperBound;
+   private double surfaceNormalLowerBound;
    
    public SurfaceNormalFilterParameters()
    {
@@ -19,15 +19,15 @@ public class SurfaceNormalFilterParameters
    public void set(SurfaceNormalFilterParameters other)
    {
       useSurfaceNormalFilter = other.useSurfaceNormalFilter;
-      surfaceNormalUpperBoundDegree = other.surfaceNormalUpperBoundDegree;
-      surfaceNormalLowerBoundDegree = other.surfaceNormalLowerBoundDegree;
+      surfaceNormalUpperBound = other.surfaceNormalUpperBound;
+      surfaceNormalLowerBound = other.surfaceNormalLowerBound;
    }
    
    public void setDefaultParameters()
    {
       useSurfaceNormalFilter = true;
-      surfaceNormalUpperBoundDegree = 45.0;
-      surfaceNormalLowerBoundDegree = -45.0;
+      surfaceNormalUpperBound = 0.7854;
+      surfaceNormalLowerBound = -0.7854;
    }
 
    public boolean isUseSurfaceNormalFilter()
@@ -35,14 +35,14 @@ public class SurfaceNormalFilterParameters
       return useSurfaceNormalFilter;
    }
 
-   public double getSurfaceNormalUpperBoundDegree()
+   public double getSurfaceNormalUpperBound()
    {
-      return surfaceNormalUpperBoundDegree;
+      return surfaceNormalUpperBound;
    }
 
-   public double getSurfaceNormalLowerBoundDegree()
+   public double getSurfaceNormalLowerBound()
    {
-      return surfaceNormalLowerBoundDegree;
+      return surfaceNormalLowerBound;
    }
 
    public void setUseSurfaceNormalFilter(boolean useSurfaceNormalFilter)
@@ -50,13 +50,13 @@ public class SurfaceNormalFilterParameters
       this.useSurfaceNormalFilter = useSurfaceNormalFilter;
    }
 
-   public void setSurfaceNormalUpperBoundDegree(double surfaceNormalUpperBoundDegree)
+   public void setSurfaceNormalUpperBound(double surfaceNormalUpperBound)
    {
-      this.surfaceNormalUpperBoundDegree = surfaceNormalUpperBoundDegree;
+      this.surfaceNormalUpperBound = surfaceNormalUpperBound;
    }
 
-   public void setSurfaceNormalLowerBoundDegree(double surfaceNormalLowerBoundDegree)
+   public void setSurfaceNormalLowerBound(double surfaceNormalLowerBound)
    {
-      this.surfaceNormalLowerBoundDegree = surfaceNormalLowerBoundDegree;
+      this.surfaceNormalLowerBound = surfaceNormalLowerBound;
    }
 }
