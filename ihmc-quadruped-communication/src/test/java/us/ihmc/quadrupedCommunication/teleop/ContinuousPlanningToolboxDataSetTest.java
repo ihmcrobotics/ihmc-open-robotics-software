@@ -72,7 +72,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ContinuousPlanningToolboxDataSetTest
 {
-   private static final double defaultBestEffortTimeout = 0.5;
+   private static final double defaultTimeout = 0.5;
+   private static final double defaultBestEffortTimeout = 0.25;
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 1.0;
 
@@ -369,7 +370,8 @@ public class ContinuousPlanningToolboxDataSetTest
 
       QuadrupedContinuousPlanningRequestPacket requestPacket = new QuadrupedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(defaultBestEffortTimeout);
+      requestPacket.setTimeout(defaultTimeout);
+      requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getQuadrupedGoalPosition());
 
@@ -523,7 +525,10 @@ public class ContinuousPlanningToolboxDataSetTest
             statusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
             statusMessage.getDesiredTouchdownPositionInWorld().set(stepJustStarted.getGoalPosition());
 
-            LogTools.info("Just started at t = " + timeReference.get() + " step " + stepJustStarted.getRobotQuadrant() + " : " + stepJustStarted.getGoalPosition() + " Time: " + stepJustStarted.getTimeInterval());
+            if (DEBUG)
+            {
+               LogTools.info("Just started at t = " + timeReference.get() + " step " + stepJustStarted.getRobotQuadrant() + " : " + stepJustStarted.getGoalPosition() + " Time: " + stepJustStarted.getTimeInterval());
+            }
 
             footstepStatusPublisher.publish(statusMessage);
 
@@ -542,7 +547,10 @@ public class ContinuousPlanningToolboxDataSetTest
             statusMessage.getActualStepInterval().setEndTime(stepJustFinished.getTimeInterval().getEndTime());
             statusMessage.getActualTouchdownPositionInWorld().set(stepJustFinished.getGoalPosition());
 
-            LogTools.info("Just finished at t = " + timeReference.get() + " step " + stepJustFinished.getRobotQuadrant() + " : " + stepJustFinished.getGoalPosition() + " Time: " + stepJustFinished.getTimeInterval());
+            if (DEBUG)
+            {
+               LogTools.info("Just finished at t = " + timeReference.get() + " step " + stepJustFinished.getRobotQuadrant() + " : " + stepJustFinished.getGoalPosition() + " Time: " + stepJustFinished.getTimeInterval());
+            }
 
             footstepStatusPublisher.publish(statusMessage);
 
@@ -559,6 +567,8 @@ public class ContinuousPlanningToolboxDataSetTest
          tickStartTime = currentTime;
          timeReference.addAndGet(dt);
       }
+
+      LogTools.info("Done!");
 
       return "";
    }
