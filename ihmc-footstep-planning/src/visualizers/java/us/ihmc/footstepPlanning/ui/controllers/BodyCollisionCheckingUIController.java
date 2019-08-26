@@ -18,6 +18,8 @@ public class BodyCollisionCheckingUIController
 
    @FXML
    private CheckBox enableBodyCollisionChecking;
+   @FXML
+   private CheckBox enablePathCollisionChecking;
 
    @FXML
    private Spinner<Double> bodyDepth;
@@ -69,6 +71,7 @@ public class BodyCollisionCheckingUIController
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       javaFXStoredPropertyMap.put(enableBodyCollisionChecking, FootstepPlannerParameterKeys.checkForBodyBoxCollisions);
+      javaFXStoredPropertyMap.put(enablePathCollisionChecking, FootstepPlannerParameterKeys.checkForPathCollisions);
       javaFXStoredPropertyMap.put(bodyDepth, FootstepPlannerParameterKeys.bodyBoxDepth);
       javaFXStoredPropertyMap.put(bodyHeight, FootstepPlannerParameterKeys.bodyBoxHeight);
       javaFXStoredPropertyMap.put(bodyWidth, FootstepPlannerParameterKeys.bodyBoxWidth);
