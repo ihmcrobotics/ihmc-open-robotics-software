@@ -42,18 +42,21 @@
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                      </columnConstraints>
                      <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <Label maxWidth="1.7976931348623157E308" text="Current Depth:" />
-                        <Slider fx:id="depthSlider" blockIncrement="1.0" majorTickUnit="1.0" max="16.0" min="10.0" minorTickCount="0" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="15.0" GridPane.columnIndex="1" />
-                        <Label maxWidth="1.7976931348623157E308" text="Node Display Type:" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="2" />
-                        <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label maxWidth="1.7976931348623157E308" text="Current Depth:" GridPane.rowIndex="1" />
+                        <Slider fx:id="depthSlider" blockIncrement="1.0" majorTickUnit="1.0" max="16.0" min="10.0" minorTickCount="0" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label maxWidth="1.7976931348623157E308" text="Node Display Type:" GridPane.rowIndex="2" />
+                        <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label maxWidth="1.7976931348623157E308" text="Current Resolution:" />
+                        <Slider fx:id="resolutionSlider" blockIncrement="1.0" majorTickUnit="0.005" max="0.06" min="0.01" minorTickCount="1" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.02" GridPane.columnIndex="1" />
                      </children>
                   </GridPane>
                </children>
