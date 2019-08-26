@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning;
 
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 
-public interface BodyPathAndPawPlanner extends PawPlanner
+public interface BodyPathAndPawPlanner extends PawStepPlanner
 {
-   WaypointsForPawPlanner getWaypointPathPlanner();
-   PawPlanner getPawPlanner();
+   WaypointsForPawStepPlanner getWaypointPathPlanner();
+   PawStepPlanner getPawStepPlanner();
 
-   PawPlanningResult planPath();
+   PawStepPlanningResult planPath();
    BodyPathPlan getPathPlan();
 }

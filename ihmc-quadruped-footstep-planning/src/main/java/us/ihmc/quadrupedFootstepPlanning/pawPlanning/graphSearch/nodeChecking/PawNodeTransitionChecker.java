@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawPlannerListener;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
@@ -12,16 +12,16 @@ import java.util.ArrayList;
 public abstract class PawNodeTransitionChecker
 {
    protected PlanarRegionsList planarRegionsList;
-   protected final ArrayList<PawPlannerListener> listeners = new ArrayList<>();
+   protected final ArrayList<PawStepPlannerListener> listeners = new ArrayList<>();
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
    }
 
-   protected void rejectNode(PawNode node, PawNode parentNode, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+   protected void rejectNode(PawNode node, PawNode parentNode, PawStepPlannerNodeRejectionReason rejectionReason)
    {
-      for (PawPlannerListener listener : listeners)
+      for (PawStepPlannerListener listener : listeners)
          listener.rejectNode(node, parentNode, rejectionReason);
    }
 
@@ -30,7 +30,7 @@ public abstract class PawNodeTransitionChecker
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
 
-   public void addPlannerListener(PawPlannerListener listener)
+   public void addPlannerListener(PawStepPlannerListener listener)
    {
       if (listener != null)
          listeners.add(listener);

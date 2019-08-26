@@ -4,7 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.FootstepPlanningRandomTools;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlanningRandomTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
@@ -25,7 +25,7 @@ public class PawNodeTest
       for (int i = 0; i < numTrials; i++)
       {
          // test for exact same transform
-         nodeA = FootstepPlanningRandomTools.createRandomFootstepNode(random);
+         nodeA = PawStepPlanningRandomTools.createRandomFootstepNode(random);
          nodeB = new PawNode(nodeA);
 
          assertTrue(nodeA.equals(nodeB));

@@ -9,13 +9,13 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawPlanner
+public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
 
@@ -32,7 +32,7 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawPlanne
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
    }
 
-   public PawPlanningResult planWaypoints()
+   public PawStepPlanningResult planWaypoints()
    {
       waypoints.clear();
 
@@ -80,12 +80,12 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawPlanne
          catch (Exception e)
          {
             e.printStackTrace();
-            yoResult.set(PawPlanningResult.PLANNER_FAILED);
+            yoResult.set(PawStepPlanningResult.PLANNER_FAILED);
             return yoResult.getEnumValue();
          }
       }
 
-      yoResult.set(PawPlanningResult.SUB_OPTIMAL_SOLUTION);
+      yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
    }
 

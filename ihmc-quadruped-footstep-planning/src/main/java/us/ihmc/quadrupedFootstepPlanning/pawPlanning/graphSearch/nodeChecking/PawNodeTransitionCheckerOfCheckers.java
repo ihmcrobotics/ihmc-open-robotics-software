@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawPlannerListener;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
@@ -41,7 +41,7 @@ public class PawNodeTransitionCheckerOfCheckers extends PawNodeTransitionChecker
    }
 
    @Override
-   public void addPlannerListener(PawPlannerListener listener)
+   public void addPlannerListener(PawStepPlannerListener listener)
    {
       for (PawNodeTransitionChecker nodeChecker : nodeCheckers)
          nodeChecker.addPlannerListener(listener);

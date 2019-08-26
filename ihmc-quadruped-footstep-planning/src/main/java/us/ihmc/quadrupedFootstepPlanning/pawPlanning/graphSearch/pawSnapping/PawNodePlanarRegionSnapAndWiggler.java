@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -30,7 +30,7 @@ public class PawNodePlanarRegionSnapAndWiggler extends PawNodeSnapper
    private final PlanarRegionPawConstraintDataHolder constraintDataHolder = new PlanarRegionPawConstraintDataHolder();
    private final PlanarRegionPawConstraintDataParameters constraintDataParameters = new PlanarRegionPawConstraintDataParameters();
 
-   public PawNodePlanarRegionSnapAndWiggler(PawPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
+   public PawNodePlanarRegionSnapAndWiggler(PawStepPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
                                             BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);

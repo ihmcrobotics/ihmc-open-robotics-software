@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -32,7 +32,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       generator.addRectangle(10.0, 10.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
@@ -72,7 +72,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
@@ -127,7 +127,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
@@ -164,7 +164,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       generator.addRectangle(1.0, 1.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
@@ -189,12 +189,12 @@ public class SimplePlanarRegionPawNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultPawPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultPawStepPlannerParameters().getProjectInsideDistance();
       double expectedTranslation = projectionDistance - extraSquareWidth;
 
       // test snapping on front edge
@@ -422,12 +422,12 @@ public class SimplePlanarRegionPawNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultPawPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultPawStepPlannerParameters().getProjectInsideDistance();
       double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(rollAngle);
 
 
@@ -481,12 +481,12 @@ public class SimplePlanarRegionPawNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultPawPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultPawStepPlannerParameters().getProjectInsideDistance();
       double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(pitchAngle);
 
       PlanarRegion region = planarRegionsList.getPlanarRegion(0);
@@ -527,7 +527,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedSnappedPoint, snappedPoint, epsilon);
    }
 
-   private class TestParameters extends DefaultPawPlannerParameters
+   private class TestParameters extends DefaultPawStepPlannerParameters
    {
       final double projectionDistance;
 

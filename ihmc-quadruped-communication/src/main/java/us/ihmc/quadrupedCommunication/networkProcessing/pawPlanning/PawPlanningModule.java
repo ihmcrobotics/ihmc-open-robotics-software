@@ -10,8 +10,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -36,7 +35,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
    private final PawPlanningController footstepPlanningController;
 
-   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawPlannerParametersBasics defaultPawPlannerParameters,
+   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawStepPlannerParametersBasics defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
@@ -45,7 +44,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
            pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
-   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawPlannerParametersBasics defaultPawPlannerParameters,
+   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawStepPlannerParametersBasics defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
@@ -83,11 +82,11 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processPawPlanningRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedPawPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processVisibilityGraphParametersPacket(s.takeNextData()));
@@ -111,7 +110,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
          footstepPlanningController.processSteppingStateChangeMessage(message);
    }
 
-   private void processFootstepPlannerParametersPacket(QuadrupedPawPlannerParametersPacket packet)
+   private void processFootstepPlannerParametersPacket(PawStepPlannerParametersPacket packet)
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processFootstepPlannerParametersPacket(packet);
@@ -135,7 +134,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
          footstepPlanningController.processSupportRegionParameters(message);
    }
 
-   private void processPawPlanningRequest(PawPlanningRequestPacket packet)
+   private void processPawPlanningRequest(PawStepPlanningRequestPacket packet)
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processPawPlanningRequest(packet);
@@ -164,10 +163,10 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
-      messages.put(QuadrupedPawPlannerParametersPacket.class, getPublisherTopicNameGenerator());
+      messages.put(PawStepPlannerParametersPacket.class, getPublisherTopicNameGenerator());
       messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicNameGenerator());
 
       return messages;

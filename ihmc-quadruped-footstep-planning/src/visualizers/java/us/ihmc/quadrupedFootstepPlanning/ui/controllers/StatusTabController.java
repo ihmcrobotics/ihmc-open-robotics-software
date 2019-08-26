@@ -9,8 +9,8 @@ import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,7 +19,7 @@ public class StatusTabController
    private static final boolean verbose = false;
 
    @FXML
-   private ComboBox<PawPlannerType> plannerTypeComboBox;
+   private ComboBox<PawStepPlannerType> plannerTypeComboBox;
    @FXML
    private TextField requestID;
    @FXML
@@ -42,8 +42,8 @@ public class StatusTabController
          PrintTools.info(this, "Clicked compute path...");
 
       int newRequestID = currentPlannerRequestId.get() + 1;
-      messager.submitMessage(PawPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
-      messager.submitMessage(PawPlannerMessagerAPI.ComputePathTopic, true);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
+      messager.submitMessage(PawStepPlannerMessagerAPI.ComputePathTopic, true);
    }
 
    @FXML
@@ -52,7 +52,7 @@ public class StatusTabController
       if (verbose)
          PrintTools.info(this, "Clicked abort planning...");
 
-      messager.submitMessage(PawPlannerMessagerAPI.AbortPlanningTopic, true);
+      messager.submitMessage(PawStepPlannerMessagerAPI.AbortPlanningTopic, true);
    }
 
    private JavaFXMessager messager;
@@ -61,14 +61,14 @@ public class StatusTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-      currentPlannerRequestId = messager.createInput(PawPlannerMessagerAPI.PlannerRequestIdTopic, -1);
+      currentPlannerRequestId = messager.createInput(PawStepPlannerMessagerAPI.PlannerRequestIdTopic, -1);
    }
 
    private void setupControls()
    {
-      ObservableList<PawPlannerType> plannerTypeOptions = FXCollections.observableArrayList(PawPlannerType.values);
+      ObservableList<PawStepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(PawStepPlannerType.values);
       plannerTypeComboBox.setItems(plannerTypeOptions);
-      plannerTypeComboBox.setValue(PawPlannerType.A_STAR);
+      plannerTypeComboBox.setValue(PawStepPlannerType.A_STAR);
    }
 
    private class TextViewerListener<T> implements TopicListener<T>
@@ -90,14 +90,14 @@ public class StatusTabController
    {
       setupControls();
 
-      messager.bindBidirectional(PawPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
-      messager.registerJavaFXSyncedTopicListener(PawPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<>(requestID));
-      messager.registerJavaFXSyncedTopicListener(PawPlannerMessagerAPI.ReceivedPlanIdTopic, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(PawPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
-      messager.registerJavaFXSyncedTopicListener(PawPlannerMessagerAPI.PlanningResultTopic, new TextViewerListener<>(planningResult));
-      messager.registerJavaFXSyncedTopicListener(PawPlannerMessagerAPI.PlannerStatusTopic, new TextViewerListener<>(plannerStatus));
+      messager.bindBidirectional(PawStepPlannerMessagerAPI.PlannerTypeTopic, plannerTypeComboBox.valueProperty(), true);
+      messager.registerJavaFXSyncedTopicListener(PawStepPlannerMessagerAPI.PlannerRequestIdTopic, new TextViewerListener<>(requestID));
+      messager.registerJavaFXSyncedTopicListener(PawStepPlannerMessagerAPI.ReceivedPlanIdTopic, new TextViewerListener<>(receivedRequestId));
+      messager.registerJavaFXSyncedTopicListener(PawStepPlannerMessagerAPI.PlannerTimeTakenTopic, new TextViewerListener<>(timeTaken));
+      messager.registerJavaFXSyncedTopicListener(PawStepPlannerMessagerAPI.PlanningResultTopic, new TextViewerListener<>(planningResult));
+      messager.registerJavaFXSyncedTopicListener(PawStepPlannerMessagerAPI.PlannerStatusTopic, new TextViewerListener<>(plannerStatus));
 
-      messager.bindBidirectional(PawPlannerMessagerAPI.AcceptNewPlanarRegionsTopic, acceptNewPlanarRegions.selectedProperty(), true);
+      messager.bindBidirectional(PawStepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic, acceptNewPlanarRegions.selectedProperty(), true);
 
    }
 

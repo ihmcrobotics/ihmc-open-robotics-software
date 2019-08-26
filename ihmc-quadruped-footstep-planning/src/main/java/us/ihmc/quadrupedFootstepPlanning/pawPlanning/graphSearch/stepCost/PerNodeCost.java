@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 
 public class PerNodeCost implements PawNodeCost
 {
-   private final PawPlannerParametersReadOnly parameters;
+   private final PawStepPlannerParametersReadOnly parameters;
 
-   public PerNodeCost(PawPlannerParametersReadOnly parameters)
+   public PerNodeCost(PawStepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }

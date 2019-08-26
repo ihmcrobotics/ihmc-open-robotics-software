@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -54,7 +54,7 @@ public class PointFootSnapperVisualizer
             maxY = convexHull.getMaxY();
       }
 
-      DefaultPawPlannerParameters parameters = new DefaultPawPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       Graphics3DObject snappedNodeGraphics = new Graphics3DObject();
       SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
                                                                                       parameters::getProjectInsideUsingConvexHull, true);

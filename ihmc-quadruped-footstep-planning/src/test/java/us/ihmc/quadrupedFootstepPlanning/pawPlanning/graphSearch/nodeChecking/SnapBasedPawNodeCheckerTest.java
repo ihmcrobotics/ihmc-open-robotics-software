@@ -15,11 +15,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.QuadrupedPawPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawPlannerListener;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -112,14 +112,14 @@ public class SnapBasedPawNodeCheckerTest
 
       isValid = nodeChecker.isNodeValid(node);
       // should be invalid, as it requires shifting way too far
-      testListener.assertCorrectRejection("", node, QuadrupedPawPlannerNodeRejectionReason.COULD_NOT_SNAP);
+      testListener.assertCorrectRejection("", node, PawStepPlannerNodeRejectionReason.COULD_NOT_SNAP);
       assertFalse(isValid);
    }
 
 
-   private class TestListener implements PawPlannerListener
+   private class TestListener implements PawStepPlannerListener
    {
-      private final AtomicReference<QuadrupedPawPlannerNodeRejectionReason> reason = new AtomicReference<>();
+      private final AtomicReference<PawStepPlannerNodeRejectionReason> reason = new AtomicReference<>();
       private final AtomicReference<PawNode> rejectedNode = new AtomicReference<>();
 
       @Override
@@ -128,21 +128,21 @@ public class SnapBasedPawNodeCheckerTest
 
       }
 
-      public void assertCorrectRejection(String message, PawNode node, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+      public void assertCorrectRejection(String message, PawNode node, PawStepPlannerNodeRejectionReason rejectionReason)
       {
          assertEquals(rejectionReason, reason.getAndSet(null), message);
          assertEquals(node, rejectedNode.getAndSet(null), message);
       }
 
       @Override
-      public void rejectNode(PawNode node, PawNode parentNode, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+      public void rejectNode(PawNode node, PawNode parentNode, PawStepPlannerNodeRejectionReason rejectionReason)
       {
          rejectedNode.set(node);
          reason.set(rejectionReason);
       }
 
       @Override
-      public void rejectNode(PawNode node, QuadrupedPawPlannerNodeRejectionReason rejectionReason)
+      public void rejectNode(PawNode node, PawStepPlannerNodeRejectionReason rejectionReason)
       {
          rejectedNode.set(node);
          reason.set(rejectionReason);
@@ -167,7 +167,7 @@ public class SnapBasedPawNodeCheckerTest
       }
    }
 
-   private class TestParameters extends DefaultPawPlannerParameters
+   private class TestParameters extends DefaultPawStepPlannerParameters
    {
       double distance;
       @Override

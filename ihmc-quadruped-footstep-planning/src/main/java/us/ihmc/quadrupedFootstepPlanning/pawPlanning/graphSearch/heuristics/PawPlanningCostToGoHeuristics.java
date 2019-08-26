@@ -1,15 +1,15 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class PawPlanningCostToGoHeuristics
 {
    private DoubleProvider heuristicsInflationWeight;
-   protected final PawPlannerParametersReadOnly parameters;
+   protected final PawStepPlannerParametersReadOnly parameters;
 
-   public PawPlanningCostToGoHeuristics(PawPlannerParametersReadOnly parameters)
+   public PawPlanningCostToGoHeuristics(PawStepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }

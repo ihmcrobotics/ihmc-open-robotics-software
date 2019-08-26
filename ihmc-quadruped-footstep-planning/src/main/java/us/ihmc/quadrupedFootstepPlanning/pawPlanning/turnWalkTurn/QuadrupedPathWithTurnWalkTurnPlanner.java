@@ -8,7 +8,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
@@ -27,7 +27,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
 
 
    private final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
-   private final WaypointsForPawPlanner waypointPathPlanner;
+   private final WaypointsForPawStepPlanner waypointPathPlanner;
 
    private final QuadrupedTurnWalkTurnPathPlanner quadBodyPathPlanner;
    private final QuadrupedXGaitStepCalculator stepCalculator;
@@ -35,7 +35,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
 
-   public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForPawPlanner waypointPathPlanner, QuadrupedXGaitSettingsBasics xGaitSettings,
+   public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForPawStepPlanner waypointPathPlanner, QuadrupedXGaitSettingsBasics xGaitSettings,
                                                YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
                                                YoVariableRegistry parentRegistry)
@@ -67,13 +67,13 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
 
 
    @Override
-   public WaypointsForPawPlanner getWaypointPathPlanner()
+   public WaypointsForPawStepPlanner getWaypointPathPlanner()
    {
       return waypointPathPlanner;
    }
 
    @Override
-   public PawPlanner getPawPlanner()
+   public PawStepPlanner getPawStepPlanner()
    {
       return this;
    }
@@ -98,22 +98,22 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    }
 
    @Override
-   public void setStart(PawPlannerStart start)
+   public void setStart(PawStepPlannerStart start)
    {
       waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
    }
 
    @Override
-   public void setGoal(PawPlannerGoal goal)
+   public void setGoal(PawStepPlannerGoal goal)
    {
       waypointPathPlanner.setGoal(goal);
    }
 
 
    @Override
-   public PawPlanningResult planPath()
+   public PawStepPlanningResult planPath()
    {
-      PawPlanningResult result = waypointPathPlanner.planWaypoints();
+      PawStepPlanningResult result = waypointPathPlanner.planWaypoints();
 
       bodyPathPlanner.setWaypoints(waypointPathPlanner.getWaypoints());
       bodyPathPlanner.compute();
@@ -122,7 +122,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    }
 
    @Override
-   public PawPlanningResult plan()
+   public PawStepPlanningResult plan()
    {
       BodyPathPlan bodyPathPlan = bodyPathPlanner.getPlan();
       bodyPathPlan.setStartPose(waypointPathPlanner.getInitialBodyPose().getPosition().getX(), waypointPathPlanner.getInitialBodyPose().getPosition().getY(), waypointPathPlanner
@@ -136,7 +136,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
       stepCalculator.setGoalPose(waypointPathPlanner.getGoalBodyPose());
       stepCalculator.onEntry();
 
-      return PawPlanningResult.OPTIMAL_SOLUTION;
+      return PawStepPlanningResult.OPTIMAL_SOLUTION;
    }
 
    @Override
@@ -146,9 +146,9 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    }
 
    @Override
-   public PawPlan getPlan()
+   public PawStepPlan getPlan()
    {
-      PawPlan plan = new PawPlan();
+      PawStepPlan plan = new PawStepPlan();
       List<QuadrupedTimedOrientedStep> steps = stepCalculator.getSteps();
       TimeIntervalTools.sortByStartTime(steps);
       double startTime = steps.get(0).getTimeInterval().getStartTime();

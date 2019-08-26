@@ -5,12 +5,11 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParameterKeys;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParameterKeys;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
@@ -20,7 +19,7 @@ import java.io.IOException;
 public class PlannerReachParametersUIController
 {
    private JavaFXMessager messager;
-   private PawPlannerParametersBasics planningParameters;
+   private PawStepPlannerParametersBasics planningParameters;
 
 
    @FXML
@@ -75,7 +74,7 @@ public class PlannerReachParametersUIController
    private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
-   private Topic<PawPlannerParametersReadOnly> plannerParametersTopic;
+   private Topic<PawStepPlannerParametersReadOnly> plannerParametersTopic;
 
    public PlannerReachParametersUIController()
    {
@@ -98,13 +97,13 @@ public class PlannerReachParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParametersTopic(Topic<PawPlannerParametersReadOnly> plannerParametersTopic)
+   public void setPlannerParametersTopic(Topic<PawStepPlannerParametersReadOnly> plannerParametersTopic)
    {
       this.plannerParametersTopic = plannerParametersTopic;
    }
 
 
-   public void setPlannerParameters(PawPlannerParametersBasics parameters)
+   public void setPlannerParameters(PawStepPlannerParametersBasics parameters)
    {
       planningParameters = parameters;
    }
@@ -144,33 +143,33 @@ public class PlannerReachParametersUIController
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
 
-      javaFXStoredPropertyMap.put(maxFrontStepReach, PawPlannerParameterKeys.maximumFrontStepReach);
-      javaFXStoredPropertyMap.put(maxFrontStepLength, PawPlannerParameterKeys.maximumFrontStepLength);
-      javaFXStoredPropertyMap.put(minFrontStepLength, PawPlannerParameterKeys.minimumFrontStepLength);
-      javaFXStoredPropertyMap.put(maxHindStepReach, PawPlannerParameterKeys.maximumHindStepReach);
-      javaFXStoredPropertyMap.put(maxHindStepLength, PawPlannerParameterKeys.maximumHindStepLength);
-      javaFXStoredPropertyMap.put(minHindStepLength, PawPlannerParameterKeys.minimumHindStepLength);
-      javaFXStoredPropertyMap.put(maxStepWidth, PawPlannerParameterKeys.maximumStepOutward);
-      javaFXStoredPropertyMap.put(minStepWidth, PawPlannerParameterKeys.maximumStepInward);
+      javaFXStoredPropertyMap.put(maxFrontStepReach, PawStepPlannerParameterKeys.maximumFrontStepReach);
+      javaFXStoredPropertyMap.put(maxFrontStepLength, PawStepPlannerParameterKeys.maximumFrontStepLength);
+      javaFXStoredPropertyMap.put(minFrontStepLength, PawStepPlannerParameterKeys.minimumFrontStepLength);
+      javaFXStoredPropertyMap.put(maxHindStepReach, PawStepPlannerParameterKeys.maximumHindStepReach);
+      javaFXStoredPropertyMap.put(maxHindStepLength, PawStepPlannerParameterKeys.maximumHindStepLength);
+      javaFXStoredPropertyMap.put(minHindStepLength, PawStepPlannerParameterKeys.minimumHindStepLength);
+      javaFXStoredPropertyMap.put(maxStepWidth, PawStepPlannerParameterKeys.maximumStepOutward);
+      javaFXStoredPropertyMap.put(minStepWidth, PawStepPlannerParameterKeys.maximumStepInward);
 
-      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingUp, PawPlannerParameterKeys.maximumFrontStepLengthWhenSteppingUp);
-      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingUp, PawPlannerParameterKeys.minimumFrontStepLengthWhenSteppingUp);
-      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingUp, PawPlannerParameterKeys.maximumHindStepLengthWhenSteppingUp);
-      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingUp, PawPlannerParameterKeys.minimumHindStepLengthWhenSteppingUp);
-      javaFXStoredPropertyMap.put(stepZForSteppingUp, PawPlannerParameterKeys.stepZForSteppingUp);
+      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingUp, PawStepPlannerParameterKeys.maximumFrontStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingUp, PawStepPlannerParameterKeys.minimumFrontStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingUp, PawStepPlannerParameterKeys.maximumHindStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingUp, PawStepPlannerParameterKeys.minimumHindStepLengthWhenSteppingUp);
+      javaFXStoredPropertyMap.put(stepZForSteppingUp, PawStepPlannerParameterKeys.stepZForSteppingUp);
 
-      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingDown, PawPlannerParameterKeys.maximumFrontStepLengthWhenSteppingDown);
-      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingDown, PawPlannerParameterKeys.minimumFrontStepLengthWhenSteppingDown);
-      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingDown, PawPlannerParameterKeys.maximumHindStepLengthWhenSteppingDown);
-      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingDown, PawPlannerParameterKeys.minimumHindStepLengthWhenSteppingDown);
-      javaFXStoredPropertyMap.put(stepZForSteppingDown, PawPlannerParameterKeys.stepZForSteppingDown);
+      javaFXStoredPropertyMap.put(maxFrontStepLengthWhenSteppingDown, PawStepPlannerParameterKeys.maximumFrontStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(minFrontStepLengthWhenSteppingDown, PawStepPlannerParameterKeys.minimumFrontStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(maxHindStepLengthWhenSteppingDown, PawStepPlannerParameterKeys.maximumHindStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(minHindStepLengthWhenSteppingDown, PawStepPlannerParameterKeys.minimumHindStepLengthWhenSteppingDown);
+      javaFXStoredPropertyMap.put(stepZForSteppingDown, PawStepPlannerParameterKeys.stepZForSteppingDown);
 
-      javaFXStoredPropertyMap.put(maxStepYaw, PawPlannerParameterKeys.maximumStepYawOutward);
-      javaFXStoredPropertyMap.put(minStepYaw, PawPlannerParameterKeys.maximumStepYawInward);
-      javaFXStoredPropertyMap.put(maxStepChangeZ, PawPlannerParameterKeys.maximumStepChangeZ);
+      javaFXStoredPropertyMap.put(maxStepYaw, PawStepPlannerParameterKeys.maximumStepYawOutward);
+      javaFXStoredPropertyMap.put(minStepYaw, PawStepPlannerParameterKeys.maximumStepYawInward);
+      javaFXStoredPropertyMap.put(maxStepChangeZ, PawStepPlannerParameterKeys.maximumStepChangeZ);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(PawPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      messager.registerTopicListener(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
       {
          planningParameters.set(parameters);
 
@@ -184,7 +183,7 @@ public class PlannerReachParametersUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(PawPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
    }
 
    @FXML

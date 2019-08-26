@@ -10,8 +10,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
@@ -50,7 +50,7 @@ public class PawXGaitCostTest
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
 
-      PawPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
+      PawStepPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
 
       PawXGaitCost xGaitCost = new PawXGaitCost(pawPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
@@ -109,7 +109,7 @@ public class PawXGaitCostTest
 
       Random random = new Random(1738L);
 
-      PawPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
+      PawStepPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
 
       PawXGaitCost xGaitCost = new PawXGaitCost(pawPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
@@ -219,7 +219,7 @@ public class PawXGaitCostTest
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
 
-      PawPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
+      PawStepPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
 
       PawXGaitCost xGaitCost = new PawXGaitCost(pawPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
@@ -276,7 +276,7 @@ public class PawXGaitCostTest
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
 
-      PawPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
+      PawStepPlannerParametersReadOnly pawPlannerParameters = new TestParameters();
 
       PawXGaitCost xGaitCost = new PawXGaitCost(pawPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
@@ -319,7 +319,7 @@ public class PawXGaitCostTest
       assertEquals(0.0, xGaitCost.compute(startNode, endNode), 5e-2);
    }
 
-   private class TestParameters extends DefaultPawPlannerParameters
+   private class TestParameters extends DefaultPawStepPlannerParameters
    {
       @Override
       public double getXGaitWeight()

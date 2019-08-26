@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawPlannerParametersReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -21,7 +21,7 @@ public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
    private final PlanarRegionPawConstraintDataHolder constraintDataHolder = new PlanarRegionPawConstraintDataHolder();
    private final PlanarRegionPawConstraintDataParameters constraintDataParameters = new PlanarRegionPawConstraintDataParameters();
 
-   public SimplePlanarRegionPawNodeSnapper(PawPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
+   public SimplePlanarRegionPawNodeSnapper(PawStepPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
                                            BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);

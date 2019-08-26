@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SplinePawPathPlanner extends AbstractWaypointsForPawPlanner
+public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
 {
    private static final int numberOfPoints = 5;
 
@@ -27,7 +27,7 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawPlanner
       zPoly = new YoPolynomial("zPoly", 4, registry);
    }
 
-   public PawPlanningResult planWaypoints()
+   public PawStepPlanningResult planWaypoints()
    {
       waypoints.clear();
       double yaw = bodyStartPose.getYaw();
@@ -44,7 +44,7 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawPlanner
          waypoints.add(point);
       }
 
-      yoResult.set(PawPlanningResult.OPTIMAL_SOLUTION);
+      yoResult.set(PawStepPlanningResult.OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
    }
 }

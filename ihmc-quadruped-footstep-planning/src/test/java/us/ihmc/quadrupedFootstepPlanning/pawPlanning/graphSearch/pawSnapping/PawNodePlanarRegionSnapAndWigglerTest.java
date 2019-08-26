@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -150,7 +150,7 @@ class PawNodePlanarRegionSnapAndWigglerTest
       boolean careAboutGridCell = false;
       double maxWiggle = 0.05;
 
-      DefaultPawPlannerParameters plannerParameters = new DefaultPawPlannerParameters()
+      DefaultPawStepPlannerParameters plannerParameters = new DefaultPawStepPlannerParameters()
       {
          @Override
          public double getMaximumXYWiggleDistance()
