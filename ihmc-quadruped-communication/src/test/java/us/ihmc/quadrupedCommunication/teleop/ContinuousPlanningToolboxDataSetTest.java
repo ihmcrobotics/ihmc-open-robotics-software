@@ -370,7 +370,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
       QuadrupedContinuousPlanningRequestPacket requestPacket = new QuadrupedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(defaultTimeout);
+      requestPacket.setTimeout(dataset.getPlannerInput().getQuadrupedTimeout());
       requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getQuadrupedGoalPosition());
@@ -685,7 +685,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
       assertTrue(errorMessage, errorMessage.isEmpty());
 
       ThreadTools.sleepForever();
