@@ -236,6 +236,18 @@ float64 min_x_clearance_from_stance -1.0
 # this parameter.
 float64 min_y_clearance_from_stance -1.0
 
+# Radius around the goal inside which the planner should start to turn to match the goal's orientation
+float64 final_turn_proximity -1.0
+
+# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+float64 final_turn_body_path_proximity -1.0
+
+# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+# the desired orientation is the final orientation.
+float64 final_turn_proximity_blend_factor -1.0
+
 # When using a cost based planning approach this value defined how the yaw of a footstep will be
 # weighted in comparison to its position.
 float64 yaw_weight -1.0
@@ -300,3 +312,10 @@ float64 maximum_2d_distance_from_bounding_box_to_penalize -1.0
 # where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
 # {@code c * (1 - d / d_max)}, where d_max is this value.
 float64 bounding_box_cost -1.0
+
+float64 body_path_violation_weight -1.0
+
+float64 distance_from_path_tolerance -1.0
+
+float64 delta_yaw_from_reference_tolerance -1.0
+
