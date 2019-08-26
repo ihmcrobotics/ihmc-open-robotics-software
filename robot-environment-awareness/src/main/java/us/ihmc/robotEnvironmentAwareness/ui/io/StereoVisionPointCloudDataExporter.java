@@ -28,21 +28,21 @@ public class StereoVisionPointCloudDataExporter
    private final AtomicReference<StereoVisionPointCloudMessage> stereovisionPointCloudMessage;
    private final AtomicReference<String> dataDirectoryPath;
 
-   private final AtomicReference<Boolean> enableRecoding;
+   private final AtomicReference<Boolean> enableRecording;
 
    public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager)
    {
       stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.StereoVisionPointCloudState);
       dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIStereoDataExporterDirectory, new File("Data/").getAbsolutePath());
 
-      enableRecoding = uiMessager.createInput(REAModuleAPI.UIStereoDataExportRequest, false);
+      enableRecording = uiMessager.createInput(REAModuleAPI.UIStereoDataExportRequest, false);
 
-      executorService.scheduleAtFixedRate(this::recoding, 0, recodingFrequency, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::recording, 0, recodingFrequency, TimeUnit.MILLISECONDS);
    }
 
-   private void recoding()
+   private void recording()
    {
-      if (enableRecoding.get())
+      if (enableRecording.get())
       {
          StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
          int numberOfPoints = message.getColors().size();
@@ -55,7 +55,7 @@ public class StereoVisionPointCloudDataExporter
          }
 
          Path path = Paths.get(dataDirectoryPath.get());
-         File file = new File(path.toFile(), "stereovision_pointcloud_" + PlanarRegionFileTools.getDate() + "_" + message.getRobotTimestamp() + ".txt");
+         File file = new File(path.toFile(), "stereovision_pointcloud_" + PlanarRegionFileTools.getDate() + "_" + message.robot_timestamp_ + ".txt");
          FileWriter fileWriter;
          try
          {
