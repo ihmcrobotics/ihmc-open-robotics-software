@@ -25,6 +25,8 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    @FXML
    private Slider depthSlider;
    @FXML
+   private Slider resolutionSlider;
+   @FXML
    private ComboBox<DisplayType> displayTypeComboBox;
    @FXML
    private ComboBox<ColoringType> coloringTypeComboBox;
@@ -72,6 +74,21 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
          return new Double(newValue.doubleValue());
       }
    };
+   
+   private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
+   {
+      @Override
+      public Double convert(Number propertyValue)
+      {
+         return propertyValue.doubleValue();
+      }
+
+      @Override
+      public Number interpret(Double newValue)
+      {
+         return new Double(newValue.doubleValue());
+      }
+   };
 
    public OcTreeBasicsAnchorPaneController()
    {
@@ -95,6 +112,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeEnable, enableButton.selectedProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.OcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeResolution, resolutionSlider.valueProperty(), numberToDoubleConverter);
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferOcTreeCapacity, lidarBufferSizeSlider.valueProperty(), numberToIntegerConverter);
