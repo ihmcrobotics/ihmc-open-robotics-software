@@ -1,21 +1,26 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import org.junit.jupiter.api.*;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
@@ -29,10 +34,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalcu
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -44,7 +53,7 @@ public class NavigableRegionsManagerTest
 {
    private static boolean visualize = true;
    private static final double epsilon = 1e-4;
-   private static final double proximityEpsilon = 5e-2;
+   private static final double proximityEpsilon = 1e-2;
    private static final long timeout = 30000 * 100;
 
    // For enabling helpful prints.
@@ -649,7 +658,7 @@ public class NavigableRegionsManagerTest
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
@@ -724,8 +733,13 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
       List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPath(start, goal);
 
+      String errorMessages = "";
+
+
       int numberOfPoints = path.size();
-      assertTrue(numberOfPoints >= originalPath.size());
+      if (numberOfPoints < originalPath.size())
+         errorMessages += fail("number of points is not what was expected.");
+
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0).getPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(numberOfPoints - 1).getPosition(), epsilon);
 
@@ -742,6 +756,11 @@ public class NavigableRegionsManagerTest
 
       double distanceAlongExpectedPath = 0.0;
 
+      Ellipsoid3D walkerShape = new Ellipsoid3D();
+      walkerShape.setRadii(walkerRadii);
+      List<Point3D> collisions = new ArrayList<>();
+
+
       for (double alpha = 0.05; alpha < 1.0; alpha += 0.001)
       {
          Pose2D expectedPose = new Pose2D();
@@ -751,15 +770,18 @@ public class NavigableRegionsManagerTest
          calculatedPath.getPointAlongPath(alpha, actualPose);
 
          // assert it doesn't deviate too much
-         EuclidCoreTestTools
-               .assertPoint2DGeometricallyEquals("alpha = " + alpha, expectedPose.getPosition(), actualPose.getPosition(), preferredObstacleExtrusionDistance);
+         if (!expectedPose.getPosition().geometricallyEquals(actualPose.getPosition(), preferredObstacleExtrusionDistance))
+            errorMessages += fail("Pose was not as expected at alpha = " + alpha);
+
+         Point3DReadOnly position3D = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(actualPose.getPosition()), planarRegionsList);
+         Quaternion orientation = new Quaternion(actualPose.getYaw(), 0.0, 0.0);
+
+         if (position3D == null)
+            position3D = new Point3D(actualPose.getPosition());
 
          if (visualize)
          {
-            Point3DReadOnly position3D = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(actualPose.getPosition()), planarRegionsList);
-            if (position3D == null)
-               position3D = new Point3D(actualPose.getPosition());
-            Quaternion orientation = new Quaternion(actualPose.getYaw(), 0.0, 0.0);
+
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, new Point3D(position3D));
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerOrientation, orientation);
 
@@ -769,7 +791,8 @@ public class NavigableRegionsManagerTest
          // check that it's always moving along
          Point2D pointAlongExpectedPath = new Point2D();
          double newDistanceAlongExpectedPath = expectedPathNoAvoidance.getClosestPoint(pointAlongExpectedPath, actualPose);
-         assertTrue(newDistanceAlongExpectedPath >= distanceAlongExpectedPath);
+         if (newDistanceAlongExpectedPath < distanceAlongExpectedPath)
+            errorMessages += fail("Not moving forward.");
          distanceAlongExpectedPath = newDistanceAlongExpectedPath;
 
          // check that it doesn't get too close to an obstacle
@@ -790,19 +813,111 @@ public class NavigableRegionsManagerTest
             }
          }
 
+         // check the walker position
+         Point3D walkerBody3D = new Point3D(position3D);
+         walkerBody3D.addZ(walkerOffsetHeight);
+         walkerShape.getPosition().set(walkerBody3D);
+         walkerShape.getOrientation().set(orientation);
+
+         String newErrorMessages = walkerCollisionChecks(walkerShape, planarRegionsList, collisions);
+         errorMessages += newErrorMessages;
+         if (!newErrorMessages.isEmpty() && visualize)
+            messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
+
+
          distanceToObstacles += parameters.getObstacleExtrusionDistance();
 
          if (visualize && distanceToObstacles < preferredObstacleExtrusionDistance + proximityEpsilon)
          {
             Point3DReadOnly collision = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(closestPointOverall), planarRegionsList);
-            List<Point3D> collisions = new ArrayList<>();
             collisions.add(new Point3D(collision));
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
+
          }
-         assertTrue(distanceToObstacles > preferredObstacleExtrusionDistance - proximityEpsilon);
+
+         if (distanceToObstacles < preferredObstacleExtrusionDistance + proximityEpsilon)
+            errorMessages += fail("Was too close to an obstacle.");
       }
+
+      if (!errorMessages.isEmpty() && !visualize)
+         Assert.assertTrue(errorMessages, false);
+      else
+         LogTools.info(errorMessages);
    }
 
+   private static String walkerCollisionChecks(Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
+   {
+      String errorMessages = "";
+      walkerShapeWorld = new Ellipsoid3D(walkerShapeWorld); // Make a copy to ensure we are not modifying the argument
+
+      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      {
+         Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
+
+         Plane3D plane = planarRegion.getPlane();
+         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+
+         if (!walkerShapeWorld.isPointInside(closestPoint))
+            continue; // Not even close to the region plane, let's keep going.
+
+         Ellipsoid3D walkerShapeLocal = new Ellipsoid3D(walkerShapeWorld);
+         planarRegion.transformFromWorldToLocal(walkerShapeLocal);
+         walkerPosition3D.set(walkerShapeLocal.getPosition());
+         Point2D walkerPosition2D = new Point2D(walkerPosition3D);
+
+         if (planarRegion.getNumberOfConvexPolygons() == 0)
+         {
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            double depthThreshold = 0.05;
+            List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
+            ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);
+         }
+
+         for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
+         {
+            ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
+            Point2DBasics closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
+            if (closestPoint2D == null)
+            {
+//               if (convexPolygon.isPointInside(walkerPosition2D, -proximityEpsilon))
+//               {
+//                  errorMessages += fail("Body path is going through a region."); // TODO figure out the proper intersection
+                  break;
+//               }
+//               else
+//               {
+//                  throw new RuntimeException("Not sure what went wrong to here.");
+//               }
+            }
+            closestPoint = new Point3D(closestPoint2D);
+
+            if (walkerShapeLocal.isPointInside(closestPoint, -proximityEpsilon))
+            {
+               Point2DBasics intersectionLocal = closestPoint2D;
+               Point3D intersectionWorld = new Point3D(intersectionLocal);
+               planarRegion.transformFromLocalToWorld(intersectionWorld);
+               errorMessages += fail("Body path is going through a region at: " + intersectionWorld);
+               collisionsToPack.add(intersectionWorld);
+            }
+         }
+      }
+      return errorMessages;
+   }
+
+   private static String fail(String message)
+   {
+      return assertTrue(message, false);
+   }
+
+   private static String assertTrue(String message, boolean condition)
+   {
+      if (visualize || DEBUG)
+      {
+         if (!condition)
+            LogTools.error(message);
+      }
+      return !condition ? "\n" + message : "";
+   }
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
    {
