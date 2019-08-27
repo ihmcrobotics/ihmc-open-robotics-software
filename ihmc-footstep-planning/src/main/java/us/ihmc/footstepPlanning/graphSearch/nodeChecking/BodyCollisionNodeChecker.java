@@ -9,6 +9,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.List;
+
 public class BodyCollisionNodeChecker extends FootstepNodeChecker
 {
    private final FootstepNodeBodyCollisionDetector collisionDetector;
@@ -37,13 +39,22 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      double height = snapper.getSnapData(node).getSnapTransform().getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(node, height);
+      double snapHeight = snapper.getSnapData(node).getSnapTransform().getTranslationZ();
+      double previousSnapHeight = snapper.getSnapData(previousNode).getSnapTransform().getTranslationZ();
 
-      boolean collisionDetected = collisionData.isCollisionDetected();
-      if(collisionDetected)
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
-      return !collisionDetected;
+      int numberOfBoundingBoxChecks = Math.max(1, parameters.getNumberOfBoundingBoxChecks());
+      List<BodyCollisionData> collisionData = collisionDetector.checkForCollision(node, previousNode, snapHeight, previousSnapHeight, numberOfBoundingBoxChecks);
+
+      for (int i = 0; i < collisionData.size(); i++)
+      {
+         if(collisionData.get(i).isCollisionDetected())
+         {
+            rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+            return false;
+         }
+      }
+
+      return true;
    }
 
    @Override
