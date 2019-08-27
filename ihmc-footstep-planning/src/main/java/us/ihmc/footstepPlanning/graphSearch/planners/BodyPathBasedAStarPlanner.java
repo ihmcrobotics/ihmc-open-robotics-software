@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -33,7 +33,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
-   private final BodyPathPlanner bodyPathPlanner;
+   private final BodyPathPlanHolder bodyPathPlanner;
    private final FootstepPlanner footstepPlanner;
 
    private final BodyPathHeuristics heuristics;
@@ -41,7 +41,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
 
    private FootstepPlannerGoal highLevelGoal;
 
-   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParametersReadOnly parameters,
+   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, FootstepPlannerParametersReadOnly parameters,
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
                                     BipedalFootstepPlannerListener... listeners)
    {

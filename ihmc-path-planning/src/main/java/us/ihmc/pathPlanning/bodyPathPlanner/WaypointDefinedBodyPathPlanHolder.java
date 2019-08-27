@@ -12,16 +12,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.AngleTools;
 
-public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
+public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 {
    private List<Point2DReadOnly> waypointPositions;
-   private List<Point3DReadOnly> waypointsPositions3D;
    private List<MutableDouble> waypointHeadings;
    private double[] maxAlphas;
    private double[] segmentLengths;
    private final BodyPathPlan bodyPathPlan = new BodyPathPlan();
-
-   private static final double segmentLengthToReturnToHeading = 2.0;
 
    @Override
    public void setWaypoints(List<? extends Point3DReadOnly> waypointPositions, List<MutableDouble> waypointHeadings)
@@ -32,9 +29,7 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
          throw new RuntimeException("The number of waypoint positions and waypoint headings must be equal.");
 
       this.waypointPositions = new ArrayList<>();
-      this.waypointsPositions3D = new ArrayList<>();
       this.waypointHeadings = new ArrayList<>();
-      this.waypointsPositions3D.addAll(waypointPositions);
       this.waypointHeadings.addAll(waypointHeadings);
       for (int i = 0; i < waypointPositions.size(); i++)
          this.waypointPositions.add(new Point2D(waypointPositions.get(i)));
@@ -62,7 +57,7 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
       bodyPathPlan.clear();
       bodyPathPlan.setStartPose(this.waypointPositions.get(startIndex), this.waypointHeadings.get(startIndex).getValue());
       bodyPathPlan.setGoalPose(this.waypointPositions.get(endIndex), this.waypointHeadings.get(endIndex).getValue());
-      bodyPathPlan.addWaypoints(waypointsPositions3D);
+      bodyPathPlan.addWaypoints(waypointPositions);
    }
 
    @Override

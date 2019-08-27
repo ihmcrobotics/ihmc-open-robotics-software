@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -49,7 +47,7 @@ public class WaypointDefinedBodyPathPlanTest
    @Test
    public void testSimpleBodyPath(TestInfo testInfo)
    {
-      WaypointDefinedBodyPathPlanner plan = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder plan = new WaypointDefinedBodyPathPlanHolder();
       List<Point3D> positionWaypoints = new ArrayList<Point3D>();
       positionWaypoints.add(new Point3D(0.0, 0.0, 0.0));
       positionWaypoints.add(new Point3D(0.5, 0.0, 0.0));
@@ -107,7 +105,7 @@ public class WaypointDefinedBodyPathPlanTest
       }
    }
 
-   public static void showPlotter(WaypointDefinedBodyPathPlanner plan, String testName)
+   public static void showPlotter(WaypointDefinedBodyPathPlanHolder plan, String testName)
    {
       int markers = 5;
       YoVariableRegistry registry = new YoVariableRegistry(testName);
@@ -181,6 +179,6 @@ public class WaypointDefinedBodyPathPlanTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(WaypointDefinedBodyPathPlanner.class, WaypointDefinedBodyPathPlanTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(WaypointDefinedBodyPathPlanHolder.class, WaypointDefinedBodyPathPlanTest.class);
    }
 }

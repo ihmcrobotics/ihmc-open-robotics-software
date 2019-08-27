@@ -11,8 +11,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
@@ -45,7 +45,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private final YoDouble timeSpentInPawPlanner;
    private final YoEnum<PawStepPlanningResult> yoResult;
 
-   protected final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final BodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
    protected WaypointsForPawStepPlanner waypointPathPlanner;
    protected PawStepPlanner pawStepPlanner;
 
