@@ -157,7 +157,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition,
                                                                                                         desiredOrientation, worldFrame);
          handTrajectoryMessage.setSequenceId(random.nextLong());
-         handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+
+         // ROS1 users have these fields set to zero by default which can cause an exception to thrown even if these fields are not used.
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
+         handTrajectoryMessage.getWrenchTrajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
+         handTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setDataReferenceFrameId(0);
+         handTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(0);
 
          drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT);
