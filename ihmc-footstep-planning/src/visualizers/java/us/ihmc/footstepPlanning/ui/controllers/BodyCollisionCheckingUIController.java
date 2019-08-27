@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -27,6 +28,8 @@ public class BodyCollisionCheckingUIController
    private Spinner<Double> bodyWidth;
    @FXML
    private Spinner<Double> bodyHeight;
+   @FXML
+   private Spinner<Integer> numberOfBoundingBoxChecks;
 
    @FXML
    private Spinner<Double> bodyBoxBaseX;
@@ -63,6 +66,8 @@ public class BodyCollisionCheckingUIController
 
       maximum2dDistanceFromBoundingBoxToPenalize.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
       boundingBoxCost.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 10000.0, 0.0, 10.0));
+
+      numberOfBoundingBoxChecks.setValueFactory(new IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
    }
 
    public void bindControls()
