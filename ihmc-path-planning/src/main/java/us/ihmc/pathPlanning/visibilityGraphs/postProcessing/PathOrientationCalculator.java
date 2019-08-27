@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PathOrientationCalculator
 {
@@ -36,53 +36,16 @@ public class PathOrientationCalculator
 
    public List<? extends Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
    {
-      List<Cluster> allObstacleClusters = new ArrayList<>();
-      visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+      List<Pose3DBasics> pathPoses = computeNominalPosesForPath(path);
 
-      List<Pose3D> pathPoses = computeNominalPosesForPath(path);
-
-      int pathIndex = 1;
-      while (pathIndex < path.size() - 1)
-      {
-         Point3DReadOnly currentPosition = path.get(pathIndex);
-
-         Point2D currentPosition2D = new Point2D(currentPosition);
-
-         double previousOrientation = pathPoses.get(pathIndex - 1).getOrientation().getYaw();
-         double desiredOrientation = pathPoses.get(pathIndex).getOrientation().getYaw();
-
-         if (parameters.getComputeOrientationsToAvoidObstacles())
-         {
-            Point2D closestObstaclePoint = new Point2D();
-            double distanceToClosestPoint = Double.POSITIVE_INFINITY;
-            for (Cluster cluster : allObstacleClusters)
-            {
-               Point2D closestPointInCluster = new Point2D();
-               double distance = VisibilityTools.distanceToCluster(currentPosition2D, cluster.getNonNavigableExtrusionsInWorld2D(), closestPointInCluster, null);
-               if (distance < distanceToClosestPoint)
-               {
-                  distanceToClosestPoint = distance;
-                  closestObstaclePoint = closestPointInCluster;
-               }
-            }
-
-            Vector2D vectorToObstacle = new Vector2D();
-            vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
-
-            desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousOrientation, vectorToObstacle);
-         }
-
-         pathPoses.get(pathIndex).getOrientation().setYawPitchRoll(desiredOrientation, 0.0, 0.0);
-
-         pathIndex++;
-      }
+      modifyPathOrientationsToAvoidObstacles(pathPoses, visibilityMapSolution);
 
       return pathPoses;
    }
 
-   private List<Pose3D> computeNominalPosesForPath(List<Point3DReadOnly> path)
+   private List<Pose3DBasics> computeNominalPosesForPath(List<Point3DReadOnly> path)
    {
-      List<Pose3D> nominalPathPoses = new ArrayList<>();
+      List<Pose3DBasics> nominalPathPoses = new ArrayList<>();
 
       double startHeading = BodyPathPlannerTools.calculateHeading(path.get(0), path.get(1));
       nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
@@ -157,6 +120,45 @@ public class PathOrientationCalculator
       nominalPathPoses.add(new Pose3D(path.get(endingSize - 1), new Quaternion(endHeading, 0.0, 0.0)));
 
       return nominalPathPoses;
+   }
+
+   private void modifyPathOrientationsToAvoidObstacles(List<Pose3DBasics> pathPosesToPack, VisibilityMapSolution visibilityMapSolution)
+   {
+      List<Cluster> allObstacleClusters = new ArrayList<>();
+      visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+
+      for (int pathIndex = 1; pathIndex < pathPosesToPack.size() - 1; pathIndex++)
+      {
+         Point3DReadOnly currentPosition = pathPosesToPack.get(pathIndex).getPosition();
+
+         Point2D currentPosition2D = new Point2D(currentPosition);
+
+         double previousOrientation = pathPosesToPack.get(pathIndex - 1).getOrientation().getYaw();
+         double desiredOrientation = pathPosesToPack.get(pathIndex).getOrientation().getYaw();
+
+         if (parameters.getComputeOrientationsToAvoidObstacles())
+         {
+            Point2D closestObstaclePoint = new Point2D();
+            double distanceToClosestPoint = Double.POSITIVE_INFINITY;
+            for (Cluster cluster : allObstacleClusters)
+            {
+               Point2D closestPointInCluster = new Point2D();
+               double distance = VisibilityTools.distanceToCluster(currentPosition2D, cluster.getNonNavigableExtrusionsInWorld2D(), closestPointInCluster, null);
+               if (distance < distanceToClosestPoint)
+               {
+                  distanceToClosestPoint = distance;
+                  closestObstaclePoint = closestPointInCluster;
+               }
+            }
+
+            Vector2D vectorToObstacle = new Vector2D();
+            vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
+
+            desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousOrientation, vectorToObstacle);
+         }
+
+         pathPosesToPack.get(pathIndex).getOrientation().setYawPitchRoll(desiredOrientation, 0.0, 0.0);
+      }
    }
 
    private double getHeadingToAvoidObstacles(double nominalHeading, double previousHeading, Vector2DReadOnly headingToClosestObstacle)
