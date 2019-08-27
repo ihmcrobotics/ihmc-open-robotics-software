@@ -15,7 +15,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
@@ -184,7 +183,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
                                                               physicalProperties.getFeetGroundContactPoints(),
-                                                              new GenericQuadrupedFootstepPlannerParameters(),
+                                                              new GenericQuadrupedPawPlannerParameters(),
                                                               xGaitSettings,
                                                               new GenericQuadrupedPointFootSnapperParameters(),
                                                               PubSubImplementation.INTRAPROCESS,
