@@ -328,6 +328,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
+      setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
       setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
