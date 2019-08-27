@@ -14,8 +14,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -48,7 +48,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
 
    private final FootstepPlannerParametersReadOnly parameters;
 
-   protected final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final BodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
    protected WaypointsForFootstepsPlanner waypointPathPlanner;
    protected FootstepPlanner footstepPlanner;
 

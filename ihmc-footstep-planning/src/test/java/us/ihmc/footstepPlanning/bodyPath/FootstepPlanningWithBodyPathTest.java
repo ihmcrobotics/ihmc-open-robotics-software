@@ -30,7 +30,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBase
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -67,7 +67,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
-      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
       List<Point3D> waypoints = new ArrayList<>();
       waypoints.add(new Point3D(0.0, 0.0, 0.0));
       waypoints.add(new Point3D(goalDistance / 8.0, 2.0, 0.0));
@@ -88,7 +88,7 @@ public class FootstepPlanningWithBodyPathTest
    @Disabled
    public void testMaze(TestInfo testInfo)
    {
-      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
       List<Point3D> waypoints = new ArrayList<>();
 
       ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
@@ -140,7 +140,7 @@ public class FootstepPlanningWithBodyPathTest
    }
 
    private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
-                                                           WaypointDefinedBodyPathPlanner bodyPath)
+                                                           WaypointDefinedBodyPathPlanHolder bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);

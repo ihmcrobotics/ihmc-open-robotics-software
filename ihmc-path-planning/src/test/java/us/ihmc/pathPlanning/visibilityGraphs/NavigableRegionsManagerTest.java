@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import org.junit.jupiter.api.*;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -21,7 +20,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
@@ -38,7 +37,6 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -683,10 +681,10 @@ public class NavigableRegionsManagerTest
          assertFalse(point.containsNaN());
       }
 
-      WaypointDefinedBodyPathPlanner calculatedPath = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder calculatedPath = new WaypointDefinedBodyPathPlanHolder();
       calculatedPath.setPoseWaypoints(path);
 
-      WaypointDefinedBodyPathPlanner expectedPathNoAvoidance = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder expectedPathNoAvoidance = new WaypointDefinedBodyPathPlanHolder();
       expectedPathNoAvoidance.setWaypoints(originalPath);
 
       double distanceAlongExpectedPath = 0.0;

@@ -28,7 +28,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.StatisticsType;
@@ -129,7 +129,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
-   protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final WaypointDefinedBodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
 
    private final StatusMessageOutputManager statusOutputManager;
    private final ScheduledExecutorService executorService;

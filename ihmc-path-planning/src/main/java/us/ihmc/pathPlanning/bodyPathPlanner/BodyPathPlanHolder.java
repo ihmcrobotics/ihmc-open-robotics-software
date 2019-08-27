@@ -18,7 +18,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public interface BodyPathPlanner
+public interface BodyPathPlanHolder
 {
    /** Adds the position waypoints used by the body path planner, and automatically computes the heading waypoints. **/
    default void setWaypoints(List<? extends Point3DReadOnly> positionWaypoints)
@@ -46,19 +46,13 @@ public interface BodyPathPlanner
    /** Adds the position and heading waypoints used by the body path planner. **/
    default void setPoseWaypoints(List<? extends Pose3DReadOnly> poseWaypoints)
    {
-      List<Point3DReadOnly> positionWaypoints = poseWaypoints.stream().map(pose -> ((Pose3DReadOnly) pose).getPosition()).collect(Collectors.toList());
-      List<MutableDouble> headingWaypoints = poseWaypoints.stream().map(pose -> new MutableDouble(((Pose3DReadOnly) pose).getOrientation().getYaw())).collect(Collectors.toList());
+      List<Point3DReadOnly> positionWaypoints = poseWaypoints.stream().map(Pose3DReadOnly::getPosition).collect(Collectors.toList());
+      List<MutableDouble> headingWaypoints = poseWaypoints.stream().map(pose -> new MutableDouble(pose.getOrientation().getYaw())).collect(Collectors.toList());
       setWaypoints(positionWaypoints, headingWaypoints);
    }
 
    /** Adds the position and heading waypoints used by the body path planner. **/
    void setWaypoints(List<? extends Point3DReadOnly> positionWaypoints, List<MutableDouble> headingWaypoints);
-
-   /** This method is now completely unused. **/
-   @Deprecated
-   default void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-   }
 
    /**
     * Gets the computed body path plan.
