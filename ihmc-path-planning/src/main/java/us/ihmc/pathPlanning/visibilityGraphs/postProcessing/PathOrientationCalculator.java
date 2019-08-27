@@ -79,9 +79,6 @@ public class PathOrientationCalculator
          pathIndex++;
       }
 
-
-
-
       newPathPoses.add(nominalPathPoses.get(nominalPathPoses.size() - 1));
 
       return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
@@ -112,7 +109,7 @@ public class PathOrientationCalculator
             double nextLength = currentPosition.distanceXY(nextPosition);
 
             // add a point before
-            if (previousLength > 2.0 * parameters.getPreferredObstacleExtrusionDistance())
+            if (previousLength > 4.0 * parameters.getPreferredObstacleExtrusionDistance())
             {
                double alpha = 1.0 - 2.0 * parameters.getPreferredObstacleExtrusionDistance() / previousLength;
                Point3DBasics waypointPositionToAdd = new Point3D();
@@ -122,11 +119,10 @@ public class PathOrientationCalculator
 
                pathIndex++;
             }
-            else if (previousLength > 0.25 * parameters.getPreferredObstacleExtrusionDistance())
-            { // TODO extract magic number
-               double alpha = 0.5;
+            else if (previousLength > parameters.getObstacleExtrusionDistance())
+            {
                Point3DBasics waypointPositionToAdd = new Point3D();
-               waypointPositionToAdd.interpolate(previousPosition, currentPosition, alpha);
+               waypointPositionToAdd.interpolate(previousPosition, currentPosition, 0.5);
                path.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
@@ -137,18 +133,17 @@ public class PathOrientationCalculator
             pathIndex++;
 
             // add a point after
-            if (nextLength > 2.0 * parameters.getPreferredObstacleExtrusionDistance())
+            if (nextLength > 4.0 * parameters.getPreferredObstacleExtrusionDistance())
             {
                double alpha = 2.0 * parameters.getPreferredObstacleExtrusionDistance() / nextLength;
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
                path.add(pathIndex, waypointPositionToAdd);
             }
-            else if (nextHeading > 0.25 * parameters.getPreferredObstacleExtrusionDistance())
-            { // TODO extract magic number
-               double alpha = 0.5;
+            else if (nextHeading > parameters.getObstacleExtrusionDistance())
+            {
                Point3DBasics waypointPositionToAdd = new Point3D();
-               waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
+               waypointPositionToAdd.interpolate(currentPosition, nextPosition, 0.5);
                path.add(pathIndex, waypointPositionToAdd);
             }
          }
