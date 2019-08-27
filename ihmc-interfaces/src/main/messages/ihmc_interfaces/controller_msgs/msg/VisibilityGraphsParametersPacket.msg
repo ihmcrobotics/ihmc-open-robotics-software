@@ -7,11 +7,13 @@ float64 max_inter_region_connection_length -1.0
 
 float64 normal_z_threshold_for_accessible_regions -1.0
 
-float64 preferred_extrusion_distance -1.0
+float64 navigable_extrusion_distance -1.0
 
-float64 extrusion_distance -1.0
+float64 obstacle_extrusion_distance -1.0
 
-float64 extrusion_distance_if_not_too_high_to_step -1.0
+float64 preferred_obstacle_extrusion_distance -1.0
+
+float64 obstacle_extrusion_distance_if_not_too_high_to_step -1.0
 
 float64 too_high_to_step_distance -1.0
 
@@ -33,3 +35,13 @@ float64 region_orthogonal_angle -1.0
 # A positive value corresponds to growing all the regions before testing if the start/goal is inside.
 # Returns the value of the epsilon to use.
 float64 search_host_region_epsilon 0.03
+
+float64 can_duck_under_height -1.0
+
+float64 can_easily_step_over_height -1.0
+
+float64 heuristic_weight -1.0
+
+float64 distance_weight -1.0
+
+float64 elevation_weight -1.0

@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -47,7 +47,7 @@ public class PawStepPlannerMessageTools
    }
 
 
-   public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
+   public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParametersReadOnly parameters)
    {
       if (parameters == null)
       {
@@ -56,8 +56,8 @@ public class PawStepPlannerMessageTools
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setExtrusionDistance(parameters.getObstacleExtrusionDistance());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
+      packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
@@ -65,5 +65,10 @@ public class PawStepPlannerMessageTools
       packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
       packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
       packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
+      packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
+      packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
+      packet.setHeuristicWeight(parameters.getHeuristicWeight());
+      packet.setDistanceWeight(parameters.getDistanceWeight());
+      packet.setElevationWeight(parameters.getElevationWeight());
    }
 }

@@ -8,8 +8,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
@@ -53,7 +54,7 @@ public class PawPlanningController extends QuadrupedToolboxController
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
-   private final YoVisibilityGraphParameters visibilityGraphParameters;
+   private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final PawStepPlannerParametersBasics pawPlannerParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
    private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
@@ -62,7 +63,7 @@ public class PawPlanningController extends QuadrupedToolboxController
    private final YoInteger planId = new YoInteger("planId", registry);
 
 
-   public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
+   public PawPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParametersBasics defaultVisibilityGraphParameters,
                                 PawStepPlannerParametersBasics pawPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                 OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
@@ -70,9 +71,11 @@ public class PawPlanningController extends QuadrupedToolboxController
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
       this.pawPlannerParameters = pawPlannerParameters;
+      this.visibilityGraphParameters = defaultVisibilityGraphParameters;
+
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
-      visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
       new YoPawStepPlannerParameters(pawPlannerParameters, registry);
+      new YoVisibilityGraphParameters(registry, visibilityGraphParameters);
 
       if (robotDataReceiver != null)
       {

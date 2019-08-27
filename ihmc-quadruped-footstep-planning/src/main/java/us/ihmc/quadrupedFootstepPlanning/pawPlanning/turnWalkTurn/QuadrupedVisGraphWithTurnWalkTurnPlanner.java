@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -13,7 +13,7 @@ public class QuadrupedVisGraphWithTurnWalkTurnPlanner extends QuadrupedPathWithT
 {
    private static final String prefix = "visGraphBased";
 
-   public QuadrupedVisGraphWithTurnWalkTurnPlanner(QuadrupedXGaitSettingsBasics xGaitSettings, VisibilityGraphsParameters visibilityGraphsParameters,
+   public QuadrupedVisGraphWithTurnWalkTurnPlanner(QuadrupedXGaitSettingsBasics xGaitSettings, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                                    YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                    QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
                                                    YoVariableRegistry parentRegistry)

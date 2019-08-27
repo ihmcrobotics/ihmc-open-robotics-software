@@ -23,11 +23,13 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double normal_z_threshold_for_accessible_regions;
         @defaultValue(value=-1.0)
-        double preferred_extrusion_distance;
+        double navigable_extrusion_distance;
         @defaultValue(value=-1.0)
-        double extrusion_distance;
+        double obstacle_extrusion_distance;
         @defaultValue(value=-1.0)
-        double extrusion_distance_if_not_too_high_to_step;
+        double preferred_obstacle_extrusion_distance;
+        @defaultValue(value=-1.0)
+        double obstacle_extrusion_distance_if_not_too_high_to_step;
         @defaultValue(value=-1.0)
         double too_high_to_step_distance;
         @defaultValue(value=-1.0)
@@ -51,6 +53,16 @@ module controller_msgs
          */
         @defaultValue(value=0.03)
         double search_host_region_epsilon;
+        @defaultValue(value=-1.0)
+        double can_duck_under_height;
+        @defaultValue(value=-1.0)
+        double can_easily_step_over_height;
+        @defaultValue(value=-1.0)
+        double heuristic_weight;
+        @defaultValue(value=-1.0)
+        double distance_weight;
+        @defaultValue(value=-1.0)
+        double elevation_weight;
       };
     };
   };
