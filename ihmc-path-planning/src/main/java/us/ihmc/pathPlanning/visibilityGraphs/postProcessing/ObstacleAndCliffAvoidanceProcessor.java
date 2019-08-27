@@ -24,9 +24,6 @@ import java.util.stream.Collectors;
 
 public class ObstacleAndCliffAvoidanceProcessor
 {
-   private static final boolean includeMidpoints = true;
-   private static final boolean adjustMidpoints = true;
-
    private static final double minDistanceToMove = 0.01;
    private static final double cliffHeightToAvoid = 0.10;
    private static final double samePointEpsilon = 0.01;
