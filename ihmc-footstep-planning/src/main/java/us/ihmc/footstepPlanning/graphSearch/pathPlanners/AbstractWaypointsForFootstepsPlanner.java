@@ -69,7 +69,6 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    public void setGoal(FootstepPlannerGoal goal)
    {
-      AStarFootstepPlanner.checkGoalType(goal);
       FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
       bodyGoalPose.setIncludingFrame(goalPose);
    }

@@ -579,6 +579,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       goal.setGoalPoseBetweenFeet(goalPose);
       mainObjective.setGoal(goal);
 
+      goal.setDistanceProximity(request.getGoalDistanceProximity());
+      goal.setYawProximity(request.getGoalYawProximity());
+
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
