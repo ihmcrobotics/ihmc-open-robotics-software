@@ -113,6 +113,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -130,7 +131,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
@@ -322,7 +322,7 @@ public class HumanoidMessageTools
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                   QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+                                                                   Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId));
@@ -340,8 +340,8 @@ public class HumanoidMessageTools
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition,
-                                                                   QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                   Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame));
@@ -612,7 +612,7 @@ public class HumanoidMessageTools
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
    public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                       QuaternionReadOnly desiredOrientation)
+                                                                       Orientation3DReadOnly desiredOrientation)
    {
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame()));
@@ -732,14 +732,14 @@ public class HumanoidMessageTools
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
-   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation)
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame()));
       return message;
    }
 
-   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation,
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                                              ReferenceFrame trajectoryFrame)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
@@ -789,7 +789,7 @@ public class HumanoidMessageTools
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed in World.
     */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                      long trajectoryReferenceFrameID)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -804,7 +804,7 @@ public class HumanoidMessageTools
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed the supplied frame.
     */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                      ReferenceFrame trajectoryFrame)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -812,7 +812,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, QuaternionReadOnly quaternion, ReferenceFrame dataFrame,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly quaternion, ReferenceFrame dataFrame,
                                                                      ReferenceFrame trajectoryFrame)
    {
       ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, quaternion, trajectoryFrame);
@@ -820,7 +820,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame dataFrame,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame dataFrame,
                                                                    ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
@@ -836,7 +836,7 @@ public class HumanoidMessageTools
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame));
@@ -850,7 +850,7 @@ public class HumanoidMessageTools
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                    long trajectoryReferenceFrameId)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
@@ -1023,12 +1023,12 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame.hashCode());
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       SO3TrajectoryMessage message = new SO3TrajectoryMessage();
       Vector3D zeroAngularVelocity = new Vector3D();
@@ -1051,7 +1051,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static WallPosePacket createWallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, QuaternionReadOnly centerOrientation)
+   public static WallPosePacket createWallPosePacket(double cuttingRadius, Tuple3DReadOnly centerPosition, Orientation3DReadOnly centerOrientation)
    {
       WallPosePacket message = new WallPosePacket();
       message.setCuttingRadius(cuttingRadius);
@@ -1258,14 +1258,14 @@ public class HumanoidMessageTools
    }
 
    public static FisheyePacket createFisheyePacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
-                                                   QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
+                                                   Orientation3DReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
       message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       return message;
    }
 
-   public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation,
+   public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, Orientation3DReadOnly orientation,
                                                IntrinsicParameters intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
@@ -1321,7 +1321,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SO3TrajectoryPointMessage createSO3TrajectoryPointMessage(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   public static SO3TrajectoryPointMessage createSO3TrajectoryPointMessage(double time, Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       SO3TrajectoryPointMessage message = new SO3TrajectoryPointMessage();
       message.setTime(time);
@@ -1567,7 +1567,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
                                                                  long trajectoryReferenceFrameId)
    {
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
@@ -1579,7 +1579,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
                                                                  ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.hashCode());
@@ -1627,7 +1627,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryPointMessage createSE3TrajectoryPointMessage(double time, Point3DReadOnly position, QuaternionReadOnly orientation,
+   public static SE3TrajectoryPointMessage createSE3TrajectoryPointMessage(double time, Point3DReadOnly position, Orientation3DReadOnly orientation,
                                                                            Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       SE3TrajectoryPointMessage message = new SE3TrajectoryPointMessage();
@@ -1655,24 +1655,24 @@ public class HumanoidMessageTools
       return createFootstepDataMessage(robotSide, pose.getPosition(), pose.getOrientation());
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
                                                                List<? extends Point2DReadOnly> predictedContactPoints)
    {
       return createFootstepDataMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
                                                                TrajectoryType trajectoryType, double swingHeight)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation,
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
                                                                List<? extends Point2DReadOnly> predictedContactPoints, TrajectoryType trajectoryType,
                                                                double swingHeight)
    {
@@ -1853,7 +1853,7 @@ public class HumanoidMessageTools
     * @param desiredOrientation desired foot orientation expressed in world frame.
     */
    public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                   QuaternionReadOnly desiredOrientation)
+                                                                   Orientation3DReadOnly desiredOrientation)
    {
       FootTrajectoryMessage message = new FootTrajectoryMessage();
       message.getSe3Trajectory()
