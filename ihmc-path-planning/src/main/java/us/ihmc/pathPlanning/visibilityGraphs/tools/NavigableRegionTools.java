@@ -78,7 +78,7 @@ public class NavigableRegionTools
    private static double computeMinHeightOfNavigableRegionAbovePoint(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck)
    {
       double minHeight = Double.POSITIVE_INFINITY;
-      for (Point2DReadOnly convexHullVertex : navigableRegion.getHomePlanarRegion().getConvexHull().getVertexBufferView())
+      for (Point2DReadOnly convexHullVertex : navigableRegion.getHomePlanarRegion().getConvexHull().getPolygonVerticesView())
       {
          Point3D convexHullVertexInWorld = new Point3D(convexHullVertex);
          navigableRegion.getHomePlanarRegion().transformFromLocalToWorld(convexHullVertexInWorld);
