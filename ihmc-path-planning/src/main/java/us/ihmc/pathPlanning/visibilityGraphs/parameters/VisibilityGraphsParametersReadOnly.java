@@ -149,6 +149,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(elevationWeight);
    }
 
+   default double getOccludedGoalEdgeWeight()
+   {
+      return get(occludedGoalEdgeWeight);
+   }
+
    /**
     * This flag says whether or not to return a solution even when the goal is not reached.
     * The solution that is returned is the lowest cost path, including estimated cost to goal.

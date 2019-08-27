@@ -45,6 +45,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
+   public double occluded_goal_edge_weight_ = -1.0;
    public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
@@ -98,6 +99,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       distance_weight_ = other.distance_weight_;
 
       elevation_weight_ = other.elevation_weight_;
+
+      occluded_goal_edge_weight_ = other.occluded_goal_edge_weight_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
 
@@ -311,6 +314,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return elevation_weight_;
    }
 
+   public void setOccludedGoalEdgeWeight(double occluded_goal_edge_weight)
+   {
+      occluded_goal_edge_weight_ = occluded_goal_edge_weight;
+   }
+   public double getOccludedGoalEdgeWeight()
+   {
+      return occluded_goal_edge_weight_;
+   }
+
    public void setReturnBestEffortSolution(boolean return_best_effort_solution)
    {
       return_best_effort_solution_ = return_best_effort_solution;
@@ -378,6 +390,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elevation_weight_, other.elevation_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.occluded_goal_edge_weight_, other.occluded_goal_edge_weight_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
 
@@ -433,6 +447,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.elevation_weight_ != otherMyClass.elevation_weight_) return false;
 
+      if(this.occluded_goal_edge_weight_ != otherMyClass.occluded_goal_edge_weight_) return false;
+
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
 
@@ -485,6 +501,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.distance_weight_);      builder.append(", ");
       builder.append("elevation_weight=");
       builder.append(this.elevation_weight_);      builder.append(", ");
+      builder.append("occluded_goal_edge_weight=");
+      builder.append(this.occluded_goal_edge_weight_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
       builder.append(this.return_best_effort_solution_);
       builder.append("}");

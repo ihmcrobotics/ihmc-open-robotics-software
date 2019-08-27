@@ -30,8 +30,6 @@ public class VisibilityGraph
 
    private VisibilityGraphNode startNode, goalNode;
 
-   private static final double unseenNodeEdgeWeight = 50.0;
-
    private final VisibilityGraphsParametersReadOnly parameters;
    private final InterRegionConnectionFilter interRegionConnectionFilter;
    private final InterRegionConnectionFilter allPassFilter;
@@ -267,7 +265,7 @@ public class VisibilityGraph
       if (visibilityGraphNavigableRegion == null)
       {
          goalNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(goalNode, allPassFilter, unseenNodeEdgeWeight);
+         computeInterEdgesWhenOnNoRegion(goalNode, allPassFilter, parameters.getOccludedGoalEdgeWeight());
       }
       else
       {

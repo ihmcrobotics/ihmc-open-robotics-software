@@ -107,6 +107,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(elevationWeight, weight);
    }
 
+   default void setOccludedGoalEdgeWeight(double weight)
+   {
+      set(occludedGoalEdgeWeight, weight);
+   }
+
    default void set(VisibilityGraphsParametersPacket packet)
    {
       if (packet.getMaxInterRegionConnectionLength() != -1.0)
@@ -147,6 +152,8 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setDistanceWeight(packet.getDistanceWeight());
       if (packet.getElevationWeight() != 1.0)
          setElevationWeight(packet.getElevationWeight());
+      if (packet.getOccludedGoalEdgeWeight() != 1.0)
+         setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
    }
 
 }
