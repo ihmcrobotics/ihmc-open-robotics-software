@@ -77,6 +77,7 @@ public class BodyCollisionCheckingUIController
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       javaFXStoredPropertyMap.put(enableBodyCollisionChecking, FootstepPlannerParameterKeys.checkForBodyBoxCollisions);
       javaFXStoredPropertyMap.put(enablePathCollisionChecking, FootstepPlannerParameterKeys.checkForPathCollisions);
+      javaFXStoredPropertyMap.put(numberOfBoundingBoxChecks, FootstepPlannerParameterKeys.numberOfBoundingBoxChecks);
       javaFXStoredPropertyMap.put(bodyDepth, FootstepPlannerParameterKeys.bodyBoxDepth);
       javaFXStoredPropertyMap.put(bodyHeight, FootstepPlannerParameterKeys.bodyBoxHeight);
       javaFXStoredPropertyMap.put(bodyWidth, FootstepPlannerParameterKeys.bodyBoxWidth);
