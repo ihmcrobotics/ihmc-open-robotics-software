@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.robotics.Assert.assertFalse;
 
+
 public class NavigableRegionsManagerTest
 {
    private static boolean visualize = true;
@@ -922,7 +923,6 @@ public class NavigableRegionsManagerTest
       }
       return !condition ? "\n" + message : "";
    }
-
 
    private static List<PlanarRegion> createFlatGroundWithWallEnvironment()
    {
