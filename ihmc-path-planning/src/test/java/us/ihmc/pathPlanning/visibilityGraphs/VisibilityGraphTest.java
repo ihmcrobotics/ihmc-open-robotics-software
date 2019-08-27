@@ -80,7 +80,7 @@ public class VisibilityGraphTest
             return 0.1;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -254,7 +254,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -452,7 +452,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -571,7 +571,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
