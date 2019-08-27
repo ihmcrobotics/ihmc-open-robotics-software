@@ -106,14 +106,12 @@ public class NavigableRegionTools
       if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
          return false;
 
-      // TODO: RobertGriffin: This is not 100% correct. This checks that the point is inside the home region cluster of the navigable region. There are
-      // no guarantees that this cluster is convex;
       if (!isPointInsideNavigableRegion(navigableRegion, pointInLocalToCheck))
          return false;
 
       for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
       {
-         if (isPointInsideConvexHullOfCluster(obstacleCluster, pointInLocalToCheck))
+         if (isPointInsideClosedConcaveHullOfCluster(obstacleCluster, pointInLocalToCheck))
             return false;
       }
 
@@ -185,12 +183,16 @@ public class NavigableRegionTools
     */
    public static boolean isPointInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly test)
    {
-      return isPointInsideConvexHullOfCluster(navigableRegion.getHomeRegionCluster(), test);
+      return isPointInsideClosedConcaveHullOfCluster(navigableRegion.getHomeRegionCluster(), test);
    }
 
-   public static boolean isPointInsideConvexHullOfCluster(Cluster cluster, Point2DReadOnly test)
+   public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
    {
-      List<Point2DReadOnly> vertices = cluster.getNonNavigableExtrusionsInLocal();
+      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal(), test);
+   }
+
+   public static boolean isPointInsideClosedConcaveHull(List<Point2DReadOnly> vertices, Point2DReadOnly test)
+   {
       int numberOfVertices = vertices.size();
 
       int i;
