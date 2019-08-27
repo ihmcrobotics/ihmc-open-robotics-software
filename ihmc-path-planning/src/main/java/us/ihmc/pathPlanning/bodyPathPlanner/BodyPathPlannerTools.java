@@ -30,7 +30,6 @@ public class BodyPathPlannerTools
 
    public static double calculateHeading(double deltaX, double deltaY)
    {
-      double pathHeading = Math.atan2(deltaY, deltaX);
-      return AngleTools.trimAngleMinusPiToPi(pathHeading);
+      return Math.atan2(deltaY, deltaX);
    }
 }
