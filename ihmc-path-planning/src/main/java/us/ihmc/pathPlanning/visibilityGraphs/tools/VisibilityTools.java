@@ -69,10 +69,10 @@ public class VisibilityTools
          Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
          // this will return true if they share a point, which isn't always a good thing
-         boolean sharesAPoint = first.geometricallyEquals(targetPoint, 1.0e-10);
-         sharesAPoint |= first.geometricallyEquals(observer, 1.0e-10);
-         sharesAPoint |= second.geometricallyEquals(targetPoint, 1.0e-10);
-         sharesAPoint |= second.geometricallyEquals(observer, 1.0e-10);
+         boolean sharesAPoint = first.epsilonEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= first.epsilonEquals(observer, 1.0e-10);
+         sharesAPoint |= second.epsilonEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= second.epsilonEquals(observer, 1.0e-10);
 
          if (!sharesAPoint && EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
