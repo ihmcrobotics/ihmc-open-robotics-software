@@ -40,7 +40,7 @@ public class PlannerInput
       return flagEquals(DataSetIOTools.VIS_GRAPH_TAG, DataSetIOTools.TESTABLE_FLAG);
    }
 
-   public boolean getVisGraphRequiresOcclusion()
+   public boolean getVisGraphCanRunWithOcclusion()
    {
       return getBooleanFlag(DataSetIOTools.REQUIRES_OCCLUSION);
    }
