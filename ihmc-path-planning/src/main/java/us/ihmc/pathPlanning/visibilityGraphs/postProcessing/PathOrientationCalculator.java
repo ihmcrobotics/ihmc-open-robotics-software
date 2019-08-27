@@ -8,6 +8,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
@@ -32,27 +34,24 @@ public class PathOrientationCalculator
       this.parameters = parameters;
    }
 
-   public List<Pose3DReadOnly> computePosesFromPath(List<? extends Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
+   public List<Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
    {
       List<Pose3D> newPathPoses = new ArrayList<>();
       List<Cluster> allObstacleClusters = new ArrayList<>();
       visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
 
-      int size = path.size();
-      double startHeading = BodyPathPlannerTools.calculateHeading(path.get(0), path.get(1));
+      List<Pose3D> nominalPathPoses = computeNominalPosesForPath(path);
+      newPathPoses.add(nominalPathPoses.get(0));
 
-      newPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
-      for (int i = 1; i < path.size() - 1; i++)
+      int pathIndex = 1;
+      while (pathIndex < path.size() - 1)
       {
-         Point3DReadOnly previousPosition = path.get(i - 1);
-         Point3DReadOnly currentPosition = path.get(i);
-         Point3DReadOnly nextPosition = path.get(i + 1);
+         Point3DReadOnly currentPosition = path.get(pathIndex);
 
          Point2D currentPosition2D = new Point2D(currentPosition);
 
-         double previousHeading = BodyPathPlannerTools.calculateHeading(previousPosition, currentPosition);
-         double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
-         double desiredOrientation = InterpolationTools.linearInterpolate(previousHeading, nextHeading, 0.5);
+         double previousOrientation = newPathPoses.get(pathIndex - 1).getOrientation().getYaw();
+         double desiredOrientation = nominalPathPoses.get(pathIndex).getOrientation().getYaw();
 
          if (parameters.getComputeOrientationsToAvoidObstacles())
          {
@@ -72,20 +71,101 @@ public class PathOrientationCalculator
             Vector2D vectorToObstacle = new Vector2D();
             vectorToObstacle.sub(closestObstaclePoint, currentPosition2D);
 
-            if (previousPosition.distanceXY(currentPosition) < 2.0 * parameters.getPreferredObstacleExtrusionDistance())
-               previousHeading = newPathPoses.get(i - 1).getOrientation().getYaw();
-
-            desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousHeading, vectorToObstacle);
+            desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousOrientation, vectorToObstacle);
          }
 
-         newPathPoses.add(new Pose3D(path.get(i), new Quaternion(desiredOrientation, 0.0, 0.0)));
+         newPathPoses.add(new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
+
+         pathIndex++;
       }
 
-      double endHeading = BodyPathPlannerTools.calculateHeading(path.get(size - 2), path.get(size - 1));
 
-      newPathPoses.add(new Pose3D(path.get(size - 1), new Quaternion(endHeading, 0.0, 0.0)));
+
+
+      newPathPoses.add(nominalPathPoses.get(nominalPathPoses.size() - 1));
 
       return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
+   }
+
+   private List<Pose3D> computeNominalPosesForPath(List<Point3DReadOnly> path)
+   {
+      List<Pose3D> nominalPathPoses = new ArrayList<>();
+
+      double startHeading = BodyPathPlannerTools.calculateHeading(path.get(0), path.get(1));
+      nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
+
+      int pathIndex = 1;
+
+      while (pathIndex < path.size() - 1)
+      {
+         Point3DReadOnly previousPosition = path.get(pathIndex - 1);
+         Point3DReadOnly currentPosition = path.get(pathIndex);
+         Point3DReadOnly nextPosition = path.get(pathIndex + 1);
+
+         double previousHeading = BodyPathPlannerTools.calculateHeading(previousPosition, currentPosition);
+         double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
+         double desiredOrientation = InterpolationTools.linearInterpolate(previousHeading, nextHeading, 0.5);
+
+         if (!MathTools.epsilonEquals(previousHeading, nextHeading, 1e-3))
+         {
+            double previousLength = currentPosition.distanceXY(previousPosition);
+            double nextLength = currentPosition.distanceXY(nextPosition);
+
+            // add a point before
+            if (previousLength > 2.0 * parameters.getPreferredObstacleExtrusionDistance())
+            {
+               double alpha = 1.0 - 2.0 * parameters.getPreferredObstacleExtrusionDistance() / previousLength;
+               Point3DBasics waypointPositionToAdd = new Point3D();
+               waypointPositionToAdd.interpolate(previousPosition, currentPosition, alpha);
+               path.add(pathIndex, waypointPositionToAdd);
+               nominalPathPoses.add(new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
+
+               pathIndex++;
+            }
+            else if (previousLength > 0.25 * parameters.getPreferredObstacleExtrusionDistance())
+            { // TODO extract magic number
+               double alpha = 0.5;
+               Point3DBasics waypointPositionToAdd = new Point3D();
+               waypointPositionToAdd.interpolate(previousPosition, currentPosition, alpha);
+               path.add(pathIndex, waypointPositionToAdd);
+               nominalPathPoses.add(new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
+
+               pathIndex++;
+            }
+
+            nominalPathPoses.add(new Pose3D(currentPosition, new Quaternion(desiredOrientation, 0.0, 0.0)));
+            pathIndex++;
+
+            // add a point after
+            if (nextLength > 2.0 * parameters.getPreferredObstacleExtrusionDistance())
+            {
+               double alpha = 2.0 * parameters.getPreferredObstacleExtrusionDistance() / nextLength;
+               Point3DBasics waypointPositionToAdd = new Point3D();
+               waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
+               path.add(pathIndex, waypointPositionToAdd);
+            }
+            else if (nextHeading > 0.25 * parameters.getPreferredObstacleExtrusionDistance())
+            { // TODO extract magic number
+               double alpha = 0.5;
+               Point3DBasics waypointPositionToAdd = new Point3D();
+               waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
+               path.add(pathIndex, waypointPositionToAdd);
+            }
+         }
+         else
+         {
+            nominalPathPoses.add(new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
+            pathIndex++;
+         }
+
+      }
+
+      int endingSize = path.size();
+      double endHeading = BodyPathPlannerTools.calculateHeading(path.get(endingSize - 2), path.get(endingSize - 1));
+
+      nominalPathPoses.add(new Pose3D(path.get(endingSize - 1), new Quaternion(endHeading, 0.0, 0.0)));
+
+      return nominalPathPoses;
    }
 
    private double getHeadingToAvoidObstacles(double nominalHeading, double previousHeading, Vector2DReadOnly headingToClosestObstacle)

@@ -81,32 +81,7 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
       poseToPack.getPosition().interpolate(firstPoint, secondPoint, alphaInSegment);
-
-
-      double desiredYaw;
-      if (segmentLengths[segmentIndex] < 2.0 * segmentLengthToReturnToHeading)
-      {
-         desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
-      }
-      else
-      {
-         double distanceAlongSegment = alphaInSegment * segmentLengths[segmentIndex];
-         double distanceRemainingInSegment = segmentLengths[segmentIndex] - distanceAlongSegment;
-         double heading = BodyPathPlannerTools.calculateHeading(firstPoint, secondPoint);
-
-         desiredYaw = heading;
-         if (distanceAlongSegment < segmentLengthToReturnToHeading)
-         {
-            double interpolationAlpha = distanceAlongSegment / segmentLengthToReturnToHeading;
-            desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), heading, interpolationAlpha);
-         }
-         else if (distanceRemainingInSegment < segmentLengthToReturnToHeading)
-         {
-            double interpolationAlpha = 1.0 - distanceRemainingInSegment / segmentLengthToReturnToHeading;
-            desiredYaw = AngleTools.interpolateAngle(heading, waypointHeadings.get(segmentIndex + 1).getValue(), interpolationAlpha);
-         }
-      }
-
+      double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
       poseToPack.setYaw(desiredYaw);
    }
 
