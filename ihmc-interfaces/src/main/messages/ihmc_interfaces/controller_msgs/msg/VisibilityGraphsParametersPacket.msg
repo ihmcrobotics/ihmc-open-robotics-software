@@ -48,4 +48,6 @@ float64 distance_weight -1.0
 
 float64 elevation_weight -1.0
 
+float64 occluded_goal_edge_weight -1.0
+
 bool return_best_effort_solution false

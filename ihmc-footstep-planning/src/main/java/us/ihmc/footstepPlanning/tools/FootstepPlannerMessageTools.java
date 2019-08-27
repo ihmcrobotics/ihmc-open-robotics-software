@@ -147,5 +147,6 @@ public class FootstepPlannerMessageTools
       packet.setDistanceWeight(parameters.getDistanceWeight());
       packet.setElevationWeight(parameters.getElevationWeight());
       packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
+      packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
    }
 }

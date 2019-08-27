@@ -80,6 +80,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -155,6 +157,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -204,6 +209,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getElevationWeight());
 
+      cdr.write_type_6(data.getOccludedGoalEdgeWeight());
+
       cdr.write_type_7(data.getReturnBestEffortSolution());
 
    }
@@ -250,6 +257,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setElevationWeight(cdr.read_type_6());
       	
+      data.setOccludedGoalEdgeWeight(cdr.read_type_6());
+      	
       data.setReturnBestEffortSolution(cdr.read_type_7());
       	
 
@@ -278,6 +287,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("elevation_weight", data.getElevationWeight());
+      ser.write_type_6("occluded_goal_edge_weight", data.getOccludedGoalEdgeWeight());
       ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
@@ -304,6 +314,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setElevationWeight(ser.read_type_6("elevation_weight"));
+      data.setOccludedGoalEdgeWeight(ser.read_type_6("occluded_goal_edge_weight"));
       data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 
