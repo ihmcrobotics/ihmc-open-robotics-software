@@ -2,30 +2,25 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.*;
 
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsCostParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
 
-   private final VisibilityGraphsParameters parameters;
-   private final VisibilityGraphsCostParameters costParameters;
+   private final VisibilityGraphsParametersReadOnly parameters;
 
    private final ObstacleAndCliffAvoidanceProcessor postProcessor;
 
@@ -43,7 +38,7 @@ public class NavigableRegionsManager
       this(null, null, null);
    }
 
-   public NavigableRegionsManager(VisibilityGraphsParameters parameters)
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters)
    {
       this(parameters, null, null);
    }
@@ -53,16 +48,15 @@ public class NavigableRegionsManager
       this(null, regions, null);
    }
 
-   public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions)
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions)
    {
       this(parameters, regions, null);
    }
 
-   public NavigableRegionsManager(VisibilityGraphsParameters parameters, List<PlanarRegion> regions, ObstacleAndCliffAvoidanceProcessor postProcessor)
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, ObstacleAndCliffAvoidanceProcessor postProcessor)
    {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
-      this.costParameters = new DefaultVisibilityGraphsCostParameters();
       this.postProcessor = postProcessor;
    }
 
@@ -183,7 +177,7 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = costParameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
+               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
                stack.remove(neighbor);
@@ -256,8 +250,8 @@ public class NavigableRegionsManager
 
       double angle = Math.atan(verticalDistance / horizontalDistance);
 
-      double distanceCost = costParameters.getDistanceWeight() * horizontalDistance;
-      double elevationCost = costParameters.getElevationWeight() * 2.0 * angle / Math.PI;
+      double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
+      double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
 
       return distanceCost + elevationCost;
    }

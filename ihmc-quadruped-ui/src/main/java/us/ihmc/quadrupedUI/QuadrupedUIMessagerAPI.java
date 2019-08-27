@@ -14,7 +14,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStatus;
@@ -76,7 +76,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Double> DesiredBodyHeight = apiFactory.createTypedTopicTheme("BodyHeight");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
    private static final TypedTopicTheme<PawStepPlannerParametersReadOnly> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
-   private static final TypedTopicTheme<VisibilityGraphsParameters> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
+   private static final TypedTopicTheme<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
    private static final TypedTopicTheme<QuadrupedFootstepStatusMessage> FootstepStatusMessage = apiFactory.createTypedTopicTheme("FootstepStatusMessage");
    private static final TypedTopicTheme<QuadrupedTimedStepListMessage> StepsListMessage = apiFactory.createTypedTopicTheme("StepsListMessage");
    private static final TypedTopicTheme<SoleTrajectoryMessage> SoleTrajectoryMessage = apiFactory.createTypedTopicTheme("SoleTrajectoryMessage");
@@ -107,7 +107,7 @@ public class QuadrupedUIMessagerAPI
    /* Parameters */
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Parameters).child(XGait).topic(XGaitSettings);
    public static final Topic<PawStepPlannerParametersReadOnly> FootstepPlannerParametersTopic = Root.child(Parameters).child(FootstepPlanning).topic(FootstepPlannerParameters);
-   public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParametersTopic = Root.child(Parameters).child(FootstepPlanning).topic(VisibilityGraphsParameters);
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParametersTopic = Root.child(Parameters).child(FootstepPlanning).topic(VisibilityGraphsParameters);
 
    public static final Topic<Boolean> GlobalResetTopic = Root.topic(Reset);
 

@@ -9,8 +9,6 @@ import java.util.Set;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,7 +28,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraphTest
@@ -40,7 +39,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphJustOneSquare()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -199,7 +198,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphTwoSquares()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -389,7 +388,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphTwoSquaresWithImpassableBarrier()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -513,7 +512,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphSquareInSquare()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -896,7 +895,7 @@ public class VisibilityGraphTest
 
    }
 
-   private VisibilityGraphsParameters createVisibilityGraphParametersForTest()
+   private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
       return new DefaultVisibilityGraphParameters()
       {
