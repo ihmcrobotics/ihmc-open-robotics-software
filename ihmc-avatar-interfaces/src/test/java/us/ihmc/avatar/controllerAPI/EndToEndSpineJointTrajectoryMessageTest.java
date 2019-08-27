@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,12 +22,14 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -42,9 +46,11 @@ import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
@@ -375,6 +381,190 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertDesiredsContinous(controllerSpy);
    }
 
+   @Test
+   public void testStreaming() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(54651);
+
+      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoVariableRegistry(testRegistry);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      YoDouble startTime = new YoDouble("startTime", testRegistry);
+      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
+                                               .getYoTime();
+      startTime.set(yoTime.getValue());
+      YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
+      trajectoryTime.set(2.0);
+
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      OneDoFJointBasics[] spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
+
+      YoDouble[] initialSpineJointAngles = new YoDouble[spineJoints.length];
+      YoDouble[] finalSpineJointAngles = new YoDouble[spineJoints.length];
+      YoDouble[] desiredSpineJointAngles = new YoDouble[spineJoints.length];
+      YoDouble[] desiredSpineJointVelocities = new YoDouble[spineJoints.length];
+
+      for (int i = 0; i < spineJoints.length; i++)
+      {
+         OneDoFJointBasics spineJoint = spineJoints[i];
+         YoDouble qInitial = new YoDouble("test_q_initial_" + spineJoint.getName(), testRegistry);
+         YoDouble qFinal = new YoDouble("test_q_final_" + spineJoint.getName(), testRegistry);
+         YoDouble qDesired = new YoDouble("test_q_des_" + spineJoint.getName(), testRegistry);
+         YoDouble qDDesired = new YoDouble("test_qd_des_" + spineJoint.getName(), testRegistry);
+         qInitial.set(spineJoint.getQ());
+         qFinal.set(RandomNumbers.nextDouble(random, spineJoint.getJointLimitLower(), spineJoint.getJointLimitUpper()));
+         initialSpineJointAngles[i] = qInitial;
+         finalSpineJointAngles[i] = qFinal;
+         desiredSpineJointAngles[i] = qDesired;
+         desiredSpineJointVelocities[i] = qDDesired;
+      }
+
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      {
+         @Override
+         public void initialize()
+         {
+         }
+
+         private boolean everyOtherTick = false;
+
+         @Override
+         public void doControl()
+         {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
+            double timeInTrajectory = yoTime.getValue() - startTime.getValue();
+            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
+            double alpha = timeInTrajectory / trajectoryTime.getValue();
+
+            double[] qDesireds = new double[initialSpineJointAngles.length];
+            double[] qDDesireds = new double[initialSpineJointAngles.length];
+
+            for (int i = 0; i < initialSpineJointAngles.length; i++)
+            {
+               double qDes = EuclidCoreTools.interpolate(initialSpineJointAngles[i].getValue(), finalSpineJointAngles[i].getValue(), alpha);
+               double qDDes;
+               if (alpha <= 0.0 || alpha >= 1.0)
+                  qDDes = 0.0;
+               else
+                  qDDes = (finalSpineJointAngles[i].getValue() - initialSpineJointAngles[i].getValue()) / trajectoryTime.getValue();
+               desiredSpineJointAngles[i].set(qDes);
+               desiredSpineJointVelocities[i].set(qDDes);
+               qDesireds[i] = qDes;
+               qDDesireds[i] = qDDes;
+            }
+
+            SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(0.0, qDesireds, qDDesireds, null);
+            message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return null;
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return RobotController.super.getDescription();
+         }
+
+         @Override
+         public String getName()
+         {
+            return RobotController.super.getName();
+         }
+      });
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      assertTrue(success);
+
+      double desiredEpsilon = 5.0e-3;
+      double trackingEpsilon = 5.0e-2;
+
+      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, scs);
+      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, scs);
+
+      for (int i = 0; i < spineJoints.length; i++)
+      {
+         double qDDes = desiredSpineJointVelocities[i].getValue();
+         double qDes = desiredSpineJointAngles[i].getValue() - getRobotModel().getControllerDT() * qDDes; // Hack to approx the previous desired. The last computed desired has not been processed yet.
+
+         assertEquals(qDes,
+                      controllerDesiredPositions[i],
+                      desiredEpsilon,
+                      "Desired position mismatch for joint " + spineJoints[i].getName() + " diff: " + Math.abs(qDes - controllerDesiredPositions[i]));
+         assertEquals(qDDes,
+                      controllerDesiredVelocities[i],
+                      desiredEpsilon,
+                      "Desired velocity mismatch for joint " + spineJoints[i].getName() + " diff: " + Math.abs(qDDes - controllerDesiredVelocities[i]));
+         assertEquals(controllerDesiredPositions[i],
+                      spineJoints[i].getQ(),
+                      trackingEpsilon,
+                      "Poor position tracking for joint " + spineJoints[i].getName() + " err: "
+                            + Math.abs(controllerDesiredPositions[i] - spineJoints[i].getQ()));
+         assertEquals(controllerDesiredVelocities[i],
+                      spineJoints[i].getQd(),
+                      trackingEpsilon,
+                      "Poor velocity tracking for joint " + spineJoints[i].getName() + " err: "
+                            + Math.abs(controllerDesiredVelocities[i] - spineJoints[i].getQd()));
+      }
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+
+      assertTrue(success);
+
+      desiredEpsilon = 1.0e-7;
+      trackingEpsilon = 5.0e-3;
+
+      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(spineJoints, scs);
+      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(spineJoints, scs);
+
+      for (int i = 0; i < spineJoints.length; i++)
+      {
+         double qDes = desiredSpineJointAngles[i].getValue();
+         double qDDes = desiredSpineJointVelocities[i].getValue();
+
+         assertEquals(qDes,
+                      controllerDesiredPositions[i],
+                      desiredEpsilon,
+                      "Desired position mismatch for joint " + spineJoints[i].getName() + " diff: " + Math.abs(qDes - controllerDesiredPositions[i]));
+         assertEquals(qDDes,
+                      controllerDesiredVelocities[i],
+                      desiredEpsilon,
+                      "Desired velocity mismatch for joint " + spineJoints[i].getName() + " diff: " + Math.abs(qDDes - controllerDesiredVelocities[i]));
+         assertEquals(controllerDesiredPositions[i],
+                      spineJoints[i].getQ(),
+                      trackingEpsilon,
+                      "Poor position tracking for joint " + spineJoints[i].getName() + " err: "
+                            + Math.abs(controllerDesiredPositions[i] - spineJoints[i].getQ()));
+         assertEquals(controllerDesiredVelocities[i],
+                      spineJoints[i].getQd(),
+                      trackingEpsilon,
+                      "Poor velocity tracking for joint " + spineJoints[i].getName() + " err: "
+                            + Math.abs(controllerDesiredVelocities[i] - spineJoints[i].getQd()));
+      }
+   }
+
    private SpineTrajectoryMessage createRandomSpineMessage(double trajectoryTime, Random random)
    {
       double[] jointDesireds = new double[numberOfJoints];
@@ -408,14 +598,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)
    {
-      assertFalse("Joint and Taskspace control was inconsistent.", controllerSpy.wasControlInconsistent());
+      assertFalse(controllerSpy.wasControlInconsistent(), "Joint and Taskspace control was inconsistent.");
    }
 
    private static void assertDesiredsContinous(ControllerSpy controllerSpy)
    {
       double maxSpeed = controllerSpy.getMaxSpeed();
       String errorMessage = "The maximum speed along the trajectory was " + maxSpeed + " this was probably caused by a discontinous desired value.";
-      assertTrue(errorMessage, maxSpeed < MAX_SPEED_FOR_CONTINOUS);
+      assertTrue(maxSpeed < MAX_SPEED_FOR_CONTINOUS, errorMessage);
    }
 
    private void executeMessage(SpineTrajectoryMessage message) throws SimulationExceededMaximumTimeException

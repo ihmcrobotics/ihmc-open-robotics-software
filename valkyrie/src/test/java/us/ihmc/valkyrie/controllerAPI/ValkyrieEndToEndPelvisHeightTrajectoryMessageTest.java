@@ -51,4 +51,11 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
    {
       super.testStopAllTrajectory();
    }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
 }
