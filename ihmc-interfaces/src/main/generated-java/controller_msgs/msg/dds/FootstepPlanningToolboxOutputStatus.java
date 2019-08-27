@@ -17,6 +17,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 3;
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 4;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 5;
+   public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 6;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
