@@ -34,14 +34,12 @@ public class PathOrientationCalculator
       this.parameters = parameters;
    }
 
-   public List<Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
+   public List<? extends Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
    {
-      List<Pose3D> newPathPoses = new ArrayList<>();
       List<Cluster> allObstacleClusters = new ArrayList<>();
       visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
 
-      List<Pose3D> nominalPathPoses = computeNominalPosesForPath(path);
-      newPathPoses.add(nominalPathPoses.get(0));
+      List<Pose3D> pathPoses = computeNominalPosesForPath(path);
 
       int pathIndex = 1;
       while (pathIndex < path.size() - 1)
@@ -50,8 +48,8 @@ public class PathOrientationCalculator
 
          Point2D currentPosition2D = new Point2D(currentPosition);
 
-         double previousOrientation = newPathPoses.get(pathIndex - 1).getOrientation().getYaw();
-         double desiredOrientation = nominalPathPoses.get(pathIndex).getOrientation().getYaw();
+         double previousOrientation = pathPoses.get(pathIndex - 1).getOrientation().getYaw();
+         double desiredOrientation = pathPoses.get(pathIndex).getOrientation().getYaw();
 
          if (parameters.getComputeOrientationsToAvoidObstacles())
          {
@@ -74,14 +72,12 @@ public class PathOrientationCalculator
             desiredOrientation = getHeadingToAvoidObstacles(desiredOrientation, previousOrientation, vectorToObstacle);
          }
 
-         newPathPoses.add(new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
+         pathPoses.get(pathIndex).getOrientation().setYawPitchRoll(desiredOrientation, 0.0, 0.0);
 
          pathIndex++;
       }
 
-      newPathPoses.add(nominalPathPoses.get(nominalPathPoses.size() - 1));
-
-      return newPathPoses.parallelStream().map(Pose3D::new).collect(Collectors.toList());
+      return pathPoses;
    }
 
    private List<Pose3D> computeNominalPosesForPath(List<Point3DReadOnly> path)

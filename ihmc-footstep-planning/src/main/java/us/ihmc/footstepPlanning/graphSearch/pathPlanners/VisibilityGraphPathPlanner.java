@@ -96,7 +96,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
          try
          {
             List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-            List<Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+            List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
 
             waypoints.addAll(posePath);
          }
