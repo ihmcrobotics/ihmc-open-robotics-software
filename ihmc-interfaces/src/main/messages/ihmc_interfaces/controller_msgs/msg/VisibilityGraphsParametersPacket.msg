@@ -40,6 +40,8 @@ float64 can_duck_under_height -1.0
 
 float64 can_easily_step_over_height -1.0
 
+float64 length_for_long_inter_region_edge -1.0
+
 float64 heuristic_weight -1.0
 
 float64 distance_weight -1.0

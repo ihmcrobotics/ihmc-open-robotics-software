@@ -52,6 +52,9 @@ float64 can_duck_under_height
 float64 can_easily_step_over_height
 
 # Field default value -1.0
+float64 length_for_long_inter_region_edge
+
+# Field default value -1.0
 float64 heuristic_weight
 
 # Field default value -1.0

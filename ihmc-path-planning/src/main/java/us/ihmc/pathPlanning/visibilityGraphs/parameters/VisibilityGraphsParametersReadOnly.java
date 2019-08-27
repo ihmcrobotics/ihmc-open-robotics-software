@@ -124,6 +124,16 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(canEasilyStepOverHeight);
    }
 
+   /**
+    * Returns the length of an inter region connection that defines it as "long". If it is longer than this value,
+    * then additional checks are performed on the edge to see if it is visible.
+    */
+   default double getLengthForLongInterRegionEdge()
+   {
+      return get(lengthForLongInterRegionEdge);
+   }
+
+
    default double getHeuristicWeight()
    {
       return get(heuristicWeight);

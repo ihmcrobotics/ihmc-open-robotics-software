@@ -58,6 +58,8 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double can_easily_step_over_height;
         @defaultValue(value=-1.0)
+        double length_for_long_inter_region_edge;
+        @defaultValue(value=-1.0)
         double heuristic_weight;
         @defaultValue(value=-1.0)
         double distance_weight;
