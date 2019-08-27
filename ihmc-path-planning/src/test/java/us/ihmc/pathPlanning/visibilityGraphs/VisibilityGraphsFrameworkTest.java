@@ -169,7 +169,7 @@ public class VisibilityGraphsFrameworkTest
       {
          if(!dataSet.hasPlannerInput())
             return false;
-         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphRequiresOcclusion())
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
             return false;
          else
             return dataSet.getPlannerInput().getVisGraphIsTestable();
