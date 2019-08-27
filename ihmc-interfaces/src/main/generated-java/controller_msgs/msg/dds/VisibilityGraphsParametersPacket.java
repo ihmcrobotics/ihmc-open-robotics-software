@@ -41,6 +41,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double search_host_region_epsilon_ = 0.03;
    public double can_duck_under_height_ = -1.0;
    public double can_easily_step_over_height_ = -1.0;
+   public double length_for_long_inter_region_edge_ = -1.0;
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
@@ -89,6 +90,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       can_duck_under_height_ = other.can_duck_under_height_;
 
       can_easily_step_over_height_ = other.can_easily_step_over_height_;
+
+      length_for_long_inter_region_edge_ = other.length_for_long_inter_region_edge_;
 
       heuristic_weight_ = other.heuristic_weight_;
 
@@ -272,6 +275,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return can_easily_step_over_height_;
    }
 
+   public void setLengthForLongInterRegionEdge(double length_for_long_inter_region_edge)
+   {
+      length_for_long_inter_region_edge_ = length_for_long_inter_region_edge;
+   }
+   public double getLengthForLongInterRegionEdge()
+   {
+      return length_for_long_inter_region_edge_;
+   }
+
    public void setHeuristicWeight(double heuristic_weight)
    {
       heuristic_weight_ = heuristic_weight;
@@ -358,6 +370,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.can_easily_step_over_height_, other.can_easily_step_over_height_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.length_for_long_inter_region_edge_, other.length_for_long_inter_region_edge_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.heuristic_weight_, other.heuristic_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon)) return false;
@@ -411,6 +425,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.can_easily_step_over_height_ != otherMyClass.can_easily_step_over_height_) return false;
 
+      if(this.length_for_long_inter_region_edge_ != otherMyClass.length_for_long_inter_region_edge_) return false;
+
       if(this.heuristic_weight_ != otherMyClass.heuristic_weight_) return false;
 
       if(this.distance_weight_ != otherMyClass.distance_weight_) return false;
@@ -461,6 +477,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.can_duck_under_height_);      builder.append(", ");
       builder.append("can_easily_step_over_height=");
       builder.append(this.can_easily_step_over_height_);      builder.append(", ");
+      builder.append("length_for_long_inter_region_edge=");
+      builder.append(this.length_for_long_inter_region_edge_);      builder.append(", ");
       builder.append("heuristic_weight=");
       builder.append(this.heuristic_weight_);      builder.append(", ");
       builder.append("distance_weight=");
