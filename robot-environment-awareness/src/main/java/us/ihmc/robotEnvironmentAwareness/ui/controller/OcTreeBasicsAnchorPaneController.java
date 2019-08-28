@@ -114,7 +114,6 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       setupControls();
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeEnable, enableButton.selectedProperty());
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.OcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeResolution, resolutionSlider.valueProperty(), numberToDoubleConverter);
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
