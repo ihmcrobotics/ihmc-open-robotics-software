@@ -46,16 +46,20 @@ public class ConcavePolygonToolsTest
 
       // create the ideal result
       ConcaveHull cutPolygon1 = new ConcaveHull();
-      cutPolygon1.addVertex(1.0, 1.0);
-      cutPolygon1.addVertex(1.0, -1.0);
-      cutPolygon1.addVertex(0.0, -1.0);
+      cutPolygon1.addVertex(0.0, 2.0);
+      cutPolygon1.addVertex(2.0, 2.0);
+      cutPolygon1.addVertex(2.0, 1.0);
       cutPolygon1.addVertex(0.0, 1.0);
 
       ConcaveHull cutPolygon2 = new ConcaveHull();
-      cutPolygon2.addVertex(1.0, 1.0);
+      cutPolygon2.addVertex(0.0, 0.0);
+      cutPolygon2.addVertex(2.0, 0.0);
+      cutPolygon2.addVertex(-2.0, -3.0);
+      cutPolygon2.addVertex(0.0, -3.0);
+      cutPolygon2.addVertex(0.0, -2.0);
+      cutPolygon2.addVertex(1.0, -2.0);
       cutPolygon2.addVertex(1.0, -1.0);
       cutPolygon2.addVertex(0.0, -1.0);
-      cutPolygon2.addVertex(0.0, 1.0);
 
       // assert equal
       assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-7));

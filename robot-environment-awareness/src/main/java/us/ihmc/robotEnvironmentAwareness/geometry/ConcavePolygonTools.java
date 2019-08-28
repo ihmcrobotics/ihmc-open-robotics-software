@@ -180,8 +180,11 @@ public class ConcavePolygonTools
                   drawState = ALONG_HULL;
                }
 
-               currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(travellingIndex).getPoint()));
-               model.getPoints().get(travellingIndex).setVisited(true);
+               if (travellingIndex != firstUnvisitedVertex)
+               {
+                  currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(travellingIndex).getPoint()));
+                  model.getPoints().get(travellingIndex).setVisited(true);
+               }
             }
             while (travellingIndex != firstUnvisitedVertex);
 
