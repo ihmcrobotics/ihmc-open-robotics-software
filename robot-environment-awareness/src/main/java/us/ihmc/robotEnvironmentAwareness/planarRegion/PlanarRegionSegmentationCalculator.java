@@ -343,7 +343,7 @@ public class PlanarRegionSegmentationCalculator
 
    private static boolean isNodeSurfaceNormalInBoundary(NormalOcTreeNode node, Vector3D cameraPosition, double upperBound, double lowerBound)
    {
-      Vector3D cameraToNode = new Vector3D(node.getHitLocationCopy());
+      Vector3D cameraToNode = new Vector3D(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ());
       cameraToNode.add(-cameraPosition.getX(), -cameraPosition.getY(), -cameraPosition.getZ());
       Vector3D surfaceNormal = node.getNormalCopy();
 
