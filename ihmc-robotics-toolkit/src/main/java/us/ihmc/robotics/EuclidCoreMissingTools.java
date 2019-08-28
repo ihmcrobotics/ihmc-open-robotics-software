@@ -84,36 +84,36 @@ public class EuclidCoreMissingTools
     * </ul>
     * </p>
     *
-    * @param pointOnLine1x   x-coordinate of a point located on the first line.
-    * @param pointOnLine1y   y-coordinate of a point located on the first line.
-    * @param lineDirection1x x-component of the first line direction.
-    * @param lineDirection1y y-component of the first line direction.
-    * @param pointOnLine2x   x-coordinate of a point located on the second line.
-    * @param pointOnLine2y   y-coordinate of a point located on the second line.
-    * @param lineDirection2x x-component of the second line direction.
-    * @param lineDirection2y y-component of the second line direction.
+    * @param startPoint1x   x-coordinate of a point located on the first line.
+    * @param startPoint1y   y-coordinate of a point located on the first line.
+    * @param segmentTravel1x x-component of the first line direction.
+    * @param segmentTravel1y y-component of the first line direction.
+    * @param startPoint2x   x-coordinate of a point located on the second line.
+    * @param startPoint2y   y-coordinate of a point located on the second line.
+    * @param segmentTravel2x x-component of the second line direction.
+    * @param segmentTravel2y y-component of the second line direction.
     * @return {@code alpha} the percentage along the first line of the intersection location. This
     *         method returns {@link Double#NaN} if the lines do not intersect.
     */
-   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double pointOnLine1x, double pointOnLine1y, double lineDirection1x, double lineDirection1y,
-                                                                         double pointOnLine2x, double pointOnLine2y, double lineDirection2x, double lineDirection2y)
+   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x, double startPoint1y, double segmentTravel1x, double segmentTravel1y,
+                                                                         double startPoint2x, double startPoint2y, double segmentTravel2x, double segmentTravel2y)
    {
       //      We solve for x the problem of the form: A * x = b
       //            A      *     x     =      b
-      //      / lineDirection1x -lineDirection2x \   / alpha \   / pointOnLine2x - pointOnLine1x \
+      //      / segmentTravel1x -segmentTravel2x \   / alpha \   / startPoint2x - startPoint1x \
       //      |                                  | * |       | = |                               |
-      //      \ lineDirection1y -lineDirection2y /   \ beta  /   \ pointOnLine2y - pointOnLine1y /
+      //      \ segmentTravel1y -segmentTravel2y /   \ beta  /   \ startPoint2y - startPoint1y /
       // Here, only alpha or beta is needed.
 
-      double determinant = -lineDirection1x * lineDirection2y + lineDirection1y * lineDirection2x;
+      double determinant = -segmentTravel1x * segmentTravel2y + segmentTravel1y * segmentTravel2x;
 
-      double dx = pointOnLine2x - pointOnLine1x;
-      double dy = pointOnLine2y - pointOnLine1y;
+      double dx = startPoint2x - startPoint1x;
+      double dy = startPoint2y - startPoint1y;
 
       if (Math.abs(determinant) < EuclidGeometryTools.ONE_TRILLIONTH)
       { // The lines are parallel
          // Check if they are collinear
-         double cross = dx * lineDirection1y - dy * lineDirection1x;
+         double cross = dx * segmentTravel1y - dy * segmentTravel1x;
          if (Math.abs(cross) < EuclidGeometryTools.ONE_TRILLIONTH)
          {
             /*
@@ -130,8 +130,8 @@ public class EuclidCoreMissingTools
       else
       {
          double oneOverDeterminant = 1.0 / determinant;
-         double AInverse00 = oneOverDeterminant * -lineDirection2y;
-         double AInverse01 = oneOverDeterminant * lineDirection2x;
+         double AInverse00 = oneOverDeterminant * -segmentTravel2y;
+         double AInverse01 = oneOverDeterminant * segmentTravel2x;
 
          double alpha = AInverse00 * dx + AInverse01 * dy;
 
