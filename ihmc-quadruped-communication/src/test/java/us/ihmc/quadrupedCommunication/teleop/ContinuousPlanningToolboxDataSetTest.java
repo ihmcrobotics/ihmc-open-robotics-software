@@ -40,6 +40,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning.QuadrupedContinuousPlanningModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
@@ -120,10 +121,13 @@ public class ContinuousPlanningToolboxDataSetTest
       settings.setStanceWidth(0.5);
 
       settings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
-      settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
+      settings.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
       settings.getAmbleMediumTimings().setMaxSpeed(0.3);
+      settings.getTrotMediumTimings().setEndDoubleSupportDuration(0.25);
+      settings.getTrotMediumTimings().setStepDuration(0.5);
+      settings.getTrotMediumTimings().setMaxSpeed(0.3);
       return settings;
    }
 
@@ -131,6 +135,7 @@ public class ContinuousPlanningToolboxDataSetTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setComputeOrientationsToAvoidObstacles(false);
       return parameters;
    }
 
@@ -479,7 +484,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private String simulateWalkingAlongThePathAndAssertGoodResults(DataSet dataSet)
    {
-      QuadrantDependentList<Point3D> feetPositions = new QuadrantDependentList<>();
+      QuadrantDependentList<FramePoint3D> feetPositions = new QuadrantDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
          startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getQuadrupedStartYaw());
@@ -493,7 +498,7 @@ public class ContinuousPlanningToolboxDataSetTest
          footPosition.setY(robotQuadrant.getSide().negateIfRightSide(0.5 * xGaitSettings.getStanceWidth()));
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-         feetPositions.put(robotQuadrant, new Point3D(footPosition));
+         feetPositions.put(robotQuadrant, footPosition);
       }
 
       List<QuadrupedTimedStep> stepsCurrentlyInProgress = new ArrayList<>();
@@ -567,11 +572,28 @@ public class ContinuousPlanningToolboxDataSetTest
 
             footstepStatusPublisher.publish(statusMessage);
 
-            feetPositions.put(stepJustFinished.getRobotQuadrant(), new Point3D(stepJustFinished.getGoalPosition()));
+            feetPositions.put(stepJustFinished.getRobotQuadrant(), new FramePoint3D(ReferenceFrame.getWorldFrame(), stepJustFinished.getGoalPosition()));
          }
 
-         messager.submitMessage(PawStepPlannerMessagerAPI.StartFeetPositionTopic, feetPositions);
+         Point3D centerPoint = new Point3D();
+         QuadrantDependentList<Point3D> positions = new QuadrantDependentList<>();
 
+         int number = 0;
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (feetPositions.get(robotQuadrant) != null)
+            {
+               centerPoint.add(feetPositions.get(robotQuadrant));
+               positions.put(robotQuadrant, new Point3D(feetPositions.get(robotQuadrant)));
+               number++;
+            }
+         }
+         centerPoint.scale(1.0 / number);
+
+
+
+         messager.submitMessage(PawStepPlannerMessagerAPI.StartPositionTopic, centerPoint);
+         messager.submitMessage(PawStepPlannerMessagerAPI.StartFeetPositionTopic, positions);
 
          stepsCurrentlyInProgress.clear();
          stepsCurrentlyInProgress.addAll(stepsInProgress);

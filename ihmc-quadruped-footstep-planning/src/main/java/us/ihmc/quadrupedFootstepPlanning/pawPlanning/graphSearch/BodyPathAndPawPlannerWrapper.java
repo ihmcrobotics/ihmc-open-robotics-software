@@ -60,8 +60,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
-   public BodyPathAndPawPlannerWrapper(String prefix, PawStepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
-                                       YoGraphicsListRegistry graphicsListRegistry)
+   public BodyPathAndPawPlannerWrapper(String prefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
