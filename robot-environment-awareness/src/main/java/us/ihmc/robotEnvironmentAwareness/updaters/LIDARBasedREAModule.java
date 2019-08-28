@@ -56,7 +56,6 @@ public class LIDARBasedREAModule
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
-   //   private NormalOcTree mainOctree = new NormalOcTree(DEFAULT_OCTREE_RESOLUTION, DEFAULT_OCTREE_DEPTH);
    private final AtomicReference<Double> octreeResolution;
 
    private final REAOcTreeBuffer lidarBufferUpdater;
