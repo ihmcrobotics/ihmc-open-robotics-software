@@ -51,13 +51,15 @@ public class LIDARBasedREAModule
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 10;
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
+   private static final int DEFAULT_OCTREE_DEPTH = 15;
 
    protected static final boolean DEBUG = true;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
-   private NormalOcTree mainOctree = new NormalOcTree(DEFAULT_OCTREE_RESOLUTION);
+   private NormalOcTree mainOctree = new NormalOcTree(DEFAULT_OCTREE_RESOLUTION, DEFAULT_OCTREE_DEPTH);
    private final AtomicReference<Double> octreeResolution;
+   private final AtomicReference<Integer> octreeDepth;
 
    private final REAOcTreeBuffer lidarBufferUpdater;
    private final REAOcTreeBuffer stereoVisionBufferUpdater;
@@ -81,10 +83,10 @@ public class LIDARBasedREAModule
       this.reaMessager = reaMessager;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      lidarBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.LidarBufferEnable, true,
+      lidarBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), mainOctree.getTreeDepth(), reaMessager, REAModuleAPI.LidarBufferEnable, true,
                                                REAModuleAPI.LidarBufferOcTreeCapacity, 10000, REAModuleAPI.LidarBufferMessageCapacity, 500,
                                                REAModuleAPI.RequestLidarBuffer, REAModuleAPI.LidarBufferState);
-      stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
+      stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), mainOctree.getTreeDepth(), reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
                                                       REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
                                                       REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater};
@@ -121,6 +123,7 @@ public class LIDARBasedREAModule
       preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainOctree.getResolution());
+      octreeDepth = reaMessager.createInput(REAModuleAPI.OcTreeDepth, mainOctree.getTreeDepth());
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -210,11 +213,11 @@ public class LIDARBasedREAModule
             stereoVisionBufferUpdater.clearBuffer();
             mainUpdater.clearOcTree();
             planarRegionFeatureUpdater.clearOcTree();
-            if (mainOctree.getResolution() != octreeResolution.get())
+            if (mainOctree.getResolution() != octreeResolution.get() || mainOctree.getTreeDepth() != octreeDepth.get())
             {
-               mainOctree = new NormalOcTree(octreeResolution.get());
-               lidarBufferUpdater.setOctreeResolution(octreeResolution.get());
-               stereoVisionBufferUpdater.setOctreeResolution(octreeResolution.get());
+               mainOctree = new NormalOcTree(octreeResolution.get(), octreeDepth.get());
+               lidarBufferUpdater.setOctreeParameters(octreeResolution.get(), octreeDepth.get());
+               stereoVisionBufferUpdater.setOctreeParameters(octreeResolution.get(), octreeDepth.get());
                mainUpdater.initializeReferenceOctree();
             }
          }
