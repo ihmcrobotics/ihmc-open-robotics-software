@@ -16,7 +16,7 @@ public class VisibilityGraphWithAStarPawPlanner extends BodyPathAndPawPlannerWra
                                              VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoGraphicsListRegistry graphicsListRegistry,
                                              YoVariableRegistry parentRegistry)
    {
-      super(prefix, parameters, parentRegistry, graphicsListRegistry);
+      super(prefix, parentRegistry, graphicsListRegistry);
 
       ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters);
       waypointPathPlanner = new VisibilityGraphPawPathPlanner(prefix, visibilityGraphsParameters, postProcessor, parentRegistry);

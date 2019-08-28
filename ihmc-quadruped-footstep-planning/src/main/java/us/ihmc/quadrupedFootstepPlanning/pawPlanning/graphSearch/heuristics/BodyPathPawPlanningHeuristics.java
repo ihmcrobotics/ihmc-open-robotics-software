@@ -104,7 +104,7 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
       double yawCost = parameters.getYawWeight() * remainingYaw;
       double stepCost = parameters.getCostPerStep() * minSteps;
 
-      return distanceCost + yawCost + stepCost + + pathDistanceViolationCost + pathYawViolationCost + heightCost;
+      return distanceCost + yawCost + stepCost + pathDistanceViolationCost + pathYawViolationCost + heightCost;
    }
 
    public void setGoalAlpha(double alpha)
