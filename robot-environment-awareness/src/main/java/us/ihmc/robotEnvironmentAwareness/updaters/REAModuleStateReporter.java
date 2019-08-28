@@ -43,7 +43,7 @@ public class REAModuleStateReporter
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
    {
       PlanarRegionsList planarRegionsList = regionFeaturesProvider.getPlanarRegionsList();
-      if (planarRegionsList != null && planarRegionsList.getNumberOfPlanarRegions() == 0 && arePlanarRegionsRequested.getAndSet(false))
+      if (planarRegionsList != null && planarRegionsList.getNumberOfPlanarRegions() > 0 && arePlanarRegionsRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       if (isPlanarRegionSegmentationRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationState,
