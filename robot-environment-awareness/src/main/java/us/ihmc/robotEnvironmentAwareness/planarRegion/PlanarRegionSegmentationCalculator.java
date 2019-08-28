@@ -252,10 +252,12 @@ public class PlanarRegionSegmentationCalculator
                                                                                                         boundingBox, parameters);
       if (surfaceNormalFilterParameters.isUseSurfaceNormalFilter())
       {
+         double lowerBound = Math.cos(surfaceNormalFilterParameters.getSurfaceNormalLowerBound());
+         double upperBound = Math.cos(surfaceNormalFilterParameters.getSurfaceNormalUpperBound());
+
          ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
                                .filter(node -> isNodeInBoundingBox(node, boundingBox)
-                                     && isNodeSurfaceNormalInBoundary(node, cameraPosition, surfaceNormalFilterParameters.getSurfaceNormalUpperBound(),
-                                                                      surfaceNormalFilterParameters.getSurfaceNormalLowerBound()))
+                                     && isNodeSurfaceNormalInBoundary(node, cameraPosition, lowerBound, upperBound))
                                .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       }
       else
@@ -341,7 +343,7 @@ public class PlanarRegionSegmentationCalculator
       return absoluteDot > dotThreshold;
    }
 
-   private static boolean isNodeSurfaceNormalInBoundary(NormalOcTreeNode node, Vector3D cameraPosition, double upperBound, double lowerBound)
+   private static boolean isNodeSurfaceNormalInBoundary(NormalOcTreeNode node, Vector3D cameraPosition, double lowerBound, double upperBound)
    {
       Vector3D cameraToNode = new Vector3D(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ());
       cameraToNode.add(-cameraPosition.getX(), -cameraPosition.getY(), -cameraPosition.getZ());
