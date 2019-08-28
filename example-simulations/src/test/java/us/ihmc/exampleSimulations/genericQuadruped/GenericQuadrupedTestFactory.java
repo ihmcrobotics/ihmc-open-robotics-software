@@ -11,6 +11,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGr
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
@@ -183,6 +184,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
                                                               physicalProperties.getFeetGroundContactPoints(),
+                                                              new DefaultVisibilityGraphParameters(),
                                                               new GenericQuadrupedPawPlannerParameters(),
                                                               xGaitSettings,
                                                               new GenericQuadrupedPointFootSnapperParameters(),

@@ -35,6 +35,8 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -92,6 +94,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
    private PawPlanningModule footstepPlanningModule = null;
+   private VisibilityGraphsParametersBasics visibilityGraphsParameters = null;
    private PawStepPlannerParametersBasics footstepPlannerParameters = null;
    private QuadrupedContinuousPlanningModule continuousPlanningModule = null;
 
@@ -124,6 +127,12 @@ public class ContinuousPlanningToolboxDataSetTest
       return settings;
    }
 
+   public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
+   {
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      return parameters;
+   }
+
    public PawStepPlannerParametersBasics getFootstepPlannerParameters()
    {
       PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
@@ -149,10 +158,13 @@ public class ContinuousPlanningToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
+      if (visibilityGraphsParameters == null)
+         visibilityGraphsParameters = getVisibilityGraphsParameters();
+
       if (footstepPlannerParameters == null)
          footstepPlannerParameters = getFootstepPlannerParameters();
 
-      footstepPlanningModule = new PawPlanningModule(robotName, null, footstepPlannerParameters, xGaitSettings,
+      footstepPlanningModule = new PawPlanningModule(robotName, null, visibilityGraphsParameters, footstepPlannerParameters, xGaitSettings,
                                                                    new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
       continuousPlanningModule = new QuadrupedContinuousPlanningModule(robotName, null, xGaitSettings, null, false, false, pubSubImplementation);
 
@@ -685,7 +697,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
+      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
 
       ThreadTools.sleepForever();

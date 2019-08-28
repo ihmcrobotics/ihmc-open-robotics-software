@@ -6,6 +6,8 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysica
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPawPlannerParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -23,6 +25,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    {
       this(new GenericQuadrupedModelFactory(),
            new GenericQuadrupedPhysicalProperties().getFeetGroundContactPoints(),
+           new DefaultVisibilityGraphParameters(),
            new GenericQuadrupedPawPlannerParameters(),
            new GenericQuadrupedXGaitSettings(),
            new GenericQuadrupedPointFootSnapperParameters(),
@@ -31,13 +34,13 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    }
 
    public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                           PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                           PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation,
-                                           QuadrupedNetworkModuleParameters networkModuleParameters)
+                                           VisibilityGraphsParametersBasics visibilityGraphsParameters, PawStepPlannerParametersBasics pawPlannerParameters,
+                                           QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                           DomainFactory.PubSubImplementation pubSubImplementation, QuadrupedNetworkModuleParameters networkModuleParameters)
    {
       super(robotModel,
             networkModuleParameters,
-            groundContactPoints, pawPlannerParameters,
+            groundContactPoints, visibilityGraphsParameters, pawPlannerParameters,
             xGaitSettings,
             pointFootSnapperParameters,
             pubSubImplementation);

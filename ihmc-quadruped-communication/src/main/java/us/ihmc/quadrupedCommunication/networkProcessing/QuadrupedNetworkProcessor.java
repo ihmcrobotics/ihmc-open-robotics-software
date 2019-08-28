@@ -4,6 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
@@ -33,29 +34,30 @@ public class QuadrupedNetworkProcessor
    private QuadrupedSupportPlanarRegionPublisher supportPublisher = null;
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params,
-                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
+                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                     PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettings xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters)
    {
-      this(robotModel, params, groundContactPoints, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
+      this(robotModel, params, groundContactPoints, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
            DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params,
-                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
+                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                     PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this(robotModel, null, params, groundContactPoints, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
+      this(robotModel, null, params, groundContactPoints, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
+           pubSubImplementation);
    }
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
-                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
+                                    QuadrantDependentList<ArrayList<Point2D>> groundContactPoints, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                     PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                                         params, pubSubImplementation));
+      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings,
+                                                         pointFootSnapperParameters, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params, pubSubImplementation));
       tryToStartModule(() -> setupREAStateUpdater(robotModel.getRobotDescription().getName(), params));
@@ -98,14 +100,14 @@ public class QuadrupedNetworkProcessor
       modules.add(stepTeleopModule);
    }
 
-   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawStepPlannerParametersBasics pawPlannerParameters,
-                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                            LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
-                                            DomainFactory.PubSubImplementation pubSubImplementation)
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                            PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                            PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider logModelProvider,
+                                            QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (!params.isFootstepPlanningModuleEnabled())
          return;
-      modules.add(new PawPlanningModule(modelFactory, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
+      modules.add(new PawPlanningModule(modelFactory, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
                                         params.visualizeFootstepPlanningModuleEnabled(), params.logFootstepPlanningModuleEnabled(),
                                         pubSubImplementation));
    }
