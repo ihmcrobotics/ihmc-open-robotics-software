@@ -35,6 +35,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
@@ -95,6 +96,8 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
+      parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setIntroduceMidpointsInPostProcessing(true);
 
       return parameters;
    }
@@ -557,7 +560,7 @@ public class VisibilityGraphsFrameworkTest
                                                     List<Pose3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
    {
       VisibilityGraphsParametersReadOnly parameters = createTestParameters();
-      NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
+      NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAndCliffAvoidanceProcessor(parameters));
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -832,9 +835,9 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171215_211034_DoorwayNoCeiling";
+      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_220523_SteppingStones";
-      String dataSetName = "20171218_204917_FlatGround";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
@@ -849,8 +852,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }

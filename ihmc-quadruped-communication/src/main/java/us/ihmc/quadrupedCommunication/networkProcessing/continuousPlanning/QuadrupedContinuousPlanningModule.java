@@ -13,6 +13,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -76,7 +77,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                            s -> processQuadrupedXGaitSettings(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
