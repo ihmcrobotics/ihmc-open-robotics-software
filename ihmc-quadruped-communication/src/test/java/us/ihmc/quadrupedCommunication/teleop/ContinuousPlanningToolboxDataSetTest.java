@@ -59,6 +59,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -186,8 +187,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedContinuousPlanningRequestPacket.class,
                                                    getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
-      planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
-                                                   getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
+      planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, PawStepPlannerParametersPacket.class,
                                                          getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
 
@@ -720,7 +720,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      String errorMessage = test.runAssertions(DataSetName._20171218_205120_BodyPathPlannerEnvironment);
       assertTrue(errorMessage, errorMessage.isEmpty());
 
       ThreadTools.sleepForever();

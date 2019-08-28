@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,6 +28,7 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
@@ -128,7 +130,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -156,7 +158,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -184,7 +186,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -212,7 +214,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -240,7 +242,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -268,7 +270,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -296,7 +298,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -324,7 +326,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -352,7 +354,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -380,7 +382,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -408,7 +410,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -436,7 +438,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -478,7 +480,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -506,7 +508,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -535,7 +537,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -562,7 +564,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -593,7 +595,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -621,7 +623,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -648,7 +650,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -675,7 +677,7 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
    }
 
@@ -723,12 +725,49 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
 
    }
+
+   @Test
+   public void testGoingAroundACorner()
+   {
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createCornerEnvironment());
+
+      // test straight shot, initially going to one of the nodes
+      Point3D start = new Point3D(0.0, 0.0, 0.0);
+      Point3D goal = new Point3D(6.0, 30.0, 0.0);
+
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
+
+      /*
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+      */
+
+      if (visualize)
+      {
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
+      }
+
+      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+   }
+
+
 
    private static void checkPath(List<? extends Pose3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
                                  PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)
@@ -1331,8 +1370,41 @@ public class NavigableRegionsManagerTest
       return planarRegions;
    }
 
+   private static List<PlanarRegion> createCornerEnvironment()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
 
-   private static void visualize(List<? extends Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList, Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions)
+      // set up ground plane, 10 x 5
+      Point2D groundPlanePointA = new Point2D(5.0, -2.5);
+      Point2D groundPlanePointB = new Point2D(5.0, 2.5);
+      Point2D groundPlanePointC = new Point2D(-5.0, 2.5);
+      Point2D groundPlanePointD = new Point2D(-5.0, -2.5);
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      groundTransform.setTranslation(0.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion = new PlanarRegion(groundTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      Point2D otherGroundPlanePointA = new Point2D(2.5, 20.0);
+      Point2D otherGroundPlanePointB = new Point2D(-2.5, 20.0);
+      Point2D otherGroundPlanePointC = new Point2D(-2.5, -20.0);
+      Point2D otherGroundPlanePointD = new Point2D(2.5, -20.0);
+
+      RigidBodyTransform groundTransformB = new RigidBodyTransform();
+      groundTransformB.setTranslation(7.5, 15.0, 0.0);
+      PlanarRegion groundPlaneRegionB = new PlanarRegion(groundTransformB, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(otherGroundPlanePointA, otherGroundPlanePointB, otherGroundPlanePointC, otherGroundPlanePointD)));
+
+
+      planarRegions.add(groundPlaneRegion);
+      planarRegions.add(groundPlaneRegionB);
+
+      return planarRegions;
+   }
+
+
+   private static void visualize(List<? extends Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList,
+                                 Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions, VisibilityMapSolution mapSolution)
    {
       Random random = new Random(324);
       planarRegionsList.getPlanarRegionsAsList().forEach(region -> region.setRegionId(random.nextInt()));
@@ -1342,6 +1414,7 @@ public class NavigableRegionsManagerTest
       visualizerApplication.submitGoalToVisualizer(goal);
       visualizerApplication.submitStartToVisualizer(start);
       visualizerApplication.submitNavigableRegionsToVisualizer(navigableRegions);
+      visualizerApplication.submitVisibilityGraphSolutionToVisualizer(mapSolution);
       messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, pathPoints);
 
       while (true)
@@ -1384,7 +1457,7 @@ public class NavigableRegionsManagerTest
          };
       parameters.setObstacleExtrusionDistance(obstacleExtrusionDistance);
       parameters.setPreferredObstacleExtrusionDistance(preferredObstacleExtrusionDistance);
-      parameters.setClusterResolution(0.501);
+//      parameters.setClusterResolution(0.501);
       parameters.setPerformPostProcessingNodeShifting(true);
       parameters.setComputeOrientationsToAvoidObstacles(true);
 
