@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="452.0" prefWidth="1241.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <fx:include fx:id="pawStepPlannerMenuUI" source="PawStepPlannerMenuUI.fxml" />
+    </top>
+    <bottom>
+        <TabPane prefHeight="344.0" prefWidth="742.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+
+                <Tab text="Main">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="314.0" prefWidth="742.0" />
+                        <children>
+                            <fx:include fx:id="mainTab" source="MainTab.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Footstep Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="pawPlannerParametersUI" source="PawStepPlannerParametersUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Reach Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Visibility Graph Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Node checking">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="pawNodeCheckingUI" source="PawNodeCheckingUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Visualization Control">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="visibilityGraphsViz" source="Visualization.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Unit Test Exporter">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="dataExporterAnchorPane" source="PawStepPlannerDataExporterAnchorPane.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+                <Tab text="Planner Process Visualization">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="pawStepPlannerViz" source="PawStepPlannerVisualization.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
+            </tabs>
+        </TabPane>
+    </bottom>
+</BorderPane>

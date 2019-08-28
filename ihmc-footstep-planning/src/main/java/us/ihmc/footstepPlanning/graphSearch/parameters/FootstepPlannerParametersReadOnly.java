@@ -2,14 +2,10 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.property.StoredPropertySet;
-import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -510,6 +506,24 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+    */
+   default double getFinalTurnBodyPathProximity()
+   {
+      return get(finalTurnBodyPathProximity);
+   }
+
+   /**
+    * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the final orientation should occur.
+    * That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the desired heading,
+    * and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the final orientation.
+    */
+   default double getFinalTurnProximityBlendFactor()
+   {
+      return get(finalTurnProximityBlendFactor);
+   }
+
+   /**
     * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
     */
    default boolean useQuadraticDistanceCost()
@@ -673,6 +687,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getLongStepWeight()
    {
       return get(longStepWeight);
+   }
+
+   default double getBodyPathViolationWeight()
+   {
+      return get(bodyPathViolationWeight);
+   }
+
+   default double getDistanceFromPathTolerance()
+   {
+      return get(distanceFromPathTolerance);
+   }
+
+   default double getDeltaYawFromReferenceTolerance()
+   {
+      return get(deltaYawFromReferenceTolerance);
    }
 
    /**

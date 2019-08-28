@@ -76,6 +76,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       exploredCells.clear();
       lowestCostPlan.clear();
       totalNodeCount = 1;
+      rejectionCount.values().forEach(count -> count.setValue(0));
    }
 
    @Override
@@ -89,9 +90,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       rejectionReasons.put(rejectedNode, reason);
-
-      MutableInt rejectionCount = this.rejectionCount.get(reason);
-      rejectionCount.setValue(rejectionCount.getValue() + 1);
+      rejectionCount.get(reason).increment();
    }
 
    @Override

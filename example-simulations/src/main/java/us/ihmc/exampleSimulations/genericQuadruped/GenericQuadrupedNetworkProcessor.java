@@ -3,11 +3,11 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedFootstepPlannerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPawPlannerParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
@@ -23,7 +23,7 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    {
       this(new GenericQuadrupedModelFactory(),
            new GenericQuadrupedPhysicalProperties().getFeetGroundContactPoints(),
-           new GenericQuadrupedFootstepPlannerParameters(),
+           new GenericQuadrupedPawPlannerParameters(),
            new GenericQuadrupedXGaitSettings(),
            new GenericQuadrupedPointFootSnapperParameters(),
            pubSubImplementation,
@@ -31,14 +31,13 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
    }
 
    public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
-                                           FootstepPlannerParameters footstepPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                           PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                            PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation,
                                            QuadrupedNetworkModuleParameters networkModuleParameters)
    {
       super(robotModel,
             networkModuleParameters,
-            groundContactPoints,
-            footstepPlannerParameters,
+            groundContactPoints, pawPlannerParameters,
             xGaitSettings,
             pointFootSnapperParameters,
             pubSubImplementation);

@@ -18,7 +18,8 @@ import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -123,7 +124,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   default VisibilityGraphsParameters getVisibilityGraphsParameters()
+   default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
    }

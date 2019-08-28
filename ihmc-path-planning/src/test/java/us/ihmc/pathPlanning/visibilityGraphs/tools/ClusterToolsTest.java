@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -25,7 +23,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;

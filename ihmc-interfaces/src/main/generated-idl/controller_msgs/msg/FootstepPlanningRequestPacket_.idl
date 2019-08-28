@@ -75,6 +75,16 @@ module controller_msgs
         @defaultValue(value=255)
         octet requested_footstep_planner_type;
         /**
+         * Acceptable xy distance from the given goal for the planner to terminate
+         */
+        @defaultValue(value=-1.0)
+        double goal_distance_proximity;
+        /**
+         * Acceptable yaw offset from the given goal for the planner to terminate
+         */
+        @defaultValue(value=-1.0)
+        double goal_yaw_proximity;
+        /**
          * Timeout in seconds
          */
         double timeout;
