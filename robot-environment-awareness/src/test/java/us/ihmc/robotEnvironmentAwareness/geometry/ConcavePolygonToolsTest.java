@@ -22,7 +22,7 @@ public class ConcavePolygonToolsTest
       ConcaveHull concaveSPolygon = new ConcaveHull();
       concaveSPolygon.addVertex(-2.0, 2.0);
       concaveSPolygon.addVertex(2.0, 2.0);
-      concaveSPolygon.addVertex(1.0, 2.0);
+      concaveSPolygon.addVertex(2.0, 1.0);
       concaveSPolygon.addVertex(-1.0, 1.0);
       concaveSPolygon.addVertex(-1.0, 0.0);
       concaveSPolygon.addVertex(2.0, 0.0);
