@@ -1,5 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -79,8 +81,17 @@ public class ConcavePolygonTools
          }
          else // normal intersection
          {
-            Point2D intersection = new Point2D();
-            intersections.put(nextVertex, intersection);
+            // check if contained by line segment
+
+            if (percentage > 0.0 && percentage < 1.0)
+            {
+               Point2D intersection = new Point2D();
+               intersection.interpolate(concaveHullVertices.get(i), concaveHullVertices.get(nextVertex), percentage);
+               // TODO maybe discritize?
+               intersection.setX(MathTools.roundToPrecision(intersection.getX(), 1e-6));
+               intersection.setY(MathTools.roundToPrecision(intersection.getY(), 1e-6));
+               intersections.put(nextVertex, intersection);
+            }
          }
       }
 
@@ -139,6 +150,7 @@ public class ConcavePolygonTools
             ConcaveHull currentResultingConcaveHull = new ConcaveHull();
             // always add the first point
             currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(firstUnvisitedVertex).getPoint()));
+            model.getPoints().get(firstUnvisitedVertex).setVisited(true);
 
             int travellingIndex = firstUnvisitedVertex;
 
@@ -152,16 +164,16 @@ public class ConcavePolygonTools
             {
                if (drawState == ALONG_HULL) // if we are along hull, is next point intersection?
                {
-                  boolean nextPointIsIntersection = model.getPoints().getNext(travellingIndex).isIntersection();
+                  travellingIndex = model.getPoints().getNextIndex(travellingIndex);
+
+                  boolean nextPointIsIntersection = model.getPoints().get(travellingIndex).isIntersection();
 
                   if (nextPointIsIntersection)
                   {
                      drawState = TRAVERSE_CUT_LINE;
                   }
-
-                  travellingIndex = model.getPoints().getNextIndex(travellingIndex);
                }
-               else if (drawState == TRAVERSE_CUT_LINE)
+               else // if (drawState == TRAVERSE_CUT_LINE)
                {
                   travellingIndex = model.indexOfIntersectionToLeft(travellingIndex);
 
@@ -169,6 +181,7 @@ public class ConcavePolygonTools
                }
 
                currentResultingConcaveHull.addVertex(new Point2D(model.getPoints().get(travellingIndex).getPoint()));
+               model.getPoints().get(travellingIndex).setVisited(true);
             }
             while (travellingIndex != firstUnvisitedVertex);
 

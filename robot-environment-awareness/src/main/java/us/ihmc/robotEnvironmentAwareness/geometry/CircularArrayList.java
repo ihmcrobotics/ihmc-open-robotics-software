@@ -109,7 +109,7 @@ public class CircularArrayList<E>
    @Override
    public Iterator<E> iterator()
    {
-      return this.iterator();
+      return list.iterator();
    }
 
    public int indexOf(Object o)
@@ -124,6 +124,6 @@ public class CircularArrayList<E>
 
    public void sort(Comparator<? super E> c)
    {
-      this.sort(c);
+      list.sort(c);
    }
 }

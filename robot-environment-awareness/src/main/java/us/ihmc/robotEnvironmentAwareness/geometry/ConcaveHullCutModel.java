@@ -46,15 +46,15 @@ public class ConcaveHullCutModel
       }
 
       // build vertex list with intersections included
-      for (int i = 0; i < concaveHullVertices.size(); i++)
+      int hullIndex = 0;
+      while (points.size() < concaveHullVertices.size() + nextVertexToIntersectionMap.size())
       {
-         points.add(new ConcaveHullCutPoint(concaveHullVertices.get(i)));
+         points.add(new ConcaveHullCutPoint(concaveHullVertices.get(hullIndex)));
 
-         int nextVertex = EuclidGeometryPolygonTools.next(i, concaveHullVertices.size());
-         if (nextVertexToIntersectionMap.containsKey(nextVertex))
+         hullIndex = EuclidGeometryPolygonTools.next(hullIndex, concaveHullVertices.size());
+         if (nextVertexToIntersectionMap.containsKey(hullIndex))
          {
-            points.add(nextVertexToIntersectionMap.get(nextVertex));
-            --i;
+            points.add(nextVertexToIntersectionMap.get(hullIndex));
          }
       }
 
@@ -62,7 +62,7 @@ public class ConcaveHullCutModel
       int indexOfLeftmostIntersection = 0;
       for (int i = 0; i < points.size(); i++)
       {
-         if (points.get(i).isIntersection() && points.get(i).getAsFramePoint().equals(intersectionsFromLeftToRight.get(0)))
+         if (points.get(i).isIntersection() && points.get(i).getAsFramePoint().equals(intersectionsFromLeftToRight.get(0).getAsFramePoint()))
          {
             indexOfLeftmostIntersection = i;
          }
@@ -72,12 +72,22 @@ public class ConcaveHullCutModel
 
    public int indexOfIntersectionToLeft(int indexKnownToBeAnIntersection)
    {
+      int leftToRightIndex = -1;
       for (int i = 0; i < points.size(); i++)
       {
          if (i == indexKnownToBeAnIntersection)
          {
             int intersectionIndex = intersectionsFromLeftToRight.indexOf(points.get(i));
-            return intersectionsFromLeftToRight.getPreviousIndex(intersectionIndex);
+            leftToRightIndex = intersectionsFromLeftToRight.getPreviousIndex(intersectionIndex);
+            break;
+         }
+      }
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         if (points.get(i).equals(intersectionsFromLeftToRight.get(leftToRightIndex)))
+         {
+            return i;
          }
       }
 
@@ -98,11 +108,21 @@ public class ConcaveHullCutModel
 
    public int indexOfFirstUnvisitedIntersection()
    {
+      int leftToRightIndex = -1;
       for (int i = 0; i < intersectionsFromLeftToRight.size(); i++)
       {
          ConcaveHullCutPoint concaveHullCutPoint = intersectionsFromLeftToRight.get(i);
 
          if (!concaveHullCutPoint.getVisited())
+         {
+            leftToRightIndex = i;
+            break;
+         }
+      }
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         if (points.get(i).equals(intersectionsFromLeftToRight.get(leftToRightIndex)))
          {
             return i;
          }
