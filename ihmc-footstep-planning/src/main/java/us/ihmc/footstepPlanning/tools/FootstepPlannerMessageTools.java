@@ -56,6 +56,7 @@ public class FootstepPlannerMessageTools
       }
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+      packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
@@ -82,7 +83,6 @@ public class FootstepPlannerMessageTools
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
@@ -112,6 +112,7 @@ public class FootstepPlannerMessageTools
       packet.setLateralWeight(parameters.getLateralWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
       packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
+      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
       packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       packet.setLongStepWeight(parameters.getLongStepWeight());
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());

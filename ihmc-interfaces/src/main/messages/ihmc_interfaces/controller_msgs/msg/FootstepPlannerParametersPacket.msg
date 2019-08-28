@@ -7,6 +7,10 @@ uint32 sequence_id
 # to run slower.
 bool check_for_body_box_collisions false
 
+# Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+# between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+bool check_for_path_collisions false
+
 # Sets whether or not to perform the defined heuristic search policies.
 bool perform_heuristic_search_policies false
 
@@ -190,12 +194,6 @@ bool return_best_effort_plan false
 # contains at least this many footsteps.
 uint32 minimum_steps_for_best_effort_plan
 
-# Some node checkers will check if the body of the robot will move through a higher planar region
-# (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-# ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-# This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-float64 body_ground_clearance -1.0
-
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
 # collisions, this defines the box height.
@@ -303,6 +301,10 @@ float64 depth_first_heuristics_weight -1.0
 
 # Gets the weight for the heuristics in the Body path based planner.
 float64 body_path_based_heuristics_weight -1.0
+
+# This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+# Additional checks are done by interpolating between the start and end steps
+uint32 number_of_bounding_box_checks 1
 
 # If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
