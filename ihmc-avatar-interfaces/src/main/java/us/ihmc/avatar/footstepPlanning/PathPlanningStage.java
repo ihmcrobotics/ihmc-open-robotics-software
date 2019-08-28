@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.SplinePathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPlanner;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.EnumProvider;
@@ -58,7 +58,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
 
-   public PathPlanningStage(int stageId, FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public PathPlanningStage(int stageId, FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                             EnumProvider<FootstepPlannerType> activePlanner)
    {
       this.stageId = stageId;

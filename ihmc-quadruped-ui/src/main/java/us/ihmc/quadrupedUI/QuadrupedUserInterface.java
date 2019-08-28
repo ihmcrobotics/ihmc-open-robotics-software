@@ -26,20 +26,21 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerMenuUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPawPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPawOrientationViewer;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPawPositionViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedUI.skybox.QuadrupedSkybox3D;
@@ -60,12 +61,12 @@ public class QuadrupedUserInterface
    private final JavaFXMessager messager;
 
    private final PlanarRegionViewer planarRegionViewer;
-   private final StartGoalPositionViewer startGoalPositionViewer;
-   private final StartGoalOrientationViewer startGoalOrientationViewer;
+   private final StartGoalPawPositionViewer startGoalPositionViewer;
+   private final StartGoalPawOrientationViewer startGoalOrientationViewer;
    private final StartGoalPositionEditor startGoalPositionEditor;
    private final StartGoalOrientationEditor startGoalOrientationEditor;
-   private final FootstepPathMeshViewer pawPathViewer;
-   private final BodyPathMeshViewer bodyPathMeshViewer;
+   private final PawPathMeshViewer pawPathViewer;
+   private final BodyPawPathMeshViewer bodyPathMeshViewer;
    private final TimeStatisticsManager timeStatisticsManager;
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
@@ -82,7 +83,7 @@ public class QuadrupedUserInterface
    private Label lastControllerTimeLabel;
 
    @FXML
-   private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
+   private PawStepPlannerMenuUIController pawStepPlannerMenuUIController;
    @FXML
    private MainTabController plannerTabController;
    @FXML
@@ -90,7 +91,7 @@ public class QuadrupedUserInterface
    @FXML
    private XGaitSettingsController xGaitSettingsController;
    @FXML
-   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
+   private PawStepPlannerParametersUIController pawPlannerParametersUIController;
    @FXML
    private PlannerReachParametersUIController plannerReachParametersUIController;
    @FXML
@@ -99,7 +100,7 @@ public class QuadrupedUserInterface
    private ManualStepTabController manualStepTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
-                                 FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                 PawStepPlannerParametersBasics pawPlannerParameters, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                  QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
@@ -112,14 +113,14 @@ public class QuadrupedUserInterface
 
       mainPane = loader.load();
 
-      footstepPlannerParametersUIController.setPlannerParameters(footstepPlannerParameters);
-      plannerReachParametersUIController.setPlannerParameters(footstepPlannerParameters);
+      pawPlannerParametersUIController.setPlannerParameters(pawPlannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(pawPlannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       plannerTabController.attachMessager(messager);
       robotControlTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
-      footstepPlannerParametersUIController.attachMessager(messager);
+      pawPlannerParametersUIController.attachMessager(messager);
       plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       manualStepTabController.attachMessager(messager, xGaitSettings);
@@ -127,19 +128,19 @@ public class QuadrupedUserInterface
       manualStepTabController.setFullRobotModelFactory(modelFactory);
 
       setPlannerTabTopics();
-      footstepPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
+      pawPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       plannerReachParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(QuadrupedUIMessagerAPI.VisibilityGraphsParametersTopic);
 
       plannerTabController.bindControls();
       robotControlTabController.bindControls();
-      footstepPlannerParametersUIController.bindControls();
+      pawPlannerParametersUIController.bindControls();
       plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       xGaitSettingsController.bindControls();
       manualStepTabController.bindControls();
 
-      footstepPlannerParametersUIController.loadFromFile();
+      pawPlannerParametersUIController.loadFromFile();
       plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -157,18 +158,18 @@ public class QuadrupedUserInterface
                                                         QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.ShowPlanarRegionsTopic);
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
-                                                                 QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
-                                                                 QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
-                                                                 QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
-                                                                 QuadrupedUIMessagerAPI.GoalOrientationTopic, QuadrupedUIMessagerAPI.XGaitSettingsTopic,
-                                                                 QuadrupedUIMessagerAPI.PlanarRegionDataTopic);
-      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
-                                                                       QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic,
-                                                                       QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
-                                                                       QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic,
-                                                                       QuadrupedUIMessagerAPI.LowLevelGoalOrientationTopic,
-                                                                       QuadrupedUIMessagerAPI.GoalPositionTopic, QuadrupedUIMessagerAPI.GoalOrientationTopic);
+      this.startGoalPositionViewer = new StartGoalPawPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
+                                                                    QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
+                                                                    QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
+                                                                    QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
+                                                                    QuadrupedUIMessagerAPI.GoalOrientationTopic, QuadrupedUIMessagerAPI.XGaitSettingsTopic,
+                                                                    QuadrupedUIMessagerAPI.PlanarRegionDataTopic);
+      this.startGoalOrientationViewer = new StartGoalPawOrientationViewer(messager, QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
+                                                                          QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic,
+                                                                          QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
+                                                                          QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic,
+                                                                          QuadrupedUIMessagerAPI.LowLevelGoalOrientationTopic,
+                                                                          QuadrupedUIMessagerAPI.GoalPositionTopic, QuadrupedUIMessagerAPI.GoalOrientationTopic);
       this.startGoalPositionEditor = new StartGoalPositionEditor(messager, subScenePane, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
@@ -181,13 +182,13 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
                                                                        QuadrupedUIMessagerAPI.GoalPositionTopic, QuadrupedUIMessagerAPI.GoalOrientationTopic,
                                                                        QuadrupedUIMessagerAPI.SelectedRegionTopic);
-      this.pawPathViewer = new FootstepPathMeshViewer(messager, QuadrupedUIMessagerAPI.FootstepPlanTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
-                                                      QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
+      this.pawPathViewer = new PawPathMeshViewer(messager, QuadrupedUIMessagerAPI.FootstepPlanTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
+                                                 QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
       pawPathViewer.setFootstepRadius(0.025);
       pawPathViewer.setFootstepColors(feetColors);
 
-      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
-                                                       QuadrupedUIMessagerAPI.BodyPathDataTopic);
+      this.bodyPathMeshViewer = new BodyPawPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
+                                                          QuadrupedUIMessagerAPI.BodyPathDataTopic);
 
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
@@ -358,11 +359,11 @@ public class QuadrupedUserInterface
    }
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                                            FootstepPlannerParameters footstepPlannerParameters,
-                                                            VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
+                                                            PawStepPlannerParametersBasics pawPlannerParameters,
+                                                            VisibilityGraphsParametersBasics visibilityGraphsParameters, double nominalBodyHeight,
                                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {
-      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, footstepPlannerParameters, visibilityGraphsParameters,
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, pawPlannerParameters, visibilityGraphsParameters,
                                         xGaitSettings, graphicsMutator);
    }
 }

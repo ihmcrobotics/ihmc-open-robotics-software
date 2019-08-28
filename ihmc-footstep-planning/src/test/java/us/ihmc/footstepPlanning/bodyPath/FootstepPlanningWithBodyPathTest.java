@@ -31,7 +31,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
@@ -145,10 +145,10 @@ public class FootstepPlanningWithBodyPathTest
                                                            WaypointDefinedBodyPathPlanner bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, bodyPath);
       FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+      CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, snapper, bodyPath);
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
       return planner;

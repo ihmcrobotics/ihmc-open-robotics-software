@@ -284,6 +284,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double min_y_clearance_from_stance_ = -1.0;
    /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public double final_turn_proximity_ = -1.0;
+   /**
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+            */
+   public double final_turn_body_path_proximity_ = -1.0;
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double final_turn_proximity_blend_factor_ = -1.0;
+   /**
             * When using a cost based planning approach this value defined how the yaw of a footstep will be
             * weighted in comparison to its position.
             */
@@ -366,6 +381,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * {@code c * (1 - d / d_max)}, where d_max is this value.
             */
    public double bounding_box_cost_ = -1.0;
+   public double body_path_violation_weight_ = -1.0;
+   public double distance_from_path_tolerance_ = -1.0;
+   public double delta_yaw_from_reference_tolerance_ = -1.0;
 
    public FootstepPlannerParametersPacket()
    {
@@ -453,6 +471,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
 
+      final_turn_proximity_ = other.final_turn_proximity_;
+
+      final_turn_body_path_proximity_ = other.final_turn_body_path_proximity_;
+
+      final_turn_proximity_blend_factor_ = other.final_turn_proximity_blend_factor_;
+
       yaw_weight_ = other.yaw_weight_;
 
       pitch_weight_ = other.pitch_weight_;
@@ -488,6 +512,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
 
       bounding_box_cost_ = other.bounding_box_cost_;
+
+      body_path_violation_weight_ = other.body_path_violation_weight_;
+
+      distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
+
+      delta_yaw_from_reference_tolerance_ = other.delta_yaw_from_reference_tolerance_;
 
    }
 
@@ -1275,6 +1305,57 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public void setFinalTurnProximity(double final_turn_proximity)
+   {
+      final_turn_proximity_ = final_turn_proximity;
+   }
+   /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public double getFinalTurnProximity()
+   {
+      return final_turn_proximity_;
+   }
+
+   /**
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+            */
+   public void setFinalTurnBodyPathProximity(double final_turn_body_path_proximity)
+   {
+      final_turn_body_path_proximity_ = final_turn_body_path_proximity;
+   }
+   /**
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+            */
+   public double getFinalTurnBodyPathProximity()
+   {
+      return final_turn_body_path_proximity_;
+   }
+
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public void setFinalTurnProximityBlendFactor(double final_turn_proximity_blend_factor)
+   {
+      final_turn_proximity_blend_factor_ = final_turn_proximity_blend_factor;
+   }
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double getFinalTurnProximityBlendFactor()
+   {
+      return final_turn_proximity_blend_factor_;
+   }
+
+   /**
             * When using a cost based planning approach this value defined how the yaw of a footstep will be
             * weighted in comparison to its position.
             */
@@ -1566,6 +1647,33 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return bounding_box_cost_;
    }
 
+   public void setBodyPathViolationWeight(double body_path_violation_weight)
+   {
+      body_path_violation_weight_ = body_path_violation_weight;
+   }
+   public double getBodyPathViolationWeight()
+   {
+      return body_path_violation_weight_;
+   }
+
+   public void setDistanceFromPathTolerance(double distance_from_path_tolerance)
+   {
+      distance_from_path_tolerance_ = distance_from_path_tolerance;
+   }
+   public double getDistanceFromPathTolerance()
+   {
+      return distance_from_path_tolerance_;
+   }
+
+   public void setDeltaYawFromReferenceTolerance(double delta_yaw_from_reference_tolerance)
+   {
+      delta_yaw_from_reference_tolerance_ = delta_yaw_from_reference_tolerance;
+   }
+   public double getDeltaYawFromReferenceTolerance()
+   {
+      return delta_yaw_from_reference_tolerance_;
+   }
+
 
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -1658,6 +1766,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_, other.final_turn_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_body_path_proximity_, other.final_turn_body_path_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_blend_factor_, other.final_turn_proximity_blend_factor_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pitch_weight_, other.pitch_weight_, epsilon)) return false;
@@ -1693,6 +1807,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_violation_weight_, other.body_path_violation_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.delta_yaw_from_reference_tolerance_, other.delta_yaw_from_reference_tolerance_, epsilon)) return false;
 
 
       return true;
@@ -1781,6 +1901,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
+      if(this.final_turn_proximity_ != otherMyClass.final_turn_proximity_) return false;
+
+      if(this.final_turn_body_path_proximity_ != otherMyClass.final_turn_body_path_proximity_) return false;
+
+      if(this.final_turn_proximity_blend_factor_ != otherMyClass.final_turn_proximity_blend_factor_) return false;
+
       if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
 
       if(this.pitch_weight_ != otherMyClass.pitch_weight_) return false;
@@ -1816,6 +1942,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
 
       if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
+
+      if(this.body_path_violation_weight_ != otherMyClass.body_path_violation_weight_) return false;
+
+      if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
+
+      if(this.delta_yaw_from_reference_tolerance_ != otherMyClass.delta_yaw_from_reference_tolerance_) return false;
 
 
       return true;
@@ -1901,6 +2033,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");
       builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
+      builder.append("final_turn_proximity=");
+      builder.append(this.final_turn_proximity_);      builder.append(", ");
+      builder.append("final_turn_body_path_proximity=");
+      builder.append(this.final_turn_body_path_proximity_);      builder.append(", ");
+      builder.append("final_turn_proximity_blend_factor=");
+      builder.append(this.final_turn_proximity_blend_factor_);      builder.append(", ");
       builder.append("yaw_weight=");
       builder.append(this.yaw_weight_);      builder.append(", ");
       builder.append("pitch_weight=");
@@ -1936,7 +2074,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
       builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
       builder.append("bounding_box_cost=");
-      builder.append(this.bounding_box_cost_);
+      builder.append(this.bounding_box_cost_);      builder.append(", ");
+      builder.append("body_path_violation_weight=");
+      builder.append(this.body_path_violation_weight_);      builder.append(", ");
+      builder.append("distance_from_path_tolerance=");
+      builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
+      builder.append("delta_yaw_from_reference_tolerance=");
+      builder.append(this.delta_yaw_from_reference_tolerance_);
       builder.append("}");
       return builder.toString();
    }
