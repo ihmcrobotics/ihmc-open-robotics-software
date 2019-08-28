@@ -47,8 +47,7 @@ public class REAOcTreeUpdater
       this.referenceOctree = octree;
       this.reaOcTreeBuffers = buffers;
       this.reaMessager = reaMessager;
-      referenceOctree.enableParallelComputationForNormals(true);
-      referenceOctree.enableParallelInsertionOfMisses(true);
+      initializeReferenceOctree();
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableNormalEstimation = reaMessager.createInput(REAModuleAPI.NormalEstimationEnable, true);
@@ -62,8 +61,6 @@ public class REAOcTreeUpdater
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
-
-      referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
    }
    
    public void initializeReferenceOctree()
