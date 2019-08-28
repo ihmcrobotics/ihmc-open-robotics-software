@@ -130,6 +130,7 @@ public class ContinuousPlanningToolboxDataSetTest
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      parameters.setPerformPostProcessingNodeShifting(true);
       return parameters;
    }
 
