@@ -79,7 +79,6 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
-   public static final Topic<Integer> OcTreeDepth = OcTreeCategory.topic(Depth);
    public static final Topic<Double> OcTreeResolution = OcTreeCategory.topic(Resolution);
    public static final Topic<Boolean> LidarBufferEnable = OcTreeCategory.child(Lidar).child(Buffer).topic(Enable);
    public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);

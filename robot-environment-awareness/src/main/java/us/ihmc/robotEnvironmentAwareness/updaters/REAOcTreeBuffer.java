@@ -39,7 +39,6 @@ public class REAOcTreeBuffer
    private final AtomicReference<Boolean> isBufferStateRequested;
 
    private final AtomicReference<Double> octreeResolution;
-   private final AtomicReference<Integer> octreeDepth;
    private int messageCounter = 0;
 
    private final Messager reaMessager;
@@ -51,12 +50,11 @@ public class REAOcTreeBuffer
    
    private final AtomicReference<Integer> stereoVisionBufferSize;
 
-   public REAOcTreeBuffer(double octreeResolution, int octreeDepth, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
                           Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
    {
       this.octreeResolution = new AtomicReference<Double>(octreeResolution);
-      this.octreeDepth = new AtomicReference<Integer>(octreeDepth);
       this.reaMessager = reaMessager;
       this.enableBufferTopic = enableBufferTopic;
       this.ocTreeCapacityTopic = ocTreeCapacityTopic;
@@ -108,7 +106,7 @@ public class REAOcTreeBuffer
    {
       return new Runnable()
       {
-         private NormalOcTree bufferOctree = new NormalOcTree(octreeResolution.get(), octreeDepth.get());
+         private NormalOcTree bufferOctree = new NormalOcTree(octreeResolution.get());
 
          @Override
          public void run()
@@ -150,7 +148,7 @@ public class REAOcTreeBuffer
             if (isBufferRequested.get())
             {
                newBuffer.set(bufferOctree);
-               bufferOctree = new NormalOcTree(octreeResolution.get(), octreeDepth.get());
+               bufferOctree = new NormalOcTree(octreeResolution.get());
                isBufferRequested.set(false);
                messageCounter = 0;
             }
@@ -181,10 +179,9 @@ public class REAOcTreeBuffer
       return newBuffer.getAndSet(null);
    }
    
-   public void setOctreeParameters(double resolution, int depth)
+   public void setOctreeResolution(double resolution)
    {
       octreeResolution.set(resolution);
-      octreeDepth.set(depth);
    }
 
    public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)

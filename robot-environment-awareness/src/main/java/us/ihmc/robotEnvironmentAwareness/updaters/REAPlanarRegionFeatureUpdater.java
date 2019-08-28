@@ -29,7 +29,6 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
          : null;
 
    private final TimeReporter timeReporter = new TimeReporter();
-   private final NormalOcTree octree;
 
    private final PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
@@ -54,9 +53,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
    
-   public REAPlanarRegionFeatureUpdater(NormalOcTree octree, Messager reaMessager)
+   public REAPlanarRegionFeatureUpdater(Messager reaMessager)
    {
-      this.octree = octree;
       this.reaMessager = reaMessager;
 
       isOcTreeEnabled = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
@@ -144,7 +142,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update()
+   public void update(NormalOcTree octree)
    {
       if (!isOcTreeEnabled.get())
          return;

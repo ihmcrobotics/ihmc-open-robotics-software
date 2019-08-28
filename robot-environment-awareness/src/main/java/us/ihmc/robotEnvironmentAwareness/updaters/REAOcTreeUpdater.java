@@ -25,7 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 public class REAOcTreeUpdater
 {
    private final Messager reaMessager;
-   private final NormalOcTree referenceOctree;
+   private NormalOcTree referenceOctree;
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
 
    private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
@@ -42,12 +42,11 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer[] buffers, Messager reaMessager)
+   public REAOcTreeUpdater(double octreeResolution, REAOcTreeBuffer[] buffers, Messager reaMessager)
    {
-      this.referenceOctree = octree;
+      initializeReferenceOctree(octreeResolution);
       this.reaOcTreeBuffers = buffers;
       this.reaMessager = reaMessager;
-      initializeReferenceOctree();
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableNormalEstimation = reaMessager.createInput(REAModuleAPI.NormalEstimationEnable, true);
@@ -63,8 +62,9 @@ public class REAOcTreeUpdater
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
    
-   public void initializeReferenceOctree()
+   public void initializeReferenceOctree(double octreeResolution)
    {
+      referenceOctree = new NormalOcTree(octreeResolution);
       referenceOctree.enableParallelComputationForNormals(true);
       referenceOctree.enableParallelInsertionOfMisses(true);
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
@@ -198,6 +198,11 @@ public class REAOcTreeUpdater
 
       boundingBox.update(referenceOctree.getResolution(), referenceOctree.getTreeDepth());
       referenceOctree.setBoundingBox(boundingBox);
+   }
+   
+   public NormalOcTree getMainOctree()
+   {
+      return referenceOctree;
    }
 
    public void handleLidarScanMessage(LidarScanMessage message)
