@@ -29,6 +29,8 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -107,11 +109,12 @@ public abstract class PawStepPlannerToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
       PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
       parameters.setXGaitWeight(0.0);
       parameters.setDesiredVelocityWeight(0.0);
 
-      footstepPlanningModule = new PawPlanningModule(robotName, null, parameters, xGaitSettings,
+      footstepPlanningModule = new PawPlanningModule(robotName, null, visibilityGraphsParameters, parameters, xGaitSettings,
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
 
 
