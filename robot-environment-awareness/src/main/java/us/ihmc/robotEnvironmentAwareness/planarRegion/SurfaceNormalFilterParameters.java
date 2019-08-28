@@ -5,6 +5,8 @@ public class SurfaceNormalFilterParameters
    private boolean useSurfaceNormalFilter;
    private double surfaceNormalUpperBound;
    private double surfaceNormalLowerBound;
+   private static final double DEFAULT_LOWER_BOUND_DEGREE = -45.0;
+   private static final double DEFAULT_UPPER_BOUND_DEGREE = 45.0;
    
    public SurfaceNormalFilterParameters()
    {
@@ -26,8 +28,8 @@ public class SurfaceNormalFilterParameters
    public void setDefaultParameters()
    {
       useSurfaceNormalFilter = true;
-      surfaceNormalUpperBound = 0.7854;
-      surfaceNormalLowerBound = -0.7854;
+      surfaceNormalUpperBound = Math.toRadians(DEFAULT_UPPER_BOUND_DEGREE);
+      surfaceNormalLowerBound = Math.toRadians(DEFAULT_LOWER_BOUND_DEGREE);
    }
 
    public boolean isUseSurfaceNormalFilter()
