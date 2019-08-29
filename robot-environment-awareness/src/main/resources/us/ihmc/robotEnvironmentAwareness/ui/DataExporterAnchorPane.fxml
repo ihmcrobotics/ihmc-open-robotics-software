@@ -32,7 +32,6 @@
             <Button mnemonicParsing="false" onAction="#exportSegmentation" text="Export segmentation" />
             <TextField fx:id="currentSegmentationDataFolderTextField" editable="false" prefHeight="25.0" prefWidth="444.0" GridPane.columnIndex="1" />
             <Button mnemonicParsing="false" onAction="#browseSegmentationOutputFolder" text="..." GridPane.columnIndex="2" />
-            <ToggleButton fx:id="recodingStereoButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Recoding Stereo" />
             <TextField fx:id="stereoDataFolderTextField" editable="false" prefHeight="25.0" prefWidth="444.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             <Button mnemonicParsing="false" onAction="#browseStereoOutputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <ToggleButton fx:id="exportRecodingStereoButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Exporting Stereo" GridPane.rowIndex="4" />
