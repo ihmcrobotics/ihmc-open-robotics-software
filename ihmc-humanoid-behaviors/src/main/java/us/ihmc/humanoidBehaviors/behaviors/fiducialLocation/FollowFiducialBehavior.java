@@ -94,12 +94,12 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    private YoDouble yoTime;
 
    private final AtomicReference<FootstepStatusMessage> footstepStatusReference = new AtomicReference<>();
-
+   private static int id = 0;
 
    public FollowFiducialBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
                                  HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super(robotName, "followFiducial", FollowFiducialState.class, yoTime, ros2Node);
+      super(robotName, "followFiducial-"+id++, FollowFiducialState.class, yoTime, ros2Node);
       this.yoTime = yoTime;
       //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       this.fiducialDetectorBehaviorService = goalDetectorBehaviorService;
