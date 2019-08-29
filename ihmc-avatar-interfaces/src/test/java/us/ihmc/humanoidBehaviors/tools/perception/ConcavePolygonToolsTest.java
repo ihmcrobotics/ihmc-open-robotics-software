@@ -1,13 +1,30 @@
-package us.ihmc.robotEnvironmentAwareness.geometry;
+package us.ihmc.humanoidBehaviors.tools.perception;
 
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javaFXVisualizers.RandomColorFunction;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcavePolygonTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +34,8 @@ public class ConcavePolygonToolsTest
    @Test
    public void testKeepRightSideOfS()
    {
+      boolean visualize = false;
+
       // create simple convex polygon
       ConcaveHull concaveSPolygon = drawSPolygon();
 
@@ -47,6 +66,16 @@ public class ConcavePolygonToolsTest
       cutPolygon2.addVertex(1.0, -2.0);
       cutPolygon2.addVertex(1.0, -1.0);
       cutPolygon2.addVertex(0.0, -1.0);
+
+      if (visualize)
+      {
+         ArrayList<ConcaveHull> hulls = new ArrayList<>();
+         hulls.add(concaveSPolygon);
+         hulls.addAll(result);
+         visualizePlanarRegions(hulls);
+
+         ThreadTools.sleepForever();
+      }
 
       // assert equal
       assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-7));
@@ -318,6 +347,76 @@ public class ConcavePolygonToolsTest
 
       // assert equal
       assertTrue(result.get(0).epsilonEquals(expected, 1e-7));
+   }
+
+   private void visualizePlanarRegions(ArrayList<ConcaveHull> concaveHulls)
+   {
+      JavaFXApplicationCreator.createAJavaFXApplication();
+
+      int id = 0;
+      RandomColorFunction colors = new RandomColorFunction();
+      ArrayList<PlanarRegionsGraphic> planarRegionGraphics = new ArrayList<PlanarRegionsGraphic>();
+
+      ArrayList<PlanarRegion> resultingRegions = new ArrayList<>();
+      for (ConcaveHull concaveHull : concaveHulls)
+      {
+         List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+         ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, 0.10, decomposedPolygons); // TODO: tune depth threshold?
+
+         Point2D[] concaveHullsVertices = new Point2D[concaveHull.getNumberOfVertices()];
+         concaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
+
+         PlanarRegion resultingRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullsVertices, decomposedPolygons);
+         resultingRegion.setRegionId(id++);
+         resultingRegions.add(resultingRegion);
+      }
+
+      PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic(false);
+      regionsGraphic.setColorFunction(colors);
+      regionsGraphic.generateMeshes(new PlanarRegionsList(resultingRegions));
+      regionsGraphic.update();
+      planarRegionGraphics.add(regionsGraphic);
+
+      final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+      Platform.runLater(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            //            double preferredWidth = 1000.0;
+            //            double preferredHeight = 1000.0;
+
+            View3DFactory view3dFactory = new View3DFactory(1200, 800);
+            view3dFactory.addCameraController(0.05, 2000.0, true);
+            view3dFactory.addWorldCoordinateSystem(0.3);
+            view3dFactory.addDefaultLighting();
+
+            for (PlanarRegionsGraphic regionsGraphic : planarRegionGraphics)
+            {
+               view3dFactory.addNodeToView(regionsGraphic);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle(getClass().getSimpleName());
+            stage.setMaximized(false);
+            stage.setScene(view3dFactory.getScene());
+
+            stage.centerOnScreen();
+
+            stage.show();
+
+            countDownLatch.countDown();
+         }
+      });
+
+      try
+      {
+         countDownLatch.await();
+      }
+      catch (InterruptedException e)
+      {
+      }
    }
 
    public static void main(String[] args)
