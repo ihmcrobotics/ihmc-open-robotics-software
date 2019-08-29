@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -106,6 +107,10 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       
       surfaceNormalUpperBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
       surfaceNormalLowerBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
+      
+      Tooltip tooltip = new Tooltip();
+      tooltip.setText("Press Clear Btn to apply the change of Octree resolution");
+      resolutionSlider.setTooltip(tooltip);
    }
 
    @Override
