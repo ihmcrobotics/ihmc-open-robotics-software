@@ -40,8 +40,14 @@ float64 can_duck_under_height -1.0
 
 float64 can_easily_step_over_height -1.0
 
+float64 length_for_long_inter_region_edge -1.0
+
 float64 heuristic_weight -1.0
 
 float64 distance_weight -1.0
 
 float64 elevation_weight -1.0
+
+float64 occluded_goal_edge_weight -1.0
+
+bool return_best_effort_solution false

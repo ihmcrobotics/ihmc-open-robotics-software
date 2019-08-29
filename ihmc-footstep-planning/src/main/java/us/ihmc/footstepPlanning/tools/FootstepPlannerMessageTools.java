@@ -56,6 +56,7 @@ public class FootstepPlannerMessageTools
       }
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+      packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
@@ -82,7 +83,6 @@ public class FootstepPlannerMessageTools
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
@@ -112,6 +112,7 @@ public class FootstepPlannerMessageTools
       packet.setLateralWeight(parameters.getLateralWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
       packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
+      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
       packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
       packet.setLongStepWeight(parameters.getLongStepWeight());
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
@@ -129,7 +130,9 @@ public class FootstepPlannerMessageTools
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
+      packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
       packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
@@ -140,8 +143,11 @@ public class FootstepPlannerMessageTools
       packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
       packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
       packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
+      packet.setLengthForLongInterRegionEdge(parameters.getLengthForLongInterRegionEdge());
       packet.setHeuristicWeight(parameters.getHeuristicWeight());
       packet.setDistanceWeight(parameters.getDistanceWeight());
       packet.setElevationWeight(parameters.getElevationWeight());
+      packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
+      packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
    }
 }

@@ -46,7 +46,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, null,
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewModel,
                                               drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
