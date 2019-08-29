@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
@@ -17,13 +16,14 @@ import java.util.*;
 
 public class ConcavePolygonTools
 {
+   public static final int MIN_VERTICES_TO_HAVE_CONCAVITY = 4;
 
    public static List<ConcaveHull> cropPolygonToAboveLine(ConcaveHull concaveHullToCrop,
                                                           Line2DReadOnly cuttingLine,
                                                           Vector2DReadOnly upDirection)
    {
       ArrayList<ConcaveHull> resultingConcaveHulls = new ArrayList<>();
-      if (concaveHullToCrop.getNumberOfVertices() < 5)
+      if (concaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
       {
          // must be convex, revert to convex polygon crop
          ConvexPolygon2D convexPolygonToCrop = new ConvexPolygon2D();
@@ -45,8 +45,8 @@ public class ConcavePolygonTools
          return resultingConcaveHulls;
       }
 
-      // assert vertices 5 or greater
-      if (concaveHullToCrop.getNumberOfVertices() < 5)
+      // assert vertices 4 or greater
+      if (concaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
          throw new RuntimeException("This polygon must be convex and shouldn't have gotten this far.");
 
       // find intersections (number of intersections can be as high as n-1)
