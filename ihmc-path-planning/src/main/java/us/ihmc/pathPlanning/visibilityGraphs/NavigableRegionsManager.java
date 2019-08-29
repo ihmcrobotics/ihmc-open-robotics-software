@@ -1,16 +1,8 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-<<<<<<< HEAD
-=======
-import java.util.*;
-import java.util.stream.Collectors;
-
-import us.ihmc.euclid.geometry.Pose3D;
->>>>>>> added the rotation calculation, highlighting a bug in something else
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
@@ -24,6 +16,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NavigableRegionsManager
 {
@@ -38,12 +31,8 @@ public class NavigableRegionsManager
    private VisibilityGraph visibilityGraph;
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
-<<<<<<< HEAD
    private VisibilityGraphNode endNode;
-   private Pose3DReadOnly goalInWorld;
-=======
    private Point3DReadOnly goalInWorld;
->>>>>>> added the rotation calculation, highlighting a bug in something else
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
@@ -135,14 +124,9 @@ public class NavigableRegionsManager
          visibilityGraph.fullyExpandVisibilityGraph();
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
-<<<<<<< HEAD
-      startNode = visibilityGraph.setStart(startInWorld.getPosition(), parameters.getCanDuckUnderHeight(), searchHostEpsilon);
-      goalNode = visibilityGraph.setGoal(goalInWorld.getPosition(), parameters.getCanDuckUnderHeight(), searchHostEpsilon);
+      startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
+      goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       endNode = null;
-=======
-      startNode = visibilityGraph.setStart(startInWorld, searchHostEpsilon);
-      goalNode = visibilityGraph.setGoal(goalInWorld, searchHostEpsilon);
->>>>>>> added the rotation calculation, highlighting a bug in something else
       this.goalInWorld = goalInWorld;
 
       if ((startNode == null) || (goalNode == null))
@@ -359,7 +343,7 @@ public class NavigableRegionsManager
    }
 
    @Deprecated
-   public List<Pose3DReadOnly> calculateBodyPathWithOcclusions(Pose3DReadOnly start, Pose3DReadOnly goal)
+   public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
    {
       List<Point3DReadOnly> path = calculateBodyPath(start, goal);
 
@@ -382,12 +366,12 @@ public class NavigableRegionsManager
             return path;
          }
 
-         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start.getPosition(), navigableRegions, parameters.getCanDuckUnderHeight());
-         List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start.getPosition(), goal.getPosition()););
-         Cluster closestCluster = ClusterTools.getTheClosestCluster(start.getPosition(), intersectingClusters);
+         NavigableRegion regionContainingPoint = NavigableRegionTools.getNavigableRegionContainingThisPoint(start, navigableRegions, parameters.getCanDuckUnderHeight());
+         List<Cluster> intersectingClusters = OcclusionTools.getListOfIntersectingObstacles(regionContainingPoint.getObstacleClusters(), start, goal);
+         Cluster closestCluster = ClusterTools.getTheClosestCluster(start, intersectingClusters);
          Point3D closestExtrusion = ClusterTools.getTheClosestVisibleExtrusionPoint(1.0,
-                                                                                    start.getPosition(),
-                                                                                    goal.getPosition(),
+                                                                                    start,
+                                                                                    goal,
                                                                                     closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomePlanarRegion());
 
