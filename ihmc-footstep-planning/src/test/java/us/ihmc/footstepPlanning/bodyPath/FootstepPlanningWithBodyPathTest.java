@@ -23,15 +23,15 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
@@ -57,7 +57,7 @@ public class FootstepPlanningWithBodyPathTest
    public void testWaypointPathOnFlat(TestInfo testInfo)
    {
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       double goalDistance = 5.0;
@@ -113,7 +113,7 @@ public class FootstepPlanningWithBodyPathTest
       bodyPath.getPointAlongPath(1.0, finalPose);
 
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       FramePose3D initialMidFootPose = new FramePose3D();
@@ -141,14 +141,14 @@ public class FootstepPlanningWithBodyPathTest
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose, bodyPath);
    }
 
-   private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
+   private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
                                                            WaypointDefinedBodyPathPlanner bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, bodyPath);
       FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+      CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, parameters, snapper, bodyPath);
 
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
       return planner;

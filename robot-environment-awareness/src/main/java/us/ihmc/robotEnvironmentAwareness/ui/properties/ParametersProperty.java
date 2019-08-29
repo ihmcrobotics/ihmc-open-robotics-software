@@ -8,6 +8,8 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertySet;
 
 public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
 {
@@ -130,6 +132,11 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       public DoubleField(DoubleGetter<T> doubleGetter, DoubleSetter<T> doubleSetter)
       {
          super(doubleGetter, doubleSetter);
+      }
+
+      public DoubleField(DoubleStoredPropertyKey key, StoredPropertySet set)
+      {
+         super(parameters -> set.get(key), (parameters, value) -> set.set(key, value.doubleValue()));
       }
    }
 

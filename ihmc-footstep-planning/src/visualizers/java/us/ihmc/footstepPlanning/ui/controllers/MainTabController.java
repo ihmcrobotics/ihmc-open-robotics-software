@@ -122,6 +122,11 @@ public class MainTabController
    private Spinner<Double> goalYaw;
 
    @FXML
+   private Spinner<Double> distanceProximity;
+   @FXML
+   private Spinner<Double> yawProximity;
+
+   @FXML
    private CheckBox overrideTiming;
    @FXML
    private Spinner<Double> swingTimeSpinner;
@@ -261,6 +266,9 @@ public class MainTabController
       startYaw.setValueFactory(createStartGoalOrientationValueFactory());
       goalYaw.setValueFactory(createStartGoalOrientationValueFactory());
 
+      distanceProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-100.0, 100.0, 0.0, 0.1));
+      yawProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, Math.PI, 0.0, 0.1));
+
       swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 1.2, 0.1));
       transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 0.8, 0.1));
       swingHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.05, 0.01));
@@ -327,9 +335,10 @@ public class MainTabController
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZPosition.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPositionProperty, false);
-
       messager.bindBidirectional(GoalPositionTopic, goalPositionProperty, false);
+
+      messager.bindBidirectional(GoalDistanceProximity, distanceProximity.getValueFactory().valueProperty(), true);
+      messager.bindBidirectional(GoalYawProximity, yawProximity.getValueFactory().valueProperty(), true);
 
       startRotationProperty.bindBidirectionalYaw(startYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(StartOrientationTopic, startRotationProperty, false);

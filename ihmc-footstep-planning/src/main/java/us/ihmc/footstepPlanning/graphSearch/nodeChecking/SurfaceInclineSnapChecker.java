@@ -8,19 +8,19 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public SurfaceInclineSnapChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
+   public SurfaceInclineSnapChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;

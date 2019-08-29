@@ -37,6 +37,42 @@ float64 default_transfer_duration
 # Field default value -1.0
 float64 final_transfer_duration
 
+# The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+# A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+# A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+# Field default value -1.0
+float64 default_swing_duration_shift_fraction
+
+# The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+# A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+# A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+# Field default value -1.0
+float64 default_swing_split_fraction
+
+# The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+# A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+# A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+# Field default value -1.0
+float64 default_transfer_split_fraction
+
+# The final_transfer_split_fraction is the fraction of the final transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+# A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+# A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+# Field default value -1.0
+float64 final_transfer_split_fraction
+
+# The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+# Field default value -1.0
+float64 default_transfer_weight_distribution
+
+# The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+# A lower fraction means that the midpoint is located near the trailing foot.
+# A higher fraction means that the midpoint is located near the leading foot.
+# Field default value -1.0
+float64 final_transfer_weight_distribution
+
 # If false the controller adjust each footstep height to be at the support sole height.
 # Field default value True
 bool trust_height_of_footsteps

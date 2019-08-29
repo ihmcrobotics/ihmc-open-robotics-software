@@ -6,4 +6,9 @@ public class DoubleStoredPropertyKey extends StoredPropertyKey<Double>
    {
       super(Double.class, id, titleCasedName);
    }
+
+   public DoubleStoredPropertyKey(int id, String titleCasedName, double defaultValue)
+   {
+      super(Double.class, id, titleCasedName, defaultValue);
+   }
 }
