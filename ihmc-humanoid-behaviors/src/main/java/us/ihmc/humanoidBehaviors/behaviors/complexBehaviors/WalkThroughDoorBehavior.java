@@ -87,7 +87,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private SleepBehavior sleepBehavior;
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   private IHMCROS2Publisher<DoorLocationPacket> publisher;
+   private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
+   private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
+
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final HumanoidReferenceFrames referenceFrames;
@@ -126,7 +128,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
+      doorToBehaviorPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
+      doorToUIPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      
 
       //setup publisher for sending door location to UI
       setupStateMachine();
@@ -141,7 +145,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       
       //should constantly be searching for door and updating its location here
-      publisher = createBehaviorInputPublisher(DoorLocationPacket.class);
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
@@ -186,7 +189,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          pose.get(location, orientation);
          publishUIPositionCheckerPacket(location, orientation);
 
-         publisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
+         doorToBehaviorPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
+         doorToUIPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
       }
       super.doControl();
 
@@ -266,6 +270,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            lookDown();
             if (DEBUG)
             {
                publishTextToSpeech("walk to door action");
@@ -283,16 +288,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          protected void setBehaviorInput()
          {
             lookDown();
-            doorOpenDetectorBehaviorService.reset();
-            doorOpenDetectorBehaviorService.run(true);
-            System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
             if (DEBUG)
             {
                publishTextToSpeech("open door action");
             }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
-            System.out.println("SET OPEN DOOR ACTION INPUT" + searchForDoorBehavior.getLocation());
-
          }
       };
 
@@ -350,13 +350,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            sleepBehavior.setSleepTime(3000);
+            sleepBehavior.setSleepTime(1);
             publishTextToSpeech("Finished Walking Through Door");
          }
       };
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT, setup, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.WALKING_TO_DOOR);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
 
       factory.addState(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, walkToDoorAction);
       factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
@@ -405,6 +405,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       Pose3D unrotatedDoor = new Pose3D(searchForDoorBehavior.getLocation());
 
+      double offsetLeftRight = -.05;
+      
+
+      
       unrotatedDoor.appendYawRotation(Math.toRadians(180));
       unrotatedDoor.appendTranslation(-0.9144, 0, 0);
 
@@ -412,22 +416,22 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       RobotSide startStep = RobotSide.LEFT;
 
-      double footZ2 = referenceFrames.getFootFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
                                                                                            atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
 
-      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5864031335585762, 0.592160790421584, -footZ2),
+      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5864031335585762+offsetLeftRight, 0.592160790421584, -0),
                                                        new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+     
 
-      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.4053278408799188, 0.23597592988662308, -footZ2),
+      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.4053278408799188+offsetLeftRight, 0.23597592988662308, -0),
                                                        new Quaternion(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
-      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5924372369454293, -0.26851462759487155, -footZ2),
+      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5924372369454293+offsetLeftRight, -0.26851462759487155, -0),
                                                        new Quaternion(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
-      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.36887783182356804, -0.7234607322382425, -footZ2),
+      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.36887783182356804+offsetLeftRight, -0.7234607322382425, -0),
                                                        new Quaternion(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419,
                                                                       0.7098782806128114));
-      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5896714303877739, -0.7199905519593679, -footZ2),
+      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5896714303877739+offsetLeftRight, -0.7199905519593679, -0),
                                                        new Quaternion(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419,
                                                                       0.7098782806128114));
 
@@ -446,6 +450,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       FramePose3D pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
+      double footZ2 = referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
+
+      pose.setZ(footZ2);
       FootstepDataMessage message = HumanoidMessageTools.createFootstepDataMessage(side, pose.getPosition(), pose.getOrientation());
       return message;
    }

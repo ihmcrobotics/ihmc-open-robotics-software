@@ -10,7 +10,7 @@ import us.ihmc.ros2.Ros2Node;
 public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorService
 {
 
-   private int numberToAverage = 5;
+   private int numberToAverage = 10;
    private ArrayList<FramePose3D> originPoses;
    private ArrayList<FramePose3D> doorPoses;
 
@@ -18,7 +18,7 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
    private FramePose3D averageCurrentDoorLocation;
    public FramePose3D newPose = null;
    private boolean doorOpen = false;
-   private float openDistance = 0.0227f;
+   private float openDistance = 0.0254f;
    private boolean run = false;
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)

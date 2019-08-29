@@ -32,6 +32,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      doorLocationQueue.clear();
    }
 
    @Override

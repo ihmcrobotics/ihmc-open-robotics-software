@@ -39,7 +39,6 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
 
    private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
-   private final ConcurrentListeningQueue<TaskspaceTrajectoryStatusMessage> taskSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 
    public ArmTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
@@ -65,7 +64,6 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
       createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
-      createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, taskSpaceTrajectoryStatus::put);
 
       armTrajectoryPublisher = createPublisherForController(ArmTrajectoryMessage.class);
       stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
@@ -144,6 +142,8 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+
+      jointSpaceTrajectoryStatus.clear();
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
@@ -161,6 +161,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
+      publishTextToSpeech("****************ARM MOTION COMPLETE****************");
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
 
@@ -187,33 +188,21 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      if (isPaused.getBooleanValue())
-      {
-         return;
-      }
-      else
-      {
+
          stopArmMotion();
-         isPaused.set(true);
-      }
+      
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      if (!isPaused.getBooleanValue())
-      {
-         return;
-      }
-      else
-      {
-         isPaused.set(false);
+      
 
          if (hasInputBeenSet())
          {
             sendOutgoingPacketToControllerAndNetworkProcessor();
          }
-      }
+      
    }
 
    @Override

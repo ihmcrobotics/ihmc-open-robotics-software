@@ -194,33 +194,20 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      if (isPaused.getBooleanValue())
-      {
-         return;
-      }
-      else
-      {
+      
          stopArmMotion();
-         isPaused.set(true);
-      }
+        
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      if (!isPaused.getBooleanValue())
-      {
-         return;
-      }
-      else
-      {
-         isPaused.set(false);
-
+     
          if (hasInputBeenSet())
          {
             sendOutgoingPacketToControllerAndNetworkProcessor();
          }
-      }
+      
    }
 
    @Override
