@@ -28,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -35,6 +36,9 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
+import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -45,6 +49,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -61,7 +66,7 @@ public class ExploreAreaBehavior
    private final List<Double> chestYawsForLookingAround = Arrays.asList(-40.0, 0.0, 40.0); //, 40.0); //-10.0, 0.0); //Arrays.asList(-10.0, -20.0, -30.0, 0.0);
    private final List<Point3D> pointsObservedFrom = new ArrayList<Point3D>();
 
-   private final double turnChestTrajectoryDuration = 3.0;
+   private final double turnChestTrajectoryDuration = 1.0;
    private final double perceiveDuration = 14.0;
 
    private int chestYawForLookingAroundIndex = 0;
@@ -112,23 +117,19 @@ public class ExploreAreaBehavior
 
       factory.setOnEntry(ExploreAreaBehaviorState.Perceive, this::onPerceiveStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.Perceive, this::doPerceiveStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.Perceive,
-                            ExploreAreaBehaviorState.GrabPlanarRegions,
+      factory.addTransition(ExploreAreaBehaviorState.Perceive, ExploreAreaBehaviorState.GrabPlanarRegions,
                             this::readyToTransitionFromPerceiveToGrabPlanarRegions);
 
       factory.setOnEntry(ExploreAreaBehaviorState.GrabPlanarRegions, this::onGrabPlanarRegionsStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.GrabPlanarRegions, this::doGrabPlanarRegionsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
-                            ExploreAreaBehaviorState.LookAround,
+      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions, ExploreAreaBehaviorState.LookAround,
                             this::readyToTransitionFromGrabPlanarRegionsToLookAround);
-      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions,
-                            ExploreAreaBehaviorState.DetermineNextLocations,
+      factory.addTransition(ExploreAreaBehaviorState.GrabPlanarRegions, ExploreAreaBehaviorState.DetermineNextLocations,
                             this::readyToTransitionFromGrabPlanarRegionsToDetermineNextLocations);
 
       factory.setOnEntry(ExploreAreaBehaviorState.DetermineNextLocations, this::onDetermineNextLocationsStateEntry);
       factory.setDoAction(ExploreAreaBehaviorState.DetermineNextLocations, this::doDetermineNextLocationsStateAction);
-      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations,
-                            ExploreAreaBehaviorState.Plan,
+      factory.addTransition(ExploreAreaBehaviorState.DetermineNextLocations, ExploreAreaBehaviorState.Plan,
                             this::readyToTransitionFromDetermineNextLocationsToPlan);
 
       factory.setOnEntry(ExploreAreaBehaviorState.Plan, this::onPlanStateEntry);
@@ -152,8 +153,7 @@ public class ExploreAreaBehavior
       stateMachine = factory.getFactory().build(ExploreAreaBehaviorState.Stop);
 
       ExceptionHandlingThreadScheduler exploreAreaThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
-                                                                                                DefaultExceptionHandler.PRINT_STACKTRACE,
-                                                                                                5);
+                                                                                                DefaultExceptionHandler.PRINT_STACKTRACE, 5);
       exploreAreaThread.schedule(this::runExploreAreaThread, 5, TimeUnit.MILLISECONDS);
    }
 
@@ -194,11 +194,12 @@ public class ExploreAreaBehavior
 
    private boolean readyToTransitionFromLookAroundToPerceive(double timeInState)
    {
-      return (timeInState > turnChestTrajectoryDuration);
+      return (timeInState > 9.0 * turnChestTrajectoryDuration);
    }
 
    private void onPerceiveStateEntry()
    {
+      LogTools.info("Entering perceive state. Clearing LIDAR");
       behaviorHelper.clearREA();
    }
 
@@ -232,22 +233,30 @@ public class ExploreAreaBehavior
       addNewPlanarRegionsToTheMap(latestPlanarRegionsList);
    }
 
+   private ConcaveHullMergerListener listener = null;
+//   private ConcaveHullMergerListener listener = new ConcaveHullMergerListener();
+
    private void addNewPlanarRegionsToTheMap(PlanarRegionsList latestPlanarRegionsList)
    {
       messager.submitMessage(ExploreAreaBehaviorAPI.ClearPlanarRegions, true);
-      
+
       if (concatenatedMap == null)
       {
          concatenatedMap = latestPlanarRegionsList;
       }
       else
       {
-         List<PlanarRegion> planarRegionsAsList = latestPlanarRegionsList.getPlanarRegionsAsList();
+         PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters();
 
-         for (PlanarRegion planarRegion : planarRegionsAsList)
-         {
-            concatenatedMap.addPlanarRegion(planarRegion);
-         }
+         slamParameters.setBoundingBoxHeight(0.03);
+         slamParameters.setIterationsForMatching(10);
+         slamParameters.setDampedLeastSquaresLambda(1.0);
+
+         PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, listener);
+
+         concatenatedMap = slamResult.getMergedMap();
+         RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();
+         LogTools.info("SLAM transformFromIncomingToMap = \n " + transformFromIncomingToMap);
       }
 
       computeMapBoundingBox3D();
@@ -255,25 +264,26 @@ public class ExploreAreaBehavior
       LogTools.info("concatenatedMap has " + concatenatedMap.getNumberOfPlanarRegions() + " planar Regions");
       LogTools.info("boundingBox = " + concatenatedMapBoundingBox);
 
-      
       List<PlanarRegion> planarRegionsAsList = concatenatedMap.getPlanarRegionsAsList();
-      
+
       int index = 0;
       for (PlanarRegion planarRegion : planarRegionsAsList)
       {
-         messager.submitMessage(ExploreAreaBehaviorAPI.AddPlanarRegionToMap, TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
-         
+         messager.submitMessage(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
+                                TemporaryPlanarRegionMessage.convertToTemporaryPlanarRegionMessage(planarRegion, index));
+
          List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
          for (ConvexPolygon2D polygon : convexPolygons)
          {
-            messager.submitMessage(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion, TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
+            messager.submitMessage(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
+                                   TemporaryConvexPolygon2DMessage.convertToTemporaryConvexPolygon2DMessage(polygon, index));
          }
-         
+
          index++;
       }
-      
+
       messager.submitMessage(ExploreAreaBehaviorAPI.DrawMap, true);
-      
+
       // Send it to the GUI for a viz...
       //         PlanarRegionsListMessage concatenatedMapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(concatenatedMap);
       //         messager.submitMessage(ExploreAreaBehavior.ExploreAreaBehaviorAPI.ConcatenatedMap, concatenatedMapMessage);
@@ -414,13 +424,9 @@ public class ExploreAreaBehavior
       LogTools.info("Found " + feasibleGoalPoints.size() + " feasible Points that have body paths to. Took " + durationSeconds
             + " seconds to find the body paths, or " + durationPer + " seconds Per attempt.");
 
-      Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
-      double bestDistance = distancesFromStart.get(bestGoalPoint);
-      List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
-
       desiredFramePoses = new ArrayList<>();
 
-      if (bestGoalPoint == null)
+      if (feasibleGoalPoints.isEmpty())
       {
          LogTools.info("Couldn't find a place to walk to. Just stepping in place.");
 
@@ -433,6 +439,10 @@ public class ExploreAreaBehavior
          desiredFramePoses.add(desiredFramePose);
          return;
       }
+
+      Point3DReadOnly bestGoalPoint = feasibleGoalPoints.get(0);
+      double bestDistance = distancesFromStart.get(bestGoalPoint);
+      List<Point3DReadOnly> bestBodyPath = potentialBodyPaths.get(bestGoalPoint);
 
       LogTools.info("Found bestGoalPoint = " + bestGoalPoint + ", bestDistance = " + bestDistance);
 

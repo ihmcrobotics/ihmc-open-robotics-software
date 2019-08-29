@@ -10,16 +10,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -31,14 +30,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionTools
 {
@@ -195,12 +194,17 @@ public class PlanarRegionTools
       return null;
    }
 
-   public static Point3D intersectRegionsWithRay(PlanarRegionsList regions, Point3D rayStart, Vector3D rayDirection)
+   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(PlanarRegionsList regions, Point3D rayStart, Vector3D rayDirection)
+   {
+      return intersectRegionsWithRay(regions.getPlanarRegionsAsList(), rayStart, rayDirection);
+   }
+
+   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(List<PlanarRegion> regions, Point3D rayStart, Vector3D rayDirection)
    {
       double smallestDistance = Double.POSITIVE_INFINITY;
-      Point3D closestIntersection = null;
+      ImmutablePair<Point3D, PlanarRegion> closestIntersection = null;
 
-      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      for (PlanarRegion region : regions)
       {
          Point3D intersection = intersectRegionWithRay(region, rayStart, rayDirection);
          if (intersection == null)
@@ -211,7 +215,7 @@ public class PlanarRegionTools
          if (distance < smallestDistance)
          {
             smallestDistance = distance;
-            closestIntersection = intersection;
+            closestIntersection = new ImmutablePair<>(intersection, region);
          }
       }
 
@@ -260,55 +264,7 @@ public class PlanarRegionTools
       return closestPoint.epsilonEquals(point, epsilon);
    }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions)
-   {
-      return getNavigableRegionContainingThisPoint(point, navigableRegions, 0.0);
-   }
 
-   public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double epsilon)
-   {
-      List<NavigableRegion> containers = new ArrayList<>();
-
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
-      if (naviableRegionsList == null)
-         return null;
-
-      for (NavigableRegion navigableRegion : naviableRegionsList)
-      {
-         if (isPointInWorldInsidePlanarRegion(navigableRegion.getHomePlanarRegion(), point, epsilon))
-         {
-            containers.add(navigableRegion);
-         }
-      }
-
-      if (containers.isEmpty())
-         return null;
-      if (containers.size() == 1)
-         return containers.get(0);
-
-      Point3D pointOnRegion = new Point3D();
-      Vector3D regionNormal = new Vector3D();
-
-      NavigableRegion closestContainer = containers.get(0);
-      closestContainer.getHomePlanarRegion().getNormal(regionNormal);
-      closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
-      double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
-
-      for (int i = 1; i < containers.size(); i++)
-      {
-         NavigableRegion candidate = containers.get(i);
-         candidate.getHomePlanarRegion().getNormal(regionNormal);
-         candidate.getHomePlanarRegion().getPointInRegion(pointOnRegion);
-         double distance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
-         if (distance < minDistance)
-         {
-            closestContainer = candidate;
-            minDistance = distance;
-         }
-      }
-
-      return closestContainer;
-   }
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck)
    {
@@ -875,6 +831,84 @@ public class PlanarRegionTools
          area += planarRegion.getConvexPolygon(i).getArea();
       }
       return area;
+   }
+
+   public static Point2D getAverageCentroid2DInLocal(PlanarRegion planarRegion)
+   {
+      Point2D centroid = new Point2D();
+
+      int count = 0;
+      double xSum = 0.0;
+      double ySum = 0.0;
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         Point2DReadOnly convexPolygonCentroid = convexPolygon.getCentroid();
+
+         xSum += convexPolygonCentroid.getX();
+         ySum += convexPolygonCentroid.getY();
+         ++count;
+      }
+
+      centroid.setX(xSum / count);
+      centroid.setY(ySum / count);
+
+      return centroid;
+   }
+
+   public static Point3D getAverageCentroid3DInWorld(PlanarRegion planarRegion)
+   {
+      Point2D averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
+      Point3D point3D = new Point3D(averageCentroid2DInLocal);
+      point3D.applyTransform(planarRegion.getTransformToWorld());
+      return point3D;
+   }
+
+   public static BoundingBox3D getLocalBoundingBox3DInLocal(PlanarRegion planarRegion)
+   {
+      BoundingBox3D boundingBox3DInLocal = new BoundingBox3D();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            boundingBox3DInLocal.updateToIncludePoint(convexPolygon.getVertex(j).getX(), convexPolygon.getVertex(j).getY(), 0.0);
+         }
+      }
+
+      return boundingBox3DInLocal;
+   }
+
+   public static BoundingBox2D getLocalBoundingBox2DInLocal(PlanarRegion planarRegion)
+   {
+      BoundingBox2D boundingBox2DInLocal = null;
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            Point2DReadOnly vertex = convexPolygon.getVertex(j);
+            if (boundingBox2DInLocal == null)
+            {
+               boundingBox2DInLocal = new BoundingBox2D(vertex, vertex);
+            }
+            else
+            {
+               boundingBox2DInLocal.updateToIncludePoint(vertex);
+            }
+         }
+      }
+
+      return boundingBox2DInLocal;
+   }
+
+   public static Box3D getLocalBoundingBox3DInWorld(PlanarRegion planarRegion, double height)
+   {
+      BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
+      boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
+      boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
+      Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
+      box.applyTransform(planarRegion.getTransformToWorld());
+      return box;
    }
 
    public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius, PlanarRegion query)

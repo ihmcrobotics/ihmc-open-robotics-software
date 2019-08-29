@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;

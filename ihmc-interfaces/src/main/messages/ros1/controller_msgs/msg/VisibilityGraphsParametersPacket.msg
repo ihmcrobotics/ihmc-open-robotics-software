@@ -8,13 +8,16 @@ float64 max_inter_region_connection_length
 float64 normal_z_threshold_for_accessible_regions
 
 # Field default value -1.0
-float64 preferred_extrusion_distance
+float64 navigable_extrusion_distance
 
 # Field default value -1.0
-float64 extrusion_distance
+float64 obstacle_extrusion_distance
 
 # Field default value -1.0
-float64 extrusion_distance_if_not_too_high_to_step
+float64 preferred_obstacle_extrusion_distance
+
+# Field default value -1.0
+float64 obstacle_extrusion_distance_if_not_too_high_to_step
 
 # Field default value -1.0
 float64 too_high_to_step_distance
@@ -41,5 +44,28 @@ float64 region_orthogonal_angle
 # Returns the value of the epsilon to use.
 # Field default value 0.03
 float64 search_host_region_epsilon
+
+# Field default value -1.0
+float64 can_duck_under_height
+
+# Field default value -1.0
+float64 can_easily_step_over_height
+
+# Field default value -1.0
+float64 length_for_long_inter_region_edge
+
+# Field default value -1.0
+float64 heuristic_weight
+
+# Field default value -1.0
+float64 distance_weight
+
+# Field default value -1.0
+float64 elevation_weight
+
+# Field default value -1.0
+float64 occluded_goal_edge_weight
+
+bool return_best_effort_solution
 
 

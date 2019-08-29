@@ -2,14 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -17,13 +15,13 @@ public class EnoughAreaSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public EnoughAreaSnapChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
+   public EnoughAreaSnapChecker(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;

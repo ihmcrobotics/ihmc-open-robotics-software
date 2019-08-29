@@ -13,7 +13,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -93,7 +93,7 @@ public class UIVisibilityGraphsTopics
 
    public static final Topic<Boolean> VisibilityGraphsComputePath = Root.child(VisibilityGraphs).topic(ComputePath);
    public static final Topic<Boolean> VisibilityGraphsComputePathWithOcclusions = Root.child(VisibilityGraphs).topic(ComputePathWithOcclusions);
-   public static final Topic<VisibilityGraphsParameters> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = Root.child(VisibilityGraphs).topic(Parameters);
    public static final Topic<Boolean> ShowBodyPath = Root.child(VisibilityGraphs).child(BodyPath).topic(Show);
    public static final Topic<Boolean> ShowPlanarRegions = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(RawPoints).topic(Show);

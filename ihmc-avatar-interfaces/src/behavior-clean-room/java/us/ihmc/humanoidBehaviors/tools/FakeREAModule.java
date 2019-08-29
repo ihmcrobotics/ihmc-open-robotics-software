@@ -10,23 +10,23 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 public class FakeREAModule
 {
-   private final PlanarRegionsList constantPlanarRegions;
+   private volatile PlanarRegionsList regionsToPublish;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final HashMap<Integer, PlanarRegion> customPlanarRegions = new HashMap<>();
+   private final PausablePeriodicThread thread;
 
-   public FakeREAModule(PlanarRegionsList constantPlanarRegions)
+   public FakeREAModule(PlanarRegionsList regionsToPublish)
    {
-      this.constantPlanarRegions = constantPlanarRegions;
+      this.regionsToPublish = regionsToPublish;
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
@@ -38,13 +38,27 @@ public class FakeREAModule
                          ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
                          this::acceptCustomRegion);
 
-      ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
-      scheduler.schedule(this::process, 500, TimeUnit.MILLISECONDS);
+      thread = new PausablePeriodicThread(this::process, 0.5, getClass().getSimpleName());
+   }
+
+   public void start()
+   {
+      thread.start();
+   }
+
+   public void stop()
+   {
+      thread.stop();
+   }
+
+   public void setRegionsToPublish(PlanarRegionsList regionsToPublish)
+   {
+      this.regionsToPublish = regionsToPublish;
    }
 
    private void process()
    {
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(constantPlanarRegions.getPlanarRegionsAsList());
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(regionsToPublish.getPlanarRegionsAsList());
 
       synchronized (this)
       {
