@@ -76,4 +76,9 @@ public class RemoteSyncedRobotModel
       ImmutablePair<FullHumanoidRobotModel, Long> modelAndTimestamp = new ImmutablePair<FullHumanoidRobotModel, Long>(fullRobotModel, monotonicTime);
       return modelAndTimestamp;
    }
+
+   public boolean hasReceivedFirstMessage()
+   {
+      return robotConfigurationData.hasReceivedFirstMessage();
+   }
 }

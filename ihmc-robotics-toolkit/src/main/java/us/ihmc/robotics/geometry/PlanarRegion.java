@@ -98,7 +98,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
     *           region. Expressed in local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransform transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
