@@ -68,7 +68,7 @@ public class AtlasBehaviorUIDemo extends Application
       {
          new Thread(() -> {
             LogTools.info("Creating planar region publisher");
-            new FakeREAModule(createPlanarRegions()).start();
+            new FakeREAModule(createPlanarRegions(), createRobotModel()).start();
          }).start();
 
          new Thread(() -> {

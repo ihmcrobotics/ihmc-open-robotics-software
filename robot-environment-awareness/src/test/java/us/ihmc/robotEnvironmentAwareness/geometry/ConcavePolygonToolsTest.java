@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.geometry.Line2D;
@@ -16,22 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ConcavePolygonToolsTest
 {
    @Test
-   public void testCutSimpleConcavePolygonAbove()
+   public void testKeepRightSideOfS()
    {
       // create simple convex polygon
-      ConcaveHull concaveSPolygon = new ConcaveHull();
-      concaveSPolygon.addVertex(-2.0, 2.0);
-      concaveSPolygon.addVertex(2.0, 2.0);
-      concaveSPolygon.addVertex(2.0, 1.0);
-      concaveSPolygon.addVertex(-1.0, 1.0);
-      concaveSPolygon.addVertex(-1.0, 0.0);
-      concaveSPolygon.addVertex(2.0, 0.0);
-      concaveSPolygon.addVertex(2.0, -3.0);
-      concaveSPolygon.addVertex(-2.0, -3.0);
-      concaveSPolygon.addVertex(-2.0, -2.0);
-      concaveSPolygon.addVertex(1.0, -2.0);
-      concaveSPolygon.addVertex(1.0, -1.0);
-      concaveSPolygon.addVertex(-2.0, -1.0);
+      ConcaveHull concaveSPolygon = drawSPolygon();
 
       LogTools.info("{}", concaveSPolygon.getVertex(0));
 
@@ -63,6 +50,62 @@ public class ConcavePolygonToolsTest
 
       // assert equal
       assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-7));
+   }
+
+   @Test
+   public void testKeepLeftSideOfS()
+   {
+      // create simple convex polygon
+      ConcaveHull concaveSPolygon = drawSPolygon();
+
+      LogTools.info("{}", concaveSPolygon.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(0.0, 0.0, 0.0, 1.0);
+      Vector2D xDirection = new Vector2D(-1.0, 0.0);
+
+      // cut it above a line
+      List<ConcaveHull> result = ConcavePolygonTools.cropPolygonToAboveLine(concaveSPolygon, yAxis, xDirection);
+
+      assertEquals(2, result.size(), "should be two polygons");
+
+      // create the ideal result
+      ConcaveHull cutPolygon1 = new ConcaveHull();
+      cutPolygon1.addVertex(0.0, -3.0);
+      cutPolygon1.addVertex(-2.0, -3.0);
+      cutPolygon1.addVertex(-2.0, -2.0);
+      cutPolygon1.addVertex(0.0, -2.0);
+
+      ConcaveHull cutPolygon2 = new ConcaveHull();
+      cutPolygon2.addVertex(0.0, -1.0);
+      cutPolygon2.addVertex(-2.0, -1.0);
+      cutPolygon2.addVertex(-2.0, -2.0);
+      cutPolygon2.addVertex(0.0, 2.0);
+      cutPolygon2.addVertex(0.0, 1.0);
+      cutPolygon2.addVertex(-1.0, 1.0);
+      cutPolygon2.addVertex(-1.0, 0.0);
+      cutPolygon2.addVertex(0.0, 0.0);
+
+      // assert equal
+      assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-7));
+   }
+
+   private ConcaveHull drawSPolygon()
+   {
+      ConcaveHull concaveSPolygon = new ConcaveHull();
+      concaveSPolygon.addVertex(-2.0, 2.0);
+      concaveSPolygon.addVertex(2.0, 2.0);
+      concaveSPolygon.addVertex(2.0, 1.0);
+      concaveSPolygon.addVertex(-1.0, 1.0);
+      concaveSPolygon.addVertex(-1.0, 0.0);
+      concaveSPolygon.addVertex(2.0, 0.0);
+      concaveSPolygon.addVertex(2.0, -3.0);
+      concaveSPolygon.addVertex(-2.0, -3.0);
+      concaveSPolygon.addVertex(-2.0, -2.0);
+      concaveSPolygon.addVertex(1.0, -2.0);
+      concaveSPolygon.addVertex(1.0, -1.0);
+      concaveSPolygon.addVertex(-2.0, -1.0);
+      return concaveSPolygon;
    }
 
    @Test

@@ -8,10 +8,14 @@ import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionsListCutTool;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -24,10 +28,12 @@ public class FakeREAModule
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
-   private ROS2Input<RobotConfigurationData> robotConfigurationData;
+   private RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
 
-   private final HashMap<Integer, PlanarRegion> customPlanarRegions = new HashMap<>();
+   private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
+   private MovingReferenceFrame neckFrame;
+   private FakeREAVirtualCameraFOV virtualCameraFOV;
 
    public FakeREAModule(PlanarRegionsList map)
    {
@@ -44,14 +50,16 @@ public class FakeREAModule
 
       if (robotModel != null)
       {
-         robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+         remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+         neckFrame = remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
+         virtualCameraFOV = new FakeREAVirtualCameraFOV(Math.toRadians(90.0), Math.toRadians(90.0), neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
                          PlanarRegionsListMessage.class,
                          null,
                          ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
-                         this::acceptCustomRegion);
+                         this::acceptAdditionalRegionList);
 
       thread = new PausablePeriodicThread(this::process, 0.5, getClass().getSimpleName());
    }
@@ -73,19 +81,33 @@ public class FakeREAModule
 
    private void process()
    {
-      List<PlanarRegion> regionsInView = map.getPlanarRegionsAsList();
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>(regionsInView);
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();;
+      if (remoteSyncedHumanoidFrames != null)
+      {
+         if (remoteSyncedHumanoidFrames.hasReceivedFirstMessage())
+         {
+            combinedRegionsList.addAll(virtualCameraFOV.filterMapToVisible(map).getPlanarRegionsAsList());
+         }
+         else
+         {
+            // blank result
+         }
+      }
+      else
+      {
+         combinedRegionsList.addAll(map.getPlanarRegionsAsList());
+      }
 
       synchronized (this)
       {
-         combinedRegionsList.addAll(customPlanarRegions.values());
+         combinedRegionsList.addAll(additionalPlanarRegions.values());
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
       }
    }
 
-   private void acceptCustomRegion(PlanarRegionsListMessage message)
+   private void acceptAdditionalRegionList(PlanarRegionsListMessage message)
    {
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
 
@@ -99,12 +121,12 @@ public class FakeREAModule
             }
             else if (region.isEmpty())
             {
-               customPlanarRegions.remove(region.getRegionId());
+               additionalPlanarRegions.remove(region.getRegionId());
             }
             else
             {
                CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(region);
-               customPlanarRegions.put(region.getRegionId(), region);
+               additionalPlanarRegions.put(region.getRegionId(), region);
             }
          }
       }
