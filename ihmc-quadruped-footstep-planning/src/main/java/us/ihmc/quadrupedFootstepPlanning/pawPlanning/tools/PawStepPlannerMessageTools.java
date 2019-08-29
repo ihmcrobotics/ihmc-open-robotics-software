@@ -56,7 +56,9 @@ public class PawStepPlannerMessageTools
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
+      packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
       packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
@@ -67,8 +69,11 @@ public class PawStepPlannerMessageTools
       packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
       packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
       packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
+      packet.setLengthForLongInterRegionEdge(parameters.getLengthForLongInterRegionEdge());
       packet.setHeuristicWeight(parameters.getHeuristicWeight());
       packet.setDistanceWeight(parameters.getDistanceWeight());
       packet.setElevationWeight(parameters.getElevationWeight());
+      packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
+      packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
    }
 }

@@ -1,8 +1,10 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import boofcv.struct.image.Planar;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -36,10 +38,13 @@ public class NavigableRegions
       if (regions != null)
       {
          regions = PlanarRegionTools.ensureClockwiseOrder(regions);
-         regions = regions.stream().filter(parameters.getPlanarRegionFilter()::isPlanarRegionRelevant).collect(Collectors.toList());
+         this.regions = regions.stream().filter(parameters.getPlanarRegionFilter()::isPlanarRegionRelevant).collect(Collectors.toList());
+      }
+      else
+      {
+         this.regions = null;
       }
 
-      this.regions = regions;
    }
 
    public void filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly start, Point3DReadOnly goal, double explorationDistanceFromStartGoal)
@@ -56,5 +61,4 @@ public class NavigableRegions
    {
       return navigableRegions;
    }
-
 }

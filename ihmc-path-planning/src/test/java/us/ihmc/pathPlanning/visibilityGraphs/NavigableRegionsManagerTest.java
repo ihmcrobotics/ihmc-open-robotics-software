@@ -36,7 +36,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final double epsilon = 1e-4;
    private static final long timeout = 30000 * 100;
 
@@ -58,7 +58,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -83,7 +83,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -108,7 +108,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -134,7 +134,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -159,7 +159,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -184,7 +184,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -209,7 +209,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -234,7 +234,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -259,7 +259,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -284,7 +284,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -309,7 +309,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -334,7 +334,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -359,7 +359,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       /*
       if (visualize)
@@ -372,7 +372,7 @@ public class NavigableRegionsManagerTest
 
       start = new Point3D(-15.0, 1.0 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -397,7 +397,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -422,7 +422,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -447,7 +447,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -541,7 +541,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), null);
 
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
-      List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPath(start, goal);
 
       int numberOfPoints = path.size();
       assertTrue(numberOfPoints >= originalPath.size());

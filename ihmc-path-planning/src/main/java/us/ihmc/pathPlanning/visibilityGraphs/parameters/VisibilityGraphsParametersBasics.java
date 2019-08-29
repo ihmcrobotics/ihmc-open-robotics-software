@@ -87,6 +87,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(canEasilyStepOverHeight, height);
    }
 
+   default void setLengthForLongInterRegionEdge(double length)
+   {
+      set(lengthForLongInterRegionEdge, length);
+   }
+
    default void setHeuristicWeight(double weight)
    {
       set(heuristicWeight, weight);
@@ -100,6 +105,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
    default void setElevationWeight(double weight)
    {
       set(elevationWeight, weight);
+   }
+
+   default void setOccludedGoalEdgeWeight(double weight)
+   {
+      set(occludedGoalEdgeWeight, weight);
    }
 
    default void set(VisibilityGraphsParametersPacket packet)
@@ -134,12 +144,16 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setCanDuckUnderHeight(packet.getCanDuckUnderHeight());
       if (packet.getCanEasilyStepOverHeight() != -1.0)
          setCanEasilyStepOverHeight(packet.getCanEasilyStepOverHeight());
+      if (packet.getLengthForLongInterRegionEdge() != -1.0)
+         setLengthForLongInterRegionEdge(packet.getLengthForLongInterRegionEdge());
       if (packet.getHeuristicWeight() != 1.0)
          setHeuristicWeight(packet.getHeuristicWeight());
       if (packet.getDistanceWeight() != 1.0)
          setDistanceWeight(packet.getDistanceWeight());
       if (packet.getElevationWeight() != 1.0)
          setElevationWeight(packet.getElevationWeight());
+      if (packet.getOccludedGoalEdgeWeight() != 1.0)
+         setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
    }
 
 }
