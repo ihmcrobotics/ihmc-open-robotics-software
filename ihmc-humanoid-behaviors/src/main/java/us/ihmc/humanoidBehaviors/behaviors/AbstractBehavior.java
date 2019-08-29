@@ -81,6 +81,8 @@ public abstract class AbstractBehavior implements RobotController
    protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
    protected final MessageTopicNameGenerator kinematicsPlanningToolboxSubGenerator, kinematicsPlanningToolboxPubGenerator;
 
+   private static int behaviorUniqID = 0;
+   
    public AbstractBehavior(String robotName, Ros2Node ros2Node)
    {
       this(robotName, null, ros2Node);
@@ -91,7 +93,7 @@ public abstract class AbstractBehavior implements RobotController
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
+      behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName()+"-"+behaviorUniqID++);
       registry = new YoVariableRegistry(behaviorName);
 
       yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
