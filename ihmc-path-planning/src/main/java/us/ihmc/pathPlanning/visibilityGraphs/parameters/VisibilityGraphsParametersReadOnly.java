@@ -262,24 +262,6 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       };
    }
 
-   default InterRegionConnectionFilter getGoalInterRegionConnectionFilter()
-   {
-      return new InterRegionConnectionFilter()
-      {
-         @Override
-         public double getMaximumInterRegionConnetionDistance()
-         {
-            return Double.POSITIVE_INFINITY;
-         }
-
-         @Override
-         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
-         {
-            return true;
-         }
-      };
-   }
-
    default PlanarRegionFilter getPlanarRegionFilter()
    {
       return new PlanarRegionFilter()
