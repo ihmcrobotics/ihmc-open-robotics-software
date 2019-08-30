@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -75,6 +76,7 @@ public class QuadrupedBalanceManager
    private final YoFramePoint3D yoVrpPositionSetpoint = new YoFramePoint3D("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoDesiredECMP = new YoFramePoint3D("desiredECMP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoAchievedECMP = new YoFramePoint3D("achievedECMP", worldFrame, registry);
+   private final YoFramePoint3D yoPerfectECMP = new YoFramePoint3D("perfectECMP", worldFrame, registry);
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
@@ -173,12 +175,16 @@ public class QuadrupedBalanceManager
       YoGraphicPosition yoVRPPositionSetpointViz = new YoGraphicPosition("Desired VRP", yoVrpPositionSetpoint, 0.012, YoAppearance.Purple());
       YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved eCMP", yoAchievedECMP, 0.005, DarkRed(),
                                                                YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition perfectDCMViz = new YoGraphicPosition("Perfect ECMP", yoPerfectECMP, 0.005, Blue(),
+                                                            GraphicType.SOLID_BALL);
 
       graphicsList.add(desiredDCMViz);
+      graphicsList.add(perfectDCMViz);
       graphicsList.add(finalDesiredDCMViz);
       graphicsList.add(yoCmpPositionSetpointViz);
       graphicsList.add(yoVRPPositionSetpointViz);
 
+      artifactList.add(perfectDCMViz.createArtifact());
       artifactList.add(desiredDCMViz.createArtifact());
       artifactList.add(finalDesiredDCMViz.createArtifact());
       artifactList.add(yoCmpPositionSetpointViz.createArtifact());
@@ -316,12 +322,12 @@ public class QuadrupedBalanceManager
       DCMPlannerInterface planner;
       if (useCustomCoMPlanner)
       {
-         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoDesiredECMP);
+         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoPerfectECMP);
          planner = comPlanner;
       }
       else
       {
-         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
+         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoPerfectECMP);
          planner = dcmPlanner;
       }
       planner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
@@ -331,17 +337,17 @@ public class QuadrupedBalanceManager
    {
       stepAdjustmentController.beganStep(robotQuadrant, goalPosition);
       if (useCustomCoMPlanner)
-         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoDesiredECMP);
+         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoPerfectECMP);
       else
-         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
+         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoPerfectECMP);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
    {
       if (useCustomCoMPlanner)
-         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoDesiredECMP);
+         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoPerfectECMP);
       else
-         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoDesiredECMP);
+         dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoPerfectECMP);
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
@@ -370,6 +376,7 @@ public class QuadrupedBalanceManager
 
       yoDesiredDCMPosition.set(planner.getDesiredDCMPosition());
       yoDesiredDCMVelocity.set(planner.getDesiredDCMVelocity());
+      yoPerfectECMP.set(planner.getDesiredECMPPosition());
 
       bodyICPBasedTranslationManager.compute(yoDesiredDCMPosition);
       bodyICPBasedTranslationManager.addDCMOffset(yoDesiredDCMPosition);
