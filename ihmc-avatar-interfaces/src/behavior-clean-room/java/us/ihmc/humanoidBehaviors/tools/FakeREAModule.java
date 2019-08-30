@@ -52,7 +52,7 @@ public class FakeREAModule
       {
          remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
          neckFrame = remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-         virtualCameraFOV = new FakeREAVirtualCameraFOV(Math.toRadians(90.0), Math.toRadians(90.0), neckFrame);
+         virtualCameraFOV = new FakeREAVirtualCameraFOV(Math.toRadians(160.0), Math.toRadians(100.0), neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
@@ -81,7 +81,8 @@ public class FakeREAModule
 
    private void process()
    {
-      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();;
+      remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames();
+      ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
       if (remoteSyncedHumanoidFrames != null)
       {
          if (remoteSyncedHumanoidFrames.hasReceivedFirstMessage())

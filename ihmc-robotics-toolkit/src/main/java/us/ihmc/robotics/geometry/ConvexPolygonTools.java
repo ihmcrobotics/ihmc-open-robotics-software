@@ -881,16 +881,17 @@ public class ConvexPolygonTools
          for (int i = 0; i < polygonToCrop.getNumberOfVertices(); i++) // loop over vertices
          {
             // is first, second intersection point on segment (colinear) with v(i)(i+1)
+            int nextIndex = EuclidGeometryPolygonTools.next(i, polygonToCrop.getNumberOfVertices());
 
             Point2DReadOnly intersectionPointToCheck = vertexAfterIntersectionOne >= 0 ? secondIntersectionToPack : firstIntersectionToPack;
             boolean metIntersection = EuclidGeometryTools.isPoint2DOnLineSegment2D(intersectionPointToCheck,
                                                                                    polygonToCrop.getVertex(i),
-                                                                                   polygonToCrop.getVertex(i + 1));
+                                                                                   polygonToCrop.getVertex(nextIndex));
             if (metIntersection)
             {
                if (vertexAfterIntersectionOne == -1)
                {
-                  vertexAfterIntersectionOne = i + 1;
+                  vertexAfterIntersectionOne = nextIndex;
                }
                else // at second intersection
                {
@@ -914,7 +915,7 @@ public class ConvexPolygonTools
                   }
                   else
                   {
-                     vertexAfterIntersectionTwo = i + 1;
+                     vertexAfterIntersectionTwo = nextIndex;
                      break; // optimization
                   }
                }
@@ -924,13 +925,15 @@ public class ConvexPolygonTools
          croppedPolygonToPack.clear();
          for (int i = 0; i < polygonToCrop.getNumberOfVertices(); i++) // loop over vertices
          {
+            int nextIndex = EuclidGeometryPolygonTools.next(i, polygonToCrop.getNumberOfVertices());
+
             if (vertex0IsAbove || i > 0)
             {
                LogTools.debug("Adding v({})", i);
                croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i));
             }
 
-            if (vertexAfterIntersectionOne == i + 1) // encounter 1st intersection, decisions to be made
+            if (vertexAfterIntersectionOne == nextIndex) // encounter 1st intersection, decisions to be made
             {
                LogTools.debug("Adding i(0)");
                croppedPolygonToPack.addVertex(firstIntersectionToPack);
@@ -941,7 +944,7 @@ public class ConvexPolygonTools
                   i = vertexAfterIntersectionTwo - 1; // cut across polygon; the for loop i++ will immediately add 1 more
                }
             }
-            else if (vertexAfterIntersectionTwo == i + 1) // here, this is always the last to add
+            else if (vertexAfterIntersectionTwo == nextIndex) // here, this is always the last to add
             {
                LogTools.debug("Adding i(1)");
                croppedPolygonToPack.addVertex(secondIntersectionToPack);
