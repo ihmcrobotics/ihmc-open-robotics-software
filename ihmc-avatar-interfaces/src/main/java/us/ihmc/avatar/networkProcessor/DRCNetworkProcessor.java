@@ -36,9 +36,9 @@ public class DRCNetworkProcessor
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
+      tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
       tryToStartModule(() -> setupBehaviorModule(robotModel, params));
-      tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWholebodyTrajectoryToolboxModule(robotModel, params));
