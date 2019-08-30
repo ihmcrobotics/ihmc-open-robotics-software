@@ -140,8 +140,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    public void doControl()
    {
 
-      
-      BehaviorDispatcher.messager.submitMessage(MessengerAPI.State, getStateMachine().getCurrentBehaviorKey().toString());
+	      //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
+     // BehaviorDispatcher.messager.submitMessage(MessengerAPI.State, getStateMachine().getCurrentBehaviorKey().toString());
 
       
       //should constantly be searching for door and updating its location here
@@ -356,7 +356,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       };
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT, setup, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.WALKING_TO_DOOR);
 
       factory.addState(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, walkToDoorAction);
       factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
