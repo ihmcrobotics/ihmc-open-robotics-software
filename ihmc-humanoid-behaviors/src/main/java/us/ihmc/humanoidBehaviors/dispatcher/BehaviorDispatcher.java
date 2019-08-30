@@ -79,8 +79,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
-   
-   public static Messager messager;
+   //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
+  // public static Messager messager;
    
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
@@ -119,13 +119,13 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       
       
    }
-
-   public void startMessanger()
-   {
-      messager = KryoMessager.createServer(getBehaviorAPI(),
-                                                        NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(), BehaviorDispatcher.class.getSimpleName(), 5);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-   }
+   //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
+ //  public void startMessanger()
+//   {
+ //     messager = KryoMessager.createServer(getBehaviorAPI(),
+ //                                                       NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(), BehaviorDispatcher.class.getSimpleName(), 5);
+ //     ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+ //  }
    
    public MessagerAPI getBehaviorAPI()
    {
@@ -180,7 +180,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    public void finalizeStateMachine()
    {
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
-      startMessanger();
+      
+      //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
+ //     startMessanger();
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
