@@ -1116,12 +1116,11 @@ public class ConvexPolygonToolsTest
       LogTools.info("{}", size2square0center.getVertex(0));
 
       // create line and up direction
-      Line2D yAxis = new Line2D(0.0, 0.0, 0.0, 1.0);
-      Vector2D xDirection = new Vector2D(1.0, 0.0);
+      Line2D yAxis = new Line2D(0.0, 0.0, 0.0, -1.0);
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, xDirection, croppedResult);
+      ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
 
       Assertions.assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
 
@@ -1150,11 +1149,10 @@ public class ConvexPolygonToolsTest
 
       // create line and up direction
       Line2D yAxis = new Line2D(0.0, 0.0, 0.0, 1.0);
-      Vector2D negativeXDirection = new Vector2D(-1.0, 0.0);
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cropPolygonToAboveLine(size2square0center, yAxis, negativeXDirection, croppedResult);
+      ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
 
       Assertions.assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
 

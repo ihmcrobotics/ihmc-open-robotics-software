@@ -27,7 +27,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
@@ -792,17 +791,15 @@ public class ConvexPolygonTools
       return true;
    }
 
-   public static ConvexPolygonCropResult cropPolygonToAboveLine(ConvexPolygon2DReadOnly polygonToCrop,
+   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
                                                                 Line2DReadOnly cuttingLine,
-                                                                Vector2DReadOnly upDirection,
                                                                 ConvexPolygon2DBasics croppedPolygonToPack)
    {
-      return cropPolygonToAboveLine(polygonToCrop, cuttingLine, upDirection, croppedPolygonToPack, new Point2D(), new Point2D());
+      return cutPolygonToLeftOfLine(polygonToCrop, cuttingLine, croppedPolygonToPack, new Point2D(), new Point2D());
    }
 
-   public static ConvexPolygonCropResult cropPolygonToAboveLine(ConvexPolygon2DReadOnly polygonToCrop,
+   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
                                                                 Line2DReadOnly cuttingLine,
-                                                                Vector2DReadOnly upDirection,
                                                                 ConvexPolygon2DBasics croppedPolygonToPack,
                                                                 Point2DBasics firstIntersectionToPack,
                                                                 Point2DBasics secondIntersectionToPack)
@@ -812,6 +809,10 @@ public class ConvexPolygonTools
          croppedPolygonToPack.clearAndUpdate();
          return ConvexPolygonCropResult.REMOVE_ALL;
       }
+
+      Vector2D upDirection = new Vector2D(cuttingLine.getDirection());
+      upDirection.normalize();
+      upDirection.set(-upDirection.getY(), upDirection.getX());
 
       int intersectionCount = EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(cuttingLine.getPoint(),
                                                                                                      cuttingLine.getDirection(),

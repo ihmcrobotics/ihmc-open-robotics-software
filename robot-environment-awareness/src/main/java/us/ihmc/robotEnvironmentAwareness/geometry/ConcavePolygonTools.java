@@ -6,7 +6,7 @@ import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonCropResult;
@@ -18,10 +18,36 @@ public class ConcavePolygonTools
 {
    public static final int MIN_VERTICES_TO_HAVE_CONCAVITY = 4;
 
-   public static List<ConcaveHull> cropPolygonToAboveLine(ConcaveHull concaveHullToCrop,
-                                                          Line2DReadOnly cuttingLine,
-                                                          Vector2DReadOnly upDirection)
+   public static List<ConcaveHull> cutPolygonToLeftOfLine(ConcaveHull concaveHullToCrop,
+                                                          Line2DReadOnly cuttingLine)
    {
+      Vector2D upDirection = new Vector2D(cuttingLine.getDirection());
+      upDirection.normalize();
+      upDirection.set(-upDirection.getY(), upDirection.getX());
+
+      // filter hull vertices off of line
+      ConcaveHull filteredConcaveHullToCrop = new ConcaveHull();
+      for (Point2D point2D : concaveHullToCrop)
+      {
+         Point2D filteredVertex = new Point2D(point2D);
+         double distance = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(point2D, cuttingLine.getPoint(), cuttingLine.getDirection());
+         if (Math.abs(distance) < 1e-5) // move a little
+         {
+            Vector2D moveBy = new Vector2D();
+            if (distance >= 0.0) // move just above
+            {
+               moveBy.set(upDirection);
+            }
+            else // if (distance < 0.0) // move just below
+            {
+               moveBy.set(-upDirection.getX(), -upDirection.getY());
+            }
+            moveBy.scale(1e-5);
+            filteredVertex.add(moveBy);
+         }
+         filteredConcaveHullToCrop.addVertex(filteredVertex);
+      }
+
       ArrayList<ConcaveHull> resultingConcaveHulls = new ArrayList<>();
       if (concaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
       {
@@ -33,9 +59,8 @@ public class ConcavePolygonTools
          }
          convexPolygonToCrop.update();
          ConvexPolygon2D croppedPolygonToPack = new ConvexPolygon2D();
-         ConvexPolygonCropResult result = ConvexPolygonTools.cropPolygonToAboveLine(convexPolygonToCrop,
+         ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(convexPolygonToCrop,
                                                                                     cuttingLine,
-                                                                                    upDirection,
                                                                                     croppedPolygonToPack);
          if (result != ConvexPolygonCropResult.REMOVE_ALL)
          {
