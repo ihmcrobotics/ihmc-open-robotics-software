@@ -13,7 +13,6 @@ public class FakeREAVirtualCameraFOV
 
    private final double verticalFOV;
    private final double horizontalFOV;
-   private final FramePose3D cameraPose3D;
 
    private final FramePose3D tempFramePose3D = new FramePose3D();
    private final Vector3D tempNormal = new Vector3D();
@@ -28,7 +27,6 @@ public class FakeREAVirtualCameraFOV
    {
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
-      cameraPose3D = new FramePose3D(cameraFrame);
       this.cameraFrame = cameraFrame;
 
       planeTop = new Plane3D();
@@ -39,12 +37,11 @@ public class FakeREAVirtualCameraFOV
 
    public PlanarRegionsList filterMapToVisible(PlanarRegionsList map)
    {
-      cameraPose3D.changeFrame(ReferenceFrame.getWorldFrame());
 
       calculatePlane(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
       calculatePlane(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
-      calculatePlane(planeLeft, 0.0, -horizontalFOV / 2.0, -1.0, 0.0);
-      calculatePlane(planeRight, 0.0, horizontalFOV / 2.0, 1.0, 0.0);
+      calculatePlane(planeLeft, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
+      calculatePlane(planeRight, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
 
       PlanarRegionsList visibleMap = PlanarRegionsListCutTool.cutByPlane(planeTop, map);
       visibleMap = PlanarRegionsListCutTool.cutByPlane(planeBottom, visibleMap);
@@ -64,6 +61,6 @@ public class FakeREAVirtualCameraFOV
       plane.setPoint(tempFramePose3D.getPosition());
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
-      this.planeTop.setNormal(tempNormal);
+      plane.setNormal(tempNormal);
    }
 }

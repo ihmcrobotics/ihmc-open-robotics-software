@@ -20,34 +20,20 @@ import java.util.List;
 
 public class PlanarRegionsListCutTool
 {
-   public static class Result
-   {
-      boolean fullyDeleteRegion = true;
-      List<PlanarRegion> resultingRegions;
-   }
-
    public static PlanarRegionsList cutByPlane(Plane3D plane, PlanarRegionsList map)
    {
       PlanarRegionsList resultingRegions = new PlanarRegionsList();
 
       for (PlanarRegion mapRegion : map.getPlanarRegionsAsList())
       {
-         Result result = cutRegionByPlane(plane, mapRegion);
-         if (!result.fullyDeleteRegion)
-         {
-            for (PlanarRegion resultingRegion : result.resultingRegions)
-            {
-               resultingRegions.addPlanarRegion(resultingRegion);
-            }
-         }
+         resultingRegions.addPlanarRegions(cutRegionByPlane(plane, mapRegion));
       }
 
       return resultingRegions;
    }
 
-   public static Result cutRegionByPlane(Plane3D plane, PlanarRegion region)
+   public static List<PlanarRegion> cutRegionByPlane(Plane3D plane, PlanarRegion region)
    {
-      Result result = new Result();
 
       RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
       Line3D cuttingLine3D = new Line3D();
@@ -88,7 +74,6 @@ public class PlanarRegionsListCutTool
          resultingRegions.add(resultingRegion);
       }
 
-      result.resultingRegions = resultingRegions;
-      return result;
+      return resultingRegions;
    }
 }
