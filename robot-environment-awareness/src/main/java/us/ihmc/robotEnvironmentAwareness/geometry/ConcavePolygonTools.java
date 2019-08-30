@@ -49,11 +49,11 @@ public class ConcavePolygonTools
       }
 
       ArrayList<ConcaveHull> resultingConcaveHulls = new ArrayList<>();
-      if (concaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
+      if (filteredConcaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
       {
          // must be convex, revert to convex polygon crop
          ConvexPolygon2D convexPolygonToCrop = new ConvexPolygon2D();
-         for (Point2D concaveHullVertex : concaveHullToCrop.getConcaveHullVertices())
+         for (Point2D concaveHullVertex : filteredConcaveHullToCrop.getConcaveHullVertices())
          {
             convexPolygonToCrop.addVertex(concaveHullVertex);
          }
@@ -71,12 +71,12 @@ public class ConcavePolygonTools
       }
 
       // assert vertices 4 or greater
-      if (concaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
+      if (filteredConcaveHullToCrop.getNumberOfVertices() < MIN_VERTICES_TO_HAVE_CONCAVITY)
          throw new RuntimeException("This polygon must be convex and shouldn't have gotten this far.");
 
       // find intersections (number of intersections can be as high as n-1)
       Map<Integer, Point2D> intersections = new HashMap<>(); // index after intersection; intersection point
-      List<Point2D> concaveHullVertices = concaveHullToCrop.getConcaveHullVertices();
+      List<Point2D> concaveHullVertices = filteredConcaveHullToCrop.getConcaveHullVertices();
       for (int i = 0; i < concaveHullVertices.size(); i++)
       {
          int nextVertex = EuclidGeometryPolygonTools.next(i, concaveHullVertices.size());
@@ -122,14 +122,14 @@ public class ConcavePolygonTools
 
       // filter out colinear edge intersections? did we just do this above?
 
-      boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(concaveHullToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
+      boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(filteredConcaveHullToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
       LogTools.debug("Intersection count: {} vertex(0) is above line: {}", intersections.size(), vertex0IsAbove);
 
       if (intersections.size() == 0) // first edge case: no intersections: keep all or remove all
       {
          if (vertex0IsAbove)
          {
-            resultingConcaveHulls.add(new ConcaveHull(concaveHullToCrop));
+            resultingConcaveHulls.add(new ConcaveHull(filteredConcaveHullToCrop));
             return resultingConcaveHulls;
          }
          else
@@ -140,14 +140,14 @@ public class ConcavePolygonTools
       else if (intersections.size() == 1) // second edge case: point intersection: keep all or remove all
       {
          // firstIntersectionToPack is packed with only intersection
-         if (concaveHullToCrop.getNumberOfVertices() > 1)
+         if (filteredConcaveHullToCrop.getNumberOfVertices() > 1)
          {
             // isPoint2DInFrontOfRay2D returns true for on as well. Check any two vertices. One is on the line.
-            boolean isOnOrAboveTwo = EuclidGeometryTools.isPoint2DInFrontOfRay2D(concaveHullToCrop.getVertex(1), cuttingLine.getPoint(), upDirection);
+            boolean isOnOrAboveTwo = EuclidGeometryTools.isPoint2DInFrontOfRay2D(filteredConcaveHullToCrop.getVertex(1), cuttingLine.getPoint(), upDirection);
 
             if (vertex0IsAbove && isOnOrAboveTwo)
             {
-               resultingConcaveHulls.add(new ConcaveHull(concaveHullToCrop));
+               resultingConcaveHulls.add(new ConcaveHull(filteredConcaveHullToCrop));
                return resultingConcaveHulls;
             }
             else
