@@ -31,6 +31,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -102,6 +103,8 @@ public class QuadrupedBalanceManager
 
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
+   private final FeetInContactForPlanner feetInContactForPlanner;
+
    // footstep graphics
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
    private final FramePoint3D stepSequenceVisualizationPosition = new FramePoint3D();
@@ -117,6 +120,8 @@ public class QuadrupedBalanceManager
                                   YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
+
+      feetInContactForPlanner = new FeetInContactForPlanner(controllerToolbox);
 
       numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
@@ -333,9 +338,10 @@ public class QuadrupedBalanceManager
       planner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
    }
 
-   public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
+   public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition, TimeIntervalReadOnly step)
    {
       stepAdjustmentController.beganStep(robotQuadrant, goalPosition);
+      feetInContactForPlanner.beganStep(robotQuadrant, step);
       if (useCustomCoMPlanner)
          comPlanner.setInitialState(robotTimestamp.getDoubleValue(), comPlanner.getDesiredCoMPosition(), comPlanner.getDesiredCoMVelocity(), yoPerfectECMP);
       else
@@ -349,6 +355,7 @@ public class QuadrupedBalanceManager
       else
          dcmPlanner.setInitialState(robotTimestamp.getDoubleValue(), yoDesiredDCMPosition, yoDesiredDCMVelocity, yoPerfectECMP);
       stepAdjustmentController.completedStep(robotQuadrant);
+      feetInContactForPlanner.completedStep(robotQuadrant);
    }
 
    public void setHoldCurrentDesiredPosition(boolean holdPosition)
@@ -364,6 +371,7 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.update();
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+      feetInContactForPlanner.update();
 
       DCMPlannerInterface planner;
       if (useCustomCoMPlanner)
@@ -371,7 +379,7 @@ public class QuadrupedBalanceManager
       else
          planner = dcmPlanner;
 
-      planner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
+      planner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, feetInContactForPlanner.getFeetInContactForPlanner());
       yoFinalDesiredDCM.set(planner.getFinalDCMPosition());
 
       yoDesiredDCMPosition.set(planner.getDesiredDCMPosition());
