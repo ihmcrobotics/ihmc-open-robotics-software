@@ -138,6 +138,8 @@ public class QuadrupedControllerToolbox
                                                              contactState.set(ContactState.IN_CONTACT);
                                                           else
                                                              contactState.set(ContactState.NO_CONTACT);
+
+                                                          updateFeetInContact();
                                                        });
 
       }
@@ -155,6 +157,7 @@ public class QuadrupedControllerToolbox
 
       update();
       updateSupportPolygon();
+      updateFeetInContact();
    }
 
    public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
@@ -182,7 +185,10 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
+   }
 
+   private void updateFeetInContact()
+   {
       feetInContact.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
