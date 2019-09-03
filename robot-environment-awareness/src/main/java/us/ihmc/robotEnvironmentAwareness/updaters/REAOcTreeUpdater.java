@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,7 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 public class REAOcTreeUpdater
 {
    private final Messager reaMessager;
-   private final NormalOcTree referenceOctree;
+   private NormalOcTree referenceOctree;
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
 
    private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
@@ -41,13 +42,11 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
-   public REAOcTreeUpdater(NormalOcTree octree, REAOcTreeBuffer[] buffers, Messager reaMessager)
+   public REAOcTreeUpdater(double octreeResolution, REAOcTreeBuffer[] buffers, Messager reaMessager)
    {
-      this.referenceOctree = octree;
+      initializeReferenceOctree(octreeResolution);
       this.reaOcTreeBuffers = buffers;
       this.reaMessager = reaMessager;
-      referenceOctree.enableParallelComputationForNormals(true);
-      referenceOctree.enableParallelInsertionOfMisses(true);
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableNormalEstimation = reaMessager.createInput(REAModuleAPI.NormalEstimationEnable, true);
@@ -61,7 +60,13 @@ public class REAOcTreeUpdater
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
-
+   }
+   
+   public void initializeReferenceOctree(double octreeResolution)
+   {
+      referenceOctree = new NormalOcTree(octreeResolution);
+      referenceOctree.enableParallelComputationForNormals(true);
+      referenceOctree.enableParallelInsertionOfMisses(true);
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
    }
 
@@ -194,9 +199,19 @@ public class REAOcTreeUpdater
       boundingBox.update(referenceOctree.getResolution(), referenceOctree.getTreeDepth());
       referenceOctree.setBoundingBox(boundingBox);
    }
+   
+   public NormalOcTree getMainOctree()
+   {
+      return referenceOctree;
+   }
 
    public void handleLidarScanMessage(LidarScanMessage message)
    {
       latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
+   }
+
+   public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      latestLidarPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 }
