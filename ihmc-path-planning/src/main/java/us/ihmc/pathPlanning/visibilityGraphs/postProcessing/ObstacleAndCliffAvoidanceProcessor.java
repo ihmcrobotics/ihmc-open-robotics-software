@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -40,7 +40,7 @@ public class ObstacleAndCliffAvoidanceProcessor
    private final double waypointResolution;
    private final IntermediateComparator comparator = new IntermediateComparator();
 
-   public ObstacleAndCliffAvoidanceProcessor(VisibilityGraphsParameters parameters)
+   public ObstacleAndCliffAvoidanceProcessor(VisibilityGraphsParametersReadOnly parameters)
    {
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
       maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();

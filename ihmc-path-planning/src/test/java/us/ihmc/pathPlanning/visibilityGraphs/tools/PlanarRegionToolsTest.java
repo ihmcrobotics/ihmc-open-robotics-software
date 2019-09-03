@@ -17,6 +17,7 @@ import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
@@ -883,6 +884,25 @@ public class PlanarRegionToolsTest
       regionB = new PlanarRegion(transformTwo, polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
+   }
+
+   @Test
+   public void testGetLocalBoundingBox2DInLocal()
+   {
+      ConvexPolygon2D polygonA = new ConvexPolygon2D();
+      polygonA.addVertex(4.1, 5.0);
+      polygonA.addVertex(4.0, 3.0);
+      polygonA.addVertex(2.0, 3.1);
+      polygonA.addVertex(2.1, 5.1);
+      polygonA.update();
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      transformToWorld.setRotationYawPitchRoll(1.2, 3.4, 5.6);
+      transformToWorld.setTranslation(-1.0, 2.2, 3.4);
+
+      PlanarRegion regionA = new PlanarRegion(transformToWorld, polygonA);
+      BoundingBox2D boundingBox2D = PlanarRegionTools.getLocalBoundingBox2DInLocal(regionA);
+      assertEquals(boundingBox2D, new BoundingBox2D(2.0, 3.0, 4.1, 5.1));
    }
 
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)

@@ -25,26 +25,27 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 public class AtlasBehaviorSimulation
 {
-   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, int recordTicksPerControllerTick)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick);
    }
 
    public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1);
    }
 
    private static SimulationConstructionSet create(DRCRobotModel robotModel,
                                                    CommonAvatarEnvironmentInterface environment,
-                                                   PubSubImplementation pubSubImplementation)
+                                                   PubSubImplementation pubSubImplementation, int recordTicksPerControllerTick)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
-      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT() * recordTicksPerControllerTick);
+      scsInitialSetup.setUsePerfectSensors(true);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
@@ -87,6 +88,7 @@ public class AtlasBehaviorSimulation
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
+      avatarSimulationFactory.setCreateYoVariableServer(false);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
@@ -95,11 +97,18 @@ public class AtlasBehaviorSimulation
 
       // TODO set up some useful graphs
 
-      return avatarSimulation.getSimulationConstructionSet();
+      SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
+      scs.setupGraph("root.atlas.t");
+      scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
+
+      return scs;
    }
 
    public static void main(String[] args)
    {
-      createForManualTest(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
+      int recordTicksPerControllerTick = 1;
+      SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
+                                                          new FlatGroundEnvironment(), recordTicksPerControllerTick);
+      scs.simulate();
    }
 }

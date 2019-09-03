@@ -19,7 +19,10 @@ import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -33,7 +36,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
-public class PlanarRegion
+public class PlanarRegion implements SupportingVertexHolder
 {
    public static final int NO_REGION_ID = -1;
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
@@ -179,7 +182,7 @@ public class PlanarRegion
     * Returns all of the intersections when the convexPolygon is projected vertically onto this
     * PlanarRegion.
     *
-    * @param convexPolygonInWorld Polygon to project vertically.
+    * @param lineSegmentInWorld Line segment to project vertically.
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
@@ -263,7 +266,6 @@ public class PlanarRegion
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
     *           same surface normal as this region.
-    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
    public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2D convexPolygon2d, RigidBodyTransform snappingTransform)
@@ -278,7 +280,7 @@ public class PlanarRegion
     * @param convexPolygon2d Polygon to snap.
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have
     *           same surface normal as this region.
-    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @param intersectionPolygonToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     * @return intersectionArea Total area of intersections
     */
    public double getPolygonIntersectionAreaWhenSnapped(ConvexPolygon2D convexPolygon2d, RigidBodyTransform snappingTransform,
@@ -768,6 +770,9 @@ public class PlanarRegion
 
    private void checkConcaveHullRepeatVertices(boolean throwException)
    {
+      if (concaveHullsVertices.length < 2)
+         return;
+
       for (int i=0; i<concaveHullsVertices.length; i++)
       {
          int nextIndex = (i + 1) % concaveHullsVertices.length;
@@ -918,6 +923,30 @@ public class PlanarRegion
       transformToPack.set(fromWorldToLocalTransform);
    }
 
+   public RigidBodyTransformReadOnly getTransformToLocal()
+   {
+      return fromWorldToLocalTransform;
+   }
+
+   public RigidBodyTransformReadOnly getTransformToWorld()
+   {
+      return fromLocalToWorldTransform;
+   }
+
+   public RigidBodyTransform getTransformToWorldCopy()
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      getTransformToWorld(transformToWorld);
+      return transformToWorld;
+   }
+
+   public RigidBodyTransform getTransformToLocalCopy()
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
    /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
@@ -949,6 +978,63 @@ public class PlanarRegion
    public void getBoundingBox3dInWorld(BoundingBox3D boundingBox3dToPack)
    {
       boundingBox3dToPack.set(this.boundingBox3dInWorld);
+   }
+
+   @Override
+   public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
+   {
+      if (convexHull.isEmpty())
+      {
+         return false;
+      }
+      else if (convexHull.getNumberOfVertices() == 1)
+      {
+         supportingVertexToPack.set(convexHull.getVertex(0), 0.0);
+         transformFromLocalToWorld(supportingVertexToPack);
+         return true;
+      }
+
+      supportingVertexToPack.set(supportDirection);
+      fromWorldToLocalTransform.getRotation().transform(supportingVertexToPack);
+
+      double vx = supportingVertexToPack.getX();
+      double vy = supportingVertexToPack.getY();
+
+      double dotProduct0 = vx * convexHull.getVertex(0).getX() + vy * convexHull.getVertex(0).getY();
+      double dotProductCW = vx * convexHull.getVertex(1).getX() + vy * convexHull.getVertex(1).getY();
+      double dotProductCCW =
+            vx * convexHull.getVertex(convexHull.getNumberOfVertices() - 1).getX() + vy * convexHull.getVertex(convexHull.getNumberOfVertices() - 1).getY();
+
+      int bestVertexIndex = 0;
+      if (convexHull.getNumberOfVertices() == 2)
+      {
+         bestVertexIndex = dotProduct0 > dotProductCW ? 0 : 1;
+      }
+      else if (dotProduct0 < Math.max(dotProductCW, dotProductCCW))
+      {
+         boolean iterateClockwise = dotProductCW > dotProductCCW;
+         double previousDotProduct = iterateClockwise ? dotProductCW : dotProductCCW;
+         int indexToCheck = iterateClockwise ? 2 : convexHull.getNumberOfVertices() - 2;
+
+         while (true)
+         {
+            double dotProduct = vx * convexHull.getVertex(indexToCheck).getX() + vy * convexHull.getVertex(indexToCheck).getY();
+            if (dotProduct > previousDotProduct)
+            {
+               previousDotProduct = dotProduct;
+               indexToCheck = iterateClockwise ? convexHull.getNextVertexIndex(indexToCheck) : convexHull.getPreviousVertexIndex(indexToCheck);
+            }
+            else
+            {
+               bestVertexIndex = iterateClockwise ? convexHull.getPreviousVertexIndex(indexToCheck) : convexHull.getNextVertexIndex(indexToCheck);
+               break;
+            }
+         }
+      }
+
+      supportingVertexToPack.set(convexHull.getVertex(bestVertexIndex), 0.0);
+      transformFromLocalToWorld(supportingVertexToPack);
+      return true;
    }
 
    public boolean epsilonEquals(PlanarRegion other, double epsilon)
@@ -1088,10 +1174,42 @@ public class PlanarRegion
       updateConvexHull();
    }
 
+   //TODO: +++JEP 190719 I think this is the correct implementation for transform(). Double check and if so, replace the one above with this.
+   public void transformByPreMultiply(RigidBodyTransform transform)
+   {
+      fromLocalToWorldTransform.preMultiply(transform);
+      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
+      fromWorldToLocalTransform.invert();
+
+      updateBoundingBox();
+      updateConvexHull();
+   }
+
    public void update()
    {
       updateBoundingBox();
       updateConvexHull();
+   }
+
+   /**
+    * Intersect this region's plane with 3D plane resulting in a Line3D in world.
+    *
+    * @param plane
+    * @return line3D in world
+    */
+   public Line3D intersectionWith(Plane3D plane)
+   {
+      Plane3D thisPlane = getPlane();
+
+      Point3D intersectionPoint = new Point3D();
+      Vector3D intersectionDirection = new Vector3D();
+      EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(thisPlane.getPoint(),
+                                                         thisPlane.getNormal(),
+                                                         plane.getPoint(),
+                                                         plane.getNormal(),
+                                                         intersectionPoint,
+                                                         intersectionDirection);
+      return new Line3D(intersectionPoint, intersectionDirection);
    }
 
    /**
@@ -1106,14 +1224,7 @@ public class PlanarRegion
          return ret;
       }
 
-      Plane3D thisPlane = getPlane();
-      Plane3D otherPlane = other.getPlane();
-      Point3D intersectionPoint = new Point3D();
-      Vector3D intersectionDirection = new Vector3D();
-
-      EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(thisPlane.getPoint(), thisPlane.getNormal(), otherPlane.getPoint(), otherPlane.getNormal(),
-                                                         intersectionPoint, intersectionDirection);
-      Line3D fullIntersectionLine = new Line3D(intersectionPoint, intersectionDirection);
+      Line3D fullIntersectionLine = intersectionWith(other.getPlane());
 
       List<LineSegment3D> intersectionsWithThis = projectAndIntersect(fullIntersectionLine);
       List<LineSegment3D> intersectionsWithOther = other.projectAndIntersect(fullIntersectionLine);

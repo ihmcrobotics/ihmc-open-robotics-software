@@ -1,65 +1,36 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Arrays;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BoundingBoxCollisionDetectorTest
 {
    @Test
    public void testBodyCollisionWithZeroYaw()
    {
-      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return 1.0;
-         }
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(0.5);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return 0.5;
-         }
-
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-               {
-                  return 0.25;
-               }
-            };
-         }
-      };
-
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
       collisionChecker.setBoxPose(0.25, 0.5, 0.0, 0.0);
       double distanceFromBox = 1e-3;
 
@@ -123,41 +94,19 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollisionWithRotatedBody()
    {
-      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return 0.5;
-         }
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return 1.0;
-         }
 
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return 1.0;
-         }
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
 
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-               {
-                  return 0.25;
-               }
-            };
-         }
-      };
-
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       double distanceFromRegionAtZeroYaw = 0.025;
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.75, 0.75, 0.5, 0.0, 0.5 - 2.0 * distanceFromRegionAtZeroYaw);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
@@ -182,41 +131,18 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testHeightDetection()
    {
-      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return 0.5;
-         }
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return 1.0;
-         }
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
 
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-               {
-                  return 0.25;
-               }
-            };
-         }
-      };
-
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
       PlanarRegionsList planarRegionsList = getSquarePlanarRegionsList(0.25, 0.25, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
@@ -240,39 +166,11 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollidingWithACube()
    {
-      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return 0.5;
-         }
-
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-               {
-                  return 0.25;
-               }
-            };
-         }
-      };
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -287,7 +185,12 @@ public class BoundingBoxCollisionDetectorTest
       generator.addCubeReferencedAtBottomMiddle(cubeDepth, cubeWidth, cubeHeight);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       // test just outside along y
@@ -310,39 +213,11 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testClosestPointsInFrontAndBack()
    {
-      FootstepPlannerParameters plannerParameters = new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getBodyBoxDepth()
-         {
-            return 0.5;
-         }
-
-         @Override
-         public double getBodyBoxWidth()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public double getBodyBoxHeight()
-         {
-            return 1.0;
-         }
-
-         @Override
-         public FootstepPlannerCostParameters getCostParameters()
-         {
-            return new DefaultFootstepPlannerCostParameters()
-            {
-               @Override
-               public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-               {
-                  return 0.25;
-               }
-            };
-         }
-      };
+      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
+      ((DefaultFootstepPlannerParameters) plannerParameters).setMaximum2dDistanceFromBoundingBoxToPenalize(0.25);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -359,7 +234,12 @@ public class BoundingBoxCollisionDetectorTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(plannerParameters);
+      double boxDepth = plannerParameters.getBodyBoxDepth();
+      double boxWidth = plannerParameters.getBodyBoxWidth();
+      double boxHeight = plannerParameters.getBodyBoxHeight();
+      double xyProximityCheck = plannerParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector(boxDepth, boxWidth, boxHeight, xyProximityCheck);
+
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       // test just outside along world y

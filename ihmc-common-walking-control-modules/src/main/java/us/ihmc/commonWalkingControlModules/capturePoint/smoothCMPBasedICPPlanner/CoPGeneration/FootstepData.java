@@ -47,7 +47,7 @@ public class FootstepData
 
    public void setSwingTime(double swingTime)
    {
-      this.timing.setTimings(swingTime, timing.getTouchdownDuration(), timing.getTransferTime());
+      this.timing.setTimings(swingTime, timing.getTransferTime());
    }
    
    public Footstep getFootstep()

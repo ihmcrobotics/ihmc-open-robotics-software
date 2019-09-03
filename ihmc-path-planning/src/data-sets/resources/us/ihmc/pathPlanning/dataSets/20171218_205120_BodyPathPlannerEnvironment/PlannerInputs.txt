@@ -1,9 +1,11 @@
 start_position 0.400 0.500 0.001
 goal_position 8.500 -3.500 0.010
-vis_graph_status dev
+vis_graph_status test
 step_planner_status dev
 a_star_timeout 10.0
 vis_graph_with_a_star_timeout 45.0
+requires_occlusion false
+
 
 quadruped_start_position 0.700 0.500 0.001
 quadruped_goal_position 8.000 -3.500 0.010

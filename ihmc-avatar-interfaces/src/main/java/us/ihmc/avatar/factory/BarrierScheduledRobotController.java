@@ -2,43 +2,36 @@ package us.ihmc.avatar.factory;
 
 import java.util.List;
 
-import us.ihmc.commons.Conversions;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
-import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
+import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 
-public class BarrierScheduledRobotController<C> implements DisposableRobotController
+public class BarrierScheduledRobotController implements DisposableRobotController
 {
    private final YoVariableRegistry registry;
-   private final BarrierScheduler<C> barrierScheduler;
-   private final YoLong schedulerTick;
-   private final YoDouble schedulerDT;
-   private final YoDouble schedulerTimer;
+   private final BarrierScheduler<HumanoidRobotContextData> barrierScheduler;
+   private final HumanoidRobotContextData masterContext;
 
-   private long lastStartTime;
+   private final ThreadTimer timer;
 
-   public BarrierScheduledRobotController(String name, List<? extends Task<C>> tasks, C masterContext, TaskOverrunBehavior overrunBehavior)
+   public BarrierScheduledRobotController(String name, List<HumanoidRobotControlTask> tasks, HumanoidRobotContextData masterContext,
+                                          TaskOverrunBehavior overrunBehavior, double schedulerDt)
    {
-      // TODO: add some YoVariables back that measure missed ticks.
+      this.masterContext = masterContext;
+
       barrierScheduler = new BarrierScheduler<>(tasks, masterContext, overrunBehavior);
       registry = new YoVariableRegistry(name);
-      schedulerTick = new YoLong("SchedulerTick", registry);
-      schedulerDT = new YoDouble("SchedulerDT", registry);
-      schedulerTimer = new YoDouble("SchedulerTimer", registry);
 
-      // Start the task threads.
-      for (int i = 0; i < tasks.size(); i++)
-      {
-         new Thread(tasks.get(i), tasks.get(i).getClass().getSimpleName() + "Thread").start();
-      }
+      timer = new ThreadTimer("Scheduler", schedulerDt, registry);
    }
 
    @Override
    public void initialize()
    {
+      masterContext.setControllerRan(false);
+      masterContext.setEstimatorRan(false);
    }
 
    @Override
@@ -50,15 +43,10 @@ public class BarrierScheduledRobotController<C> implements DisposableRobotContro
    @Override
    public void doControl()
    {
-      long startTime = System.nanoTime();
-      if (lastStartTime != 0)
-         schedulerDT.set(Conversions.nanosecondsToMilliseconds((double) (startTime - lastStartTime)));
-      lastStartTime = startTime;
-
-      schedulerTick.increment();
+      timer.start();
+      masterContext.setSchedulerTick(timer.getTickCount());
       barrierScheduler.run();
-
-      schedulerTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
+      timer.stop();
    }
 
    @Override

@@ -75,7 +75,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final static double defaultTransferTime = 2.5;
    private final static double defaultChickenPercentage = 0.5;
 
-   private final static String chickenSupportName = "icpPlannerPercentageChickenSupport";
+   private final static String chickenSupportName = "icpPlannerPercentageStandingWeightDistributionOnLeftFoot";
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

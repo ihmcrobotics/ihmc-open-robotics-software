@@ -12,6 +12,8 @@ float64 end_phase_shift -1.0
 float64 stance_length -1.0
 float64 stance_width -1.0
 float64 step_ground_clearance -1.0
+float64 max_horizontal_speed_fraction -1.0
+float64 max_yaw_speed_fraction -1.0
 byte quadruped_speed
 
 QuadrupedGaitTimingsPacket pace_slow_settings_packet

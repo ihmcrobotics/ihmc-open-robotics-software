@@ -135,7 +135,7 @@ public class WalkingControllerTest
 
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
    private final CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
-   private final HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
+   private final HighLevelControlManagerFactory managerFactory = new HighLevelControlManagerFactory(registry);
    private final List<ContactablePlaneBody> contactableBodies = new ArrayList<>();
 
    private final SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
@@ -470,11 +470,15 @@ public class WalkingControllerTest
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, feet, statusOutputManager, yoTime,
+      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
+      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction, feet, statusOutputManager, yoTime,
                                                                               yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 

@@ -79,9 +79,11 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
 /**
  * The objective of this class is to help the passing commands between two instances of the same
@@ -179,12 +181,25 @@ public class CrossRobotCommandResolver
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
-      resolveHumanoidRobotContextDataControllerToEstimator(in, out);
-      resolveHumanoidRobotContextDataEstimatorToController(in, out);
+      resolveHumanoidRobotContextDataScheduler(in, out);
+      resolveHumanoidRobotContextDataController(in, out);
+      resolveHumanoidRobotContextDataEstimator(in, out);
    }
 
-   // TODO: split context up in part that goes from controller to estimator and other way.
-   public void resolveHumanoidRobotContextDataControllerToEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   /**
+    * Resolves only the part of the context data that is updated by the scheduler thread.
+    */
+   public void resolveHumanoidRobotContextDataScheduler(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveSensorDataContext(in.getSensorDataContext(), out.getSensorDataContext());
+      out.setTimestamp(in.getTimestamp());
+      out.setSchedulerTick(in.getSchedulerTick());
+   }
+
+   /**
+    * Resolves only the part of the context data that is updated by the controller thread.
+    */
+   public void resolveHumanoidRobotContextDataController(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
@@ -192,19 +207,37 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
-   // TODO: split context up in part that goes from controller to estimator and other way.
-   public void resolveHumanoidRobotContextDataEstimatorToController(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   /**
+    * Resolves only the part of the context data that is updated by the estimator thread.
+    */
+   public void resolveHumanoidRobotContextDataEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
-      out.setTimestamp(in.getTimestamp());
       out.setEstimatorRan(in.getEstimatorRan());
+
+      // TODO: remove this hack.
+      // Was the easiest way to get Atlas working since it needs additional context information.
+      if (in instanceof AtlasHumanoidRobotContextData && out instanceof AtlasHumanoidRobotContextData)
+      {
+         resolveRawJointSensorDataHolderMap(((AtlasHumanoidRobotContextData) in).getRawJointSensorDataHolderMap(),
+                                            ((AtlasHumanoidRobotContextData) out).getRawJointSensorDataHolderMap());
+      }
    }
 
    public void resolveAtlasHumanoidRobotContextData(AtlasHumanoidRobotContextData in, AtlasHumanoidRobotContextData out)
    {
-      resolveRawJointSensorDataHolderMap(in.getRawJointSensorDataHolderMap(), out.getRawJointSensorDataHolderMap());
       resolveHumanoidRobotContextData(in, out);
+   }
+
+   public void resolveSensorDataContext(SensorDataContext in, SensorDataContext out)
+   {
+      out.set(in);
+   }
+
+   public void resolveImuData(ImuData in, ImuData out)
+   {
+      out.set(in);
    }
 
    public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)

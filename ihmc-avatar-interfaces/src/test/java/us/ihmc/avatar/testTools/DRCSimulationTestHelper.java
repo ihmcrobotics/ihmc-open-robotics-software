@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -153,7 +155,7 @@ public class DRCSimulationTestHelper
 
       defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
       defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
-      
+
       defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class, createPublisherForController(ValkyrieHandFingerTrajectoryMessage.class));
    }
 
@@ -357,14 +359,29 @@ public class DRCSimulationTestHelper
    }
 
    private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+
    public void notifyControllerHasFailed()
    {
       hasControllerFailed.set(true);
       scs.stop();
    }
 
+   public void resetControllerFailure()
+   {
+      if (blockingSimulationRunner != null)
+      { // FIXME Hack to reset controller failure inside the BlockingSimulationRunner.
+         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+         blockingSimulationRunner.createValidDesiredICPListener();
+         blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
+      }
+      hasControllerFailed.set(false);
+   }
+
    public void destroySimulation()
    {
+      if (simulationTestingParameters.getKeepSCSUp())
+         ThreadTools.sleepForever();
+
       if (blockingSimulationRunner != null)
       {
          blockingSimulationRunner.destroySimulation();

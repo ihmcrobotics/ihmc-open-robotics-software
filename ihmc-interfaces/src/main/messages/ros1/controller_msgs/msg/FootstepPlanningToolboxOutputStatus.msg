@@ -10,6 +10,8 @@ int8 FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED=4
 
 int8 FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED=5
 
+int8 FOOTSTEP_PLANNING_RESULT_INVALID_GOAL=6
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -23,13 +25,12 @@ int8 footstep_planning_result
 # Field default value -1
 int32 plan_id
 
-# Field default value -1.0
-float64 time_taken
-
 controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Point[] body_path
 
 geometry_msgs/Pose low_level_planner_goal
+
+controller_msgs/FootstepPlanningStatistics footstep_planning_statistics
 
 

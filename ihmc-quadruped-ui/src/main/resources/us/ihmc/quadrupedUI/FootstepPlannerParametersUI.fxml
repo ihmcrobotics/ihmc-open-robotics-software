@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedFootstepPlanning.ui.controllers.PawStepPlannerParametersUIController">
     <children>
       <HBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -42,15 +42,15 @@
                           <Label text="Expansion project inside distance" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                           <Label text="Post project inside distance" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
                           <Label text="Maximum xy wiggle distance" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
-                          
+
                                 <Label text="Cliff height to avoid" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                           <Label text="Min front forward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                           <Label text="Min front backward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                           <Label text="Min hind forward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                           <Label text="Min hind backward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                           <Label text="Min lateral from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                          
-                                
+
+
 
                           <Label text="Distance weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" />
                           <Label text="Yaw weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
@@ -65,17 +65,16 @@
                           <Spinner fx:id="minXClearanceFromFoot" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                           <Spinner fx:id="minYClearanceFromFoot" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                           <Spinner fx:id="minSurfaceIncline" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                          <Spinner fx:id="projectInsideDistanceForExpansion" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                          <Spinner fx:id="projectInsideDistanceForPostProcessing" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                          <Spinner fx:id="projectInsideDistance" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                           <Spinner fx:id="maximumXYWiggleDistance" editable="true" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                          
+
                                 <Spinner fx:id="cliffHeightToAvoid" editable="true" prefWidth="100.0" GridPane.columnIndex="3" />
                           <Spinner fx:id="minFrontEndForwardDistanceFromCliffBottoms" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                           <Spinner fx:id="minFrontEndBackwardDistanceFromCliffBottoms" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                           <Spinner fx:id="minHindEndForwardDistanceFromCliffBottoms" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                           <Spinner fx:id="minHindEndBackwardDistanceFromCliffBottoms" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                           <Spinner fx:id="minLateralDistanceFromCliffBottoms" editable="true" prefWidth="100.0" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                          
+
 
 
                                 <Spinner fx:id="distanceWeight" editable="true" prefWidth="100.0" GridPane.columnIndex="5" />

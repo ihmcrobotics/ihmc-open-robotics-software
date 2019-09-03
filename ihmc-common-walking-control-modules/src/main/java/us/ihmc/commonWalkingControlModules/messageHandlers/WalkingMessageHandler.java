@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -41,6 +42,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegion
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -68,6 +70,7 @@ public class WalkingMessageHandler
    private static final int maxNumberOfFootsteps = 100;
    private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
    private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
+   private final RecyclingArrayList<FootstepShiftFractions> upcomingFootstepShiftFractions = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepShiftFractions.class);
    private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
 
    private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
@@ -92,8 +95,17 @@ public class WalkingMessageHandler
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
-   private final YoDouble defaultTouchdownTime = new YoDouble("defaultTouchdownTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
+
+   private final YoDouble defaultSwingSplitFraction = new YoDouble("defaultSwingSplitFraction", registry);
+   private final YoDouble defaultSwingDurationShiftFraction = new YoDouble("defaultSwingDurationShiftFraction", registry);
+   private final YoDouble defaultTransferSplitFraction = new YoDouble("defaultTransferSplitFraction", registry);
+   private final YoDouble defaultFinalTransferSplitFraction = new YoDouble("defaultFinalTransferSplitFraction", registry);
+   private final YoDouble finalTransferSplitFraction = new YoDouble("finalTransferSplitFraction", registry);
+
+   private final YoDouble defaultTransferWeightDistribution = new YoDouble("defaultTransferWeightDistribution", registry);
+   private final YoDouble defaultFinalTransferWeightDistribution = new YoDouble("defaultFinalTransferWeightDistribution", registry);
+   private final YoDouble finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
 
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
    private final YoLong lastCommandID = new YoLong("lastFootStepDataListCommandID", registry);
@@ -126,8 +138,9 @@ public class WalkingMessageHandler
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
-                                double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
+                                double defaultSwingDurationShiftFraction, double defaultSwingSplitFraction, double defaultTransferSplitFraction,
+                                double defaultFinalTransferSplitFraction, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                 StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoVariableRegistry parentRegistry)
    {
@@ -138,10 +151,19 @@ public class WalkingMessageHandler
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.defaultSwingTime.set(defaultSwingTime);
-      this.defaultTouchdownTime.set(defaultTouchdownTime);
       this.defaultInitialTransferTime.set(defaultInitialTransferTime);
       this.defaultFinalTransferTime.set(defaultFinalTransferTime);
       this.finalTransferTime.set(defaultFinalTransferTime);
+
+      this.defaultSwingSplitFraction.set(defaultSwingSplitFraction);
+      this.defaultSwingDurationShiftFraction.set(defaultSwingDurationShiftFraction);
+      this.defaultTransferSplitFraction.set(defaultTransferSplitFraction);
+      this.defaultFinalTransferSplitFraction.set(defaultFinalTransferSplitFraction);
+      this.finalTransferSplitFraction.set(defaultFinalTransferSplitFraction);
+
+      defaultTransferWeightDistribution.set(0.5);
+      defaultFinalTransferWeightDistribution.set(0.5);
+      finalTransferWeightDistribution.set(defaultFinalTransferWeightDistribution.getDoubleValue());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -227,7 +249,7 @@ public class WalkingMessageHandler
       lastCommandID.set(command.getCommandId());
 
       if (isWalkingPaused.getValue())
-      { 
+      {
          /*
           * The walking was paused, when paused isWalking remains true. We're
           * receiving a new series of footsteps, let's reset isWalking so the
@@ -253,6 +275,33 @@ public class WalkingMessageHandler
       else
          finalTransferTime.set(defaultFinalTransferTime.getDoubleValue());
 
+      double commandDefaultSwingSplitFraction = command.getDefaultSwingSplitFraction();
+      double commandDefaultSwingDurationShiftFraction = command.getDefaultSwingDurationShiftFraction();
+      double commandDefaultTransferSplitFraction = command.getDefaultTransferSplitFraction();
+      if (!Double.isNaN(commandDefaultSwingSplitFraction) && MathTools.intervalContains(commandDefaultSwingSplitFraction, 0.0, 1.0, false, false))
+         defaultSwingSplitFraction.set(commandDefaultSwingSplitFraction);
+      if (!Double.isNaN(commandDefaultSwingDurationShiftFraction) && MathTools.intervalContains(commandDefaultSwingDurationShiftFraction, 0.0, 1.0, false, false))
+         defaultSwingDurationShiftFraction.set(commandDefaultSwingDurationShiftFraction);
+      if (!Double.isNaN(commandDefaultTransferSplitFraction) && MathTools.intervalContains(commandDefaultTransferSplitFraction, 0.0, 1.0, false, false))
+         defaultTransferSplitFraction.set(commandDefaultTransferSplitFraction);
+
+      double commandFinalTransferSplitFraction = command.getFinalTransferSplitFraction();
+
+      if (commandFinalTransferSplitFraction > 0.0)
+         finalTransferSplitFraction.set(commandFinalTransferSplitFraction);
+      else
+         finalTransferSplitFraction.set(defaultFinalTransferSplitFraction.getDoubleValue());
+
+
+      double commandDefaultTransferWeightDistribution = command.getDefaultTransferWeightDistribution();
+      if (!Double.isNaN(commandDefaultTransferWeightDistribution) && MathTools.intervalContains(commandDefaultTransferWeightDistribution, 0.0, 1.0, false, false))
+         defaultTransferWeightDistribution.set(commandDefaultSwingDurationShiftFraction);
+      double commandFinalTransferWeightDistribution = command.getFinalTransferWeightDistribution();
+      if (!Double.isNaN(commandFinalTransferWeightDistribution) && MathTools.intervalContains(commandFinalTransferSplitFraction, 0.0, 1.0, false, false))
+         finalTransferWeightDistribution.set(commandFinalTransferWeightDistribution);
+      else
+         finalTransferWeightDistribution.set(defaultFinalTransferWeightDistribution.getDoubleValue());
+
       boolean trustHeightOfFootsteps = command.isTrustHeightOfFootsteps();
       boolean areFootstepsAdjustable = command.areFootstepsAdjustable();
 
@@ -260,6 +309,7 @@ public class WalkingMessageHandler
       {
          setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
                            command.getExecutionMode());
+         setFootstepShiftFractions(command.getFootstep(i), upcomingFootstepShiftFractions.add());
          setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
          currentNumberOfFootsteps.increment();
       }
@@ -378,6 +428,24 @@ public class WalkingMessageHandler
    }
 
    /**
+    * This method will set the provided shift fraction to the shift fraction of the {@code i}'th upcoming
+    * footstep. If there is less then {@code i} upcoming steps this method will throw a
+    * {@link RuntimeException}. To check how many footsteps are upcoming use
+    * {@link #getCurrentNumberOfFootsteps()}.
+    *
+    * @param i is the index of the upcoming footstep shift fraction that will be packed.
+    * @param shiftFractionToPack will be set to the shift fraction of footstep i in the list of upcoming steps.
+    */
+   public void peekShiftFraction(int i, FootstepShiftFractions shiftFractionToPack)
+   {
+      if (i >= upcomingFootstepShiftFractions.size())
+      {
+         throw new RuntimeException("Can not get shift fraction " + i + " since there are only " + upcomingFootstepShiftFractions.size() + " upcoming shift fractions.");
+      }
+      shiftFractionToPack.set(upcomingFootstepShiftFractions.get(i));
+   }
+
+   /**
     * This method will set the provided footstep to the {@code i}'th upcoming
     * footstep. If there is less then {@code i} upcoming steps this method will throw a
     * {@link RuntimeException}. To check how many footsteps are upcoming use
@@ -404,7 +472,7 @@ public class WalkingMessageHandler
     * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
     * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
     */
-   public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
+   public void poll(Footstep footstepToPack, FootstepTiming timingToPack, FootstepShiftFractions shiftFractions)
    {
       if (getStepsBeforePause() == 0)
       {
@@ -413,6 +481,7 @@ public class WalkingMessageHandler
 
       footstepToPack.set(upcomingFootsteps.get(0));
       timingToPack.set(upcomingFootstepTimings.get(0));
+      shiftFractions.set(upcomingFootstepShiftFractions.get(0));
       lastTimingExecuted.set(upcomingFootstepTimings.get(0));
 
       updateVisualization();
@@ -420,6 +489,7 @@ public class WalkingMessageHandler
       currentFootstepIndex.increment();
 
       upcomingFootstepTimings.remove(0);
+      upcomingFootstepShiftFractions.remove(0);
       pauseDurationAfterStep.remove(0);
       upcomingFootsteps.remove(0);
    }
@@ -431,13 +501,13 @@ public class WalkingMessageHandler
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTiming(double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
+   public void adjustTiming(double newSwingDuration, double newTransferDuration)
    {
       if (upcomingFootstepTimings.isEmpty())
       {
          throw new RuntimeException("Can not adjust timing of upciming step - have no steps.");
       }
-      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
+      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -729,18 +799,6 @@ public class WalkingMessageHandler
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
 
-   public double getDefaultTouchdownTime()
-   {
-      return defaultTouchdownTime.getDoubleValue();
-   }
-
-   public double getNextTouchdownDuration()
-   {
-      if (upcomingFootstepTimings.isEmpty())
-         return getDefaultTouchdownTime();
-      return upcomingFootstepTimings.get(0).getTouchdownDuration();
-   }
-
    public double getInitialTransferTime()
    {
       return defaultInitialTransferTime.getDoubleValue();
@@ -749,6 +807,31 @@ public class WalkingMessageHandler
    public double getFinalTransferTime()
    {
       return finalTransferTime.getDoubleValue();
+   }
+
+   public double getDefaultSwingDurationShiftFraction()
+   {
+      return defaultSwingDurationShiftFraction.getDoubleValue();
+   }
+
+   public double getDefaultSwingSplitFraction()
+   {
+      return defaultSwingSplitFraction.getDoubleValue();
+   }
+
+   public double getDefaultTransferSplitFraction()
+   {
+      return defaultTransferSplitFraction.getDoubleValue();
+   }
+
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction.getDoubleValue();
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution.getDoubleValue();
    }
 
    public double getDefaultStepTime()
@@ -842,6 +925,31 @@ public class WalkingMessageHandler
       footstepToSet.addOffset(planOffsetInWorld);
    }
 
+   private void setFootstepShiftFractions(FootstepDataCommand footstepData, FootstepShiftFractions shiftFractionsToSet)
+   {
+      double swingDurationShiftFraction = footstepData.getSwingDurationShiftFraction();
+      double swingSplitFraction = footstepData.getSwingSplitFraction();
+      double transferSplitFraction = footstepData.getTransferSplitFraction();
+
+      if (Double.isNaN(transferSplitFraction) || !MathTools.intervalContains(transferSplitFraction, 0.0, 1.0, false, false))
+         transferSplitFraction = defaultTransferSplitFraction.getDoubleValue();
+
+      if (Double.isNaN(swingSplitFraction) || !MathTools.intervalContains(swingSplitFraction, 0.0, 1.0, false, false))
+         swingSplitFraction = defaultSwingSplitFraction.getDoubleValue();
+
+      if (Double.isNaN(swingDurationShiftFraction) || !MathTools.intervalContains(swingDurationShiftFraction, 0.0, 1.0, false, false))
+         swingDurationShiftFraction = defaultSwingDurationShiftFraction.getDoubleValue();
+
+      shiftFractionsToSet.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
+
+      double transferWeightDistribution = footstepData.getTransferWeightDistribution();
+
+      if (Double.isNaN(transferWeightDistribution) || !MathTools.intervalContains(transferWeightDistribution, 0.0, 1.0))
+         transferWeightDistribution = defaultTransferWeightDistribution.getDoubleValue();
+
+      shiftFractionsToSet.setTransferWeightDistribution(transferWeightDistribution);
+   }
+
    private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
                                   ExecutionMode executionMode)
    {
@@ -863,13 +971,10 @@ public class WalkingMessageHandler
             transferDuration = defaultTransferTime.getDoubleValue();
       }
 
-      double touchdownDuration = footstep.getTouchdownDuration();
-      if (Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
-      {
-         touchdownDuration = defaultTouchdownTime.getDoubleValue();
-      }
 
-      timingToSet.setTimings(swingDuration, touchdownDuration, transferDuration);
+      timingToSet.setTimings(swingDuration, transferDuration);
+      timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());
+      timingToSet.setLiftoffDuration(footstep.getLiftoffDuration());
 
       switch (executionTiming)
       {

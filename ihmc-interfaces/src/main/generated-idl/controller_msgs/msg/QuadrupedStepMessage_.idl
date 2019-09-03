@@ -20,7 +20,23 @@ module controller_msgs
       const octet HIND_LEFT =
       3;
 
+      const octet TRAJECTORY_TYPE_DEFAULT =
+      0;
 
+      const octet TRAJECTORY_TYPE_OBSTACLE_CLEARANCE =
+      1;
+
+      const octet TRAJECTORY_TYPE_CUSTOM =
+      2;
+
+      const octet TRAJECTORY_TYPE_WAYPOINTS =
+      3;
+
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message is used to switch the control scheme between different stepping modes.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::QuadrupedStepMessage_")
       struct QuadrupedStepMessage
       {
@@ -28,10 +44,28 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Specifies the quadrant of the foot to swing.
+         */
         @defaultValue(value=255)
         octet robot_quadrant;
+        /**
+         * Specifies the world-frame touchdown position of the step
+         */
         geometry_msgs::msg::dds::Point goal_position;
+        /**
+         * Specifies the height of the swing trajectory.
+         * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+         */
+        @defaultValue(value=-1.0)
         double ground_clearance;
+        /**
+         * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
+         * TRAJECTORY_TYPE_CUSTOM and TRAJECTORY_TYPE_WAYPOINTS are currently not supported. If a trajectory type is not set,
+         * the controller uses either TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
+         */
+        @defaultValue(value=255)
+        octet trajectory_type;
       };
     };
   };

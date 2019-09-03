@@ -16,8 +16,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -28,7 +28,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final GoHomeBehavior armGoHomeLeftBehavior;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    public enum BasicStates
    {
@@ -41,7 +41,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
                                 HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(robotName, ros2Node);
       clearLidarBehavior = new ClearLidarBehavior(robotName, ros2Node);
       walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel,
@@ -87,10 +87,10 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          }
 
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
 
-            super.doTransitionOutOfAction();
+            super.onExit();
             currentState = BasicStates.BEHAVIOR_COMPLETE;
 
          }

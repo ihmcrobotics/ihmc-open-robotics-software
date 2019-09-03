@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * This interface is part of the API of {@link ContinuousStepGenerator}.
@@ -13,9 +14,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 public interface FootstepValidityIndicator
 {
    /**
-    * Checks if the given pose is steppable.
+    * Checks if the given touchdown pose is steppable given the stance pose.
     *
-    * @param solePose footstep to check
+    * @param touchdownPose touchdown pose of the step
+    * @param stanceFootPose stance pose of the step
+    * @param robotSide side of the swing foot
     */
-   boolean isFootstepValid(FramePose3DReadOnly solePose);
+   boolean isFootstepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stanceFootPose, RobotSide robotSide);
 }

@@ -57,6 +57,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    protected final SixDoFJoint rootJoint;
    private final RigidBodyBasics rootLink;
    private final LinkedHashMap<String, OneDoFJointBasics> oneDoFJoints = new LinkedHashMap<String, OneDoFJointBasics>();
+   private final OneDoFJointBasics[] oneDoFJointsAsArray;
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
@@ -119,6 +120,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
       {
          addJointsRecursively((OneDoFJointDescription) jointDescription, rootLink);
       }
+
+      oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
+      oneDoFJoints.values().toArray(oneDoFJointsAsArray);
    }
 
    @Override
@@ -238,8 +242,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
    @Override
    public OneDoFJointBasics[] getOneDoFJoints()
    {
-      OneDoFJointBasics[] oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
-      oneDoFJoints.values().toArray(oneDoFJointsAsArray);
       return oneDoFJointsAsArray;
    }
 

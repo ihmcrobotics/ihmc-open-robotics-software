@@ -17,6 +17,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 
    public AtlasBehaviorDispatcherTest()
    {
+      
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
    }
 
@@ -31,7 +32,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
+   
    @Override
    @Test
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException

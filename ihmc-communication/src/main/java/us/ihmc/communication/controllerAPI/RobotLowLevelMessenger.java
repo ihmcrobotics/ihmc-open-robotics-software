@@ -10,4 +10,9 @@ public interface RobotLowLevelMessenger
    {
       throw new RuntimeException("Robot shutdown request is not implemented.");
    }
+
+   default void setHydraulicPumpPSI(int psi)
+   {
+      throw new RuntimeException("Robot pump PSI request is not implemented.");
+   }
 }

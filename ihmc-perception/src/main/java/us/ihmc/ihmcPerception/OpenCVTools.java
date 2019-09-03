@@ -17,7 +17,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class OpenCVTools
 {
-   public static final String OPEN_CV_LIBRARY_NAME = "opencv_java320";
+   public static final String OPEN_CV_LIBRARY_NAME = "jniopencv_core";
    
    public static Mat convertBufferedImageToMat(BufferedImage image)
    {

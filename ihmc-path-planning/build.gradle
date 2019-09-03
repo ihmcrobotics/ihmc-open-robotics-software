@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.16.5"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -15,11 +16,11 @@ ihmc {
 mainDependencies {
    compile group: "org.jgrapht", name: "jgrapht-core", version: "0.9.0"
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.11.0"
-   compile group: "us.ihmc", name: "euclid-shape", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
+   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
+   compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
 }
@@ -28,17 +29,18 @@ visualizersDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("data-sets")
 
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
    compile ihmc.sourceSetProject("data-sets")
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
@@ -46,7 +48,7 @@ testDependencies {
 dataSetsDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
 }
@@ -58,7 +60,7 @@ task updateDataSetList {
       def className = "DataSetName"
 
       def dataSetDir = new File(resourcesDir)
-      def dataSetList = files { dataSetDir.listFiles() }
+      def dataSetList = files { dataSetDir.listFiles().sort().reverse() }
 
       File classFile = new File(srcDir + "/" + className + ".java")
       println classFile.getAbsolutePath()
