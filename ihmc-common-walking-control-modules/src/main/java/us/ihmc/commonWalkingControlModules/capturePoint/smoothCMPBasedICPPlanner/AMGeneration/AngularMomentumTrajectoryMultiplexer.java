@@ -36,7 +36,20 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
                                                boolean debug, YoVariableRegistry parentRegistry)
    {
-      predictedAngularMomentum = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, maxNumberOfStepsToConsider, registry);
+      this(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, true, parentRegistry);
+   }
+
+   public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
+                                               boolean debug, boolean createAngularMomentumPredictor, YoVariableRegistry parentRegistry)
+   {
+      if (createAngularMomentumPredictor)
+      {
+         predictedAngularMomentum = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, maxNumberOfStepsToConsider, registry);
+      }
+      else
+      {
+         predictedAngularMomentum = null;
+      }
 
       if (momentumTrajectoryHandler == null)
       {
@@ -56,7 +69,10 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    @Override
    public void clear()
    {
-      predictedAngularMomentum.clear();
+      if (predictedAngularMomentum != null)
+      {
+         predictedAngularMomentum.clear();
+      }
 
       if (commandedAngularMomentum != null)
       {
@@ -68,7 +84,10 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    {
       planSwingAngularMomentum = icpPlannerParameters.planSwingAngularMomentum();
       planTransferAngularMomentum = icpPlannerParameters.planTransferAngularMomentum();
-      predictedAngularMomentum.initializeParameters(icpPlannerParameters, totalMass, gravityZ);
+      if (predictedAngularMomentum != null)
+      {
+         predictedAngularMomentum.initializeParameters(icpPlannerParameters, totalMass, gravityZ);
+      }
 
       if (commandedAngularMomentum != null)
       {
@@ -79,51 +98,88 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    @Override
    public void update(double currentTime)
    {
-      currentAngularMomentumTrajectoryGenerator.update(currentTime);
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.update(currentTime);
+      }
    }
 
    @Override
    public void getDesiredAngularMomentum(FixedFrameVector3DBasics desiredAngMomToPack, FixedFrameVector3DBasics desiredTorqueToPack)
    {
-      currentAngularMomentumTrajectoryGenerator.getDesiredAngularMomentum(desiredAngMomToPack, desiredTorqueToPack);
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.getDesiredAngularMomentum(desiredAngMomToPack, desiredTorqueToPack);
+      }
+      else
+      {
+         desiredAngMomToPack.setToZero();
+         desiredTorqueToPack.setToZero();
+      }
    }
 
    @Override
    public void initializeForDoubleSupport(double currentTime, boolean isStanding)
    {
-      currentAngularMomentumTrajectoryGenerator.initializeForDoubleSupport(currentTime, isStanding);
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.initializeForDoubleSupport(currentTime, isStanding);
+      }
    }
 
    @Override
    public void initializeForSingleSupport(double currentTime)
    {
-      currentAngularMomentumTrajectoryGenerator.initializeForSingleSupport(currentTime);
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.initializeForSingleSupport(currentTime);
+      }
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean initialTransfer, boolean standing)
    {
       updateCurrentAngularMomentumTrajectoryGenerator();
-      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(initialTransfer, standing);
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(initialTransfer, standing);
+      }
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
       updateCurrentAngularMomentumTrajectoryGenerator();
-      currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         currentAngularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
+      }
    }
 
    @Override
    public List<AngularMomentumTrajectory> getTransferAngularMomentumTrajectories()
    {
-      return currentAngularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories();
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
+         return currentAngularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
    public List<AngularMomentumTrajectory> getSwingAngularMomentumTrajectories()
    {
+      if (currentAngularMomentumTrajectoryGenerator != null)
+      {
       return currentAngularMomentumTrajectoryGenerator.getSwingAngularMomentumTrajectories();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
@@ -133,13 +189,28 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
                                            List<? extends FrameVector3DReadOnly> comInitialAccelerations,
                                            List<? extends FrameVector3DReadOnly> comFinalAccelerations, int numberOfRegisteredFootsteps)
    {
-      predictedAngularMomentum.addCopAndComSetpointsToPlan(copLocations, comInitialPositions, comFinalPositions, comInitialVelocities, comFinalVelocities,
-                                                           comInitialAccelerations, comFinalAccelerations, numberOfRegisteredFootsteps);
+      if (predictedAngularMomentum != null)
+      {
+         predictedAngularMomentum.addCopAndComSetpointsToPlan(copLocations,
+                                                              comInitialPositions,
+                                                              comFinalPositions,
+                                                              comInitialVelocities,
+                                                              comFinalVelocities,
+                                                              comInitialAccelerations,
+                                                              comFinalAccelerations,
+                                                              numberOfRegisteredFootsteps);
+      }
 
       if (commandedAngularMomentum != null)
       {
-         commandedAngularMomentum.addCopAndComSetpointsToPlan(copLocations, comInitialPositions, comFinalPositions, comInitialVelocities, comFinalVelocities,
-                                                              comInitialAccelerations, comFinalAccelerations, numberOfRegisteredFootsteps);
+         commandedAngularMomentum.addCopAndComSetpointsToPlan(copLocations,
+                                                              comInitialPositions,
+                                                              comFinalPositions,
+                                                              comInitialVelocities,
+                                                              comFinalVelocities,
+                                                              comInitialAccelerations,
+                                                              comFinalAccelerations,
+                                                              numberOfRegisteredFootsteps);
       }
    }
 
