@@ -27,6 +27,10 @@ geometry_msgs/Point goal_position_in_world
 geometry_msgs/Quaternion goal_orientation_in_world
 # Footstep planner type, see above
 byte requested_footstep_planner_type 255
+# Acceptable xy distance from the given goal for the planner to terminate
+float64 goal_distance_proximity -1.0
+# Acceptable yaw offset from the given goal for the planner to terminate
+float64 goal_yaw_proximity -1.0
 # Timeout in seconds
 float64 timeout
 # Max body path length if using body path

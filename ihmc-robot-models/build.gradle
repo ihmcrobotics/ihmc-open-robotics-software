@@ -1,6 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.16.5"
    id("us.ihmc.ihmc-ci") version "4.25"
+   id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -16,10 +17,10 @@ mainDependencies {
    compile group: "javax.vecmath", name: "vecmath", version: "1.5.2"
    compile group: "com.google.guava", name: "guava", version: "18.0"
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
@@ -33,5 +34,5 @@ visualizersDependencies {
    compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
 }

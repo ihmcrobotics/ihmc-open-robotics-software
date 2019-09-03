@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -7,25 +8,24 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
-import javax.tools.Tool;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
@@ -34,13 +34,11 @@ public class RemoteQuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
-   private final YoBoolean walking = new YoBoolean("walking", registry);
    private final Ros2Node ros2Node;
-
-   private final AtomicBoolean paused = new AtomicBoolean(false);
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 
    private final IHMCROS2Publisher<HighLevelStateMessage> controllerStatePublisher;
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
@@ -50,28 +48,28 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingMessagePublisher;
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingMessagePublisher;
    private final IHMCROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingMessagePublisher;
+   private final IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
+   private final IHMCROS2Publisher<QuadrupedBodyTrajectoryMessage> bodyPosePublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
-   private final IHMCROS2Publisher<QuadrupedTeleopDesiredHeight> desiredHeightPublisher;
-   private final IHMCROS2Publisher<QuadrupedTeleopDesiredPose> desiredPosePublisher;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> stepTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> bodyTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> heightTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> footstepPlannerStatePublisher;
+   private final IHMCROS2Publisher<ToolboxStateMessage> pawPlannerStatePublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListTeleopPublisher;
    private final IHMCROS2Publisher<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
 
    private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
-   private final IHMCROS2Publisher<QuadrupedFootstepPlanningRequestPacket> planningRequestPublisher;
+   private final IHMCROS2Publisher<PawStepPlanningRequestPacket> planningRequestPublisher;
 
+   private final AtomicDouble timestamp = new AtomicDouble();
+   private final QuadrupedRobotDataReceiver robotDataReceiver;
    private final QuadrupedNetworkProcessor networkProcessor;
    private final String robotName;
 
    public RemoteQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
-                                       QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
+                                       FullQuadrupedRobotModel robotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
@@ -83,15 +81,12 @@ public class RemoteQuadrupedTeleopManager
                                            s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
                                            s -> steppingStateChangeMessage.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> paused.set(true));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       MessageTopicNameGenerator stepTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator footstepPlannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                                     ROS2Tools.ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator heightTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_TELEOP_TOOLBOX,
-                                                                                 ROS2Tools.ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator bodyTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.BODY_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
@@ -101,26 +96,24 @@ public class RemoteQuadrupedTeleopManager
       pauseWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
       abortWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
       loadBearingMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
+      bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
+      bodyPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
-      desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
-      desiredHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopSubGenerator);
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
-      heightTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopSubGenerator);
-      bodyTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopSubGenerator);
-      footstepPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
+      pawPlannerStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
       planarRegionsListTeleopPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
       stepXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubGenerator);
       bodyPathPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopSubGenerator);
 
       plannerXGaitSettingsPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedXGaitSettingsPacket.class, footstepPlannerSubGenerator);
-      planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepPlanningRequestPacket.class, footstepPlannerSubGenerator);
+      planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, PawStepPlanningRequestPacket.class, footstepPlannerSubGenerator);
+
+      robotDataReceiver = new QuadrupedRobotDataReceiver(robotModel, null);
 
       parentRegistry.addChild(registry);
-
-      initialize();
    }
 
    public String getRobotName()
@@ -144,16 +137,10 @@ public class RemoteQuadrupedTeleopManager
       plannerXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
    }
 
-   public void publishPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
+   public void publishPlanningRequest(PawStepPlanningRequestPacket packet)
    {
-      footstepPlannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+      pawPlannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
       planningRequestPublisher.publish(packet);
-   }
-
-   public void initialize()
-   {
-      heightTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
    }
 
    public void setDesiredVelocity(double desiredVelocityX, double desiredVelocityY, double desiredVelocityZ)
@@ -188,15 +175,7 @@ public class RemoteQuadrupedTeleopManager
 
    private void requestStopWalking()
    {
-      QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
-      steppingMessage.setQuadrupedSteppingRequestedEvent(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
-      steppingStatePublisher.publish(steppingMessage);
-   }
-
-   public void requestBodyTeleop()
-   {
-      heightTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-      bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+      abortWalkingMessagePublisher.publish(new AbortWalkingMessage());
    }
 
    public void requestXGait()
@@ -212,23 +191,37 @@ public class RemoteQuadrupedTeleopManager
 
    public void setDesiredBodyHeight(double desiredBodyHeight)
    {
-      desiredHeightPublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredHeight(desiredBodyHeight));
+      updateRobotModel();
+
+      ReferenceFrame bodyHeightFrame = robotDataReceiver.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      FramePoint3D bodyHeight = new FramePoint3D(bodyHeightFrame, 0.0, 0.0, desiredBodyHeight);
+      bodyHeight.changeFrame(ReferenceFrame.getWorldFrame());
+
+      QuadrupedBodyHeightMessage bodyHeightMessage = QuadrupedMessageTools.createQuadrupedBodyHeightMessage(0.0, bodyHeight.getZ());
+      bodyHeightMessage.setControlBodyHeight(true);
+      bodyHeightMessage.setIsExpressedInAbsoluteTime(false);
+
+      bodyHeightPublisher.publish(bodyHeightMessage);
    }
 
-   public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
+   public void setDesiredBodyOrientation(double desiredYaw, double desiredPitch, double desiredRoll, double time)
    {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(yaw, pitch, roll, time));
-   }
+      updateRobotModel();
 
-   public void setDesiredBodyTranslation(double x, double y, double time)
-   {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, time));
-   }
+      QuadrupedBodyTrajectoryMessage bodyTrajectoryMessage = new QuadrupedBodyTrajectoryMessage();
+      SE3TrajectoryMessage se3Trajectory = bodyTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      se3Trajectory.getAngularSelectionMatrix().setXSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setYSelected(true);
+      se3Trajectory.getAngularSelectionMatrix().setZSelected(true);
+      se3Trajectory.getLinearSelectionMatrix().setXSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setYSelected(false);
+      se3Trajectory.getLinearSelectionMatrix().setZSelected(false);
+      SE3TrajectoryPointMessage trajectoryPointMessage = se3Trajectory.getTaskspaceTrajectoryPoints().add();
+      trajectoryPointMessage.getOrientation().setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
+      trajectoryPointMessage.setTime(time + timestamp.get());
 
-
-   public void setDesiredBodyPose(double x, double y, double yaw, double pitch, double roll, double time)
-   {
-      desiredPosePublisher.publish(QuadrupedMessageTools.createQuadrupedTeleopDesiredPose(x, y, yaw, pitch, roll, time));
+      bodyPosePublisher.publish(bodyTrajectoryMessage);
    }
 
    public void submitPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -369,6 +362,17 @@ public class RemoteQuadrupedTeleopManager
          }
       }
       publishXGaitSettings(xGaitSettings);
+   }
+
+   private void updateRobotModel()
+   {
+      RobotConfigurationData robotConfigurationData = this.robotConfigurationData.getAndSet(null);
+      if(robotConfigurationData != null)
+      {
+         robotDataReceiver.receivedPacket(robotConfigurationData);
+         robotDataReceiver.updateRobotModel();
+         timestamp.set(1e-9 * robotConfigurationData.getMonotonicTime());
+      }
    }
 
    public void setShiftPlanBasedOnStepAdjustment(boolean shift)

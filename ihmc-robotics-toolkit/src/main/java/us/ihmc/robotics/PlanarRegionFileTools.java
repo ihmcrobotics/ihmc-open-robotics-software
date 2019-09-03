@@ -267,6 +267,12 @@ public class PlanarRegionFileTools
    private static PlanarRegionsList importPlanarRegionDataInternalForTests(ReaderCreator readerCreator) throws IOException
    {
       BufferedReader headerFile = readerCreator.createReader("header.txt");
+      if (headerFile == null)
+      {
+         LogTools.error("Could not find header file for planar region!");
+         return null;
+      }
+
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       while (true)

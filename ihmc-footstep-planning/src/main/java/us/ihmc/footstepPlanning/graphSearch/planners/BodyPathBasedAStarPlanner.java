@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
@@ -37,16 +37,15 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    private final BodyPathHeuristics heuristics;
    private final YoDouble planningHorizonLength;
 
-   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParameters parameters,
+   private FootstepPlannerGoal highLevelGoal;
+
+   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanner bodyPathPlanner, FootstepPlannerParametersReadOnly parameters,
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
                                     BipedalFootstepPlannerListener... listeners)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
-
-
-      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, this.bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
@@ -60,6 +59,8 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       costBuilder.setIncludePitchAndRollCost(false);
 
       FootstepCost footstepCost = costBuilder.buildCost();
+
+      heuristics = new BodyPathHeuristics(heuristicWeight, parameters, snapper, this.bodyPathPlanner);
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
@@ -99,6 +100,7 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      highLevelGoal = goal;
    }
 
    @Override
@@ -143,6 +145,11 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
       FramePose3D footstepPlannerGoal = new FramePose3D();
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
       footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+
+      if (alpha >= 1.0)
+      {
+         footstepPlannerGoal.setOrientation(highLevelGoal.getGoalPoseBetweenFeet().getOrientation());
+      }
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);

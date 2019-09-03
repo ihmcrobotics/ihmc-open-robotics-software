@@ -6,16 +6,16 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.ui.components.FootstepPlannerParametersProperty;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class FootstepPlannerCostsUIController
 {
    private JavaFXMessager messager;
-   private final FootstepPlannerParametersProperty property = new FootstepPlannerParametersProperty(this, "footstepPlannerCostParametersProperty");
+   private FootstepPlannerParametersBasics planningParameters;
+
 
    @FXML
    private CheckBox useQuadraticHeightCost;
@@ -48,9 +48,9 @@ public class FootstepPlannerCostsUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlannerParameters parameters)
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
-      property.setPlannerParameters(parameters);
+      this.planningParameters = parameters;
    }
 
    public void setupControls()
@@ -72,40 +72,34 @@ public class FootstepPlannerCostsUIController
    {
       setupControls();
 
-      property.bidirectionalBindUseQuadraticDistanceCost(useQuadraticDistanceCost.selectedProperty());
-      property.bidirectionalBindUseQuadraticHeightCost(useQuadraticHeightCost.selectedProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap.put(useQuadraticDistanceCost, FootstepPlannerParameterKeys.useQuadraticDistanceCost);
+      javaFXStoredPropertyMap.put(useQuadraticHeightCost, FootstepPlannerParameterKeys.useQuadraticHeightCost);
+      javaFXStoredPropertyMap.put(costPerStep, FootstepPlannerParameterKeys.costPerStep);
+      javaFXStoredPropertyMap.put(aStarHeuristicsWeight, FootstepPlannerParameterKeys.aStarHeuristicsWeight);
+      javaFXStoredPropertyMap.put(yawWeight, FootstepPlannerParameterKeys.yawWeight);
+      javaFXStoredPropertyMap.put(pitchWeight, FootstepPlannerParameterKeys.pitchWeight);
+      javaFXStoredPropertyMap.put(rollWeight, FootstepPlannerParameterKeys.rollWeight);
+      javaFXStoredPropertyMap.put(forwardWeight, FootstepPlannerParameterKeys.forwardWeight);
+      javaFXStoredPropertyMap.put(lateralWeight, FootstepPlannerParameterKeys.lateralWeight);
+      javaFXStoredPropertyMap.put(stepUpWeight, FootstepPlannerParameterKeys.stepUpWeight);
+      javaFXStoredPropertyMap.put(stepDownWeight, FootstepPlannerParameterKeys.stepDownWeight);
 
-      property.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
-      property.bidirectionalBindAStarHeuristicsWeight(aStarHeuristicsWeight.getValueFactory().valueProperty());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v ->
+      {
+         planningParameters.set(v);
 
-      property.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindPitchWeight(pitchWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindRollWeight(rollWeight.getValueFactory().valueProperty());
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
 
-      property.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
-      property.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, property, createConverter(), true);
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
    }
 
-   private PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters> createConverter()
+   private void publishParameters()
    {
-      return new PropertyToMessageTypeConverter<FootstepPlannerParameters, SettableFootstepPlannerParameters>()
-      {
-         @Override
-         public FootstepPlannerParameters convert(SettableFootstepPlannerParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableFootstepPlannerParameters interpret(FootstepPlannerParameters messageContent)
-         {
-            return new SettableFootstepPlannerParameters(messageContent);
-         }
-      };
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createLowWeightValueFactory()

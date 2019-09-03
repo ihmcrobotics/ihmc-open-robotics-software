@@ -6,6 +6,8 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -995,5 +998,51 @@ public class GeometryTools
                                                                                                              rotatationAxis);
    
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
+   }
+
+   /**
+    * Creates a 3D Euclid Box (a Shape) out of a 3D Bounding Box.
+    *
+    * Allocates a new Box3D.
+    *
+    * @param boundingBox
+    * @return box
+    */
+   public static Box3D convertBoundingBox3DToBox3D(BoundingBox3DReadOnly boundingBox)
+   {
+      Point3DReadOnly minPoint = boundingBox.getMinPoint();
+      Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
+
+      Point3D boxCenter = new Point3D();
+      boxCenter.interpolate(minPoint, maxPoint, 0.5);
+      Vector3D size = new Vector3D();
+      size.sub(maxPoint, minPoint);
+
+      return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
+   }
+
+   /**
+    * Finds the intersection of two bounding boxes defined by a bounding box
+    *
+    * Allocates a new BoundingBox2D.
+    *
+    * TODO: Check, Unit test, move where BoundingBox union is, and implement for BoundingBox3D.
+    *
+    * @param a
+    * @param b
+    * @return the intersection bounding box, or null if no intersection
+    */
+   public static BoundingBox2D getIntersectionOfTwoBoundingBoxes(BoundingBox2D a, BoundingBox2D b)
+   {
+      double maxX = Math.min(a.getMaxX(), b.getMaxX());
+      double maxY = Math.min(a.getMaxY(), b.getMaxY());
+      double minX = Math.max(a.getMinX(), b.getMinX());
+      double minY = Math.max(a.getMinY(), b.getMinY());
+
+      if ((maxX <= minX) || (maxY <= minY))
+         return null;
+
+      BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
+      return  intersection;
    }
 }

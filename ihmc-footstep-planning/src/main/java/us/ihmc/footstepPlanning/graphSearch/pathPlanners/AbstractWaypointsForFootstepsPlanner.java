@@ -8,9 +8,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,7 +26,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    protected final YoEnum<FootstepPlanningResult> yoResult;
 
-   protected final FootstepPlannerParameters parameters;
+   protected final FootstepPlannerParametersReadOnly parameters;
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 
@@ -35,12 +34,12 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    protected PlanarRegionsList planarRegionsList;
 
-   public AbstractWaypointsForFootstepsPlanner(FootstepPlannerParameters parameters, YoVariableRegistry registry)
+   public AbstractWaypointsForFootstepsPlanner(FootstepPlannerParametersReadOnly parameters, YoVariableRegistry registry)
    {
       this("", parameters, registry);
    }
 
-   public AbstractWaypointsForFootstepsPlanner(String prefix, FootstepPlannerParameters parameters, YoVariableRegistry registry)
+   public AbstractWaypointsForFootstepsPlanner(String prefix, FootstepPlannerParametersReadOnly parameters, YoVariableRegistry registry)
    {
       this.parameters = parameters;
 
@@ -70,7 +69,6 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
 
    public void setGoal(FootstepPlannerGoal goal)
    {
-      AStarFootstepPlanner.checkGoalType(goal);
       FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
       bodyGoalPose.setIncludingFrame(goalPose);
    }

@@ -30,7 +30,6 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -38,6 +37,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.JointAxisVisualizer;
@@ -64,37 +64,41 @@ public class AvatarControllerThread
 
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
 
-   private final YoDouble controllerTime = new YoDouble("controllerTime", registry);
-   private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
-   private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
+   private final YoDouble controllerTime = new YoDouble("ControllerTime", registry);
+   private final YoLong timestampOffset = new YoLong("TimestampOffsetController", registry);
+   private final YoLong timestamp = new YoLong("TimestampController", registry);
+   private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
+   private final YoBoolean runController = new YoBoolean("RunController", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
-   private final LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final DRCOutputProcessor outputProcessor;
-
    private final ModularRobotController robotController;
-
-   private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
-
-   private final YoBoolean runController = new YoBoolean("runController", registry);
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
-   private final HumanoidRobotContextJointData processedJointData;
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    public AvatarControllerThread(String robotName, DRCRobotModel robotModel, HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
    {
-      this.outputProcessor = outputProcessor;
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
-      processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
+      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
+      ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
+      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
+      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
+      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
+      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
+      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setProcessedJointData(processedJointData);
+      contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
+      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       crashNotificationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
@@ -108,36 +112,25 @@ public class AvatarControllerThread
          fullRobotModelCorruptor = null;
       }
 
-      ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
-      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
 
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
-      desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
                                                   forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator, sensorInformation,
                                                   desiredJointDataHolder, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
-      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
 
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
       if (outputProcessor != null)
       {
-         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, desiredJointDataHolder);
+         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
-
-      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
-      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
-      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
-      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
-      contextDataFactory.setProcessedJointData(processedJointData);
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters<RobotSide> robotModel,
@@ -257,8 +250,11 @@ public class AvatarControllerThread
       return inverseDynamicsStructure;
    }
 
-   public void read()
+   public void initialize()
    {
+      firstTick.set(true);
+      humanoidRobotContextData.setControllerRan(false);
+      humanoidRobotContextData.setEstimatorRan(false);
    }
 
    public void run()
@@ -271,52 +267,29 @@ public class AvatarControllerThread
 
       try
       {
-         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, processedJointData);
-         controllerTimestamp.set(humanoidRobotContextData.getTimestamp());
-         controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
+         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotContextData.getProcessedJointData());
+         timestamp.set(humanoidRobotContextData.getTimestamp());
+         if (firstTick.getValue())
+         {
+            // Record this to have time start at 0.0 on the real robot for viewing pleasure.
+            timestampOffset.set(timestamp.getValue());
+         }
+         controllerTime.set(Conversions.nanosecondsToSeconds(timestamp.getValue() - timestampOffset.getValue()));
 
-         if (firstTick.getBooleanValue())
+         if (firstTick.getValue())
          {
             robotController.initialize();
-            if (outputProcessor != null)
-            {
-               outputProcessor.initialize();
-            }
             firstTick.set(false);
          }
 
-         controllerTimer.startMeasurement();
          robotController.doControl();
          humanoidRobotContextData.setControllerRan(true);
-         controllerTimer.stopMeasurement();
       }
       catch (Exception e)
       {
          crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e.getMessage()));
 
          throw new RuntimeException(e);
-      }
-   }
-
-   public void write()
-   {
-      if (!runController.getValue())
-      {
-         return;
-      }
-
-      try
-      {
-         if (outputProcessor != null)
-         {
-            outputProcessor.processAfterController(controllerTimestamp.getLongValue());
-         }
-      }
-      catch (Exception e)
-      {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_WRITE, e.getMessage()));
-         throw new RuntimeException(e);
-
       }
    }
 
@@ -352,7 +325,7 @@ public class AvatarControllerThread
 
    public JointDesiredOutputListBasics getDesiredJointDataHolder()
    {
-      return desiredJointDataHolder;
+      return humanoidRobotContextData.getJointDesiredOutputList();
    }
 
 }

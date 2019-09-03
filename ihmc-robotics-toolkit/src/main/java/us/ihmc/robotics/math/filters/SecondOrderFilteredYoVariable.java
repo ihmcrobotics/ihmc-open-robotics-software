@@ -81,12 +81,14 @@ public class SecondOrderFilteredYoVariable extends YoDouble implements Processin
       reset();
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);
       computeCoefficients();
    }
 
+   @Override
    public void update()
    {
       if (inputVariable == null)

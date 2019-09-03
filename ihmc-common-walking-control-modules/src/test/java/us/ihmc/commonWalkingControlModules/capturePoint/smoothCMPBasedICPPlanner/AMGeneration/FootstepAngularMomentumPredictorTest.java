@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,12 @@ import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimat
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -95,12 +92,13 @@ public class FootstepAngularMomentumPredictorTest
                                                                                        new FrameVector3D());
    private final List<YoDouble> swingDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> transferDurations = new ArrayList<YoDouble>();
-   private final List<YoDouble> touchdownDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> swingSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> transferSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> swingShiftFractions = new ArrayList<YoDouble>();
+   private final List<YoDouble> transferWeightDistributions = new ArrayList<>();
    private final List<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
+   private final YoDouble percentageChickenSupport = new YoDouble("percentageChickenSupport", testRegistry);
    // Some variables for setters, getters and intermediate computations
    private final FramePoint3D tempFramePoint1 = new FramePoint3D(), tempFramePoint2 = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
@@ -166,9 +164,6 @@ public class FootstepAngularMomentumPredictorTest
          tempYoDouble = new YoDouble(testName + "Step" + i + "TransferDuration", testRegistry);
          tempYoDouble.set(transferTime);
          transferDurations.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "touchdownDuration", testRegistry);
-         tempYoDouble.set(0.0);
-         touchdownDurations.add(tempYoDouble);
          tempYoDouble = new YoDouble(testName + "Step" + i + "SwingSplitFraction", testRegistry);
          tempYoDouble.set(testParameters.getSwingSplitFraction());
          swingSplitFractions.add(tempYoDouble);
@@ -178,6 +173,9 @@ public class FootstepAngularMomentumPredictorTest
          tempYoDouble = new YoDouble(testName + "Step" + i + "TransferSplit", testRegistry);
          tempYoDouble.set(testParameters.getTransferSplitFraction());
          transferSplitFractions.add(tempYoDouble);
+         tempYoDouble = new YoDouble(testName + "Step" + i + "TransferWeightDistribution", testRegistry);
+         tempYoDouble.set(0.5);
+         transferWeightDistributions.add(tempYoDouble);
       }
       YoDouble tempYoDouble = new YoDouble(testName + "Step" + testParameters.getNumberOfFootstepsToConsider() + "TransferDuration", testRegistry);
       tempYoDouble.set(transferTime);
@@ -189,6 +187,8 @@ public class FootstepAngularMomentumPredictorTest
       isDoubleSupport = new YoBoolean(testName + "IsDoubleSupport", testRegistry);
       isInitialTransfer = new YoBoolean(testName + "IsInitialTransfer", testRegistry);
 
+      percentageChickenSupport.set(0.5);
+
       numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", testRegistry);
       numberOfFootstepsToConsider.set(testParameters.getNumberOfFootstepsToConsider());
       midFeetFrame = new MidFootZUpGroundFrame(testName + "MidFeetFrame", soleFrames.get(RobotSide.RIGHT), soleFrames.get(RobotSide.LEFT));
@@ -196,9 +196,9 @@ public class FootstepAngularMomentumPredictorTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfFootstepsToConsider(),
                                                                    bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, swingDurations,
-                                                                   transferDurations, touchdownDurations, swingSplitFractions, swingShiftFractions,
-                                                                   transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, soleFrames,
-                                                                   testRegistry);
+                                                                   transferDurations, swingSplitFractions, swingShiftFractions, transferSplitFractions,
+                                                                   transferWeightDistributions, percentageChickenSupport, numberOfUpcomingFootsteps,
+                                                                   upcomingFootstepsData, soleFrames, testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isStanding, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);

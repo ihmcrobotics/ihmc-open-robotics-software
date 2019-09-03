@@ -39,7 +39,7 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
    @Override
    public Point3D getFinalPlanarPosition()
    {
-      return new Point3D(1.684, 0.077, 0.0);
+      return new Point3D(1.75, 0.0, 0.0);
    }
 
    @Override

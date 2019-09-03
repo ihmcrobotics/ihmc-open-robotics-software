@@ -410,7 +410,7 @@ public class MessageTools
    public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
    {
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.setRobotTimestamp(timestamp);
+      message.setTimestamp(timestamp);
       message.getPointCloud().add(pointCloud);
       message.getColors().add(colors);
       return message;
@@ -900,5 +900,19 @@ public class MessageTools
       scanPointToPack.setX(stereoVisionPointCloudMessage.getPointCloud().get(index++));
       scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
       scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
+   }
+   
+   public static Point3D[] unpackScanPoint3ds(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
+   {
+      int numberOfScanPoints = stereoVisionPointCloudMessage.point_cloud_.size() / 3;
+      Point3D[] scanPoints = new Point3D[numberOfScanPoints];
+      for (int index = 0; index < numberOfScanPoints; index++)
+      {
+         Point3D scanPoint1 = new Point3D();
+         MessageTools.unpackScanPoint(stereoVisionPointCloudMessage, index, scanPoint1);
+         Point3D scanPoint = scanPoint1;
+         scanPoints[index] = scanPoint;
+      }
+      return scanPoints;
    }
 }

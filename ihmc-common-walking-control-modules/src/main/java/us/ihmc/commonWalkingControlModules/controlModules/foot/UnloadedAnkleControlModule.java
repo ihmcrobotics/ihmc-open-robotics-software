@@ -42,7 +42,6 @@ public class UnloadedAnkleControlModule
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
-   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
    private final FrameVector3D shinAngularVelocity = new FrameVector3D();
    private final FramePoint3D controlFramePosition = new FramePoint3D();
    private final FrameQuaternion controlFrameOrientation = new FrameQuaternion();
@@ -89,7 +88,8 @@ public class UnloadedAnkleControlModule
          throw new RuntimeException("The foot control frame can not be rotated with respect to the ankle when using this module.");
       }
 
-      feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      desiredOrientation.setIncludingFrame(feedbackControlCommand.getReferenceOrientation());
+      desiredAngularVelocity.setIncludingFrame(feedbackControlCommand.getReferenceAngularVelocity());
       desiredOrientation.changeFrame(shinFrame);
       desiredAngularVelocity.changeFrame(shinFrame);
 

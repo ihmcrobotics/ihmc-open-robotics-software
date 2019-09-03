@@ -1,28 +1,25 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.robotics.testing.YoVariableTestGoal.StringProvider;
 
 public class QuadrupedTestGoals
 {
-   public static YoVariableTestGoal notFallen(QuadrupedForceTestYoVariables variables)
+   public static YoVariableTestGoal notFallen(QuadrupedTestYoVariables variables)
    {
       YoVariableTestGoal minHeightGoal = YoVariableTestGoal.deltaGreaterThan(variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), 0.0);
       YoVariableTestGoal fallenFlag = YoVariableTestGoal.booleanEquals(variables.getIsFallDetected(), false);
-      return YoVariableTestGoal.and(minHeightGoal, fallenFlag);
+      StringProvider stringProvider = () -> "Fell from reason " + variables.getFallDetectionType() + "\n.";
+      return YoVariableTestGoal.and(stringProvider, minHeightGoal, fallenFlag);
    }
 
-   public static YoVariableTestGoal bodyHeight(QuadrupedForceTestYoVariables variables, double height)
+   public static YoVariableTestGoal bodyHeight(QuadrupedTestYoVariables variables, double height)
    {
-      return YoVariableTestGoal.deltaGreaterThan(variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), height);
-   }
-
-   public static YoVariableTestGoal notFallen(QuadrupedPositionTestYoVariables variables)
-   {
-      return YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyZ(), variables.getDesiredCoMPositionZ().getDoubleValue() / 2.0);
+      return YoVariableTestGoal.deltaGreaterThan("Body height went too low. ", variables.getRobotBodyZ(), variables.getGroundPlanePointZ(), height);
    }
 
    public static YoVariableTestGoal timeInFuture(QuadrupedTestYoVariables variables, double durationFromNow)
    {
-      return YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + durationFromNow);
+      return YoVariableTestGoal.timeInFuture(variables.getYoTime(), durationFromNow);
    }
 }

@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -19,8 +18,6 @@ public interface QuadrupedTestFactory
 
    public RemoteQuadrupedTeleopManager getRemoteStepTeleopManager();
 
-   public void setControlMode(QuadrupedControlMode controlMode);
-
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType);
 
    public void setUseStateEstimator(boolean useStateEstimator);
@@ -32,8 +29,6 @@ public interface QuadrupedTestFactory
    public void setUsePushRobotController(boolean usePushRobotController);
 
    public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition);
-
-   public void setUseNetworking(boolean useNetworking);
 
    void setScsParameters(SimulationConstructionSetParameters scsParameters);
 

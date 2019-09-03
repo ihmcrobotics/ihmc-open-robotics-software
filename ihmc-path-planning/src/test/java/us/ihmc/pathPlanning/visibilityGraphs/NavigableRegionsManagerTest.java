@@ -2,8 +2,6 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
@@ -22,7 +20,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -35,11 +34,9 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.*;
 
-import static us.ihmc.robotics.Assert.*;
-
 public class NavigableRegionsManagerTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final double epsilon = 1e-4;
    private static final long timeout = 30000 * 100;
 
@@ -49,7 +46,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallInlineWithWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -61,7 +58,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -74,7 +71,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallOnOppositeSidesOfWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -86,7 +83,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -99,7 +96,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallStraightShotButVeryNearWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -111,7 +108,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -125,7 +122,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallStraightShotButNearWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -137,7 +134,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -150,7 +147,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallAlmostStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -162,7 +159,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -175,7 +172,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithWallStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallEnvironment());
 
@@ -187,7 +184,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -200,7 +197,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxInlineWithWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -212,7 +209,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -225,7 +222,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxOnOppositeSidesOfWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -237,7 +234,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -250,7 +247,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxStraightShotButVeryNearWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -262,7 +259,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -275,7 +272,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxStraightShotButNearWall()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -287,7 +284,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -300,7 +297,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxAlmostStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -312,7 +309,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -325,7 +322,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithBoxStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxEnvironment());
 
@@ -337,7 +334,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -350,7 +347,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundWithTwoDifferentWalls()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundTwoDifferentWidthWallsEnvironment());
 
@@ -362,7 +359,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       /*
       if (visualize)
@@ -375,7 +372,7 @@ public class NavigableRegionsManagerTest
 
       start = new Point3D(-15.0, 1.0 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
-      path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -388,7 +385,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundBetweenWallOpening()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallOpeningEnvironment());
 
@@ -400,7 +397,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -413,7 +410,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundBetweenWallOpeningStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallOpeningEnvironment());
 
@@ -425,7 +422,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -439,7 +436,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundBetweenAwkwardWallOpening()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithWallAwkwardOpeningEnvironment());
 
@@ -450,7 +447,7 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), new ObstacleAndCliffAvoidanceProcessor(parameters));
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
 
       if (visualize)
       {
@@ -467,7 +464,7 @@ public class NavigableRegionsManagerTest
       This test sets up an environment where the first, aggressive pass will hug the left of the opening. It is then further away from the other side than
       the preferred distance, so it may not queue that up as a distance it should consider.
        */
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxesEnvironment());
 
@@ -492,7 +489,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundBetweenBoxesOpeningStraightShot()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxesEnvironment());
 
@@ -517,7 +514,7 @@ public class NavigableRegionsManagerTest
    @Test
    public void testFlatGroundBetweenBoxInMiddle()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(createFlatGroundWithBoxInMiddleEnvironment());
 
@@ -538,13 +535,13 @@ public class NavigableRegionsManagerTest
       checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   private static void checkPath(List<Point3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParameters parameters,
+   private static void checkPath(List<Point3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
                                  PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)
    {
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), null);
 
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
-      List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<Point3DReadOnly> originalPath = navigableRegionsManager.calculateBodyPath(start, goal);
 
       int numberOfPoints = path.size();
       assertTrue(numberOfPoints >= originalPath.size());
@@ -1002,7 +999,7 @@ public class NavigableRegionsManagerTest
       ThreadTools.sleepForever();
    }
 
-   private VisibilityGraphsParameters createVisibilityGraphParametersForTest()
+   private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
       return new DefaultVisibilityGraphParameters()
       {

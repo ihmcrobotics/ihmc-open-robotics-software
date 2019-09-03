@@ -7,15 +7,15 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoorTimingBehaviorAutomated extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private final WalkThroughDoorBehavior walkThroughDoorBehavior;
    private final DoorTimingBehavior doorTimingBehavior;
@@ -26,6 +26,7 @@ public class DoorTimingBehaviorAutomated extends AbstractBehavior
                                             AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       walkThroughDoorBehavior = new WalkThroughDoorBehavior(robotName, "automated", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry);
       doorTimingBehavior = new DoorTimingBehavior(robotName, yoTime, ros2Node, false);
    }

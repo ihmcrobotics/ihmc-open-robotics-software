@@ -13,11 +13,11 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
    FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT),
    HIND_RIGHT(RobotEnd.HIND, RobotSide.RIGHT),
    HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT);
-   
+
    public static final EnumSet<RobotQuadrant> enumSet = EnumSet.allOf(RobotQuadrant.class);
    public static final RobotQuadrant[] values = values();
    public static final RobotQuadrant[] reversedValues = values();
-   static 
+   static
    {
       ArrayUtils.reverse(reversedValues);
    }
@@ -32,7 +32,7 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
    private static final Color[] colorArray = new Color[] { Color.YELLOW, Color.WHITE, Color.BLUE, Color.BLACK };
 
    private static final Color[] colorArrayForWhiteBackground = new Color[] { Color.YELLOW, Color.PINK, Color.BLUE, Color.BLACK };
-   
+
    private RobotQuadrant(RobotEnd end, RobotSide side)
    {
       this.end = end;
@@ -61,22 +61,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
    {
       return end;
    }
-   
+
    public RobotEnd getOppositeEnd()
    {
       return end.getOppositeEnd();
    }
-  
+
    public RobotSide getSide()
    {
       return side;
    }
-   
+
    public RobotSide getOppositeSide()
    {
       return side.getOppositeSide();
    }
-   
+
    public static final RobotQuadrant getQuadrant(RobotEnd robotEnd, RobotSide robotSide)
    {
       if (robotEnd == RobotEnd.HIND)
@@ -102,7 +102,7 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          }
       }
    }
-   
+
    // Methods:
    public final RobotQuadrant getDiagonalOppositeQuadrant()
    {
@@ -112,22 +112,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
@@ -153,29 +153,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public final RobotQuadrant getAcrossBodyFrontQuadrant()
    {
       switch (this)
@@ -184,29 +184,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public final RobotQuadrant getAcrossBodyHindQuadrant()
    {
       switch (this)
@@ -215,29 +215,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public final RobotQuadrant getNextClockwiseQuadrant()
    {
       switch (this)
@@ -246,29 +246,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public final RobotQuadrant getNextCounterClockwiseQuadrant()
    {
       switch (this)
@@ -277,22 +277,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
@@ -308,22 +308,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return "FL";
          }
-   
+
          case FRONT_RIGHT:
          {
             return "FR";
          }
-   
+
          case HIND_RIGHT:
          {
             return "HR";
          }
-   
+
          case HIND_LEFT:
          {
             return "HL";
          }
-   
+
          default:
          {
             throw new RuntimeException();
@@ -392,22 +392,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
@@ -439,7 +439,7 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
    {
       return getNextRegularGaitSwingQuadrant(this);
    }
-   
+
    public final RobotQuadrant getNextReversedRegularGaitSwingQuadrant()
    {
       return getNextReversedRegularGaitSwingQuadrant(this);
@@ -453,29 +453,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return RobotQuadrant.HIND_RIGHT;
          }
-   
+
          case FRONT_RIGHT:
          {
             return RobotQuadrant.HIND_LEFT;
          }
-   
+
          case HIND_RIGHT:
          {
             return RobotQuadrant.FRONT_RIGHT;
          }
-   
+
          case HIND_LEFT:
          {
             return RobotQuadrant.FRONT_LEFT;
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public static final RobotQuadrant getNextReversedRegularGaitSwingQuadrant(RobotQuadrant currentSwingQuadrant)
    {
       switch (currentSwingQuadrant)
@@ -484,22 +484,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
       {
          return RobotQuadrant.HIND_LEFT;
       }
-      
+
       case FRONT_RIGHT:
       {
          return RobotQuadrant.HIND_RIGHT;
       }
-      
+
       case HIND_RIGHT:
       {
          return RobotQuadrant.FRONT_LEFT;
       }
-      
+
       case HIND_LEFT:
       {
          return RobotQuadrant.FRONT_RIGHT;
       }
-      
+
       default:
       {
          throw new RuntimeException();
@@ -568,22 +568,22 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return "FrontLeft";
          }
-   
+
          case FRONT_RIGHT:
          {
             return "FrontRight";
          }
-   
+
          case HIND_RIGHT:
          {
             return "HindRight";
          }
-   
+
          case HIND_LEFT:
          {
             return "HindLeft";
          }
-   
+
          default:
          {
             throw new RuntimeException();
@@ -618,7 +618,7 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          }
       }
    }
-   
+
    public String getCamelCaseName()
    {
       switch (this)
@@ -627,29 +627,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return "frontLeft";
          }
-   
+
          case FRONT_RIGHT:
          {
             return "frontRight";
          }
-   
+
          case HIND_RIGHT:
          {
             return "hindRight";
          }
-   
+
          case HIND_LEFT:
          {
             return "hindLeft";
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    public String getUnderBarName()
    {
       switch (this)
@@ -658,29 +658,29 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          {
             return "front_left";
          }
-   
+
          case FRONT_RIGHT:
          {
             return "front_right";
          }
-   
+
          case HIND_RIGHT:
          {
             return "hind_right";
          }
-   
+
          case HIND_LEFT:
          {
             return "hind_left";
          }
-   
+
          default:
          {
             throw new RuntimeException();
          }
       }
    }
-   
+
    /**
     * @deprecated Use getPascalCaseName() instead.
     */
@@ -688,10 +688,7 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
    {
       return getPascalCaseName();
    }
-   
-   /**
-    * @deprecated Use getCamelCaseName() instead.
-    */
+
    public String getCamelCaseNameForStartOfExpression()
    {
       return getCamelCaseName();

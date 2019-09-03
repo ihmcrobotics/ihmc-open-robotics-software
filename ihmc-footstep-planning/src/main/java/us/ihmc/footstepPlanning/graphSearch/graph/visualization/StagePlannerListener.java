@@ -1,10 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +13,8 @@ import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
@@ -40,11 +38,18 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final long occupancyMapUpdateDt;
    private long lastUpdateTime = -1;
+   private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
+   private int totalNodeCount = 0;
 
    public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapUpdateDt)
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
+
+      for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
+      {
+         rejectionCount.put(rejectionReason, new MutableInt(0));
+      }
    }
 
    @Override
@@ -52,10 +57,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       if (previousNode == null)
       {
-         rejectionReasons.clear();
-         childMap.clear();
-         exploredCells.clear();
-         lowestCostPlan.clear();
+         reset();
       }
       else
       {
@@ -63,7 +65,18 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          PlannerCell plannerCell = new PlannerCell(node.getXIndex(), node.getYIndex());
 
          exploredCells.add(plannerCell);
+         totalNodeCount++;
       }
+   }
+
+   public void reset()
+   {
+      rejectionReasons.clear();
+      childMap.clear();
+      exploredCells.clear();
+      lowestCostPlan.clear();
+      totalNodeCount = 1;
+      rejectionCount.values().forEach(count -> count.setValue(0));
    }
 
    @Override
@@ -77,6 +90,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       rejectionReasons.put(rejectedNode, reason);
+      rejectionCount.get(reason).increment();
    }
 
    @Override
@@ -193,10 +207,23 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       nodeDataMessage.setYIndex(node.getYIndex());
       nodeDataMessage.setYawIndex(node.getYawIndex());
 
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
-      Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-      Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-      snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+      if(snapper != null)
+      {
+         FootstepNodeSnapData snapData = snapper.getSnapData(node);
+         Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
+         Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
+         snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+      }
+   }
+
+   public int getTotalNodeCount()
+   {
+      return totalNodeCount;
+   }
+
+   public int getRejectionReasonCount(BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      return rejectionCount.get(rejectionReason).getValue();
    }
 
    private class ConcurrentList<T> extends ConcurrentCopier<List<T>>

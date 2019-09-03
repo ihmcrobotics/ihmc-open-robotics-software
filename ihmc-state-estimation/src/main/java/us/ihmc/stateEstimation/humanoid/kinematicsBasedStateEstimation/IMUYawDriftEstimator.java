@@ -162,6 +162,19 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       estimatedYawDriftRate.update(0.0);
    }
 
+   public void initialize()
+   {
+      estimatedYawDriftRate.reset();
+      estimatedYawDriftRate.update(0.0);
+
+      for (int i = 0; i < numberOfFeet; i++)
+      {
+         RigidBodyBasics foot = allFeet.get(i);
+         areFeetTrusted.get(foot).set(false);
+         areFeetTrusted.get(foot).update(false);
+      }
+   }
+
    public void update()
    {
       updateFootLinearVelocities();

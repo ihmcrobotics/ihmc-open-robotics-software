@@ -35,7 +35,7 @@ public class SphereWithConvexPolygonIntersector
       
       closestPointOnPolygon.set(closestPointOnPolygon2d, 0.0);
       
-      boolean isInsideOrOnSurface = sphere.getSphere3d().isInsideOrOnSurface(closestPointOnPolygon);
+      boolean isInsideOrOnSurface = sphere.getSphere3d().isPointInside(closestPointOnPolygon);
       
       closestPointOnPolygon.changeFrame(ReferenceFrame.getWorldFrame());
       sphere.changeFrame(originalSphereFrame);
