@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -8,6 +10,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -18,6 +21,7 @@ import java.util.List;
 public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
+   private final PathOrientationCalculator orientationCalculator;
 
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
@@ -30,6 +34,7 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
    {
       super(prefix, registry);
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
+      this.orientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
 
    public PawStepPlanningResult planWaypoints()
@@ -38,8 +43,8 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
 
       if (planarRegionsList == null)
       {
-         waypoints.add(new Point3D(bodyStartPose.getPosition()));
-         waypoints.add(new Point3D(bodyGoalPose.getPosition()));
+         waypoints.add(new Pose3D(bodyStartPose));
+         waypoints.add(new Pose3D(bodyGoalPose));
       }
       else
       {
@@ -70,12 +75,10 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
 
          try
          {
-            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
+            List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution());
 
-            for (Point3DReadOnly waypoint3d : path)
-            {
-               waypoints.add(new Point3D(waypoint3d));
-            }
+            waypoints.addAll(path);
          }
          catch (Exception e)
          {
