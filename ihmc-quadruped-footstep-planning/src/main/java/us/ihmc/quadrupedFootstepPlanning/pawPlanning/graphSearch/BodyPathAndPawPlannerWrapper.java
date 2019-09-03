@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -181,7 +182,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
          return yoResult.getEnumValue();
       }
 
-      List<Point3D> waypoints = waypointPathPlanner.getWaypoints();
+      List<Pose3DReadOnly> waypoints = waypointPathPlanner.getWaypoints();
 
       if (waypoints.size() < 2)
       {
@@ -199,7 +200,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 //         }
       }
 
-      bodyPathPlanner.setWaypoints(waypoints);
+      bodyPathPlanner.setPoseWaypoints(waypoints);
 
       if (visualizing)
       {
