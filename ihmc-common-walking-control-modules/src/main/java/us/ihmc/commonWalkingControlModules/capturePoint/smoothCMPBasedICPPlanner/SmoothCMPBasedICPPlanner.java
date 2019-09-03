@@ -779,6 +779,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          LogTools.warn("Received bad footstep: " + footstep + ", ignoring");
          return;
       }
+      else if (numberOfUpcomingFootsteps.getValue() == numberFootstepsToConsider.getValue())
+      {
+         return;
+      }
       else
       {
          upcomingFootstepsData.add().set(footstep, timing);
