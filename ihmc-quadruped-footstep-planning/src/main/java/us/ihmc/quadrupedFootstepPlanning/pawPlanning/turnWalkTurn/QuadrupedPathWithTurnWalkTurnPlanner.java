@@ -115,7 +115,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    {
       PawStepPlanningResult result = waypointPathPlanner.planWaypoints();
 
-      bodyPathPlanner.setWaypoints(waypointPathPlanner.getWaypoints());
+      bodyPathPlanner.setPoseWaypoints(waypointPathPlanner.getWaypoints());
 
       return result;
    }
