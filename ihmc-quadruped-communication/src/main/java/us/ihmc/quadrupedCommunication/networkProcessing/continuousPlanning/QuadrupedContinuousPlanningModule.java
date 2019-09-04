@@ -10,7 +10,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
