@@ -48,9 +48,11 @@ public class PathOrientationCalculator
    private List<Pose3DBasics> computeNominalPosesForPath(List<Point3DReadOnly> path, Orientation3DReadOnly startOrientation, Orientation3DReadOnly goalOrientation)
    {
       List<Pose3DBasics> nominalPathPoses = new ArrayList<>();
+      if (path.size() < 2)
+         return nominalPathPoses;
 
-      nominalPathPoses.add(new Pose3D(path.get(0), startOrientation));
-
+      double startHeading = startOrientation.getYaw();
+      nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
 
       int pathIndex = 1;
 
@@ -66,7 +68,7 @@ public class PathOrientationCalculator
 
          // override these orientations if it's the start or goal.
          if (pathIndex == 1)
-            previousOrientation = startOrientation.getYaw();
+            previousOrientation = startHeading;
 
          double desiredOrientation = InterpolationTools.linearInterpolate(previousOrientation, nextHeading, 0.5);
 
