@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
@@ -148,7 +149,8 @@ public class VisibilityGraphOcclusionTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(new DefaultVisibilityGraphParameters());
       List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                       new Quaternion(), new Quaternion());
 
       if(visualize)
       {
