@@ -107,6 +107,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(computeOrientationsToAvoidObstacles, compute);
    }
 
+   default void setReturnBestEffortSolution(boolean returnBestEffort)
+   {
+      set(returnBestEffortSolution, returnBestEffort);
+   }
+
    default void setHeuristicWeight(double weight)
    {
       set(heuristicWeight, weight);
@@ -170,6 +175,7 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       if (packet.getOccludedGoalEdgeWeight() != -1.0)
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
 
+      setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());

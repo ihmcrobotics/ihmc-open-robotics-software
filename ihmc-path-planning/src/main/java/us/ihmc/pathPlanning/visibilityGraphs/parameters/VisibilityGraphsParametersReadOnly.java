@@ -174,7 +174,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
     */
    default boolean returnBestEffortSolution()
    {
-      return true;
+      return get(returnBestEffortSolution);
    }
 
    /**
