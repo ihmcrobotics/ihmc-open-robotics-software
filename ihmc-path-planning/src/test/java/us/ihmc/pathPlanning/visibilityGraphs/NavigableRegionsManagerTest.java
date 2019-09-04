@@ -117,7 +117,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -144,7 +145,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -171,7 +173,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -199,7 +202,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -226,7 +230,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -253,7 +258,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -280,7 +286,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -307,7 +314,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -334,7 +342,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -361,7 +370,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -388,7 +398,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -415,7 +426,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -442,7 +454,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       /*
       if (visualize)
@@ -456,7 +469,8 @@ public class NavigableRegionsManagerTest
       start = new Point3D(-15.0, 1.0 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
 
       path = navigableRegionsManager.calculateBodyPath(start, goal);
-      posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                            new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -483,7 +497,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -511,7 +526,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -538,7 +554,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -568,7 +585,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -595,7 +613,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -621,7 +640,8 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
 
       if (visualize)
       {
@@ -647,16 +667,14 @@ public class NavigableRegionsManagerTest
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
-      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator
+            .computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 
       if (visualize)
       {
          visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList());
       }
-
-      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
-
 
    private static void checkPath(List<? extends Pose3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
                                  PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)

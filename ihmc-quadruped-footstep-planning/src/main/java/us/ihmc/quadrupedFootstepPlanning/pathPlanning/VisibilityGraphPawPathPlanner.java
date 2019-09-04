@@ -76,7 +76,8 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
          try
          {
             List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-            List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution());
+            List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                             bodyStartPose.getOrientation(), bodyGoalPose.getOrientation());
 
             waypoints.addAll(path);
          }
