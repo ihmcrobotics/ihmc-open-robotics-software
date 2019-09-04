@@ -410,7 +410,10 @@ public class KinematicsToolboxController extends ToolboxController
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
       if (robotConfigurationData == null)
+      {
+         commandInputManager.clearAllCommands();
          return false;
+      }
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
