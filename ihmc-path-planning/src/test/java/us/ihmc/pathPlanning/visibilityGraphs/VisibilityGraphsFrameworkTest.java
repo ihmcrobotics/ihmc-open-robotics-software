@@ -61,7 +61,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -90,8 +90,6 @@ public class VisibilityGraphsFrameworkTest
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
-   private VisibilityGraphsParametersReadOnly parameters;
-
    private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
@@ -115,8 +113,6 @@ public class VisibilityGraphsFrameworkTest
 
          messager = visualizerApplication.getMessager();
       }
-
-      parameters = createTestParameters();
    }
 
    @AfterEach
@@ -128,8 +124,6 @@ public class VisibilityGraphsFrameworkTest
          visualizerApplication = null;
          messager = null;
       }
-
-      parameters = null;
    }
 
    @Test
@@ -836,8 +830,9 @@ public class VisibilityGraphsFrameworkTest
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_220523_SteppingStones";
+      String dataSetName = "20171218_204917_FlatGround";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
