@@ -1,5 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -388,6 +392,19 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    public boolean initialize()
    {
+      boolean success = initializeInternal();
+
+      KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
+      status.setJointNameHash(-1);
+      status.setSolutionQuality(Double.NaN);
+      status.setCurrentToolboxState(success ? CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL : CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD);
+      reportMessage(status);
+
+      return success;
+   }
+
+   protected boolean initializeInternal()
+   {
       userFeedbackCommands.clear();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
@@ -453,6 +470,7 @@ public class KinematicsToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
+      inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
       MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
