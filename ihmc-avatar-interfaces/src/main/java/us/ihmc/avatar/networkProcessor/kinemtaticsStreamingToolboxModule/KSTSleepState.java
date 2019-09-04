@@ -6,9 +6,11 @@ import us.ihmc.robotics.stateMachine.core.State;
 public class KSTSleepState implements State
 {
    private final HumanoidKinematicsToolboxController ikController;
+   private final KSTTools tools;
 
    public KSTSleepState(KSTTools tools)
    {
+      this.tools = tools;
       ikController = tools.getIKController();
    }
 
@@ -21,7 +23,11 @@ public class KSTSleepState implements State
    public void doAction(double timeInState)
    {
       if (!ikController.hasBeenInitialized())
+      {
+         tools.pollInputCommand();
+         tools.getCommandInputManager().clearAllCommands();
          ikController.update();
+      }
    }
 
    @Override
