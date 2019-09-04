@@ -53,8 +53,7 @@ public class PathOrientationCalculator
       if (path.size() < 2)
          return nominalPathPoses;
 
-      double startHeading = startOrientation.getYaw();
-      nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
+      nominalPathPoses.add(new Pose3D(path.get(0), startOrientation));
 
       int pathIndex = 1;
 
@@ -70,11 +69,11 @@ public class PathOrientationCalculator
 
          // override these orientations if it's the start or goal.
          if (pathIndex == 1)
-            previousOrientation = startHeading;
+            previousOrientation = startOrientation.getYaw();
 
-         double desiredOrientation = AngleTools.interpolateAngle(previousOrientation, nextHeading, 0.5);
+         double desiredOrientation = InterpolationTools.linearInterpolate(previousOrientation, nextHeading, 0.5);
 
-         if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(previousOrientation, nextHeading)) > 1e-3)
+         if (!MathTools.epsilonEquals(previousOrientation, nextHeading, 1e-3))
          {
             double previousLength = currentPosition.distanceXY(previousPosition);
             double nextLength = currentPosition.distanceXY(nextPosition);
