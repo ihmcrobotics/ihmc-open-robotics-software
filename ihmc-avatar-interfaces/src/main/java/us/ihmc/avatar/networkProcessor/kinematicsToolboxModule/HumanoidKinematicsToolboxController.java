@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -212,8 +215,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    public boolean initialize()
    {
-      if (!super.initialize())
+      KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
+      status.setJointNameHash(-1);
+      status.setSolutionQuality(Double.NaN);
+
+      if (!super.initializeInternal())
+      {
+         status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD);
+         reportMessage(status);
          return false;
+      }
 
       // Using the most recent CapturabilityBasedStatus received from the walking controller to figure out which foot is in support.
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();
@@ -236,6 +247,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableSupportPolygonConstraint.set(true);
       holdSupportFootPose.set(true);
       holdCenterOfMassXYPosition.set(true);
+
+      status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
+      reportMessage(status);
 
       return true;
    }
