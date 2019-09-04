@@ -235,8 +235,6 @@ public class VisibilityGraph
 
    public VisibilityGraphNode setStart(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
    {
-      //TODO: Need a fallback map if start is not connectable...
-
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegionContainingThisPoint(sourceLocationInWorld, ceilingHeight,
                                                                                                                            searchHostEpsilon);
       if (visibilityGraphNavigableRegion == null)
