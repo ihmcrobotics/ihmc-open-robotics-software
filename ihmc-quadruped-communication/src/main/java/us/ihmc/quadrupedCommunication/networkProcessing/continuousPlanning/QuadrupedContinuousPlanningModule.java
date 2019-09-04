@@ -59,10 +59,6 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       // status messages from the controller
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
@@ -94,18 +90,6 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(ToolboxStateMessage.class, plannerSubGenerator);
 
       return messages;
-   }
-
-   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
-   {
-      if (continuousPlanningController != null)
-         continuousPlanningController.processHighLevelStateChangeMessage(message);
-   }
-
-   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
-   {
-      if (continuousPlanningController != null)
-         continuousPlanningController.processSteppingStateChangeMessage(message);
    }
 
    private void processFootstepPlannerOutputMessage(PawStepPlanningToolboxOutputStatus footstepPlannerOutput)
