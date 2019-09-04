@@ -829,14 +829,14 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-//      String dataSetName = "20171218_204953_FlatGroundWithWall";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_220523_SteppingStones";
-//      String dataSetName = "20171218_204917_FlatGround";
+      String dataSetName = "20171218_204917_FlatGround";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
 
+      VISUALIZE = true;
       test.setup();
       if (VISUALIZE)
       {
