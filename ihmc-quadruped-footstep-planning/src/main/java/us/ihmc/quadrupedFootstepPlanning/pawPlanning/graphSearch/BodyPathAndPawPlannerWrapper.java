@@ -129,7 +129,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
             if (!position.containsNaN())
             {
                startPosition.add(position);
-               startPositions.put(robotQuadrant, new FramePoint3D(ReferenceFrame.getWorldFrame(), startPosition));
+               startPositions.put(robotQuadrant, new FramePoint3D(ReferenceFrame.getWorldFrame(), position));
                feetInContact++;
             }
          }
@@ -137,7 +137,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
          startPosition.scale(1.0 / feetInContact);
          double nominalYaw = QuadrupedSupportPolygon.getNominalYaw(startPositions, feetInContact);
          FrameQuaternion startOrientation = new FrameQuaternion();
-         startOrientation.setToYawQuaternion(nominalYaw);
+         startOrientation.setYawPitchRoll(nominalYaw, 0.0, 0.0);
          waypointPathPlanner.setInitialBodyPose(new FramePose3D(startPosition, startOrientation));
       }
 
