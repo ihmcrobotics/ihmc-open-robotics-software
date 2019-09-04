@@ -116,7 +116,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       if (!result.validForExecution())
       {
          LogTools.info("Planner result failed. Terminating because of " + result);
-         planningFailed.getBooleanValue();
+         planningFailed.set(true);
       }
       footstepPlannerOutput.set(message);
       receivedPlanId.set(message.getPlanId());

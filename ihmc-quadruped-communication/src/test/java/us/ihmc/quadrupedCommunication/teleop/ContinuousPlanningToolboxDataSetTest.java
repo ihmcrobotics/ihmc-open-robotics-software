@@ -25,7 +25,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
@@ -140,6 +139,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
 //      parameters.setPerformPostProcessingNodeShifting(true);
       parameters.setComputeOrientationsToAvoidObstacles(false);
+      parameters.setReturnBestEffortSolution(true);
       return parameters;
    }
 
@@ -623,8 +623,6 @@ public class ContinuousPlanningToolboxDataSetTest
 
       return false;
    }
-
-
 
 
    private static String assertPlanIsValid(DataSet dataSet, List<Pose3D> pathPlan, List<QuadrupedTimedStep> plannedSteps,
