@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -28,11 +29,19 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       if (waypointHeadings.size() != waypointPositions.size())
          throw new RuntimeException("The number of waypoint positions and waypoint headings must be equal.");
 
+      bodyPathPlan.clear();
+
       this.waypointPositions = new ArrayList<>();
       this.waypointHeadings = new ArrayList<>();
       this.waypointHeadings.addAll(waypointHeadings);
       for (int i = 0; i < waypointPositions.size(); i++)
+      {
          this.waypointPositions.add(new Point2D(waypointPositions.get(i)));
+         Pose3D waypointPose = new Pose3D();
+         waypointPose.getPosition().set(waypointPositions.get(i));
+         waypointPose.getOrientation().setYawPitchRoll(waypointHeadings.get(i).getValue(), 0.0, 0.0);
+         bodyPathPlan.addWaypoint(waypointPose);
+      }
       this.maxAlphas = new double[waypointPositions.size() - 1];
       this.segmentLengths = new double[waypointPositions.size() - 1];
 
@@ -54,10 +63,8 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 
       int startIndex = 0;
       int endIndex = this.waypointPositions.size() - 1;
-      bodyPathPlan.clear();
       bodyPathPlan.setStartPose(this.waypointPositions.get(startIndex), this.waypointHeadings.get(startIndex).getValue());
       bodyPathPlan.setGoalPose(this.waypointPositions.get(endIndex), this.waypointHeadings.get(endIndex).getValue());
-      bodyPathPlan.addWaypoints(waypointPositions);
    }
 
    @Override

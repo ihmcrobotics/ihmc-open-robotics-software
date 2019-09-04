@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -247,7 +248,7 @@ public class RemoteUIMessageConverter
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       PawStepPlanningResult result = PawStepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
 
       messager.submitMessage(PawStepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(PawStepPlannerMessagerAPI.PlanningResultTopic, result);
@@ -282,7 +283,7 @@ public class RemoteUIMessageConverter
       int plannerRequestId = packet.getPlanId();
       PawStepPlanningResult result = PawStepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       PawStepPlan pawStepPlan = convertToFootstepPlan(footstepDataListMessage);
-      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
       if (plannerRequestId > currentPlanRequestId.get())
