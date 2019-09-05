@@ -307,7 +307,9 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
             if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
             {
                LogTools.error("The next quadrant when appending would be out of order. The fixed queue size " + fixedStepQueue.size() +
-                                    " ends with a step on the " + lastQuadrant + " quadrant, whereas the next plan starts with " + nextQuadrant);
+                                    " ends with a step on the " + lastQuadrant + " quadrant, meaning it should start with " +
+                                    lastQuadrant.getNextRegularGaitSwingQuadrant() + ". It actually starts with " + nextQuadrant + ", but " +
+                                    expectedInitialQuadrant.get() + " was requested for starting.");
                resetForNewPlan();
                planningFailed.set(true);
                throw new RuntimeException("This is out of order.");
