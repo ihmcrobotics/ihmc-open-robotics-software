@@ -89,7 +89,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
+   protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = true;
@@ -154,6 +154,7 @@ public class ContinuousPlanningToolboxDataSetTest
       parameters.setDesiredVelocityWeight(0.0);
       parameters.setReturnBestEffortPlan(true);
       parameters.setPerformGraphRepairingStep(false);
+      parameters.setMinimumStepsForBestEffortPlan(6);
 
       return parameters;
    }
@@ -324,14 +325,14 @@ public class ContinuousPlanningToolboxDataSetTest
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
       List<String> failingMessages = new ArrayList<>();
-      int numbberOfTestedSets = 0;
+      int numberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
          DataSet dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
             LogTools.info("Testing file: " + dataset.getName());
 
-         numbberOfTestedSets++;
+         numberOfTestedSets++;
          resetAllAtomics();
          String errorMessagesForCurrentFile = runAssertions(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
@@ -345,13 +346,14 @@ public class ContinuousPlanningToolboxDataSetTest
          {
             String result = errorMessagesForCurrentFile.isEmpty() ? "passed" : "failed";
             LogTools.info(dataset.getName() + " " + result);
-            LogTools.info(errorMessagesForCurrentFile);
+            if (!errorMessagesForCurrentFile.isEmpty())
+               LogTools.info(errorMessagesForCurrentFile);
          }
 
-         ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
+         ThreadTools.sleep(1000); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
+      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numberOfTestedSets;
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
@@ -376,11 +378,11 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private String runAssertions(DataSet dataset)
    {
-      ThreadTools.sleep(2000);
-
       resetAllAtomics();
       ThreadTools.sleep(1000);
       broadcastPlanningRequest(dataset);
+      ThreadTools.sleep(1000);
+
       return simulateWalkingAlongThePathAndAssertGoodResults(dataset);
    }
 
@@ -766,7 +768,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment);
+      String errorMessage = test.runAssertions(DataSetName._20171216_111326_CrossoverPlatforms);
       assertTrue(errorMessage, errorMessage.isEmpty());
 
       ThreadTools.sleepForever();
