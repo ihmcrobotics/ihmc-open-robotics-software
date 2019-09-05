@@ -216,7 +216,7 @@ public class ConvexPolygonScaler
    public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distanceInside,
                                                              ConvexPolygon2D scaledPolygonToPack)
    {
-      if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0 -10)
+      if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0e-10)
       {
          scaledPolygonToPack.set(exteriorPolygon);
          return true;
