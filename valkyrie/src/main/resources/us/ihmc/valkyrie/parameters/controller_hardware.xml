@@ -247,12 +247,12 @@
                   <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
                   <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
                   <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0" />
-                  <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
+                  <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                   <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
                   <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                   <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                   <parameter name="zetaYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
-                  <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                  <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.75" />
                   <parameter name="maxDerivativeErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
@@ -261,9 +261,9 @@
                   <parameter name="maxProportionalErrorSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maximumFeedbackSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                   <parameter name="maximumFeedbackRateSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0" />
-                  <parameter name="kpXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="kpXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="50.0" />
                   <parameter name="kpZHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                  <parameter name="zetaXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                  <parameter name="zetaXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7" />
                   <parameter name="zetaZHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                   <parameter name="maxDerivativeErrorHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                   <parameter name="maxProportionalErrorHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
@@ -417,14 +417,14 @@
                <registry name="WalkingJointSettings">
                   <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
-                  <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0" />
+                  <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.2" />
                   <parameter name="NoLoadhipPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
                   <parameter name="NoLoadkneePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0" />
-                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
-                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0" />
-                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
-                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0" />
+                  <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadHipPitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
+                  <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
+                  <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="7.5" />
+                  <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
                   <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5" />
                   <parameter name="NoLoadhipYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.08" />
                   <parameter name="NoLoadhipYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
@@ -433,7 +433,7 @@
                   <parameter name="NoLoadhipPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
                   <parameter name="NoLoadhipPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadhipRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
-                  <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
+                  <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
                   <parameter name="NoLoadhipRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
                   <parameter name="NoLoadhipRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadkneePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
@@ -484,12 +484,12 @@
                   <parameter name="NoLoaddistalNeckPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
                   <parameter name="NoLoaddistalNeckPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadHipYawControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
+                  <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
                   <parameter name="NoLoadHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipRollControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="NoLoadHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="NoLoadHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
+                  <parameter name="NoLoadHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
                   <parameter name="NoLoadHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadHipPitchControlMode" type="EnumParameter" value="EFFORT" />
@@ -579,7 +579,7 @@
                   <parameter name="LoadedHipYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedHipRollControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="LoadedHipRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="15.0" />
-                  <parameter name="LoadedHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.5" />
+                  <parameter name="LoadedHipRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="1.2" />
                   <parameter name="LoadedHipRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedHipRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedHipPitchControlMode" type="EnumParameter" value="EFFORT" />
@@ -1167,12 +1167,12 @@
                   <parameter name="NoLoadSpineYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineYawVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
+                  <parameter name="NoLoadSpinePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
                   <parameter name="NoLoadSpinePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpinePitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpinePitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollControlMode" type="EnumParameter" value="EFFORT" />
-                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="180.0" />
+                  <parameter name="NoLoadSpineRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="150.0" />
                   <parameter name="NoLoadSpineRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="12.0" />
                   <parameter name="NoLoadSpineRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadSpineRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
