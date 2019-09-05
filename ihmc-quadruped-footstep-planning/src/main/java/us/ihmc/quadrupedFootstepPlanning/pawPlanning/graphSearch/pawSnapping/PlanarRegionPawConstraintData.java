@@ -39,21 +39,32 @@ public class PlanarRegionPawConstraintData
    {
       ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
       TIntArrayList indicesToIgnore = getPolygonIndicesToIgnore(internalRegionToScale);
-      if (polygonScaler.scaleConvexPolygon(internalRegionToScale, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray()))
+      int[] vertexStartIndicesToNotScale = indicesToIgnore.toArray();
+      if (polygonScaler.scaleConvexPolygon(internalRegionToScale, projectionInsideDelta, scaledRegionPolygon, vertexStartIndicesToNotScale))
+      {
          return scaledRegionPolygon;
+      }
       else
+      {
+         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, -1);
+         polygonScaler.scaleConvexPolygon(internalRegionToScale, maximumProjectionDistance, scaledRegionPolygon, vertexStartIndicesToNotScale);
          return scaledRegionPolygon;
-//         return null;
+      }
    }
 
    private ConvexPolygon2DReadOnly computedScaledConvexHull(ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
    {
       ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
       if (polygonScaler.scaleConvexPolygon(planarRegion.getConvexHull(), projectionInsideDelta, scaledRegionPolygon))
+      {
          return scaledRegionPolygon;
+      }
       else
-//         return null;
+      {
+         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, -1);
+         polygonScaler.scaleConvexPolygon(planarRegion.getConvexHull(), maximumProjectionDistance, scaledRegionPolygon, -1);
          return scaledRegionPolygon;
+      }
    }
 
    private static TIntArrayList computeIndicesToIgnoreForRegion(ConvexPolygon2DReadOnly containingRegion, List<ConvexPolygon2D> allRegions)

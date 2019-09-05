@@ -404,4 +404,27 @@ public class ConvexPolygonScaler
       scaleConvexPolygon((ConvexPolygon2DReadOnly) polygonQ, distance, (ConvexPolygon2DBasics) framePolygonToPack);
       framePolygonToPack.update();
    }
+
+   /**
+    * Does a binary search for the maximum possible scale distance. For example, a 1m x 1m has a max of 0.5m,
+    * and a 1m x 0.5m rectangle has a max of 0.25m. Given the precision value, this method computes the maximum
+    * scale distance up to that precision.
+    */
+   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double scaleDistanceUpperBound, double precision,
+                                             int... vertexStartIndicesToNotScale)
+   {
+      double projectionDistanceLowerBound = 0.0;
+      double projectionDistanceUpperBound = scaleDistanceUpperBound;
+
+      while (projectionDistanceUpperBound - projectionDistanceLowerBound > precision)
+      {
+         double projectionQuery = 0.5 * (projectionDistanceUpperBound + projectionDistanceLowerBound);
+         boolean success = scaleConvexPolygon(regionToScale, projectionQuery, tempPolygon, vertexStartIndicesToNotScale);
+         if (success)
+            projectionDistanceLowerBound = projectionQuery;
+         else
+            projectionDistanceUpperBound = projectionQuery;
+      }
+      return projectionDistanceLowerBound;
+   }
 }
