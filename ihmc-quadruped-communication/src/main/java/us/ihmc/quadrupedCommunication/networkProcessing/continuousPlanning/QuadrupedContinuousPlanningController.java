@@ -40,14 +40,16 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    private static final double proximityGoal = 1.0e-2;
    private static final int defaultStartPlanId = 13;
 
-   private static final int defaultNumberOfStepsToLeaveUnchanged = 4;
+   private static final int defaultNumberOfStepsToLeaveUnchanged = 6;
 
    private final AtomicReference<PawStepPlanningToolboxOutputStatus> latestPlannerOutput = new AtomicReference<>();
    private final AtomicReference<PawStepPlanningToolboxOutputStatus> currentPlannerOutput = new AtomicReference<>();
    private final AtomicReference<QuadrupedContinuousPlanningRequestPacket> planningRequestPacket = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegions = new AtomicReference<>();
    private final AtomicReference<List<QuadrupedFootstepStatusMessage>> footstepStatusBuffer = new AtomicReference<>(new ArrayList<>());
+   private final AtomicReference<RobotQuadrant> expectedInitialQuadrant = new AtomicReference<>();
 
+   private final QuadrantDependentList<Point3DReadOnly> currentFeetPositions = new QuadrantDependentList<>();
    private final List<QuadrupedTimedStep> fixedStepQueue = new ArrayList<>();
    private final List<QuadrupedTimedStep> stepQueue = new ArrayList<>();
 
@@ -110,6 +112,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       if (!result.validForExecution())
       {
          LogTools.info("Planner result failed. Terminating because of " + result);
+         resetForNewPlan();
          planningFailed.set(true);
       }
       latestPlannerOutput.set(message);
@@ -137,6 +140,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       List<QuadrupedFootstepStatusMessage> messages = footstepStatusBuffer.get();
       messages.add(message);
       footstepStatusBuffer.set(messages);
+      currentFeetPositions.put(RobotQuadrant.fromByte(message.getRobotQuadrant()), message.getActualTouchdownPositionInWorld());
    }
 
    public void processPlanarRegionListMessage(PlanarRegionsListMessage message)
@@ -157,9 +161,11 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       planningFailed.set(false);
       hasReachedGoal.set(false);
       fixedStepQueue.clear();
+      currentFeetPositions.clear();
       stepQueue.clear();
       footstepStatusBuffer.set(new ArrayList<>());
       latestPlannerOutput.set(null);
+      expectedInitialQuadrant.set(null);
 
       broadcastPlanId.set(defaultStartPlanId);
       receivedPlanId.set(-1);
@@ -300,7 +306,9 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
             if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
             {
-               LogTools.error("The next quadrant when appending would be out of order.");
+               LogTools.error("The next quadrant when appending would be out of order. The fixed queue size " + fixedStepQueue.size() +
+                                    " ends with a step on the " + lastQuadrant + " quadrant, whereas the next plan starts with " + nextQuadrant);
+               resetForNewPlan();
                planningFailed.set(true);
                throw new RuntimeException("This is out of order.");
             }
@@ -319,6 +327,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       if (firstStep.getTimeInterval().getStartTime() != 0.0)
       {
          LogTools.error("The first step is not at time 0.0.");
+         resetForNewPlan();
          planningFailed.set(true);
          throw new RuntimeException("This steps aren't at the correct times.");
       }
@@ -339,6 +348,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
          {
             LogTools.error("The steps are out of order, and the bug may be getting swallowed.");
+            resetForNewPlan();
             planningFailed.set(true);
             throw new RuntimeException("This is out of order.");
          }
@@ -360,6 +370,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          if (!MathTools.epsilonEquals(startTime - previousStartTime, expectedTimeBetweenSteps, 1e-3))
          {
             LogTools.error("The " + prefix + " steps are improperly timed.");
+            resetForNewPlan();
             planningFailed.set(true);
             throw new RuntimeException("This is poorly timed.");
          }
@@ -428,6 +439,9 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
             startPositions.put(RobotQuadrant.HIND_RIGHT, continuousPlanningRequestPacket.getHindRightStartPositionInWorld());
          }
 
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            currentFeetPositions.put(robotQuadrant, startPositions.get(robotQuadrant));
+
          if (debug || verbose)
          {
             Point3D averageStart = new Point3D();
@@ -444,18 +458,11 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       {
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            QuadrupedTimedStep timedStepMessage = getLastStepInQuadrantFromList(robotQuadrant, fixedStepQueue);
-            if (timedStepMessage != null)
-            {
-               startPositions.put(robotQuadrant, timedStepMessage.getGoalPosition());
-            }
+            QuadrupedTimedStep step = getLastStepInQuadrantFromList(robotQuadrant, fixedStepQueue);
+            if (step != null)
+               startPositions.put(robotQuadrant, step.getGoalPosition());
             else
-            {
-               String message = "The fixed step queue did not contain a step for the " + robotQuadrant + " quadrant.";
-               LogTools.info(message);
-               planningFailed.set(true);
-               throw new RuntimeException(message);
-            }
+               startPositions.put(robotQuadrant, currentFeetPositions.get(robotQuadrant));
          }
       }
 
@@ -483,6 +490,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          }
          else
          {
+            resetForNewPlan();
             planningFailed.set(true);
             throw new RuntimeException("This is not supported.");
          }
@@ -497,12 +505,14 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());
 
+      expectedInitialQuadrant.set(RobotQuadrant.fromByte(planningRequestPacket.getInitialStepRobotQuadrant()));
+
       broadcastPlanId.increment();
       planningRequestPacket.setPlannerRequestId(broadcastPlanId.getIntegerValue());
 
-      if (debug)
+      if (debug || verbose)
       {
-         LogTools.info("Planning #" + broadcastPlanId.getValue() + " to " + continuousPlanningRequestPacket.getGoalPositionInWorld());
+         LogTools.info("Planning #" + broadcastPlanId.getValue() + " to " + continuousPlanningRequestPacket.getGoalPositionInWorld() + ", starting with " + expectedInitialQuadrant.get());
       }
       waitingForPlan.set(true);
       reportMessage(planningRequestPacket);

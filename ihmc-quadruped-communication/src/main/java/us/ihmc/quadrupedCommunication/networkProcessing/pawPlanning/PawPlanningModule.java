@@ -172,6 +172,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    @Override
    public void sleep()
    {
+      footstepPlanningController.processPawPlanningRequest(null);
 //      footstepPlanningController.setPaused(true);
 
       super.sleep();
