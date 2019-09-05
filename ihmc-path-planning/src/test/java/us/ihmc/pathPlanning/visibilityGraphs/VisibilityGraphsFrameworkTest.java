@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -33,6 +34,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
@@ -434,7 +436,7 @@ public class VisibilityGraphsFrameworkTest
 
       String errorMessages = "";
 
-      List<Point3DReadOnly> latestBodyPath = new ArrayList<>();
+      List<Pose3DReadOnly> latestBodyPath = new ArrayList<>();
 
       Point3D walkerPosition = new Point3D(start);
 
@@ -494,15 +496,15 @@ public class VisibilityGraphsFrameworkTest
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
 
-   private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, List<Point3DReadOnly> bodyPath)
+   private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, List<Pose3DReadOnly> bodyPath)
    {
-      Point3D initialPosition = new Point3D(bodyPath.get(0));
+      Point3D initialPosition = new Point3D(bodyPath.get(0).getPosition());
 
       Point3D positionWithShift = new Point3D();
 
       for (int i = 0; i < bodyPath.size() - 1; i++)
       {
-         LineSegment3D segment = new LineSegment3D(bodyPath.get(i), bodyPath.get(i + 1));
+         LineSegment3D segment = new LineSegment3D(bodyPath.get(i).getPosition(), bodyPath.get(i + 1).getPosition());
          if (segment.length() < 5e-3)
             continue;
 
@@ -543,22 +545,25 @@ public class VisibilityGraphsFrameworkTest
    }
 
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
-                                                    List<Point3DReadOnly> bodyPathToPack)
+                                                    List<Pose3DReadOnly> bodyPathToPack)
    {
       return calculateAndTestVizGraphsBodyPath(datasetName, start, goal, planarRegionsList, bodyPathToPack, false);
    }
 
    private String calculateAndTestVizGraphsBodyPath(String datasetName, Point3D start, Point3D goal, PlanarRegionsList planarRegionsList,
-                                                    List<Point3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
+                                                    List<Pose3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
    {
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters);
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-      List<Point3DReadOnly> path = null;
+      List<? extends Pose3DReadOnly> path = null;
+      List<Point3DReadOnly> pathPoints = null;
 
       try
       {
-         path = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution());
 //         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }
       catch (Exception e)
@@ -571,7 +576,7 @@ public class VisibilityGraphsFrameworkTest
       {
          if (path != null)
          {
-            messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
+            messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, pathPoints);
          }
 
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
@@ -590,8 +595,8 @@ public class VisibilityGraphsFrameworkTest
 
       // "Walk" along the body path and assert that the walker does not go through any region.
       int currentSegmentIndex = 0;
-      Point3DReadOnly pathStart = path.get(0);
-      Point3DReadOnly pathEnd = path.get(path.size() - 1);
+      Point3DReadOnly pathStart = path.get(0).getPosition();
+      Point3DReadOnly pathEnd = path.get(path.size() - 1).getPosition();
       Point3D walkerCurrentPosition = new Point3D(pathStart);
       List<Point3D> collisions = new ArrayList<>();
       Ellipsoid3D walkerShape = new Ellipsoid3D();
@@ -612,8 +617,8 @@ public class VisibilityGraphsFrameworkTest
          errorMessages += walkerCollisionChecks(datasetName, walkerShape, planarRegionsList, collisions, parameters, !simulateOcclusions);
 
          //         walkerCurrentPosition.set(travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path));
-         Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
-         Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
+         Point3DReadOnly segmentStart = path.get(currentSegmentIndex).getPosition();
+         Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1).getPosition();
 
 
          Vector3D segmentDirection = new Vector3D();
@@ -706,7 +711,7 @@ public class VisibilityGraphsFrameworkTest
       return errorMessages;
    }
 
-   private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Point3DReadOnly> path, boolean checkEnds)
+   private String basicBodyPathSanityChecks(String datasetName, Point3DReadOnly start, Point3DReadOnly goal, List<? extends Pose3DReadOnly> path, boolean checkEnds)
    {
       String errorMessages = "";
       errorMessages += assertTrue(datasetName, "Path is null!", path != null);
@@ -718,8 +723,8 @@ public class VisibilityGraphsFrameworkTest
       if (!errorMessages.isEmpty())
          return errorMessages; // Cannot test anything else when no path is returned.
 
-      Point3DReadOnly pathEnd = path.get(path.size() - 1);
-      Point3DReadOnly pathStart = path.get(0);
+      Point3DReadOnly pathEnd = path.get(path.size() - 1).getPosition();
+      Point3DReadOnly pathStart = path.get(0).getPosition();
 
       Point2DReadOnly pathEnd2D = new Point2D(pathEnd);
       Point2DReadOnly pathStart2D = new Point2D(pathStart);

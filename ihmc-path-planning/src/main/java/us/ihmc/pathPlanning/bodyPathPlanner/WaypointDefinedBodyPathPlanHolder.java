@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.bodyPathPlanner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -11,45 +12,38 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.AngleTools;
 
-public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
+public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 {
-   private List<Point2DReadOnly> waypoints;
-   private List<Point3DReadOnly> waypoints3D;
+   private List<Point2DReadOnly> waypointPositions;
+   private List<MutableDouble> waypointHeadings;
    private double[] maxAlphas;
    private double[] segmentLengths;
-   private double[] segmentHeadings;
    private final BodyPathPlan bodyPathPlan = new BodyPathPlan();
 
    @Override
-   public void setWaypoints(List<? extends Point3DReadOnly> waypoints)
+   public void setWaypoints(List<? extends Point3DReadOnly> waypointPositions, List<MutableDouble> waypointHeadings)
    {
-      if (waypoints.size() < 2)
-      {
-         throw new RuntimeException("Must have at least two waypoints!");
-      }
-      this.waypoints = new ArrayList<>();
-      this.waypoints3D = new ArrayList<>();
-      this.waypoints3D.addAll(waypoints);
-      for (int i = 0; i < waypoints.size(); i++)
-         this.waypoints.add(new Point2D(waypoints.get(i)));
-      this.maxAlphas = new double[waypoints.size() - 1];
-      this.segmentLengths = new double[waypoints.size() - 1];
-      this.segmentHeadings = new double[waypoints.size() - 1];
-   }
+      if (waypointPositions.size() < 2)
+         throw new RuntimeException("Must have at least two waypoint Positions!");
+      if (waypointHeadings.size() != waypointPositions.size())
+         throw new RuntimeException("The number of waypoint positions and waypoint headings must be equal.");
 
-   @Override
-   public BodyPathPlan compute()
-   {
+      this.waypointPositions = new ArrayList<>();
+      this.waypointHeadings = new ArrayList<>();
+      this.waypointHeadings.addAll(waypointHeadings);
+      for (int i = 0; i < waypointPositions.size(); i++)
+         this.waypointPositions.add(new Point2D(waypointPositions.get(i)));
+      this.maxAlphas = new double[waypointPositions.size() - 1];
+      this.segmentLengths = new double[waypointPositions.size() - 1];
+
       double totalPathLength = 0.0;
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2DReadOnly segmentStart = waypoints.get(i);
-         Point2DReadOnly segmentEnd = waypoints.get(i + 1);
+         Point2DReadOnly segmentStart = this.waypointPositions.get(i);
+         Point2DReadOnly segmentEnd = this.waypointPositions.get(i + 1);
          segmentLengths[i] = segmentEnd.distance(segmentStart);
          totalPathLength = totalPathLength + segmentLengths[i];
-
-         segmentHeadings[i] = calculateHeading(segmentStart, segmentEnd);
       }
 
       for (int i = 0; i < segmentLengths.length; i++)
@@ -59,13 +53,11 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
       }
 
       int startIndex = 0;
-      int endIndex = waypoints.size() - 1;
+      int endIndex = this.waypointPositions.size() - 1;
       bodyPathPlan.clear();
-      bodyPathPlan.setStartPose(waypoints.get(startIndex), segmentHeadings[startIndex]);
-      bodyPathPlan.setGoalPose(waypoints.get(endIndex), segmentHeadings[endIndex - 1]);
-      bodyPathPlan.addWaypoints(waypoints3D);
-
-      return bodyPathPlan;
+      bodyPathPlan.setStartPose(this.waypointPositions.get(startIndex), this.waypointHeadings.get(startIndex).getValue());
+      bodyPathPlan.setGoalPose(this.waypointPositions.get(endIndex), this.waypointHeadings.get(endIndex).getValue());
+      bodyPathPlan.addWaypoints(waypointPositions);
    }
 
    @Override
@@ -74,32 +66,18 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
       return bodyPathPlan;
    }
 
-   private static double calculateHeading(Point2DReadOnly startPose, Point2DReadOnly endPoint)
-   {
-      double deltaX = endPoint.getX() - startPose.getX();
-      double deltaY = endPoint.getY() - startPose.getY();
-      double heading;
-
-      double pathHeading = Math.atan2(deltaY, deltaX);
-      heading = AngleTools.trimAngleMinusPiToPi(pathHeading);
-
-      return heading;
-
-   }
-
    @Override
    public void getPointAlongPath(double alpha, Pose2D poseToPack)
    {
       int segmentIndex = getRegionIndexFromAlpha(alpha);
-      Point2DReadOnly firstPoint = waypoints.get(segmentIndex);
-      Point2DReadOnly secondPoint = waypoints.get(segmentIndex + 1);
+      Point2DReadOnly firstPoint = waypointPositions.get(segmentIndex);
+      Point2DReadOnly secondPoint = waypointPositions.get(segmentIndex + 1);
 
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
-      Point2D pointToPack = new Point2D();
-      pointToPack.interpolate(firstPoint, secondPoint, alphaInSegment);
-      poseToPack.setPosition(pointToPack);
-      poseToPack.setYaw(segmentHeadings[segmentIndex]);
+      poseToPack.getPosition().interpolate(firstPoint, secondPoint, alphaInSegment);
+      double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
+      poseToPack.setYaw(desiredYaw);
    }
 
    @Override
@@ -111,8 +89,8 @@ public class WaypointDefinedBodyPathPlanner implements BodyPathPlanner
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2DReadOnly segmentStart = waypoints.get(i);
-         Point2DReadOnly segmentEnd = waypoints.get(i + 1);
+         Point2DReadOnly segmentStart = waypointPositions.get(i);
+         Point2DReadOnly segmentEnd = waypointPositions.get(i + 1);
          EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, segmentStart, segmentEnd, tempClosestPoint);
 
          double distance = tempClosestPoint.distance(point);

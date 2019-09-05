@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
@@ -16,7 +18,7 @@ public interface WaypointsForPawStepPlanner
 
    void setPlanarRegionsList(PlanarRegionsList planarRegionsList);
 
-   List<Point3D> getWaypoints();
+   List<Pose3DReadOnly> getWaypoints();
 
    PawStepPlanningResult planWaypoints();
 

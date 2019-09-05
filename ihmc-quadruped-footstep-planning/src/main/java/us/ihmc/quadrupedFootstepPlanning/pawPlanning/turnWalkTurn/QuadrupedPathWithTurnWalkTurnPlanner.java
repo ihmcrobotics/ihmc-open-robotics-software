@@ -2,8 +2,8 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -26,7 +26,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
 
 
 
-   private final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   private final BodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
    private final WaypointsForPawStepPlanner waypointPathPlanner;
 
    private final QuadrupedTurnWalkTurnPathPlanner quadBodyPathPlanner;
@@ -115,8 +115,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    {
       PawStepPlanningResult result = waypointPathPlanner.planWaypoints();
 
-      bodyPathPlanner.setWaypoints(waypointPathPlanner.getWaypoints());
-      bodyPathPlanner.compute();
+      bodyPathPlanner.setPoseWaypoints(waypointPathPlanner.getWaypoints());
 
       return result;
    }
