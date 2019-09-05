@@ -46,7 +46,8 @@ public class PlanarRegionPawConstraintData
       }
       else
       {
-         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, -1);
+         double projectionDistanceEpsilon = 1e-3;
+         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, projectionDistanceEpsilon, -1);
          polygonScaler.scaleConvexPolygon(internalRegionToScale, maximumProjectionDistance, scaledRegionPolygon, vertexStartIndicesToNotScale);
          return scaledRegionPolygon;
       }
@@ -61,7 +62,8 @@ public class PlanarRegionPawConstraintData
       }
       else
       {
-         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, -1);
+         double projectionDistanceEpsilon = 1e-3;
+         double maximumProjectionDistance = polygonScaler.computeMaximumScaleDistance(planarRegion.getConvexHull(), projectionInsideDelta, projectionDistanceEpsilon, -1);
          polygonScaler.scaleConvexPolygon(planarRegion.getConvexHull(), maximumProjectionDistance, scaledRegionPolygon, -1);
          return scaledRegionPolygon;
       }

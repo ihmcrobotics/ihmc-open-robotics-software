@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -409,14 +410,23 @@ public class ConvexPolygonScaler
     * Does a binary search for the maximum possible scale distance. For example, a 1m x 1m has a max of 0.5m,
     * and a 1m x 0.5m rectangle has a max of 0.25m. Given the precision value, this method computes the maximum
     * scale distance up to that precision.
+    *
+    * {@param projectionDistanceUpperBound} is the upper bound of the search. If this value is negative an upper bound is calculated.
     */
-   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double scaleDistanceUpperBound, double precision,
+   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double projectionDistanceUpperBound, double precision,
                                              int... vertexStartIndicesToNotScale)
    {
       double projectionDistanceLowerBound = 0.0;
-      double projectionDistanceUpperBound = scaleDistanceUpperBound;
+      int iterations = 0;
+      int maxIterations = 50;
 
-      while (projectionDistanceUpperBound - projectionDistanceLowerBound > precision)
+      if(projectionDistanceUpperBound < 0.0)
+      {
+         BoundingBox2DReadOnly boundingBox = regionToScale.getBoundingBox();
+         projectionDistanceUpperBound = Math.max(boundingBox.getMaxX() - boundingBox.getMinX(), boundingBox.getMaxY() - boundingBox.getMinY());
+      }
+
+      while (projectionDistanceUpperBound - projectionDistanceLowerBound > precision && iterations < maxIterations)
       {
          double projectionQuery = 0.5 * (projectionDistanceUpperBound + projectionDistanceLowerBound);
          boolean success = scaleConvexPolygon(regionToScale, projectionQuery, tempPolygon, vertexStartIndicesToNotScale);
@@ -424,6 +434,7 @@ public class ConvexPolygonScaler
             projectionDistanceLowerBound = projectionQuery;
          else
             projectionDistanceUpperBound = projectionQuery;
+         iterations++;
       }
       return projectionDistanceLowerBound;
    }
