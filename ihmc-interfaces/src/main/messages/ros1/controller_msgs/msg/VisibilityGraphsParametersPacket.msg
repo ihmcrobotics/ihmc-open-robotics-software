@@ -51,6 +51,14 @@ float64 can_duck_under_height
 # Field default value -1.0
 float64 can_easily_step_over_height
 
+bool perform_post_processing_node_shifting
+
+# Field default value True
+bool introduce_midpoints_in_post_processing
+
+# Field default value True
+bool compute_orientations_to_avoid_obstacles
+
 # Field default value -1.0
 float64 length_for_long_inter_region_edge
 

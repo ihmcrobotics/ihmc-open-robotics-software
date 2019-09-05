@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -36,7 +36,7 @@ public class PlanningTestTools
 
 
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath)
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, null, null);
    }
@@ -51,13 +51,13 @@ public class PlanningTestTools
       visualizeAndSleep(planarRegionsList, footseps, null, null, null, null);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
                                         YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, PlannerTools.createDefaultFootPolygon(), registry, graphicsListRegistry);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
                                         ConvexPolygon2D defaultFoothold, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
