@@ -9,7 +9,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,16 +35,21 @@ public class PlannerTools
    private static final double footLength = 0.2;
    private static final double footWidth = 0.1;
 
-   public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
+   public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, heelWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -heelWidth / 2.0);
       footPolygon.update();
 
       return footPolygon;
+   }
+
+   public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
+   {
+      return createFootPolygon(footLength, footWidth, footWidth);
    }
 
    public static ConvexPolygon2D createDefaultFootPolygon()
@@ -54,13 +64,16 @@ public class PlannerTools
 
    public static SideDependentList<ConvexPolygon2D> createFootPolygons(double footLength, double footWidth)
    {
-      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-         footPolygons.put(side, createFootPolygon(footLength, footWidth));
-      return footPolygons;
+      return createFootPolygons(footLength, footWidth, footWidth);
    }
 
-
+   public static SideDependentList<ConvexPolygon2D> createFootPolygons(double footLength, double heelWidth, double toeWidth)
+   {
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         footPolygons.put(side, createFootPolygon(footLength, heelWidth, toeWidth));
+      return footPolygons;
+   }
 
    public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {

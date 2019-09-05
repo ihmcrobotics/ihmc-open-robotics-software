@@ -65,7 +65,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
       {
          VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
          RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
-         videoTimestamp = robotConfigurationData.getTimestamp();
+         videoTimestamp = robotConfigurationData.getMonotonicTime();
 
          latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
 

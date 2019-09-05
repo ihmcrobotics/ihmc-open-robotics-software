@@ -84,6 +84,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       }
    }
 
+   @Override
    public void reset()
    {
       hasBeenCalled.set(false);

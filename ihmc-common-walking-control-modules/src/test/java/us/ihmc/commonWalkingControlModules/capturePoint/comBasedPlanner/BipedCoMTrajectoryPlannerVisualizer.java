@@ -228,6 +228,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
          feetInContact.add(robotSide);
 
       scsParameters.setShowWindows(visualize);
+      scsParameters.setCreateGUI(visualize);
 
       scs = new SimulationConstructionSet(robot, scsParameters);
       scs.setDT(simDt, 1);
@@ -248,7 +249,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       scs.startOnAThread();
       simulate();
-      ThreadTools.sleepForever();
+      if (visualize)
+         ThreadTools.sleepForever();
    }
 
    private static double computeStiffness()

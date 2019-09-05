@@ -217,7 +217,10 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    JointDesiredOutputBasics getJointDesiredOutput(int index);
 
    @Override
-   JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint);
+   default JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint)
+   {
+      return getJointDesiredOutputFromHash(joint.hashCode());
+   }
 
    @Override
    JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode);
@@ -230,5 +233,10 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    static void throwJointNotRegisteredException(int index)
    {
       throw new RuntimeException("The joint index : " + index + " has not been registered.");
+   }
+
+   static void throwJointAlreadyRegisteredException(OneDoFJointBasics joint)
+   {
+      throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
    }
 }

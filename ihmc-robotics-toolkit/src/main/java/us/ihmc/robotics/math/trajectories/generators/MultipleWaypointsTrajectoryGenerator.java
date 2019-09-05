@@ -275,6 +275,19 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       pointToPack.setTime(lastWaypoint.getTime());
    }
 
+   public double getFirstWaypointTime()
+   {
+      return waypoints.get(0).getTime();
+   }
+
+   public void getFirstWaypoint(OneDoFTrajectoryPointBasics pointToPack)
+   {
+      YoOneDoFTrajectoryPoint firstWaypoint = waypoints.get(0);
+      pointToPack.setPosition(firstWaypoint.getPosition());
+      pointToPack.setVelocity(firstWaypoint.getVelocity());
+      pointToPack.setTime(firstWaypoint.getTime());
+   }
+
    @Override
    public String toString()
    {

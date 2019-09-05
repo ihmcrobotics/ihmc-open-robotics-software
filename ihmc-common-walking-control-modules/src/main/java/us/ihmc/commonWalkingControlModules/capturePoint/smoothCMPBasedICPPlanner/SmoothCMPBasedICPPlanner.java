@@ -169,7 +169,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    protected final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    protected final List<YoDouble> swingDurations = new ArrayList<>();
-   protected final List<YoDouble> touchdownDurations = new ArrayList<>();
    protected final List<YoDouble> transferDurations = new ArrayList<>();
    protected final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
@@ -265,9 +264,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
-         YoDouble touchdownDuration = new YoDouble(namePrefix + "TouchdownDuration" + i, registry);
-         touchdownDuration.setToNaN();
-         touchdownDurations.add(touchdownDuration);
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
@@ -310,9 +306,9 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       }
 
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
-                                                                  numberFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
-                                                                  swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, debug,
-                                                                  numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames, registry);
+                                                                  numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
+                                                                  swingDurationShiftFractions, transferDurationAlphas, debug, numberOfUpcomingFootsteps,
+                                                                  upcomingFootstepsData, soleZUpFrames, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
 
@@ -320,7 +316,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                   yoGraphicsListRegistry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isDoubleSupport, registry);
-      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, registry);
+      boolean createAngularMomentumPredictor = icpPlannerParameters.getAngularMomentumEstimationParameters() != null;
+      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, createAngularMomentumPredictor, registry);
 
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
@@ -632,18 +629,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    }
 
    @Override
-   public void setTouchdownDuration(int stepNumber, double duration)
-   {
-      touchdownDurations.get(stepNumber).set(duration);
-   }
-
-    @Override
-   public double getTouchdownDuration(int stepNumber)
-   {
-       return touchdownDurations.get(stepNumber).getDoubleValue();
-   }
-
-   @Override
    public double getTransferDuration(int stepNumber)
    {
       return transferDurations.get(stepNumber).getDoubleValue();
@@ -758,7 +743,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       {
          swingDurations.get(i).setToNaN();
          transferDurations.get(i).setToNaN();
-         touchdownDurations.get(i).setToNaN();
          swingDurationAlphas.get(i).setToNaN();
          transferDurationAlphas.get(i).setToNaN();
          swingDurationShiftFractions.get(i).setToNaN();
@@ -795,6 +779,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          LogTools.warn("Received bad footstep: " + footstep + ", ignoring");
          return;
       }
+      else if (numberOfUpcomingFootsteps.getValue() == numberFootstepsToConsider.getValue())
+      {
+         return;
+      }
       else
       {
          upcomingFootstepsData.add().set(footstep, timing);
@@ -804,20 +792,15 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       int footstepIndex = referenceCoPGenerator.getNumberOfFootstepsRegistered() - 1;
 
       double swingDuration = timing.getSwingTime();
-      double touchdownDuration = timing.getTouchdownDuration();
       double transferTime = timing.getTransferTime();
 
       if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
          swingDuration = 1.0;
 
-      if (!Double.isFinite(touchdownDuration) || touchdownDuration < 0.0)
-         touchdownDuration = 0.0;
-
       if (!Double.isFinite(transferTime) || transferTime < 0.0)
          transferTime = 1.0;
 
       swingDurations.get(footstepIndex).set(swingDuration);
-      touchdownDurations.get(footstepIndex).set(touchdownDuration);
       transferDurations.get(footstepIndex).set(transferTime);
 
       swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());

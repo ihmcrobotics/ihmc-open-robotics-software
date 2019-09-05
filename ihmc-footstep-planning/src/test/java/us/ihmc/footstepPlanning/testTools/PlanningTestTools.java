@@ -54,6 +54,12 @@ public class PlanningTestTools
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
                                         YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, PlannerTools.createDefaultFootPolygon(), registry, graphicsListRegistry);
+   }
+
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+                                        ConvexPolygon2D defaultFoothold, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       if (registry != null)
          scs.addYoVariableRegistry(registry);
@@ -95,7 +101,7 @@ public class PlanningTestTools
       if (footseps != null)
       {
          YoFrameConvexPolygon2D yoDefaultFootPolygon = new YoFrameConvexPolygon2D("DefaultFootPolygon", worldFrame, 4, vizRegistry);
-         yoDefaultFootPolygon.set(PlannerTools.createDefaultFootPolygon());
+         yoDefaultFootPolygon.set(defaultFoothold);
 
          int numberOfSteps = footseps.getNumberOfSteps();
 

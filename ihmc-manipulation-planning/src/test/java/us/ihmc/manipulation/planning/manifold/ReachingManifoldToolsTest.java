@@ -1,6 +1,6 @@
 package us.ihmc.manipulation.planning.manifold;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,9 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ReachingManifoldMessage;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Cylinder3D;
-import us.ihmc.euclid.shape.Sphere3D;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.ReachingManifoldCommand;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -33,7 +31,7 @@ public class ReachingManifoldToolsTest
 
    private final RigidBodyTransform shapeTransform = new RigidBodyTransform();
    private final Sphere3D sphere = new Sphere3D(3.0, 3.0, 3.0, 1.0);
-   private final Cylinder3D cylinder = new Cylinder3D(new RigidBodyTransform(), 1.0, 0.5);
+   private final Cylinder3D cylinder = new Cylinder3D(1.0, 0.5);
 
    private void appendRandomTransform(RigidBodyTransform transform)
    {

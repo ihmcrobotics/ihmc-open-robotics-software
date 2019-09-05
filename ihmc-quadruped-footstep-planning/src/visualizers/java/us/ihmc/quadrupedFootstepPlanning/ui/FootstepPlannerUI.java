@@ -63,6 +63,8 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
+   private PlannerReachParametersUIController plannerReachParametersUIController;
+   @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
@@ -104,11 +106,13 @@ public class FootstepPlannerUI
       mainPane = loader.load();
 
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
@@ -117,18 +121,21 @@ public class FootstepPlannerUI
 
       setMainTabTopics();
       footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      plannerReachParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       mainTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsVizController.bindControls();
       footstepPlannerVizController.bindControls();
 
       footstepPlannerParametersUIController.loadFromFile();
+      plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -138,7 +145,7 @@ public class FootstepPlannerUI
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
-                                                                 GoalOrientationTopic, XGaitSettingsTopic);
+                                                                 GoalOrientationTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
                                                                        StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
                                                                        LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);
@@ -270,7 +277,8 @@ public class FootstepPlannerUI
       mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
                                            FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
                                            FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
-                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic);
+                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic,
+                                           FootstepPlannerMessagerAPI.StartTargetTypeTopic, FootstepPlannerMessagerAPI.StartFeetPositionTopic);
       mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
       mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
       mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);

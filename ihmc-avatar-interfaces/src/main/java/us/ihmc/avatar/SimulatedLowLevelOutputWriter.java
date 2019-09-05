@@ -3,8 +3,7 @@ package us.ihmc.avatar;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -27,7 +26,7 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
    }
 
    @Override
-   public void setJointDesiredOutputList(JointDesiredOutputList lowLevelDataHolder)
+   public void setJointDesiredOutputList(JointDesiredOutputListBasics lowLevelDataHolder)
    {
       revoluteJoints.clear();
 
@@ -42,18 +41,6 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
          ImmutablePair<OneDegreeOfFreedomJoint, JointDesiredOutputReadOnly> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, JointDesiredOutputReadOnly>(oneDoFJoint, data);
          this.revoluteJoints.add(jointPair);
       }
-
-   }
-
-   @Override
-   public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator)
-   {
-
-   }
-
-   @Override
-   public void initialize()
-   {
 
    }
 

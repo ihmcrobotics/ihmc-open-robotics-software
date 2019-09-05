@@ -49,7 +49,8 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       }
 
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
-      robotConfigurationData.setTimestamp(totalNsecs);
+      robotConfigurationData.setWallTime(totalNsecs);
+      robotConfigurationData.setMonotonicTime(totalNsecs);
       Vector3D translation = new Vector3D();
       Quaternion orientation = new Quaternion();
       robotConfigurationData.getRootTranslation().set(translation);

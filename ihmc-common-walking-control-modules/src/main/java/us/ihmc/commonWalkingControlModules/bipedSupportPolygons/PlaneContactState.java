@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.List;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -46,4 +48,62 @@ public interface PlaneContactState
    public abstract boolean pollContactHasChangedNotification();
 
    public abstract boolean peekContactHasChangedNotification();
+
+   /**
+    * Will modify the provided contact state such that all contact points with the largest
+    * x position value will be in contact and all other contact points will be deactivated.
+    *
+    * @param contactState to enable the toe contacts on.
+    */
+   public static void enableToeContacts(PlaneContactState contactState)
+   {
+      double maxX = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < contactState.getContactPoints().size(); i++)
+      {
+         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         maxX = Math.max(maxX, x);
+      }
+      for (int i = 0; i < contactState.getContactPoints().size(); i++)
+      {
+         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         contactState.getContactPoints().get(i).setInContact(Precision.equals(x, maxX));
+      }
+      contactState.notifyContactStateHasChanged();
+   }
+
+   /**
+    * Will modify the provided contact state such that all contact points with the smallest
+    * x position value will be in contact and all other contact points will be deactivated.
+    *
+    * @param contactState to enable the heel contacts on.
+    */
+   public static void enableHeelContacts(PlaneContactState contactState)
+   {
+      double minX = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < contactState.getContactPoints().size(); i++)
+      {
+         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         minX = Math.min(minX, x);
+      }
+      for (int i = 0; i < contactState.getContactPoints().size(); i++)
+      {
+         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         contactState.getContactPoints().get(i).setInContact(Precision.equals(x, minX));
+      }
+      contactState.notifyContactStateHasChanged();
+   }
+
+   /**
+    * Enables all contact points in the provided contact state.
+    *
+    * @param contactState to enable all contacts on.
+    */
+   public static void enableAllContacts(PlaneContactState contactState)
+   {
+      for (int i = 0; i < contactState.getContactPoints().size(); i++)
+      {
+         contactState.getContactPoints().get(i).setInContact(true);
+      }
+      contactState.notifyContactStateHasChanged();
+   }
 }

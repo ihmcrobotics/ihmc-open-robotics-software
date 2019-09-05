@@ -21,11 +21,10 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -37,7 +36,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private FootstepPlanningResult planningResult;
 
-   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private PipeLine<BehaviorAction> pipeLine;
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private FramePose3D goalPose = null;
@@ -53,11 +52,15 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+   
+   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
+   
+   private boolean assumeFlatGround = false;
 
    public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 
@@ -67,9 +70,11 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
 
-   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
+   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerType footStepPlannerToUse, boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
+      this.assumeFlatGround = assumeFlatGround;
+      this.footStepPlannerToUse = footStepPlannerToUse;
       this.initialStanceSide = initialStanceSide;
       this.initialStanceFootPose.setIncludingFrame(initialStanceFootPose);
       this.initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -126,9 +131,16 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             planId.increment();
             FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
-                                                                                                                    goalPose, FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                                    goalPose, footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+            request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
+            {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
+            }
+            else
+            {
+               publishTextToSpeech("PlanPathToLocationBehavior: Planar regions are null, Requesting Plan without planar regions");
+            }
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
             footstepPlanningRequestPublisher.publish(request);
@@ -141,7 +153,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            publishTextToSpeech("PlanPathToLocationBehavior: Waiting For Plan");
 
             sleepBehavior.setSleepTime(timeout);
          }

@@ -162,8 +162,12 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
    {
-      isInContact.set(trustFootSwitch);
+   }
+
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
+   {
    }
 }

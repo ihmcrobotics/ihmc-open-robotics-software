@@ -1,18 +1,28 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.swing.JFrame;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -25,13 +35,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.*;
-
 public class PolygonWigglingTest
 {
    private static final boolean visualize = false;
@@ -41,12 +44,6 @@ public class PolygonWigglingTest
    private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
 
    private final static double epsilon = 0.00001;
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testSimpleProjection()
@@ -76,6 +73,50 @@ public class PolygonWigglingTest
       }
 
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+   }
+
+   @Test
+   public void testProjectionBestEffort()
+   {
+      ConvexPolygon2D plane = new ConvexPolygon2D();
+      plane.addVertex(0.0, 0.0);
+      plane.addVertex(0.5, 0.0);
+      plane.addVertex(0.0, 0.5);
+      plane.addVertex(0.5, 0.5);
+      plane.update();
+
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
+      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.deltaInside = 0.5; // Not possible, should do the best it can.
+      ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
+
+      if (visualize)
+      {
+         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      // A deltaInside of 0.1 is possible in this case so the wiggler should have done at least that.
+      checkThatWiggledInsideBestEffort(plane, 0.1, foot);
+   }
+
+   private void checkThatWiggledInsideBestEffort(ConvexPolygon2D plane, double minDelta, ConvexPolygon2D foot)
+   {
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+
+      for (int i = 0; i < foot.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = foot.getVertex(i);
+         double distance = Math.abs(plane.signedDistance(vertex));
+         assertTrue(distance > minDelta);
+      }
    }
 
    @Test
@@ -158,7 +199,9 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(foot == null);
+      double initialDistance = initialFoot.getCentroid().distance(plane.getCentroid());
+      double finalDistance = foot.getCentroid().distance(plane.getCentroid());
+      assertTrue(initialDistance > finalDistance);
    }
 
    @Test
@@ -206,12 +249,20 @@ public class PolygonWigglingTest
          initialFootTransform.setTranslation(x, y, 0.0);
          initialFoot.applyTransform(initialFootTransform, false);
 
-         ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
-         assertTrue(foot == null);
+         WiggleParameters parameters = new WiggleParameters();
+         parameters.minX = -5.0;
+         parameters.maxX = 5.0;
+         parameters.minY = -5.0;
+         parameters.maxY = 5.0;
+         parameters.minYaw = -5.0;
+         parameters.maxYaw = 5.0;
+         ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+         assertTrue(ConvexPolygon2dCalculator.isPolygonInside(plane, 1.0e-5, foot));
 
          if (visualize)
          {
             addPolygonToArtifacts("InitialFoot" + i, initialFoot, Color.RED);
+            addPolygonToArtifacts("Foot" + i, foot, Color.BLUE);
          }
       }
 
@@ -277,7 +328,9 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(foot == null);
+      double initialDistance = initialFoot.getCentroid().distance(plane.getCentroid());
+      double finalDistance = foot.getCentroid().distance(plane.getCentroid());
+      assertTrue(initialDistance > finalDistance);
    }
 
    @Test
@@ -471,7 +524,7 @@ public class PolygonWigglingTest
 
       for (int i = 0; i < foot.getNumberOfVertices(); i++)
       {
-         if (!foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10))
+         if (!foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-5))
          {
             fail("Failed at vertex index: " + i + ", expected: " + expected + ", was: " + foot);
          }
@@ -519,7 +572,7 @@ public class PolygonWigglingTest
          ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
          assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
          if (ConvexPolygon2dCalculator.isPolygonInside(initialFoot, 1.0e-5, plane))
-            assertTrue(initialFoot.epsilonEquals(foot, 1.0e-10));
+            assertTrue(initialFoot.epsilonEquals(foot, 1.0e-5));
 
          if (visualize)
          {
@@ -704,13 +757,16 @@ public class PolygonWigglingTest
       WiggleParameters parameters = new WiggleParameters();
       parameters.minX = 0.0;
       RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, parameters);
-      assertTrue(wiggleTransfrom == null);
+      assertTrue(wiggleTransfrom != null);
+      ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
+      foot.applyTransform(wiggleTransfrom, false);
 
       if (visualize)
       {
          for (int i = 0; i < region.getNumberOfConvexPolygons(); i++)
             addPolygonToArtifacts("Plane" + i, region.getConvexPolygon(i), Color.BLACK);
          addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
          showPlotterAndSleep(artifacts);
       }
    }

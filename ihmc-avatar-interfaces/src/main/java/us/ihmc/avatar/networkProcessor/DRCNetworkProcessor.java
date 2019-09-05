@@ -28,7 +28,7 @@ import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class DRCNetworkProcessor
 {
@@ -36,9 +36,9 @@ public class DRCNetworkProcessor
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
+      tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
       tryToStartModule(() -> setupBehaviorModule(robotModel, params));
-      tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupMocapModule(robotModel, params));
       tryToStartModule(() -> setupZeroPoseRobotConfigurationPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWholebodyTrajectoryToolboxModule(robotModel, params));
@@ -115,7 +115,7 @@ public class DRCNetworkProcessor
    {
       if (params.isBehaviorModuleEnabled())
       {
-         DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+         HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
 
          if (params.isAutomaticDiagnosticEnabled())

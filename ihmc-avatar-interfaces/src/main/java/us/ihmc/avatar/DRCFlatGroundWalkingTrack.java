@@ -5,6 +5,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 import java.util.ArrayList;
 
+import javax.swing.JButton;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
@@ -28,7 +30,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -83,7 +85,7 @@ public class DRCFlatGroundWalkingTrack
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -128,6 +130,14 @@ public class DRCFlatGroundWalkingTrack
 
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
+
+      if (robotInitialSetup.supportsReset())
+      {
+         JButton resetButton = new JButton("Reset Robot");
+         resetButton.addActionListener(e -> avatarSimulation.resetRobot());
+         avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
+      }
+
       avatarSimulation.start();
    }
 

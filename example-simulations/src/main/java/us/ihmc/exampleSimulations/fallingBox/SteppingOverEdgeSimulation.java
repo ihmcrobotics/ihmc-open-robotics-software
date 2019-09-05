@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.fallingBox;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;

@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Cylinder3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
 {
@@ -25,15 +26,15 @@ public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
       this.cylinder3d = getGeometryObject();
    }
 
-   public FrameCylinder3d(ReferenceFrame referenceFrame, double height, double radius)
+   public FrameCylinder3d(ReferenceFrame referenceFrame, double length, double radius)
    {
-      super(referenceFrame, new Cylinder3D(height, radius));
+      super(referenceFrame, new Cylinder3D(length, radius));
       cylinder3d = getGeometryObject();
    }
    
-   public FrameCylinder3d(ReferenceFrame referenceFrame, RigidBodyTransform configuration, double height, double radius)
+   public FrameCylinder3d(ReferenceFrame referenceFrame, Point3DReadOnly position, Vector3DReadOnly axis, double length, double radius)
    {
-      super(referenceFrame, new Cylinder3D(configuration, height, radius));
+      super(referenceFrame, new Cylinder3D(position, axis, length, radius));
       cylinder3d = getGeometryObject();
    }
 
@@ -47,8 +48,8 @@ public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
       return cylinder3d.getRadius();
    }
 
-   public double getHeight()
+   public double getLength()
    {
-      return cylinder3d.getHeight();
+      return cylinder3d.getLength();
    }
 }

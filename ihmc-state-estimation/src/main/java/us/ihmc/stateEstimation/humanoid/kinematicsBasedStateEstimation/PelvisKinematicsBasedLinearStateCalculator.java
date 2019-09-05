@@ -220,6 +220,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    public void initialize(FramePoint3D pelvisPosition)
    {
+      for (int i = 0; i < feetRigidBodies.size(); i++)
+      {
+         RigidBodyBasics foot = feetRigidBodies.get(i);
+         footToRootJointPositions.get(foot).reset();
+         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(foot);
+         copFilteredInFootFrame.reset();
+         copFilteredInFootFrame.update(0.0, 0.0);
+         footVelocitiesInWorld.get(foot).setToZero();
+      }
+      setPelvisLinearVelocityToZero();
+
       updateKinematics();
       setPelvisPosition(pelvisPosition);
 
@@ -520,8 +531,21 @@ public class PelvisKinematicsBasedLinearStateCalculator
       linearVelocityToPack.setIncludingFrame(rootJointLinearVelocityNewTwist);
    }
 
+   /** Call {@link #getFootToRootJointPosition(FramePoint3D, RigidBodyBasics)} instead */
+   @Deprecated
    public void getFootToPelvisPosition(FramePoint3D positionToPack, RigidBodyBasics foot)
+   {
+      getFootToRootJointPosition(positionToPack, foot);
+   }
+
+   public void getFootToRootJointPosition(FramePoint3D positionToPack, RigidBodyBasics foot)
    {
       positionToPack.setIncludingFrame(footToRootJointPositions.get(foot));
    }
+
+   public FrameVector3DReadOnly getFootVelocityInWorld(RigidBodyBasics foot)
+   {
+      return footVelocitiesInWorld.get(foot);
+   }
+
 }

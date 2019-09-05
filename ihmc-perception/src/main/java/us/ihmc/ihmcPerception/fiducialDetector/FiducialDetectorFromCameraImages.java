@@ -1,6 +1,11 @@
 package us.ihmc.ihmcPerception.fiducialDetector;
 
+import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
@@ -26,6 +31,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -39,6 +45,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
+
+   private boolean DEBUG = false;
 
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
@@ -58,7 +66,7 @@ public class FiducialDetectorFromCameraImages
 
    private final YoGraphicReferenceFrame cameraGraphic, detectorGraphic, locatedFiducialGraphic, reportedFiducialGraphic;
 
-   private final String prefix = "fiducial";
+   private String prefix = "fiducial";
 
    private final YoDouble expectedFiducialSize = new YoDouble("expectedFiducialSize", registry);
    private final YoDouble fieldOfViewXinRadians = new YoDouble("fovXRadians", registry);
@@ -72,18 +80,22 @@ public class FiducialDetectorFromCameraImages
    private final YoDouble detectorEulerRotZ = new YoDouble(prefix + "DetectorEulerRotZ", registry);
 
    private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
-   private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
+   private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry,
+                                                                                                      targetIDHasBeenLocated, 4);
    private final YoLong targetIDToLocate = new YoLong(prefix + "TargetIDToLocate", registry);
 
    private final YoFramePose3D cameraPose = new YoFramePose3D(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D locatedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(),
+                                                                                    registry);
 
-   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry, String prefix)
    {
       this.expectedFiducialSize.set(1.0);
-
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+      this.prefix = prefix;
+      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+                                              ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
 
       expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
       {
@@ -92,14 +104,11 @@ public class FiducialDetectorFromCameraImages
          {
             synchronized (expectedFiducialSizeChangedConch)
             {
-               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+                                                       ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
             }
          }
       });
-
-      // fov values from http://carnegierobotics.com/multisense-s7/
-      fieldOfViewXinRadians.set(Math.toRadians(80.0));
-      fieldOfViewYinRadians.set(Math.toRadians(45.0));
 
       cameraReferenceFrame = new ReferenceFrame(prefix + "CameraReferenceFrame", ReferenceFrame.getWorldFrame())
       {
@@ -128,7 +137,8 @@ public class FiducialDetectorFromCameraImages
          }
       };
 
-      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame, transformFromReportedToFiducialFrame);
+      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame,
+                                                                   transformFromReportedToFiducialFrame);
 
       if (yoGraphicsListRegistry == null)
       {
@@ -167,15 +177,44 @@ public class FiducialDetectorFromCameraImages
 
    public void detectFromVideoPacket(VideoPacket videoPacket)
    {
-      BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
-      detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+      detect(videoPacket);
    }
 
-   public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward)
+   private JFrame frame;
+   private ImageIcon image;
+
+   public void detect(VideoPacket videoPacket)
    {
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+      detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
+             HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
+
+   }
+
+   public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
+                      IntrinsicParameters intrinsicParameters)
+   {
+      detector.setIntrinsic(intrinsicParameters);
+      //increase brightness for sim
+      //RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      //rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
+      if (DEBUG)
+      {
+         if (frame == null)
+         {
+            frame = new JFrame();
+
+            frame.getContentPane().setLayout(new FlowLayout());
+
+            image = new ImageIcon(bufferedImage);
+            frame.getContentPane().add(new JLabel(image));
+
+            frame.pack();
+            frame.setVisible(true);
+         }
+      }
       synchronized (expectedFiducialSizeChangedConch)
       {
-         setIntrinsicParameters(bufferedImage);
 
          cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
@@ -189,8 +228,13 @@ public class FiducialDetectorFromCameraImages
 
          GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
-         detector.detect(grayImage);
+         if (DEBUG)
+         {
+            image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
+            frame.setVisible(true);
+         }
 
+         detector.detect(grayImage);
          int matchingFiducial = -1;
          for (int i = 0; i < detector.totalFound(); i++)
          {
@@ -247,32 +291,24 @@ public class FiducialDetectorFromCameraImages
             targetIDHasBeenLocated.set(false);
          }
       }
-      
+
       targetIDHasBeenLocatedFiltered.update();
    }
 
-   private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+  // private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
 
-   private IntrinsicParameters setIntrinsicParameters(BufferedImage image)
-   {
-      int height = image.getHeight();
-      int width = image.getWidth();
-
-      double fx = (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
-      double fy = (height / 2.0) / Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
-
-      intrinsicParameters.width = width;
-      intrinsicParameters.height = height;
-      intrinsicParameters.cx = width / 2.0;
-      intrinsicParameters.cy = height / 2.0;
-      intrinsicParameters.fx = fx;
-      intrinsicParameters.fy = fy;
-
-      detector.setIntrinsic(intrinsicParameters);
-      this.targetIDHasBeenLocated.set(false);
-
-      return intrinsicParameters;
-   }
+   /*
+    * private IntrinsicParameters setIntrinsicParameters(BufferedImage image) {
+    * int height = image.getHeight(); int width = image.getWidth(); double fx =
+    * (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
+    * double fy = (height / 2.0) /
+    * Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
+    * intrinsicParameters.width = width; intrinsicParameters.height = height;
+    * intrinsicParameters.cx = width / 2.0; intrinsicParameters.cy = height /
+    * 2.0; intrinsicParameters.fx = fx; intrinsicParameters.fy = fy;
+    * detector.setIntrinsic(intrinsicParameters);
+    * this.targetIDHasBeenLocated.set(false); return intrinsicParameters; }
+    */
 
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {

@@ -45,7 +45,7 @@ public class QuadrupedAStarFootstepPlannerTest
 {
    private static final double epsilon = 1e-3;
    private static boolean visualize = true;
-   private static boolean activelyVisualize = true;
+   private static boolean activelyVisualize = false;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
@@ -208,13 +208,12 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.getAmbleMediumTimings().setStepDuration(0.4);
       xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.35);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
       if (activelyVisualize)
          visualizer = new QuadrupedAStarFootstepPlannerVisualizer(planarRegionsList);
       else
          visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, registry);
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();

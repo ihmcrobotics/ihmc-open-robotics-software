@@ -29,11 +29,11 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -47,7 +47,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    private final ArmTrajectoryBehavior rightArmBehavior;
    private HumanoidReferenceFrames referenceFrames;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    public enum BasicStates
    {
@@ -62,6 +62,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                                     WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.referenceFrames = referenceFrames;
       this.fullRobotModel = fullRobotModel;
       footListBehavior = atlasPrimitiveActions.footstepListBehavior;

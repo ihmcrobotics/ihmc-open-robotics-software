@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Ramp3D;
+import us.ihmc.euclid.shape.primitives.Ramp3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3D>
@@ -38,6 +38,6 @@ public class FrameRamp3d extends FrameShape3d<FrameRamp3d, Ramp3D>
 
    public void setTransform(RigidBodyTransform transform3D)
    {
-      ramp3d.setPose(transform3D);
+      ramp3d.getPose().set(transform3D);
    }
 }
