@@ -19,8 +19,23 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public long timestamp_;
-   public long sensor_head_pps_timestamp_;
+   /**
+            * Time in nanoseconds of the clock hanging on the wall.
+            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+            */
+   public long wall_time_;
+   /**
+            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+            * It is not affected by changes in the system time-of-day clock.
+            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+            */
+   public long monotonic_time_;
+   /**
+            * Platform dependent.
+            * Time signal in nanoseconds that can be used to synchronize two time sources.
+            */
+   public long sync_timestamp_;
    public int joint_name_hash_;
    public us.ihmc.idl.IDLSequence.Float  joint_angles_;
    public us.ihmc.idl.IDLSequence.Float  joint_velocities_;
@@ -65,9 +80,11 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    {
       sequence_id_ = other.sequence_id_;
 
-      timestamp_ = other.timestamp_;
+      wall_time_ = other.wall_time_;
 
-      sensor_head_pps_timestamp_ = other.sensor_head_pps_timestamp_;
+      monotonic_time_ = other.monotonic_time_;
+
+      sync_timestamp_ = other.sync_timestamp_;
 
       joint_name_hash_ = other.joint_name_hash_;
 
@@ -106,22 +123,59 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       return sequence_id_;
    }
 
-   public void setTimestamp(long timestamp)
+   /**
+            * Time in nanoseconds of the clock hanging on the wall.
+            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+            */
+   public void setWallTime(long wall_time)
    {
-      timestamp_ = timestamp;
+      wall_time_ = wall_time;
    }
-   public long getTimestamp()
+   /**
+            * Time in nanoseconds of the clock hanging on the wall.
+            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+            */
+   public long getWallTime()
    {
-      return timestamp_;
+      return wall_time_;
    }
 
-   public void setSensorHeadPpsTimestamp(long sensor_head_pps_timestamp)
+   /**
+            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+            * It is not affected by changes in the system time-of-day clock.
+            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+            */
+   public void setMonotonicTime(long monotonic_time)
    {
-      sensor_head_pps_timestamp_ = sensor_head_pps_timestamp;
+      monotonic_time_ = monotonic_time;
    }
-   public long getSensorHeadPpsTimestamp()
+   /**
+            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+            * It is not affected by changes in the system time-of-day clock.
+            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+            */
+   public long getMonotonicTime()
    {
-      return sensor_head_pps_timestamp_;
+      return monotonic_time_;
+   }
+
+   /**
+            * Platform dependent.
+            * Time signal in nanoseconds that can be used to synchronize two time sources.
+            */
+   public void setSyncTimestamp(long sync_timestamp)
+   {
+      sync_timestamp_ = sync_timestamp;
+   }
+   /**
+            * Platform dependent.
+            * Time signal in nanoseconds that can be used to synchronize two time sources.
+            */
+   public long getSyncTimestamp()
+   {
+      return sync_timestamp_;
    }
 
    public void setJointNameHash(int joint_name_hash)
@@ -249,9 +303,11 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wall_time_, other.wall_time_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_head_pps_timestamp_, other.sensor_head_pps_timestamp_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.monotonic_time_, other.monotonic_time_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sync_timestamp_, other.sync_timestamp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_name_hash_, other.joint_name_hash_, epsilon)) return false;
 
@@ -303,9 +359,11 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.timestamp_ != otherMyClass.timestamp_) return false;
+      if(this.wall_time_ != otherMyClass.wall_time_) return false;
 
-      if(this.sensor_head_pps_timestamp_ != otherMyClass.sensor_head_pps_timestamp_) return false;
+      if(this.monotonic_time_ != otherMyClass.monotonic_time_) return false;
+
+      if(this.sync_timestamp_ != otherMyClass.sync_timestamp_) return false;
 
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
 
@@ -339,10 +397,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       builder.append("RobotConfigurationData {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("timestamp=");
-      builder.append(this.timestamp_);      builder.append(", ");
-      builder.append("sensor_head_pps_timestamp=");
-      builder.append(this.sensor_head_pps_timestamp_);      builder.append(", ");
+      builder.append("wall_time=");
+      builder.append(this.wall_time_);      builder.append(", ");
+      builder.append("monotonic_time=");
+      builder.append(this.monotonic_time_);      builder.append(", ");
+      builder.append("sync_timestamp=");
+      builder.append(this.sync_timestamp_);      builder.append(", ");
       builder.append("joint_name_hash=");
       builder.append(this.joint_name_hash_);      builder.append(", ");
       builder.append("joint_angles=");

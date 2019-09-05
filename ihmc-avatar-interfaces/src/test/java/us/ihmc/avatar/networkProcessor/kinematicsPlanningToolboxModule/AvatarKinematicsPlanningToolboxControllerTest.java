@@ -20,7 +20,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -46,6 +46,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -231,9 +232,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       if (inputMessage.getCenterOfMassMessage() == null)
          System.out.println("null");
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
       int numberOfIterations = 350;
 
@@ -292,9 +293,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
                                                                                                                                           keyFrameTimes);
       commandInputManager.submitMessage(holdAnotherHandMessage);
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
       int numberOfIterations = 350;
 
@@ -334,9 +335,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       commandInputManager.submitMessage(endEffectorMessage);
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
       int numberOfIterations = 350;
 
@@ -387,9 +388,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       commandInputManager.submitMessage(endEffectorMessage);
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
       int numberOfIterations = 350;
 
@@ -449,9 +450,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       commandInputManager.submitMessage(endEffectorMessage);
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
 
       int numberOfIterations = 350;
 
@@ -500,9 +501,11 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, robotModel.getJointMap());
-      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, null, 0);
-      drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
-      drcPerfectSensorReaderFactory.getSensorReader().read();
+      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
+      drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
+      SensorDataContext sensorDataContext = new SensorDataContext();
+      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
+      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
       return initialFullRobotModel;
    }
 

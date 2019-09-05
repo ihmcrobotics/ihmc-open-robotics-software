@@ -30,6 +30,15 @@ module controller_msgs
          * Properties for queueing footstep lists.
          */
         controller_msgs::msg::dds::QueueableMessage queueing_properties;
+        /**
+         * Defines if the step list is adjustable
+         */
+        @defaultValue(value=True)
+        boolean are_steps_adjustable;
+        /**
+         * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+         */
+        boolean offset_steps_height_with_execution_error;
       };
     };
   };

@@ -1,27 +1,89 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.commons.InterpolationTools;
+import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.robotics.trajectories.CubicSplineCurveGenerator;
 
 public interface FootstepPlannerParameters
 {
    /**
     * The total maximum Euclidean distance length.
     */
-   double getMaximumStepReach();
+   double getMaximumFrontStepReach();
 
-   double getMaximumStepLength();
+   double getMaximumFrontStepLength();
 
-   double getMinimumStepLength();
+   double getMinimumFrontStepLength();
+
+   default double getMaximumHindStepReach()
+   {
+      return getMaximumFrontStepReach();
+   }
+
+   default double getMaximumHindStepLength()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumHindStepLength()
+   {
+      return getMinimumFrontStepLength();
+   }
 
    double getMaximumStepWidth();
 
    double getMinimumStepWidth();
+
+   default double getMaximumFrontStepLengthWhenSteppingUp()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingUp()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingUp()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingUp()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingUp()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   default double getMaximumFrontStepLengthWhenSteppingDown()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingDown()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingDown()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingDown()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingDown()
+   {
+      return Double.NEGATIVE_INFINITY;
+   }
 
    double getMinimumStepYaw();
 
@@ -49,24 +111,31 @@ public interface FootstepPlannerParameters
 
    double getMinYClearanceFromFoot();
 
-
-   default double getDesiredWalkingSpeed(double phase)
+   default double getMaxWalkingSpeedMultiplier()
    {
-      if (phase < 90)
-         return InterpolationTools.hermiteInterpolate(getPaceSpeed(), getCrawlSpeed(), phase / 90.0);
-      else
-         return InterpolationTools.hermiteInterpolate(getCrawlSpeed(), getTrotSpeed(), (phase - 90.0) / 90.0);
+      return 0.8;
    }
 
-   double getCrawlSpeed();
-   double getTrotSpeed();
-   double getPaceSpeed();
-
    /**
-    * Distance which a foothold is projected into planar region. Should be a positive value,
+    * Distance which a foothold is projected into planar region during expansion and node checking. Should be a positive value,
     * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
     */
-   double getProjectInsideDistance();
+   double getProjectInsideDistanceForExpansion();
+
+   /**
+    * Distance which a foothold is projected into planar region during post processing. Should be a positive value,
+    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
+    */
+   double getProjectInsideDistanceForPostProcessing();
+
+   boolean getProjectInsideUsingConvexHullDuringExpansion();
+
+   boolean getProjectInsideUsingConvexHullDuringPostProcessing();
+
+   /***
+    * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
+    */
+   double getMaximumXYWiggleDistance();
 
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
@@ -109,43 +178,80 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   default double getMinimumDistanceFromCliffBottoms()
+   default double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
       return 0.1;
    }
 
-   /**
-    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
-    * until it is minimumDistanceFromCliffBottoms away from it.
-    *
-    * <p>
-    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
-    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
-    * generator is capable of swinging over.
-    * </p>
-    */
-   default double getMinimumDistanceFromCliffTops()
+   default double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return 0.01;
+      return 0.1;
    }
 
-   default SteppableRegionFilter getSteppableRegionFilter()
+   default double getMinimumHindEndForwardDistanceFromCliffBottoms()
    {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
+      return 0.1;
+   }
 
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
+   default double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return 0.1;
+   }
 
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
+   default double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return 0.1;
+   }
 
-            return true;
-         }
-      };
+
+   default QuadrupedFootstepPlannerParametersPacket getAsPacket()
+   {
+      QuadrupedFootstepPlannerParametersPacket packet = new QuadrupedFootstepPlannerParametersPacket();
+      packet.setMaximumFrontStepReach(getMaximumFrontStepReach());
+      packet.setMaximumFrontStepLength(getMaximumFrontStepLength());
+      packet.setMinimumFrontStepLength(getMinimumFrontStepLength());
+      packet.setMaximumHindStepReach(getMaximumHindStepReach());
+      packet.setMaximumHindStepLength(getMaximumHindStepLength());
+      packet.setMinimumHindStepLength(getMinimumHindStepLength());
+      packet.setMaximumFrontStepLengthWhenSteppingUp(getMaximumFrontStepLengthWhenSteppingUp());
+      packet.setMinimumFrontStepLengthWhenSteppingUp(getMinimumFrontStepLengthWhenSteppingUp());
+      packet.setMaximumHindStepLengthWhenSteppingUp(getMaximumHindStepLengthWhenSteppingUp());
+      packet.setMinimumHindStepLengthWhenSteppingUp(getMinimumHindStepLengthWhenSteppingUp());
+      packet.setStepZForSteppingUp(getStepZForSteppingUp());
+      packet.setMaximumFrontStepLengthWhenSteppingDown(getMaximumFrontStepLengthWhenSteppingDown());
+      packet.setMinimumFrontStepLengthWhenSteppingDown(getMinimumFrontStepLengthWhenSteppingDown());
+      packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
+      packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
+      packet.setStepZForSteppingDown(getStepZForSteppingDown());
+      packet.setMaximumStepWidth(getMaximumStepWidth());
+      packet.setMinimumStepWidth(getMinimumStepWidth());
+      packet.setMinimumStepYaw(getMinimumStepYaw());
+      packet.setMaximumStepYaw(getMaximumStepYaw());
+      packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
+      packet.setBodyGroundClearance(getBodyGroundClearance());
+      packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
+      packet.setDistanceHeuristicWeight(getDistanceHeuristicWeight());
+      packet.setYawWeight(getYawWeight());
+      packet.setXGaitWeight(getXGaitWeight());
+      packet.setCostPerStep(getCostPerStep());
+      packet.setStepUpWeight(getStepUpWeight());
+      packet.setStepDownWeight(getStepDownWeight());
+      packet.setHeuristicsWeight(getHeuristicsInflationWeight());
+      packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
+      packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
+      packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
+      packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
+      packet.setProjectInsideUsingConvexHullDuringExpansion(getProjectInsideUsingConvexHullDuringExpansion());
+      packet.setProjectInsideUsingConvexHullDuringPostProcessing(getProjectInsideUsingConvexHullDuringPostProcessing());
+      packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
+      packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
+      packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
+      packet.setMinimumFrontEndForwardDistanceFromCliffBottoms(getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumFrontEndBackwardDistanceFromCliffBottoms(getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndForwardDistanceFromCliffBottoms(getMinimumHindEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndBackwardDistanceFromCliffBottoms(getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumLateralDistanceFromCliffBottoms(getMinimumLateralDistanceFromCliffBottoms());
+
+      return packet;
    }
 }

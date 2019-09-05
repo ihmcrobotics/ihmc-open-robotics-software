@@ -30,7 +30,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -76,7 +75,6 @@ public class FullRobotModelTestTools
 
       private final IMUDefinition[] imuDefinitions = new IMUDefinition[0];
       private final ForceSensorDefinition[] forceSensorDefinitions = new ForceSensorDefinition[0];
-      private final ContactSensorDefinition[] contactSensorDefinitions = new ContactSensorDefinition[0];
 
       private final RobotSpecificJointNames robotSpecificJointNames;
 
@@ -434,11 +432,6 @@ public class FullRobotModelTestTools
       @Override public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return forceSensorDefinitions;
-      }
-
-      @Override public ContactSensorDefinition[] getContactSensorDefinitions()
-      {
-         return contactSensorDefinitions;
       }
 
       @Override public double getTotalMass()

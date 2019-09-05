@@ -47,13 +47,13 @@ public class PlannerTestEnvironments
       generator.translate(0.4, 0.0, 0.0);
 
       generator.translate(0.0, -0.5 * cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
       generator.translate(cinderBlockSize, -1.5 * cinderBlockSize, 0.05);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.1);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
 
       generator.identity();
       generator.translate(3 * cinderBlockSize, 0.0, 0.001);
@@ -84,41 +84,41 @@ public class PlannerTestEnvironments
       generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
 
       generator.translate(0.0, -0.5 * cinderBlockSize, -cinderBlockHeight);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
       if (pitchCinderBack)
-         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+         PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
       else
-         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
+         PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
 
       generator.translate(cinderBlockSize, -1.5 * cinderBlockSize, 0.03);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(cinderBlockSize, -0.5 * cinderBlockSize, 0.03);
       if (pitchCinderBack)
-         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+         PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
       else
-         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
+         PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
       generator.translate(0.0, cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
 
       generator.translate(cinderBlockSize, -0.5 * cinderBlockSize, 0.03);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, -0.06);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
 
       generator.identity();
       generator.translate(8 * cinderBlockSize, 0.0, fieldHeight);
@@ -139,13 +139,13 @@ public class PlannerTestEnvironments
       generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
 
       generator.translate(-0.2, -0.5 * cinderBlockSize, -cinderBlockHeight);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.2 + cinderBlockSize, -cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
       generator.translate(0.0, cinderBlockSize, 0.0);
-      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      PlanarRegionsListExamples.generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
 
       generator.identity();
       generator.translate(3 * cinderBlockSize, 0.0, fieldHeight);

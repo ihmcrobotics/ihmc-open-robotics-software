@@ -32,7 +32,7 @@ public class YoReferencePose extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      yoFramePose.getOrientation().getQuaternion(rotation);
+      rotation.set(yoFramePose.getYawPitchRoll());
       transformToParent.setRotation(rotation);
       YoFramePoint3D yoFramePoint = yoFramePose.getPosition();
       transformToParent.setTranslation(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
@@ -84,7 +84,7 @@ public class YoReferencePose extends ReferenceFrame
 
    public void get(Quaternion rotation)
    {
-      yoFramePose.getOrientation().getQuaternion(rotation);
+      rotation.set(yoFramePose.getOrientation());
    }
 
    public void get(Vector3D translation)

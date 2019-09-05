@@ -52,6 +52,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final AtomicBoolean recomputeInitialPose = new AtomicBoolean();
    private final AtomicBoolean recomputeStepAdjustment = new AtomicBoolean();
 
+   private final List<QuadrupedFootstepStatusMessage> sortedMessageList = new ArrayList<>();
    private final FramePose2D tempPose = new FramePose2D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
@@ -274,43 +275,36 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       return getLatestStatusMessage(footstepCompleteStatuses, depth);
    }
 
-   private static QuadrupedFootstepStatusMessage getLatestStatusMessage(QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepStatuses, int depth)
+   private QuadrupedFootstepStatusMessage getLatestStatusMessage(QuadrantDependentList<AtomicReference<QuadrupedFootstepStatusMessage>> footstepStatuses, int depth)
    {
-      double latestEndTime = Double.NEGATIVE_INFINITY;
-      QuadrupedFootstepStatusMessage firstLatestMessage = null;
-      QuadrupedFootstepStatusMessage secondLatestMessage = null;
-      QuadrupedFootstepStatusMessage thirdLatestMessage = null;
-      QuadrupedFootstepStatusMessage fourthLatestMessage = null;
+      if (depth < 1)
+      {
+         throw new IllegalArgumentException("Depth is 1 indexed.");
+      }
+      else if(depth > 4)
+      {
+         throw new IllegalArgumentException("Depth cannot be greater than 4");
+      }
+
+      sortedMessageList.clear();
+
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          QuadrupedFootstepStatusMessage message = footstepStatuses.get(quadrant).get();
-         if (message != null && message.getDesiredStepInterval().getEndTime() > latestEndTime)
+         if (message != null)
          {
-            latestEndTime = message.getDesiredStepInterval().getEndTime();
-            fourthLatestMessage = thirdLatestMessage;
-            thirdLatestMessage = secondLatestMessage;
-            secondLatestMessage = firstLatestMessage;
-            firstLatestMessage = message;
+            sortedMessageList.add(message);
          }
       }
-      switch (depth)
-      {
-      case 1:
-         return firstLatestMessage;
-      case 2:
-         return secondLatestMessage;
-      case 3:
-         return thirdLatestMessage;
-      case 4:
-         return fourthLatestMessage;
-      default:
-         if (depth == 0)
-            throw new IllegalArgumentException("Depth is 1 indexed.");
-         else
-            throw new IllegalArgumentException("Depth cannot be greater than 4.");
-      }
-   }
 
+      if(sortedMessageList.isEmpty())
+      {
+         return null;
+      }
+
+      sortedMessageList.sort((message1, message2) -> Double.compare(message2.getDesiredStepInterval().getEndTime(), message1.getDesiredStepInterval().getEndTime()));
+      return sortedMessageList.get(Math.min(sortedMessageList.size(), depth) - 1);
+   }
 
    public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
    {

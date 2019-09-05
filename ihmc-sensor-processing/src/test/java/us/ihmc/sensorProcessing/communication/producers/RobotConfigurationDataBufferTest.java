@@ -37,7 +37,8 @@ public abstract class RobotConfigurationDataBufferTest
       for (int i = 0; i < RobotConfigurationDataBuffer.BUFFER_SIZE * 2; i++)
       {
          RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, imuDefinitions);
-         test.setTimestamp(i * 10);
+         test.setWallTime(i * 11);
+         test.setMonotonicTime(i * 10);
          test.getJointAngles().add(i * 10);
          buffer.receivedPacket(test);
       }
@@ -86,7 +87,8 @@ public abstract class RobotConfigurationDataBufferTest
          {
             ThreadTools.sleep(100);
             RobotConfigurationData data = new RobotConfigurationData();
-            data.setTimestamp(i * (TEST_COUNT * 10) + i);
+            data.setWallTime(i * (TEST_COUNT * 10) + i);
+            data.setMonotonicTime(i * (TEST_COUNT * 11) + i);
             robotConfigurationDataBuffer.receivedPacket(data);
          }
 
@@ -100,7 +102,8 @@ public abstract class RobotConfigurationDataBufferTest
          }
          assertEquals(1, countdownB.getCount());
          RobotConfigurationData data = new RobotConfigurationData();
-         data.setTimestamp(TEST_COUNT * (TEST_COUNT * 10));
+         data.setWallTime(TEST_COUNT * (TEST_COUNT * 11));
+         data.setMonotonicTime(TEST_COUNT * (TEST_COUNT * 10));
          robotConfigurationDataBuffer.receivedPacket(data);
 
          try

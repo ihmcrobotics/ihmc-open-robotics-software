@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -29,7 +30,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -48,15 +48,15 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfigurati
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -86,7 +86,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
+   private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
+   private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
    private final YoDouble diagnosticControllerTime = new YoDouble("diagnosticControllerTime", registry);
    private final ExecutionTimer diagnosticControllerTimer = new ExecutionTimer("diagnosticControllerTimer", 10.0, registry);
    private final YoLong startTime = new YoLong("startTime", registry);
@@ -163,7 +164,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, monotonicTimeProvider,
                                                                                                             diagnosticSensorProcessingConfiguration,
                                                                                                             jointHandles, emptyPositionJointHandles,
                                                                                                             emptyJointStateHandles, imuHandles,
@@ -173,10 +174,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
-      ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
-      RawJointSensorDataHolderMap rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
-      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
-                                estimatorDesiredJointDataHolder, registry);
+      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
       SensorOutputMapReadOnly sensorOutputMap = sensorReader.getSensorOutputMapReadOnly();
 
@@ -210,15 +208,15 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private boolean firstDiagnosticControlTick = true;
 
    @Override
-   protected void doControl(long time, long duration)
+   protected void doControl(long rosTime, long duration)
    {
       diagnosticControllerTimer.startMeasurement();
-      timestampProvider.setTimestamp(time);
+      wallTimeProvider.setTimestamp(rosTime);
       sensorReader.readSensors();
 
       if (firstEstimatorTick)
       {
-         startTime.set(time);
+         startTime.set(rosTime);
          stateEstimator.initialize();
          forceSensorStateUpdater.initialize();
          firstEstimatorTick = false;
@@ -242,9 +240,9 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       diagnosticController.doControl();
       sensorReader.writeCommandsToRobot();
 
-      diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));
+      diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(rosTime - startTime.getLongValue()));
 
-      yoVariableServer.update(time);
+      yoVariableServer.update(rosTime);
 
       diagnosticControllerTimer.stopMeasurement();
    }
@@ -254,7 +252,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -290,7 +288,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
          FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix, contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
-                                                                                   footForceSensorForEstimator, null, totalRobotWeight, null, registry);
+                                                                                   footForceSensorForEstimator, totalRobotWeight, null, registry);
          footSwitchMap.put(rigidBody, footSwitchInterface);
 
       }

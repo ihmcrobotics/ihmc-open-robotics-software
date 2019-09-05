@@ -30,6 +30,13 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    }
 
    @Override
+   @Test
+   public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      // Not supported for Valkyrie yet.
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

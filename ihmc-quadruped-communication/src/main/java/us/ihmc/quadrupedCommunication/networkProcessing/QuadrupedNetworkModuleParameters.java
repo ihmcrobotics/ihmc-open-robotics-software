@@ -12,6 +12,7 @@ public class QuadrupedNetworkModuleParameters
    private boolean useStepTeleopModule;
    private boolean visualizeStepTeleopModule;
    private boolean logStepTeleopModule;
+   private boolean useQuadrupedSupportPlanarRegionPublisher;
    private boolean useFootstepPlanningModule;
    private boolean visualizeFootstepPlanningModule;
    private boolean logFootstepPlanningModule;
@@ -21,12 +22,23 @@ public class QuadrupedNetworkModuleParameters
    private boolean useXBoxModule;
    private boolean useRemoteObjectDetectionFeedback;
    private boolean visualizeXBoxModule;
+   private boolean useAutoREAStateUpdater;
 
    private URI rosUri;
 
    public void enableRobotEnvironmentAwarenessModule(boolean enable)
    {
       this.useRobotEnvironmentAwarenessModule = enable;
+   }
+   
+   public void enableAutoREAStateUpdater(boolean enable)
+   {
+      this.useAutoREAStateUpdater = enable;
+   }
+   
+   public boolean isAutoREAStateUpdaterEnabled()
+   {
+      return useAutoREAStateUpdater;
    }
 
    public boolean isRobotEnvironmentAwarenessModuleEnabled()
@@ -52,6 +64,16 @@ public class QuadrupedNetworkModuleParameters
    public boolean isFootstepPlanningModuleEnabled()
    {
       return useFootstepPlanningModule;
+   }
+
+   public void enableQuadrupedSupportPlanarRegionPublisher(boolean enable)
+   {
+      useQuadrupedSupportPlanarRegionPublisher = enable;
+   }
+
+   public boolean isQuadrupedSupportPlanarRegionPublisherEnabled()
+   {
+      return useQuadrupedSupportPlanarRegionPublisher;
    }
 
    public void enableStepTeleopModule(boolean enable)

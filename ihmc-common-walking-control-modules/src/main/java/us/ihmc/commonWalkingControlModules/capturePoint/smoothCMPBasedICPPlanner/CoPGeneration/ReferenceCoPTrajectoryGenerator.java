@@ -110,7 +110,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
-   private final List<YoDouble> touchdownDurations;
    private final List<YoDouble> swingSplitFractions;
    private final List<YoDouble> swingDurationShiftFractions;
    private final List<YoDouble> transferSplitFractions;
@@ -169,22 +168,22 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
-                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations,
-                                          List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
                                           IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
-           touchdownDurations, swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, numberOfUpcomingFootsteps,
-           upcomingFootstepsData, soleZUpFrames, parentRegistry);
+           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, false, numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames,
+           parentRegistry);
 
    }
 
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
-                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations,
-                                          List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          boolean debug, IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, boolean debug,
+                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
@@ -210,7 +209,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
-      this.touchdownDurations = touchdownDurations;
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
@@ -1004,16 +1002,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       double transferTime = transferDurations.get(footstepIndex).getDoubleValue();
 
-      if (footstepIndex > 0 && touchdownDurations.size() > 0)
-      {
-         int previousSwingTouchdownIndex = footstepIndex - 1;
-         double touchdownDuration = touchdownDurations.get(previousSwingTouchdownIndex).getDoubleValue();
-         if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
-         {
-            transferTime -= touchdownDuration;
-         }
-      }
-
       if (transferTime <= 0.0 || !Double.isFinite(transferTime))
       {
          transferTime = defaultTransferTime;
@@ -1076,15 +1064,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getSwingSegmentTimes(int segmentIndex, int footstepIndex)
    {
       double swingTime = swingDurations.get(footstepIndex).getDoubleValue();
-      double touchdownDuration = touchdownDurations.get(footstepIndex).getDoubleValue();
       if (swingTime <= 0.0 || !Double.isFinite(swingTime))
       {
          swingTime = defaultSwingTime;
-      }
-
-      if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
-      {
-         swingTime += touchdownDuration;
       }
 
       double initialSegmentDuration =

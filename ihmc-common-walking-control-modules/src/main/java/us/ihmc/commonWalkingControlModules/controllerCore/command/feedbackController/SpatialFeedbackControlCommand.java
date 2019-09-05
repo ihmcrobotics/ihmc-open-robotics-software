@@ -58,24 +58,24 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /** Represents the expected control mode to execute this command. */
    private WholeBodyControllerCoreMode controlMode = null;
    /** The desired orientation to use in the feedback controller. */
-   private final FrameQuaternion referenceOrientationInRootFrame = new FrameQuaternion();
+   private final FrameQuaternion referenceOrientation = new FrameQuaternion();
    /** The desired position to use in the feedback controller. */
-   private final FramePoint3D referencePositionInRootFrame = new FramePoint3D();
+   private final FramePoint3D referencePosition = new FramePoint3D();
 
    /** The desired or (IK) feed-forward angular velocity to use in the feedback controller. */
-   private final FrameVector3D referenceAngularVelocityInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceAngularVelocity = new FrameVector3D();
    /** The desired or (IK) feed-forward linear velocity to use in the feedback controller. */
-   private final FrameVector3D referenceLinearVelocityInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceLinearVelocity = new FrameVector3D();
 
    /** The (ID) feed-forward angular acceleration to use in the feedback controller. */
-   private final FrameVector3D referenceAngularAccelerationInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceAngularAcceleration = new FrameVector3D();
    /** The (ID) feed-forward linear acceleration to use in the feedback controller. */
-   private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceLinearAcceleration = new FrameVector3D();
 
    /** The (VMC) feed-forward torque to use in the feedback controller. */
-   private final FrameVector3D referenceTorqueInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceTorque = new FrameVector3D();
    /** The (VMC) feed-forward force to use in the feedback controller. */
-   private final FrameVector3D referenceForceInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceForce = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
@@ -123,14 +123,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       controlFramePoseInEndEffectorFrame.setIncludingFrame(other.controlFramePoseInEndEffectorFrame);
       controlMode = other.controlMode;
-      referenceOrientationInRootFrame.setIncludingFrame(other.referenceOrientationInRootFrame);
-      referencePositionInRootFrame.setIncludingFrame(other.referencePositionInRootFrame);
-      referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(other.referenceLinearVelocityInRootFrame);
-      referenceAngularAccelerationInRootFrame.setIncludingFrame(other.referenceAngularAccelerationInRootFrame);
-      referenceLinearAccelerationInRootFrame.setIncludingFrame(other.referenceLinearAccelerationInRootFrame);
-      referenceTorqueInRootFrame.setIncludingFrame(other.referenceTorqueInRootFrame);
-      referenceForceInRootFrame.setIncludingFrame(other.referenceForceInRootFrame);
+      referenceOrientation.setIncludingFrame(other.referenceOrientation);
+      referencePosition.setIncludingFrame(other.referencePosition);
+      referenceAngularVelocity.setIncludingFrame(other.referenceAngularVelocity);
+      referenceLinearVelocity.setIncludingFrame(other.referenceLinearVelocity);
+      referenceAngularAcceleration.setIncludingFrame(other.referenceAngularAcceleration);
+      referenceLinearAcceleration.setIncludingFrame(other.referenceLinearAcceleration);
+      referenceTorque.setIncludingFrame(other.referenceTorque);
+      referenceForce.setIncludingFrame(other.referenceForce);
 
       gains.set(other.gains);
       angularGainsFrame = other.angularGainsFrame;
@@ -324,7 +324,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse kinematics.
     * </p>
     * <p>
@@ -338,19 +338,18 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
-      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      referenceOrientationInRootFrame.changeFrame(rootFrame);
-      referenceAngularVelocityInRootFrame.setIncludingFrame(feedForwardAngularVelocity);
-      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
-      referenceAngularAccelerationInRootFrame.setToZero(rootFrame);
-      referenceTorqueInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
+      referenceOrientation.setIncludingFrame(desiredOrientation);
+      referenceAngularVelocity.setIncludingFrame(feedForwardAngularVelocity);
+      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceAngularAcceleration.setToZero(trajectoryFrame);
+      referenceTorque.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse kinematics.
     * </p>
     * <p>
@@ -364,19 +363,18 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
-      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
-      referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(feedForwardLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
-      referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
-      referenceForceInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
+      referencePosition.setIncludingFrame(desiredPosition);
+      referenceLinearVelocity.setIncludingFrame(feedForwardLinearVelocity);
+      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceLinearAcceleration.setToZero(trajectoryFrame);
+      referenceForce.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse kinematics.
     * </p>
     * <p>
@@ -401,7 +399,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse kinematics.
     * </p>
     * <p>
@@ -421,7 +419,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse dynamics.
     * </p>
     * <p>
@@ -438,20 +436,19 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      referenceOrientationInRootFrame.changeFrame(rootFrame);
-      referenceAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
-      referenceAngularAccelerationInRootFrame.setIncludingFrame(feedForwardAngularAcceleration);
-      referenceAngularAccelerationInRootFrame.changeFrame(rootFrame);
-      referenceTorqueInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
+      referenceOrientation.setIncludingFrame(desiredOrientation);
+      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
+      referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      referenceTorque.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse dynamics.
     * </p>
     * <p>
@@ -468,20 +465,19 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
-      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
-      referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
-      referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
-      referenceForceInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
+      referencePosition.setIncludingFrame(desiredPosition);
+      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceLinearAcceleration.setIncludingFrame(feedForwardLinearAcceleration);
+      referenceLinearAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      referenceForce.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for inverse dynamics.
     * </p>
     * <p>
@@ -532,7 +528,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for virtual model control.
     * </p>
     * <p>
@@ -548,20 +544,19 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
                                       FrameVector3DReadOnly feedForwardTorque)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
-      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      referenceOrientationInRootFrame.changeFrame(rootFrame);
-      referenceAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
-      referenceTorqueInRootFrame.setIncludingFrame(feedForwardTorque);
-      referenceTorqueInRootFrame.changeFrame(rootFrame);
-      referenceAngularAccelerationInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
+      referenceOrientation.setIncludingFrame(desiredOrientation);
+      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceTorque.setIncludingFrame(feedForwardTorque);
+      referenceTorque.checkReferenceFrameMatch(trajectoryFrame);
+      referenceAngularAcceleration.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
     * the control mode for virtual model control.
     * </p>
     * <p>
@@ -576,14 +571,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
-      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
-      referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
-      referenceForceInRootFrame.setIncludingFrame(feedForwardForce);
-      referenceForceInRootFrame.changeFrame(rootFrame);
-      referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
+      ReferenceFrame trajectoryFrame = desiredPosition.getReferenceFrame();
+      referencePosition.setIncludingFrame(desiredPosition);
+      referenceLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+      referenceLinearVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      referenceForce.setIncludingFrame(feedForwardForce);
+      referenceForce.checkReferenceFrameMatch(trajectoryFrame);
+      referenceLinearAcceleration.setToZero(trajectoryFrame);
    }
 
    /**
@@ -881,7 +875,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameQuaternionBasics getReferenceOrientation()
    {
-      return referenceOrientationInRootFrame;
+      return referenceOrientation;
    }
 
    /**
@@ -894,7 +888,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FramePoint3DBasics getReferencePosition()
    {
-      return referencePositionInRootFrame;
+      return referencePosition;
    }
 
    /**
@@ -908,7 +902,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3DBasics getReferenceAngularVelocity()
    {
-      return referenceAngularVelocityInRootFrame;
+      return referenceAngularVelocity;
    }
 
    /**
@@ -922,7 +916,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3DBasics getReferenceLinearVelocity()
    {
-      return referenceLinearVelocityInRootFrame;
+      return referenceLinearVelocity;
    }
 
    /**
@@ -935,7 +929,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3DBasics getReferenceAngularAcceleration()
    {
-      return referenceAngularAccelerationInRootFrame;
+      return referenceAngularAcceleration;
    }
 
    /**
@@ -948,7 +942,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3DBasics getReferenceLinearAcceleration()
    {
-      return referenceLinearAccelerationInRootFrame;
+      return referenceLinearAcceleration;
    }
 
    /**
@@ -961,7 +955,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3DBasics getReferenceTorque()
    {
-      return referenceTorqueInRootFrame;
+      return referenceTorque;
    }
 
    /**
@@ -974,7 +968,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public FrameVector3D getReferenceForce()
    {
-      return referenceForceInRootFrame;
+      return referenceForce;
    }
 
    public RigidBodyBasics getBase()
@@ -1036,21 +1030,21 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
             return false;
          if (!controlFramePoseInEndEffectorFrame.equals(other.controlFramePoseInEndEffectorFrame))
             return false;
-         if (!referenceOrientationInRootFrame.equals(other.referenceOrientationInRootFrame))
+         if (!referenceOrientation.equals(other.referenceOrientation))
             return false;
-         if (!referencePositionInRootFrame.equals(other.referencePositionInRootFrame))
+         if (!referencePosition.equals(other.referencePosition))
             return false;
-         if (!referenceAngularVelocityInRootFrame.equals(other.referenceAngularVelocityInRootFrame))
+         if (!referenceAngularVelocity.equals(other.referenceAngularVelocity))
             return false;
-         if (!referenceLinearVelocityInRootFrame.equals(other.referenceLinearVelocityInRootFrame))
+         if (!referenceLinearVelocity.equals(other.referenceLinearVelocity))
             return false;
-         if (!referenceAngularAccelerationInRootFrame.equals(other.referenceAngularAccelerationInRootFrame))
+         if (!referenceAngularAcceleration.equals(other.referenceAngularAcceleration))
             return false;
-         if (!referenceLinearAccelerationInRootFrame.equals(other.referenceLinearAccelerationInRootFrame))
+         if (!referenceLinearAcceleration.equals(other.referenceLinearAcceleration))
             return false;
-         if (!referenceTorqueInRootFrame.equals(other.referenceTorqueInRootFrame))
+         if (!referenceTorque.equals(other.referenceTorque))
             return false;
-         if (!referenceForceInRootFrame.equals(other.referenceForceInRootFrame))
+         if (!referenceForce.equals(other.referenceForce))
             return false;
          if (!gains.equals(other.gains))
             return false;
@@ -1077,7 +1071,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       String ret = getClass().getSimpleName() + ": ";
       ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
       ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
-      ret += "position = " + referencePositionInRootFrame + ", orientation = " + referenceOrientationInRootFrame.toStringAsYawPitchRoll();
+      ret += "position = " + referencePosition + ", orientation = " + referenceOrientation.toStringAsYawPitchRoll();
       return ret;
    }
 }

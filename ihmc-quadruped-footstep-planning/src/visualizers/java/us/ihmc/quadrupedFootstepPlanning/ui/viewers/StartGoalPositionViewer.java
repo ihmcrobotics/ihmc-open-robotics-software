@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -16,7 +19,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -24,10 +26,10 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class StartGoalPositionViewer extends AnimationTimer
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    public static final double RADIUS = 0.05;
 
    private final Group root = new Group();
@@ -58,18 +60,17 @@ public class StartGoalPositionViewer extends AnimationTimer
    private AtomicReference<Point3D> goalPositionReference = null;
    private AtomicReference<Quaternion> goalOrientationReference = null;
    private AtomicReference<Point3D> lowLevelGoalPositionReference = null;
+   private AtomicReference<PlanarRegionsList> planarRegionsList = null;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
-   private final AtomicReference<PlanarRegionsList> planarRegionsList;
-
+   private Topic<Boolean> startEditModeEnabledTopic;
+   private Topic<Boolean> goalEditModeEnabledTopic;
 
    private final Messager messager;
 
    public StartGoalPositionViewer(Messager messager)
    {
       this.messager = messager;
-
-      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -82,9 +83,18 @@ public class StartGoalPositionViewer extends AnimationTimer
          goalFeetSpheres.put(robotQuadrant, goalFootSphere);
       }
 
-      startSphere.setMouseTransparent(true);
-      goalSphere.setMouseTransparent(true);
       lowLevelGoalSphere.setMouseTransparent(true);
+
+      startSphere.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (startEditModeEnabled != null && !startEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(startEditModeEnabledTopic, true);
+      });
+      goalSphere.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (goalEditModeEnabled != null && !goalEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(goalEditModeEnabledTopic, true);
+      });
 
       showStart(true);
       showGoal(true);
@@ -94,13 +104,14 @@ public class StartGoalPositionViewer extends AnimationTimer
    public StartGoalPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
                                   Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
                                   Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
-                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic)
+                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic, Topic<PlanarRegionsList> planarRegionDataTopic)
    {
       this(messager);
 
       setEditStartGoalTopics(startEditModeEnabledTopic, goalEditModeEnabledTopic);
       setPositionStartGoalTopics(startPositionTopic, startOrientationTopic, lowLevelGoalPositionTopic, goalPositionTopic, goalOrientationTopic);
       setXGaitSettingsTopic(xGaitSettingsTopic);
+      setPlanarRegionDataTopic(planarRegionDataTopic);
    }
 
    public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
@@ -116,6 +127,8 @@ public class StartGoalPositionViewer extends AnimationTimer
    // TODO
    public void setEditStartGoalTopics(Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic)
    {
+      this.startEditModeEnabledTopic = startEditModeEnabledTopic;
+      this.goalEditModeEnabledTopic = goalEditModeEnabledTopic;
       startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
       goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
    }
@@ -135,6 +148,11 @@ public class StartGoalPositionViewer extends AnimationTimer
    private void handleXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       xGaitSettingsReference.set(xGaitSettings);
+   }
+
+   public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)
+   {
+      planarRegionsList = messager.createInput(planarRegionDataTopic);
    }
 
    @Override
@@ -221,8 +239,8 @@ public class StartGoalPositionViewer extends AnimationTimer
       {
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
-         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
+         footPosition.changeFrame(worldFrame);
+         footPosition.setZ(getHeightAtPoint(footPosition));
 
          startFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -246,8 +264,8 @@ public class StartGoalPositionViewer extends AnimationTimer
       {
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
-         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
+         footPosition.changeFrame(worldFrame);
+         footPosition.setZ(getHeightAtPoint(footPosition));
 
          goalFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          goalFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -331,13 +349,13 @@ public class StartGoalPositionViewer extends AnimationTimer
       return new Color(red, green, blue, opacity);
    }
 
-   private double getHeightAtPoint(double x, double y)
+   private double getHeightAtPoint(Point3DReadOnly point)
    {
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
       if (planarRegionsList == null)
          return 0.0;
-      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 100.0), planarRegionsList);
-      return projectedPoint == null ? 0.0 : projectedPoint.getZ();
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(point.getX(), point.getY(), 100.0), planarRegionsList);
+      return projectedPoint == null ? point.getZ() : projectedPoint.getZ();
    }
 
    public Node getRoot()

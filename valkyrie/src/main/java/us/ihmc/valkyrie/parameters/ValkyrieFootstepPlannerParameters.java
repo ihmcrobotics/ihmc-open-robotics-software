@@ -9,7 +9,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public boolean checkForBodyBoxCollisions()
    {
-      return true;
+      return false;
    }
 
    @Override

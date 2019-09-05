@@ -3,7 +3,7 @@ package us.ihmc.avatar.polaris;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

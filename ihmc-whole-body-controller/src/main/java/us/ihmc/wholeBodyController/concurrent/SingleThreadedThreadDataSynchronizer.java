@@ -11,7 +11,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -28,7 +27,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
-   private final ContactSensorHolder estimatorContactSensorHolder;
    private final JointDesiredOutputList estimatorDesiredJointDataHolder;
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
@@ -37,7 +35,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
-   private final ContactSensorHolder controllerContactSensorHolder;
    private final JointDesiredOutputList controllerDesiredJointDataHolder;
 
    private final YoLong timestamp;
@@ -62,7 +59,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorCenterOfMassDataHolder = new CenterOfMassDataHolder();
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
-      estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
@@ -79,7 +75,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       controllerRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
       controllerCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
       controllerRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
-      controllerContactSensorHolder = estimatorContactSensorHolder;
       controllerDesiredJointDataHolder = estimatorDesiredJointDataHolder;
 
       this.fullRobotModelRewinder = new FullRobotModelRootJointRewinder(estimatorFullRobotModel, registry);
@@ -205,18 +200,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    public boolean receiveControllerDataForEstimator()
    {
       return true;
-   }
-
-   @Override
-   public ContactSensorHolder getControllerContactSensorHolder()
-   {
-      return controllerContactSensorHolder;
-   }
-
-   @Override
-   public ContactSensorHolder getEstimatorContactSensorHolder()
-   {
-      return estimatorContactSensorHolder;
    }
 
    @Override
