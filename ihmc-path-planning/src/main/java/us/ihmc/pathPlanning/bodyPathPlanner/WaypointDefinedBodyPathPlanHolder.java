@@ -1,12 +1,7 @@
 package us.ihmc.pathPlanning.bodyPathPlanner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -14,12 +9,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.robotics.geometry.AngleTools;
+
+import java.util.List;
 
 public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 {
-   private List<Point2DReadOnly> waypointPositions;
-   private List<MutableDouble> waypointHeadings;
    private double[] maxAlphas;
    private double[] segmentLengths;
    private final BodyPathPlan bodyPathPlan = new BodyPathPlan();
@@ -34,12 +28,8 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 
       bodyPathPlan.clear();
 
-      this.waypointPositions = new ArrayList<>();
-      this.waypointHeadings = new ArrayList<>();
-      this.waypointHeadings.addAll(waypointHeadings);
       for (int i = 0; i < waypointPositions.size(); i++)
       {
-         this.waypointPositions.add(new Point2D(waypointPositions.get(i)));
          Pose3D waypointPose = new Pose3D();
          waypointPose.getPosition().set(waypointPositions.get(i));
          waypointPose.getOrientation().setYawPitchRoll(waypointHeadings.get(i).getValue(), 0.0, 0.0);
@@ -52,9 +42,9 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2DReadOnly segmentStart = this.waypointPositions.get(i);
-         Point2DReadOnly segmentEnd = this.waypointPositions.get(i + 1);
-         segmentLengths[i] = segmentEnd.distance(segmentStart);
+         Point3DReadOnly segmentStart = waypointPositions.get(i);
+         Point3DReadOnly segmentEnd = waypointPositions.get(i + 1);
+         segmentLengths[i] = segmentEnd.distanceXY(segmentStart);
          totalPathLength = totalPathLength + segmentLengths[i];
       }
 
@@ -65,9 +55,12 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       }
 
       int startIndex = 0;
-      int endIndex = this.waypointPositions.size() - 1;
-      bodyPathPlan.setStartPose(this.waypointPositions.get(startIndex), this.waypointHeadings.get(startIndex).getValue());
-      bodyPathPlan.setGoalPose(this.waypointPositions.get(endIndex), this.waypointHeadings.get(endIndex).getValue());
+      int endIndex = waypointPositions.size() - 1;
+      Point3DReadOnly startPosition = waypointPositions.get(startIndex);
+      Point3DReadOnly endPosition = waypointPositions.get(endIndex);
+
+      bodyPathPlan.setStartPose(startPosition.getX(), startPosition.getY(), waypointHeadings.get(startIndex).getValue());
+      bodyPathPlan.setGoalPose(endPosition.getX(), endPosition.getY(), waypointHeadings.get(endIndex).getValue());
    }
 
    @Override
@@ -97,14 +90,14 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 
       for (int i = 0; i < segmentLengths.length; i++)
       {
-         Point2DReadOnly segmentStart = waypointPositions.get(i);
-         Point2DReadOnly segmentEnd = waypointPositions.get(i + 1);
-         EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, segmentStart, segmentEnd, tempClosestPoint);
+         Point3DReadOnly segmentStart = bodyPathPlan.getWaypoint(i).getPosition();
+         Point3DReadOnly segmentEnd = bodyPathPlan.getWaypoint(i + 1).getPosition();
+         EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, segmentStart.getX(), segmentStart.getY(), segmentEnd.getX(), segmentEnd.getY(), tempClosestPoint);
 
          double distance = tempClosestPoint.distance(point);
          if (distance < closestPointDistance)
          {
-            double distanceToSegmentStart = tempClosestPoint.distance(segmentStart);
+            double distanceToSegmentStart = tempClosestPoint.distanceXY(segmentStart);
             double alphaInSegment = distanceToSegmentStart / segmentLengths[i];
 
             boolean firstSegment = i == 0;
