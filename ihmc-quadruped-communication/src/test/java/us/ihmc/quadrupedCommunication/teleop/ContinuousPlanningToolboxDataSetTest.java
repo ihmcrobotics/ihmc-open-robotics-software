@@ -89,7 +89,7 @@ public class ContinuousPlanningToolboxDataSetTest
 
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = true;
+   protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = true;
@@ -163,7 +163,7 @@ public class ContinuousPlanningToolboxDataSetTest
    public void setup()
    {
       VISUALIZE = VISUALIZE && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-      timeScaleFactor = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? timeScaleFactor = 10.0 : 100.0;
+      timeScaleFactor = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? timeScaleFactor = 10.0 : 10.0;
 
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(PawStepPlannerMessagerAPI.API);
@@ -643,8 +643,13 @@ public class ContinuousPlanningToolboxDataSetTest
 
       if (planReference.get() != null)
       {
-         if (planReference.get().getLowLevelPlanGoal().getPositionDistance(dataSet.getPlannerInput().getQuadrupedGoalPosition()) > PawNode.gridSizeXY)
-            message += "Final goal pose was not correct, meaning it did not reach the goal\n";
+         Point3DReadOnly pointReached = planReference.get().getLowLevelPlanGoal().getPosition();
+         Point3DReadOnly goalPosition = dataSet.getPlannerInput().getQuadrupedGoalPosition();
+         if (pointReached.distanceXY(goalPosition) > PawNode.gridSizeXY)
+         {
+            message += "Final goal pose was not correct, meaning it did not reach the goal.\n";
+            message += "Reached ( " + pointReached.getX() + ", " + pointReached.getY() + ", " + pointReached.getZ() + " ), but was trying to get to " + goalPosition + ".\n";
+         }
       }
       else if (!planningFailed.getBooleanValue())
       {
@@ -768,8 +773,9 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171216_111326_CrossoverPlatforms);
+      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
+      LogTools.info("Done!");
 
       ThreadTools.sleepForever();
       test.tearDown();
