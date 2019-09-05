@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class QuadrupedContinuousPlanningController extends QuadrupedToolboxController
 {
    private static final boolean debug = false;
+   private static final boolean verbose = true;
 
    private static final double proximityGoal = 1.0e-2;
    private static final int defaultStartPlanId = 13;
@@ -119,6 +121,11 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    public void processContinuousPlanningRequest(QuadrupedContinuousPlanningRequestPacket message)
    {
       resetForNewPlan();
+
+      if (debug || verbose)
+      {
+         LogTools.info("Received new plan request. Going to " + message.getGoalPositionInWorld());
+      }
 
       planningRequestPacket.set(message);
    }
@@ -246,7 +253,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       isInitialSegmentOfPlan.set(false);
    }
 
-   private final QuadrupedTimedStepMessage getFinalStepFromFixedQueue()
+   private QuadrupedTimedStepMessage getFinalStepFromFixedQueue()
    {
       if (fixedStepQueue.size() == 0)
          return null;
@@ -412,6 +419,18 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
             startPositions.put(RobotQuadrant.FRONT_RIGHT, continuousPlanningRequestPacket.getFrontLeftStartPositionInWorld());
             startPositions.put(RobotQuadrant.HIND_LEFT, continuousPlanningRequestPacket.getHindLeftStartPositionInWorld());
             startPositions.put(RobotQuadrant.HIND_RIGHT, continuousPlanningRequestPacket.getHindRightStartPositionInWorld());
+         }
+
+         if (debug || verbose)
+         {
+            Point3D averageStart = new Point3D();
+            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            {
+               averageStart.add(startPositions.get(robotQuadrant));
+            }
+            averageStart.scale(0.25);
+
+            LogTools.info("Starting from " + averageStart);
          }
       }
       else
