@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
@@ -29,14 +30,14 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    @Override
    protected double computeHeuristics(FramePose3D pose)
    {
-      Pose2D closestPointOnPath = new Pose2D();
+      Pose3D closestPointOnPath = new Pose3D();
 
       midFootPoint.set(pose.getPosition());
       double alpha = bodyPath.getClosestPoint(midFootPoint, closestPointOnPath);
       alpha = MathTools.clamp(alpha, 0.0, goalAlpha);
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
-      double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
+      double distanceToPath = closestPointOnPath.getPosition().distanceXY(midFootPoint);
       double croppedDistanceToPath = Math.max(0.0, distanceToPath - parameters.getDistanceFromPathTolerance());
 
       double remainingPathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);

@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -75,21 +77,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
    }
 
    @Override
-   public void getPointAlongPath(double alpha, Pose2D poseToPack)
-   {
-      int segmentIndex = getRegionIndexFromAlpha(alpha);
-      Point2DReadOnly firstPoint = waypointPositions.get(segmentIndex);
-      Point2DReadOnly secondPoint = waypointPositions.get(segmentIndex + 1);
-
-      double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
-
-      poseToPack.getPosition().interpolate(firstPoint, secondPoint, alphaInSegment);
-      double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
-      poseToPack.setYaw(desiredYaw);
-   }
-
-   @Override
-   public void getPointAlongPath(double alpha, Pose3D poseToPack)
+   public void getPointAlongPath(double alpha, Pose3DBasics poseToPack)
    {
       int segmentIndex = getRegionIndexFromAlpha(alpha);
       Pose3DReadOnly firstPoint = bodyPathPlan.getWaypoint(segmentIndex);
@@ -98,13 +86,10 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
       poseToPack.interpolate(firstPoint, secondPoint, alphaInSegment);
-//      double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
-
-//      poseToPack.getOrientation().setToYawQuaternion(desiredYaw);
    }
 
    @Override
-   public double getClosestPoint(Point2DReadOnly point, Pose2D poseToPack)
+   public double getClosestPoint(Point2DReadOnly point, Pose3DBasics poseToPack)
    {
       double closestPointDistance = Double.POSITIVE_INFINITY;
       double alpha = Double.NaN;

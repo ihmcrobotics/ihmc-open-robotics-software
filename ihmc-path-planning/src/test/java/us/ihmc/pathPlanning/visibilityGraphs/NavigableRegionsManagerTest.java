@@ -6,6 +6,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
@@ -714,8 +715,8 @@ public class NavigableRegionsManagerTest
 
       for (double alpha = 0.05; alpha < 1.0; alpha += 0.001)
       {
-         Pose2D expectedPose = new Pose2D();
-         Pose2D actualPose = new Pose2D();
+         Pose3D expectedPose = new Pose3D();
+         Pose3D actualPose = new Pose3D();
 
          expectedPathNoAvoidance.getPointAlongPath(alpha, expectedPose);
          calculatedPath.getPointAlongPath(alpha, actualPose);
@@ -755,7 +756,7 @@ public class NavigableRegionsManagerTest
             {
                List<Point2DReadOnly> clusterPolygon = obstacleCluster.getNonNavigableExtrusionsInWorld2D();
                Point2D closestPointOnCluster = new Point2D();
-               double distanceToCluster = VisibilityTools.distanceToCluster(actualPose.getPosition(), clusterPolygon, closestPointOnCluster, null);
+               double distanceToCluster = VisibilityTools.distanceToCluster(new Point2D(actualPose.getPosition()), clusterPolygon, closestPointOnCluster, null);
                if (distanceToCluster < distanceToObstacles)
                {
                   distanceToObstacles = distanceToCluster;
