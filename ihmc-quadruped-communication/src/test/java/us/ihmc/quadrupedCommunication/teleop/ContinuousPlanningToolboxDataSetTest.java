@@ -70,6 +70,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -86,6 +87,8 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private static final double dt = 0.01;
    private static double timeScaleFactor;
+
+   private final DecimalFormat numberFormat = new DecimalFormat("#.00");
 
 
    // Whether to start the UI or not.
@@ -350,7 +353,7 @@ public class ContinuousPlanningToolboxDataSetTest
                LogTools.info(errorMessagesForCurrentFile);
          }
 
-         ThreadTools.sleep(1000); // Apparently need to give some time for the prints to appear in the right order.
+         ThreadTools.sleep(2000); // Apparently need to give some time for the prints to appear in the right order.
       }
 
       String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numberOfTestedSets;
@@ -560,7 +563,8 @@ public class ContinuousPlanningToolboxDataSetTest
          String newMessage = assertPlanIsValid(dataSet, pathReference.get(), stepList, xGaitSettings, footstepPlannerParameters);
          if (!newMessage.isEmpty())
          {
-            message += "\tAt time " + timeReference.get() + newMessage;
+            DecimalFormat numberFormat = new DecimalFormat("#.00");
+            message += "\tAt time " + numberFormat.format(timeReference.get()) + " " + newMessage;
          }
 
          List<QuadrupedTimedStep> stepsJustStarted = stepsInProgress.stream().filter(step -> !hasQuadrantInProgress(step.getRobotQuadrant(), stepsCurrentlyInProgress)).collect(Collectors.toList());
@@ -648,7 +652,8 @@ public class ContinuousPlanningToolboxDataSetTest
          if (pointReached.distanceXY(goalPosition) > PawNode.gridSizeXY)
          {
             message += "Final goal pose was not correct, meaning it did not reach the goal.\n";
-            message += "Reached ( " + pointReached.getX() + ", " + pointReached.getY() + ", " + pointReached.getZ() + " ), but was trying to get to " + goalPosition + ".\n";
+            message += "Reached ( " + numberFormat.format(pointReached.getX()) + ", " + numberFormat.format(pointReached.getY()) + ", " +
+                  numberFormat.format(pointReached.getZ()) + " ), but was trying to get to " + goalPosition + ".\n";
          }
       }
       else if (!planningFailed.getBooleanValue())
@@ -757,8 +762,9 @@ public class ContinuousPlanningToolboxDataSetTest
 
          if (previousStep != null)
          {
-            if (Math.abs(step.getGoalPosition().getZ() - previousStep.getGoalPosition().getZ()) > parameters.getMaximumStepChangeZ())
-               errorMessage += datasetName + "\t Step " + i + " height changed too much.";
+            double heightChange = Math.abs(step.getGoalPosition().getZ() - previousStep.getGoalPosition().getZ());
+            if (heightChange > parameters.getMaximumStepChangeZ())
+               errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much.";
          }
 
          previousSteps.put(stepQuadrant, step);
@@ -773,7 +779,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      String errorMessage = test.runAssertions(DataSetName._20171215_220208_SimpleStairs);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 
