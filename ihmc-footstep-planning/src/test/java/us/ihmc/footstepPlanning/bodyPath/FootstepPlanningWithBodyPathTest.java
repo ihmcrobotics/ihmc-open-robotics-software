@@ -113,9 +113,9 @@ public class FootstepPlanningWithBodyPathTest
       }
       bodyPath.setPoseWaypoints(path);
 
-      Pose2D startPose = new Pose2D();
+      Pose3D startPose = new Pose3D();
       bodyPath.getPointAlongPath(0.0, startPose);
-      Pose2D finalPose = new Pose2D();
+      Pose3D finalPose = new Pose3D();
       bodyPath.getPointAlongPath(1.0, finalPose);
 
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());

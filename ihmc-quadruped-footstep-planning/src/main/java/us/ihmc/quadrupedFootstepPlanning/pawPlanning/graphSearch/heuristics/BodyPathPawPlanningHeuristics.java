@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
@@ -42,13 +43,13 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
    protected double computeHeuristics(PawNode node, PawNode goalNode)
    {
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-      Pose2D closestPointOnPath = new Pose2D();
+      Pose3D closestPointOnPath = new Pose3D();
 
       double alpha = bodyPath.getClosestPoint(xGaitCenterPoint, closestPointOnPath);
       alpha = MathTools.clamp(alpha, 0.0, goalAlpha);
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
-      double distanceToPath = closestPointOnPath.getPosition().distance(xGaitCenterPoint);
+      double distanceToPath = closestPointOnPath.getPosition().distanceXY(xGaitCenterPoint);
       double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
 
       double remainingPathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
