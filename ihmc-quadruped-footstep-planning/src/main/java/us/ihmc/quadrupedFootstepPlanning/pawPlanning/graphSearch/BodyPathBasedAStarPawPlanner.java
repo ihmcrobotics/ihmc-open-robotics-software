@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
@@ -136,15 +137,16 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    @Override
    public PawStepPlanningResult plan()
    {
-      Pose2D goalPose2d = new Pose2D();
+      Pose3D goalPose = new Pose3D();
       double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose);
       bodyPathHeuristics.setGoalAlpha(alpha);
 
       FramePose3D pawPlannerGoal = new FramePose3D();
-      pawPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      pawPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      pawPlannerGoal.set(goalPose);
+//      pawPlannerGoal.setPosition(goalPose.getPosition());
+//      pawPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       if (alpha >= 1.0)
          pawPlannerGoal.setOrientation(highLevelGoal.getTargetPose().getOrientation());

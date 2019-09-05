@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -247,22 +248,12 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 
    private void updateBodyPathVisualization()
    {
-      Pose2D tempPose = new Pose2D();
+      Pose3D tempPose = new Pose3D();
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
          double percent = (double) i / (double) (bodyPathPointsForVisualization - 1);
          bodyPathPlanner.getPointAlongPath(percent, tempPose);
-         Point3D position = new Point3D();
-         position.set(tempPose.getPosition());
-         Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
-         if (projectedPoint != null)
-         {
-            bodyPathPoints.get(i).set(projectedPoint);
-         }
-         else
-         {
-            bodyPathPoints.get(i).setToNaN();
-         }
+         bodyPathPoints.get(i).set(tempPose.getPosition());
       }
    }
 
