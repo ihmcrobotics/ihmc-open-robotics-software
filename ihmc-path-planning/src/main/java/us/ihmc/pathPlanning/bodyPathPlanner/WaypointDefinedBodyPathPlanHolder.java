@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -85,6 +86,21 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       poseToPack.getPosition().interpolate(firstPoint, secondPoint, alphaInSegment);
       double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
       poseToPack.setYaw(desiredYaw);
+   }
+
+   @Override
+   public void getPointAlongPath(double alpha, Pose3D poseToPack)
+   {
+      int segmentIndex = getRegionIndexFromAlpha(alpha);
+      Pose3DReadOnly firstPoint = bodyPathPlan.getWaypoint(segmentIndex);
+      Pose3DReadOnly secondPoint = bodyPathPlan.getWaypoint(segmentIndex + 1);
+
+      double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
+
+      poseToPack.interpolate(firstPoint, secondPoint, alphaInSegment);
+//      double desiredYaw = AngleTools.interpolateAngle(waypointHeadings.get(segmentIndex).getValue(), waypointHeadings.get(segmentIndex + 1).getValue(), alphaInSegment);
+
+//      poseToPack.getOrientation().setToYawQuaternion(desiredYaw);
    }
 
    @Override
