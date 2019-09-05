@@ -7,7 +7,9 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -44,11 +46,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PawPlanningController extends QuadrupedToolboxController
 {
+   private final static boolean debug = true;
+
    private final YoEnum<PawStepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, PawStepPlannerType.class);
    private final EnumMap<PawStepPlannerType, BodyPathAndPawPlanner> plannerMap = new EnumMap<>(PawStepPlannerType.class);
-
-   private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
-   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
    private final AtomicReference<PawStepPlanningRequestPacket> latestRequestReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
@@ -149,6 +150,25 @@ public class PawPlanningController extends QuadrupedToolboxController
       PawStepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
+
+      if (debug)
+      {
+         Point3D startPosition;
+         if (PawStepPlannerTargetType.fromByte(request.getStartTargetType()) == PawStepPlannerTargetType.FOOTSTEPS)
+         {
+            startPosition = new Point3D();
+            startPosition.add(request.getFrontLeftPositionInWorld());
+            startPosition.add(request.getFrontRightPositionInWorld());
+            startPosition.add(request.getHindLeftPositionInWorld());
+            startPosition.add(request.getHindRightPositionInWorld());
+            startPosition.scale(0.25);
+         }
+         else
+         {
+            startPosition = request.getBodyPositionInWorld();
+         }
+         LogTools.info("Planning from " + startPosition + " to " + request.getGoalPositionInWorld());
+      }
 
       planId.set(request.getPlannerRequestId());
       if (request.getRequestedPawPlannerType() >= 0)
