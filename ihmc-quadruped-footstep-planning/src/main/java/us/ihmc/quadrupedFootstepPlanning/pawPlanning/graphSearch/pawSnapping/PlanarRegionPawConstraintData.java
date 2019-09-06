@@ -46,7 +46,7 @@ public class PlanarRegionPawConstraintData
       {
          return scaledRegionPolygon;
       }
-      else if(minimumProjectionInsideDelta < 0.0 || !polygonScaler.scaleConvexPolygon(internalRegionToScale, minimumProjectionInsideDelta, scaledRegionPolygon, vertexStartIndicesToNotScale))
+      else if(minimumProjectionInsideDelta < 0.0 || minimumProjectionInsideDelta >= projectionInsideDelta || !polygonScaler.scaleConvexPolygon(internalRegionToScale, minimumProjectionInsideDelta, scaledRegionPolygon, vertexStartIndicesToNotScale))
       {
          return null;
       }

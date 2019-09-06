@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class ConvexPolygonScaler
 {
@@ -423,6 +424,12 @@ public class ConvexPolygonScaler
       {
          BoundingBox2DReadOnly boundingBox = regionToScale.getBoundingBox();
          projectionDistanceUpperBound = Math.max(boundingBox.getMaxX() - boundingBox.getMinX(), boundingBox.getMaxY() - boundingBox.getMinY());
+      }
+
+      if(projectionDistanceLowerBound > projectionDistanceUpperBound)
+      {
+         LogTools.error("Received lower bound that's greater than upper bound");
+         return 0.0;
       }
 
       while (projectionDistanceUpperBound - projectionDistanceLowerBound > precision && iterations < maxIterations)
