@@ -400,6 +400,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
       double lastStepStartTime = 0;
 
+      PawNode previousNode = path.get(0);
       for (int i = 1; i < path.size(); i++)
       {
          PawNode node = path.get(i);
@@ -425,16 +426,26 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+         Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
          PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
+         RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
 
          position.applyTransform(snapTransform);
+         previousPosition.applyTransform(previousSnapTransform);
+
+         if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
+         {
+            LogTools.error("height change error.");
+         }
 
          newStep.setGoalPosition(position);
 
          plan.addPawStep(newStep);
 
          lastStepStartTime = thisStepStartTime;
+         previousNode = node;
       }
 
       if (plan.getPawStep(0).getRobotQuadrant() != startQuadrant)
@@ -701,7 +712,8 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          PawNode nodeAtGoal = PawNode.constructNodeFromOtherNode(movingQuadrant, goalNode.getXIndex(movingQuadrant),
                                                                  goalNode.getYIndex(movingQuadrant), goalNode.getYawIndex(), endNode);
 
-         snapper.snapPawNode(nodeAtGoal);
+         if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, endNode))
+            break;
 
          nodePathToPack.add(nodeAtGoal);
          endNode = nodeAtGoal;
