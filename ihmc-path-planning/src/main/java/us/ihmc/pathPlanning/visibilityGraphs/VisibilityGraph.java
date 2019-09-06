@@ -253,9 +253,6 @@ public class VisibilityGraph
          computeInterEdges(startNode);
       }
 
-      if (startNode.getEdges().size() == 0)
-         throw new RuntimeException("We have a problem.");
-
       return startNode;
    }
 
