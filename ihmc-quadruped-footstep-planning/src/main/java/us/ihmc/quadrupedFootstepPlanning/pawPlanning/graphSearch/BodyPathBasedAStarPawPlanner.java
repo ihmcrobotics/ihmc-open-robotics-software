@@ -75,7 +75,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
       planningHorizonLength.set(1.0);
 
       pawStepPlanner = new AStarPawStepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics, expansion, pawNodeCost,
-                                               snapper, snapper, null, registry);
+                                               snapper, null, registry);
 
       parentRegistry.addChild(registry);
    }
