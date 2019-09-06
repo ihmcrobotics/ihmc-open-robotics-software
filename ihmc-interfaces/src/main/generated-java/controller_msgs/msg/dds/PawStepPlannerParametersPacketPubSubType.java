@@ -134,6 +134,8 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -298,6 +300,9 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -390,6 +395,8 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
       cdr.write_type_7(data.getProjectInsideUsingConvexHull());
 
       cdr.write_type_6(data.getProjectionInsideDistance());
+
+      cdr.write_type_6(data.getMinimumProjectionInsideDistance());
 
       cdr.write_type_6(data.getMaximumXyWiggleDistance());
 
@@ -499,6 +506,8 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
       	
       data.setProjectionInsideDistance(cdr.read_type_6());
       	
+      data.setMinimumProjectionInsideDistance(cdr.read_type_6());
+      	
       data.setMaximumXyWiggleDistance(cdr.read_type_6());
       	
       data.setMinimumSurfaceInclineRadians(cdr.read_type_6());
@@ -573,6 +582,7 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
       ser.write_type_6("max_walking_speed_multiplier", data.getMaxWalkingSpeedMultiplier());
       ser.write_type_7("project_inside_using_convex_hull", data.getProjectInsideUsingConvexHull());
       ser.write_type_6("projection_inside_distance", data.getProjectionInsideDistance());
+      ser.write_type_6("minimum_projection_inside_distance", data.getMinimumProjectionInsideDistance());
       ser.write_type_6("maximum_xy_wiggle_distance", data.getMaximumXyWiggleDistance());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
@@ -630,6 +640,7 @@ public class PawStepPlannerParametersPacketPubSubType implements us.ihmc.pubsub.
       data.setMaxWalkingSpeedMultiplier(ser.read_type_6("max_walking_speed_multiplier"));
       data.setProjectInsideUsingConvexHull(ser.read_type_7("project_inside_using_convex_hull"));
       data.setProjectionInsideDistance(ser.read_type_6("projection_inside_distance"));
+      data.setMinimumProjectionInsideDistance(ser.read_type_6("minimum_projection_inside_distance"));
       data.setMaximumXyWiggleDistance(ser.read_type_6("maximum_xy_wiggle_distance"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));

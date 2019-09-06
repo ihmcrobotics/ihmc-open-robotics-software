@@ -24,7 +24,7 @@ public class PlanarRegionPawConstraintDataTest
       generator.addRectangle(0.2, 1.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      PlanarRegionPawConstraintData planarRegionPawConstraintData = new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(0), true, 0.2);
+      PlanarRegionPawConstraintData planarRegionPawConstraintData = new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(0), true, 0.2, -1.0);
       ConvexPolygon2DReadOnly scaledRegionPolygon = planarRegionPawConstraintData.getScaledRegionPolygon(new Point2D(0.0, 0.0));
 
       Point2D projectionPoint = new Point2D();
@@ -77,7 +77,7 @@ public class PlanarRegionPawConstraintDataTest
       start = System.nanoTime();
       for (int i = 0; i < numberOfRegions; i++)
       {
-         new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(i), true, successfulProjectionDistance[i]);
+         new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(i), true, successfulProjectionDistance[i], -1.0);
       }
       stop = System.nanoTime();
       System.out.println("Average time taken not using fallback projection: " + (Conversions.nanosecondsToSeconds(stop - start) / numberOfRegions) + " sec");
@@ -85,7 +85,7 @@ public class PlanarRegionPawConstraintDataTest
       start = System.nanoTime();
       for (int i = 0; i < numberOfRegions; i++)
       {
-         new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(i), true, unsuccessfulProjectionDistances[i]);
+         new PlanarRegionPawConstraintData(scaler, planarRegionsList.getPlanarRegion(i), true, unsuccessfulProjectionDistances[i], -1.0);
       }
       stop = System.nanoTime();
       System.out.println("Average time taken using fallback projection: " + (Conversions.nanosecondsToSeconds(stop - start) / numberOfRegions) + " sec");

@@ -20,10 +20,9 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
 {
    private final double cliffHeightToAvoid;
 
-   public CliffAvoidancePlanarRegionFootstepNodeSnapper(PawStepPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
-                                                        BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
+   public CliffAvoidancePlanarRegionFootstepNodeSnapper(PawStepPlannerParametersReadOnly parameters, boolean enforceTranslationLessThanGridCell)
    {
-      super(parameters, projectionInsideDelta, projectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
+      super(parameters, enforceTranslationLessThanGridCell);
 
       cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
    }

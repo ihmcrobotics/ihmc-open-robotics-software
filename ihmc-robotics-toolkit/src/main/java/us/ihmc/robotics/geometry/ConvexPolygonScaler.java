@@ -413,14 +413,13 @@ public class ConvexPolygonScaler
     *
     * {@param projectionDistanceUpperBound} is the upper bound of the search. If this value is negative an upper bound is calculated.
     */
-   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double projectionDistanceUpperBound, double precision,
-                                             int... vertexStartIndicesToNotScale)
+   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double projectionDistanceLowerBound, double projectionDistanceUpperBound,
+                                             double precision, int... vertexStartIndicesToNotScale)
    {
-      double projectionDistanceLowerBound = 0.0;
       int iterations = 0;
       int maxIterations = 50;
 
-      if(projectionDistanceUpperBound < 0.0)
+      if (projectionDistanceUpperBound < 0.0)
       {
          BoundingBox2DReadOnly boundingBox = regionToScale.getBoundingBox();
          projectionDistanceUpperBound = Math.max(boundingBox.getMaxX() - boundingBox.getMinX(), boundingBox.getMaxY() - boundingBox.getMinY());
