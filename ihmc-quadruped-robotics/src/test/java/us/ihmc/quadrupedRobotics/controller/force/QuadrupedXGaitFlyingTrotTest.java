@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 
+@Disabled
 @Tag("quadruped-xgait-2")
 public abstract class QuadrupedXGaitFlyingTrotTest implements QuadrupedMultiRobotTestInterface
 {
