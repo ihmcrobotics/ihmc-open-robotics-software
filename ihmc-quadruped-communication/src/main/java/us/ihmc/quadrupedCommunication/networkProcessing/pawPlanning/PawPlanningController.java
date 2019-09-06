@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PawPlanningController extends QuadrupedToolboxController
 {
-   private final static boolean debug = true;
+   private final static boolean debug = false;
 
    private final YoEnum<PawStepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, PawStepPlannerType.class);
    private final EnumMap<PawStepPlannerType, BodyPathAndPawPlanner> plannerMap = new EnumMap<>(PawStepPlannerType.class);

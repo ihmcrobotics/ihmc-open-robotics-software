@@ -96,7 +96,10 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
          }
       }
 
-      yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
+      if (waypoints.size() < 2)
+         yoResult.set(PawStepPlanningResult.PLANNER_FAILED);
+      else
+         yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
    }
 
