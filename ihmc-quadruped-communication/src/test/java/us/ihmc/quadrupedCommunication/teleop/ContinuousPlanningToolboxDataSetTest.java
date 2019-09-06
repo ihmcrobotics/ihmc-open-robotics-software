@@ -90,6 +90,11 @@ public class ContinuousPlanningToolboxDataSetTest
 
    private final DecimalFormat numberFormat = new DecimalFormat("#.00");
 
+   private static final List<DataSetName> datasetsToIgnore = new ArrayList<>();
+   static
+   {
+      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
+   }
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
@@ -299,6 +304,12 @@ public class ContinuousPlanningToolboxDataSetTest
                                                            {
                                                               if (!dataSet.hasPlannerInput())
                                                                  return false;
+                                                              for (DataSetName nameToIgnore : datasetsToIgnore)
+                                                              {
+                                                                 if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
+                                                                    return false;
+                                                              }
+
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
                                                            });
       runAssertionsOnAllDatasets(dataSets);
@@ -779,7 +790,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171215_220208_SimpleStairs);
+      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 
