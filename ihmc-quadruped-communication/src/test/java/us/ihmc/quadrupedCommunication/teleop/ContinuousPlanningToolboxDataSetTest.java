@@ -774,7 +774,7 @@ public class ContinuousPlanningToolboxDataSetTest
          if (previousStep != null)
          {
             double heightChange = Math.abs(step.getGoalPosition().getZ() - previousStep.getGoalPosition().getZ());
-            if (heightChange > 1.1 * parameters.getMaximumStepChangeZ())
+            if (heightChange > parameters.getMaximumStepChangeZ())
                errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much. Max is " + parameters.getMaximumStepChangeZ();
          }
 

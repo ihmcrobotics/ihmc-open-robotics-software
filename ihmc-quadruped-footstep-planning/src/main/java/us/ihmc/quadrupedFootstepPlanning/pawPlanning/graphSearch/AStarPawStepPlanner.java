@@ -495,6 +495,19 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          if (snapData != null)
             position.applyTransform(snapData.getSnapTransform());
 
+         if (debug)
+         {
+            PawNode previousNode = path.get(i - 1);
+            Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
+            PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
+            RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+            previousPosition.applyTransform(previousSnapTransform);
+            if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
+            {
+               LogTools.error("height change error.");
+            }
+         }
+
          newStep.setGoalPosition(position);
 
          plan.addPawStep(newStep);
