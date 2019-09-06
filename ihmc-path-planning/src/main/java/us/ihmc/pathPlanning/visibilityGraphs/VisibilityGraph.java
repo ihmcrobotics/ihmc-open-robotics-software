@@ -240,18 +240,21 @@ public class VisibilityGraph
       if (visibilityGraphNavigableRegion == null)
       {
          startNode = createNodeWithNoRegion(sourceLocationInWorld);
-         computeInterEdgesWhenOnNoRegion(startNode, interRegionConnectionFilter, 1.0);
+         computeInterEdgesWhenOnNoRegion(startNode, allPassFilter, 1.0);
       }
       else
       {
          startNode = createNode(sourceLocationInWorld, visibilityGraphNavigableRegion);
          connectNodeToInnerRegionNodes(startNode, visibilityGraphNavigableRegion, goalNode);
-
-         if (visibilityGraphNavigableRegion.getAllEdges().size() < 1)
-         { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
-            computeInterEdges(startNode);
-         }
       }
+
+      if (startNode.getEdges().size() < 1)
+      { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
+         computeInterEdges(startNode);
+      }
+
+      if (startNode.getEdges().size() == 0)
+         throw new RuntimeException("We have a problem.");
 
       return startNode;
    }
