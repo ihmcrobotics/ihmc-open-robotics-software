@@ -22,10 +22,10 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
-   private GoalOrientedTestConductor conductor;
-   private QuadrupedTestYoVariables variables;
-   private RemoteQuadrupedTeleopManager stepTeleopManager;
-   private QuadrupedTestFactory quadrupedTestFactory;
+   protected GoalOrientedTestConductor conductor;
+   protected QuadrupedTestYoVariables variables;
+   protected RemoteQuadrupedTeleopManager stepTeleopManager;
+   protected QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
    public abstract double getPacingStepDuration();
