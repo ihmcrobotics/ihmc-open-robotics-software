@@ -26,7 +26,7 @@ import java.util.List;
 
 public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsForPawStepPlanner
 {
-   protected final static boolean debug = true;
+   protected final static boolean debug = false;
    private static final double defaultFallbackRegionSize = 0.3;
 
    protected final FramePose3D bodyStartPose = new FramePose3D();
