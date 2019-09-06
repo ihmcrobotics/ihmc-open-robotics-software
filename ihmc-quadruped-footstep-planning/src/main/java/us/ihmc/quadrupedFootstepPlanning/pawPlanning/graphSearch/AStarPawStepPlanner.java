@@ -57,6 +57,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
 
+   private RobotQuadrant startQuadrant;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -84,7 +85,6 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    private final PawNodeExpansion nodeExpansion;
    private final PawNodeCost stepCostCalculator;
    private final PawNodeSnapper snapper;
-   private final PawNodeSnapper postProcessingSnapper;
 
    private final ArrayList<StartAndGoalPawListener> startAndGoalListeners = new ArrayList<>();
 
@@ -106,7 +106,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
    public AStarPawStepPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeChecker nodeChecker,
                               PawNodeTransitionChecker nodeTransitionChecker, PawPlanningCostToGoHeuristics heuristics, PawNodeExpansion nodeExpansion,
-                              PawNodeCost stepCostCalculator, PawNodeSnapper snapper, PawNodeSnapper postProcessingSnapper,
+                              PawNodeCost stepCostCalculator, PawNodeSnapper snapper,
                               PawStepPlannerListener listener, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -118,7 +118,6 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       this.stepCostCalculator = stepCostCalculator;
       this.listener = listener;
       this.snapper = snapper;
-      this.postProcessingSnapper = postProcessingSnapper;
       this.graph = new PawStepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
@@ -172,6 +171,12 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public void setStart(PawStepPlannerStart start)
    {
       checkGoalType(start);
+      requestInitialize();
+
+      if (start.getInitialQuadrant() == null)
+         startQuadrant = defaultFirstQuadrant;
+      else
+         startQuadrant = start.getInitialQuadrant();
 
       startNode = getNodeFromTarget(start.getInitialQuadrant(), start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
@@ -310,7 +315,6 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
       nodeTransitionChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
-      postProcessingSnapper.setPlanarRegions(planarRegionsList);
       this.planarRegionsList = planarRegionsList;
    }
 
@@ -346,18 +350,26 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          {
             PawNode node = path.get(i);
 
-            PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
+            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
+            PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
             RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
             if (snapTransform.containsNaN())
             {
                if (debug)
                   System.out.println("Failed to snap in post processing.");
-               result =  PawStepPlanningResult.NO_PATH_EXISTS;
+               result = PawStepPlanningResult.NO_PATH_EXISTS;
                break;
             }
          }
+
+         if (path.get(1).getMovingQuadrant() != startQuadrant)
+         {
+            LogTools.error("The plan is starting with the wrong quadrant.");
+//            result = PawStepPlanningResult.PLANNER_FAILED;
+         }
       }
+
 
       if (debug)
       {
@@ -413,7 +425,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
+         PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
          position.applyTransform(snapTransform);
@@ -423,6 +435,12 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          plan.addPawStep(newStep);
 
          lastStepStartTime = thisStepStartTime;
+      }
+
+      if (plan.getPawStep(0).getRobotQuadrant() != startQuadrant)
+      {
+         LogTools.error("The plan is starting with the wrong quadrant.");
+         throw new RuntimeException("Plan is starting with the wrong quadrant.");
       }
 
       return plan;
@@ -683,6 +701,8 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          PawNode nodeAtGoal = PawNode.constructNodeFromOtherNode(movingQuadrant, goalNode.getXIndex(movingQuadrant),
                                                                  goalNode.getYIndex(movingQuadrant), goalNode.getYawIndex(), endNode);
 
+         snapper.snapPawNode(nodeAtGoal);
+
          nodePathToPack.add(nodeAtGoal);
          endNode = nodeAtGoal;
 
@@ -745,7 +765,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       PawNodeCost pawNodeCost = costBuilder.buildCost();
 
       AStarPawStepPlanner planner = new AStarPawStepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics,
-                                                            expansion, pawNodeCost, snapper, snapper, listener, registry);
+                                                            expansion, pawNodeCost, snapper, listener, registry);
 
       return planner;
    }
