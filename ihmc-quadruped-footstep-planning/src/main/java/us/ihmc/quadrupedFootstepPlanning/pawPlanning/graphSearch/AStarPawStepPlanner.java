@@ -342,31 +342,49 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          if (listener != null)
          listener.plannerFinished(null);
 
-      // checking path
          List<PawNode> path = graph.getPathFromStart(endNode);
          if (hasReachedFinalGoal.getBooleanValue())
             addGoalNodesToEnd(path);
-         for (int i = 0; i < path.size(); i++)
+
+         // checking path
+         if (debug)
          {
-            PawNode node = path.get(i);
-
-            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
-            PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
-            RigidBodyTransform snapTransform = snapData.getSnapTransform();
-
-            if (snapTransform.containsNaN())
+            PawNode previousNode = path.get(0);
+            for (int i = 0; i < path.size(); i++)
             {
-               if (debug)
-                  System.out.println("Failed to snap in post processing.");
-               result = PawStepPlanningResult.NO_PATH_EXISTS;
-               break;
-            }
-         }
+               PawNode node = path.get(i);
+               RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
-         if (path.get(1).getMovingQuadrant() != startQuadrant)
-         {
-            LogTools.error("The plan is starting with the wrong quadrant.");
-//            result = PawStepPlanningResult.PLANNER_FAILED;
+               PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+               RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+               Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+               position.applyTransform(snapTransform);
+
+               if (snapTransform.containsNaN())
+               {
+                  System.out.println("Failed to snap in post processing.");
+                  result = PawStepPlanningResult.PLANNER_FAILED;
+                  break;
+               }
+
+               Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
+               PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
+               RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+               previousPosition.applyTransform(previousSnapTransform);
+               if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
+               {
+                  LogTools.error("height change error.");
+               }
+
+               previousNode = node;
+            }
+
+            if (path.get(1).getMovingQuadrant() != startQuadrant)
+            {
+               LogTools.error("The plan is starting with the wrong quadrant.");
+               //            result = PawStepPlanningResult.PLANNER_FAILED;
+            }
          }
       }
 
@@ -400,7 +418,6 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
       double lastStepStartTime = 0;
 
-      PawNode previousNode = path.get(0);
       for (int i = 1; i < path.size(); i++)
       {
          PawNode node = path.get(i);
@@ -426,32 +443,16 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
          PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
-         PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
-         RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
 
          position.applyTransform(snapTransform);
-         previousPosition.applyTransform(previousSnapTransform);
-
-         if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
-         {
-            LogTools.error("height change error.");
-         }
 
          newStep.setGoalPosition(position);
 
          plan.addPawStep(newStep);
 
          lastStepStartTime = thisStepStartTime;
-         previousNode = node;
-      }
-
-      if (plan.getPawStep(0).getRobotQuadrant() != startQuadrant)
-      {
-         LogTools.error("The plan is starting with the wrong quadrant.");
-         throw new RuntimeException("Plan is starting with the wrong quadrant.");
       }
 
       return plan;
