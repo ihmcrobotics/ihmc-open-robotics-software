@@ -307,6 +307,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistance();
+      highLevelPlanarRegionConstraintDataParameters.minimumProjectionInsideDelta = parameters.getMinimumProjectInsideDistance();
       highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
       nodeTransitionChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
@@ -714,9 +715,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public static AStarPawStepPlanner createPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                    PawStepPlannerListener listener, YoVariableRegistry registry)
    {
-      PawNodeSnapper snapper = new CliffAvoidancePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull, true);
-
+      PawNodeSnapper snapper = new CliffAvoidancePlanarRegionFootstepNodeSnapper(parameters, true);
       PawNodeExpansion expansion = new ParameterBasedPawNodeExpansion(parameters, xGaitSettings);
 
       SnapBasedPawNodeTransitionChecker snapBasedNodeTransitionChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
