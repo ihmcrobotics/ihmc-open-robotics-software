@@ -37,6 +37,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    private static final boolean debug = false;
    private static final boolean verbose = true;
 
+   private static final RobotQuadrant defaultInitialQuadrant = RobotQuadrant.FRONT_LEFT;
+
    private static final double proximityGoal = 1.0e-2;
    private static final int defaultStartPlanId = 13;
 
@@ -165,7 +167,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       stepQueue.clear();
       footstepStatusBuffer.set(new ArrayList<>());
       latestPlannerOutput.set(null);
-      expectedInitialQuadrant.set(null);
+      expectedInitialQuadrant.set(defaultInitialQuadrant);
 
       broadcastPlanId.set(defaultStartPlanId);
       receivedPlanId.set(-1);
@@ -185,28 +187,24 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    public void updateInternal()
    {
       clearCompletedSteps();
-//      updateFixedStepQueue();
 
       checkIfLastPlanFulfilledRequest();
 
-      if (!waitingForPlan.getBooleanValue())// && receivedPlanForLastRequest.getBooleanValue())
+      if (!waitingForPlan.getBooleanValue() && !hasReachedGoal.getBooleanValue() && fixedStepQueue.size() < numberOfStepsToLeaveUnchanged.getValue())
       {
          updateStepQueueFromNewPlan();
 
-         boolean fixedStepsWereUpdated = updateFixedStepQueue();
+         updateFixedStepQueue();
 
-         if (fixedStepsWereUpdated)
+         updateHasReachedGoal();
+
+         if (!hasReachedGoal.getBooleanValue())
          {
-            updateHasReachedGoal();
+            broadcastLatestPlan();
 
-            if (!hasReachedGoal.getBooleanValue())
-            {
-               broadcastLatestPlan();
-
-               if (debug)
-                  LogTools.info("Sending a new planning request.");
-               computeAndSendLatestPlanningRequest();
-            }
+            if (debug)
+               LogTools.info("Sending a new planning request.");
+            computeAndSendLatestPlanningRequest();
          }
       }
    }
@@ -234,7 +232,11 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
    private void updateStepQueueFromNewPlan()
    {
       PawStepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
-      if (plannerOutput == null)
+      if (plannerOutput == null || plannerOutput.getPlanId() != broadcastPlanId.getValue())
+         return;
+
+      // ignore this plan, it's out of date.
+      if (plannerOutput.getPlanId() != broadcastPlanId.getValue())
          return;
 
       currentPlannerOutput.set(plannerOutput);
@@ -242,6 +244,15 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       stepQueue.clear();
       for (int i = 0; i < stepList.size(); i++)
          stepQueue.add(new QuadrupedTimedStep(stepList.get(i)));
+
+      if (stepQueue.get(0).getRobotQuadrant() != expectedInitialQuadrant.get())
+      {
+         LogTools.error("Got a plan back starting with the wrong first step. Should start with " + expectedInitialQuadrant.get() + ", but actually starts with " +
+               stepQueue.get(0).getRobotQuadrant());
+         resetForNewPlan();
+         planningFailed.set(true);
+         throw new RuntimeException("Got back the wrong starting step.");
+      }
 
       shiftStepTimesToAppendToList(fixedStepQueue, stepQueue, xGaitSettings);
 
@@ -318,8 +329,8 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          fixedStepQueue.add(stepToAdd);
       }
 
-      checkStepOrders(fixedStepQueue);
-      checkStepOrders(stepQueue);
+      checkStepOrders("fixed queue", fixedStepQueue);
+      checkStepOrders("step queue", stepQueue);
 
       QuadrupedTimedStep firstStep = fixedStepQueue.get(0);
       double timeShift = -firstStep.getTimeInterval().getStartTime();
@@ -340,7 +351,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       return true;
    }
 
-   private void checkStepOrders(List<QuadrupedTimedStep> stepList)
+   private void checkStepOrders(String prefix, List<QuadrupedTimedStep> stepList)
    {
       for (int i = 0; i < stepList.size() - 1; i++)
       {
@@ -349,7 +360,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
 
          if (lastQuadrant.getNextRegularGaitSwingQuadrant() != nextQuadrant)
          {
-            LogTools.error("The steps are out of order, and the bug may be getting swallowed.");
+            LogTools.error("The steps are out of order for " + prefix +", and the bug may be getting swallowed.");
             resetForNewPlan();
             planningFailed.set(true);
             throw new RuntimeException("This is out of order.");
@@ -479,16 +490,15 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       {
          if (MathTools.epsilonEquals(xGaitSettings.getEndPhaseShift(), QuadrupedGait.AMBLE.getEndPhaseShift(), 1e-5))
          {
-            RobotQuadrant nextQuadrant = finalStep.getRobotQuadrant().getNextRegularGaitSwingQuadrant();
-            planningRequestPacket.setInitialStepRobotQuadrant(nextQuadrant.toByte());
+            expectedInitialQuadrant.set(finalStep.getRobotQuadrant().getNextRegularGaitSwingQuadrant());
          }
          else if (MathTools.epsilonEquals(xGaitSettings.getEndPhaseShift(), QuadrupedGait.TROT.getEndPhaseShift(), 1e-5))
          {
             RobotQuadrant quadrant = finalStep.getRobotQuadrant();
             if (quadrant.getEnd() == RobotEnd.FRONT)
-               planningRequestPacket.setInitialStepRobotQuadrant(quadrant.getAcrossBodyQuadrant().toByte());
+               expectedInitialQuadrant.set(quadrant.getAcrossBodyQuadrant());
             else
-               planningRequestPacket.setInitialStepRobotQuadrant(quadrant.getDiagonalOppositeQuadrant().getAcrossBodyQuadrant().toByte());
+               expectedInitialQuadrant.set(quadrant.getDiagonalOppositeQuadrant().getAcrossBodyQuadrant());
          }
          else
          {
@@ -498,6 +508,7 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
          }
       }
 
+      planningRequestPacket.setInitialStepRobotQuadrant(expectedInitialQuadrant.get().toByte());
       planningRequestPacket.setHorizonLength(continuousPlanningRequestPacket.getHorizonLength());
       planningRequestPacket.setRequestedPawPlannerType(PawStepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
       planningRequestPacket.setStartTargetType(PawStepPlanningRequestPacket.PAW_PLANNER_TARGET_TYPE_FOOTSTEPS);
@@ -506,8 +517,6 @@ public class QuadrupedContinuousPlanningController extends QuadrupedToolboxContr
       planningRequestPacket.getGoalPositionInWorld().set(continuousPlanningRequestPacket.getGoalPositionInWorld());
       planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());
-
-      expectedInitialQuadrant.set(RobotQuadrant.fromByte(planningRequestPacket.getInitialStepRobotQuadrant()));
 
       broadcastPlanId.increment();
       planningRequestPacket.setPlannerRequestId(broadcastPlanId.getIntegerValue());
