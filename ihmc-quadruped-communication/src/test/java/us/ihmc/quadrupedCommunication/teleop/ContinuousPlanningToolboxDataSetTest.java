@@ -161,7 +161,7 @@ public class ContinuousPlanningToolboxDataSetTest
       parameters.setXGaitWeight(10.0);
       parameters.setDesiredVelocityWeight(0.0);
       parameters.setReturnBestEffortPlan(true);
-      parameters.setPerformGraphRepairingStep(false);
+      parameters.setPerformGraphRepairingStep(true);
       parameters.setMinimumStepsForBestEffortPlan(6);
 
       return parameters;
@@ -575,7 +575,7 @@ public class ContinuousPlanningToolboxDataSetTest
          if (!newMessage.isEmpty())
          {
             DecimalFormat numberFormat = new DecimalFormat("#.00");
-            message += "\tAt time " + numberFormat.format(timeReference.get()) + " " + newMessage;
+            message += "\nAt time " + numberFormat.format(timeReference.get()) + " " + newMessage;
          }
 
          List<QuadrupedTimedStep> stepsJustStarted = stepsInProgress.stream().filter(step -> !hasQuadrantInProgress(step.getRobotQuadrant(), stepsCurrentlyInProgress)).collect(Collectors.toList());
@@ -774,8 +774,8 @@ public class ContinuousPlanningToolboxDataSetTest
          if (previousStep != null)
          {
             double heightChange = Math.abs(step.getGoalPosition().getZ() - previousStep.getGoalPosition().getZ());
-            if (heightChange > parameters.getMaximumStepChangeZ())
-               errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much.";
+            if (heightChange > 1.1 * parameters.getMaximumStepChangeZ())
+               errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much. Max is " + parameters.getMaximumStepChangeZ();
          }
 
          previousSteps.put(stepQuadrant, step);
