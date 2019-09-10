@@ -80,14 +80,21 @@ public class BipedalSupportPlanarRegionPublisher
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           (NewMessageListener<CapturabilityBasedStatus>) subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           CapturabilityBasedStatus.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      regionPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                  PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           BipedalSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT),
+                                           s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);
