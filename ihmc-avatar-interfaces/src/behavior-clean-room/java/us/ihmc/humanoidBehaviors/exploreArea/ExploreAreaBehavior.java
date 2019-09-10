@@ -760,8 +760,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       if (!desiredFramePoses.isEmpty())
       {
-         FramePose3D goal = desiredFramePoses.get(0);
-         desiredFramePoses.remove(0);
+         FramePose3D goal = desiredFramePoses.remove(0);
 
          LogTools.info("\nPlanning to " + goal);
          Point3D goalToSend = new Point3D(goal.getPosition());
