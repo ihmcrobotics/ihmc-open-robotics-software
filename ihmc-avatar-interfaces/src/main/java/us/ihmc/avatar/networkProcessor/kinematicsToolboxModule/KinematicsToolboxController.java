@@ -4,6 +4,7 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -23,21 +26,28 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -46,6 +56,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -54,6 +65,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -219,6 +231,8 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
+   private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
+
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
@@ -261,6 +275,11 @@ public class KinematicsToolboxController extends ToolboxController
 
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
+   }
+
+   public void registerCollidable(KinematicsCollidable collidable)
+   {
+      robotCollidables.add(collidable);
    }
 
    /**
@@ -454,6 +473,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
+      controllerCoreCommand.addInverseKinematicsCommand(resolveCollisions());
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
@@ -534,7 +554,6 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointAccelerationWeight(optimizationSettings.getJointAccelerationWeight());
          else
             activeOptimizationSettings.setJointAccelerationWeight(command.getJointAccelerationWeight());
-
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
@@ -563,6 +582,63 @@ public class KinematicsToolboxController extends ToolboxController
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
+   }
+
+   public InverseKinematicsCommand<?> resolveCollisions()
+   {
+      if (robotCollidables.isEmpty())
+         return null;
+
+      int collisionIndex = 0;
+      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
+
+      for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
+      {
+         KinematicsCollidable collidableA = robotCollidables.get(collidableAIndex);
+         RigidBodyBasics bodyA = collidableA.getRigidBody();
+         MovingReferenceFrame bodyFixedFrameA = bodyA.getBodyFixedFrame();
+
+         for (int collidableBIndex = collidableAIndex + 1; collidableBIndex < robotCollidables.size(); collidableBIndex++)
+         {
+            KinematicsCollidable collidableB = robotCollidables.get(collidableBIndex);
+
+            if (!collidableA.isCollidableWith(collidableB))
+               continue;
+
+            KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
+            double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
+
+            double maxVelocityMagnitude = (collisionResult.getSignedDistance() - minimumSafeDistance) / updateDT;
+
+            FramePoint3D pointOnA = collisionResult.getPointOnA();
+            FramePoint3D pointOnB = collisionResult.getPointOnB();
+            pointOnA.changeFrame(bodyFixedFrameA);
+            pointOnB.changeFrame(bodyFixedFrameA);
+
+            RigidBodyTransform collisionFramePose = new RigidBodyTransform();
+            collisionFramePose.setTranslation(pointOnA);
+            Vector3D collisionDirection = new Vector3D();
+            collisionDirection.sub(pointOnB, pointOnA);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionDirection, collisionFramePose.getRotation());
+
+            ReferenceFrame collisionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("collisionFrame" + collisionIndex,
+                                                                                                              bodyFixedFrameA,
+                                                                                                              collisionFramePose);
+
+            SpatialVelocityCommand command = new SpatialVelocityCommand();
+            command.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+            command.set(bodyA, collidableB.getRigidBody());
+            command.getDesiredLinearVelocity().setZ(maxVelocityMagnitude);
+            command.getControlFramePose().setIncludingFrame(bodyFixedFrameA, collisionFramePose);
+            SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
+            selectionMatrix.clearSelection();
+            selectionMatrix.selectLinearZ(true);
+            selectionMatrix.setSelectionFrames(null, collisionFrame);
+            commandList.addCommand(command);
+         }
+      }
+
+      return commandList;
    }
 
    /**
