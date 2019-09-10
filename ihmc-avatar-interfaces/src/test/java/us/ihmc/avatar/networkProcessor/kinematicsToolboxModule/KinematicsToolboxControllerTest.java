@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -25,12 +24,12 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -168,8 +167,6 @@ public class KinematicsToolboxControllerTest
          scs.closeAndDispose();
          scs = null;
       }
-
-      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    @Test
@@ -198,7 +195,7 @@ public class KinematicsToolboxControllerTest
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
-         PrintTools.info(this, "Entering: testRandomHandPositions");
+         LogTools.info("Entering: testRandomHandPositions");
       Random random = new Random(2135);
       Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -227,7 +224,7 @@ public class KinematicsToolboxControllerTest
          assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
-            PrintTools.info(this, "Solution quality: " + solutionQuality);
+            LogTools.info("Solution quality: " + solutionQuality);
          assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
       }
    }
@@ -236,7 +233,7 @@ public class KinematicsToolboxControllerTest
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)
-         PrintTools.info(this, "Entering: testRandomHandPoses");
+         LogTools.info("Entering: testRandomHandPoses");
       Random random = new Random(2134);
       Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
@@ -268,14 +265,14 @@ public class KinematicsToolboxControllerTest
          assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
-            PrintTools.info(this, "Solution quality: " + solutionQuality);
+            LogTools.info("Solution quality: " + solutionQuality);
          averageSolutionQuality += solutionQuality / numberOfTests;
          worstSolutionQuality = Math.max(worstSolutionQuality, solutionQuality);
       }
 
       if (VERBOSE)
       {
-         PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
+         LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
       assertTrue(worstSolutionQuality < 5.0e-4, "Poor worst solution quality: " + worstSolutionQuality);
       assertTrue(averageSolutionQuality < 5.0e-5, "Poor average solution quality: " + averageSolutionQuality);
@@ -355,7 +352,7 @@ public class KinematicsToolboxControllerTest
             {
                toolboxController.updateInternal();
                if (VERBOSE)
-                  PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
+                  LogTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
                jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
                numberOfIterations.increment();
             }
