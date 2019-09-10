@@ -38,10 +38,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class BipedalSupportPlanarRegionPublisher
 {
@@ -128,7 +125,9 @@ public class BipedalSupportPlanarRegionPublisher
 
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusMessage.get();
       if (capturabilityBasedStatus == null)
+      {
          return;
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -143,7 +142,9 @@ public class BipedalSupportPlanarRegionPublisher
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationData.get();
       if (robotConfigurationData == null)
+      {
          return;
+      }
 
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
 
