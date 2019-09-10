@@ -1,9 +1,11 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -28,11 +30,14 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -45,6 +50,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -93,6 +99,9 @@ public class AvatarKinematicsSimulationController
    private final StateExecutor taskExecutor = new StateExecutor(StateMachineClock.dummyClock()); // should be dummy?
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
+   private CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+   private BalanceManager balanceManager;
+
    public AvatarKinematicsSimulationController(DRCRobotModel robotModel,
                                                Pose3DReadOnly initialPelvisPose,
                                                List<Double> initialJointAngles,
@@ -138,8 +147,6 @@ public class AvatarKinematicsSimulationController
                                                        rootJoint,
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
-      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
@@ -151,8 +158,6 @@ public class AvatarKinematicsSimulationController
                                                                  walkingControllerParameters,
                                                                  controllerToolbox);
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
-
-      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
 
@@ -176,8 +181,7 @@ public class AvatarKinematicsSimulationController
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
 
-      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+      balanceManager = managerFactory.getOrCreateBalanceManager();
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
 
@@ -321,8 +325,7 @@ public class AvatarKinematicsSimulationController
                                                                        foostepCommand,
                                                                        walkingInputManager,
                                                                        walkingOutputManager,
-                                                                       controllerToolbox.getFootContactStates(),
-                                                                       managerFactory.getOrCreateBalanceManager(),
+                                                                       controllerToolbox.getFootContactStates(), balanceManager,
                                                                        footSwitches,
                                                                        walkingStatusPublisher,
                                                                        footstepStatusPublisher));
@@ -335,45 +338,63 @@ public class AvatarKinematicsSimulationController
          controllerToolbox.update();
       }
 
+      if (balanceManager != null)
+      {
+         capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
+      }
+
       if (taskExecutor.isDone())  // keep robot from drifting when no tasks are present
       {
          zeroMotion();
-         return;
       }
-
-      taskExecutor.doControl();
-
-      walkingController.doAction();
-
-      linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
-      if (!linearMomentumRateControlModule.computeControllerCoreCommands())
+      else
       {
-         controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
+         State currentTask = taskExecutor.getCurrentTask();
+         if (currentTask instanceof KinematicsWalkingInitializeTask)
+         {
+
+         }
+         else if (currentTask instanceof KinematicsWalkingFootstepSequenceTask)
+         {
+            KinematicsWalkingFootstepSequenceTask footstepSequenceTask = (KinematicsWalkingFootstepSequenceTask) currentTask;
+         }
+
+         taskExecutor.doControl();
+
+         walkingController.doAction();
+
+         linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
+         if (!linearMomentumRateControlModule.computeControllerCoreCommands())
+         {
+            controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
+         }
+         walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
+
+         ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+         controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
+         if (!taskExecutor.isDone())
+         {
+            controllerCoreCommand.addInverseDynamicsCommand(((KinematicsWalkingTask) taskExecutor.getCurrentTask()).getOutput());
+         }
+
+         controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+         controllerCore.compute();
+
+         linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+         linearMomentumRateControlModule.computeAchievedCMP();
+
+         rootJoint.setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
+         JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
+
+         for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
+         {
+            JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+            joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
+         }
+
+         integrator.setIntegrationDT(integrationDT);
+         integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
       }
-      walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
-
-      ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
-      if (!taskExecutor.isDone())
-         controllerCoreCommand.addInverseDynamicsCommand(((KinematicsWalkingTask) taskExecutor.getCurrentTask()).getOutput());
-
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
-
-      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
-      linearMomentumRateControlModule.computeAchievedCMP();
-
-      rootJoint.setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
-      JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
-
-      for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
-      {
-         JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-         joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
-      }
-
-      integrator.setIntegrationDT(integrationDT);
-      integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
    }
 
    private void zeroMotion()
@@ -393,5 +414,10 @@ public class AvatarKinematicsSimulationController
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public CapturabilityBasedStatus getCapturabilityBasedStatus()
+   {
+      return capturabilityBasedStatus;
    }
 }
