@@ -7,21 +7,29 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 public class KinematicsCollidable
 {
    private final RigidBodyBasics rigidBody;
-   private final int groupId;
+   private final int collisionMask;
+   private final int collisionGroup;
    private final Shape3DReadOnly shape;
    private final ReferenceFrame shapeFrame;
+   private final double minimumSafeDistance;
 
-   public KinematicsCollidable(RigidBodyBasics rigidBody, int groupId, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
+   public KinematicsCollidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame, double minimumSafeDistance)
    {
       this.rigidBody = rigidBody;
-      this.groupId = groupId;
+      this.collisionMask = collisionMask;
+      this.collisionGroup = collisionGroup;
       this.shape = shape;
       this.shapeFrame = shapeFrame;
+      this.minimumSafeDistance = minimumSafeDistance;
    }
 
    public boolean isCollidableWith(KinematicsCollidable other)
    {
-      return groupId != other.groupId;
+      if ((collisionGroup & other.collisionMask) == 0x00)
+         return false;
+      if ((other.collisionGroup & collisionMask) == 0x00)
+         return false;
+      return true;
    }
 
    public KinematicsCollisionResult evaluateCollision(KinematicsCollidable other)
@@ -34,13 +42,23 @@ public class KinematicsCollidable
       return rigidBody;
    }
 
-   public int getGroupId()
+   public int getCollisionMask()
    {
-      return groupId;
+      return collisionMask;
+   }
+
+   public int getCollisionGroup()
+   {
+      return collisionGroup;
    }
 
    public Shape3DReadOnly getShape()
    {
       return shape;
+   }
+
+   public double getMinimumSafeDistance()
+   {
+      return minimumSafeDistance;
    }
 }
