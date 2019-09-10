@@ -1,9 +1,6 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commons.Conversions;
@@ -46,6 +43,7 @@ public class AvatarKinematicsSimulation
                                                                                                              5);
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final IHMCROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
    private final IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher;
    private final IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -80,6 +78,10 @@ public class AvatarKinematicsSimulation
                                                                 RobotConfigurationData.class,
                                                                 robotModel.getSimpleRobotName(),
                                                                 ROS2Tools.HUMANOID_CONTROLLER);
+      capturabilityBasedStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                                  CapturabilityBasedStatus.class,
+                                                                  robotModel.getSimpleRobotName(),
+                                                                  ROS2Tools.HUMANOID_CONTROLLER);
       walkingStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                        WalkingStatusMessage.class,
                                                        robotModel.getSimpleRobotName(),
@@ -118,6 +120,8 @@ public class AvatarKinematicsSimulation
       avatarKinematicsSimulationController.doControl();
 
       robotConfigurationDataPublisher.publish(extractRobotConfigurationData(avatarKinematicsSimulationController.getFullRobotModel()));
+
+      capturabilityBasedStatusPublisher.publish(avatarKinematicsSimulationController.getCapturabilityBasedStatus());
    }
 
    private void acceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
