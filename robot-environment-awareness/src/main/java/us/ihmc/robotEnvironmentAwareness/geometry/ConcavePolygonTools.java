@@ -123,7 +123,7 @@ public class ConcavePolygonTools
       // filter out colinear edge intersections? did we just do this above?
 
       boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(filteredConcaveHullToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
-      LogTools.debug("Intersection count: {} vertex(0) is above line: {}", intersections.size(), vertex0IsAbove);
+      LogTools.trace("Intersection count: {} vertex(0) is above line: {}", intersections.size(), vertex0IsAbove);
 
       if (intersections.size() == 0) // first edge case: no intersections: keep all or remove all
       {
