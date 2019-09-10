@@ -821,7 +821,7 @@ public class ConvexPolygonTools
                                                                                                      polygonToCrop.isClockwiseOrdered(),
                                                                                                      firstIntersectionToPack,
                                                                                                      secondIntersectionToPack);
-      LogTools.debug("Intersection count: {}", intersectionCount);
+      LogTools.trace("Intersection count: {}", intersectionCount);
       boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
       if (intersectionCount == 0)
       {
