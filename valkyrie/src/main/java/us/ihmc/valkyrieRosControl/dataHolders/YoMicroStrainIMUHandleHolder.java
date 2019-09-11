@@ -5,13 +5,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
+import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 
 public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
 {
    private final MicroStrainIMUHandle microStrainIMUHandle;
 
-   private final YoEnum<MicrostrainFilterType> filterTypeToUse;
+   private final YoEnum<MicroStrainData.MicrostrainFilterType> filterTypeToUse;
 
    public static YoMicroStrainIMUHandleHolder create(int sensorId, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
@@ -23,7 +23,7 @@ public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
       super(handle, imuDefinition, parentRegistry);
       this.microStrainIMUHandle = handle;
 
-      filterTypeToUse = new YoEnum<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicrostrainFilterType.class);
+      filterTypeToUse = new YoEnum<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicroStrainData.MicrostrainFilterType.class);
 
       filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
       {
@@ -33,7 +33,7 @@ public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
             microStrainIMUHandle.setFilterTypeToReturn(filterTypeToUse.getEnumValue());
          }
       });
-      filterTypeToUse.set(MicrostrainFilterType.COMPLIMENTARY_FILTER);
+      filterTypeToUse.set(MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER);
 
    }
 

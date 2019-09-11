@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.valkyrie.imu.MicroStrainData;
+import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 
 /**
  * Created by dstephen on 12/14/15.
