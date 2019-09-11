@@ -1,8 +1,12 @@
 package us.ihmc.stateEstimation.head.carnegie.multisense;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.HeadPoseEstimator;
@@ -12,6 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -27,6 +32,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    private final HeadPoseEstimator headPoseEstimator;
    private final MicroStrainUDPPacketListener imuListener;
 
+   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
    private final RigidBodyTransform estimatedHeadTransform = new RigidBodyTransform();
 
    /*
@@ -36,7 +42,8 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    */
    private MicroStrainData microStrainData = new MicroStrainData();
 
-   public MultisenseSLWithMicroStrainHeadPoseEstimator(double dt, RigidBodyTransform imuToHeadTransform, PriorityParameters imuListenerPriority, long microStrainSerialNumber, YoVariableRegistry parentRegistry)
+   public MultisenseSLWithMicroStrainHeadPoseEstimator(double dt, RigidBodyTransform imuToHeadTransform, PriorityParameters imuListenerPriority,
+                                                       long microStrainSerialNumber, RealtimeRos2Node realtimeRos2Node, YoVariableRegistry parentRegistry)
          throws IOException
    {
       headPoseEstimator = new HeadPoseEstimator(dt, imuToHeadTransform, ESTIMATE_ANGULAR_VELOCITY_BIAS, registry);
@@ -55,6 +62,8 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
       {
          imuListener = MicroStrainUDPPacketListener.createNonRealtimeListener(microStrainSerialNumber);
       }
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, ROS2Tools::generateDefaultTopicName, this::onNewDataMessage);
 
       parentRegistry.addChild(registry);
    }
@@ -78,5 +87,15 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
       }
 
       headPoseEstimator.getHeadTransform(estimatedHeadTransform);
+   }
+
+   private void updateRobotConfigurationData(RobotConfigurationData latestData)
+   {
+      latestRobotConfigurationDataReference.set(latestData);
+   }
+
+   private void onNewDataMessage(Subscriber<RobotConfigurationData> subscriber)
+   {
+      updateRobotConfigurationData(subscriber.takeNextData());
    }
 }
