@@ -42,7 +42,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    private final RigidBodyTransform estimatedHeadTransform = new RigidBodyTransform();
 
    /*
-    this is not final but is still real-time safe because
+    this field is not final but is still real-time safe because
     the value returned by the UDP listener is a concurrent copier
     buffer element.
    */
