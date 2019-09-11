@@ -2,11 +2,15 @@ package us.ihmc.stateEstimation.head.carnegie.multisense;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.HeadPoseEstimator;
@@ -16,7 +20,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -32,7 +35,10 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    private final HeadPoseEstimator headPoseEstimator;
    private final MicroStrainUDPPacketListener imuListener;
 
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   private final FullRobotModel fullRobotModel;
+   private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
+   private final FramePoint3D headPositionEstimateFromRobotModel;
+
    private final RigidBodyTransform estimatedHeadTransform = new RigidBodyTransform();
 
    /*
@@ -42,10 +48,12 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    */
    private MicroStrainData microStrainData = new MicroStrainData();
 
-   public MultisenseSLWithMicroStrainHeadPoseEstimator(double dt, RigidBodyTransform imuToHeadTransform, PriorityParameters imuListenerPriority,
+   public MultisenseSLWithMicroStrainHeadPoseEstimator(FullRobotModel fullRobotModel, double dt, RigidBodyTransform imuToHeadTransform,
+                                                       PriorityParameters imuListenerPriority,
                                                        long microStrainSerialNumber, RealtimeRos2Node realtimeRos2Node, YoVariableRegistry parentRegistry)
          throws IOException
    {
+      this.fullRobotModel = fullRobotModel;
       headPoseEstimator = new HeadPoseEstimator(dt, imuToHeadTransform, ESTIMATE_ANGULAR_VELOCITY_BIAS, registry);
 
       XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
@@ -65,6 +73,8 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, ROS2Tools::generateDefaultTopicName, this::onNewDataMessage);
 
+      headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());
+
       parentRegistry.addChild(registry);
    }
 
@@ -77,21 +87,28 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator
    {
       microStrainData = imuListener.getLatestData(MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER);
 
+      boolean modelUpdatedWithNewData = robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
+
+      if (modelUpdatedWithNewData)
+      {
+         headPositionEstimateFromRobotModel.set(fullRobotModel.getHeadBaseFrame().getTransformToWorldFrame().getTranslation());
+         headPoseEstimator.setEstimatedHeadPosition(headPositionEstimateFromRobotModel);
+      }
+
       if(microStrainData != null)
       {
          headPoseEstimator.setImuAngularVelocity(microStrainData.getAngularRate());
          headPoseEstimator.setImuLinearAcceleration(microStrainData.getLinearAcceleration());
          headPoseEstimator.setImuMagneticFieldVector(microStrainData.getGeomagneticNorthVector());
-         headPoseEstimator.setEstimatedHeadPosition(null); //TODO this
-         headPoseEstimator.compute();
       }
 
+      headPoseEstimator.compute();
       headPoseEstimator.getHeadTransform(estimatedHeadTransform);
    }
 
    private void updateRobotConfigurationData(RobotConfigurationData latestData)
    {
-      latestRobotConfigurationDataReference.set(latestData);
+      robotConfigurationDataBuffer.receivedPacket(latestData);
    }
 
    private void onNewDataMessage(Subscriber<RobotConfigurationData> subscriber)
