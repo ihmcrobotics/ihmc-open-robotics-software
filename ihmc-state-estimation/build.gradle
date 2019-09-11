@@ -27,6 +27,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ekf", version: "0.2.10"
+   compile group: "us.ihmc", name: "ihmc-lord-microstrain-drivers", version: "0.0.1"
 }
 
 testDependencies {
