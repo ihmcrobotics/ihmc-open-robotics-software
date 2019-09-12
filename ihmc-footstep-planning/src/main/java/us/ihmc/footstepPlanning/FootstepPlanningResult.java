@@ -12,7 +12,8 @@ public enum FootstepPlanningResult
    TIMED_OUT_BEFORE_SOLUTION,
    NO_PATH_EXISTS,
    SNAPPING_FAILED,
-   PLANNER_FAILED;
+   PLANNER_FAILED,
+   INVALID_GOAL;
 
    public static final FootstepPlanningResult[] values = values();
 
@@ -35,8 +36,8 @@ public enum FootstepPlanningResult
 
    public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)
    {
-      byte aResult = (byte) MathTools.clamp(resultA.toByte(), OPTIMAL_SOLUTION.toByte(), PLANNER_FAILED.toByte());
-      byte bResult = (byte) MathTools.clamp(resultB.toByte(), OPTIMAL_SOLUTION.toByte(), PLANNER_FAILED.toByte());
+      byte aResult = (byte) MathTools.clamp(resultA.toByte(), OPTIMAL_SOLUTION.toByte(), INVALID_GOAL.toByte());
+      byte bResult = (byte) MathTools.clamp(resultB.toByte(), OPTIMAL_SOLUTION.toByte(), INVALID_GOAL.toByte());
       return fromByte((byte) Math.max(aResult, bResult));
    }
 

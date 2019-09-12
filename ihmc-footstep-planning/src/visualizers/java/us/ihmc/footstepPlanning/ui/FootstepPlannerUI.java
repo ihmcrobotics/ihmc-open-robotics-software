@@ -56,8 +56,9 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -116,7 +117,7 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
-   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParametersBasics plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParametersBasics plannerParameters, VisibilityGraphsParametersBasics visibilityGraphsParameters) throws Exception
    {
       this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null, null, null);
       messager.startMessager();
@@ -128,7 +129,7 @@ public class FootstepPlannerUI
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
-                            VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
       this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, null, contactPointParameters,
@@ -136,7 +137,7 @@ public class FootstepPlannerUI
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
-                            VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters,
                             WalkingControllerParameters walkingControllerParameters) throws Exception
    {
@@ -353,7 +354,7 @@ public class FootstepPlannerUI
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
-                                                    VisibilityGraphsParameters visibilityGraphsParameters,
+                                                    VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,

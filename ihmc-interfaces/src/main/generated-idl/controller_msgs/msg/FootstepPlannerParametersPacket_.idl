@@ -34,6 +34,11 @@ module controller_msgs
          */
         boolean check_for_body_box_collisions;
         /**
+         * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+         * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+         */
+        boolean check_for_path_collisions;
+        /**
          * Sets whether or not to perform the defined heuristic search policies.
          */
         boolean perform_heuristic_search_policies;
@@ -253,14 +258,6 @@ module controller_msgs
          */
         unsigned long minimum_steps_for_best_effort_plan;
         /**
-         * Some node checkers will check if the body of the robot will move through a higher planar region
-         * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-         * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-         * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-         */
-        @defaultValue(value=-1.0)
-        double body_ground_clearance;
-        /**
          * Some node checkers will check if a bounding box that describes the body of the robot will move
          * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
          * collisions, this defines the box height.
@@ -316,6 +313,24 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double min_y_clearance_from_stance;
+        /**
+         * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+         */
+        @defaultValue(value=-1.0)
+        double final_turn_proximity;
+        /**
+         * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+         */
+        @defaultValue(value=-1.0)
+        double final_turn_body_path_proximity;
+        /**
+         * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+         * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+         * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+         * the desired orientation is the final orientation.
+         */
+        @defaultValue(value=-1.0)
+        double final_turn_proximity_blend_factor;
         /**
          * When using a cost based planning approach this value defined how the yaw of a footstep will be
          * weighted in comparison to its position.
@@ -403,6 +418,12 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double body_path_based_heuristics_weight;
         /**
+         * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+         * Additional checks are done by interpolating between the start and end steps
+         */
+        @defaultValue(value=1)
+        unsigned long number_of_bounding_box_checks;
+        /**
          * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
          * @see FootstepPlannerCostParameters#getBoundingBoxCost
          */
@@ -415,6 +436,12 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double bounding_box_cost;
+        @defaultValue(value=-1.0)
+        double body_path_violation_weight;
+        @defaultValue(value=-1.0)
+        double distance_from_path_tolerance;
+        @defaultValue(value=-1.0)
+        double delta_yaw_from_reference_tolerance;
       };
     };
   };

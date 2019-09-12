@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.planners;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,8 +14,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -47,7 +48,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
 
    private final FootstepPlannerParametersReadOnly parameters;
 
-   protected final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final BodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
    protected WaypointsForFootstepsPlanner waypointPathPlanner;
    protected FootstepPlanner footstepPlanner;
 
@@ -59,8 +60,8 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
 
    private final ListOfStatistics listOfStatistics = new ListOfStatistics();
 
-   public BodyPathAndFootstepPlannerWrapper(String prefix, FootstepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry)
+   public BodyPathAndFootstepPlannerWrapper(String prefix, FootstepPlannerParametersReadOnly parameters,
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
       this.parameters = parameters;
@@ -121,6 +122,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
    public void setGoal(FootstepPlannerGoal goal)
    {
       waypointPathPlanner.setGoal(goal);
+      footstepPlanner.setGoal(goal);
 
       hasPath.set(false);
    }
@@ -169,7 +171,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
          return yoResult.getEnumValue();
       }
 
-      List<Point3D> waypoints = waypointPathPlanner.getWaypoints();
+      List<Pose3DReadOnly> waypoints = waypointPathPlanner.getWaypoints();
 
       if (waypoints.size() < 2)
       {
@@ -187,8 +189,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
          }
       }
 
-      bodyPathPlanner.setWaypoints(waypoints);
-      bodyPathPlanner.compute();
+      bodyPathPlanner.setPoseWaypoints(waypoints);
 
       if (visualizing)
       {

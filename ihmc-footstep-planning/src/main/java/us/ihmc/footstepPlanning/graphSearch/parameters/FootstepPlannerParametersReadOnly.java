@@ -2,14 +2,10 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.LinearHeightCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.property.StoredPropertySet;
-import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -18,10 +14,19 @@ import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerPar
 public interface FootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
-    * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
-    * to run slower.
+    * Sets whether or not the search should check if a bounding box approximation of the robot collides with the world.
+    * This may cause the planner to run slower.
     */
    default boolean checkForBodyBoxCollisions()
+   {
+      return get(checkForBodyBoxCollisions);
+   }
+
+   /**
+    * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker}
+    */
+   default boolean checkForPathCollisions()
    {
       return get(checkForBodyBoxCollisions);
    }
@@ -410,17 +415,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Some node checkers will check if the body of the robot will move through a higher planar region
-    * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-    * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-    * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-    */
-   default double getBodyGroundClearance()
-   {
-      return get(bodyGroundClearance);
-   }
-
-   /**
     * Some node checkers will check if a bounding box that describes the body of the robot will move
     * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
     * collisions, this defines the box height. Note that this box will go from {@code getBodyBoxBaseZ}
@@ -507,6 +501,24 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getFinalTurnProximity()
    {
       return get(finalTurnProximity);
+   }
+
+   /**
+    * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+    */
+   default double getFinalTurnBodyPathProximity()
+   {
+      return get(finalTurnBodyPathProximity);
+   }
+
+   /**
+    * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the final orientation should occur.
+    * That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the desired heading,
+    * and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the final orientation.
+    */
+   default double getFinalTurnProximityBlendFactor()
+   {
+      return get(finalTurnProximityBlendFactor);
    }
 
    /**
@@ -640,6 +652,16 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
+    * between the start and end steps.
+    */
+   default int getNumberOfBoundingBoxChecks()
+   {
+      return get(numberOfBoundingBoxChecks);
+   }
+
+   /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
     * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
@@ -673,6 +695,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getLongStepWeight()
    {
       return get(longStepWeight);
+   }
+
+   default double getBodyPathViolationWeight()
+   {
+      return get(bodyPathViolationWeight);
+   }
+
+   default double getDistanceFromPathTolerance()
+   {
+      return get(distanceFromPathTolerance);
+   }
+
+   default double getDeltaYawFromReferenceTolerance()
+   {
+      return get(deltaYawFromReferenceTolerance);
    }
 
    /**

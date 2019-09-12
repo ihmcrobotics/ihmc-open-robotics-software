@@ -80,8 +80,8 @@ public class DepthFirstFootstepPlanner implements BodyPathAndFootstepPlanner
       DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(snapper, parameters.getDepthFirstHeuristicsWeight(),
                                                                                            parameters);
       this.nodeComparator = (node1, node2) -> {
-         double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
-         double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
+         double cost1 = costToGoHeuristics.compute(node1);
+         double cost2 = costToGoHeuristics.compute(node2);
          if (cost1 == cost2)
             return 0;
          return cost1 > cost2 ? -1 : 1;

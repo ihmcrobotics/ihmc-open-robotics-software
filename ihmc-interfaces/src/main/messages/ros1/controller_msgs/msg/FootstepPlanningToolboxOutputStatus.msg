@@ -10,6 +10,8 @@ int8 FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED=4
 
 int8 FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED=5
 
+int8 FOOTSTEP_PLANNING_RESULT_INVALID_GOAL=6
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

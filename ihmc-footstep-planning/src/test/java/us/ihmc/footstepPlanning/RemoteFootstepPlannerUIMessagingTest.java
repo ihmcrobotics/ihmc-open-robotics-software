@@ -46,7 +46,9 @@ import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -366,7 +368,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       for (int iter = 0; iter < iters; iter++)
       {
          FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
-         VisibilityGraphsParameters randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
+         VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
          Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
@@ -576,106 +578,34 @@ public class RemoteFootstepPlannerUIMessagingTest
 
 
 
-   private static VisibilityGraphsParameters createRandomVisibilityGraphsParameters(Random random)
+   private static VisibilityGraphsParametersReadOnly createRandomVisibilityGraphsParameters(Random random)
    {
-      VisibilityGraphsParameters parameters = new VisibilityGraphsParameters()
-      {
-         private final double maxInterRegionConnectionLength = RandomNumbers.nextDouble(random, 0.01, 5.0);
+      double maxInterRegionConnectionLength = RandomNumbers.nextDouble(random, 0.01, 5.0);
+      double normalZThresholdForAccessibleRegions = RandomNumbers.nextDouble(random, 0.01, 2.0);
+      double preferredExtrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+      double extrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
+      double extrusionDistanceIfNotTooHighToStep = RandomNumbers.nextDouble(random, 0.01, 1.0);
+      double tooHighToStepDistance = RandomNumbers.nextDouble(random, 0.01, 0.5);
+      double clusterResolution = RandomNumbers.nextDouble(random, 0.01, 1.0);
+      double explorationDistance = RandomNumbers.nextDouble(random, 1.0, 100.0);
+      double planarRegionMinArea = RandomNumbers.nextDouble(random, 0.01, 0.5);
+      int planarRegionMinSize = RandomNumbers.nextInt(random, 0, 100);
+      double regionOrthogonalAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI / 2.0);
+      double searchHostRegionEpsilon = RandomNumbers.nextDouble(random, 0.0, 0.5);
 
-         @Override
-         public double getMaxInterRegionConnectionLength()
-         {
-            return maxInterRegionConnectionLength;
-         }
-
-         private final double normalZThresholdForAccessibleRegions = RandomNumbers.nextDouble(random, 0.01, 2.0);
-
-         @Override
-         public double getNormalZThresholdForAccessibleRegions()
-         {
-            return normalZThresholdForAccessibleRegions;
-         }
-
-         private final double preferredExtrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getPreferredObstacleExtrusionDistance()
-         {
-            return preferredExtrusionDistance;
-         }
-
-         private final double extrusionDistance = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getObstacleExtrusionDistance()
-         {
-            return extrusionDistance;
-         }
-
-         private final double extrusionDistanceIfNotTooHighToStep = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getObstacleExtrusionDistanceIfNotTooHighToStep()
-         {
-            return extrusionDistanceIfNotTooHighToStep;
-         }
-
-         private final double tooHighToStepDistance = RandomNumbers.nextDouble(random, 0.01, 0.5);
-
-         @Override
-         public double getTooHighToStepDistance()
-         {
-            return tooHighToStepDistance;
-         }
-
-         private final double clusterResolution = RandomNumbers.nextDouble(random, 0.01, 1.0);
-
-         @Override
-         public double getClusterResolution()
-         {
-            return clusterResolution;
-         }
-
-         private final double explorationDistance = RandomNumbers.nextDouble(random, 1.0, 100.0);
-
-         @Override
-         public double getExplorationDistanceFromStartGoal()
-         {
-            return explorationDistance;
-         }
-
-         private final double planarRegionMinArea = RandomNumbers.nextDouble(random, 0.01, 0.5);
-
-         @Override
-         public double getPlanarRegionMinArea()
-         {
-            return planarRegionMinArea;
-         }
-
-         private final int planarRegionMinSize = RandomNumbers.nextInt(random, 0, 100);
-
-         @Override
-         public int getPlanarRegionMinSize()
-         {
-            return planarRegionMinSize;
-         }
-
-         private final double regionOrthogonalAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI / 2.0);
-
-         @Override
-         public double getRegionOrthogonalAngle()
-         {
-            return regionOrthogonalAngle;
-         }
-
-         private final double searchHostRegionEpsilon = RandomNumbers.nextDouble(random, 0.0, 0.5);
-
-         @Override
-         public double getSearchHostRegionEpsilon()
-         {
-            return searchHostRegionEpsilon;
-         }
-      };
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      parameters.setMaxInterRegionConnectionLength(maxInterRegionConnectionLength);
+      parameters.setNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegions);
+      parameters.setPreferredObstacleExtrusionDistance(preferredExtrusionDistance);
+      parameters.setObstacleExtrusionDistance(extrusionDistance);
+      parameters.setObstacleExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStep);
+      parameters.setTooHighToStepDistance(tooHighToStepDistance);
+      parameters.setClusterResolution(clusterResolution);
+      parameters.setExplorationDistanceFromStartGoal(explorationDistance);
+      parameters.setPlanarRegionMinArea(planarRegionMinArea);
+      parameters.setPlanarRegionMinSize(planarRegionMinSize);
+      parameters.setRegionOrthogonalAngle(regionOrthogonalAngle);
+      parameters.setSearchHostRegionEpsilon(searchHostRegionEpsilon);
 
       return parameters;
    }
@@ -736,6 +666,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static void checkFootstepPlannerParameters(FootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersPacket packet)
    {
       assertEquals("Check for body box collisions flags aren't equal.", parameters.checkForBodyBoxCollisions(), packet.getCheckForBodyBoxCollisions());
+      assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals(parameters.performHeuristicSearchPolicies(), packet.getPerformHeuristicSearchPolicies());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
@@ -767,7 +698,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
-      assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
@@ -786,6 +716,7 @@ public class RemoteFootstepPlannerUIMessagingTest
                    packet.getDepthFirstHeuristicsWeight(), epsilon);
       assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
                    packet.getBodyPathBasedHeuristicsWeight(), epsilon);
+      assertEquals("Number of bounding box checks weren't equal", parameters.getNumberOfBoundingBoxChecks(), packet.getNumberOfBoundingBoxChecks());
 
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
@@ -798,12 +729,12 @@ public class RemoteFootstepPlannerUIMessagingTest
    }
 
 
-   private static void checkVisibilityGraphsParameters(VisibilityGraphsParameters parameters, VisibilityGraphsParametersPacket packet)
+   private static void checkVisibilityGraphsParameters(VisibilityGraphsParametersReadOnly parameters, VisibilityGraphsParametersPacket packet)
    {
       assertEquals(parameters.getMaxInterRegionConnectionLength(), packet.getMaxInterRegionConnectionLength(), epsilon);
       assertEquals(parameters.getNormalZThresholdForAccessibleRegions(), packet.getNormalZThresholdForAccessibleRegions(), epsilon);
-      assertEquals(parameters.getObstacleExtrusionDistance(), packet.getExtrusionDistance(), epsilon);
-      assertEquals(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep(), packet.getExtrusionDistanceIfNotTooHighToStep(), epsilon);
+      assertEquals(parameters.getObstacleExtrusionDistance(), packet.getObstacleExtrusionDistance(), epsilon);
+      assertEquals(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep(), packet.getObstacleExtrusionDistanceIfNotTooHighToStep(), epsilon);
       assertEquals(parameters.getTooHighToStepDistance(), packet.getTooHighToStepDistance(), epsilon);
       assertEquals(parameters.getClusterResolution(), packet.getClusterResolution(), epsilon);
       assertEquals(parameters.getExplorationDistanceFromStartGoal(), packet.getExplorationDistanceFromStartGoal(), epsilon);

@@ -29,7 +29,6 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
          : null;
 
    private final TimeReporter timeReporter = new TimeReporter();
-   private final NormalOcTree octree;
 
    private final PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
@@ -51,11 +50,11 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
+   private final AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
-
-   public REAPlanarRegionFeatureUpdater(NormalOcTree octree, Messager reaMessager)
+   
+   public REAPlanarRegionFeatureUpdater(Messager reaMessager)
    {
-      this.octree = octree;
       this.reaMessager = reaMessager;
 
       isOcTreeEnabled = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
@@ -71,6 +70,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       concaveHullFactoryParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsConcaveHullParameters, new ConcaveHullFactoryParameters());
       polygonizerParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerParameters, new PolygonizerParameters());
       intersectionEstimationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionParameters, new IntersectionEstimationParameters());
+      surfaceNormalFilterParameters = reaMessager.createInput(REAModuleAPI.SurfaceNormalFilterParameters, new SurfaceNormalFilterParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
    }
@@ -142,7 +142,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update()
+   public void update(NormalOcTree octree)
    {
       if (!isOcTreeEnabled.get())
          return;
@@ -161,11 +161,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
-
+      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
+      
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-
+      
       List<PlanarRegion> unmergedCustomPlanarRegions;
 
       if (clearCustomRegions.getAndSet(false))

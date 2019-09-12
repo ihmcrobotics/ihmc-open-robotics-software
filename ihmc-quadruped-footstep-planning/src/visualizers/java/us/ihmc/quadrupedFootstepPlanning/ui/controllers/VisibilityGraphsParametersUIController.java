@@ -7,14 +7,16 @@ import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.SettableVisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersUIController
 {
    private JavaFXMessager messager;
-   private final VisibilityGraphsParametersProperty parametersProperty = new VisibilityGraphsParametersProperty(this, "visibilityGraphsParametersProperty");
+   private VisibilityGraphsParametersBasics parameters;
 
    @FXML
    private Slider clusterResolution;
@@ -42,21 +44,21 @@ public class VisibilityGraphsParametersUIController
    @FXML
    private Slider normalZThresholdForAccessibleRegions;
 
-   private Topic<VisibilityGraphsParameters> visibilityGraphsParametersTopic;
+   private Topic<VisibilityGraphsParametersReadOnly> visibilityGraphsParametersTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
 
-   public void setVisibilityGraphsParametersTopic(Topic<VisibilityGraphsParameters> visibilityGraphsParametersTopic)
+   public void setVisibilityGraphsParametersTopic(Topic<VisibilityGraphsParametersReadOnly> visibilityGraphsParametersTopic)
    {
       this.visibilityGraphsParametersTopic = visibilityGraphsParametersTopic;
    }
 
-   public void setVisbilityGraphsParameters(VisibilityGraphsParameters parameters)
+   public void setVisbilityGraphsParameters(VisibilityGraphsParametersBasics parameters)
    {
-      parametersProperty.setPlannerParameters(parameters);
+      this.parameters = parameters;
    }
 
    private void setupControls()
@@ -69,19 +71,35 @@ public class VisibilityGraphsParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindMaxInterRegionConnectionLength(maxInterRegionConnectionLength.valueProperty());
-      parametersProperty.bidirectionalBindNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegions.valueProperty());
-      parametersProperty.bidirectionalBindExtrusionDistance(extrusionDistance.valueProperty());
-      parametersProperty.bidirectionalBindExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStep.valueProperty());
-      parametersProperty.bidirectionalBindTooHighToStepDistance(tooHighToStepDistance.valueProperty());
-      parametersProperty.bidirectionalBindClusterResolution(clusterResolution.valueProperty());
-      parametersProperty.bidirectionalBindExplorationDistanceFromStartGoal(explorationDistanceFromStartGoal.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindPlanarRegionMinArea(planarRegionMinArea.valueProperty());
-      parametersProperty.bidirectionalBindPlanarRegionMinSize(planarRegionMinSize.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindRegionOrthogonalAngle(regionOrthogonalAngle.valueProperty());
-      parametersProperty.bidirectionalBindSearchHostRegionEpsilon(searchHostRegionEpsilon.valueProperty());
+      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(parameters);
+      javaFXStoredPropertyMap.put(maxInterRegionConnectionLength.valueProperty(), VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
+      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegions.valueProperty(), VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
+      javaFXStoredPropertyMap.put(extrusionDistance.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistance);
+      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStep.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
+      javaFXStoredPropertyMap.put(tooHighToStepDistance.valueProperty(), VisibilityGraphParametersKeys.tooHighToStepDistance);
+      javaFXStoredPropertyMap.put(clusterResolution.valueProperty(), VisibilityGraphParametersKeys.clusterResolution);
+      javaFXStoredPropertyMap.put(explorationDistanceFromStartGoal.getValueFactory().valueProperty(), VisibilityGraphParametersKeys.explorationDistanceFromStartGoal);
+      javaFXStoredPropertyMap.put(planarRegionMinArea.valueProperty(), VisibilityGraphParametersKeys.planarRegionMinArea);
+      javaFXStoredPropertyMap.put(planarRegionMinSize, VisibilityGraphParametersKeys.planarRegionMinSize);
+      javaFXStoredPropertyMap.put(regionOrthogonalAngle.valueProperty(), VisibilityGraphParametersKeys.regionOrthogonalAngle);
+      javaFXStoredPropertyMap.put(searchHostRegionEpsilon.valueProperty(), VisibilityGraphParametersKeys.searchHostRegionEpsilon);
 
-      messager.bindBidirectional(visibilityGraphsParametersTopic, parametersProperty, createConverter(), true);
+      // set messager updates to update all stored properties and select JavaFX properties
+      messager.registerTopicListener(visibilityGraphsParametersTopic, parameters ->
+      {
+         this.parameters.set(parameters);
+
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      });
+
+      // set JavaFX user input to update stored properties and publish messager message
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+   }
+
+   private void publishParameters()
+   {
+      messager.submitMessage(visibilityGraphsParametersTopic, parameters);
    }
 
    private SpinnerValueFactory.IntegerSpinnerValueFactory createPlanarRegionMinSizeValueFactory()
@@ -98,23 +116,5 @@ public class VisibilityGraphsParametersUIController
       double max = Double.POSITIVE_INFINITY;
       double amountToStepBy = 1.0;
       return new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, 0, amountToStepBy);
-   }
-
-   private PropertyToMessageTypeConverter<VisibilityGraphsParameters, SettableVisibilityGraphsParameters> createConverter()
-   {
-      return new PropertyToMessageTypeConverter<VisibilityGraphsParameters, SettableVisibilityGraphsParameters>()
-      {
-         @Override
-         public VisibilityGraphsParameters convert(SettableVisibilityGraphsParameters propertyValue)
-         {
-            return propertyValue;
-         }
-
-         @Override
-         public SettableVisibilityGraphsParameters interpret(VisibilityGraphsParameters messageContent)
-         {
-            return new SettableVisibilityGraphsParameters(messageContent);
-         }
-      };
    }
 }
