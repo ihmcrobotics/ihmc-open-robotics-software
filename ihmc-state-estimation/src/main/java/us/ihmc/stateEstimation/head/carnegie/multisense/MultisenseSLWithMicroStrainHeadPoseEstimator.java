@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotModels.FullRobotModel;
@@ -26,6 +28,14 @@ import java.util.Set;
  */
 public class MultisenseSLWithMicroStrainHeadPoseEstimator
 {
+   private static final RigidBodyTransform MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(0.0, -Math.PI / 2.0, 0.0),
+                                                                                                new Vector3D(-0.0825, 0.0, 0.0787));
+   private static final RigidBodyTransform IMU_TO_MULTISENSE_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      IMU_TO_MULTISENSE_TRANSFORM.setAndInvert(MULTISENSE_TO_IMU_TRANSFORM);
+   }
+
    private static final String PARAMETER_FILE = "headPoseEstimatorTest.xml";
    private static final boolean ESTIMATE_ANGULAR_VELOCITY_BIAS = true;
 
