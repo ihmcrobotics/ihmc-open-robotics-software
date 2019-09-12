@@ -3,6 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
+
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
    default void set(FootstepPlannerParametersReadOnly footstepPlannerParameters)
@@ -13,6 +17,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setCheckForBodyBoxCollisions(boolean checkForBodyBoxCollisions)
    {
       set(FootstepPlannerParameterKeys.checkForBodyBoxCollisions, checkForBodyBoxCollisions);
+   }
+
+   default void setCheckForPathCollisions(boolean checkForPathCollisions)
+   {
+      set(FootstepPlannerParameterKeys.checkForPathCollisions, checkForPathCollisions);
    }
 
    default void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
@@ -260,6 +269,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
    }
 
+   default void setNumberOfBoundingBoxChecks(int numberOfBoundingBoxChecks)
+   {
+      set(FootstepPlannerParameterKeys.numberOfBoundingBoxChecks, numberOfBoundingBoxChecks);
+   }
+
    default void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
       set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
@@ -275,6 +289,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
+   default void setFinalTurnBodyPathProximity(double finalTurnProximity)
+   {
+      set(FootstepPlannerParameterKeys.finalTurnBodyPathProximity, finalTurnProximity);
+   }
+
+   default void setFinalTurnProximityBlendFactor(double finalTurnProximityBlendFactor)
+   {
+      set(FootstepPlannerParameterKeys.finalTurnProximityBlendFactor, finalTurnProximityBlendFactor);
+   }
+
    default void setFootholdAreaWeight(double footholdAreaWeight)
    {
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
@@ -285,9 +309,26 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.longStepWeight, weight);
    }
 
+   default void setBodyPathViolationWeight(double weight)
+   {
+      set(FootstepPlannerParameterKeys.bodyPathViolationWeight, weight);
+   }
+
+   default void setDistanceFromPathTolerance(double tolerance)
+   {
+      set(distanceFromPathTolerance, tolerance);
+   }
+
+   default void setDeltaYawFromReferenceTolerance(double tolerance)
+   {
+      set(deltaYawFromReferenceTolerance, tolerance);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
+      setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
+      setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
       setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
@@ -336,8 +377,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
       if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
          setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
-      if (parametersPacket.getBodyGroundClearance() != -1.0)
-         setBodyGroundClearance(parametersPacket.getBodyGroundClearance());
       if (parametersPacket.getBodyBoxHeight() != -1.0)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != -1.0)
@@ -354,6 +393,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      if (parametersPacket.getFinalTurnProximity() != -1.0)
+         setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
+      if (parametersPacket.getFinalTurnBodyPathProximity() != -1.0)
+         setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
+      if (parametersPacket.getFinalTurnProximityBlendFactor() != -1.0)
+         setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
 
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
       setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
@@ -392,5 +437,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
       if (parametersPacket.getLongStepWeight() != -1.0)
          setLongStepWeight(parametersPacket.getLongStepWeight());
+      if (parametersPacket.getBodyPathViolationWeight() != -1.0)
+         setBodyPathViolationWeight(parametersPacket.getBodyPathViolationWeight());
+      if (parametersPacket.getDistanceFromPathTolerance() != -1.0)
+         setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
+      if (parametersPacket.getDeltaYawFromReferenceTolerance() != -1.0)
+         setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
    }
 }

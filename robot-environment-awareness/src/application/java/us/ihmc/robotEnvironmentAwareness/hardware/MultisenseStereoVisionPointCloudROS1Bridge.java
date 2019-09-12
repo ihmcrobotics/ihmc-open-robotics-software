@@ -134,14 +134,13 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
          try
          {
             fileWriter = new FileWriter("stereovision_pointcloud_" + savingIndex + ".txt");
-            String pointCloudDataString = "";
+            StringBuilder builder = new StringBuilder("");
             for (int i = 0; i < numberOfPoints; i++)
             {
                Point3D scanPoint = pointCloud[i];
-               String pointInfo = i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB() + "\n";
-               pointCloudDataString = pointCloudDataString + pointInfo;
+               builder.append(i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB() + "\n");
             }
-            fileWriter.write(pointCloudDataString);
+            fileWriter.write(builder.toString());
             fileWriter.close();
             System.out.println("saving is done");
          }

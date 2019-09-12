@@ -19,6 +19,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
       setRejectIfCannotFullyWiggleInside(false);
       setReturnBestEffortPlan(false);
       setCheckForBodyBoxCollisions(false);
+      setCheckForPathCollisions(true);
       setPerformHeuristicSearchPolicies(true);
       setMinimumStepsForBestEffortPlan(3);
       setCliffHeightToAvoid(0.05);

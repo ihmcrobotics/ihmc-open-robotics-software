@@ -247,7 +247,7 @@ public class PlanarRegionsList
 
    public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(Point2DReadOnly point)
    {
-      return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
+      return findPlanarRegionsContainingPointByVerticalLineIntersection(point.getX(), point.getY());
    }
 
    public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(double x, double y)
@@ -387,7 +387,7 @@ public class PlanarRegionsList
          regions.get(i).transform(rigidBodyTransform);
       }
    }
-   
+
    public void transformByPreMultiply(RigidBodyTransform rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)

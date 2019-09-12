@@ -1,10 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,8 +16,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -24,22 +27,35 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
+   private final PathOrientationCalculator pathOrientationCalculator;
 
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
-   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
+   {
+      this("", footstepPlannerParameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
+   }
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
+   {
+      this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
+   }
+
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry parentRegistry)
    {
       super(prefix, footstepPlannerParameters, parentRegistry);
 
-      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
+      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);
+      this.pathOrientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
 
    public FootstepPlanningResult planWaypoints()
@@ -48,8 +64,8 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
       if (planarRegionsList == null)
       {
-         waypoints.add(new Point3D(bodyStartPose.getPosition()));
-         waypoints.add(new Point3D(bodyGoalPose.getPosition()));
+         waypoints.add(new Pose3D(bodyStartPose));
+         waypoints.add(new Pose3D(bodyGoalPose));
       }
       else
       {
@@ -79,12 +95,10 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
          try
          {
-            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
+            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+            List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
 
-            for (Point3DReadOnly waypoint3d : path)
-            {
-               waypoints.add(new Point3D(waypoint3d));
-            }
+            waypoints.addAll(posePath);
          }
          catch (Exception e)
          {

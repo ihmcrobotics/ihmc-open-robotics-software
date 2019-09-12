@@ -119,7 +119,7 @@ public class JointAnglesWriter
          {
             FixedFrameTwistBasics jointTwist = sixDoFJoint.getJointTwist();
             FixedFrameSpatialAccelerationBasics jointAcceleration = sixDoFJoint.getJointAcceleration();
-            floatingJoint.setAngularVelocityInBody(jointAcceleration.getAngularPart());
+            floatingJoint.setAngularAccelerationInBody(jointAcceleration.getAngularPart());
             jointAcceleration.getLinearAccelerationAtBodyOrigin(jointTwist, linearAcceleration);
             linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
             floatingJoint.setAcceleration(linearAcceleration);
