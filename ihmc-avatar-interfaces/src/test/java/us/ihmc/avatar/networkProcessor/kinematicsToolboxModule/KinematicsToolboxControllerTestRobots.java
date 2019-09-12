@@ -311,7 +311,17 @@ public class KinematicsToolboxControllerTestRobots
    {
       LinkGraphicsDescription graphics = new LinkGraphicsDescription();
       graphics.addGenTruncatedCone(torsoHeight, torsoThickness, 0.7 * torsoWidth, 0.7 * torsoThickness, 0.5 * torsoWidth, appearance);
-      graphics.translate(0.0, 0.0, 0.5 * torsoHeight);
+      graphics.translate(0.0, 0.0, torsoHeight);
+      double eyeBigRadius = 0.35 * torsoWidth;
+      graphics.translate(0.0, 0.25 * torsoWidth, 1.1  * eyeBigRadius);
+      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, YoAppearance.White());
+      graphics.translate(0.0, -0.5 * torsoWidth, 0.0);
+      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, YoAppearance.White());
+      double eyeSmallRadius = 0.3 * eyeBigRadius;
+      graphics.translate(0.01, 0.5 * eyeSmallRadius, -eyeSmallRadius);
+      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, YoAppearance.Black());
+      graphics.translate(0.0, - eyeSmallRadius + 0.5 * torsoWidth, 0.0);
+      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, YoAppearance.Black());
       return graphics;
    }
 
