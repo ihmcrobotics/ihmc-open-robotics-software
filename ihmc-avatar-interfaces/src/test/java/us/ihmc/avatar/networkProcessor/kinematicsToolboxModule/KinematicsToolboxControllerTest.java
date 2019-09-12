@@ -6,6 +6,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMe
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -25,7 +27,13 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.Capsule3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
@@ -41,6 +49,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -49,7 +58,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -80,22 +88,22 @@ public final class KinematicsToolboxControllerTest
    private YoDouble finalSolutionQuality;
 
    private SimulationConstructionSet scs;
-   private BlockingSimulationRunner blockingSimulationRunner;
 
    private Robot robot;
    private Robot ghost;
    private RobotController toolboxUpdater;
 
+   private Pair<FloatingJointBasics, OneDoFJointBasics[]> desiredFullRobotModel;
+
    public void setup(RobotDescription robotDescription, RobotDescription ghostRobotDescription)
    {
-
       mainRegistry = new YoVariableRegistry("main");
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      Pair<FloatingJointBasics, OneDoFJointBasics[]> desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
+      desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getSuccessor())));
 
@@ -116,20 +124,23 @@ public final class KinematicsToolboxControllerTest
       robot.setDynamic(false);
       robot.setGravity(0);
 
-      ghostRobotDescription.setName("Ghost");
-      recursivelyModifyGraphics(ghostRobotDescription.getChildrenJoints().get(0), ghostApperance);
-      ghost = new RobotFromDescription(ghostRobotDescription);
-      ghost.setDynamic(false);
-      ghost.setGravity(0);
+      if (ghostRobotDescription != null)
+      {
+         ghostRobotDescription.setName("Ghost");
+         recursivelyModifyGraphics(ghostRobotDescription.getChildrenJoints().get(0), ghostApperance);
+         ghost = new RobotFromDescription(ghostRobotDescription);
+         ghost.setDynamic(false);
+         ghost.setGravity(0);
+      }
 
       if (visualize)
       {
-         scs = new SimulationConstructionSet(new Robot[] {robot, ghost}, simulationTestingParameters);
+         Robot[] robots = ghost != null ? new Robot[] {robot, ghost} : new Robot[] {robot};
+         scs = new SimulationConstructionSet(robots, simulationTestingParameters);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setCameraFix(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
          scs.startOnAThread();
-         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       }
    }
 
@@ -158,9 +169,9 @@ public final class KinematicsToolboxControllerTest
 
       toolboxController = null;
 
+      desiredFullRobotModel = null;
       robot = null;
       toolboxUpdater = null;
-      blockingSimulationRunner = null;
 
       if (scs != null)
       {
@@ -332,6 +343,102 @@ public final class KinematicsToolboxControllerTest
       }
    }
 
+   @Test
+   public void testRandomDualHandPositionsCollisionWithTorso() throws Exception
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
+
+      Capsule3D torsoCollisionShape = new Capsule3D(0.2, 0.2);
+      torsoCollisionShape.getPosition().addZ(0.2);
+      Sphere3D handCollisionShape = new Sphere3D(0.1);
+      handCollisionShape.getPosition().addZ(0.05);
+
+      LinkDescription torsoLinkDescription = robotDescription.getLinkDescription("torsoYaw");
+      SideDependentList<LinkDescription> handLinkDescriptions = new SideDependentList<>(side -> robotDescription.getLinkDescription(side.getCamelCaseName()
+            + "WristYaw"));
+
+      AppearanceDefinition collisionGraphicAppearance = YoAppearance.SpringGreen();
+      collisionGraphicAppearance.setTransparency(0.5);
+
+      Graphics3DObject torsoCollisionGraphic = new Graphics3DObject();
+      torsoCollisionGraphic.translate(torsoCollisionShape.getPosition());
+      torsoCollisionGraphic.addCapsule(torsoCollisionShape.getRadius(),
+                                       torsoCollisionShape.getLength() + 2.0 * torsoCollisionShape.getRadius(), // the 2nd term is removed internally.
+                                       collisionGraphicAppearance);
+      torsoLinkDescription.getLinkGraphics().combine(torsoCollisionGraphic);
+      Graphics3DObject handCollisionGraphic = new Graphics3DObject();
+      handCollisionGraphic.translate(handCollisionShape.getPosition());
+      handCollisionGraphic.addSphere(handCollisionShape.getRadius(), collisionGraphicAppearance);
+      handLinkDescriptions.values().forEach(linkDescription -> linkDescription.getLinkGraphics().combine(handCollisionGraphic));
+
+      setup(robotDescription, null);
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
+      List<? extends RigidBodyBasics> rigidBodies = rootBody.subtreeList();
+
+      RigidBodyBasics torso = rigidBodies.stream().filter(body -> body.getName().equals("torsoLink")).findFirst().get();
+      SideDependentList<RigidBodyBasics> hands = new SideDependentList<>(side -> rigidBodies.stream()
+                                                                                            .filter(body -> body.getName()
+                                                                                                                .equals(side.getCamelCaseName() + "HandLink"))
+                                                                                            .findFirst().get());
+
+      KinematicsCollidable torsoCollidable = new KinematicsCollidable(torso,
+                                                                      0b001,
+                                                                      0b110,
+                                                                      torsoCollisionShape,
+                                                                      torso.getParentJoint().getFrameAfterJoint(),
+                                                                      0.0);
+
+      SideDependentList<KinematicsCollidable> handCollidables = new SideDependentList<>(side ->
+      {
+         RigidBodyBasics hand = hands.get(side);
+         int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
+         int collisionGroup = 0b001;
+         ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
+         return new KinematicsCollidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame, 0.0);
+      });
+
+      toolboxController.registerCollidable(torsoCollidable);
+      toolboxController.registerCollidable(handCollidables.get(RobotSide.LEFT)); // TODO Re-introduce right hand when done debugging
+
+      if (VERBOSE)
+         LogTools.info("Entering: testRandomDualHandPositionsCollisionWithTorso");
+      Random random = new Random(2135);
+      Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
+      RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
+
+      for (int i = 0; i < 10; i++)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
+            desiredPosition.setZ(EuclidCoreTools.interpolate(torsoCollisionShape.getBottomCenter().getZ(),
+                                                             torsoCollisionShape.getTopCenter().getZ(),
+                                                             random.nextDouble()));
+            double distanceFromCenter = random.nextDouble() * (torsoCollisionShape.getRadius() + handCollisionShape.getRadius());
+            desiredPosition.add(EuclidCoreRandomTools.nextVector3DWithFixedLength(random, distanceFromCenter));
+
+            KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hands.get(robotSide), desiredPosition);
+            message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.1));
+            commandInputManager.submitMessage(message);
+         }
+
+         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+
+         int numberOfIterations = 1000;
+
+         runKinematicsToolboxController(numberOfIterations);
+
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
+         double solutionQuality = toolboxController.getSolution().getSolutionQuality();
+         if (VERBOSE)
+            LogTools.info("Solution quality: " + solutionQuality);
+         //         assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
+      }
+   }
+
    private void runKinematicsToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
    {
       initializationSucceeded.set(false);
@@ -339,7 +446,12 @@ public final class KinematicsToolboxControllerTest
 
       if (visualize)
       {
-         blockingSimulationRunner.simulateNTicksAndBlockAndCatchExceptions(numberOfIterations);
+         for (int i = 0; i < numberOfIterations; i++)
+         {
+            toolboxUpdater.doControl();
+            Arrays.asList(scs.getRobots()).forEach(robot -> robot.getYoTime().add(toolboxController.getUpdateDT()));
+            scs.tickAndUpdate();
+         }
       }
       else
       {

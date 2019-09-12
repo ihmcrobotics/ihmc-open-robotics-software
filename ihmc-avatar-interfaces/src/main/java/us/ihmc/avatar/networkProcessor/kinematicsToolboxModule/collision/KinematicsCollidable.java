@@ -34,7 +34,10 @@ public class KinematicsCollidable
 
    public KinematicsCollisionResult evaluateCollision(KinematicsCollidable other)
    {
-      return KinematicsCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame);
+      KinematicsCollisionResult result = KinematicsCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame);
+      result.setCollidableA(this);
+      result.setCollidableB(other);
+      return result;
    }
 
    public RigidBodyBasics getRigidBody()

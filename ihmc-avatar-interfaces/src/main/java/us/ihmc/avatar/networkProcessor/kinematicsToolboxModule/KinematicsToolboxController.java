@@ -4,9 +4,11 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -45,12 +48,15 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -61,6 +67,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
@@ -70,6 +77,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -232,6 +240,11 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
    private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
+   private final int numberOfCollisionsToVisualize = 20;
+   private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
+   private final YoDouble[] collisionVelocities = new YoDouble[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -275,11 +288,49 @@ public class KinematicsToolboxController extends ToolboxController
 
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
+
+      setupCollisionVisualization();
+   }
+
+   private void setupCollisionVisualization()
+   {
+      double hueMin = 0.0;
+      double hueMax = 360.0;
+
+      for (int i = 0; i < numberOfCollisionsToVisualize; i++)
+      {
+         double hue = EuclidCoreTools.interpolate(hueMin, hueMax, (double) i / ((double) numberOfCollisionsToVisualize - 1.0));
+         YoDouble collisionDistance = new YoDouble("collision_" + i + "_distance", registry);
+         YoDouble collisionVelocity = new YoDouble("collision_" + i + "_velocity", registry);
+         YoFramePoint3D collisionPointA = new YoFramePoint3D("collision_" + i + "_pointA" + i, worldFrame, registry);
+         YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
+
+         AppearanceDefinition appearance = new YoAppearanceRGBColor(Color.getHSBColor((float) hue / 360.f, 0.9f, 0.8f), 0.7);
+         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+
+         collisionDistances[i] = collisionDistance;
+         collisionVelocities[i] = collisionVelocity;
+         collisionPointAs[i] = collisionPointA;
+         collisionPointBs[i] = collisionPointB;
+      }
    }
 
    public void registerCollidable(KinematicsCollidable collidable)
    {
       robotCollidables.add(collidable);
+   }
+
+   public void registerCollidables(KinematicsCollidable... collidables)
+   {
+      for (KinematicsCollidable collidable : collidables)
+         robotCollidables.add(collidable);
+   }
+
+   public void registerCollidables(Iterable<? extends KinematicsCollidable> collidables)
+   {
+      for (KinematicsCollidable collidable : collidables)
+         robotCollidables.add(collidable);
    }
 
    /**
@@ -445,6 +496,8 @@ public class KinematicsToolboxController extends ToolboxController
       return true;
    }
 
+   private List<KinematicsCollisionResult> collisions = Collections.emptyList();
+
    /**
     * This is the control loop called periodically only when the user requested a solution for a
     * desired set of inputs.
@@ -473,7 +526,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
-      controllerCoreCommand.addInverseKinematicsCommand(resolveCollisions());
+      controllerCoreCommand.addInverseKinematicsCommand(resolveCollisions(collisions));
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
@@ -495,7 +548,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
       MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
+      rootBody.updateFramesRecursively();
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+      collisions = computeCollisions();
 
       timeSinceLastSolutionPublished.add(updateDT);
 
@@ -584,19 +639,17 @@ public class KinematicsToolboxController extends ToolboxController
       return inputs;
    }
 
-   public InverseKinematicsCommand<?> resolveCollisions()
+   public List<KinematicsCollisionResult> computeCollisions()
    {
       if (robotCollidables.isEmpty())
-         return null;
+         return Collections.emptyList();
 
       int collisionIndex = 0;
-      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
+      List<KinematicsCollisionResult> collisions = new ArrayList<>();
 
       for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
       {
          KinematicsCollidable collidableA = robotCollidables.get(collidableAIndex);
-         RigidBodyBasics bodyA = collidableA.getRigidBody();
-         MovingReferenceFrame bodyFixedFrameA = bodyA.getBodyFixedFrame();
 
          for (int collidableBIndex = collidableAIndex + 1; collidableBIndex < robotCollidables.size(); collidableBIndex++)
          {
@@ -606,39 +659,97 @@ public class KinematicsToolboxController extends ToolboxController
                continue;
 
             KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
-            double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
 
-            double maxVelocityMagnitude = (collisionResult.getSignedDistance() - minimumSafeDistance) / updateDT;
+            if (collisionIndex < numberOfCollisionsToVisualize)
+            {
+               collisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
+               MovingReferenceFrame bodyFixedFrameA = collidableA.getRigidBody().getBodyFixedFrame();
+               MovingReferenceFrame bodyFixedFrameB = collidableB.getRigidBody().getBodyFixedFrame();
+               MovingReferenceFrame collisionFrameAtA = collisionFrame(bodyFixedFrameA,
+                                                                       collisionResult.getPointOnA(),
+                                                                       collisionResult.getPointOnB(),
+                                                                       collisionIndex);
+               MovingReferenceFrame collisionFrameAtB = collisionFrame(bodyFixedFrameB,
+                                                                       collisionResult.getPointOnB(),
+                                                                       collisionResult.getPointOnA(),
+                                                                       collisionIndex);
+               Twist relativeTwist = new Twist();
+               collisionFrameAtA.getTwistRelativeToOther(collisionFrameAtB, relativeTwist);
+               collisionVelocities[collisionIndex].set(relativeTwist.getLinearPartZ());
+               collisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
+               collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+            }
 
-            FramePoint3D pointOnA = collisionResult.getPointOnA();
-            FramePoint3D pointOnB = collisionResult.getPointOnB();
-            pointOnA.changeFrame(bodyFixedFrameA);
-            pointOnB.changeFrame(bodyFixedFrameA);
-
-            RigidBodyTransform collisionFramePose = new RigidBodyTransform();
-            collisionFramePose.setTranslation(pointOnA);
-            Vector3D collisionDirection = new Vector3D();
-            collisionDirection.sub(pointOnB, pointOnA);
-            EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionDirection, collisionFramePose.getRotation());
-
-            ReferenceFrame collisionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("collisionFrame" + collisionIndex,
-                                                                                                              bodyFixedFrameA,
-                                                                                                              collisionFramePose);
-
-            SpatialVelocityCommand command = new SpatialVelocityCommand();
-            command.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-            command.set(bodyA, collidableB.getRigidBody());
-            command.getDesiredLinearVelocity().setZ(maxVelocityMagnitude);
-            command.getControlFramePose().setIncludingFrame(bodyFixedFrameA, collisionFramePose);
-            SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
-            selectionMatrix.clearSelection();
-            selectionMatrix.selectLinearZ(true);
-            selectionMatrix.setSelectionFrames(null, collisionFrame);
-            commandList.addCommand(command);
+            collisions.add(collisionResult);
+            collisionIndex++;
          }
       }
 
+      return collisions;
+   }
+
+   public InverseKinematicsCommand<?> resolveCollisions(List<KinematicsCollisionResult> collisions)
+   {
+      if (collisions.isEmpty())
+         return null;
+
+      int collisionIndex = 0;
+      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
+
+      for (KinematicsCollisionResult collision : collisions)
+      {
+         KinematicsCollidable collidableA = collision.getCollidableA();
+         KinematicsCollidable collidableB = collision.getCollidableB();
+
+         RigidBodyBasics bodyA = collidableA.getRigidBody();
+         MovingReferenceFrame bodyFixedFrameA = bodyA.getBodyFixedFrame();
+
+         double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
+         double sigma = collision.getSignedDistance() - minimumSafeDistance;
+         double maxVelocityMagnitude = Math.copySign(MathTools.square(sigma), sigma) / updateDT;
+
+         ReferenceFrame collisionFrame = collisionFrame(collision, collisionIndex);
+
+         SpatialVelocityCommand command = new SpatialVelocityCommand();
+         command.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+         command.set(bodyA, collidableB.getRigidBody());
+         command.getDesiredLinearVelocity().setZ(maxVelocityMagnitude);
+         command.getControlFramePose().setIncludingFrame(bodyFixedFrameA, collisionFrame.getTransformToParent());
+         SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
+         selectionMatrix.clearSelection();
+         selectionMatrix.selectLinearZ(true);
+         selectionMatrix.setSelectionFrames(null, collisionFrame);
+         commandList.addCommand(command);
+
+         collisionIndex++;
+      }
+
       return commandList;
+   }
+
+   private static MovingReferenceFrame collisionFrame(KinematicsCollisionResult collisionResult, int index)
+   {
+      return collisionFrame(collisionResult.getCollidableA().getRigidBody().getBodyFixedFrame(),
+                            collisionResult.getPointOnA(),
+                            collisionResult.getPointOnB(),
+                            index);
+   }
+
+   private static MovingReferenceFrame collisionFrame(MovingReferenceFrame bodyFixedFrameA, FramePoint3DReadOnly pointOnA, FramePoint3DReadOnly pointOnB,
+                                                      int index)
+   {
+      FramePoint3D pointOnALocal = new FramePoint3D(pointOnA);
+      pointOnALocal.changeFrame(bodyFixedFrameA);
+      FramePoint3D pointOnBLocal = new FramePoint3D(pointOnB);
+      pointOnBLocal.changeFrame(bodyFixedFrameA);
+
+      RigidBodyTransform collisionFramePose = new RigidBodyTransform();
+      collisionFramePose.setTranslation(pointOnALocal);
+      Vector3D collisionDirection = new Vector3D();
+      collisionDirection.sub(pointOnBLocal, pointOnALocal);
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionDirection, collisionFramePose.getRotation());
+
+      return MovingReferenceFrame.constructFrameFixedInParent("collisionFrame" + index, bodyFixedFrameA, collisionFramePose);
    }
 
    /**
@@ -781,5 +892,10 @@ public class KinematicsToolboxController extends ToolboxController
    public void setPreserveUserCommandHistory(boolean value)
    {
       preserveUserCommandHistory.set(value);
+   }
+
+   public double getUpdateDT()
+   {
+      return updateDT;
    }
 }
