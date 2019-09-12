@@ -1,9 +1,5 @@
 package us.ihmc.stateEstimation.head;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.ekf.filter.sensor.Sensor;
@@ -13,9 +9,9 @@ import us.ihmc.ekf.filter.sensor.implementations.MagneticFieldSensor;
 import us.ihmc.ekf.filter.state.implementations.PoseState;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -24,6 +20,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An estimator for the head pose based on the EKF package. The inputs to the estimation algorithm are:
@@ -42,7 +42,7 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
  * @author Georg Wiedebach
  *
  */
-public class HeadPoseEstimator
+public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -69,7 +69,7 @@ public class HeadPoseEstimator
     * @param parentRegistry the {@link YoVariableRegistry} that all variables created by this class should be attached
     * to (can be {@code null}).
     */
-   public HeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias, YoVariableRegistry parentRegistry)
+   public EKFHeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias, YoVariableRegistry parentRegistry)
    {
       // Creates a simple joint structure representing the head attached to world with a floating joint:
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -106,6 +106,7 @@ public class HeadPoseEstimator
     *
     * @param headTransform to be packed.
     */
+   @Override
    public void getHeadTransform(RigidBodyTransform headTransform)
    {
       poseState.getTransform(headTransform);
@@ -119,6 +120,7 @@ public class HeadPoseEstimator
     * @param initialHeadTransform the initial guess for the head pose.
     * @param magneticFieldDirection the "north" direction in world frame.
     */
+   @Override
    public void initialize(RigidBodyTransform initialHeadTransform, FrameVector3D magneticFieldDirection)
    {
       headTwist.setToZero(headJoint.getFrameAfterJoint(), headJoint.getFrameBeforeJoint(), headJoint.getFrameAfterJoint());
@@ -165,7 +167,7 @@ public class HeadPoseEstimator
     *
     * @param headPosition estimate in world frame.
     */
-   public void setEstimatedHeadPosition(FramePoint3DReadOnly headPosition)
+   public void setEstimatedHeadPosition(Point3DReadOnly headPosition)
    {
       positionSensor.setMeasurement(headPosition);
    }
@@ -175,11 +177,12 @@ public class HeadPoseEstimator
     * <li>{@link #setImuAngularVelocity(Vector3DReadOnly)}</li>
     * <li>{@link #setImuLinearAcceleration(Vector3DReadOnly)}</li>
     * <li>{@link #setImuMagneticFieldVector(Vector3DReadOnly)}</li>
-    * <li>{@link #setEstimatedHeadPosition(Vector3DReadOnly)}</li>
+    * <li>{@link #setEstimatedHeadPosition(Point3DReadOnly)}</li>
     * <p>
     * each tick with the newest measurements before calling this method. After the call to this method the newest head
     * pose estimate can be obtained via {@link #getHeadTransform(RigidBodyTransform)}.
     */
+   @Override
    public void compute()
    {
       stateEstimator.predict();
