@@ -1,11 +1,5 @@
 package us.ihmc.avatar;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
@@ -23,7 +17,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -55,6 +52,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
+import us.ihmc.stateEstimation.head.AvatarHeadPoseEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -63,6 +61,12 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 public class AvatarEstimatorThread
 {
@@ -79,6 +83,7 @@ public class AvatarEstimatorThread
    private final StateEstimatorController drcStateEstimator;
    private final StateEstimatorController ekfStateEstimator;
    private final YoBoolean reinitializeEKF;
+   private final YoBoolean initializeHeadPoseEstimator;
 
    private final SensorReader sensorReader;
 
@@ -95,6 +100,8 @@ public class AvatarEstimatorThread
    private final ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
+
+   private AvatarHeadPoseEstimatorInterface headPoseEstimator;
 
    @SuppressWarnings("unused")
    public AvatarEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation,
@@ -129,7 +136,6 @@ public class AvatarEstimatorThread
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");
-
 
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
@@ -277,6 +283,9 @@ public class AvatarEstimatorThread
          reinitializeEKF = null;
          ekfStateEstimator = null;
       }
+
+      initializeHeadPoseEstimator = new YoBoolean("initializeHeadPoseEstimator", estimatorRegistry);
+      initializeHeadPoseEstimator.set(false);
    }
 
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
@@ -297,6 +306,12 @@ public class AvatarEstimatorThread
    public YoVariableRegistry getYoVariableRegistry()
    {
       return estimatorRegistry;
+   }
+
+   public void setHeadPoseEstimator(AvatarHeadPoseEstimatorInterface headPoseEstimator)
+   {
+      this.headPoseEstimator = headPoseEstimator;
+      initializeHeadPoseEstimator.set(true);
    }
 
    public void run()
@@ -325,6 +340,15 @@ public class AvatarEstimatorThread
          if (forceSensorStateUpdater != null)
          {
             forceSensorStateUpdater.updateForceSensorState();
+         }
+
+         if(initializeHeadPoseEstimator.getBooleanValue())
+         {
+            headPoseEstimator.initialize(estimatorFullRobotModel.getHeadBaseFrame().getTransformToWorldFrame(), null);
+         }
+         else if(!initializeHeadPoseEstimator.getBooleanValue() && headPoseEstimator != null)
+         {
+            headPoseEstimator.compute();
          }
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());

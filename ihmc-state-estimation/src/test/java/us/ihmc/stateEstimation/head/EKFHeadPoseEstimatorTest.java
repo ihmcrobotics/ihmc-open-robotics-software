@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class HeadPoseEstimatorTest
+public class EKFHeadPoseEstimatorTest
 {
    private final static boolean VISUALIZE = false;
    private static final String PARAMETER_FILE = "headPoseEstimatorTest.xml";
@@ -74,7 +74,7 @@ public class HeadPoseEstimatorTest
       trajectoryGenerator.initialize();
 
       // Create an EKF based orientation estimator:
-      HeadPoseEstimator poseEstimator = new HeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true, registry);
+      EKFHeadPoseEstimator poseEstimator = new EKFHeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true, registry);
       XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
       Set<String> defaultParameters = new HashSet<>();
       Set<String> unmatchedParameters = new HashSet<>();
