@@ -25,6 +25,9 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
    /** The collision distance, either separation distance or penetration depth. */
    private double signedDistance;
 
+   private KinematicsCollidable collidableA;
+   private KinematicsCollidable collidableB;
+
    /** The first shape in the collision. */
    private Shape3DReadOnly shapeA;
    /** The second shape in the collision. */
@@ -64,6 +67,16 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
    public void setSignedDistance(double distance)
    {
       this.signedDistance = distance;
+   }
+
+   public void setCollidableA(KinematicsCollidable collidableA)
+   {
+      this.collidableA = collidableA;
+   }
+
+   public void setCollidableB(KinematicsCollidable collidableB)
+   {
+      this.collidableB = collidableB;
    }
 
    /** {@inheritDoc} */
@@ -118,6 +131,16 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
    public double getSignedDistance()
    {
       return signedDistance;
+   }
+
+   public KinematicsCollidable getCollidableA()
+   {
+      return collidableA;
+   }
+
+   public KinematicsCollidable getCollidableB()
+   {
+      return collidableB;
    }
 
    /** {@inheritDoc} */
