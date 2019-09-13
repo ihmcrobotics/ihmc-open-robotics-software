@@ -70,4 +70,73 @@ public class EuclidCoreMissingTools
                                                                lineDirection2x, lineDirection2y, intersectionToPack);
    }
 
+   /**
+    * Computes the intersection between two infinitely long 2D lines each defined by a 2D point and a
+    * 2D direction and returns a percentage {@code alpha} along the first line such that the
+    * intersection coordinates can be computed as follows: <br>
+    * {@code intersection = pointOnLine1 + alpha * lineDirection1}
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the two lines are parallel but not collinear, the two lines do not intersect and the
+    * returned value is {@link Double#NaN}.
+    * <li>if the two lines are collinear, the two lines are assumed to be intersecting infinitely the returned value {@code Double.POSITIVE_INFINITY}.
+    * </ul>
+    * </p>
+    *
+    * @param startPoint1x   x-coordinate of a point located on the first line.
+    * @param startPoint1y   y-coordinate of a point located on the first line.
+    * @param segmentTravel1x x-component of the first line direction.
+    * @param segmentTravel1y y-component of the first line direction.
+    * @param startPoint2x   x-coordinate of a point located on the second line.
+    * @param startPoint2y   y-coordinate of a point located on the second line.
+    * @param segmentTravel2x x-component of the second line direction.
+    * @param segmentTravel2y y-component of the second line direction.
+    * @return {@code alpha} the percentage along the first line of the intersection location. This
+    *         method returns {@link Double#NaN} if the lines do not intersect.
+    */
+   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x, double startPoint1y, double segmentTravel1x, double segmentTravel1y,
+                                                                         double startPoint2x, double startPoint2y, double segmentTravel2x, double segmentTravel2y)
+   {
+      //      We solve for x the problem of the form: A * x = b
+      //            A      *     x     =      b
+      //      / segmentTravel1x -segmentTravel2x \   / alpha \   / startPoint2x - startPoint1x \
+      //      |                                  | * |       | = |                               |
+      //      \ segmentTravel1y -segmentTravel2y /   \ beta  /   \ startPoint2y - startPoint1y /
+      // Here, only alpha or beta is needed.
+
+      double determinant = -segmentTravel1x * segmentTravel2y + segmentTravel1y * segmentTravel2x;
+
+      double dx = startPoint2x - startPoint1x;
+      double dy = startPoint2y - startPoint1y;
+
+      if (Math.abs(determinant) < EuclidGeometryTools.ONE_TRILLIONTH)
+      { // The lines are parallel
+         // Check if they are collinear
+         double cross = dx * segmentTravel1y - dy * segmentTravel1x;
+         if (Math.abs(cross) < EuclidGeometryTools.ONE_TRILLIONTH)
+         {
+            /*
+             * The two lines are collinear. There's an infinite number of intersection. Let's set the
+             * result to infinity, i.e. alpha = infinity so it can be handled.
+             */
+            return Double.POSITIVE_INFINITY;
+         }
+         else
+         {
+            return Double.NaN;
+         }
+      }
+      else
+      {
+         double oneOverDeterminant = 1.0 / determinant;
+         double AInverse00 = oneOverDeterminant * -segmentTravel2y;
+         double AInverse01 = oneOverDeterminant * segmentTravel2x;
+
+         double alpha = AInverse00 * dx + AInverse01 * dy;
+
+         return alpha;
+      }
+   }
+
 }
