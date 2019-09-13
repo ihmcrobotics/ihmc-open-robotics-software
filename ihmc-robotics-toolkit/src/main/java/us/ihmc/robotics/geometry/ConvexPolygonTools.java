@@ -791,6 +791,171 @@ public class ConvexPolygonTools
       return true;
    }
 
+   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
+                                                                Line2DReadOnly cuttingLine,
+                                                                ConvexPolygon2DBasics croppedPolygonToPack)
+   {
+      return cutPolygonToLeftOfLine(polygonToCrop, cuttingLine, croppedPolygonToPack, new Point2D(), new Point2D());
+   }
+
+   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
+                                                                Line2DReadOnly cuttingLine,
+                                                                ConvexPolygon2DBasics croppedPolygonToPack,
+                                                                Point2DBasics firstIntersectionToPack,
+                                                                Point2DBasics secondIntersectionToPack)
+   {
+      if (polygonToCrop.isEmpty())
+      {
+         croppedPolygonToPack.clearAndUpdate();
+         return ConvexPolygonCropResult.REMOVE_ALL;
+      }
+
+      Vector2D upDirection = new Vector2D(cuttingLine.getDirection());
+      upDirection.normalize();
+      upDirection.set(-upDirection.getY(), upDirection.getX());
+
+      int intersectionCount = EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(cuttingLine.getPoint(),
+                                                                                                     cuttingLine.getDirection(),
+                                                                                                     polygonToCrop.getVertexBufferView(),
+                                                                                                     polygonToCrop.getNumberOfVertices(),
+                                                                                                     polygonToCrop.isClockwiseOrdered(),
+                                                                                                     firstIntersectionToPack,
+                                                                                                     secondIntersectionToPack);
+      LogTools.trace("Intersection count: {}", intersectionCount);
+      boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCrop.getVertex(0), cuttingLine.getPoint(), upDirection);
+      if (intersectionCount == 0)
+      {
+         if (vertex0IsAbove)
+         {
+            croppedPolygonToPack.set(polygonToCrop);
+            return ConvexPolygonCropResult.KEEP_ALL;
+         }
+         else
+         {
+            croppedPolygonToPack.clearAndUpdate();
+            return ConvexPolygonCropResult.REMOVE_ALL;
+         }
+      }
+      else if (intersectionCount == 1)
+      {
+         // firstIntersectionToPack is packed with only intersection
+         if (polygonToCrop.getNumberOfVertices() > 1)
+         {
+            // isPoint2DInFrontOfRay2D returns true for on as well. Check any two vertices. One is on the line.
+            boolean isOnOrAboveTwo = EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCrop.getVertex(1), cuttingLine.getPoint(), upDirection);
+
+            if (vertex0IsAbove && isOnOrAboveTwo)
+            {
+               croppedPolygonToPack.set(polygonToCrop);
+               return ConvexPolygonCropResult.KEEP_ALL;
+            }
+            else
+            {
+               croppedPolygonToPack.clearAndUpdate();
+               return ConvexPolygonCropResult.REMOVE_ALL;
+            }
+         }
+         else
+         {
+            croppedPolygonToPack.clearAndUpdate();
+            return ConvexPolygonCropResult.REMOVE_ALL;
+         }
+      }
+      else
+      {
+         if (intersectionCount != 2)
+            throw new RuntimeException("Should only be possible for 2 intersections with a convex polygon.");
+
+         if (polygonToCrop.getNumberOfVertices() < 3)
+         {
+            croppedPolygonToPack.set(polygonToCrop);
+            return ConvexPolygonCropResult.KEEP_ALL;
+         }
+
+         if (polygonToCrop.getNumberOfVertices() < 3)
+            throw new RuntimeException("Two intersections only possible at this point only for convex polygon of size 3 or greater.");
+
+         // find vertex after intersections
+         int vertexAfterIntersectionOne = -1;
+         int vertexAfterIntersectionTwo = -1;
+         for (int i = 0; i < polygonToCrop.getNumberOfVertices(); i++) // loop over vertices
+         {
+            // is first, second intersection point on segment (colinear) with v(i)(i+1)
+            int nextIndex = EuclidGeometryPolygonTools.next(i, polygonToCrop.getNumberOfVertices());
+
+            Point2DReadOnly intersectionPointToCheck = vertexAfterIntersectionOne >= 0 ? secondIntersectionToPack : firstIntersectionToPack;
+            boolean metIntersection = EuclidGeometryTools.isPoint2DOnLineSegment2D(intersectionPointToCheck,
+                                                                                   polygonToCrop.getVertex(i),
+                                                                                   polygonToCrop.getVertex(nextIndex));
+            if (metIntersection)
+            {
+               if (vertexAfterIntersectionOne == -1)
+               {
+                  vertexAfterIntersectionOne = nextIndex;
+               }
+               else // at second intersection
+               {
+                  if (i == vertexAfterIntersectionOne) // this is a line intersection colinear with this edge
+                  {
+                     // if any below, keep intersection segment
+                     for (int j = 0; j < polygonToCrop.getNumberOfVertices(); j++)
+                     {
+                        if (!EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCrop.getVertex(j), cuttingLine.getPoint(), upDirection))
+                        {
+                           croppedPolygonToPack.clear();
+                           croppedPolygonToPack.addVertex(firstIntersectionToPack);
+                           croppedPolygonToPack.addVertex(secondIntersectionToPack);
+                           croppedPolygonToPack.update();
+                           return ConvexPolygonCropResult.CUT;
+                        }
+                     }
+                     // else keep all
+                     croppedPolygonToPack.set(polygonToCrop);
+                     return ConvexPolygonCropResult.KEEP_ALL;
+                  }
+                  else
+                  {
+                     vertexAfterIntersectionTwo = nextIndex;
+                     break; // optimization
+                  }
+               }
+            }
+         }
+
+         croppedPolygonToPack.clear();
+         for (int i = 0; i < polygonToCrop.getNumberOfVertices(); i++) // loop over vertices
+         {
+            int nextIndex = EuclidGeometryPolygonTools.next(i, polygonToCrop.getNumberOfVertices());
+
+            if (vertex0IsAbove || i > 0)
+            {
+               LogTools.debug("Adding v({})", i);
+               croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i));
+            }
+
+            if (vertexAfterIntersectionOne == nextIndex) // encounter 1st intersection, decisions to be made
+            {
+               LogTools.debug("Adding i(0)");
+               croppedPolygonToPack.addVertex(firstIntersectionToPack);
+               if (vertex0IsAbove) // traverse from i(0) to i(1)
+               {
+                  LogTools.debug("Adding i(1)");
+                  croppedPolygonToPack.addVertex(secondIntersectionToPack);
+                  i = vertexAfterIntersectionTwo - 1; // cut across polygon; the for loop i++ will immediately add 1 more
+               }
+            }
+            else if (vertexAfterIntersectionTwo == nextIndex) // here, this is always the last to add
+            {
+               LogTools.debug("Adding i(1)");
+               croppedPolygonToPack.addVertex(secondIntersectionToPack);
+               break;
+            }
+         }
+      }
+
+      return ConvexPolygonCropResult.CUT;
+   }
+
    public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut,
                                         FrameConvexPolygonWithLineIntersector2d lineIntersector2d, RobotSide sideOfLineToCut)
    {
@@ -832,11 +997,12 @@ public class ConvexPolygonTools
       return cutPolygonWithLine(cuttingLine, (ConvexPolygon2DBasics) polygonToCut, sideOfLineToCut);
    }
 
-   private final Point2D intersectionPoint1 = new Point2D();
-   private final Point2D intersectionPoint2 = new Point2D();
-
    // TODO Needs to be extracted to Euclid.
-   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(Line2DReadOnly cuttingLine,
+                                        ConvexPolygon2DBasics polygonToCut,
+                                        RobotSide sideOfLineToCut,
+                                        Point2D intersectionPoint1,
+                                        Point2D intersectionPoint2)
    {
       int intersectionPoints = polygonToCut.intersectionWith(cuttingLine, intersectionPoint1, intersectionPoint2);
 
@@ -867,6 +1033,14 @@ public class ConvexPolygonTools
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }
+   }
+
+   private final Point2D intersectionPoint1 = new Point2D();
+   private final Point2D intersectionPoint2 = new Point2D();
+
+   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      return cutPolygonWithLine(cuttingLine, polygonToCut, sideOfLineToCut, intersectionPoint1, intersectionPoint2);
    }
 
    /**
