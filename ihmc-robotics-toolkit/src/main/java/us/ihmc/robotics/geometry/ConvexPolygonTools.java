@@ -791,23 +791,23 @@ public class ConvexPolygonTools
       return true;
    }
 
-   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
-                                                                Line2DReadOnly cuttingLine,
-                                                                ConvexPolygon2DBasics croppedPolygonToPack)
+   public static ConvexPolygonCutResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
+                                                               Line2DReadOnly cuttingLine,
+                                                               ConvexPolygon2DBasics croppedPolygonToPack)
    {
       return cutPolygonToLeftOfLine(polygonToCrop, cuttingLine, croppedPolygonToPack, new Point2D(), new Point2D());
    }
 
-   public static ConvexPolygonCropResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
-                                                                Line2DReadOnly cuttingLine,
-                                                                ConvexPolygon2DBasics croppedPolygonToPack,
-                                                                Point2DBasics firstIntersectionToPack,
-                                                                Point2DBasics secondIntersectionToPack)
+   public static ConvexPolygonCutResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCrop,
+                                                               Line2DReadOnly cuttingLine,
+                                                               ConvexPolygon2DBasics croppedPolygonToPack,
+                                                               Point2DBasics firstIntersectionToPack,
+                                                               Point2DBasics secondIntersectionToPack)
    {
       if (polygonToCrop.isEmpty())
       {
          croppedPolygonToPack.clearAndUpdate();
-         return ConvexPolygonCropResult.REMOVE_ALL;
+         return ConvexPolygonCutResult.REMOVE_ALL;
       }
 
       Vector2D upDirection = new Vector2D(cuttingLine.getDirection());
@@ -828,12 +828,12 @@ public class ConvexPolygonTools
          if (vertex0IsAbove)
          {
             croppedPolygonToPack.set(polygonToCrop);
-            return ConvexPolygonCropResult.KEEP_ALL;
+            return ConvexPolygonCutResult.KEEP_ALL;
          }
          else
          {
             croppedPolygonToPack.clearAndUpdate();
-            return ConvexPolygonCropResult.REMOVE_ALL;
+            return ConvexPolygonCutResult.REMOVE_ALL;
          }
       }
       else if (intersectionCount == 1)
@@ -847,18 +847,18 @@ public class ConvexPolygonTools
             if (vertex0IsAbove && isOnOrAboveTwo)
             {
                croppedPolygonToPack.set(polygonToCrop);
-               return ConvexPolygonCropResult.KEEP_ALL;
+               return ConvexPolygonCutResult.KEEP_ALL;
             }
             else
             {
                croppedPolygonToPack.clearAndUpdate();
-               return ConvexPolygonCropResult.REMOVE_ALL;
+               return ConvexPolygonCutResult.REMOVE_ALL;
             }
          }
          else
          {
             croppedPolygonToPack.clearAndUpdate();
-            return ConvexPolygonCropResult.REMOVE_ALL;
+            return ConvexPolygonCutResult.REMOVE_ALL;
          }
       }
       else
@@ -869,7 +869,7 @@ public class ConvexPolygonTools
          if (polygonToCrop.getNumberOfVertices() < 3)
          {
             croppedPolygonToPack.set(polygonToCrop);
-            return ConvexPolygonCropResult.KEEP_ALL;
+            return ConvexPolygonCutResult.KEEP_ALL;
          }
 
          if (polygonToCrop.getNumberOfVertices() < 3)
@@ -906,12 +906,12 @@ public class ConvexPolygonTools
                            croppedPolygonToPack.addVertex(firstIntersectionToPack);
                            croppedPolygonToPack.addVertex(secondIntersectionToPack);
                            croppedPolygonToPack.update();
-                           return ConvexPolygonCropResult.CUT;
+                           return ConvexPolygonCutResult.CUT;
                         }
                      }
                      // else keep all
                      croppedPolygonToPack.set(polygonToCrop);
-                     return ConvexPolygonCropResult.KEEP_ALL;
+                     return ConvexPolygonCutResult.KEEP_ALL;
                   }
                   else
                   {
@@ -953,7 +953,7 @@ public class ConvexPolygonTools
          }
       }
 
-      return ConvexPolygonCropResult.CUT;
+      return ConvexPolygonCutResult.CUT;
    }
 
    public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut,
