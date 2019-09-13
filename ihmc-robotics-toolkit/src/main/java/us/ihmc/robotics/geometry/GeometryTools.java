@@ -459,6 +459,8 @@ public class GeometryTools
    }
 
    /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
+    *
     * @param plane1
     * @param plane2
     * @return line of intersection, or null if planes are parallel
@@ -478,6 +480,7 @@ public class GeometryTools
    }
 
    /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
     *
     * @param plane1
     * @param plane2
