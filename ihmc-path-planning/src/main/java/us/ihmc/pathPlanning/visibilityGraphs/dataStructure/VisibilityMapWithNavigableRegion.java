@@ -3,7 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -58,7 +58,7 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
       return navigableRegion.getHomePlanarRegion();
    }
 
-   public RigidBodyTransform getTransformToWorld()
+   public RigidBodyTransformReadOnly getTransformToWorld()
    {
       return navigableRegion.getTransformToWorld();
    }
@@ -98,7 +98,7 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
    {
       return navigableRegion.getMapId();
    }
-   
+
    public void setVisibilityMapInLocal(VisibilityMap visibilityMap)
    {
       visibilityMapInLocal = visibilityMap;

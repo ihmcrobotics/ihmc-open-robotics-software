@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,17 +22,20 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.StatisticsType;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
-import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -67,7 +71,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final AtomicReference<FootstepPlannerParametersPacket> latestFootstepPlannerParametersReference = new AtomicReference<>(null);
    private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
 
-   private final AtomicReference<List<Point3D>> waypointPlan = new AtomicReference<>(null);
+   private final AtomicReference<List<Pose3DReadOnly>> waypointPlan = new AtomicReference<>(null);
    private final AtomicReference<BodyPathPlan> bodyPathPlan = new AtomicReference<>(null);
    private final AtomicReference<FootstepPlan> footstepPlan = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
@@ -97,7 +101,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final ConcurrentMap<PathPlanningStage, ScheduledFuture<?>> pathPlanningTasks = new ConcurrentMap<>();
 
    private final ConcurrentList<FootstepPlanningResult> completedPathResults = new ConcurrentList<>();
-   private final ConcurrentPairList<Integer, List<Point3D>> completedPathWaypoints = new ConcurrentPairList<>();
+   private final ConcurrentPairList<Integer, List<Pose3DReadOnly>> completedPathWaypoints = new ConcurrentPairList<>();
 
    private final ConcurrentPairList<Integer, PlannerStatistics<?>> completedPathPlanStatistics = new ConcurrentPairList<>();
 
@@ -118,14 +122,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private long tickDurationMs;
 
-   private final YoFootstepPlannerParameters footstepPlanningParameters;
-   private final YoVisibilityGraphParameters visibilityGraphsParameters;
+   private final FootstepPlannerParametersBasics footstepPlanningParameters;
+   private final VisibilityGraphsParametersBasics visibilityGraphsParameters;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
 
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
-   protected final WaypointDefinedBodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final WaypointDefinedBodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
 
    private final StatusMessageOutputManager statusOutputManager;
    private final ScheduledExecutorService executorService;
@@ -152,8 +156,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
-      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(drcRobotModel.getVisibilityGraphsParameters(), registry);
+      this.footstepPlanningParameters = drcRobotModel.getFootstepPlannerParameters();
+      this.visibilityGraphsParameters = drcRobotModel.getVisibilityGraphsParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, footstepPlanningParameters);
+      new YoVisibilityGraphParameters(registry, visibilityGraphsParameters);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
       isDone.set(false);
@@ -575,6 +581,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       goal.setGoalPoseBetweenFeet(goalPose);
       mainObjective.setGoal(goal);
 
+      goal.setDistanceProximity(request.getGoalDistanceProximity());
+      goal.setYawProximity(request.getGoalYawProximity());
+
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
       {
@@ -865,11 +874,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          return;
       }
 
-      PairList<Integer, List<Point3D>> completedPathWaypoints = this.completedPathWaypoints.getCopyForReading();
-      completedPathWaypoints.sort(Comparator.comparingInt(ImmutablePair<Integer, List<Point3D>>::getLeft));
+      PairList<Integer, List<Pose3DReadOnly>> completedPathWaypoints = this.completedPathWaypoints.getCopyForReading();
+      completedPathWaypoints.sort(Comparator.comparingInt(ImmutablePair<Integer, List<Pose3DReadOnly>>::getLeft));
 
-      List<Point3D> allWaypoints = new ArrayList<>();
-      for (ImmutablePair<Integer, List<Point3D>> completedWaypoints : completedPathWaypoints)
+      List<Pose3DReadOnly> allWaypoints = new ArrayList<>();
+      for (ImmutablePair<Integer, List<Pose3DReadOnly>> completedWaypoints : completedPathWaypoints)
       {
          allWaypoints.addAll(completedWaypoints.getRight());
       }
@@ -908,11 +917,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
       }
 
-      List<Point3D> waypoints = waypointPlan.getAndSet(null);
-      bodyPathPlanner.setWaypoints(waypoints);
+      List<Pose3DReadOnly> waypoints = waypointPlan.getAndSet(null);
+      bodyPathPlanner.setPoseWaypoints(waypoints);
       waypoints.clear();
 
-      bodyPathPlan.set(bodyPathPlanner.compute());
+      bodyPathPlan.set(bodyPathPlanner.getPlan());
       return true;
    }
 
@@ -938,7 +947,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       goalDirection.scale(horizonLength / goalDirection.length());
       Point3D waypoint = new Point3D(bodyStartPose.getPosition());
       waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
-      waypointPlan.get().add(waypoint);
+      Quaternion orientation = new Quaternion(BodyPathPlannerTools.calculateHeading(goalDirection), 0.0, 0.0);
+      waypointPlan.get().add(new Pose3D(waypoint, orientation));
    }
 
    private void concatenateFootstepPlans()

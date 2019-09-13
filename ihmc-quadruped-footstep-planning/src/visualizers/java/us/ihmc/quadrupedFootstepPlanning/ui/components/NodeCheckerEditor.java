@@ -10,7 +10,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +28,7 @@ public class NodeCheckerEditor extends AnimationTimer
 
    private final AtomicReference<Boolean> moduleEnabled;
    private final AtomicReference<Boolean> positionEditingEnabled;
-   private final MessagerAPIFactory.Topic<Point3D> positionTopic = FootstepPlannerMessagerAPI.NodeCheckingPosition;
+   private final MessagerAPIFactory.Topic<Point3D> positionTopic = PawStepPlannerMessagerAPI.NodeCheckingPosition;
 
    private final AtomicBoolean positionValidated = new AtomicBoolean(false);
 
@@ -37,8 +37,8 @@ public class NodeCheckerEditor extends AnimationTimer
       this.messager = messager;
       this.sceneNode = sceneNode;
 
-      this.moduleEnabled = messager.createInput(FootstepPlannerMessagerAPI.EnableNodeChecking, false);
-      this.positionEditingEnabled = messager.createInput(FootstepPlannerMessagerAPI.EnableNodeCheckingPositionEditing, false);
+      this.moduleEnabled = messager.createInput(PawStepPlannerMessagerAPI.EnableNodeChecking, false);
+      this.positionEditingEnabled = messager.createInput(PawStepPlannerMessagerAPI.EnableNodeCheckingPositionEditing, false);
 
       rayCastInterceptor = event ->
       {

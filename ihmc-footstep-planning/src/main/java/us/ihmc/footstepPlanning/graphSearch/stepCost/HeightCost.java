@@ -2,27 +2,27 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
 public class HeightCost implements FootstepCost
 {
-   private final FootstepPlannerCostParameters costParameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    private final LinearHeightCost linearHeightCost;
    private final QuadraticHeightCost quadraticHeightCost;
 
-   public HeightCost(FootstepPlannerCostParameters costParameters, FootstepNodeSnapperReadOnly snapper)
+   public HeightCost(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
-      this.costParameters = costParameters;
+      this.parameters = parameters;
 
-      linearHeightCost = new LinearHeightCost(costParameters, snapper);
-      quadraticHeightCost = new QuadraticHeightCost(costParameters, snapper);
+      linearHeightCost = new LinearHeightCost(parameters, snapper);
+      quadraticHeightCost = new QuadraticHeightCost(parameters, snapper);
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      if (costParameters.useQuadraticHeightCost())
+      if (parameters.useQuadraticHeightCost())
          return quadraticHeightCost.compute(startNode, endNode);
       else
          return linearHeightCost.compute(startNode, endNode);

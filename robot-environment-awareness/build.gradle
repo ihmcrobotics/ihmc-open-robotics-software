@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-build") version "0.17.1"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.scs") version "0.4"
@@ -20,7 +20,7 @@ mainDependencies {
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
    
    compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
-   compile group: "us.ihmc", name: "joctomap", version: "1.6.12"
+   compile group: "us.ihmc", name: "joctomap", version: "1.6.13"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"

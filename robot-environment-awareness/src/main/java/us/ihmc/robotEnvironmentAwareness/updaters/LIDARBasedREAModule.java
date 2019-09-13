@@ -50,12 +50,13 @@ public class LIDARBasedREAModule
 
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 10;
-   private static final double OCTREE_RESOLUTION = 0.02;
+   private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
+
    protected static final boolean DEBUG = true;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
-   private final NormalOcTree mainOctree = new NormalOcTree(OCTREE_RESOLUTION);
+   private final AtomicReference<Double> octreeResolution;
 
    private final REAOcTreeBuffer lidarBufferUpdater;
    private final REAOcTreeBuffer stereoVisionBufferUpdater;
@@ -66,25 +67,28 @@ public class LIDARBasedREAModule
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
 
    private final AtomicReference<Boolean> clearOcTree;
+   private final AtomicReference<Boolean> enableStereoBuffer;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
+
+   private final AtomicReference<Boolean> preserveOcTreeHistory;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
       this.reaMessager = reaMessager;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      lidarBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.LidarBufferEnable, true,
+      lidarBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.LidarBufferEnable, true,
                                                REAModuleAPI.LidarBufferOcTreeCapacity, 10000, REAModuleAPI.LidarBufferMessageCapacity, 500,
                                                REAModuleAPI.RequestLidarBuffer, REAModuleAPI.LidarBufferState);
-      stereoVisionBufferUpdater = new REAOcTreeBuffer(mainOctree.getResolution(), reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
-                                                      REAModuleAPI.StereoVisionBufferOcTreeCapacity, 0, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
+      stereoVisionBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
+                                                      REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
                                                       REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater};
-      mainUpdater = new REAOcTreeUpdater(mainOctree, bufferUpdaters, reaMessager);
-      planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(mainOctree, reaMessager);
+      mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
+      planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
@@ -112,6 +116,10 @@ public class LIDARBasedREAModule
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
+
+      preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
+      enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
+      octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -127,6 +135,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      mainUpdater.handleStereoVisionPointCloudMessage(message);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -194,22 +203,32 @@ public class LIDARBasedREAModule
 
       try
       {
+         NormalOcTree mainOctree = mainUpdater.getMainOctree();
          if (clearOcTree.getAndSet(false))
          {
             lidarBufferUpdater.clearBuffer();
             stereoVisionBufferUpdater.clearBuffer();
             mainUpdater.clearOcTree();
             planarRegionFeatureUpdater.clearOcTree();
+            if (mainOctree.getResolution() != octreeResolution.get())
+            {
+               lidarBufferUpdater.setOctreeResolution(octreeResolution.get());
+               stereoVisionBufferUpdater.setOctreeResolution(octreeResolution.get());
+               mainUpdater.initializeReferenceOctree(octreeResolution.get());
+            }
          }
          else
          {
+            if (enableStereoBuffer.get() && !preserveOcTreeHistory.get())
+               mainUpdater.clearOcTree();
+
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
 
             if (isThreadInterrupted())
                return;
 
-            timeReporter.run(planarRegionFeatureUpdater::update, planarRegionsTimeReport);
+            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
