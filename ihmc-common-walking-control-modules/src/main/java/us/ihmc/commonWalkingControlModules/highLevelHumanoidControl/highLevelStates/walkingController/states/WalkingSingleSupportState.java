@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -37,11 +38,13 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
+   private final FootstepShiftFractions footstepShiftFraction = new FootstepShiftFractions();
    private double swingTime;
 
    private static final int additionalFootstepsToConsider = 2;
    private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
+   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(additionalFootstepsToConsider);
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePoint3D adjustedFootstepPositionInWorld = new FramePoint3D(worldFrame);
@@ -146,9 +149,14 @@ public class WalkingSingleSupportState extends SingleSupportState
             double swingDuration = footstepTiming.getSwingTime();
             double transferDuration = footstepTiming.getTransferTime();
 
+            double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+            double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
+
             balanceManager.clearICPPlan();
             balanceManager.setFinalTransferTime(finalTransferTime);
-            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+            balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+            balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
+            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
          }
@@ -217,6 +225,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
+
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          swingTime = defaultSwingTime;
@@ -229,7 +240,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       else
       {
          swingTime = walkingMessageHandler.getNextSwingTime();
-         walkingMessageHandler.poll(nextFootstep, footstepTiming);
+         walkingMessageHandler.poll(nextFootstep, footstepTiming, footstepShiftFraction);
       }
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
@@ -240,7 +251,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setNextFootstep(nextFootstep);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
+      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       boolean isLastStep = stepsToAdd == 0;
@@ -248,7 +261,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
-         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+         walkingMessageHandler.peekShiftFraction(i, footstepShiftFractions[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i], footstepShiftFractions[i]);
       }
 
       balanceManager.setICPPlanSupportSide(supportSide);

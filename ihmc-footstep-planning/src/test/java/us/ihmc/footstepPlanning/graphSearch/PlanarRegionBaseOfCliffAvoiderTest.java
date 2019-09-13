@@ -4,19 +4,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -36,7 +35,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
-   private boolean visualize = true;
+   private boolean visualize = false;
    private final Random random = new Random(4587L);
 
    @BeforeEach
@@ -64,20 +63,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getCliffHeightToAvoid()
-         {
-            return 0.01;
-         }
-
-         @Override
-         public double getMinimumDistanceFromCliffBottoms()
-         {
-            return minimumDistanceFromCliffBottom;
-         }
-      });
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, parameters);
+      parameters.setCliffHeightToAvoid(0.01);
+      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       double footLength = 0.2;
       double footWidth = 0.1;
@@ -131,20 +120,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getCliffHeightToAvoid()
-         {
-            return cliffHeightToAvoid;
-         }
-
-         @Override
-         public double getMinimumDistanceFromCliffBottoms()
-         {
-            return minimumDistanceFromCliffBottom;
-         }
-      });
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      new YoVariablesForFootstepPlannerParameters(registry, parameters);
+      parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
+      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
