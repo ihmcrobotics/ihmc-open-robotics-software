@@ -1,9 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +17,11 @@ public class ConcaveHull implements Iterable<Point2D>
 {
    private final List<Point2D> hullVertices;
 
+   public ConcaveHull()
+   {
+      hullVertices = new ArrayList<>();
+   }
+
    public ConcaveHull(List<? extends Point2DReadOnly> hullVertices)
    {
       this.hullVertices = hullVertices.stream().map(Point2D::new).collect(Collectors.toList());
@@ -27,8 +29,12 @@ public class ConcaveHull implements Iterable<Point2D>
 
    public ConcaveHull(ConcaveHull other)
    {
-      this.hullVertices = new ArrayList<>();
-      other.forEach(hullVertices::add);
+      hullVertices = new ArrayList<>();
+
+      for (Point2D hullVertex : other.hullVertices)
+      {
+         hullVertices.add(new Point2D(hullVertex)); // TODO: Make sure this doesn't break anything
+      }
    }
 
    public boolean isEmpty()
@@ -120,6 +126,16 @@ public class ConcaveHull implements Iterable<Point2D>
       return hullVertices;
    }
 
+   public void addVertex(double x, double y)
+   {
+      hullVertices.add(new Point2D(x, y));
+   }
+
+   public void addVertex(Point2D vertex)
+   {
+      hullVertices.add(vertex);
+   }
+
    public Point2D getVertex(int vertexIndex)
    {
       return hullVertices.get(vertexIndex);
@@ -147,17 +163,41 @@ public class ConcaveHull implements Iterable<Point2D>
       return stream().map(vertex -> new Point3D(vertex.getX(), vertex.getY(), zOffset)).collect(Collectors.toList());
    }
 
+   /**
+    * Two concave hulls are equal if they contain the same points in the same order,
+    * but the start/end doesn't need to line up.
+    */
    public boolean epsilonEquals(ConcaveHull other, double epsilon)
    {
       if (getNumberOfVertices() != other.getNumberOfVertices())
-         return false;
-
-      for (int vertexIndex = 0; vertexIndex <= getNumberOfVertices(); vertexIndex++)
       {
-         if (!hullVertices.get(vertexIndex).epsilonEquals(other.hullVertices.get(vertexIndex), epsilon))
-            return false;
+         return false;
       }
-      return true;
+
+      if (getNumberOfVertices() == 0)
+      {
+         return true;
+      }
+
+      int alignmentOffset = 0;
+      boolean failed = true;
+      while (failed && alignmentOffset < getNumberOfVertices())
+      {
+         failed = false;
+         for (int i = 0; i < getNumberOfVertices(); i++)
+         {
+            int compareIndex = (i + alignmentOffset) % getNumberOfVertices();
+            boolean epsilonEquals = hullVertices.get(i).epsilonEquals(other.hullVertices.get(compareIndex), epsilon);
+            if (!epsilonEquals)
+            {
+               failed = true;
+               ++alignmentOffset;
+               break; // optimization
+            }
+         }
+      }
+
+      return !failed;
    }
 
    public Stream<Point2D> stream()
