@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
 
 public class ConvexPolygonToolsTest
@@ -258,8 +256,8 @@ public class ConvexPolygonToolsTest
       Random random = new Random(123821L);
       int tests = 1000;
 
-      //      int increase = 0;
-      //      int decrease = 0;
+//      int increase = 0;
+//      int decrease = 0;
 
       for (int test = 0; test < tests; test++)
       {
@@ -276,10 +274,10 @@ public class ConvexPolygonToolsTest
          int desiredNumberOfVertices = random.nextInt(10);
          FrameConvexPolygon2D originalPolygon = new FrameConvexPolygon2D(polygon);
 
-         //         if (desiredNumberOfVertices > polygon.getNumberOfVertices())
-         //            increase++;
-         //         if (desiredNumberOfVertices < polygon.getNumberOfVertices())
-         //            decrease++;
+//         if (desiredNumberOfVertices > polygon.getNumberOfVertices())
+//            increase++;
+//         if (desiredNumberOfVertices < polygon.getNumberOfVertices())
+//            decrease++;
 
          ConvexPolygonTools.limitVerticesConservative(polygon, desiredNumberOfVertices);
 
@@ -313,8 +311,8 @@ public class ConvexPolygonToolsTest
             assertTrue(originalPolygon.distance(vertex) <= 4.0e-7, "Expecting less than 3.0e-7: " + originalPolygon.distance(vertex));
       }
 
-      //      System.out.println("Tested " + increase + " point increases");
-      //      System.out.println("Tested " + decrease + " point decreases");
+//      System.out.println("Tested " + increase + " point increases");
+//      System.out.println("Tested " + decrease + " point decreases");
    }
 
    @Test
@@ -628,9 +626,9 @@ public class ConvexPolygonToolsTest
          // getIntersectingEdges
          LineSegment2D[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);
          boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.slope()
-                                      + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
+               + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
          boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.slope()
-                                      + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
+               + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
          boolean lineCrossesThroughPolygon = isLineAbovePoint0 ^ isLineAbovePoint1;
 
          if (!lineCrossesThroughPolygon)
@@ -1085,10 +1083,10 @@ public class ConvexPolygonToolsTest
    public void testComputeMinimumDistancePointsTroublesomeOneWithOutOfBoundsException()
    {
       double[][] verticesOne = new double[][] {{5.147, -1.271}, {5.215, -1.234}, {7.149, -0.379}, {7.375, -0.379}, {7.480, -0.403}, {9.429, -1.753},
-                                               {9.436, -1.830}, {9.444, -1.988}, {9.277, -1.991}, {7.778, -1.994}, {5.346, -1.992}, {5.248, -1.990}, {5.212, -1.913}};
+            {9.436, -1.830}, {9.444, -1.988}, {9.277, -1.991}, {7.778, -1.994}, {5.346, -1.992}, {5.248, -1.990}, {5.212, -1.913}};
 
       double[][] verticesTwo = new double[][] {{3.090, -1.211}, {3.564, -1.185}, {4.693, -1.185}, {4.924, -1.214}, {4.985, -1.225}, {4.995, -1.289},
-                                               {4.073, -1.290}, {3.177, -1.290}};
+            {4.073, -1.290}, {3.177, -1.290}};
 
       ConvexPolygon2D polygonOne = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(verticesOne));
       ConvexPolygon2D polygonTwo = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(verticesTwo));
