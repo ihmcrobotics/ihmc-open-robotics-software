@@ -117,7 +117,6 @@ public class StereoVisionPointCloudPublisher
 
    public void setCustomStereoVisionTransformer(StereoVisionWorldTransformCalculator transformer)
    {
-      LogTools.info("setCustomStereoVisionTransformer()");
       stereoVisionTransformer = transformer;
    }
 

@@ -208,10 +208,10 @@ public class AStarPlanarRegionsPlannerTest
 
       final AtomicDouble heuristicCost = new AtomicDouble(1.0);
       DoubleProvider heuristicCostProvider = () -> heuristicCost.get();
-      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(heuristicCostProvider);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+      EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(heuristicCostProvider, snapper);
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);

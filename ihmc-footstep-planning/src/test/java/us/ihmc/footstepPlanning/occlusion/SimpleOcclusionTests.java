@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -38,8 +39,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -132,7 +133,7 @@ public class SimpleOcclusionTests
    }
 
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
-                        VisibilityGraphsParameters visibilityGraphsParameters, double maxAllowedSolveTime)
+                        VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -489,8 +490,8 @@ public class SimpleOcclusionTests
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersectionPair == null)
          {
             if (rayPointsToPack != null)
             {
@@ -498,6 +499,8 @@ public class SimpleOcclusionTests
             }
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
 
          if (rayPointsToPack != null)
          {
@@ -586,7 +589,7 @@ public class SimpleOcclusionTests
       return ret;
    }
 
-   private FootstepPlanner getPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   private FootstepPlanner getPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                       YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
@@ -598,7 +601,7 @@ public class SimpleOcclusionTests
       return new DefaultFootstepPlannerParameters();
    }
 
-   private VisibilityGraphsParameters getVisibilityGraphsParameters()
+   private VisibilityGraphsParametersReadOnly getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
    }

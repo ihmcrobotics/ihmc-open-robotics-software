@@ -9,10 +9,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -54,28 +54,28 @@ public class PointFootSnapperVisualizer
             maxY = convexHull.getMaxY();
       }
 
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       Graphics3DObject snappedNodeGraphics = new Graphics3DObject();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                                parameters::getProjectInsideUsingConvexHull, true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                      parameters::getProjectInsideUsingConvexHull, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      int minXIndex = (int) Math.round(minX / FootstepNode.gridSizeXY);
-      int maxXIndex = (int) Math.round(maxX / FootstepNode.gridSizeXY);
-      int minYIndex = (int) Math.round(minY / FootstepNode.gridSizeXY);
-      int maxYIndex = (int) Math.round(maxY / FootstepNode.gridSizeXY);
+      int minXIndex = (int) Math.round(minX / PawNode.gridSizeXY);
+      int maxXIndex = (int) Math.round(maxX / PawNode.gridSizeXY);
+      int minYIndex = (int) Math.round(minY / PawNode.gridSizeXY);
+      int maxYIndex = (int) Math.round(maxY / PawNode.gridSizeXY);
 
       for (int i = minXIndex; i <= maxXIndex; i++)
       {
          for (int j = minYIndex; j <= maxYIndex; j++)
          {
-            FootstepNodeSnapData snapData = snapper.snapFootstepNode(i, j);
+            PawNodeSnapData snapData = snapper.snapPawNode(i, j);
             Vector3DReadOnly snapTranslation = snapData.getSnapTransform().getTranslationVector();
 
             if(snapTranslation.containsNaN())
                continue;
 
-            Point3D snappedPosition = new Point3D(i * FootstepNode.gridSizeXY, j * FootstepNode.gridSizeXY, 0.0);
+            Point3D snappedPosition = new Point3D(i * PawNode.gridSizeXY, j * PawNode.gridSizeXY, 0.0);
             snappedPosition.add(snapTranslation);
 
             snappedNodeGraphics.identity();
