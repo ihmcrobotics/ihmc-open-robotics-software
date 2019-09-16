@@ -438,12 +438,12 @@ public class RelativeEndEffectorControlTest
       }
    }
 
-   private static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center)
+   public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center)
    {
       return circlePositionAt(time, frequency, radius, center, new Vector3D());
    }
 
-   private static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
+   public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
    {
       double angle = 2.0 * Math.PI * frequency * time;
       Vector3D offset = new Vector3D(Axis.Z);
@@ -455,12 +455,12 @@ public class RelativeEndEffectorControlTest
       return position;
    }
 
-   private static FrameVector3D circleLinearVelocityAt(double time, double frequency, double radius, Point3DReadOnly center)
+   public static FrameVector3D circleLinearVelocityAt(double time, double frequency, double radius, Point3DReadOnly center)
    {
       return circleLinearVelocityAt(time, frequency, radius, center, new Vector3D());
    }
 
-   private static FrameVector3D circleLinearVelocityAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
+   public static FrameVector3D circleLinearVelocityAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
    {
       double omega = 2.0 * Math.PI * frequency;
       double angle = omega * time;
