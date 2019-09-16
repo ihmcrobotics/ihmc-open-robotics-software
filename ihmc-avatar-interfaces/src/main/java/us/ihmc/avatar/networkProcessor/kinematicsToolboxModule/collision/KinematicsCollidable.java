@@ -60,6 +60,11 @@ public class KinematicsCollidable
       return shape;
    }
 
+   public ReferenceFrame getShapeFrame()
+   {
+      return shapeFrame;
+   }
+
    public double getMinimumSafeDistance()
    {
       return minimumSafeDistance;
