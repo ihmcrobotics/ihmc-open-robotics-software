@@ -39,7 +39,7 @@
             <Tab text="Footstep Parameters">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" />
-                  <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
+                  <fx:include fx:id="pawStepPlannerParametersUI" source="PawStepPlannerParametersUI.fxml" />
                </content>
             </Tab>
             <Tab text="Reach Parameters">

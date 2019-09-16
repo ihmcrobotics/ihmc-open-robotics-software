@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathPlan;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -37,10 +37,10 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final YoEnum<RobotSpeed> robotSpeed = YoEnum.create("robotSpeed", RobotSpeed.class, registry);
 
    private final QuadrupedBodyPathPlan pathPlan = new QuadrupedBodyPathPlan();
-   private final BodyPathPlanner bodyPathPlanner;
+   private final BodyPathPlanHolder bodyPathPlanner;
 
 
-   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, BodyPathPlanner bodyPathPlanner, YoVariableRegistry parentRegistry)
+   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, BodyPathPlanHolder bodyPathPlanner, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
