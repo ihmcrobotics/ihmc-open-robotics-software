@@ -9,7 +9,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -32,7 +31,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -110,7 +109,7 @@ public class ControllerBasedBodyPathTest
       private final List<YoFramePoint3D> points = new ArrayList<>();
 
       private final List<Point3D> waypoints = new ArrayList<>();
-      private final WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
+      private final WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
       private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       private final AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
@@ -196,7 +195,6 @@ public class ControllerBasedBodyPathTest
             }
 
             bodyPath.setWaypoints(waypoints);
-            bodyPath.compute();
 
             Pose2D pose = new Pose2D();
             for (int i = 0; i < numberOfPoints; i++)
@@ -271,7 +269,7 @@ public class ControllerBasedBodyPathTest
       }
 
       private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
-                                                              WaypointDefinedBodyPathPlanner bodyPath)
+                                                              WaypointDefinedBodyPathPlanHolder bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);

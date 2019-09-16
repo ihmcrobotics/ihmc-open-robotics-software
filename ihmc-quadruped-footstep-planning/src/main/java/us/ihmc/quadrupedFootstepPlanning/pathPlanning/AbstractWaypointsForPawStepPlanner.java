@@ -2,6 +2,8 @@ package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -10,6 +12,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -30,7 +34,7 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 
-   protected final List<Point3D> waypoints = new ArrayList<>();
+   protected final List<Pose3DReadOnly> waypoints = new ArrayList<>();
 
    protected final YoEnum<PawStepPlanningResult> yoResult;
 
@@ -76,13 +80,15 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
       Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
       goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
       goalDirection.scale(horizonLength / goalDirection.length());
-      Point3D waypoint = new Point3D(bodyStartPose.getPosition());
-      waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
+      Pose3D waypoint = new Pose3D();
+      waypoint.getPosition().set(bodyStartPose.getPosition());
+      waypoint.getPosition().add(goalDirection.getX(), goalDirection.getY(), 0.0);
+      waypoint.getOrientation().setYawPitchRoll(BodyPathPlannerTools.calculateHeading(goalDirection), 0.0, 0.0);
       waypoints.add(waypoint);
    }
 
    @Override
-   public List<Point3D> getWaypoints()
+   public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints;
    }

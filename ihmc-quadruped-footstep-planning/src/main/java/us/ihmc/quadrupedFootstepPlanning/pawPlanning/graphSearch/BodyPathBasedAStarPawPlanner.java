@@ -5,7 +5,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 
 public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 {
-   private final BodyPathPlanner bodyPathPlanner;
+   private final BodyPathPlanHolder bodyPathPlanner;
    private final PawStepPlanner pawStepPlanner;
 
    private final FramePose3D lowLevelGoal = new FramePose3D();
@@ -36,7 +36,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 
    private PawStepPlannerGoal highLevelGoal;
 
-   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
+   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
                                        QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;

@@ -1,11 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class FootstepNodeBodyCollisionDetector
 {
@@ -27,10 +32,37 @@ public class FootstepNodeBodyCollisionDetector
       collisionDataHolder.clear();
    }
 
+   public List<BodyCollisionData> checkForCollision(FootstepNode footstepNode, FootstepNode previousNode, double snapHeight, double previousSnapHeight, int numberOfCollisionChecks)
+   {
+      if(numberOfCollisionChecks < 1)
+         return null;
+
+      ArrayList<BodyCollisionData> collisionDataList = new ArrayList<>();
+
+      LatticeNode previousLatticeNode = createNodeForCollisionCheck(previousNode);
+      LatticeNode latticeNode = createNodeForCollisionCheck(footstepNode);
+
+      for (int i = 0; i < numberOfCollisionChecks; i++)
+      {
+         double alpha = i / ((double) numberOfCollisionChecks);
+         LatticeNode interpolatedNode = FootstepNodeTools.interpolate(latticeNode, previousLatticeNode, alpha);
+         double interpolatedHeight = EuclidCoreTools.interpolate(snapHeight, previousSnapHeight, alpha);
+
+         BodyCollisionData collisionData = checkForCollision(interpolatedNode, interpolatedHeight);
+         collisionDataList.add(collisionData);
+      }
+
+      return collisionDataList;
+   }
+
    public BodyCollisionData checkForCollision(FootstepNode footstepNode, double snappedNodeHeight)
    {
       LatticeNode latticeNode = createNodeForCollisionCheck(footstepNode);
+      return checkForCollision(latticeNode, snappedNodeHeight);
+   }
 
+   private BodyCollisionData checkForCollision(LatticeNode latticeNode, double snappedNodeHeight)
+   {
       if (collisionDataHolder.containsKey(latticeNode))
       {
          return collisionDataHolder.get(latticeNode);
