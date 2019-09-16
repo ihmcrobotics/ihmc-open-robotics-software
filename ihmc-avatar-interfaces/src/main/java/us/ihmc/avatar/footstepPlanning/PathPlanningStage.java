@@ -5,8 +5,8 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -16,6 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlan
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPlanner;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.EnumProvider;
@@ -42,7 +43,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    private final EnumMap<FootstepPlannerType, WaypointsForFootstepsPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
    private final EnumProvider<FootstepPlannerType> activePlannerEnum;
 
-   private final AtomicReference<List<Point3D>> waypoints = new AtomicReference<>();
+   private final AtomicReference<List<Pose3DReadOnly>> waypoints = new AtomicReference<>();
 
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
@@ -70,7 +71,9 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
       sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathPlanner(parameters, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(prefix, parameters, visibilityGraphsParameters, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(prefix, parameters, visibilityGraphsParameters,
+                                                                                               new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters),
+                                                                                               registry));
 
       initialize.set(true);
    }
@@ -144,7 +147,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
    }
 
    @Override
-   public List<Point3D> getWaypoints()
+   public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints.getAndSet(null);
    }

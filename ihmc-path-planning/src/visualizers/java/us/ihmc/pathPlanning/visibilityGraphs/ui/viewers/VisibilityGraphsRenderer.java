@@ -156,7 +156,7 @@ public class VisibilityGraphsRenderer
          List<Point3DReadOnly> bodyPath;
          if (computePathWithOcclusions)
          {
-            bodyPath = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+            bodyPath = navigableRegionsManager.calculateBodyPath(start, goal);
          }
          else
          {

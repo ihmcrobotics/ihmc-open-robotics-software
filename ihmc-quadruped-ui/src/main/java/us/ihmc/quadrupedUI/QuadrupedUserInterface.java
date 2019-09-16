@@ -91,7 +91,7 @@ public class QuadrupedUserInterface
    @FXML
    private XGaitSettingsController xGaitSettingsController;
    @FXML
-   private PawStepPlannerParametersUIController pawPlannerParametersUIController;
+   private PawStepPlannerParametersUIController pawStepPlannerParametersUIController;
    @FXML
    private PlannerReachParametersUIController plannerReachParametersUIController;
    @FXML
@@ -113,14 +113,14 @@ public class QuadrupedUserInterface
 
       mainPane = loader.load();
 
-      pawPlannerParametersUIController.setPlannerParameters(pawPlannerParameters);
+      pawStepPlannerParametersUIController.setPlannerParameters(pawPlannerParameters);
       plannerReachParametersUIController.setPlannerParameters(pawPlannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       plannerTabController.attachMessager(messager);
       robotControlTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
-      pawPlannerParametersUIController.attachMessager(messager);
+      pawStepPlannerParametersUIController.attachMessager(messager);
       plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       manualStepTabController.attachMessager(messager, xGaitSettings);
@@ -128,19 +128,19 @@ public class QuadrupedUserInterface
       manualStepTabController.setFullRobotModelFactory(modelFactory);
 
       setPlannerTabTopics();
-      pawPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
+      pawStepPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       plannerReachParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(QuadrupedUIMessagerAPI.VisibilityGraphsParametersTopic);
 
       plannerTabController.bindControls();
       robotControlTabController.bindControls();
-      pawPlannerParametersUIController.bindControls();
+      pawStepPlannerParametersUIController.bindControls();
       plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       xGaitSettingsController.bindControls();
       manualStepTabController.bindControls();
 
-      pawPlannerParametersUIController.loadFromFile();
+      pawStepPlannerParametersUIController.loadFromFile();
       plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();

@@ -1,18 +1,17 @@
 package us.ihmc.pathPlanning.visibilityGraphs.parameters;
 
-import java.util.List;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
+
+import java.util.List;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys.*;
 
@@ -125,6 +124,30 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(canEasilyStepOverHeight);
    }
 
+   /**
+    * Returns the length of an inter region connection that defines it as "long". If it is longer than this value,
+    * then additional checks are performed on the edge to see if it is visible.
+    */
+   default double getLengthForLongInterRegionEdge()
+   {
+      return get(lengthForLongInterRegionEdge);
+   }
+
+   default boolean getPerformPostProcessingNodeShifting()
+   {
+      return get(performPostProcessingNodeShifting);
+   }
+
+   default boolean getIntroduceMidpointsInPostProcessing()
+   {
+      return get(introduceMidpointsInPostProcessing);
+   }
+
+   default boolean getComputeOrientationsToAvoidObstacles()
+   {
+      return get(computeOrientationsToAvoidObstacles);
+   }
+
    default double getHeuristicWeight()
    {
       return get(heuristicWeight);
@@ -138,6 +161,20 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    default double getElevationWeight()
    {
       return get(elevationWeight);
+   }
+
+   default double getOccludedGoalEdgeWeight()
+   {
+      return get(occludedGoalEdgeWeight);
+   }
+
+   /**
+    * This flag says whether or not to return a solution even when the goal is not reached.
+    * The solution that is returned is the lowest cost path, including estimated cost to goal.
+    */
+   default boolean returnBestEffortSolution()
+   {
+      return true;
    }
 
    /**
@@ -320,11 +357,5 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
             return true;
          }
       };
-   }
-
-   default VisibilityGraphPathPlanner getPathPlanner()
-   {
-      return new DijkstraVisibilityGraphPlanner();
-      //      return JGraphTools.getJGraphPlanner();
    }
 }

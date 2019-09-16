@@ -2,34 +2,36 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   private final BodyPathPlanner bodyPath;
+   private final BodyPathPlanHolder bodyPath;
    private final FootstepPlannerParametersReadOnly parameters;
+   private final Point2D midFootPoint = new Point2D();
 
    private double goalAlpha = 1.0;
 
-   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, BodyPathPlanner bodyPath)
+   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, BodyPathPlanHolder bodyPath)
    {
-      super(weight);
+      super(weight, snapper);
 
       this.bodyPath = bodyPath;
       this.parameters = parameters;
    }
 
    @Override
-   protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
+   protected double computeHeuristics(FramePose3D pose)
    {
-      Point2D midFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
       Pose2D closestPointOnPath = new Pose2D();
 
+      midFootPoint.set(pose.getPosition());
       double alpha = bodyPath.getClosestPoint(midFootPoint, closestPointOnPath);
       alpha = MathTools.clamp(alpha, 0.0, goalAlpha);
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
@@ -41,10 +43,10 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double remainingDistance = remainingPathLength + distanceToPath - croppedDistanceToPath;
       double pathDistanceViolationCost = parameters.getBodyPathViolationWeight() * croppedDistanceToPath;
 
-      double referenceYaw = computeReferenceGoalYaw(node, goalNode, closestPointOnPath.getYaw());
+      double referenceYaw = computeReferenceGoalYaw(pose, closestPointOnPath.getYaw());
 
-      double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw));
-      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), referenceYaw));
+      double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pose.getYaw(), referenceYaw));
+      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalPose.getYaw(), referenceYaw));
 
       double croppedYawDifferenceFromReference = Math.max(0.0, yawDifferenceFromReference - parameters.getDeltaYawFromReferenceTolerance());
 
@@ -56,9 +58,9 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    }
 
 
-   private double computeReferenceGoalYaw(FootstepNode node, FootstepNode goalNode, double pathHeading)
+   private double computeReferenceGoalYaw(FramePose3D pose, double pathHeading)
    {
-      double distanceToGoal = node.euclideanDistance(goalNode);
+      double distanceToGoal = pose.getPosition().distanceXY(goalPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnBodyPathProximity();
 
       double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
@@ -72,7 +74,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       else
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
-      return AngleTools.interpolateAngle(goalNode.getYaw(), pathHeading, yawMultiplier);
+      return AngleTools.interpolateAngle(goalPose.getYaw(), pathHeading, yawMultiplier);
    }
 
    public void setGoalAlpha(double alpha)
