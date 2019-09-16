@@ -6,6 +6,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -19,7 +20,9 @@ public class VisibilityGraphWithAStarPlanner extends BodyPathAndFootstepPlannerW
    {
       super(prefix, parameters, parentRegistry, graphicsListRegistry);
 
-      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, parentRegistry);
+      ObstacleAndCliffAvoidanceProcessor pathPostProcessor = new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters);
+
+      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
       footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
                                                       parameters.getAStarHeuristicsWeight(), registry, listeners);
    }

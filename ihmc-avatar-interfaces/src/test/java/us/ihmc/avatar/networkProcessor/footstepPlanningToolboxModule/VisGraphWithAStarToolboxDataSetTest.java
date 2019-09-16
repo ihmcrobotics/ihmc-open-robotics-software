@@ -38,7 +38,7 @@ public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxD
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171216_111326_CrossoverPlatforms);
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171215_214730_CinderBlockField);
 
       ThreadTools.sleepForever();
       test.tearDown();

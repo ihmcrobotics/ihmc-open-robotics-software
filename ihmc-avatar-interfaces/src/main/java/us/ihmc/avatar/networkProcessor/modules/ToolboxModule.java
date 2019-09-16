@@ -65,7 +65,7 @@ public abstract class ToolboxModule
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
-   protected final int updatePeriodMilliseconds = 1;
+   protected final int updatePeriodMilliseconds;
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -103,6 +103,7 @@ public abstract class ToolboxModule
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
+      this.updatePeriodMilliseconds = updatePeriodMilliseconds;
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());

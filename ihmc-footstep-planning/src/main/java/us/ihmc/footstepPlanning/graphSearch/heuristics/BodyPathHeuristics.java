@@ -5,21 +5,20 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   private final BodyPathPlanner bodyPath;
+   private final BodyPathPlanHolder bodyPath;
    private final FootstepPlannerParametersReadOnly parameters;
    private final Point2D midFootPoint = new Point2D();
 
    private double goalAlpha = 1.0;
 
-   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, BodyPathPlanner bodyPath)
+   public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, BodyPathPlanHolder bodyPath)
    {
       super(weight, snapper);
 
