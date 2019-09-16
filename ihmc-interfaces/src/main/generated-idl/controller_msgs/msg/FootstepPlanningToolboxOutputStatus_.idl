@@ -30,6 +30,9 @@ module controller_msgs
       const octet FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED =
       5;
 
+      const octet FOOTSTEP_PLANNING_RESULT_INVALID_GOAL =
+      6;
+
       const long NO_PLAN_ID =
       -1;
 

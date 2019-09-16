@@ -77,7 +77,7 @@ public class SnapBasedNodeCheckerTest
          Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
-         PlanarRegion bodyRegion = ObstacleBetweenNodesChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
+         PlanarRegion bodyRegion = ObstacleBetweenNodesChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyBoxBaseZ(), 2.0);
          Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
@@ -128,7 +128,7 @@ public class SnapBasedNodeCheckerTest
    public void testSwingingThroughObstacle1()
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      double bodyGroundClearance = parameters.getBodyGroundClearance();
+      double bodyGroundClearance = parameters.getBodyBoxBaseZ();
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(0.0, 0.0, 0.001);
@@ -155,7 +155,7 @@ public class SnapBasedNodeCheckerTest
 
          Point3D nodeA = new Point3D(node0.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
          Point3D nodeB = new Point3D(node1.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-         PlanarRegion bodyRegion = ObstacleBetweenNodesChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
+         PlanarRegion bodyRegion = ObstacleBetweenNodesChecker.createBodyRegionFromNodes(nodeA, nodeB, bodyGroundClearance, 2.0);
          Graphics3DObjectTools.addPlanarRegionsList(graphics, new PlanarRegionsList(bodyRegion), YoAppearance.White());
 
          for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())

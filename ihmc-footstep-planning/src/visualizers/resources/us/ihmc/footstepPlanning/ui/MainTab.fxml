@@ -72,7 +72,7 @@
 
                 <Separator prefHeight="20" />
 
-                <GridPane layoutX="23.0" layoutY="29.0">
+                <GridPane layoutX="23.0" layoutY="29.0" vgap="3">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="90.0" prefWidth="150.0" />
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="93.0" minWidth="10.0" prefWidth="25.0" />
@@ -87,8 +87,9 @@
                         <ColumnConstraints />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="38.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="38.0" minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="38.0" minHeight="10.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
                         <Button fx:id="placeStart" mnemonicParsing="false" onAction="#placeStart" prefWidth="130.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
@@ -102,14 +103,20 @@
                         <Label text="z" textAlignment="RIGHT" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                         <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="7" GridPane.halignment="CENTER" />
                         <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="7" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                        <Label text="Distance proximity" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                        <Label text="Yaw proximity" textAlignment="RIGHT" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+
                         <Spinner fx:id="startXPosition" GridPane.columnIndex="2" />
-                        <Spinner fx:id="goalXPosition" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalXPosition" editable="true" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                         <Spinner fx:id="startYPosition" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="4" />
-                        <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalYPosition" editable="true" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                         <Spinner fx:id="startZPosition" layoutX="409.0" layoutY="11.0" GridPane.columnIndex="6" />
-                        <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalZPosition" editable="true" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
                         <Spinner fx:id="startYaw" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="8" />
-                        <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                        <Spinner fx:id="goalYaw" editable="true" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
+                        <Spinner fx:id="distanceProximity" editable="true" layoutX="243.0" layoutY="11.0" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                        <Spinner fx:id="yawProximity" editable="true" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="8" GridPane.rowIndex="2" />
+
                         <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                     </children>
                 </GridPane>
@@ -136,8 +143,8 @@
                 <HBox alignment="TOP_CENTER">
                     <GridPane alignment="TOP_CENTER">
                         <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="150.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="50.0" prefWidth="125.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="50.0" prefWidth="150.0" />
                         </columnConstraints>
                         <rowConstraints>
                             <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -149,10 +156,10 @@
                             <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         </rowConstraints>
                         <children>
-                            <Label text="Sent Request ID" GridPane.halignment="RIGHT" />
-                            <Label text="Received Request ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Sent ID" GridPane.halignment="RIGHT" />
+                            <Label text="Received ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                             <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                            <Label text="Planning Result" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Result" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                             <Label text="Time Taken" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                             <Label text="Rejection %" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
 
@@ -167,7 +174,7 @@
 
                     <Separator orientation="VERTICAL" prefWidth="20" />
 
-                    <TableView fx:id="rejectionTable" prefWidth="400"/>
+                    <TableView fx:id="rejectionTable" prefWidth="400" />
                 </HBox>
             </children>
         </VBox>
