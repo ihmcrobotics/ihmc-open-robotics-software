@@ -5,6 +5,8 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -22,6 +24,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTStreamingState implements State
 {
+   private static final double defaultMessageWeight = 1.0;
+
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final KSTTools tools;
    private OutputPublisher outputPublisher = m ->
    {
@@ -32,8 +38,10 @@ public class KSTStreamingState implements State
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager ikCommandInputManager;
 
-   private final KinematicsToolboxRigidBodyMessage pelvisOrientationMessage = new KinematicsToolboxRigidBodyMessage();
+   private final KinematicsToolboxRigidBodyMessage defaultPelvisMessage = new KinematicsToolboxRigidBodyMessage();
+   private final KinematicsToolboxRigidBodyMessage defaultChestMessage = new KinematicsToolboxRigidBodyMessage();
    private final RigidBodyBasics pelvis;
+   private final RigidBodyBasics chest;
 
    private YoBoolean isStreaming;
 
@@ -47,11 +55,18 @@ public class KSTStreamingState implements State
       ikCommandInputManager = tools.getIKCommandInputManager();
 
       pelvis = desiredFullRobotModel.getPelvis();
-      pelvisOrientationMessage.setEndEffectorHashCode(pelvis.hashCode());
-      pelvisOrientationMessage.getDesiredOrientationInWorld().setToZero();
-      pelvisOrientationMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false));
-      pelvisOrientationMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, false, ReferenceFrame.getWorldFrame()));
-      pelvisOrientationMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
+      defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
+      defaultPelvisMessage.getDesiredOrientationInWorld().setToZero();
+      defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
+      defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
+      defaultPelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
+      defaultPelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
+      chest = desiredFullRobotModel.getChest();
+      defaultChestMessage.setEndEffectorHashCode(chest.hashCode());
+      defaultChestMessage.getDesiredOrientationInWorld().setToZero();
+      defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
+      defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
+      defaultChestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
 
       YoVariableRegistry registry = tools.getRegistry();
       defaultLinearWeight = new YoDouble("defaultLinearWeight", registry);
@@ -81,6 +96,14 @@ public class KSTStreamingState implements State
       defaultGains.setOrientationMaxFeedbackAndFeedbackRate(35.0, Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
       ikCommandInputManager.submitMessage(configurationMessage);
+
+      FramePose3D pelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
+      pelvisPose.changeFrame(worldFrame);
+      defaultPelvisMessage.getDesiredPositionInWorld().set(pelvisPose.getPosition());
+      defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(pelvisPose.getYaw());
+      FrameQuaternion chestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
+      chestOrientation.changeFrame(worldFrame);
+      defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
    }
 
    @Override
@@ -98,7 +121,9 @@ public class KSTStreamingState implements State
          }
 
          if (!latestInput.hasInputFor(pelvis))
-            ikCommandInputManager.submitMessage(pelvisOrientationMessage);
+            ikCommandInputManager.submitMessage(defaultPelvisMessage);
+         if (!latestInput.hasInputFor(chest))
+            ikCommandInputManager.submitMessage(defaultChestMessage);
 
          isStreaming.set(latestInput.getStreamToController());
       }
@@ -126,7 +151,7 @@ public class KSTStreamingState implements State
       setDefaultWeightIfNeeded(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), defaultLinearWeight.getValue());
       setDefaultWeightIfNeeded(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), defaultAngularWeight.getValue());
    }
-   
+
    private void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, double defaultWeight)
    {
       if (selectionMatrix.isXSelected())
