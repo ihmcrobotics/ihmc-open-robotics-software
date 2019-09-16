@@ -44,7 +44,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -69,6 +68,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -242,7 +242,8 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
    private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
-   private final int numberOfCollisionsToVisualize = 20;
+   private final int numberOfCollisionsToVisualize = 100;
+   private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
    private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
    private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
@@ -250,13 +251,22 @@ public class KinematicsToolboxController extends ToolboxController
 
    private final ThreadTimer threadTimer;
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
-                                      OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                      YoVariableRegistry parentRegistry)
-   {
-      this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, updateDT, yoGraphicsListRegistry, parentRegistry);
-   }
-
+   /**
+    * @param commandInputManager     the message/command barrier used by this controller. Submit
+    *                                messages or commands to be processed to the
+    *                                {@code commandInputManager} from outside the controller.
+    * @param statusOutputManager     the output interface used by this controller.
+    * @param rootJoint               the underactuated floating root joint of the multi-body system.
+    *                                Can be {@code null} in the case all the joints are actuated.
+    * @param oneDoFJoints            the actuated joints of the system. The inverse kinematics will
+    *                                only use these joints during the optimization.
+    * @param controllableRigidBodies the sublist of rigid-bodies that can be controlled by the user.
+    *                                Can be {@code null} in the case all rigid-body should be
+    *                                controllable.
+    * @param updateDT                the period of one optimization tick.
+    * @param yoGraphicsListRegistry  registry to register visualization to.
+    * @param parentRegistry          registry to attach {@code YoVariable}s to.
+    */
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -295,6 +305,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
+      collisionActivationDistanceThreshold.set(0.10);
       setupCollisionVisualization();
    }
 
@@ -647,7 +658,7 @@ public class KinematicsToolboxController extends ToolboxController
       return inputs;
    }
 
-   public List<KinematicsCollisionResult> computeCollisions()
+   private List<KinematicsCollisionResult> computeCollisions()
    {
       if (robotCollidables.isEmpty())
          return Collections.emptyList();
@@ -667,6 +678,9 @@ public class KinematicsToolboxController extends ToolboxController
                continue;
 
             KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
+
+            if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+               continue;
 
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
@@ -704,7 +718,8 @@ public class KinematicsToolboxController extends ToolboxController
          double sigmaDot = sigma / updateDT;
 
          ReferenceFrame collisionFrame = collisionFrame(collision, true, collisionIndex);
-         collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
+         if (collisionIndex < numberOfCollisionsToVisualize)
+            collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
          SpatialVelocityCommand command = new SpatialVelocityCommand();
          command.set(bodyA, collidableB.getRigidBody());
@@ -786,7 +801,7 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    private static ReferenceFrame newFrameFromOriginAndZAxis(MovingReferenceFrame parentFrame, String name, FramePoint3DReadOnly origin,
-                                                                  FrameVector3DReadOnly zAxis)
+                                                            FrameVector3DReadOnly zAxis)
    {
       FramePoint3D originLocal = new FramePoint3D(origin);
       originLocal.changeFrame(parentFrame);
@@ -795,7 +810,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       RigidBodyTransform frameTransform = new RigidBodyTransform();
       frameTransform.setTranslation(originLocal);
-      EuclidGeometryTools.orientation3DFromZUpToVector3D(zAxis, frameTransform.getRotation());
+      EuclidCoreMissingTools.rotationMatrix3DFromZUpToVector3D(zAxisLocal, frameTransform.getRotation());
 
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, parentFrame, frameTransform);
    }
