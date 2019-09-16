@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
@@ -40,18 +41,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -67,17 +68,18 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -242,9 +244,11 @@ public class KinematicsToolboxController extends ToolboxController
    private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
    private final int numberOfCollisionsToVisualize = 20;
    private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
-   private final YoDouble[] collisionVelocities = new YoDouble[numberOfCollisionsToVisualize];
    private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePose3D[] collisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
+
+   private final ThreadTimer threadTimer;
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -289,30 +293,32 @@ public class KinematicsToolboxController extends ToolboxController
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
 
+      threadTimer = new ThreadTimer("timer", updateDT, registry);
+
       setupCollisionVisualization();
    }
 
    private void setupCollisionVisualization()
    {
-      double hueMin = 0.0;
-      double hueMax = 360.0;
+      Random random = new Random();
 
       for (int i = 0; i < numberOfCollisionsToVisualize; i++)
       {
-         double hue = EuclidCoreTools.interpolate(hueMin, hueMax, (double) i / ((double) numberOfCollisionsToVisualize - 1.0));
          YoDouble collisionDistance = new YoDouble("collision_" + i + "_distance", registry);
-         YoDouble collisionVelocity = new YoDouble("collision_" + i + "_velocity", registry);
          YoFramePoint3D collisionPointA = new YoFramePoint3D("collision_" + i + "_pointA" + i, worldFrame, registry);
          YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
+         YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
 
-         AppearanceDefinition appearance = new YoAppearanceRGBColor(Color.getHSBColor((float) hue / 360.f, 0.9f, 0.8f), 0.7);
+         AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
          yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
          yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+         yoGraphicsListRegistry.registerYoGraphic("Collisions",
+                                                  new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
 
          collisionDistances[i] = collisionDistance;
-         collisionVelocities[i] = collisionVelocity;
          collisionPointAs[i] = collisionPointA;
          collisionPointBs[i] = collisionPointB;
+         collisionFramePoses[i] = collisionFramePose;
       }
    }
 
@@ -508,6 +514,7 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
+      threadTimer.start();
       // Updating the reference frames and twist calculator.
       updateTools();
 
@@ -559,6 +566,7 @@ public class KinematicsToolboxController extends ToolboxController
          reportMessage(inverseKinematicsSolution);
          timeSinceLastSolutionPublished.set(0.0);
       }
+      threadTimer.stop();
    }
 
    /**
@@ -663,19 +671,6 @@ public class KinematicsToolboxController extends ToolboxController
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
                collisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
-               MovingReferenceFrame bodyFixedFrameA = collidableA.getRigidBody().getBodyFixedFrame();
-               MovingReferenceFrame bodyFixedFrameB = collidableB.getRigidBody().getBodyFixedFrame();
-               MovingReferenceFrame collisionFrameAtA = collisionFrame(bodyFixedFrameA,
-                                                                       collisionResult.getPointOnA(),
-                                                                       collisionResult.getPointOnB(),
-                                                                       collisionIndex);
-               MovingReferenceFrame collisionFrameAtB = collisionFrame(bodyFixedFrameB,
-                                                                       collisionResult.getPointOnB(),
-                                                                       collisionResult.getPointOnA(),
-                                                                       collisionIndex);
-               Twist relativeTwist = new Twist();
-               collisionFrameAtA.getTwistRelativeToOther(collisionFrameAtB, relativeTwist);
-               collisionVelocities[collisionIndex].set(relativeTwist.getLinearPartZ());
                collisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
                collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
             }
@@ -696,30 +691,45 @@ public class KinematicsToolboxController extends ToolboxController
       int collisionIndex = 0;
       InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
 
-      for (KinematicsCollisionResult collision : collisions)
+      for (int i = 0; i < collisions.size(); i++)
       {
+         KinematicsCollisionResult collision = collisions.get(i);
          KinematicsCollidable collidableA = collision.getCollidableA();
          KinematicsCollidable collidableB = collision.getCollidableB();
 
          RigidBodyBasics bodyA = collidableA.getRigidBody();
-         MovingReferenceFrame bodyFixedFrameA = bodyA.getBodyFixedFrame();
 
-         double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
-         double sigma = collision.getSignedDistance() - minimumSafeDistance;
-         double maxVelocityMagnitude = Math.copySign(MathTools.square(sigma), sigma) / updateDT;
+         //         double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
+         double sigma = collision.getDistance();// - minimumSafeDistance;
+         double sigmaDot = sigma / updateDT;
 
-         ReferenceFrame collisionFrame = collisionFrame(collision, collisionIndex);
+         ReferenceFrame collisionFrame = collisionFrame(collision, true, collisionIndex);
+         collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
          SpatialVelocityCommand command = new SpatialVelocityCommand();
-         command.setConstraintType(ConstraintType.LEQ_INEQUALITY);
          command.set(bodyA, collidableB.getRigidBody());
-         command.getDesiredLinearVelocity().setZ(maxVelocityMagnitude);
-         command.getControlFramePose().setIncludingFrame(bodyFixedFrameA, collisionFrame.getTransformToParent());
+         command.getControlFramePose().setFromReferenceFrame(collisionFrame);
          SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
          selectionMatrix.clearSelection();
          selectionMatrix.selectLinearZ(true);
          selectionMatrix.setSelectionFrames(null, collisionFrame);
-         commandList.addCommand(command);
+
+         if (collision.areShapesColliding())
+         {
+            command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+            command.getDesiredLinearVelocity().setZ(sigmaDot);
+            commandList.addCommand(command);
+         }
+         else
+         {
+            if (sigmaDot < 100.0)
+            {
+               sigmaDot = -sigmaDot;
+               command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+               command.getDesiredLinearVelocity().setZ(sigmaDot);
+               commandList.addCommand(command);
+            }
+         }
 
          collisionIndex++;
       }
@@ -727,29 +737,67 @@ public class KinematicsToolboxController extends ToolboxController
       return commandList;
    }
 
-   private static MovingReferenceFrame collisionFrame(KinematicsCollisionResult collisionResult, int index)
+   private static ReferenceFrame collisionFrame(KinematicsCollisionResult collision, boolean centerFrameAtA, int index)
    {
-      return collisionFrame(collisionResult.getCollidableA().getRigidBody().getBodyFixedFrame(),
-                            collisionResult.getPointOnA(),
-                            collisionResult.getPointOnB(),
-                            index);
+      MovingReferenceFrame parentFrame;
+      FramePoint3D origin, otherShapePoint;
+      FrameVector3D normal, otherShapeNormal;
+
+      if (centerFrameAtA)
+      {
+         parentFrame = collision.getCollidableA().getRigidBody().getBodyFixedFrame();
+         origin = new FramePoint3D(collision.getPointOnA());
+         otherShapePoint = new FramePoint3D(collision.getPointOnB());
+         normal = new FrameVector3D(collision.getNormalOnA());
+         otherShapeNormal = new FrameVector3D(collision.getNormalOnB());
+      }
+      else
+      {
+         parentFrame = collision.getCollidableB().getRigidBody().getBodyFixedFrame();
+         origin = new FramePoint3D(collision.getPointOnB());
+         otherShapePoint = new FramePoint3D(collision.getPointOnA());
+         normal = new FrameVector3D(collision.getNormalOnB());
+         otherShapeNormal = new FrameVector3D(collision.getNormalOnA());
+      }
+
+      FrameVector3D collisionAxis = new FrameVector3D(parentFrame);
+
+      if (!normal.containsNaN())
+      {
+         normal.changeFrame(parentFrame);
+         collisionAxis.set(normal);
+      }
+      else if (!otherShapeNormal.containsNaN())
+      {
+         otherShapeNormal.changeFrame(parentFrame);
+         collisionAxis.set(otherShapeNormal);
+         collisionAxis.negate();
+      }
+      else
+      {
+         origin.changeFrame(parentFrame);
+         otherShapePoint.changeFrame(parentFrame);
+         collisionAxis.sub(otherShapePoint, origin);
+         if (collision.areShapesColliding())
+            collisionAxis.negate();
+      }
+
+      return newFrameFromOriginAndZAxis(parentFrame, "collisionFrame" + index, origin, collisionAxis);
    }
 
-   private static MovingReferenceFrame collisionFrame(MovingReferenceFrame bodyFixedFrameA, FramePoint3DReadOnly pointOnA, FramePoint3DReadOnly pointOnB,
-                                                      int index)
+   private static ReferenceFrame newFrameFromOriginAndZAxis(MovingReferenceFrame parentFrame, String name, FramePoint3DReadOnly origin,
+                                                                  FrameVector3DReadOnly zAxis)
    {
-      FramePoint3D pointOnALocal = new FramePoint3D(pointOnA);
-      pointOnALocal.changeFrame(bodyFixedFrameA);
-      FramePoint3D pointOnBLocal = new FramePoint3D(pointOnB);
-      pointOnBLocal.changeFrame(bodyFixedFrameA);
+      FramePoint3D originLocal = new FramePoint3D(origin);
+      originLocal.changeFrame(parentFrame);
+      FrameVector3D zAxisLocal = new FrameVector3D(zAxis);
+      zAxisLocal.changeFrame(parentFrame);
 
-      RigidBodyTransform collisionFramePose = new RigidBodyTransform();
-      collisionFramePose.setTranslation(pointOnALocal);
-      Vector3D collisionDirection = new Vector3D();
-      collisionDirection.sub(pointOnBLocal, pointOnALocal);
-      EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionDirection, collisionFramePose.getRotation());
+      RigidBodyTransform frameTransform = new RigidBodyTransform();
+      frameTransform.setTranslation(originLocal);
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(zAxis, frameTransform.getRotation());
 
-      return MovingReferenceFrame.constructFrameFixedInParent("collisionFrame" + index, bodyFixedFrameA, collisionFramePose);
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, parentFrame, frameTransform);
    }
 
    /**

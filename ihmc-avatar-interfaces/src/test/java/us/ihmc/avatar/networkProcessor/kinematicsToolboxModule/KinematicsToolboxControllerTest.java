@@ -400,7 +400,7 @@ public final class KinematicsToolboxControllerTest
       });
 
       toolboxController.registerCollidable(torsoCollidable);
-      toolboxController.registerCollidable(handCollidables.get(RobotSide.LEFT)); // TODO Re-introduce right hand when done debugging
+      toolboxController.registerCollidables(handCollidables);
 
       if (VERBOSE)
          LogTools.info("Entering: testRandomDualHandPositionsCollisionWithTorso");
@@ -408,7 +408,7 @@ public final class KinematicsToolboxControllerTest
       Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 4; i++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -421,7 +421,7 @@ public final class KinematicsToolboxControllerTest
 
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hands.get(robotSide), desiredPosition);
             message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false));
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.1));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
             commandInputManager.submitMessage(message);
          }
 
