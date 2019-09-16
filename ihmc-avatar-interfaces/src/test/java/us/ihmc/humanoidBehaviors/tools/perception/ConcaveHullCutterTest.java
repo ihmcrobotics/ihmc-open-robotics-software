@@ -69,7 +69,7 @@ public class ConcaveHullCutterTest
       visualizePlanarRegions(concaveSPolygon, result);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(cutPolygon1, 1e-5));
    }
 
    @Test
@@ -108,7 +108,7 @@ public class ConcaveHullCutterTest
       visualizePlanarRegions(concaveSPolygon, result);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(cutPolygon1, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(cutPolygon1, 1e-5));
    }
 
    private ConcaveHull drawSPolygon()
@@ -159,7 +159,7 @@ public class ConcaveHullCutterTest
       aboveYAxisRectangle.addVertex(0.0, 1.0);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(aboveYAxisRectangle, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(aboveYAxisRectangle, 1e-5));
    }
 
    @Test
@@ -190,7 +190,7 @@ public class ConcaveHullCutterTest
       expected.addVertex(-1.0, -1.0);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(expected, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(expected, 1e-5));
    }
 
    @Test
@@ -224,7 +224,7 @@ public class ConcaveHullCutterTest
       expected.addVertex(1.0, -0.9999999999999999);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(expected, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(expected, 1e-5));
    }
 
    @Test
@@ -260,7 +260,7 @@ public class ConcaveHullCutterTest
       expected.addVertex(1.0, -1.0);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(expected, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(expected, 1e-5));
    }
 
 
@@ -319,7 +319,7 @@ public class ConcaveHullCutterTest
       expected.addVertex(-1.0, -1.0);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(expected, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(expected, 1e-5));
    }
 
    @Test
@@ -352,7 +352,7 @@ public class ConcaveHullCutterTest
       expected.addVertex(-1.0, 1.0);
 
       // assert equal
-      assertTrue(result.get(0).epsilonEquals(expected, 1e-5));
+      assertTrue(result.get(0).geometricallyEquals(expected, 1e-5));
    }
 
    private void visualizePlanarRegions(ConcaveHull original, List<ConcaveHull> results)
