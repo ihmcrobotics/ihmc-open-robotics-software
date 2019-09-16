@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -220,6 +221,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       return listOfControllableRigidBodies;
+   }
+
+   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   {
+      if (collisionModel != null)
+         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel()));
    }
 
    @Override

@@ -6,6 +6,7 @@ import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -70,6 +71,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       streamingState = new KSTStreamingState(tools);
 
       stateMachine = createStateMachine(time);
+   }
+
+   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   {
+      tools.getIKController().setCollisionModel(collisionModel);
    }
 
    private StateMachine<KSTState, State> createStateMachine(DoubleProvider timeProvider)
@@ -139,6 +145,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       tools.updateCapturabilityBasedStatus(newStatus);
+   }
+
+   public KSTTools getTools()
+   {
+      return tools;
    }
 
    public FullHumanoidRobotModel getDesiredFullRobotModel()
