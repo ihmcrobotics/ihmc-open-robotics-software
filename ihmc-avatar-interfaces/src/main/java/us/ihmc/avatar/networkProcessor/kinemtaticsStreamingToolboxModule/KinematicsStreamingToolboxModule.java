@@ -50,6 +50,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                             yoGraphicsListRegistry,
                                                             registry);
+      controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
