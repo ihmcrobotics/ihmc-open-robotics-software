@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.hardware;
+package us.ihmc.robotEnvironmentAwareness.fusion;
 
 import boofcv.struct.calib.IntrinsicParameters;
 
