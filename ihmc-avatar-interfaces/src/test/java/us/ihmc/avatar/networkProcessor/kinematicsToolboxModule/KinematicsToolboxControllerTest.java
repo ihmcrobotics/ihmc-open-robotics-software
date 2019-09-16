@@ -114,6 +114,7 @@ public final class KinematicsToolboxControllerTest
                                                           statusOutputManager,
                                                           desiredFullRobotModel.getLeft(),
                                                           desiredFullRobotModel.getRight(),
+                                                          null,
                                                           updateDT,
                                                           yoGraphicsListRegistry,
                                                           mainRegistry);
