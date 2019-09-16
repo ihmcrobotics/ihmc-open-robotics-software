@@ -85,6 +85,11 @@ public class IMUSensor implements IMUSensorReadOnly
       orientationMeasurement.set(newOrientation);
    }
 
+   public void setOrientationMeasurement(QuaternionReadOnly newOrientation)
+   {
+      orientationMeasurement.set(newOrientation);
+   }
+
    public void setAngularVelocityMeasurement(Vector3DReadOnly newAngularOrientation)
    {
       angularVelocityMeasurement.set(newAngularOrientation);
