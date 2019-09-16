@@ -666,6 +666,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static void checkFootstepPlannerParameters(FootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersPacket packet)
    {
       assertEquals("Check for body box collisions flags aren't equal.", parameters.checkForBodyBoxCollisions(), packet.getCheckForBodyBoxCollisions());
+      assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals(parameters.performHeuristicSearchPolicies(), packet.getPerformHeuristicSearchPolicies());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
@@ -697,7 +698,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
       assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
                    epsilon);
-      assertEquals("Body ground clearance isn't equal.", parameters.getBodyGroundClearance(), packet.getBodyGroundClearance(), epsilon);
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
@@ -716,6 +716,7 @@ public class RemoteFootstepPlannerUIMessagingTest
                    packet.getDepthFirstHeuristicsWeight(), epsilon);
       assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
                    packet.getBodyPathBasedHeuristicsWeight(), epsilon);
+      assertEquals("Number of bounding box checks weren't equal", parameters.getNumberOfBoundingBoxChecks(), packet.getNumberOfBoundingBoxChecks());
 
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);

@@ -1,15 +1,19 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,7 +34,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 
-   protected final List<Point3D> waypoints = new ArrayList<>();
+   protected final List<Pose3DReadOnly> waypoints = new ArrayList<>();
 
    protected PlanarRegionsList planarRegionsList;
 
@@ -83,12 +87,13 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
       goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
       goalDirection.scale(horizonLength / goalDirection.length());
-      Point3D waypoint = new Point3D(bodyStartPose.getPosition());
-      waypoint.add(goalDirection.getX(), goalDirection.getY(), 0.0);
-      waypoints.add(waypoint);
+      Point3D waypointPosition = new Point3D(bodyStartPose.getPosition());
+      waypointPosition.add(goalDirection.getX(), goalDirection.getY(), 0.0);
+      Quaternion waypointOrientation = new Quaternion(BodyPathPlannerTools.calculateHeading(goalDirection), 0.0, 0.0);
+      waypoints.add(new Pose3D(waypointPosition, waypointOrientation));
    }
 
-   public List<Point3D> getWaypoints()
+   public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints;
    }

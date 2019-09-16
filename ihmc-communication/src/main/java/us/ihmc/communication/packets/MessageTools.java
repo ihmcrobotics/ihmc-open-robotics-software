@@ -410,7 +410,7 @@ public class MessageTools
    public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
    {
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.setRobotTimestamp(timestamp);
+      message.setTimestamp(timestamp);
       message.getPointCloud().add(pointCloud);
       message.getColors().add(colors);
       return message;

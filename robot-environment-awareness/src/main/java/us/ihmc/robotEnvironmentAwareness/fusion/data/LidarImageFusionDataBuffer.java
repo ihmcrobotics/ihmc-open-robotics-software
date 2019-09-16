@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataFactory;
@@ -42,7 +43,7 @@ public class LidarImageFusionDataBuffer
 
       latestCameraPosition = messager.createInput(LidarImageFusionAPI.CameraPositionState, new Point3D());
       latestCameraOrientation = messager.createInput(LidarImageFusionAPI.CameraOrientationState, new Quaternion());
-      latestCameraIntrinsicParameters = messager.createInput(LidarImageFusionAPI.CameraIntrinsicParametersState, new IntrinsicParameters());
+      latestCameraIntrinsicParameters = messager.createInput(LidarImageFusionAPI.CameraIntrinsicParametersState, MultisenseInformation.CART.getIntrinsicParameters());
    }
 
    public LidarImageFusionData pollNewBuffer()

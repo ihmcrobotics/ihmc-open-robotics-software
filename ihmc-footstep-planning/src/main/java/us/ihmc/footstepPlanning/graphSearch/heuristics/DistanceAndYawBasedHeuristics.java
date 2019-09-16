@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -47,8 +48,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
       double maximumBlendDistance = (1.0 + parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
 
-      double pathHeading = Math.atan2(goalPose.getY() - pose.getY(), goalPose.getX() - pose.getX());
-      pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
+      double pathHeading = BodyPathPlannerTools.calculateHeading(goalPose.getX() - pose.getX(), goalPose.getY() - pose.getY());
 
       double yawMultiplier;
       if (distanceToGoal < minimumBlendDistance)
