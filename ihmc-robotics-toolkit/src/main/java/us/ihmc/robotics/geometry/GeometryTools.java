@@ -485,25 +485,17 @@ public class GeometryTools
     * @param plane1
     * @param plane2
     * @param intersectionToPack
-    * @return success
+    * @return success (not parallel)
     */
    public static boolean getIntersectionBetweenTwoPlanes(Plane3D plane1, Plane3D plane2, Line3DBasics intersectionToPack)
    {
-      boolean parallel = !EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(plane1.getPoint(),
-                                                                             plane1.getNormal(),
-                                                                             plane2.getPoint(),
-                                                                             plane2.getNormal(),
-                                                                             1e-8,
-                                                                             intersectionToPack.getPoint(),
-                                                                             intersectionToPack.getDirection());
-      if (parallel)
-      {
-         return false;
-      }
-      else
-      {
-         return true;
-      }
+      return EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(plane1.getPoint(),
+                                                                plane1.getNormal(),
+                                                                plane2.getPoint(),
+                                                                plane2.getNormal(),
+                                                                1e-8,
+                                                                intersectionToPack.getPoint(),
+                                                                intersectionToPack.getDirection());
    }
 
    /**
