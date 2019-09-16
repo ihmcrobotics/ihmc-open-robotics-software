@@ -51,6 +51,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public byte requested_footstep_planner_type_ = (byte) 255;
    /**
+            * Acceptable xy distance from the given goal for the planner to terminate
+            */
+   public double goal_distance_proximity_ = -1.0;
+   /**
+            * Acceptable yaw offset from the given goal for the planner to terminate
+            */
+   public double goal_yaw_proximity_ = -1.0;
+   /**
             * Timeout in seconds
             */
    public double timeout_;
@@ -97,6 +105,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_position_in_world_, goal_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
+
+      goal_distance_proximity_ = other.goal_distance_proximity_;
+
+      goal_yaw_proximity_ = other.goal_yaw_proximity_;
 
       timeout_ = other.timeout_;
 
@@ -188,6 +200,36 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public byte getRequestedFootstepPlannerType()
    {
       return requested_footstep_planner_type_;
+   }
+
+   /**
+            * Acceptable xy distance from the given goal for the planner to terminate
+            */
+   public void setGoalDistanceProximity(double goal_distance_proximity)
+   {
+      goal_distance_proximity_ = goal_distance_proximity;
+   }
+   /**
+            * Acceptable xy distance from the given goal for the planner to terminate
+            */
+   public double getGoalDistanceProximity()
+   {
+      return goal_distance_proximity_;
+   }
+
+   /**
+            * Acceptable yaw offset from the given goal for the planner to terminate
+            */
+   public void setGoalYawProximity(double goal_yaw_proximity)
+   {
+      goal_yaw_proximity_ = goal_yaw_proximity;
+   }
+   /**
+            * Acceptable yaw offset from the given goal for the planner to terminate
+            */
+   public double getGoalYawProximity()
+   {
+      return goal_yaw_proximity_;
    }
 
    /**
@@ -287,6 +329,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
@@ -318,6 +364,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!this.goal_position_in_world_.equals(otherMyClass.goal_position_in_world_)) return false;
       if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
+
+      if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
+
+      if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
@@ -352,6 +402,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.goal_orientation_in_world_);      builder.append(", ");
       builder.append("requested_footstep_planner_type=");
       builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
+      builder.append("goal_distance_proximity=");
+      builder.append(this.goal_distance_proximity_);      builder.append(", ");
+      builder.append("goal_yaw_proximity=");
+      builder.append(this.goal_yaw_proximity_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("horizon_length=");

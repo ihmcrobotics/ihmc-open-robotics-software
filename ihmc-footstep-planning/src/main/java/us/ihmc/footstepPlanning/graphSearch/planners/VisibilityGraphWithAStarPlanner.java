@@ -5,7 +5,8 @@ import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerList
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -13,13 +14,15 @@ public class VisibilityGraphWithAStarPlanner extends BodyPathAndFootstepPlannerW
 {
    private static final String prefix = "VisGraph";
 
-   public VisibilityGraphWithAStarPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphWithAStarPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
                                           YoVariableRegistry parentRegistry, BipedalFootstepPlannerListener... listeners)
    {
       super(prefix, parameters, parentRegistry, graphicsListRegistry);
 
-      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, parentRegistry);
+      ObstacleAndCliffAvoidanceProcessor pathPostProcessor = new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters);
+
+      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
       footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
                                                       parameters.getAStarHeuristicsWeight(), registry, listeners);
    }

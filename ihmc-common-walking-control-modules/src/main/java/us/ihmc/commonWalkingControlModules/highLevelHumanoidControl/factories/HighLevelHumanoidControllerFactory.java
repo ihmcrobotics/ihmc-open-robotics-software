@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerComma
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -307,6 +308,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
+   }
+
+   public void useDefaultFallingControlState()
+   {
+      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
    }
 
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
