@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 import java.util.Collection;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -12,7 +13,7 @@ public class SingleSourceVisibilityMap implements VisibilityMapHolder
 {
    private final Point3D sourceInWorld, sourceInLocal;
    private final int mapId;
-   private final RigidBodyTransform transformToWorld;
+   private final RigidBodyTransformReadOnly transformToWorld;
    private final VisibilityMapWithNavigableRegion hostRegion;
    private final VisibilityMap visibilityMapInLocal;
    private final VisibilityMap visibilityMapInWorld;

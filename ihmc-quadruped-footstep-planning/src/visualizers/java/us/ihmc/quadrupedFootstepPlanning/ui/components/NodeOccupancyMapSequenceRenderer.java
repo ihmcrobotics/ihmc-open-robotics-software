@@ -29,9 +29,9 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.PawPathMeshViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -55,10 +55,10 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
    private static final double nodeOffsetZ = 0.05;
    private static final QuadrantDependentList<Color> pathColors = new QuadrantDependentList<>(Color.GREEN, Color.RED, Color.DARKGREEN, Color.DARKRED);
 
-   private final List<Collection<FootstepNode>> nodesBeingExpandedBuffer = new ArrayList<>();
-   private final List<Collection<FootstepNode>> validChildNodesBuffer = new ArrayList<>();
-   private final List<Collection<FootstepNode>> invalidChildNodesBuffer = new ArrayList<>();
-   private final List<Collection<List<FootstepNode>>> optimalPathsBuffer = new ArrayList<>();
+   private final List<Collection<PawNode>> nodesBeingExpandedBuffer = new ArrayList<>();
+   private final List<Collection<PawNode>> validChildNodesBuffer = new ArrayList<>();
+   private final List<Collection<PawNode>> invalidChildNodesBuffer = new ArrayList<>();
+   private final List<Collection<List<PawNode>>> optimalPathsBuffer = new ArrayList<>();
 
    private final NodeOccupancyMapRenderer validChildNodeRenderer;
    private final NodeOccupancyMapRenderer invalidChildNodeRenderer;
@@ -99,7 +99,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       this.invalidChildNodeRenderer = new NodeOccupancyMapRenderer(messager, executorService);
       this.parentMapRenderer = new NodeOccupancyMapRenderer(messager, executorService);
 
-      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+      planarRegionsList = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       root.getChildren().addAll(validChildNodeRenderer.getRoot(), invalidChildNodeRenderer.getRoot(), parentMapRenderer.getRoot());
 
@@ -159,13 +159,13 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       if (nodesBeingExpandedBuffer.size() < 1)
          return;
 
-      Collection<FootstepNode> nodesBeingExpanded = nodesBeingExpandedBuffer.get(frameIndex);
+      Collection<PawNode> nodesBeingExpanded = nodesBeingExpandedBuffer.get(frameIndex);
       Color parentNodeColor = this.parentNodeColor;
       if (nodesBeingExpanded != null && !nodesBeingExpanded.isEmpty())
       {
-         for (FootstepNode node : nodesBeingExpanded)
+         for (PawNode node : nodesBeingExpanded)
          {
-            parentNodeColor = FootstepPathMeshViewer.defaultSolutionFootstepColors.get(node.getMovingQuadrant());
+            parentNodeColor = PawPathMeshViewer.defaultSolutionFootstepColors.get(node.getMovingQuadrant());
             break;
          }
       }
@@ -177,22 +177,22 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       processParentNodesOnThread(nodesBeingExpanded);
    }
 
-   private void processFootstepPathOnThread(Collection<List<FootstepNode>> paths)
+   private void processFootstepPathOnThread(Collection<List<PawNode>> paths)
    {
       executorService.execute(() -> processFootstepPath(paths));
    }
 
-   private void processFootstepPath(Collection<List<FootstepNode>> paths)
+   private void processFootstepPath(Collection<List<PawNode>> paths)
    {
       meshBuilder.clear();
 
-      for (List<FootstepNode> path : paths)
+      for (List<PawNode> path : paths)
       {
-         for (FootstepNode node : path)
+         for (PawNode node : path)
          {
             RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-            double x = node.getXIndex(movingQuadrant) * FootstepNode.gridSizeXY;
-            double y = node.getYIndex(movingQuadrant) * FootstepNode.gridSizeXY;
+            double x = node.getXIndex(movingQuadrant) * PawNode.gridSizeXY;
+            double y = node.getYIndex(movingQuadrant) * PawNode.gridSizeXY;
             double z = getHeightAtPoint(x, y) + nodeOffsetZ;
             RigidBodyTransform transform = new RigidBodyTransform();
             transform.setTranslation(x, y, z);
@@ -203,17 +203,17 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       pathMeshBuilderToRender.set(meshBuilder);
    }
 
-   private void processParentNodesOnThread(Collection<FootstepNode> parentNodes)
+   private void processParentNodesOnThread(Collection<PawNode> parentNodes)
    {
       executorService.execute(() -> processParentNodes(parentNodes));
    }
 
-   private void processParentNodes(Collection<FootstepNode> parentNodes)
+   private void processParentNodes(Collection<PawNode> parentNodes)
    {
       parentFeetMeshBuilder.clear();
       centerMesh.clear();
 
-      for (FootstepNode parentNode : parentNodes)
+      for (PawNode parentNode : parentNodes)
       {
          Point2DReadOnly centerPosition2D = parentNode.getOrComputeXGaitCenterPoint();
          double centerHeight = getHeightAtPoint(centerPosition2D.getX(), centerPosition2D.getY()) + nodeOffsetZ;
@@ -244,8 +244,8 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
             else
                color = pathColors.get(robotQuadrant);
 
-            double x = parentNode.getXIndex(robotQuadrant) * FootstepNode.gridSizeXY;
-            double y = parentNode.getYIndex(robotQuadrant) * FootstepNode.gridSizeXY;
+            double x = parentNode.getXIndex(robotQuadrant) * PawNode.gridSizeXY;
+            double y = parentNode.getYIndex(robotQuadrant) * PawNode.gridSizeXY;
             double z = getHeightAtPoint(x, y) + nodeOffsetZ;
             RigidBodyTransform transform = new RigidBodyTransform();
             transform.setTranslation(x, y, z);
@@ -275,8 +275,8 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       return projectedPoint == null ? 0.0 : projectedPoint.getZ();
    }
 
-   public void processNodesToRender(Collection<FootstepNode> nodesBeingExpanded, Collection<FootstepNode> validChildNodes,
-                                    Collection<FootstepNode> invalidChildNodes, Collection<List<FootstepNode>> optimalPath)
+   public void processNodesToRender(Collection<PawNode> nodesBeingExpanded, Collection<PawNode> validChildNodes,
+                                    Collection<PawNode> invalidChildNodes, Collection<List<PawNode>> optimalPath)
    {
       nodesBeingExpandedBuffer.add(nodesBeingExpanded);
       validChildNodesBuffer.add(validChildNodes);

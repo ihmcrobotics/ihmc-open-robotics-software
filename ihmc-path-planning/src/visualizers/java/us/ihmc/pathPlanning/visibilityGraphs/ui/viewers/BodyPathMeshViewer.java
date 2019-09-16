@@ -16,15 +16,20 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import javafx.util.Pair;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.log.LogTools;
@@ -47,6 +52,7 @@ public class BodyPathMeshViewer extends AnimationTimer
    private final Group root = new Group();
    private final MeshView bodyPathMeshView = new MeshView();
    private final Sphere walker = new Sphere();
+   private final Box walkerBox = new Box();
 
    private final AtomicDouble currentWalkerDistanceInPath = new AtomicDouble(0.0);
    private final AtomicReference<List<Point3DReadOnly>> activeBodyPathReference = new AtomicReference<>(null);
@@ -54,8 +60,10 @@ public class BodyPathMeshViewer extends AnimationTimer
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show, resetRequested;
    private final AtomicReference<Vector3D> walkerSize;
+   private final AtomicReference<Vector3D> walkerBoxSize;
    private final AtomicReference<Double> walkerOffsetHeight;
    private final AtomicReference<Point3D> walkerPosition;
+   private final AtomicReference<Quaternion> walkerOrientation;
    private final AtomicReference<Boolean> enableWalkerAnimation;
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
@@ -79,18 +87,24 @@ public class BodyPathMeshViewer extends AnimationTimer
       Vector3D defaultSize = new Vector3D(1.0, 1.0, 1.0);
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
       walkerSize = messager.createInput(UIVisibilityGraphsTopics.WalkerSize, defaultSize);
+      walkerBoxSize = messager.createInput(UIVisibilityGraphsTopics.WalkerBoxSize, new Vector3D());
       walkerOffsetHeight = messager.createInput(UIVisibilityGraphsTopics.WalkerOffsetHeight, 0.0);
       walker.setMaterial(new PhongMaterial(Color.YELLOW));
       walker.setRadius(1.0);
+      walkerBox.setMaterial(new PhongMaterial(Color.YELLOW));
+      walkerBox.setHeight(0.0);
+      walkerBox.setWidth(0.0);
+      walkerBox.setDepth(0.0);
 
       resetRequested = messager.createInput(UIVisibilityGraphsTopics.GlobalReset, false);
       show = messager.createInput(UIVisibilityGraphsTopics.ShowBodyPath, true);
       messager.registerTopicListener(UIVisibilityGraphsTopics.BodyPathData, this::processBodyPathOnThread);
 
       walkerPosition = messager.createInput(UIVisibilityGraphsTopics.WalkerPosition, null);
+      walkerOrientation = messager.createInput(UIVisibilityGraphsTopics.WalkerOrientation, null);
       enableWalkerAnimation = messager.createInput(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
 
-      root.getChildren().addAll(bodyPathMeshView, walker);
+      root.getChildren().addAll(bodyPathMeshView, walker, walkerBox);
    }
 
    @Override
@@ -98,7 +112,7 @@ public class BodyPathMeshViewer extends AnimationTimer
    {
       if (show.get() && root.getChildren().isEmpty())
       {
-         root.getChildren().addAll(bodyPathMeshView, walker);
+         root.getChildren().addAll(bodyPathMeshView, walker, walkerBox);
          currentWalkerDistanceInPath.set(0.0);
       }
       else if (!show.get() && !root.getChildren().isEmpty())
@@ -128,6 +142,9 @@ public class BodyPathMeshViewer extends AnimationTimer
       walker.setScaleX(walkerSize.get().getX());
       walker.setScaleY(walkerSize.get().getY());
       walker.setScaleZ(walkerSize.get().getZ());
+      walkerBox.setDepth(walkerBoxSize.get().getZ());
+      walkerBox.setWidth(walkerBoxSize.get().getX());
+      walkerBox.setHeight(walkerBoxSize.get().getY());
 
       if (enableWalkerAnimation.get())
       {
@@ -137,6 +154,8 @@ public class BodyPathMeshViewer extends AnimationTimer
          {
             if (show.get() && !root.getChildren().contains(walker))
                root.getChildren().add(walker);
+            if (show.get() && !root.getChildren().contains(walkerBox))
+               root.getChildren().add(walkerBox);
 
             double distance = currentWalkerDistanceInPath.getAndAdd(WALKER_SPEED);
             setWalkerPosition(PathTools.getPointAlongPathGivenDistanceFromStart(bodyPath, distance));
@@ -147,6 +166,7 @@ public class BodyPathMeshViewer extends AnimationTimer
          else
          {
             root.getChildren().remove(walker);
+            root.getChildren().remove(walkerBox);
          }
       }
       else
@@ -156,12 +176,19 @@ public class BodyPathMeshViewer extends AnimationTimer
          {
             if (show.get() && !root.getChildren().contains(walker))
                root.getChildren().add(walker);
+            if (show.get() && !root.getChildren().contains(walkerBox))
+               root.getChildren().add(walkerBox);
+
+            Quaternion orientation = walkerOrientation.get();
+            if (orientation != null)
+               setWalkerOrientation(orientation);
 
             setWalkerPosition(position);
          }
          else
          {
             root.getChildren().remove(walker);
+            root.getChildren().remove(walkerBox);
          }
       }
 
@@ -174,6 +201,15 @@ public class BodyPathMeshViewer extends AnimationTimer
       walker.setTranslateX(position.getX());
       walker.setTranslateY(position.getY());
       walker.setTranslateZ(position.getZ() + walkerOffsetHeight.get());
+      walkerBox.setTranslateX(position.getX());
+      walkerBox.setTranslateY(position.getY());
+      walkerBox.setTranslateZ(position.getZ() + walkerOffsetHeight.get());
+   }
+
+   private void setWalkerOrientation(QuaternionReadOnly orientation)
+   {
+      walker.setRotate(Math.toDegrees(orientation.getYaw()));
+      walkerBox.setRotate(Math.toDegrees(orientation.getYaw()));
    }
 
    private void processBodyPathOnThread(List<Point3DReadOnly> bodyPath)

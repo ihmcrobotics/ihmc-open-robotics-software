@@ -3,14 +3,13 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,7 +29,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class VisibilityGraphTest
@@ -40,7 +40,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphJustOneSquare()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -80,7 +80,7 @@ public class VisibilityGraphTest
             return 0.1;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -93,7 +93,7 @@ public class VisibilityGraphTest
       List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
       assertEquals(8, homeRegionNodes.size());
 
-      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
       assertEquals(0, crossRegionEdges.size());
 
       ConnectionPoint3D connectionA = new ConnectionPoint3D(0.0, 1.0, 0.0, 0);
@@ -166,7 +166,8 @@ public class VisibilityGraphTest
       assertTrue(interRegionVisibilityMap.getVisibilityMapInWorld().isEmpty());
 
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+      double ceilingHeight = 2.0;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon, ceilingHeight);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(97, startNode.getRegionId());
@@ -180,7 +181,7 @@ public class VisibilityGraphTest
 
       assertEquals(8, startEdges.size());
 
-      visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(0.6, 0.55, 0.003), searchHostEpsilon, ceilingHeight);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(97, goalNode.getRegionId());
@@ -199,7 +200,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphTwoSquares()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -253,7 +254,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -308,7 +309,7 @@ public class VisibilityGraphTest
       assertTrue(nodesContainPoint(nodes1, connectionH));
       assertTrue(nodesContainPoint(nodes1, connectionHE));
 
-      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
       assertEquals(3, crossRegionEdges.size());
 
       assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionF));
@@ -354,7 +355,8 @@ public class VisibilityGraphTest
       assertTrue(connectionsContain(connections, connectionD, connectionE));
 
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), searchHostEpsilon);
+      double ceilingHeight = 2.0;
+      visibilityGraph.setStart(new Point3D(0.4, 0.35, 0.005), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
@@ -368,7 +370,7 @@ public class VisibilityGraphTest
 
       assertEquals(8, startEdges.size());
 
-      visibilityGraph.setGoal(new Point3D(1.5, 0.55, 0.003), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(1.5, 0.55, 0.003), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());
@@ -389,7 +391,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphTwoSquaresWithImpassableBarrier()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -450,7 +452,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -506,14 +508,14 @@ public class VisibilityGraphTest
       assertTrue(nodesContainPoint(nodes1, connectionHE));
 
       // Should be no cross region edges since the barrier should be blocking them...
-      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
       assertEquals(0, crossRegionEdges.size());
    }
 
    @Test
    public void testVisibilityGraphSquareInSquare()
    {
-      VisibilityGraphsParameters parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -569,7 +571,7 @@ public class VisibilityGraphTest
             return 0.58;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -712,7 +714,7 @@ public class VisibilityGraphTest
       assertEquals(11 + 6 + 9 + 6 + 9 + 6 + 8 + 5 + 20, internalEdges0.size());
       assertEquals(28, internalEdges1.size());
 
-      ArrayList<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
+      Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
       assertEquals(24, crossRegionEdges.size());
 
       assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
@@ -762,8 +764,9 @@ public class VisibilityGraphTest
       assertTrue(connectionsContain(interRegionConnections, connectionBC, connectionFG));
       assertFalse(connectionsContain(interRegionConnections, connectionBC, connectionG));
 
+      double ceilingHeight = 2.0;
       double searchHostEpsilon = 0.01;
-      visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), searchHostEpsilon);
+      visibilityGraph.setStart(new Point3D(0.1, 0.5, 0.005), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
@@ -785,7 +788,7 @@ public class VisibilityGraphTest
       assertTrue(edgeListContains(startEdges, startInWorld, connectionEF0));
       assertTrue(edgeListContains(startEdges, startInWorld, connectionF0));
 
-      visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), searchHostEpsilon);
+      visibilityGraph.setGoal(new Point3D(0.5, 0.5, 0.053), ceilingHeight, searchHostEpsilon);
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());
@@ -860,7 +863,7 @@ public class VisibilityGraphTest
 
    }
 
-   private boolean edgeListContains(List<VisibilityGraphEdge> edges, ConnectionPoint3D pointOne, ConnectionPoint3D pointTwo)
+   private boolean edgeListContains(Collection<VisibilityGraphEdge> edges, ConnectionPoint3D pointOne, ConnectionPoint3D pointTwo)
    {
       for (VisibilityGraphEdge edge : edges)
       {
@@ -896,7 +899,7 @@ public class VisibilityGraphTest
 
    }
 
-   private VisibilityGraphsParameters createVisibilityGraphParametersForTest()
+   private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
       return new DefaultVisibilityGraphParameters()
       {

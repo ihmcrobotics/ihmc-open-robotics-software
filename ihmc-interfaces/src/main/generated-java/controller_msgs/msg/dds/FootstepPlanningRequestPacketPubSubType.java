@@ -58,6 +58,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -100,6 +104,12 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -124,6 +134,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
       cdr.write_type_9(data.getRequestedFootstepPlannerType());
 
+      cdr.write_type_6(data.getGoalDistanceProximity());
+
+      cdr.write_type_6(data.getGoalYawProximity());
+
       cdr.write_type_6(data.getTimeout());
 
       cdr.write_type_6(data.getHorizonLength());
@@ -146,6 +160,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
       data.setRequestedFootstepPlannerType(cdr.read_type_9());
+      	
+      data.setGoalDistanceProximity(cdr.read_type_6());
+      	
+      data.setGoalYawProximity(cdr.read_type_6());
       	
       data.setTimeout(cdr.read_type_6());
       	
@@ -173,6 +191,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
       ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
+      ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
+      ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
       ser.write_type_6("timeout", data.getTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
@@ -195,6 +215,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
       data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
+      data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
+      data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
       data.setTimeout(ser.read_type_6("timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
