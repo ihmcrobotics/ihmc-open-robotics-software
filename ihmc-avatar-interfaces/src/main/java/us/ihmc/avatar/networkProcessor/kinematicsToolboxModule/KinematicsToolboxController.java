@@ -509,6 +509,8 @@ public class KinematicsToolboxController extends ToolboxController
       snapPrivilegedConfigurationToCurrent();
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+      // It is required to update the tools now as it is only done at the end of each iteration.
+      updateTools();
 
       return true;
    }
@@ -527,7 +529,6 @@ public class KinematicsToolboxController extends ToolboxController
    {
       threadTimer.start();
       // Updating the reference frames and twist calculator.
-      updateTools();
 
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
@@ -544,7 +545,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
-      controllerCoreCommand.addInverseKinematicsCommand(resolveCollisions(collisions));
+      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisions));
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
@@ -566,8 +567,14 @@ public class KinematicsToolboxController extends ToolboxController
 
       inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
       MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
-      rootBody.updateFramesRecursively();
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+      /*
+       * Update tools for the next iteration. Only need to do it 1 per iteration and since it is updated
+       * in the initialization method, it can be done at the end of the control tick. By doing this at the
+       * end and computing collisions at the end, when visualizing the collisions they are exactly in sync
+       * with the robot configuration.
+       */
+      updateTools();
       collisions = computeCollisions();
 
       timeSinceLastSolutionPublished.add(updateDT);
@@ -697,7 +704,7 @@ public class KinematicsToolboxController extends ToolboxController
       return collisions;
    }
 
-   public InverseKinematicsCommand<?> resolveCollisions(List<KinematicsCollisionResult> collisions)
+   public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
    {
       if (collisions.isEmpty())
          return null;
