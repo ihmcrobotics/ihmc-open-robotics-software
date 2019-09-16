@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
@@ -21,14 +21,14 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
    private static final double deltaYawFromReferenceTolerance = 0.2;
    private static final double finalTurnProximity = 0.25;
 
-   private final BodyPathPlanner bodyPath;
+   private final BodyPathPlanHolder bodyPath;
    private final PawNodeSnapper snapper;
 
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    private double goalAlpha = 1.0;
 
-   public BodyPathPawPlanningHeuristics(PawStepPlannerParametersReadOnly parameters, BodyPathPlanner bodyPath,
+   public BodyPathPawPlanningHeuristics(PawStepPlannerParametersReadOnly parameters, BodyPathPlanHolder bodyPath,
                                         QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeSnapper snapper)
    {
       super(parameters);

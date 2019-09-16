@@ -20,7 +20,7 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        long long robot_timestamp;
+        long long timestamp;
         geometry_msgs::msg::dds::Point sensor_position;
         geometry_msgs::msg::dds::Quaternion sensor_orientation;
         sequence<float, 600000> point_cloud;

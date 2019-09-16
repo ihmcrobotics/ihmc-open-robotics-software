@@ -38,8 +38,11 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      super(drcRobotModel.getSimpleRobotName(),
+            drcRobotModel.createFullRobotModel(),
+            drcRobotModel.getLogModelProvider(),
+            startYoVariableServer,
+            pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 

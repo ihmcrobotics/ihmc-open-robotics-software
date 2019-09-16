@@ -19,6 +19,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.checkForBodyBoxCollisions, checkForBodyBoxCollisions);
    }
 
+   default void setCheckForPathCollisions(boolean checkForPathCollisions)
+   {
+      set(FootstepPlannerParameterKeys.checkForPathCollisions, checkForPathCollisions);
+   }
+
    default void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
    {
       set(FootstepPlannerParameterKeys.performHeuristicSearchPolicies, performHeuristicSearchPolicies);
@@ -264,6 +269,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
    }
 
+   default void setNumberOfBoundingBoxChecks(int numberOfBoundingBoxChecks)
+   {
+      set(FootstepPlannerParameterKeys.numberOfBoundingBoxChecks, numberOfBoundingBoxChecks);
+   }
+
    default void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
       set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
@@ -317,6 +327,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
+      setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
+      setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
       setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != -1.0)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
@@ -365,8 +377,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
       if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
          setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
-      if (parametersPacket.getBodyGroundClearance() != -1.0)
-         setBodyGroundClearance(parametersPacket.getBodyGroundClearance());
       if (parametersPacket.getBodyBoxHeight() != -1.0)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != -1.0)

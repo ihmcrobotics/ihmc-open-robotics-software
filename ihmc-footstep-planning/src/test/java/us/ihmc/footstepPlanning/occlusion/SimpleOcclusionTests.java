@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -489,8 +490,8 @@ public class SimpleOcclusionTests
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersectionPair == null)
          {
             if (rayPointsToPack != null)
             {
@@ -498,6 +499,8 @@ public class SimpleOcclusionTests
             }
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
 
          if (rayPointsToPack != null)
          {

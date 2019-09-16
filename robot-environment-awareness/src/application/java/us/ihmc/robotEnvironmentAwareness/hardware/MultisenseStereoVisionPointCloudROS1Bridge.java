@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -134,14 +135,13 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
          try
          {
             fileWriter = new FileWriter("stereovision_pointcloud_" + savingIndex + ".txt");
-            String pointCloudDataString = "";
+            StringBuilder builder = new StringBuilder("");
             for (int i = 0; i < numberOfPoints; i++)
             {
                Point3D scanPoint = pointCloud[i];
-               String pointInfo = i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB() + "\n";
-               pointCloudDataString = pointCloudDataString + pointInfo;
+               builder.append(i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB() + "\n");
             }
-            fileWriter.write(pointCloudDataString);
+            fileWriter.write(builder.toString());
             fileWriter.close();
             System.out.println("saving is done");
          }

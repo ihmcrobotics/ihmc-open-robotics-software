@@ -36,7 +36,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -88,7 +88,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final PlannerGoalRecommendationHolder plannerGoalRecommendationHolder;
 
    public FootstepPlanningStage(int stageId, RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                BodyPathPlanner bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener multiStageListener,
+                                BodyPathPlanHolder bodyPathPlanner, EnumProvider<FootstepPlannerType> activePlanner, MultiStagePlannerListener multiStageListener,
                                 IntegerProvider planId, long tickDurationMs)
 
    {
@@ -129,7 +129,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       initialize.set(true);
    }
 
-   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, BodyPathPlanner bodyPathPlanner,
+   private BodyPathBasedAStarPlanner createBodyPathBasedAStarPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, BodyPathPlanHolder bodyPathPlanner,
                                                                      MultiStagePlannerListener multiStageListener,
                                                                      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
    {
