@@ -999,9 +999,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       case POSE_BETWEEN_FEET:
          goalPosition.set(goal.getGoalPoseBetweenFeet().getPosition());
          break;
-      case POSITION_BETWEEN_FEET:
-         goalPosition.set(goal.getGoalPositionBetweenFeet());
-         break;
       case DOUBLE_FOOTSTEP:
          FramePose3D leftFootPose = new FramePose3D();
          FramePose3D rightFootPose = new FramePose3D();
