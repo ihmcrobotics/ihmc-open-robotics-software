@@ -44,7 +44,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double length_for_long_inter_region_edge_ = -1.0;
    public boolean perform_post_processing_node_shifting_;
    public boolean introduce_midpoints_in_post_processing_ = true;
-   public boolean compute_orientations_to_avoid_obstacles_ = true;
+   public boolean compute_orientations_to_avoid_obstacles_;
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
