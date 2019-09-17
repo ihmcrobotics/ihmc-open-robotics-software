@@ -128,4 +128,11 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
    {
       super.testStopAllTrajectoryRepeatedly();
    }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
 }

@@ -1,8 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -40,7 +41,9 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -61,13 +64,20 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
@@ -80,10 +90,13 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 @Tag("controller-api-3")
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
@@ -1258,6 +1271,201 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(poseToHold.getPosition(), currentHandPose.getPosition(), 1.0e-2);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
       }
+   }
+
+   @Test
+   public void testStreaming() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(595161);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoVariableRegistry(testRegistry);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics chestCloned = MultiBodySystemFactories.cloneSubtree(chest, "Cloned");
+
+      YoDouble startTime = new YoDouble("startTime", testRegistry);
+      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
+                                               .getYoTime();
+      startTime.set(yoTime.getValue());
+      YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
+      trajectoryTime.set(2.0);
+
+      SideDependentList<YoFramePose3D> initialPoses = new SideDependentList<>();
+      SideDependentList<YoFramePose3D> finalPoses = new SideDependentList<>();
+      SideDependentList<YoFramePose3D> desiredPoses = new SideDependentList<>();
+      SideDependentList<YoFixedFrameSpatialVector> desiredVelocities = new SideDependentList<>();
+
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, chestCloned).forEach(joint -> joint.setQ(nextJointConfiguration(random, 0.6, joint)));
+      chestCloned.updateFramesRecursively();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String prefix = robotSide.getCamelCaseName();
+         YoFramePose3D initialPose = new YoFramePose3D(prefix + "HandInitialOrientation", worldFrame, testRegistry);
+         YoFramePose3D finalPose = new YoFramePose3D(prefix + "HandFinalOrientation", worldFrame, testRegistry);
+         YoFramePose3D desiredPose = new YoFramePose3D(prefix + "HandDesiredOrientation", worldFrame, testRegistry);
+         YoFixedFrameSpatialVector desiredVelocity = new YoFixedFrameSpatialVector(prefix + "HandDesiredAngularVelocity", worldFrame, testRegistry);
+         initialPoses.put(robotSide, initialPose);
+         finalPoses.put(robotSide, finalPose);
+         desiredPoses.put(robotSide, desiredPose);
+         desiredVelocities.put(robotSide, desiredVelocity);
+
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+
+         initialPose.setFromReferenceFrame(hand.getBodyFixedFrame());
+         finalPose.setFromReferenceFrame(chestCloned.subtreeStream().filter(body -> body.getName().equals(hand.getName() + "Cloned")).findFirst().get()
+                                                    .getBodyFixedFrame());
+      }
+
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      {
+         @Override
+         public void initialize()
+         {
+         }
+
+         private boolean everyOtherTick = false;
+         private final OrientationInterpolationCalculator calculator = new OrientationInterpolationCalculator();
+
+         @Override
+         public void doControl()
+         {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
+            double timeInTrajectory = yoTime.getValue() - startTime.getValue();
+            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
+            double alpha = timeInTrajectory / trajectoryTime.getValue();
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               desiredPoses.get(robotSide).interpolate(initialPoses.get(robotSide), finalPoses.get(robotSide), alpha);
+
+               if (alpha <= 0.0 || alpha >= 1.0)
+               {
+                  desiredVelocities.get(robotSide).setToZero();
+               }
+               else
+               {
+                  calculator.computeAngularVelocity(desiredVelocities.get(robotSide).getAngularPart(),
+                                                    initialPoses.get(robotSide).getOrientation(),
+                                                    finalPoses.get(robotSide).getOrientation(),
+                                                    1.0 / trajectoryTime.getValue());
+                  desiredVelocities.get(robotSide).getLinearPart().sub(finalPoses.get(robotSide).getPosition(), initialPoses.get(robotSide).getPosition());
+                  desiredVelocities.get(robotSide).getLinearPart().scale(1.0 / trajectoryTime.getValue());
+               }
+
+               HandTrajectoryMessage message = HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
+                                                                                                0.0,
+                                                                                                desiredPoses.get(robotSide),
+                                                                                                desiredVelocities.get(robotSide),
+                                                                                                worldFrame);
+               message.getSe3Trajectory().setUseCustomControlFrame(true); // This is to force the controller to use the body-fixed frame
+               message.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+               message.getSe3Trajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+               drcSimulationTestHelper.publishToController(message);
+            }
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return null;
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return RobotController.super.getDescription();
+         }
+
+         @Override
+         public String getName()
+         {
+            return RobotController.super.getName();
+         }
+      });
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      assertTrue(success);
+
+      double desiredEpsilon = 6.0e-3;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         SE3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(hand.getName(), scs);
+         Pose3D controllerDesiredPose = new Pose3D(currentDesiredTrajectoryPoint.getPosition(), currentDesiredTrajectoryPoint.getOrientation());
+         SpatialVector controllerDesiredVelocity = new SpatialVector(ReferenceFrame.getWorldFrame(),
+                                                                     currentDesiredTrajectoryPoint.getAngularVelocity(),
+                                                                     currentDesiredTrajectoryPoint.getLinearVelocity());
+
+         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
+
+         FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
+         currentPose.changeFrame(worldFrame);
+         EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
+               + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 0.1);
+      }
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+      assertTrue(success);
+
+      desiredEpsilon = 1.0e-7;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         SE3TrajectoryPoint currentDesiredTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(hand.getName(), scs);
+         Pose3D controllerDesiredPose = new Pose3D(currentDesiredTrajectoryPoint.getPosition(), currentDesiredTrajectoryPoint.getOrientation());
+         SpatialVector controllerDesiredVelocity = new SpatialVector(ReferenceFrame.getWorldFrame(),
+                                                                     currentDesiredTrajectoryPoint.getAngularVelocity(),
+                                                                     currentDesiredTrajectoryPoint.getLinearVelocity());
+
+         EuclidGeometryTestTools.assertPose3DEquals(desiredPoses.get(robotSide), controllerDesiredPose, desiredEpsilon);
+         MecanoTestTools.assertSpatialVectorEquals(desiredVelocities.get(robotSide), controllerDesiredVelocity, desiredEpsilon);
+
+         FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
+         currentPose.changeFrame(worldFrame);
+         EuclidCoreTestTools.assertTuple3DEquals("Poor position tracking for side: " + robotSide + " error: "
+               + currentPose.getPositionDistance(controllerDesiredPose), controllerDesiredPose.getPosition(), currentPose.getPosition(), 3.0e-2);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))),
+                                                                 controllerDesiredPose.getOrientation(),
+                                                                 currentPose.getOrientation(),
+                                                                 0.3);
+      }
+   }
+
+   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
+   {
+      double jointLimitLower = joint.getJointLimitLower();
+      if (Double.isInfinite(jointLimitLower))
+         jointLimitLower = -Math.PI;
+      double jointLimitUpper = joint.getJointLimitUpper();
+      if (Double.isInfinite(jointLimitUpper))
+         jointLimitUpper = -Math.PI;
+      double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
+      jointLimitLower += 0.5 * rangeReduction;
+      jointLimitUpper -= 0.5 * rangeReduction;
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
    public static void assertSingleWaypointExecuted(String bodyName, Pose3DReadOnly desiredPose, SimulationConstructionSet scs)

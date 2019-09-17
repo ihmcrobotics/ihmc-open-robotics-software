@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
+
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
@@ -116,7 +118,6 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -152,6 +153,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -241,34 +243,51 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param robotSide             is used to define which arm is performing the trajectory.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of arm joints.
+    *                              number of arm joints.
     */
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions)
    {
-      ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
-      message.setRobotSide(robotSide.toByte());
-      return message;
+      return createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, null);
    }
 
    /**
-    * Use this constructor to go straight to the given end points using the specified qp weights.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to go straight to the given end points using the specified qp weights. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param robotSide             is used to define which arm is performing the trajectory.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of arm joints.
-    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
-    *           joint will use the controller default weight
+    *                              number of arm joints.
+    * @param weights               the qp weights for the joint accelerations. If any index is set to
+    *                              NaN, that joint will use the controller default weight
     */
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
+      return createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions, null, weights);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points with final velocity using the
+    * specified qp weights. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param robotSide              is used to define which arm is performing the trajectory.
+    * @param trajectoryTime         how long it takes to reach the desired pose.
+    * @param desiredJointPositions  desired joint positions. The array length should be equal to the
+    *                               number of arm joints.
+    * @param desiredJointVelocities desired final joint velocities. The array length should be equal to
+    *                               the number of arm joints. Can be {@code null}.
+    * @param weights                the qp weights for the joint accelerations. If any index is set to
+    *                               NaN, that joint will use the controller default weight. Can be
+    *                               {@code null}.
+    */
+   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions,
+                                                                 double[] desiredJointVelocities, double[] weights)
+   {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights));
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -277,7 +296,7 @@ public class HumanoidMessageTools
     * Create a message using the given joint trajectory points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which arm is performing the trajectory.
+    * @param robotSide                     is used to define which arm is performing the trajectory.
     * @param jointTrajectory1DListMessages joint trajectory points to be executed.
     */
    public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
@@ -291,8 +310,8 @@ public class HumanoidMessageTools
    /**
     * Use this constructor to build a message with more than one trajectory point. This constructor
     * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param robotSide is used to define which arm is performing the trajectory.
     */
@@ -312,13 +331,12 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as
-    * the base for the control. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the
+    * base for the control. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which hand is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired hand position expressed in world frame.
+    * @param robotSide          is used to define which hand is performing the trajectory.
+    * @param trajectoryTime     how long it takes to reach the desired pose.
+    * @param desiredPosition    desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
@@ -331,13 +349,12 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as
-    * the base for the control. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the
+    * base for the control. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which hand is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired hand position expressed in world frame.
+    * @param robotSide          is used to define which hand is performing the trajectory.
+    * @param trajectoryTime     how long it takes to reach the desired pose.
+    * @param desiredPosition    desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
    public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
@@ -345,6 +362,24 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
+                                                                   ReferenceFrame trajectoryReferenceFrame)
+   {
+      HandTrajectoryMessage message = new HandTrajectoryMessage();
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, trajectoryReferenceFrame));
+      message.setRobotSide(robotSide.toByte());
+      return message;
+   }
+
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
+                                                                   SpatialVectorReadOnly desiredVelocity, ReferenceFrame trajectoryReferenceFrame)
+   {
+      HandTrajectoryMessage message = new HandTrajectoryMessage();
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, trajectoryReferenceFrame));
       message.setRobotSide(robotSide.toByte());
       return message;
    }
@@ -381,8 +416,8 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Create a message to request one end-effector to switch to load bearing. Set the id of the
-    * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Create a message to request one end-effector to switch to load bearing. Set the id of the message
+    * to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param robotSide refers to the side of the end-effector if necessary.
     */
@@ -447,8 +482,8 @@ public class HumanoidMessageTools
    public static VehiclePosePacket createVehiclePosePacket(RigidBodyTransform transformFromVehicleToWorld)
    {
       VehiclePosePacket message = new VehiclePosePacket();
-      message.getOrientation().set(transformFromVehicleToWorld.getRotationMatrix());
-      message.getPosition().set(transformFromVehicleToWorld.getTranslationVector());
+      message.getOrientation().set(transformFromVehicleToWorld.getRotation());
+      message.getPosition().set(transformFromVehicleToWorld.getTranslation());
       return message;
    }
 
@@ -479,7 +514,8 @@ public class HumanoidMessageTools
    public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBodyBasics rigidBody,
                                                                                                          ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
-      return createRigidBodyExplorationConfigurationMessage(rigidBody, degreesOfFreedomToExplore,
+      return createRigidBodyExplorationConfigurationMessage(rigidBody,
+                                                            degreesOfFreedomToExplore,
                                                             WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationAmplitudeArray(degreesOfFreedomToExplore));
    }
 
@@ -598,17 +634,12 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose)
-   {
-      return createPelvisTrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
-   }
-
    /**
     * Use this constructor to execute a straight line trajectory in taskspace. Set the id of the
     * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired pelvis position expressed in world frame.
+    * @param trajectoryTime     how long it takes to reach the desired pose.
+    * @param desiredPosition    desired pelvis position expressed in world frame.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
    public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
@@ -616,6 +647,18 @@ public class HumanoidMessageTools
    {
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame()));
+      return message;
+   }
+
+   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose)
+   {
+      return createPelvisTrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
+   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity)
+   {
+      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, ReferenceFrame.getWorldFrame()));
       return message;
    }
 
@@ -684,31 +727,46 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of joints.
+    *                              number of joints.
     */
    public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions));
-      return message;
+      return createNeckTrajectoryMessage(trajectoryTime, desiredJointPositions, null, null);
    }
 
    /**
     * Use this constructor to go straight to the given end points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of joints.
-    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
-    *           joint will use the controller default weight
+    *                              number of joints.
+    * @param weights               the qp weights for the joint accelerations. If any index is set to
+    *                              NaN, that joint will use the controller default weight
     */
    public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
+      return createNeckTrajectoryMessage(trajectoryTime, desiredJointPositions, null, weights);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points with final velocity using the given
+    * weights. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime        how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *                              number of joints. Can be {@code null}.
+    * @param weights               the qp weights for the joint accelerations. If any index is set to
+    *                              NaN, that joint will use the controller default weight. Can be
+    *                              {@code null}.
+    */
+   public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities,
+                                                                   double[] weights)
+   {
       NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights));
+      message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
       return message;
    }
 
@@ -726,16 +784,16 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to execute a simple interpolation towards the given endpoint. Set the id
-    * of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a simple interpolation towards the given endpoint. Set the id of
+    * the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param trajectoryTime     how long it takes to reach the desired pose.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
    public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame()));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, ReferenceFrame.getWorldFrame()));
       return message;
    }
 
@@ -743,7 +801,15 @@ public class HumanoidMessageTools
                                                                                              ReferenceFrame trajectoryFrame)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame));
+      return message;
+   }
+
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                                             Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+   {
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
       return message;
    }
 
@@ -783,32 +849,43 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation.
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
     *
-    * @param trajectoryTime how long it takes to reach the desired orientation.
+    * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed in World.
     */
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                      long trajectoryReferenceFrameID)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameID));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryReferenceFrameID));
       return message;
    }
 
    /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation.
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
     *
-    * @param trajectoryTime how long it takes to reach the desired orientation.
+    * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed the supplied frame.
     */
    public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                      ReferenceFrame trajectoryFrame)
    {
+      return createChestTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame);
+   }
+
+   /**
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
+    *
+    * @param trajectoryTime         how long it takes to reach the desired orientation.
+    * @param desiredOrientation     desired chest orientation expressed the supplied frame.
+    * @param desiredAngularVelocity desired angular velocity at the end of the trajectory.
+    */
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                     Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+   {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
       return message;
    }
 
@@ -824,53 +901,58 @@ public class HumanoidMessageTools
                                                                    ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame));
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
 
    /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired orientation.
+    * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
    public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame));
       return message;
    }
 
    /**
-    * Use this constructor to execute a simple interpolation in taskspace to the desired
-    * orientation. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired orientation.
+    * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
    public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
                                                                    long trajectoryReferenceFrameId)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryReferenceFrameId));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryReferenceFrameId));
       return message;
    }
 
    /**
     * set a single point
     *
-    * @param trajectoryTime the duration of the trajectory
-    * @param desiredPosition the desired end position
+    * @param trajectoryTime             the duration of the trajectory
+    * @param desiredPosition            the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
     */
    public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
                                                                              long trajectoryReferenceFrameId)
    {
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrameId);
+   }
+
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity, long trajectoryReferenceFrameId)
+   {
       EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
-      Vector3D zeroLinearVelocity = new Vector3D();
-      message.getTaskspaceTrajectoryPoints().add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, zeroLinearVelocity));
+      message.getTaskspaceTrajectoryPoints().add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, desiredLinearVelocity));
       message.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -878,14 +960,20 @@ public class HumanoidMessageTools
    /**
     * set a single point
     *
-    * @param trajectoryTime the duration of the trajectory
-    * @param desiredPosition the desired end position
+    * @param trajectoryTime           the duration of the trajectory
+    * @param desiredPosition          the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
    public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
-      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, trajectoryReferenceFrame.hashCode());
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrame);
+   }
+
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity, ReferenceFrame trajectoryReferenceFrame)
+   {
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, trajectoryReferenceFrame.hashCode());
    }
 
    public static LocalizationPacket createLocalizationPacket(boolean reset, boolean toggle)
@@ -900,18 +988,20 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end point. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired height.
-    * @param desiredHeight desired pelvis height expressed in data frame
+    * @param trajectoryTime           how long it takes to reach the desired height.
+    * @param desiredHeight            desired pelvis height expressed in data frame
     * @param trajectoryReferenceFrame the frame in which the height will be executed
-    * @param dataReferenceFrame the frame the desiredHeight is expressed in, the height will be
-    *           changed to the trajectory frame on the controller side
+    * @param dataReferenceFrame       the frame the desiredHeight is expressed in, the height will be
+    *                                 changed to the trajectory frame on the controller side
     */
    public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight,
                                                                                    ReferenceFrame trajectoryReferenceFrame, ReferenceFrame dataReferenceFrame)
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
-      message.getEuclideanTrajectory().set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
-                                                                                                 trajectoryReferenceFrame.hashCode()));
+      message.getEuclideanTrajectory()
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime,
+                                                                        new Point3D(0.0, 0.0, desiredHeight),
+                                                                        trajectoryReferenceFrame.hashCode()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataReferenceFrame));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
@@ -920,11 +1010,11 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to go straight to the given end point. The trajectory and data frame are
-    * set to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to go straight to the given end point. The trajectory and data frame are set
+    * to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param trajectoryTime how long it takes to reach the desired height.
-    * @param desiredHeight desired pelvis height expressed in world frame.
+    * @param desiredHeight  desired pelvis height expressed in world frame.
     */
    public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight)
    {
@@ -939,9 +1029,29 @@ public class HumanoidMessageTools
    }
 
    /**
+    * Use this constructor to go straight to the given end point. The trajectory and data frame are set
+    * to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime how long it takes to reach the desired height.
+    * @param desiredHeight  desired pelvis height expressed in world frame.
+    * @param desiredHeightRate the desired rate of change of height when the  desired height is reached.
+    */
+   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, double desiredHeightRate)
+   {
+      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+      message.getEuclideanTrajectory()
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), new Vector3D(0.0, 0.0, desiredHeightRate), ReferenceFrame.getWorldFrame()));
+      message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
+      return message;
+   }
+
+   /**
     * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint}
-    * for each trajectory point afterwards. Set the id of the message to
+    * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint} for
+    * each trajectory point afterwards. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage()
@@ -1023,16 +1133,17 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
    {
-      return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame.hashCode());
+      return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame.hashCode());
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredAngularVelocity, long trajectoryReferenceFrameId)
    {
       SO3TrajectoryMessage message = new SO3TrajectoryMessage();
-      Vector3D zeroAngularVelocity = new Vector3D();
-      message.getTaskspaceTrajectoryPoints().add().set(createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity));
+      message.getTaskspaceTrajectoryPoints().add().set(createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity));
       message.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -1174,7 +1285,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param footstepDataList
@@ -1189,7 +1299,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param footstepDataList
@@ -1211,7 +1320,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. Set execution mode to
     * OVERRIDE
     *
@@ -1224,7 +1332,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. Set execution mode to
     * OVERRIDE
     *
@@ -1246,7 +1353,7 @@ public class HumanoidMessageTools
     * Creates a message with the desired grasp to be performed. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide refers to which hand will perform the grasp.
+    * @param robotSide                refers to which hand will perform the grasp.
     * @param handDesiredConfiguration refers to the desired grasp.
     */
    public static HandDesiredConfigurationMessage createHandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
@@ -1288,7 +1395,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    *
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param pause
@@ -1354,9 +1460,9 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of controlled joints.
+    *                              number of controlled joints.
     */
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
@@ -1367,13 +1473,13 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to go straight to the given end points using the specified qp weights.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to go straight to the given end points using the specified qp weights. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
     * @param desiredJointPositions desired joint positions. The array length should be equal to the
-    *           number of controlled joints.
-    * @param weights the qp weights for the joint accelerations
+    *                              number of controlled joints.
+    * @param weights               the qp weights for the joint accelerations
     */
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
@@ -1382,6 +1488,50 @@ public class HumanoidMessageTools
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
          oneDoFJointTrajectoryMessage.setWeight(weights[jointIndex]);
+         message.getJointTrajectoryMessages().add().set(oneDoFJointTrajectoryMessage);
+      }
+      return message;
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points using the specified qp weights. Set
+    * the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime         how long it takes to reach the desired pose.
+    * @param desiredJointPositions  desired joint positions. The array length should be equal to the
+    *                               number of controlled joints.
+    * @param desiredJointVelocities desired joint velocities. The array length should be equal to the
+    *                               number of controlled joints. Can be {@code null}.
+    * @param weights                the qp weights for the joint accelerations. The array length should
+    *                               be equal to the number of controlled joints. Can be {@code null}.
+    */
+   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions,
+                                                                               double[] desiredJointVelocities, double[] weights)
+   {
+      JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage;
+         if (desiredJointVelocities == null)
+         {
+            if (weights == null)
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+            else
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex], weights[jointIndex]);
+         }
+         else
+         {
+            if (weights == null)
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime,
+                                                                                 desiredJointPositions[jointIndex],
+                                                                                 desiredJointVelocities[jointIndex],
+                                                                                 -1.0);
+            else
+               oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime,
+                                                                                 desiredJointPositions[jointIndex],
+                                                                                 desiredJointVelocities[jointIndex],
+                                                                                 weights[jointIndex]);
+         }
          message.getJointTrajectoryMessages().add().set(oneDoFJointTrajectoryMessage);
       }
       return message;
@@ -1439,26 +1589,39 @@ public class HumanoidMessageTools
    /**
     * Use this constructor to go straight to the given end point.
     *
-    * @param trajectoryTime how long it takes to reach the desired position.
+    * @param trajectoryTime  how long it takes to reach the desired position.
     * @param desiredPosition desired end point position.
     */
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
-      OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
-      message.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0));
-      return message;
+      return createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition, -1.0);
    }
 
    /**
     * Use this constructor to go straight to the given end point.
     *
-    * @param trajectoryTime how long it takes to reach the desired position.
+    * @param trajectoryTime  how long it takes to reach the desired position.
     * @param desiredPosition desired end point position.
-    * @param weight the weight for the qp
+    * @param weight          the weight for the qp
     */
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double weight)
    {
-      OneDoFJointTrajectoryMessage message = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition);
+      return createOneDoFJointTrajectoryMessage(trajectoryTime, desiredPosition, 0.0, weight);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end point and terminate at the given velocity.
+    *
+    * @param trajectoryTime  how long it takes to reach the desired position.
+    * @param desiredPosition desired end point position.
+    * @param desiredVelocity desired final velocity.
+    * @param weight          the weight for the qp
+    */
+   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double desiredVelocity,
+                                                                                 double weight)
+   {
+      OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
+      message.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, desiredVelocity));
       message.setWeight(weight);
       return message;
    }
@@ -1522,15 +1685,28 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param jointDesireds desired joint positions. The array length should be equal to the number
-    *           of joints.
+    * @param trajectoryTime        how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *                              number of joints.
     */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds)
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, jointDesireds));
-      return message;
+      return createSpineTrajectoryMessage(trajectoryTime, desiredJointPositions, null, null);
+   }
+
+   /**
+    * Use this constructor to go straight to the given end points. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime        how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the
+    *                              number of joints.
+    * @param weights               the qp weights for the joint accelerations. If any index is set to
+    *                              NaN, that joint will use the controller default weight
+    */
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
+   {
+      return createSpineTrajectoryMessage(trajectoryTime, desiredJointPositions, null, weights);
    }
 
    /**
@@ -1538,15 +1714,17 @@ public class HumanoidMessageTools
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
     * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param jointDesireds desired joint positions. The array length should be equal to the number
-    *           of joints.
-    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that
-    *           joint will use the controller default weight
+    * @param jointDesireds  desired joint positions. The array length should be equal to the number of
+    *                       joints.
+    * @param weights        the qp weights for the joint accelerations. If any index is set to NaN,
+    *                       that joint will use the controller default weight
     */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds, double[] weights)
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities,
+                                                                     double[] weights)
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.getJointspaceTrajectory().set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, jointDesireds, weights));
+      message.getJointspaceTrajectory()
+             .set(HumanoidMessageTools.createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
       return message;
    }
 
@@ -1570,19 +1748,52 @@ public class HumanoidMessageTools
    public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
                                                                  long trajectoryReferenceFrameId)
    {
+      return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrameId);
+   }
+
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
+                                                                 long trajectoryReferenceFrameId)
+   {
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      Vector3D zeroLinearVelocity = new Vector3D();
-      Vector3D zeroAngularVelocity = new Vector3D();
       message.getTaskspaceTrajectoryPoints().add()
-             .set(createSE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity));
+             .set(createSE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity));
       message.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
+   }
+
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose, ReferenceFrame trajectoryReferenceFrame)
+   {
+      return createSE3TrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation(), trajectoryReferenceFrame);
+   }
+
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity,
+                                                                 ReferenceFrame trajectoryReferenceFrame)
+   {
+      return createSE3TrajectoryMessage(trajectoryTime,
+                                        desiredPose.getPosition(),
+                                        desiredPose.getOrientation(),
+                                        desiredVelocity.getLinearPart(),
+                                        desiredVelocity.getAngularPart(),
+                                        trajectoryReferenceFrame);
    }
 
    public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
                                                                  ReferenceFrame trajectoryReferenceFrame)
    {
-      return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.hashCode());
+      return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrame);
+   }
+
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
+                                                                 ReferenceFrame trajectoryReferenceFrame)
+   {
+      return createSE3TrajectoryMessage(trajectoryTime,
+                                        desiredPosition,
+                                        desiredOrientation,
+                                        desiredLinearVelocity,
+                                        desiredAngularVelocity,
+                                        trajectoryReferenceFrame.hashCode());
    }
 
    public static DetectedObjectPacket createDetectedObjectPacket(Pose3D pose, int id)
@@ -1744,7 +1955,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBodyBasics endEffector, ReferenceFrame controlFrame,
+   public static KinematicsPlanningToolboxRigidBodyMessage createKinematicsPlanningToolboxRigidBodyMessage(RigidBodyBasics endEffector,
+                                                                                                           ReferenceFrame controlFrame,
                                                                                                            TDoubleArrayList keyFrameTimes,
                                                                                                            List<Pose3DReadOnly> keyFramePoses)
    {
@@ -1843,13 +2055,12 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as
-    * the base for the control. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the
+    * base for the control. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param robotSide is used to define which foot is performing the trajectory.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredPosition desired foot position expressed in world frame.
+    * @param robotSide          is used to define which foot is performing the trajectory.
+    * @param trajectoryTime     how long it takes to reach the desired pose.
+    * @param desiredPosition    desired foot position expressed in world frame.
     * @param desiredOrientation desired foot orientation expressed in world frame.
     */
    public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
@@ -1862,9 +2073,18 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose)
    {
       return createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
+                                                                   SpatialVectorReadOnly desiredVelocity, ReferenceFrame trajectoryReferenceFrame)
+   {
+      FootTrajectoryMessage message = new FootTrajectoryMessage();
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, trajectoryReferenceFrame));
+      message.setRobotSide(robotSide.toByte());
+      return message;
    }
 
    public static PrepareForLocomotionMessage createPrepareForLocomotionMessage(boolean prepareManipulation, boolean preparePelvis)
