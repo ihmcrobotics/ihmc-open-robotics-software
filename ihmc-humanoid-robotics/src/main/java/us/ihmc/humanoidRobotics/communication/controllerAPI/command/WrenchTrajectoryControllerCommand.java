@@ -106,6 +106,12 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, WrenchTrajectoryMessage message)
    {
+      if (message.getWrenchTrajectoryPoints().isEmpty())
+      {
+         clear();
+         return;
+      }
+
       if (resolver != null)
       {
          FrameInformation frameInformation = message.getFrameInformation();
