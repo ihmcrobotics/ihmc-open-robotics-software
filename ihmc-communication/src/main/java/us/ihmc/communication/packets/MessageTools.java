@@ -58,7 +58,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public class MessageTools
 {
    public static final boolean DEBUG = false;
-   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 1000;
+   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 250;
 
    public static TextToSpeechPacket createTextToSpeechPacket(String textToSpeak)
    {

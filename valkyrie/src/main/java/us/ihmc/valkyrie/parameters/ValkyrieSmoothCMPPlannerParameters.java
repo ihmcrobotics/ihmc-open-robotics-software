@@ -7,6 +7,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
 {
+   public static final boolean CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE = false;
+
    public ValkyrieSmoothCMPPlannerParameters()
    {
       super(1.0);
@@ -41,15 +43,21 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    }
 
    @Override
+   public int getNumberOfFootstepsToConsider()
+   { // FIXME Workaround to speed up the ICP planner so the controller can meet its deadline.
+      return 2;
+   }
+
+   @Override
    public boolean planSwingAngularMomentum()
    {
-      return true;
+      return false;
    }
 
    @Override
    public boolean planTransferAngularMomentum()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
@@ -80,20 +88,27 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
    {
-      return new AngularMomentumEstimationParameters()
+      if (CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE)
       {
-         @Override
-         public double getPercentageSwingLegMass()
+         return new AngularMomentumEstimationParameters()
          {
-            return 0.02;
-         }
-
-         @Override
-         public double getPercentageSupportLegMass()
-         {
-            return 0.02;
-         }
-      };
+            @Override
+            public double getPercentageSwingLegMass()
+            {
+               return 0.02;
+            }
+            
+            @Override
+            public double getPercentageSupportLegMass()
+            {
+               return 0.02;
+            }
+         };
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override
@@ -136,5 +151,11 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    public boolean doContinuousReplanningForSwing()
    {
       return true;
+   }
+
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
    }
 }

@@ -17,6 +17,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -85,6 +87,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
    private final ValkyrieSensorInformation sensorInformation;
+   private final WallTimeBasedROSClockCalculator rosClockCalculator = new WallTimeBasedROSClockCalculator();
    private final ValkyrieJointMap jointMap;
    private final ValkyrieContactPointParameters contactPointParameters;
    private final ValkyrieCalibrationParameters calibrationParameters;
@@ -418,6 +421,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
+   }
+
+   @Override
+   public RobotROSClockCalculator getROSClockCalculator()
+   {
+      return rosClockCalculator;
    }
 
    @Override
