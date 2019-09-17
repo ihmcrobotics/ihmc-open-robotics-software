@@ -85,6 +85,31 @@ public class LinearMomentumConvexConstraint2DCommand implements InverseKinematic
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof LinearMomentumConvexConstraint2DCommand)
+      {
+         LinearMomentumConvexConstraint2DCommand other = (LinearMomentumConvexConstraint2DCommand) object;
+         if (linearMomentumConstraintVertices.size() != other.linearMomentumConstraintVertices.size())
+            return false;
+         for (int i = 0; i < linearMomentumConstraintVertices.size(); i++)
+         {
+            if (!linearMomentumConstraintVertices.get(i).equals(other.linearMomentumConstraintVertices.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.MOMENTUM_CONVEX_CONSTRAINT;
