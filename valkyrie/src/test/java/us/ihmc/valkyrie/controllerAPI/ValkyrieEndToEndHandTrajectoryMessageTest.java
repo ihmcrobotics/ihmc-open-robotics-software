@@ -95,6 +95,13 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testStopAllTrajectory();
    }
 
+   @Override
+   @Test
+   public void testHoldHandWhileWalking() throws SimulationExceededMaximumTimeException
+   {
+      super.testHoldHandWhileWalking();
+   }
+
    @Test
    public void testWrenchTrajectoryMessage() throws Exception
    {
