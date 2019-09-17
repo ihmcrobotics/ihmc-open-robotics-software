@@ -73,7 +73,9 @@ public class RigidBodyJointControlHelper
          String jointName = joint.getName();
          jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, RigidBodyJointspaceControlState.maxPointsInGenerator, registry));
 
-         RecyclingArrayDeque<OneDoFTrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, OneDoFTrajectoryPoint.class, OneDoFTrajectoryPoint::set);
+         RecyclingArrayDeque<OneDoFTrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints,
+                                                                                           OneDoFTrajectoryPoint.class,
+                                                                                           OneDoFTrajectoryPoint::set);
          pointQueue.clear();
          pointQueues.add(pointQueue);
 
@@ -263,7 +265,9 @@ public class RigidBodyJointControlHelper
          return false;
       }
 
-      boolean override = command.getExecutionMode() == ExecutionMode.OVERRIDE;
+      // Both OVERRIDE and STREAM should override the current trajectory stored.
+      boolean override = command.getExecutionMode() != ExecutionMode.QUEUE;
+
       if (override || isEmpty())
       {
          overrideTrajectory();
@@ -272,6 +276,7 @@ public class RigidBodyJointControlHelper
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
             OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
+
             if (trajectoryPoints.getNumberOfTrajectoryPoints() > 0)
             {
                OneDoFTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
@@ -287,6 +292,7 @@ public class RigidBodyJointControlHelper
 
             double weight = trajectoryPoints.getWeight();
             messageWeights.get(jointIdx).set(weight);
+
             if (Double.isNaN(weight) || weight < 0.0)
             {
                messageHasValidWeights = false;
@@ -299,18 +305,46 @@ public class RigidBodyJointControlHelper
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
-         for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
+
+         if (command.getExecutionMode() == ExecutionMode.STREAM)
          {
-            OneDoFTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(pointIdx);
-            if (trajectoryPoint != null)
+            if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
             {
-               if (!checkTime(trajectoryPoint.getTime(), jointIdx))
+               LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
+               return false;
+            }
+
+            OneDoFTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+
+            if (trajectoryPoint.getTime() != 0.0)
+            {
+               LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+               return false;
+            }
+
+            if (!queuePoint(trajectoryPoint, jointIdx))
+               return false;
+
+            double t = command.getStreamIntegrationDuration();
+            double qd = trajectoryPoint.getVelocity();
+            double q = trajectoryPoint.getPosition() + t * qd;
+
+            if (!queuePoint(q, qd, t, jointIdx))
+               return false;
+         }
+         else
+         {
+            for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
+            {
+               OneDoFTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(pointIdx);
+
+               if (trajectoryPoint != null)
                {
-                  return false;
-               }
-               if (!queuePoint(trajectoryPoint, jointIdx))
-               {
-                  return false;
+                  if (!checkTime(trajectoryPoint.getTime(), jointIdx))
+                     return false;
+
+                  if (!queuePoint(trajectoryPoint, jointIdx))
+                     return false;
                }
             }
          }

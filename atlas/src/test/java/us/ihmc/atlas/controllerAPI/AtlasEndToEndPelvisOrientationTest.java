@@ -71,6 +71,13 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
    }
 
    @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

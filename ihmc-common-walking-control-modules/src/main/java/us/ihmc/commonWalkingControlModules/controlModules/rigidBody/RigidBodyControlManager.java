@@ -279,7 +279,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid orientation trajectory command.");
          hold();
       }
    }
@@ -292,7 +292,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid pose trajectory command.");
          hold();
       }
    }
@@ -307,7 +307,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid jointspace trajectory command.");
          hold();
       }
    }
@@ -322,7 +322,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
          hold();
       }
    }
@@ -337,7 +337,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SO3 trajectory command.");
          hold();
       }
    }
@@ -350,7 +350,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid desired accelerations command.");
          hold();
       }
    }
@@ -359,7 +359,6 @@ public class RigidBodyControlManager
    {
       if (!externalWrenchManager.handleWrenchTrajectoryCommand(command))
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid wrench trajectory command.");
          externalWrenchManager.clear();
       }
    }
