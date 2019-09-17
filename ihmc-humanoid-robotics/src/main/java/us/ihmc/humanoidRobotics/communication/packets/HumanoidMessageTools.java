@@ -134,7 +134,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
@@ -1795,13 +1794,6 @@ public class HumanoidMessageTools
                                                                  Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
                                                                  ReferenceFrame trajectoryReferenceFrame)
    {
-      return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrame);
-   }
-
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
-                                                                 Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
-                                                                 ReferenceFrame trajectoryReferenceFrame)
-   {
       return createSE3TrajectoryMessage(trajectoryTime,
                                         desiredPosition,
                                         desiredOrientation,
@@ -2019,8 +2011,8 @@ public class HumanoidMessageTools
 
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
