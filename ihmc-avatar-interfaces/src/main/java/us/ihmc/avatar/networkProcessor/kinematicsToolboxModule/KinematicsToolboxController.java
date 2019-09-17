@@ -72,7 +72,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Indicates the duration of a control tick. It should match the thread period in
     * {@link ToolboxModule}.
     */
-   private static final double updateDT = 1.0e-3;
+   public static final double updateDT = 1.0e-3;
    /**
     * Specifies how many control ticks have to be performed before sending a solution to the caller.
     */

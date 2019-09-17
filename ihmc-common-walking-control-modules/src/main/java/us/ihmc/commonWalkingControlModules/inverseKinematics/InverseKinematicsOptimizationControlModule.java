@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -37,7 +38,7 @@ public class InverseKinematicsOptimizationControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
-   private final QPInput motionQPInput;
+   private final QPInput qpInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
@@ -60,7 +61,7 @@ public class InverseKinematicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      motionQPInput = new QPInput(numberOfDoFs);
+      qpInput = new QPInput(numberOfDoFs);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
@@ -156,30 +157,37 @@ public class InverseKinematicsOptimizationControlModule
 
    private void computePrivilegedJointVelocities()
    {
-      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(motionQPInput);
+      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitSpatialVelocityCommand(SpatialVelocityCommand command)
    {
-      boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
    {
-      boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitMomentumCommand(MomentumCommand command)
    {
-      boolean success = motionQPInputCalculator.convertMomentumCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertMomentumCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
+   }
+
+   public void submitLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertLinearMomentumConvexConstraint2DCommand(command, qpInput);
+      if (success)
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
