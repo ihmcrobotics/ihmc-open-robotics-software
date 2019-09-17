@@ -13,19 +13,19 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
-   compile group: "org.ejml", name: "core", version: "0.30"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
+   compile("us.ihmc.thirdparty.jinput:jinput:190214")
+   compile("org.ejml:core:0.30")
+   compile("org.ejml:dense64:0.30")
 
-   compile group: "us.ihmc", name: "euclid-geometry", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-quadruped-basics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning", version: "source"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
+   compile("us.ihmc:euclid-geometry:0.12.0")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-quadruped-basics:source")
+   compile("us.ihmc:ihmc-quadruped-planning:source")
+   compile("us.ihmc:ihmc-quadruped-footstep-planning:source")
+   compile("us.ihmc:ihmc-common-walking-control-modules:source")
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning-visualizers", version: "source"
+   compile("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
 }

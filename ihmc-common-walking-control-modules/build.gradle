@@ -14,42 +14,42 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "gov.nist.math", name: "jama", version: "1.0.3"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.ejml", name: "core", version: "0.30"
-   compile group: "net.java.dev.jna", name: "jna", version: "4.1.0"
-   compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
+   compile("gov.nist.math:jama:1.0.3")
+   compile("org.apache.commons:commons-lang3:3.8.1")
+   compile("com.google.guava:guava:18.0")
+   compile("org.ejml:dense64:0.30")
+   compile("org.ejml:core:0.30")
+   compile("net.java.dev.jna:jna:4.1.0")
+   compile("net.sf.trove4j:trove4j:3.0.3")
 
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
-   compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-trajectory-optimization", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
+   compile("us.ihmc:ihmc-realtime:1.2.6")
+   compile("us.ihmc:ihmc-native-library-loader:1.1")
+   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-robot-models:source")
+   compile("us.ihmc:ihmc-sensor-processing:source")
+   compile("us.ihmc:ihmc-trajectory-optimization:source")
+   compile("us.ihmc:ihmc-communication:source")
+   compile("us.ihmc:ihmc-convex-optimization-adapter:source")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   compile("us.ihmc:ihmc-java-toolkit:source")
+   compile("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter-test", version: "source"
+   compile("us.ihmc:ihmc-commons-testing:0.26.6")
+   compile("us.ihmc:simulation-construction-set:0.12.15")
+   compile("us.ihmc:simulation-construction-set-test:0.12.15")
+   compile("us.ihmc:simulation-construction-set-tools-test:source")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   compile("us.ihmc:ihmc-convex-optimization-adapter-test:source")
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
+   compile("us.ihmc:simulation-construction-set:0.12.15")
 }
