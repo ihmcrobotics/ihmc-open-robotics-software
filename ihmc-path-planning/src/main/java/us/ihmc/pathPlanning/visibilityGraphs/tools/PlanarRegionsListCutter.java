@@ -20,6 +20,13 @@ import java.util.List;
 
 public class PlanarRegionsListCutter
 {
+   /**
+    * Cut a planar region map by a plane in 3D world; keeping the pert "above" the plane. (i.e. In the direction the normal points)
+    *
+    * @param plane
+    * @param map
+    * @return cut planar regions list
+    */
    public static PlanarRegionsList cutByPlane(Plane3D plane, PlanarRegionsList map)
    {
       PlanarRegionsList resultingRegions = new PlanarRegionsList();
@@ -32,6 +39,13 @@ public class PlanarRegionsListCutter
       return resultingRegions;
    }
 
+   /**
+    * Cut a planar region by a plane in 3D world; keeping the pert "above" the plane. (i.e. In the direction the normal points)
+    *
+    * @param plane
+    * @param region
+    * @return cut planar regions list
+    */
    public static List<PlanarRegion> cutRegionByPlane(Plane3D plane, PlanarRegion region)
    {
 
