@@ -23,7 +23,7 @@ public class VisibilityGraph
 {
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
-   private static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
+   protected static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
    private ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = new ArrayList<>();
    private final NavigableRegions navigableRegions;
    private final List<VisibilityGraphEdge> crossRegionEdges = new ArrayList<>();
