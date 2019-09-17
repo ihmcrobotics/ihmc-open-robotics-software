@@ -33,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -358,6 +359,9 @@ public class CrossRobotCommandResolver
          case MOMENTUM:
             resolveMomentumCommand((MomentumCommand) commandToResolve, out.addMomentumCommand());
             break;
+         case MOMENTUM_CONVEX_CONSTRAINT:
+            resolveLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) commandToResolve, out.addLinearMomentumConvexConstraint2DCommand());
+            break;
          case PRIVILEGED_CONFIGURATION:
             resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
             break;
@@ -604,6 +608,11 @@ public class CrossRobotCommandResolver
       out.setMomentum(in.getMomentum());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand in, LinearMomentumConvexConstraint2DCommand out)
+   {
+      out.set(in);
    }
 
    public void resolvePrivilegedConfigurationCommand(PrivilegedConfigurationCommand in, PrivilegedConfigurationCommand out)
