@@ -1034,7 +1034,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                + Math.abs(controllerDesiredPositions[i] - armJoints[i].getQ()));
             assertEquals(controllerDesiredVelocities[i],
                          armJoints[i].getQd(),
-                         2.0 * trackingEpsilon,
+                         3.0 * trackingEpsilon,
                          "Poor velocity tracking for joint " + armJoints[i].getName() + " err: "
                                + Math.abs(controllerDesiredVelocities[i] - armJoints[i].getQd()));
          }
