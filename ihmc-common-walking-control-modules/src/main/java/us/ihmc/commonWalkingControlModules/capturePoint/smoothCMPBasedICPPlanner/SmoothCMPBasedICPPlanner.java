@@ -334,7 +334,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                   yoGraphicsListRegistry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isDoubleSupport, registry);
-      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, registry);
+      boolean createAngularMomentumPredictor = icpPlannerParameters.getAngularMomentumEstimationParameters() != null;
+      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, createAngularMomentumPredictor, registry);
 
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
@@ -808,6 +809,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       else if (footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
       {
          LogTools.warn("Received bad footstep: " + footstep + ", ignoring");
+         return;
+      }
+      else if (numberOfUpcomingFootsteps.getValue() == numberFootstepsToConsider.getValue())
+      {
          return;
       }
       else
