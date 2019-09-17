@@ -13,15 +13,15 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "javax.vecmath", name: "vecmath", version: "1.5.2"
-   compile group: "com.google.guava", name: "guava", version: "18.0"
+   compile("org.apache.commons:commons-lang3:3.8.1")
+   compile("javax.vecmath:vecmath:1.5.2")
+   compile("com.google.guava:guava:18.0")
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:ihmc-robot-description:0.12.7")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
@@ -31,8 +31,8 @@ testDependencies {
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("test")
-   compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
+   compile("us.ihmc:ihmc-interfaces:source")
+   compile("us.ihmc:ihmc-java-toolkit:source")
+   compile("us.ihmc:simulation-construction-set-tools:source")
+   compile("us.ihmc:simulation-construction-set:0.12.15")
 }

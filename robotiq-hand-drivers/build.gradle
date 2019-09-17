@@ -15,26 +15,26 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
-   compile group: "net.wimpi", name: "jamod", version: "1.2"
-   compile group: "commons-collections", name: "commons-collections", version: "3.2.1"
+   compile("com.martiansoftware:jsap:2.1")
+   compile("net.wimpi:jamod:1.2")
+   compile("commons-collections:commons-collections:3.2.1")
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:simulation-construction-set:0.12.15")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-humanoid-robotics:source")
+   compile("us.ihmc:ihmc-avatar-interfaces:source")
+   compile("us.ihmc:ihmc-communication:source")
+   compile("us.ihmc:ihmc-whole-body-controller:source")
+   compile("us.ihmc:ihmc-java-toolkit:source")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile("us.ihmc:ihmc-commons-testing:0.26.6")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 applicationName = "RobotiqControlThread"
 mainClassName = "us.ihmc.robotiq.control.RobotiqControlThread"

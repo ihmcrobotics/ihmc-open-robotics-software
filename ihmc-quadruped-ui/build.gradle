@@ -14,9 +14,9 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning-visualizers", version: "source"
+   compile("us.ihmc:ihmc-quadruped-robotics:source")
+   compile("us.ihmc:ihmc-robot-models-visualizers:source")
+   compile("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
 }
 
 testDependencies {

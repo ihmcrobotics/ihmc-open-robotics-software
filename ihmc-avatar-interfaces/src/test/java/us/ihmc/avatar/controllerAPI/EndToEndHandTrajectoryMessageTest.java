@@ -1,8 +1,9 @@
 package us.ihmc.avatar.controllerAPI;
 
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -16,7 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.PrepareForLocomotionMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -24,6 +28,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
@@ -175,7 +180,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                                                         desiredOrientation,
                                                                                                         worldFrame);
          handTrajectoryMessage.setSequenceId(random.nextLong());
-         handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+
+         // ROS1 users have these fields set to zero by default which can cause an exception to be thrown even if these fields are not used.
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
+         handTrajectoryMessage.getWrenchTrajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
+         handTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setDataReferenceFrameId(0);
+         handTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(0);
 
          drcSimulationTestHelper.publishToController(handTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT);
@@ -1213,6 +1223,56 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
+   public void testHoldHandWhileWalking() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
+
+      PrepareForLocomotionMessage prepareForLocomotionMessage = new PrepareForLocomotionMessage();
+      prepareForLocomotionMessage.setPrepareManipulation(false);
+      drcSimulationTestHelper.publishToController(prepareForLocomotionMessage);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RobotSide controlledSide = RobotSide.RIGHT;
+      ReferenceFrame rightHandControlFrame = fullRobotModel.getHandControlFrame(controlledSide);
+
+      FramePose3D poseToHold = new FramePose3D(rightHandControlFrame);
+      poseToHold.changeFrame(ReferenceFrame.getWorldFrame());
+      HandTrajectoryMessage message = HumanoidMessageTools.createHandTrajectoryMessage(controlledSide,
+                                                                                       0.5,
+                                                                                       poseToHold.getPosition(),
+                                                                                       poseToHold.getOrientation(),
+                                                                                       ReferenceFrame.getWorldFrame());
+      drcSimulationTestHelper.publishToController(message);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      FootstepDataListMessage twoStepsInPlace = twoStepsInPlace(fullRobotModel.getSoleFrames());
+      drcSimulationTestHelper.publishToController(twoStepsInPlace);
+
+      double walkingDuration = computeWalkingDuration(twoStepsInPlace, getRobotModel().getWalkingControllerParameters());
+
+      int numberOfAssertions = 50;
+
+      for (int i = 0; i < numberOfAssertions; i++)
+      {
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration / numberOfAssertions));
+
+         FramePose3D currentHandPose = new FramePose3D(rightHandControlFrame);
+         currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(poseToHold.getPosition(), currentHandPose.getPosition(), 1.0e-2);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(poseToHold.getOrientation(), currentHandPose.getOrientation(), Math.toRadians(10.0));
+      }
+   }
+
    @Test
    public void testStreaming() throws Exception
    {
@@ -1423,6 +1483,61 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       QuaternionReadOnly controllerDesiredOrientation = EndToEndTestTools.findFeedbackControllerDesiredOrientation(bodyName, scs);
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
+   }
+
+   public static FootstepDataListMessage twoStepsInPlace(SideDependentList<? extends ReferenceFrame> soleFrames)
+   {
+      List<FootstepDataMessage> footstepDataList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame soleFrame = soleFrames.get(robotSide);
+         FramePose3D footPose = new FramePose3D(soleFrame);
+         footPose.changeFrame(ReferenceFrame.getWorldFrame());
+         footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(robotSide, footPose));
+      }
+
+      return HumanoidMessageTools.createFootstepDataListMessage(footstepDataList, -1.0);
+   }
+
+   public static double computeWalkingDuration(FootstepDataListMessage message, WalkingControllerParameters parameters)
+   {
+      double walkingDuration = 0.0;
+
+      Object<FootstepDataMessage> footsteps = message.getFootstepDataList();
+
+      if (footsteps.isEmpty())
+         return walkingDuration;
+
+      double defaultSwingTime = selectDefaultIfCustomInvalid(message.getDefaultSwingDuration(), parameters.getDefaultSwingTime());
+      double defaultTransferTime = selectDefaultIfCustomInvalid(message.getDefaultTransferDuration(), parameters.getDefaultTransferTime());
+      FootstepDataMessage initialFootstep = footsteps.get(0);
+
+      walkingDuration += computeStepDuration(initialFootstep, parameters.getDefaultInitialTransferTime(), defaultSwingTime);
+
+      for (int i = 1; i < footsteps.size(); i++)
+      {
+         walkingDuration += computeStepDuration(footsteps.get(i), defaultTransferTime, defaultSwingTime);
+      }
+
+      walkingDuration += selectDefaultIfCustomInvalid(message.getFinalTransferDuration(), parameters.getDefaultFinalTransferTime());
+
+      return walkingDuration;
+   }
+
+   public static double computeStepDuration(FootstepDataMessage message, double defaultTransferDuration, double defaultSwingDuration)
+   {
+      double stepDuration = selectDefaultIfCustomInvalid(message.getTransferDuration(), defaultTransferDuration);
+      stepDuration += selectDefaultIfCustomInvalid(message.getSwingDuration(), defaultSwingDuration);
+      return stepDuration;
+   }
+
+   private static double selectDefaultIfCustomInvalid(double customValue, double defaultValue)
+   {
+      if (customValue <= 0.0 || Double.isNaN(customValue))
+         return defaultValue;
+      else
+         return customValue;
    }
 
    @BeforeEach
