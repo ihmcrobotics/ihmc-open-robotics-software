@@ -360,6 +360,7 @@ public class MessageTools
       else
       {
          double outputDT = inputDT * (double) previewFrames.size() / (double) WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+         message.setFrameDt(outputDT);
 
          for (int outputFrameIndex = 0; outputFrameIndex < WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES; outputFrameIndex++)
          {
