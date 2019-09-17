@@ -13,36 +13,36 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
-   compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.ejml", name: "core", version: "0.30"
+   compile("us.ihmc:euclid-frame:0.12.0")
+   compile("us.ihmc:euclid-shape:0.12.0")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("org.ejml:dense64:0.30")
+   compile("org.ejml:core:0.30")
    compile "org.apache.commons:commons-lang3:3.8.1"
-   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
+   compile("us.ihmc.thirdparty.jinput:jinput:190214")
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-model-file-loader:source")
+   compile("us.ihmc:ihmc-java-toolkit:source")
+   compile("us.ihmc:ihmc-quadruped-robotics:source")
+   compile("us.ihmc:ihmc-avatar-interfaces:source")
+   compile("us.ihmc:simulation-construction-set:0.12.15")
+   compile("us.ihmc:simulation-construction-set-tools:source")
+   compile("us.ihmc:ihmc-common-walking-control-modules:source")
+   compile("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   compile("us.ihmc:ihmc-robot-description:0.12.7")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-robot-data-logger:source")
+   compile("us.ihmc:ihmc-humanoid-robotics:source")
+   compile("us.ihmc:ihmc-sensor-processing:source")
+   compile("us.ihmc:ihmc-robot-models:source")
+   compile("us.ihmc:ihmc-simulation-toolkit:source")
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-robotics-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-quadruped-planning-test", version: "source"
+   compile("us.ihmc:ihmc-commons-testing:0.26.6")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   compile("us.ihmc:ihmc-quadruped-robotics-test:source")
+   compile("us.ihmc:ihmc-quadruped-planning-test:source")
 
 }

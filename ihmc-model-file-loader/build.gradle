@@ -17,19 +17,19 @@ ihmc {
 // }
 
 mainDependencies {
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
+   compile("org.apache.commons:commons-lang3:3.8.1")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:ihmc-commons:0.26.6")
+   compile("us.ihmc:ihmc-robot-description:0.12.7")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile("us.ihmc:ihmc-commons-testing:0.26.6")
+   compile("us.ihmc:simulation-construction-set-test:0.12.15")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

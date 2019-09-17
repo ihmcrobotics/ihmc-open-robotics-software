@@ -16,35 +16,35 @@ mainDependencies {
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
+   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:ihmc-graphics-description:0.12.12")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   compile("us.ihmc:ihmc-convex-optimization-adapter:source")
+   compile("us.ihmc:ihmc-path-planning:source")
+   compile("us.ihmc:ihmc-humanoid-robotics:source")
+   compile("us.ihmc:ihmc-common-walking-control-modules:source")
+   compile("us.ihmc:ihmc-path-planning-data-sets:source")
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
 
-   compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning-test", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
+   compile("us.ihmc:ihmc-path-planning-data-sets:source")
+   compile("us.ihmc:simulation-construction-set-test:0.12.15")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   compile("us.ihmc:ihmc-path-planning-test:source")
+   compile("us.ihmc:simulation-construction-set-tools-test:source")
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
-   compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
+   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   compile("us.ihmc:robot-environment-awareness-application:source")
+   compile("us.ihmc:ihmc-communication:source")
+   compile("us.ihmc:ihmc-path-planning-visualizers:source")
+   compile("us.ihmc:ihmc-robot-models:source")
+   compile("us.ihmc:ihmc-robot-models-visualizers:source")
+   compile("us.ihmc:ihmc-whole-body-controller:source")
 }

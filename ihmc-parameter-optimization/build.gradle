@@ -13,12 +13,12 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile("us.ihmc:ihmc-yovariables:0.3.11")
+   compile("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   compile("us.ihmc:ihmc-commons-testing:0.26.6")
+   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
