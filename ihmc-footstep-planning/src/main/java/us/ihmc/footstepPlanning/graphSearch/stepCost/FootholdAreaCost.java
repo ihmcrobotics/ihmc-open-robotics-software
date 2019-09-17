@@ -25,14 +25,21 @@ public class FootholdAreaCost implements FootstepCost
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
       FootstepNodeSnapData snapData = snapper.getSnapData(endNode);
-      ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
-      double area = footholdAfterSnap.getArea();
-      double footArea = footPolygons.get(endNode.getRobotSide()).getArea();
+      if (snapData != null)
+      {
+         ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
+         double area = footholdAfterSnap.getArea();
+         double footArea = footPolygons.get(endNode.getRobotSide()).getArea();
 
-      if (footholdAfterSnap.isEmpty())
+         if (footholdAfterSnap.isEmpty())
+            return 0.0;
+
+         double percentAreaUnoccupied = 1.0 - area / footArea;
+         return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
+      }
+      else
+      {
          return 0.0;
-
-      double percentAreaUnoccupied = 1.0 - area / footArea;
-      return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
+      }
    }
 }

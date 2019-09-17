@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -26,7 +27,13 @@ public abstract class CostToGoHeuristics
 
    public double compute(FootstepNode node)
    {
-      pose.setPosition(node.getX(), node.getY(), snapper.getSnapData(node).getSnapTransform().getTranslationZ());
+      double height = 0.0;
+
+      FootstepNodeSnapData snapData = snapper.getSnapData(node);
+      if (snapData != null)
+         height = snapData.getSnapTransform().getTranslationZ();
+
+      pose.setPosition(node.getX(), node.getY(), height);
       pose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
       return weight.getValue() * computeHeuristics(pose);

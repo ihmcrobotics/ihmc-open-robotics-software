@@ -15,4 +15,6 @@ public interface StoredPropertySetReadOnly
    <T> StoredPropertyReadOnly<T> getProperty(StoredPropertyKey<T> key);
 
    List<Object> getAll();
+
+   List<String> getAllAsStrings();
 }
