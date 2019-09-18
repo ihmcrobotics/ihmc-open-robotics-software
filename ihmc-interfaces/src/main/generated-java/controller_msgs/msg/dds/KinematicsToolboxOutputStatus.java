@@ -13,9 +13,30 @@ import us.ihmc.pubsub.TopicDataType;
 public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutputStatus> implements Settable<KinematicsToolboxOutputStatus>, EpsilonComparable<KinematicsToolboxOutputStatus>
 {
    /**
+          * Nothing reported by the toolbox.
+          */
+   public static final byte CURRENT_TOOLBOX_STATE_NO_STATUS = (byte) 0;
+   /**
+          * The toolbox just initialized successfully and is about to start running.
+          */
+   public static final byte CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL = (byte) 1;
+   /**
+          * The toolbox failed its initialization and cannot run until it succeeds.
+          * This failure specifies that the toolbox has not received RobotConfigurationData from the IHMC walking controller.
+          */
+   public static final byte CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD = (byte) 2;
+   /**
+          * The toolbox has been initialized properly and is running.
+          */
+   public static final byte CURRENT_TOOLBOX_STATE_RUNNING = (byte) 3;
+   /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+            */
+   public byte current_toolbox_state_;
    public int joint_name_hash_;
    public us.ihmc.idl.IDLSequence.Float  desired_joint_angles_;
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
@@ -53,6 +74,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    {
       sequence_id_ = other.sequence_id_;
 
+      current_toolbox_state_ = other.current_toolbox_state_;
+
       joint_name_hash_ = other.joint_name_hash_;
 
       desired_joint_angles_.set(other.desired_joint_angles_);
@@ -78,6 +101,21 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+            */
+   public void setCurrentToolboxState(byte current_toolbox_state)
+   {
+      current_toolbox_state_ = current_toolbox_state;
+   }
+   /**
+            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+            */
+   public byte getCurrentToolboxState()
+   {
+      return current_toolbox_state_;
    }
 
    public void setJointNameHash(int joint_name_hash)
@@ -160,6 +198,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_toolbox_state_, other.current_toolbox_state_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_name_hash_, other.joint_name_hash_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_angles_, other.desired_joint_angles_, epsilon)) return false;
@@ -187,6 +227,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.current_toolbox_state_ != otherMyClass.current_toolbox_state_) return false;
+
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
 
       if (!this.desired_joint_angles_.equals(otherMyClass.desired_joint_angles_)) return false;
@@ -209,6 +251,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append("KinematicsToolboxOutputStatus {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("current_toolbox_state=");
+      builder.append(this.current_toolbox_state_);      builder.append(", ");
       builder.append("joint_name_hash=");
       builder.append(this.joint_name_hash_);      builder.append(", ");
       builder.append("desired_joint_angles=");

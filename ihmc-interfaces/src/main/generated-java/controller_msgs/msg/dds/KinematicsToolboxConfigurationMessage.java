@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC hole-body inverse kinematics module.
+       * This message is part of the IHMC whole-body inverse kinematics module.
        * It contains auxiliary information that allows to further customized the behavior of the solver.
        */
 public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsToolboxConfigurationMessage> implements Settable<KinematicsToolboxConfigurationMessage>, EpsilonComparable<KinematicsToolboxConfigurationMessage>
@@ -16,6 +16,14 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Indicates whether the privileged_root_joint_position is to be used or not.
+            */
+   public boolean use_privileged_root_joint_position_;
+   /**
+            * Indicates whether the privileged_root_joint_orientation is to be used or not.
+            */
+   public boolean use_privileged_root_joint_orientation_;
    /**
             * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
             */
@@ -38,13 +46,26 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
             * Any value less than zero will be ignored.
+            * A value of -1 will result in the solver using its default value.
             */
    public double privileged_weight_ = -1.0;
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
+            * A value of -1 will result in the solver using its default value.
             */
    public double privileged_gain_ = -1.0;
+   /**
+            * Specifies how much high joint velocity values should be penalized in the optimization problem.
+            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public double joint_velocity_weight_ = -1.0;
+   /**
+            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public double joint_acceleration_weight_ = -1.0;
 
    public KinematicsToolboxConfigurationMessage()
    {
@@ -66,6 +87,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       sequence_id_ = other.sequence_id_;
 
+      use_privileged_root_joint_position_ = other.use_privileged_root_joint_position_;
+
+      use_privileged_root_joint_orientation_ = other.use_privileged_root_joint_orientation_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.privileged_root_joint_position_, privileged_root_joint_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
       privileged_joint_hash_codes_.set(other.privileged_joint_hash_codes_);
@@ -73,6 +98,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       privileged_weight_ = other.privileged_weight_;
 
       privileged_gain_ = other.privileged_gain_;
+
+      joint_velocity_weight_ = other.joint_velocity_weight_;
+
+      joint_acceleration_weight_ = other.joint_acceleration_weight_;
 
    }
 
@@ -89,6 +118,36 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Indicates whether the privileged_root_joint_position is to be used or not.
+            */
+   public void setUsePrivilegedRootJointPosition(boolean use_privileged_root_joint_position)
+   {
+      use_privileged_root_joint_position_ = use_privileged_root_joint_position;
+   }
+   /**
+            * Indicates whether the privileged_root_joint_position is to be used or not.
+            */
+   public boolean getUsePrivilegedRootJointPosition()
+   {
+      return use_privileged_root_joint_position_;
+   }
+
+   /**
+            * Indicates whether the privileged_root_joint_orientation is to be used or not.
+            */
+   public void setUsePrivilegedRootJointOrientation(boolean use_privileged_root_joint_orientation)
+   {
+      use_privileged_root_joint_orientation_ = use_privileged_root_joint_orientation;
+   }
+   /**
+            * Indicates whether the privileged_root_joint_orientation is to be used or not.
+            */
+   public boolean getUsePrivilegedRootJointOrientation()
+   {
+      return use_privileged_root_joint_orientation_;
    }
 
 
@@ -133,6 +192,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
             * Any value less than zero will be ignored.
+            * A value of -1 will result in the solver using its default value.
             */
    public void setPrivilegedWeight(double privileged_weight)
    {
@@ -143,6 +203,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
             * Any value less than zero will be ignored.
+            * A value of -1 will result in the solver using its default value.
             */
    public double getPrivilegedWeight()
    {
@@ -152,6 +213,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
+            * A value of -1 will result in the solver using its default value.
             */
    public void setPrivilegedGain(double privileged_gain)
    {
@@ -160,10 +222,47 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
+            * A value of -1 will result in the solver using its default value.
             */
    public double getPrivilegedGain()
    {
       return privileged_gain_;
+   }
+
+   /**
+            * Specifies how much high joint velocity values should be penalized in the optimization problem.
+            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public void setJointVelocityWeight(double joint_velocity_weight)
+   {
+      joint_velocity_weight_ = joint_velocity_weight;
+   }
+   /**
+            * Specifies how much high joint velocity values should be penalized in the optimization problem.
+            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public double getJointVelocityWeight()
+   {
+      return joint_velocity_weight_;
+   }
+
+   /**
+            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public void setJointAccelerationWeight(double joint_acceleration_weight)
+   {
+      joint_acceleration_weight_ = joint_acceleration_weight;
+   }
+   /**
+            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+            * A value of -1 will result in the solver using its default value.
+            */
+   public double getJointAccelerationWeight()
+   {
+      return joint_acceleration_weight_;
    }
 
 
@@ -186,6 +285,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_privileged_root_joint_position_, other.use_privileged_root_joint_position_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_privileged_root_joint_orientation_, other.use_privileged_root_joint_orientation_, epsilon)) return false;
+
       if (!this.privileged_root_joint_position_.epsilonEquals(other.privileged_root_joint_position_, epsilon)) return false;
       if (!this.privileged_root_joint_orientation_.epsilonEquals(other.privileged_root_joint_orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.privileged_joint_hash_codes_, other.privileged_joint_hash_codes_, epsilon)) return false;
@@ -195,6 +298,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_weight_, other.privileged_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_gain_, other.privileged_gain_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_velocity_weight_, other.joint_velocity_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_acceleration_weight_, other.joint_acceleration_weight_, epsilon)) return false;
 
 
       return true;
@@ -211,6 +318,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.use_privileged_root_joint_position_ != otherMyClass.use_privileged_root_joint_position_) return false;
+
+      if(this.use_privileged_root_joint_orientation_ != otherMyClass.use_privileged_root_joint_orientation_) return false;
+
       if (!this.privileged_root_joint_position_.equals(otherMyClass.privileged_root_joint_position_)) return false;
       if (!this.privileged_root_joint_orientation_.equals(otherMyClass.privileged_root_joint_orientation_)) return false;
       if (!this.privileged_joint_hash_codes_.equals(otherMyClass.privileged_joint_hash_codes_)) return false;
@@ -218,6 +329,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if(this.privileged_weight_ != otherMyClass.privileged_weight_) return false;
 
       if(this.privileged_gain_ != otherMyClass.privileged_gain_) return false;
+
+      if(this.joint_velocity_weight_ != otherMyClass.joint_velocity_weight_) return false;
+
+      if(this.joint_acceleration_weight_ != otherMyClass.joint_acceleration_weight_) return false;
 
 
       return true;
@@ -231,6 +346,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append("KinematicsToolboxConfigurationMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("use_privileged_root_joint_position=");
+      builder.append(this.use_privileged_root_joint_position_);      builder.append(", ");
+      builder.append("use_privileged_root_joint_orientation=");
+      builder.append(this.use_privileged_root_joint_orientation_);      builder.append(", ");
       builder.append("privileged_root_joint_position=");
       builder.append(this.privileged_root_joint_position_);      builder.append(", ");
       builder.append("privileged_root_joint_orientation=");
@@ -242,7 +361,11 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append("privileged_weight=");
       builder.append(this.privileged_weight_);      builder.append(", ");
       builder.append("privileged_gain=");
-      builder.append(this.privileged_gain_);
+      builder.append(this.privileged_gain_);      builder.append(", ");
+      builder.append("joint_velocity_weight=");
+      builder.append(this.joint_velocity_weight_);      builder.append(", ");
+      builder.append("joint_acceleration_weight=");
+      builder.append(this.joint_acceleration_weight_);
       builder.append("}");
       return builder.toString();
    }
