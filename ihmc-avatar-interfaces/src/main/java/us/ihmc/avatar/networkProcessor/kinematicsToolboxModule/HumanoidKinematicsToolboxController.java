@@ -128,14 +128,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
+   /** The active support polygon updated from the most recent robot configuration. */
    private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   /**
+    * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
+    * the convex horizontal region that the center of mass is constrained to.
+    */
    private final List<Point2D> shrunkSupportPolygonVertices = new ArrayList<>();
+   /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
-
+   /** Distance to shrink the support polygon for safety purpose. */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
                                                                 "Describes the minimum distance away from the support polygon's edges.",
                                                                 registry);
-
+   /** The total mass of the robot. */
    private final double robotMass;
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
@@ -398,6 +404,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return jointLimitReductionCommand;
    }
 
+   /**
+    * Computes the set of constraints for the momentum x and y components such that the center of mass
+    * is guaranteed to remain above the shrunken support polygon.
+    * 
+    * @return the constraints to submit to the controller core.
+    */
    private InverseKinematicsCommandList createLinearMomentumConvexConstraint2DCommand()
    {
       if (!enableSupportPolygonConstraint.getValue())

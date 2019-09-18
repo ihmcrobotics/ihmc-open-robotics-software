@@ -46,12 +46,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -62,13 +57,11 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -241,14 +234,25 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
+   /** Represents the collision model of the robot. */
    private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
-   private final int numberOfCollisionsToVisualize = 100;
+   /**
+    * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
+    * is less than this value, only then the solver handles it. This is for reducing computational
+    * burden.
+    */
    private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   /** Sets the maximum number of collisions to create YoVariables for. */
+   private final int numberOfCollisionsToVisualize = 20;
+   /** Debug variable. */
    private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
+   /** Debug variable. */
    private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   /** Debug variable. */
    private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   /** Debug variable. */
    private final YoFramePose3D[] collisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
-
+   /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
 
    /**
@@ -309,6 +313,9 @@ public class KinematicsToolboxController extends ToolboxController
       setupCollisionVisualization();
    }
 
+   /**
+    * Creates the debug variables and graphics for the collisions.
+    */
    private void setupCollisionVisualization()
    {
       Random random = new Random();
@@ -333,17 +340,32 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
+   /**
+    * Registers a new collidable to be used with this solver for preventing collisions.
+    * 
+    * @param collidable the new collidable to consider.
+    */
    public void registerCollidable(KinematicsCollidable collidable)
    {
       robotCollidables.add(collidable);
    }
 
+   /**
+    * Registers new collidables to be used with this solver for preventing collisions.
+    * 
+    * @param collidables the new collidables to consider.
+    */
    public void registerCollidables(KinematicsCollidable... collidables)
    {
       for (KinematicsCollidable collidable : collidables)
          robotCollidables.add(collidable);
    }
 
+   /**
+    * Registers new collidables to be used with this solver for preventing collisions.
+    * 
+    * @param collidables the new collidables to consider.
+    */
    public void registerCollidables(Iterable<? extends KinematicsCollidable> collidables)
    {
       for (KinematicsCollidable collidable : collidables)
@@ -665,6 +687,11 @@ public class KinematicsToolboxController extends ToolboxController
       return inputs;
    }
 
+   /**
+    * Evaluates the collision between each possible pair of collidables that can collide.
+    * 
+    * @return the result of the evaluation.
+    */
    private List<KinematicsCollisionResult> computeCollisions()
    {
       if (robotCollidables.isEmpty())
@@ -704,6 +731,12 @@ public class KinematicsToolboxController extends ToolboxController
       return collisions;
    }
 
+   /**
+    * Calculates and sets up the list of constraints to submit to the solver to prevent collisions.
+    * 
+    * @param collisions the previously computed collisions.
+    * @return the constraints to submit to the controller core.
+    */
    public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
    {
       if (collisions.isEmpty())
@@ -720,11 +753,10 @@ public class KinematicsToolboxController extends ToolboxController
 
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
-         //         double minimumSafeDistance = Math.max(collidableA.getMinimumSafeDistance(), collidableB.getMinimumSafeDistance());
-         double sigma = collision.getDistance();// - minimumSafeDistance;
+         double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
 
-         ReferenceFrame collisionFrame = collisionFrame(collision, true, collisionIndex);
+         ReferenceFrame collisionFrame = KinematicsToolboxHelper.collisionFrame(collision, true, "collisionFrame" + collisionIndex);
          if (collisionIndex < numberOfCollisionsToVisualize)
             collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
@@ -736,90 +768,14 @@ public class KinematicsToolboxController extends ToolboxController
          selectionMatrix.selectLinearZ(true);
          selectionMatrix.setSelectionFrames(null, collisionFrame);
 
-         if (collision.areShapesColliding())
-         {
-            command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-            command.getDesiredLinearVelocity().setZ(sigmaDot);
-            commandList.addCommand(command);
-         }
-         else
-         {
-            if (sigmaDot < 100.0)
-            {
-               sigmaDot = -sigmaDot;
-               command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-               command.getDesiredLinearVelocity().setZ(sigmaDot);
-               commandList.addCommand(command);
-            }
-         }
+         command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+         command.getDesiredLinearVelocity().setZ(sigmaDot);
+         commandList.addCommand(command);
 
          collisionIndex++;
       }
 
       return commandList;
-   }
-
-   private static ReferenceFrame collisionFrame(KinematicsCollisionResult collision, boolean centerFrameAtA, int index)
-   {
-      MovingReferenceFrame parentFrame;
-      FramePoint3D origin, otherShapePoint;
-      FrameVector3D normal, otherShapeNormal;
-
-      if (centerFrameAtA)
-      {
-         parentFrame = collision.getCollidableA().getRigidBody().getBodyFixedFrame();
-         origin = new FramePoint3D(collision.getPointOnA());
-         otherShapePoint = new FramePoint3D(collision.getPointOnB());
-         normal = new FrameVector3D(collision.getNormalOnA());
-         otherShapeNormal = new FrameVector3D(collision.getNormalOnB());
-      }
-      else
-      {
-         parentFrame = collision.getCollidableB().getRigidBody().getBodyFixedFrame();
-         origin = new FramePoint3D(collision.getPointOnB());
-         otherShapePoint = new FramePoint3D(collision.getPointOnA());
-         normal = new FrameVector3D(collision.getNormalOnB());
-         otherShapeNormal = new FrameVector3D(collision.getNormalOnA());
-      }
-
-      FrameVector3D collisionAxis = new FrameVector3D(parentFrame);
-
-      if (!normal.containsNaN())
-      {
-         normal.changeFrame(parentFrame);
-         collisionAxis.set(normal);
-      }
-      else if (!otherShapeNormal.containsNaN())
-      {
-         otherShapeNormal.changeFrame(parentFrame);
-         collisionAxis.set(otherShapeNormal);
-         collisionAxis.negate();
-      }
-      else
-      {
-         origin.changeFrame(parentFrame);
-         otherShapePoint.changeFrame(parentFrame);
-         collisionAxis.sub(otherShapePoint, origin);
-         if (collision.areShapesColliding())
-            collisionAxis.negate();
-      }
-
-      return newFrameFromOriginAndZAxis(parentFrame, "collisionFrame" + index, origin, collisionAxis);
-   }
-
-   private static ReferenceFrame newFrameFromOriginAndZAxis(MovingReferenceFrame parentFrame, String name, FramePoint3DReadOnly origin,
-                                                            FrameVector3DReadOnly zAxis)
-   {
-      FramePoint3D originLocal = new FramePoint3D(origin);
-      originLocal.changeFrame(parentFrame);
-      FrameVector3D zAxisLocal = new FrameVector3D(zAxis);
-      zAxisLocal.changeFrame(parentFrame);
-
-      RigidBodyTransform frameTransform = new RigidBodyTransform();
-      frameTransform.setTranslation(originLocal);
-      EuclidCoreMissingTools.rotationMatrix3DFromZUpToVector3D(zAxisLocal, frameTransform.getRotation());
-
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, parentFrame, frameTransform);
    }
 
    /**
