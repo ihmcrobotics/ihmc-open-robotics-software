@@ -5,6 +5,8 @@ import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKi
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createFullRobotModelAtInitialConfiguration;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -68,6 +70,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
          commandInputManager.submitMessage(input);
          toolboxController.update();
          snapSCSRobotToFullRobotModel(desiredFullRobotModel, robot);
+         Arrays.asList(scs.getRobots()).forEach(robot -> robot.getYoTime().add(toolboxControllerPeriod));
          scs.tickAndUpdate();
       }
    }
