@@ -17,10 +17,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -108,9 +105,11 @@ public class AvatarEstimatorThread
                                 RobotContactPointParameters<RobotSide> contactPointParameters, DRCRobotModel robotModel,
                                 StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
                                 HumanoidRobotContextDataFactory contextDataFactory, RealtimeRos2Node realtimeRos2Node,
-                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter, double gravity)
+                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, AvatarHeadPoseEstimatorInterface headPoseEstimator,
+                                JointDesiredOutputWriter outputWriter, double gravity)
    {
       estimatorFullRobotModel = robotModel.createFullRobotModel();
+      this.headPoseEstimator = headPoseEstimator;
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
@@ -232,6 +231,15 @@ public class AvatarEstimatorThread
          }
       }
 
+      initializeHeadPoseEstimator = new YoBoolean("initializeHeadPoseEstimator", estimatorRegistry);
+      initializeHeadPoseEstimator.set(false);
+
+      if(this.headPoseEstimator != null)
+      {
+         estimatorRegistry.addChild(headPoseEstimator.getRegistry());
+         initializeHeadPoseEstimator.set(true);
+      }
+
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
 
       // Create EKF Estimator:
@@ -283,9 +291,6 @@ public class AvatarEstimatorThread
          reinitializeEKF = null;
          ekfStateEstimator = null;
       }
-
-      initializeHeadPoseEstimator = new YoBoolean("initializeHeadPoseEstimator", estimatorRegistry);
-      initializeHeadPoseEstimator.set(false);
    }
 
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
@@ -306,12 +311,6 @@ public class AvatarEstimatorThread
    public YoVariableRegistry getYoVariableRegistry()
    {
       return estimatorRegistry;
-   }
-
-   public void setHeadPoseEstimator(AvatarHeadPoseEstimatorInterface headPoseEstimator)
-   {
-      this.headPoseEstimator = headPoseEstimator;
-      initializeHeadPoseEstimator.set(true);
    }
 
    public void run()
@@ -345,6 +344,7 @@ public class AvatarEstimatorThread
          if(initializeHeadPoseEstimator.getBooleanValue())
          {
             headPoseEstimator.initialize(estimatorFullRobotModel.getHeadBaseFrame().getTransformToWorldFrame(), null);
+            initializeHeadPoseEstimator.set(false);
          }
          else if(!initializeHeadPoseEstimator.getBooleanValue() && headPoseEstimator != null)
          {

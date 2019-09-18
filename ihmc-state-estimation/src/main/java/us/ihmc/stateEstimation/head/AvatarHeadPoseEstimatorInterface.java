@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -33,4 +34,6 @@ public interface AvatarHeadPoseEstimatorInterface
     * pose estimate can be obtained via {@link #getHeadTransform(RigidBodyTransform)}.
     */
    void compute();
+
+   YoVariableRegistry getRegistry();
 }

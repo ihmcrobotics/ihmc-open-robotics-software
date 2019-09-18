@@ -66,10 +66,8 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
     * @param dt the time interval at which compute is called and the measurements are sampled.
     * @param imuToHead the transform that describes the location of the IMU on the head.
     * @param estimateAngularVelocityBias whether a bias should be estimated for the angular velocity measurements.
-    * @param parentRegistry the {@link YoVariableRegistry} that all variables created by this class should be attached
-    * to (can be {@code null}).
     */
-   public EKFHeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias, YoVariableRegistry parentRegistry)
+   public EKFHeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias)
    {
       // Creates a simple joint structure representing the head attached to world with a floating joint:
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -90,15 +88,12 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       RobotState robotState = new RobotState(poseState, Collections.emptyList());
       stateEstimator = new StateEstimator(sensors, robotState, registry);
 
-      if (parentRegistry != null)
-      {
-         headPose = new YoFramePoseUsingYawPitchRoll("EstimatedHeadPose", ReferenceFrame.getWorldFrame(), registry);
-         parentRegistry.addChild(registry);
-      }
-      else
-      {
-         headPose = null;
-      }
+      headPose = new YoFramePoseUsingYawPitchRoll("EstimatedHeadPose", ReferenceFrame.getWorldFrame(), registry);
+   }
+
+   public YoVariableRegistry getRegistry()
+   {
+      return registry;
    }
 
    /**
