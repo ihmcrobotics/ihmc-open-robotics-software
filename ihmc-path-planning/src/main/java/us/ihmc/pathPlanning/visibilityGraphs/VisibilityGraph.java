@@ -144,7 +144,7 @@ public class VisibilityGraph
 
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
-                                                interEdges, parameters.getLengthForLongInterRegionEdge());
+                                                interEdges, parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge());
       }
 
       crossRegionEdges.addAll(interEdges);
@@ -206,7 +206,7 @@ public class VisibilityGraph
                                                       VisibilityGraphNavigableRegion targetNavigableRegion)
    {
       createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion, interRegionConnectionFilter, crossRegionEdges,
-                                             parameters.getLengthForLongInterRegionEdge());
+                                             parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge());
    }
 
    public VisibilityGraphNode getStartNode()
@@ -313,7 +313,8 @@ public class VisibilityGraph
 
    public static void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
                                                              VisibilityGraphNavigableRegion targetNavigableRegion, InterRegionConnectionFilter filter,
-                                                             List<VisibilityGraphEdge> edgesToPack, double lengthForLongInterRegionEdge)
+                                                             List<VisibilityGraphEdge> edgesToPack, double lengthForLongInterRegionEdge,
+                                                             double weightForInterRegionEdge)
    {
       int sourceId = sourceNavigableRegion.getMapId();
       int targetId = targetNavigableRegion.getMapId();
@@ -340,35 +341,35 @@ public class VisibilityGraph
       List<VisibilityGraphNode> targetRegionNodes = targetNavigableRegion.getAllNavigableNodes();
 
       createInterRegionVisibilityConnections(sourceRegionNodes, targetRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                             lengthForLongInterRegionEdge);
+                                             lengthForLongInterRegionEdge, weightForInterRegionEdge);
    }
 
 
    public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> sourceNodeList, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, List<VisibilityGraphEdge> edgesToPack,
-                                                             double lengthForLongInterRegionEdge)
+                                                             double lengthForLongInterRegionEdge, double weightForInterRegionEdge)
    {
       for (VisibilityGraphNode sourceNode : sourceNodeList)
       {
          createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                                lengthForLongInterRegionEdge);
+                                                lengthForLongInterRegionEdge, weightForInterRegionEdge);
       }
    }
 
    public static void createInterRegionVisibilityConnections(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, List<VisibilityGraphEdge> edgesToPack,
-                                                             double lengthForLongInterRegionEdge)
+                                                             double lengthForLongInterRegionEdge, double weightForInterRegionEdge)
    {
       createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                             ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, lengthForLongInterRegionEdge);
+                                             ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, lengthForLongInterRegionEdge, weightForInterRegionEdge);
    }
 
    public static void createInterRegionVisibilityConnections(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
                                                              InterRegionConnectionFilter filter, List<VisibilityGraphEdge> edgesToPack,
-                                                             boolean onlyUseShortestEdge, double lengthForLongInterRegionEdge)
+                                                             boolean onlyUseShortestEdge, double lengthForLongInterRegionEdge,  double weightForInterRegionEdge)
    {
       PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
@@ -420,6 +421,7 @@ public class VisibilityGraph
                if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
                {
                   VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+                  edge.setEdgeWeight(weightForInterRegionEdge);
                   potentialEdges.add(edge);
                }
             }

@@ -56,4 +56,6 @@ float64 elevation_weight -1.0
 
 float64 occluded_goal_edge_weight -1.0
 
+float64 weight_for_inter_region_edge -1.0
+
 bool return_best_effort_solution false

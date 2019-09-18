@@ -92,6 +92,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(lengthForLongInterRegionEdge, length);
    }
 
+   default void setWeightForInterRegionEdge(double weight)
+   {
+      set(weightForInterRegionEdge, weight);
+   }
+
    default void setPerformPostProcessingNodeShifting(boolean perform)
    {
       set(performPostProcessingNodeShifting, perform);
@@ -174,6 +179,8 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setElevationWeight(packet.getElevationWeight());
       if (packet.getOccludedGoalEdgeWeight() != -1.0)
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
+      if (packet.getWeightForInterRegionEdge() != -1.0)
+         setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
 
       setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
