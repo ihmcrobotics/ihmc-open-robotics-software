@@ -20,6 +20,7 @@ import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -347,7 +348,6 @@ public final class KinematicsToolboxControllerTest
    @Test
    public void testRandomDualHandPositionsCollisionWithTorso() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
 
       Capsule3D torsoCollisionShape = new Capsule3D(0.2, 0.2);
@@ -409,7 +409,7 @@ public final class KinematicsToolboxControllerTest
       Pair<FloatingJointBasics, OneDoFJointBasics[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration(robotDescription);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < 10; i++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -428,7 +428,7 @@ public final class KinematicsToolboxControllerTest
 
          toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
-         int numberOfIterations = 1000;
+         int numberOfIterations = 250;
 
          runKinematicsToolboxController(numberOfIterations);
 
@@ -436,7 +436,12 @@ public final class KinematicsToolboxControllerTest
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
-         //         assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            KinematicsCollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
+            assertTrue(collision.getSignedDistance() > -1.0e-3);
+         }
       }
    }
 
