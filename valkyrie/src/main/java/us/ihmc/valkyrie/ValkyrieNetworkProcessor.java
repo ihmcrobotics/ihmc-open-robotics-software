@@ -22,15 +22,11 @@ public class ValkyrieNetworkProcessor
       
       networkModuleParams.enableControllerCommunicator(true);
       networkModuleParams.enableLocalControllerCommunicator(false);
-      networkModuleParams.enableUiModule(true);
-      networkModuleParams.enableBehaviorModule(true);
-      networkModuleParams.enableBehaviorVisualizer(true);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(launchFootstepPlannerModule);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-      networkModuleParams.setEnableJoystickBasedStepping(true);
       networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
       networkModuleParams.enableWalkingPreviewToolbox(true);
       networkModuleParams.enableAutoREAStateUpdater(true);

@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
+   id("us.ihmc.ihmc-build") version "0.18.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -52,8 +52,8 @@ mainDependencies {
    compile("us.ihmc:ihmc-commons:0.26.6")
    compile("us.ihmc:ihmc-graphics-description:0.12.12")
    compile("us.ihmc:ihmc-robot-description:0.12.7")
-   compile("us.ihmc:mecano:0.0.20")
-   compile("us.ihmc:mecano-yovariables:0.0.20")
+   compile("us.ihmc:mecano:0.0.21")
+   compile("us.ihmc:mecano-yovariables:0.0.21")
    
    compile("us.ihmc:ihmc-model-file-loader:source")
    

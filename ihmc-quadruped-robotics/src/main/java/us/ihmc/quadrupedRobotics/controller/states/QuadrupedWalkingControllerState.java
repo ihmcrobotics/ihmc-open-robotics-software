@@ -250,7 +250,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(quadrant);
 
-      footstepStatusMessage.setFootstepQuadrant(quadrant.toByte());
+      footstepStatusMessage.setRobotQuadrant(quadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
       footstepStatusMessage.setSequenceId(stepIndex.getIntegerValue());
       footstepStatusMessage.getDesiredStepInterval().setStartTime(step.getTimeInterval().getStartTime());
@@ -278,7 +278,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
 
-      footstepStatusMessage.setFootstepQuadrant(thisStepQuadrant.toByte());
+      footstepStatusMessage.setRobotQuadrant(thisStepQuadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
       footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
       footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempPoint);

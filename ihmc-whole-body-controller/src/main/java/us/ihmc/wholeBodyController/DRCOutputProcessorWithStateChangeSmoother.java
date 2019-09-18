@@ -24,7 +24,7 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
 
    private final AtomicBoolean hasHighLevelControllerStateChanged = new AtomicBoolean(false);
    private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
-   private final DoubleParameter slopTime = new DoubleParameter("slopTimeForSmoothedJointTorques", registry, 0.16);
+   private final DoubleParameter slopTime = new DoubleParameter("slopTimeForSmoothedJointTorques", registry, 0.12);
 
    private final DRCOutputProcessor drcOutputProcessor;
 

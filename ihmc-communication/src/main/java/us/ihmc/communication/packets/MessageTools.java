@@ -59,7 +59,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public class MessageTools
 {
    public static final boolean DEBUG = false;
-   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 1000;
+   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 250;
 
    public static TextToSpeechPacket createTextToSpeechPacket(String textToSpeak)
    {
@@ -372,6 +372,7 @@ public class MessageTools
       else
       {
          double outputDT = inputDT * (double) previewFrames.size() / (double) WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+         message.setFrameDt(outputDT);
 
          for (int outputFrameIndex = 0; outputFrameIndex < WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES; outputFrameIndex++)
          {

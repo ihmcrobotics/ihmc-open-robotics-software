@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
+   id("us.ihmc.ihmc-build") version "0.18.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -29,8 +29,8 @@ testDependencies {
 }
 
 visualizersDependencies {
-   compile ihmc.sourceSetProject("main")
-   compile ihmc.sourceSetProject("test")
+   compile(ihmc.sourceSetProject("main"))
+   compile(ihmc.sourceSetProject("test"))
    compile("us.ihmc:ihmc-interfaces:source")
    compile("us.ihmc:ihmc-java-toolkit:source")
    compile("us.ihmc:simulation-construction-set-tools:source")
