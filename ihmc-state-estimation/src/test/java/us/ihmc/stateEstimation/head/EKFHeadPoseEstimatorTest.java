@@ -74,7 +74,8 @@ public class EKFHeadPoseEstimatorTest
       trajectoryGenerator.initialize();
 
       // Create an EKF based orientation estimator:
-      EKFHeadPoseEstimator poseEstimator = new EKFHeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true, registry);
+      EKFHeadPoseEstimator poseEstimator = new EKFHeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true);
+      registry.addChild(poseEstimator.getRegistry());
       XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
       Set<String> defaultParameters = new HashSet<>();
       Set<String> unmatchedParameters = new HashSet<>();
