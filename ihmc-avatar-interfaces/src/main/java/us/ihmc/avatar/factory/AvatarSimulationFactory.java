@@ -222,7 +222,7 @@ public class AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       estimatorThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
                                                   robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, contextDataFactory,
-                                                  realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter, gravity.get());
+                                                  realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, null, simulationOutputWriter, gravity.get());
    }
 
    private void setupControllerThread()

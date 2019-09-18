@@ -38,11 +38,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       DEFAULT_IMU_TO_MULTISENSE_TRANSFORM.setAndInvert(DEFAULT_MULTISENSE_TO_IMU_TRANSFORM);
    }
 
-   private static final String PARAMETER_FILE = "headPoseEstimatorTest.xml";
-   private static final boolean ESTIMATE_ANGULAR_VELOCITY_BIAS = true;
-
-   private final String simpleName = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(simpleName);
+   private static final boolean ESTIMATE_ANGULAR_VELOCITY_BIAS = false;
 
    private final MicroStrainUDPPacketListener imuListener;
 
@@ -61,17 +57,11 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
    public MultisenseSLWithMicroStrainHeadPoseEstimator(FullRobotModel fullRobotModel, double dt, RigidBodyTransform imuToHeadTransform,
                                                        PriorityParameters imuListenerPriority, long microStrainSerialNumber,
-                                                       boolean getRobotConfigurationDataFromNetwork, YoVariableRegistry parentRegistry)
+                                                       boolean getRobotConfigurationDataFromNetwork)
          throws IOException
    {
-      super(dt, imuToHeadTransform, ESTIMATE_ANGULAR_VELOCITY_BIAS, parentRegistry);
+      super(dt, imuToHeadTransform, ESTIMATE_ANGULAR_VELOCITY_BIAS);
       this.fullRobotModel = fullRobotModel;
-
-      XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
-      Set<String> defaultParameters = new HashSet<>();
-      Set<String> unmatchedParameters = new HashSet<>();
-      reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
-      unmatchedParameters.forEach(p -> System.out.println("Did not find parameter " + p));
 
       if(imuListenerPriority != null)
       {
@@ -91,8 +81,6 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       }
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());
-
-      parentRegistry.addChild(registry);
    }
 
    @Override

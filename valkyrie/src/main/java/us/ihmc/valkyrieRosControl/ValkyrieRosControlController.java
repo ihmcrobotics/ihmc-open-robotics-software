@@ -386,7 +386,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       estimatorThread = new AvatarEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
                                                   stateEstimatorParameters, sensorReaderFactory, estimatorContextFactory, estimatorRealtimeRos2Node,
-                                                  externalPelvisPoseSubscriber, outputWriter, gravity);
+                                                  externalPelvisPoseSubscriber, null, outputWriter, gravity);
       yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
                                        estimatorThread.getYoGraphicsListRegistry());
 
