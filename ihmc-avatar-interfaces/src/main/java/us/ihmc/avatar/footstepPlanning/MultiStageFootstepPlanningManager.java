@@ -16,6 +16,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -62,6 +63,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private static final int absoluteMaxNumberOfPathStages = 4;
    private static final int absoluteMaxNumberOfStepStages = 4;
+
+   private static final double safetyThresholdForFaultyStep = 0.7;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -413,7 +416,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
-   public void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
+   public synchronized void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
       completedPathResults.add(pathPlanningResult);
 
@@ -430,7 +433,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    }
 
    @Override
-   public void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
+   public synchronized void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
       completedStepResults.add(stepPlanningResult);
 
@@ -980,6 +983,42 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
 
       footstepPlan.set(totalFootstepPlan);
+      removeUnsafeSteps();
+   }
+
+   // Adding in because JSC has seen extra steps at the end of their plans
+   // This should be removed once the cause of the problem is found/fixed
+   private void removeUnsafeSteps()
+   {
+      FootstepPlan footstepPlan = this.footstepPlan.get();
+
+      Point3D goalPosition = new Point3D();
+      FootstepPlannerGoal goal = mainObjective.getGoal();
+      switch (goal.getFootstepPlannerGoalType())
+      {
+      case POSE_BETWEEN_FEET:
+         goalPosition.set(goal.getGoalPoseBetweenFeet().getPosition());
+         break;
+      case DOUBLE_FOOTSTEP:
+         FramePose3D leftFootPose = new FramePose3D();
+         FramePose3D rightFootPose = new FramePose3D();
+         goal.getDoubleFootstepGoal().get(RobotSide.LEFT).getSoleFramePose(leftFootPose);
+         goal.getDoubleFootstepGoal().get(RobotSide.RIGHT).getSoleFramePose(rightFootPose);
+         goalPosition.interpolate(leftFootPose.getPosition(), rightFootPose.getPosition(), 0.5);
+         break;
+      }
+
+      FramePose3D lastStepPose = new FramePose3D();
+
+      int lastStepIndex = footstepPlan.getNumberOfSteps() - 1;
+      footstepPlan.getFootstep(lastStepIndex).getSoleFramePose(lastStepPose);
+      if(lastStepPose.getPositionDistance(goalPosition) > safetyThresholdForFaultyStep)
+         footstepPlan.remove(lastStepIndex);
+
+      lastStepIndex = footstepPlan.getNumberOfSteps() - 1;
+      footstepPlan.getFootstep(lastStepIndex).getSoleFramePose(lastStepPose);
+      if(lastStepPose.getPositionDistance(goalPosition) > safetyThresholdForFaultyStep)
+         footstepPlan.remove(lastStepIndex);
    }
 
    private void setStepHeightsForFlatGround()

@@ -250,6 +250,12 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
+   public boolean integrateEstimatedIMUYawDriftRate()
+   {
+      return true;
+   }
+
+   @Override
    public double getIMUBiasFilterFreqInHertz()
    {
       return 6.0e-3;
@@ -402,6 +408,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public boolean createFootWrenchSensorDriftEstimator()
    {
-      return target == RobotTarget.REAL_ROBOT;
+      return false;
+      /*
+       * FIXME On both unit A & B, we identified scale or coupling issues with the 6-axis F/T sensors
+       * which prevents the drift estimator to work reliably.
+       */
+      // return target == RobotTarget.REAL_ROBOT;
    }
 }
