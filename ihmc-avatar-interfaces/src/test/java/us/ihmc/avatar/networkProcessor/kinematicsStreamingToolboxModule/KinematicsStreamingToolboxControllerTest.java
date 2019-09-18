@@ -46,6 +46,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    protected static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    protected static final boolean visualize = simulationTestingParameters.getCreateGUI();
+   static
+   {
+      simulationTestingParameters.setDataBufferSize(1 << 16);
+   }
 
    protected CommandInputManager commandInputManager;
    protected YoVariableRegistry mainRegistry;
@@ -119,6 +123,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setCameraFix(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
+         scs.setDT(toolboxControllerPeriod, 1);
          scs.startOnAThread();
       }
    }
