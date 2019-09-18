@@ -70,9 +70,9 @@ public class PathOrientationCalculator
          if (pathIndex == 1)
             previousOrientation = startHeading;
 
-         double desiredOrientation = InterpolationTools.linearInterpolate(previousOrientation, nextHeading, 0.5);
+         double desiredOrientation = AngleTools.interpolateAngle(previousOrientation, nextHeading, 0.5);
 
-         if (!MathTools.epsilonEquals(previousOrientation, nextHeading, 1e-3))
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(previousOrientation, nextHeading) > 1e-3)
          {
             double previousLength = currentPosition.distanceXY(previousPosition);
             double nextLength = currentPosition.distanceXY(nextPosition);
@@ -135,7 +135,10 @@ public class PathOrientationCalculator
    private void modifyPathOrientationsToAvoidObstacles(List<Pose3DBasics> pathPosesToPack, VisibilityMapSolution visibilityMapSolution)
    {
       List<Cluster> allObstacleClusters = new ArrayList<>();
-      visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+      if (parameters.getComputeOrientationsToAvoidObstacles())
+      {
+         visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+      }
 
       for (int pathIndex = 1; pathIndex < pathPosesToPack.size() - 1; pathIndex++)
       {
