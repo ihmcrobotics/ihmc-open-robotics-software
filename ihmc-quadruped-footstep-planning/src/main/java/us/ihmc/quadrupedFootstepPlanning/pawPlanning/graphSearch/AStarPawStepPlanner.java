@@ -345,9 +345,8 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          for (int i = 0; i < path.size(); i++)
          {
             PawNode node = path.get(i);
-            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
-            PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+            PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
             RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
             if (snapTransform.containsNaN())
@@ -414,7 +413,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
          position.applyTransform(snapTransform);
@@ -715,14 +714,14 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public static AStarPawStepPlanner createPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                    PawStepPlannerListener listener, YoVariableRegistry registry)
    {
-      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                    parameters::getProjectInsideUsingConvexHull, true);
+      PawNodeSnapper snapper = new CliffAvoidancePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistance,
+                                                                                      parameters::getProjectInsideUsingConvexHull, true);
 
       PawNodeExpansion expansion = new ParameterBasedPawNodeExpansion(parameters, xGaitSettings);
 
       SnapBasedPawNodeTransitionChecker snapBasedNodeTransitionChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
       SnapBasedPawNodeChecker snapBasedNodeChecker = new SnapBasedPawNodeChecker(parameters, snapper);
-      PawPlanarRegionCliffAvoider cliffAvoider = new PawPlanarRegionCliffAvoider(parameters, snapper);
+//      PawPlanarRegionCliffAvoider cliffAvoider = new PawPlanarRegionCliffAvoider(parameters, snapper);
 
       PawPlaningCostToGoHeuristicsBuilder heuristicsBuilder = new PawPlaningCostToGoHeuristicsBuilder();
       heuristicsBuilder.setPawPlannerParameters(parameters);
@@ -733,7 +732,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       PawPlanningCostToGoHeuristics heuristics = heuristicsBuilder.buildHeuristics();
 
       PawNodeTransitionChecker nodeTransitionChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeTransitionChecker));
-      PawNodeChecker nodeChecker = new PawNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
+      PawNodeChecker nodeChecker = new PawNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));//, cliffAvoider));
       nodeTransitionChecker.addPlannerListener(listener);
       nodeChecker.addPlannerListener(listener);
 
