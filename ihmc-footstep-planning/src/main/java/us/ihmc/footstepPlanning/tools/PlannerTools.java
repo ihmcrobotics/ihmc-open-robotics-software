@@ -98,6 +98,7 @@ public class PlannerTools
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
                                          PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
+      planner.setPlanningHorizonLength(100.0);
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
