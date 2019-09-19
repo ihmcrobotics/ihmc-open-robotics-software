@@ -49,7 +49,8 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
 
       assertTrue(toolboxController.initialize());
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);
-      scs.tickAndUpdate();
+      if (visualize)
+         scs.tickAndUpdate();
 
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
@@ -79,8 +80,11 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
          commandInputManager.submitMessage(input);
          toolboxController.update();
          snapSCSRobotToFullRobotModel(desiredFullRobotModel, robot);
-         Arrays.asList(scs.getRobots()).forEach(robot -> robot.getYoTime().add(toolboxControllerPeriod));
-         scs.tickAndUpdate();
+         if (visualize)
+         {
+            Arrays.asList(scs.getRobots()).forEach(robot -> robot.getYoTime().add(toolboxControllerPeriod));
+            scs.tickAndUpdate();
+         }
 
          for (int collidable1Index = 0; collidable1Index < collidables.size(); collidable1Index++)
          {
