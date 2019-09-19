@@ -21,7 +21,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
    public BodyPathHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, BodyPathPlanHolder bodyPath)
    {
-      super(weight, snapper);
+      super(weight, parameters, snapper);
 
       this.bodyPath = bodyPath;
       this.parameters = parameters;
@@ -54,7 +54,8 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double remainingYaw = remainingYawToGoal + yawDifferenceFromReference - croppedYawDifferenceFromReference;
       double pathYawViolationCost = parameters.getBodyPathViolationWeight() * croppedYawDifferenceFromReference;
 
-      double minSteps = remainingDistance / parameters.getMaximumStepReach() + Math.abs(remainingYaw) / (0.5 * parameters.getMaximumStepYaw());
+//      double minSteps = remainingDistance / parameters.getMaximumStepReach() + Math.abs(remainingYaw) / (0.5 * parameters.getMaximumStepYaw());
+      int minSteps = Math.max(((int) (remainingDistance / parameters.getMaximumStepReach())), ((int) (Math.abs(remainingYaw) / (0.5 * parameters.getMaximumStepYaw()))));
       return remainingDistance + pathDistanceViolationCost + pathYawViolationCost + parameters.getYawWeight() * remainingYaw + parameters.getCostPerStep() * minSteps;
    }
 

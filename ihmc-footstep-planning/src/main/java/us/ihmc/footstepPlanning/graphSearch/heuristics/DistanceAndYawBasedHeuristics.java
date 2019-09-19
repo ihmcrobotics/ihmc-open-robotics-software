@@ -15,7 +15,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 
    public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
    {
-      super(weight, snapper);
+      super(weight, parameters, snapper);
       this.parameters = parameters;
    }
 
