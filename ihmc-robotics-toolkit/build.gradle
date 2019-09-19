@@ -14,7 +14,7 @@ ihmc {
 
 mainDependencies {
    compile("org.ejml:denseC64:0.30")
-   compile("com.esotericsoftware.kryo:kryo:2.21")
+   compile("com.esotericsoftware.kryo:kryo:2.24.0")
    compile("com.github.quickhull3d:quickhull3d:1.0.0")
    compile("net.sf.trove4j:trove4j:3.0.3")
    compile("org.georegression:georegression:0.11")
