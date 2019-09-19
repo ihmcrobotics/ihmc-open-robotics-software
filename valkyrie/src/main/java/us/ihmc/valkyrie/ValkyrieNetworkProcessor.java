@@ -24,6 +24,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableLocalControllerCommunicator(false);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
+      networkModuleParams.enableKinematicsStreamingToolbox(true);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(launchFootstepPlannerModule);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
