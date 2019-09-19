@@ -237,6 +237,11 @@ public class KinematicsToolboxController extends ToolboxController
    /** Represents the collision model of the robot. */
    private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
    /**
+    * User parameter updated via {@link KinematicsToolboxConfigurationMessage}. Collision is only
+    * handled when this is set to {@code true}.
+    */
+   private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
+   /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
     * burden.
@@ -309,6 +314,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
+      enableCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
       setupCollisionVisualization();
    }
@@ -657,6 +663,11 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointAccelerationWeight(optimizationSettings.getJointAccelerationWeight());
          else
             activeOptimizationSettings.setJointAccelerationWeight(command.getJointAccelerationWeight());
+
+         if (command.getDisableCollisionAvoidance())
+            enableCollisionAvoidance.set(false);
+         if (command.getEnableCollisionAvoidance())
+            enableCollisionAvoidance.set(true);
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
@@ -694,7 +705,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private List<KinematicsCollisionResult> computeCollisions()
    {
-      if (robotCollidables.isEmpty())
+      if (robotCollidables.isEmpty() || !enableCollisionAvoidance.getValue())
          return Collections.emptyList();
 
       int collisionIndex = 0;
@@ -739,7 +750,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
    {
-      if (collisions.isEmpty())
+      if (collisions.isEmpty() || !enableCollisionAvoidance.getValue())
          return null;
 
       int collisionIndex = 0;

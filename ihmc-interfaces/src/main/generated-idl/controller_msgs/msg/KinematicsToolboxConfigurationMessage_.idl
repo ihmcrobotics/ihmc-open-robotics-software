@@ -75,6 +75,15 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double joint_acceleration_weight;
+        /**
+         * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+         * In case it has undesirable effects, use this flag to disable it.
+         */
+        boolean disable_collision_avoidance;
+        /**
+         * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+         */
+        boolean enable_collision_avoidance;
       };
     };
   };
