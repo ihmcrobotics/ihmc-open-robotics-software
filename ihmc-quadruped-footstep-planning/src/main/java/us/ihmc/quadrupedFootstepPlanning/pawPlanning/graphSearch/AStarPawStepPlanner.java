@@ -356,22 +356,28 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
                RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
                PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
-               RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
                Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-               position.applyTransform(snapTransform);
-
-               if (snapTransform.containsNaN())
+               if (snapData != null)
                {
-                  System.out.println("Failed to snap in post processing.");
-                  result = PawStepPlanningResult.PLANNER_FAILED;
-                  break;
+                  RigidBodyTransform snapTransform = snapData.getSnapTransform();
+                  position.applyTransform(snapTransform);
+
+                  if (snapTransform.containsNaN())
+                  {
+                     System.out.println("Failed to snap in post processing.");
+                     result = PawStepPlanningResult.PLANNER_FAILED;
+                     break;
+                  }
                }
 
                Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
                PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
-               RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
-               previousPosition.applyTransform(previousSnapTransform);
+               if (previousSnapData != null)
+               {
+                  RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+                  previousPosition.applyTransform(previousSnapTransform);
+               }
                if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
                {
                   LogTools.error("height change error.");
