@@ -13,6 +13,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -110,6 +111,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       if (initialTimestamp == -1L)
          initialTimestamp = System.nanoTime();
       time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
+
+      if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
+      { // Forwarding commands for the IK to the IK.
+         tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
+      }
 
       stateMachine.doActionAndTransition();
    }
