@@ -111,7 +111,7 @@ public class KinematicsToolboxOutputConverter
       }
 
       ArmTrajectoryMessage armTrajectoryMessage = select(robotSide, output.getLeftArmTrajectoryMessage(), output.getRightArmTrajectoryMessage());
-      armTrajectoryMessage.set(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredPositions, desiredVelocities));
+      armTrajectoryMessage.set(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredPositions, desiredVelocities, null));
    }
 
    public void computeHandTrajectoryMessages()
