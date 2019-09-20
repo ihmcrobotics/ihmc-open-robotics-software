@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ihmc-build:0.18.5")
+      classpath("us.ihmc:ihmc-build:0.19.5")
    }
 }
 
