@@ -156,7 +156,7 @@ public class PathOrientationCalculatorTest
          double actualYaw = poses.get(i).getOrientation().getYaw();
          double desiredYaw = zeroOrientation.getYaw();
          String errorMessage = "pose" + i + " had yaw " + actualYaw + ", but should have been " + desiredYaw;
-         assertTrue(errorMessage, AngleTools.computeAngleDifferenceMinusPiToPi(actualYaw, desiredYaw) < 1e-5);
+         assertTrue(errorMessage, Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(actualYaw, desiredYaw)) < 1e-5);
       }
 
       points.clear();
@@ -186,7 +186,7 @@ public class PathOrientationCalculatorTest
          double desiredOrientation = AngleTools.interpolateAngle(previousHeading, nextHeading, 0.5);
          double actualYaw = poses.get(i).getOrientation().getYaw();
          String errorMessage = "pose" + i + " had yaw " + actualYaw + ", but should have been " + desiredOrientation;
-         assertTrue(errorMessage, AngleTools.computeAngleDifferenceMinusPiToPi(actualYaw, desiredOrientation) < 1e-5);
+         assertTrue(errorMessage, Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(actualYaw, desiredOrientation)) < 1e-5);
       }
 
    }
