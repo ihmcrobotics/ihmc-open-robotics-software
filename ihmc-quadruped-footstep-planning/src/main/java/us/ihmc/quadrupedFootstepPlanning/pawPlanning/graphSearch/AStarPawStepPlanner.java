@@ -68,14 +68,12 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
    private HashSet<PawNode> expandedNodes;
    private PriorityQueue<PawNode> stack;
-   private FramePose3DReadOnly goalPose;
+   private final FramePose3D goalPoseInWorld = new FramePose3D();
    private PawNode startNode;
-   private PawNode goalNode;
+   private QuadrantDependentList<PawNode> goalNodes;
    private PawNode endNode;
 
    private PlanarRegionsList planarRegionsList;
-
-   private final FramePose2D goalPoseInWorld = new FramePose2D();
 
    private final PawStepGraph graph;
    private final PawNodeChecker nodeChecker;
@@ -234,17 +232,64 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    {
       checkGoalType(goal);
 
-      goalPose = goal.getTargetPose();
+      goalNodes = new QuadrantDependentList<>();
 
-      goalNode = getNodeFromTarget(goal);
+      if (goal.getTargetType().equals(PawStepPlannerTargetType.POSE_BETWEEN_FEET))
+      {
+         FramePose3DReadOnly goalPose = goal.getTargetPose();
+         ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
+         goalFrame.update();
 
-      goalPoseInWorld.set(goalNode.getOrComputeXGaitCenterPoint(), goalNode.getStepYaw());
+         FramePoint2D frontLeftGoalPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D frontRightGoalPosition = new FramePoint2D(goalFrame, xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D hindLeftGoalPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, xGaitSettings.getStanceWidth() / 2.0);
+         FramePoint2D hindRightGoalPosition = new FramePoint2D(goalFrame, -xGaitSettings.getStanceLength() / 2.0, -xGaitSettings.getStanceWidth() / 2.0);
+
+         frontLeftGoalPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         frontRightGoalPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         hindLeftGoalPosition.changeFrameAndProjectToXYPlane(worldFrame);
+         hindRightGoalPosition.changeFrameAndProjectToXYPlane(worldFrame);
+
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            goalNodes.put(robotQuadrant, new PawNode(robotQuadrant, frontLeftGoalPosition, frontRightGoalPosition, hindLeftGoalPosition, hindRightGoalPosition,
+                                                     goalPose.getYaw(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth()));
+         }
+
+         goalPoseInWorld.set(goalPose);
+      }
+      else if (goal.getTargetType().equals(PawStepPlannerTargetType.FOOTSTEPS))
+      {
+         goalPoseInWorld.setToZero(worldFrame);
+
+         FramePoint2D frontLeftGoalPosition = new FramePoint2D(goal.getPawGoalPosition(RobotQuadrant.FRONT_LEFT));
+         FramePoint2D frontRightGoalPosition = new FramePoint2D(goal.getPawGoalPosition(RobotQuadrant.FRONT_RIGHT));
+         FramePoint2D hindLeftGoalPosition = new FramePoint2D(goal.getPawGoalPosition(RobotQuadrant.HIND_LEFT));
+         FramePoint2D hindRightGoalPosition = new FramePoint2D(goal.getPawGoalPosition(RobotQuadrant.HIND_RIGHT));
+
+
+         frontLeftGoalPosition.checkReferenceFrameMatch(worldFrame);
+         frontRightGoalPosition.checkReferenceFrameMatch(worldFrame);
+         hindLeftGoalPosition.checkReferenceFrameMatch(worldFrame);
+         hindRightGoalPosition.checkReferenceFrameMatch(worldFrame);
+
+         double nominalYaw = PawNode.computeNominalYaw(frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+                                                       frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(),
+                                                       hindRightGoalPosition.getX(), hindRightGoalPosition.getY());
+
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            goalNodes.put(robotQuadrant, new PawNode(robotQuadrant, frontLeftGoalPosition, frontRightGoalPosition, hindLeftGoalPosition, hindRightGoalPosition,
+                                                     nominalYaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth()));
+            goalPoseInWorld.getPosition().add(goal.getPawGoalPosition(robotQuadrant));
+         }
+
+         goalPoseInWorld.getPosition().scale(0.25);
+         goalPoseInWorld.getOrientation().setToYawOrientation(nominalYaw);
+      }
+
+      heuristics.setGoalPose(goalPoseInWorld);
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setGoalPose(goalPoseInWorld));
-   }
-
-   private PawNode getNodeFromTarget(PawStepPlannerTarget target)
-   {
-      return getNodeFromTarget(defaultFirstQuadrant, target);
    }
 
    private PawNode getNodeFromTarget(RobotQuadrant quadrant, PawStepPlannerTarget target)
@@ -343,8 +388,6 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          listener.plannerFinished(null);
 
          List<PawNode> path = graph.getPathFromStart(endNode);
-         if (hasReachedFinalGoal.getBooleanValue())
-            addGoalNodesToEnd(path);
 
          // checking path
          if (debug)
@@ -416,11 +459,9 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          return null;
 
       PawStepPlan plan = new PawStepPlan();
-      plan.setLowLevelPlanGoal(goalPose);
+      plan.setLowLevelPlanGoal(goalPoseInWorld);
 
       List<PawNode> path = graph.getPathFromStart(endNode);
-      if (hasReachedFinalGoal.getBooleanValue())
-         addGoalNodesToEnd(path);
 
       double lastStepStartTime = 0;
 
@@ -473,7 +514,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    {
       if (startNode == null)
          throw new NullPointerException("Need to set initial conditions before planning.");
-      if (goalNode == null)
+      if (goalNodes == null)
          throw new NullPointerException("Need to set goal before planning.");
 
       abortPlanning.set(false);
@@ -482,16 +523,21 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          checkStartHasPlanarRegion();
 
       graph.initialize(startNode);
-      PawNodeComparator nodeComparator = new PawNodeComparator(graph, goalNode, heuristics);
+      PawNodeComparator nodeComparator = new PawNodeComparator(graph, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      validGoalNode.set(nodeTransitionChecker.isNodeValid(goalNode, null));
-      if (!validGoalNode.getBooleanValue())// && !parameters.getReturnBestEffortPlan())
+      validGoalNode.set(true);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (debug)
-            PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
-         return false;
+         if (!nodeTransitionChecker.isNodeValid(goalNodes.get(robotQuadrant), null))
+         {
+            validGoalNode.set(false);
+            if (debug)
+               PrintTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+            return false;
+         }
       }
+
 
       stack.add(startNode);
       expandedNodes = new HashSet<>();
@@ -659,9 +705,26 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (nodeToExpand.geometricallyEquals(goalNode) || nodeToExpand.xGaitGeometricallyEquals(goalNode))
+      RobotQuadrant nodeQuadrant = nodeToExpand.getMovingQuadrant();
+      if (goalNodes.get(nodeQuadrant).equals(nodeToExpand))
       {
-         endNode = nodeToExpand;
+         PawNode parentNode = nodeToExpand;
+         nodeQuadrant = nodeQuadrant.getNextRegularGaitSwingQuadrant();
+         while (nodeQuadrant != nodeToExpand.getMovingQuadrant())
+         {
+            PawNode nodeAtGoal = PawNode.constructNodeFromOtherNode(nodeQuadrant, goalNodes.get(nodeQuadrant).getXIndex(nodeQuadrant),
+                                                         goalNodes.get(nodeQuadrant).getYIndex(nodeQuadrant), goalNodes.get(nodeQuadrant).getYawIndex(),
+                                                         parentNode);
+
+            if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, endNode))
+               break;
+
+            endNode = nodeAtGoal;
+            graph.checkAndSetEdge(parentNode, endNode, 0.0);
+
+            parentNode = endNode;
+            nodeQuadrant = nodeQuadrant.getNextRegularGaitSwingQuadrant();
+         }
          return true;
       }
 
@@ -700,31 +763,11 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
          return;
 
-      if (endNode == null || heuristics.compute(nodeToExpand, goalNode) < heuristics.compute(endNode, goalNode))
+      if (endNode == null || heuristics.compute(nodeToExpand) < heuristics.compute(endNode))
       {
          if (listener != null)
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
          endNode = nodeToExpand;
-      }
-   }
-
-   private void addGoalNodesToEnd(List<PawNode> nodePathToPack)
-   {
-      PawNode endNode = this.endNode;
-      RobotQuadrant movingQuadrant = endNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
-
-      while (!endNode.geometricallyEquals(goalNode))
-      {
-         PawNode nodeAtGoal = PawNode.constructNodeFromOtherNode(movingQuadrant, goalNode.getXIndex(movingQuadrant),
-                                                                 goalNode.getYIndex(movingQuadrant), goalNode.getYawIndex(), endNode);
-
-         if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, endNode))
-            break;
-
-         nodePathToPack.add(nodeAtGoal);
-         endNode = nodeAtGoal;
-
-         movingQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
       }
    }
 
