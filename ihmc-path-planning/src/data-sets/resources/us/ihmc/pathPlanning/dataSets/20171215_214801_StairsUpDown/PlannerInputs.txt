@@ -6,7 +6,7 @@ planar_region_bipedal_timeout 5.0
 plan_then_snap_timeout 5.0
 a_star_timeout 15.0
 simple_body_path_timeout 15.0
-vis_graph_with_a_star_timeout 5.0
+vis_graph_with_a_star_timeout 10.0
 
 quadruped_start_position -2.05 2.04 0.000
 quadruped_goal_position -5.62 5.55 -0.000

@@ -72,7 +72,7 @@ public class PathOrientationCalculator
 
          double desiredOrientation = AngleTools.interpolateAngle(previousOrientation, nextHeading, 0.5);
 
-         if (AngleTools.computeAngleDifferenceMinusPiToPi(previousOrientation, nextHeading) > 1e-3)
+         if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(previousOrientation, nextHeading)) > 1e-3)
          {
             double previousLength = currentPosition.distanceXY(previousPosition);
             double nextLength = currentPosition.distanceXY(nextPosition);
@@ -94,7 +94,6 @@ public class PathOrientationCalculator
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, 0.5);
                path.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
-
 
                pathIndex++;
             }

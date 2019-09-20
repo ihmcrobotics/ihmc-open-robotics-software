@@ -683,6 +683,13 @@ public class NavigableRegionsManagerTest
       testDataSet(DataSetName._20171114_135559_PartialShallowMaze);
    }
 
+   @Disabled
+   @Test
+   public void testStairsUpDown()
+   {
+      testDataSet(DataSetName._20171215_214801_StairsUpDown);
+   }
+
    private void testDataSet(DataSetName dataSetName)
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
