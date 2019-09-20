@@ -283,6 +283,8 @@ public abstract class ToolboxModule
       if (DEBUG)
          LogTools.debug("Going to sleep");
 
+      getToolboxController().notifyToolboxStateChange(ToolboxState.SLEEP);
+
       destroyToolboxRunnable();
 
       if (toolboxTaskScheduled == null)

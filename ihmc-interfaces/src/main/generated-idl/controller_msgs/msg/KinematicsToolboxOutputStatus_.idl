@@ -9,6 +9,31 @@ module controller_msgs
   {
     module dds
     {
+      /**
+       * Nothing reported by the toolbox.
+       */
+      const octet CURRENT_TOOLBOX_STATE_NO_STATUS =
+      0;
+
+      /**
+       * The toolbox just initialized successfully and is about to start running.
+       */
+      const octet CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL =
+      1;
+
+      /**
+       * The toolbox failed its initialization and cannot run until it succeeds.
+       * This failure specifies that the toolbox has not received RobotConfigurationData from the IHMC walking controller.
+       */
+      const octet CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD =
+      2;
+
+      /**
+       * The toolbox has been initialized properly and is running.
+       */
+      const octet CURRENT_TOOLBOX_STATE_RUNNING =
+      3;
+
 
       /**
        * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
@@ -21,6 +46,10 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+         */
+        octet current_toolbox_state;
         long joint_name_hash;
         sequence<float> desired_joint_angles;
         geometry_msgs::msg::dds::Vector3 desired_root_translation;
