@@ -90,8 +90,11 @@ public class KSTTools
 
    public void update()
    {
-      updateFullRobotModel(getRobotConfigurationData(), currentFullRobotModel);
-      currentFullRobotModel.updateFrames();
+      if (getRobotConfigurationData() != null)
+      {
+         updateFullRobotModel(getRobotConfigurationData(), currentFullRobotModel);
+         currentFullRobotModel.updateFrames();
+      }
    }
 
    public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
