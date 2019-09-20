@@ -892,10 +892,17 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly quaternion, ReferenceFrame dataFrame,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame dataFrame,
                                                                      ReferenceFrame trajectoryFrame)
    {
-      ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, quaternion, trajectoryFrame);
+      return createChestTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, dataFrame, trajectoryFrame);
+   }
+
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                     Vector3DReadOnly desiredAngularVelocity, ReferenceFrame dataFrame,
+                                                                     ReferenceFrame trajectoryFrame)
+   {
+      ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
@@ -903,8 +910,15 @@ public class HumanoidMessageTools
    public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame dataFrame,
                                                                    ReferenceFrame trajectoryFrame)
    {
+      return createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, dataFrame, trajectoryFrame);
+   }
+
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                   Vector3DReadOnly desiredAngularVelocity, ReferenceFrame dataFrame,
+                                                                   ReferenceFrame trajectoryFrame)
+   {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
-      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame));
+      message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
@@ -1379,8 +1393,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, Orientation3DReadOnly orientation,
-                                               IntrinsicParameters intrinsicParameters)
+   public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
+                                               Orientation3DReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
       message.setVideoSource(videoSource.toByte());
