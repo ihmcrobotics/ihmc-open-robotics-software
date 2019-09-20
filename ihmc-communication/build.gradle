@@ -14,7 +14,7 @@ ihmc {
 
 mainDependencies {
    compile("net.sf.trove4j:trove4j:3.0.3")
-   compile("kryonet:kryonet:2.21")
+   compile("com.esotericsoftware:kryonet:2.22.0-RC1")
    compile("us.ihmc:ihmc-realtime:1.2.6")
    compile("us.ihmc:ihmc-video-codecs:2.1.5")
    compile("org.boofcv:geo:0.24.1")
