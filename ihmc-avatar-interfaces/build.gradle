@@ -32,7 +32,7 @@ mainDependencies {
    compile("com.github.wendykierp:JTransforms:3.1")
    compile("org.reflections:reflections:0.9.10")
 
-   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
    compile("us.ihmc:ihmc-yovariables:0.3.11")
    compile("us.ihmc:ihmc-commons:0.26.6")
    compile("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")

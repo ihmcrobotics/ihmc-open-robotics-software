@@ -45,4 +45,11 @@ float64 joint_velocity_weight
 # Field default value -1.0
 float64 joint_acceleration_weight
 
+# If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+# In case it has undesirable effects, use this flag to disable it.
+bool disable_collision_avoidance
+
+# In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+bool enable_collision_avoidance
+
 
