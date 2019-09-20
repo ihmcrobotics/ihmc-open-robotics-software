@@ -4,17 +4,23 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -23,15 +29,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -40,7 +49,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -54,10 +65,14 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -219,13 +234,48 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
-                                      OneDoFJointBasics[] oneDoFJoints, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                      YoVariableRegistry parentRegistry)
-   {
-      this(commandInputManager, statusOutputManager, rootJoint, oneDoFJoints, null, updateDT, yoGraphicsListRegistry, parentRegistry);
-   }
+   /** Represents the collision model of the robot. */
+   private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
+   /**
+    * User parameter updated via {@link KinematicsToolboxConfigurationMessage}. Collision is only
+    * handled when this is set to {@code true}.
+    */
+   private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
+   /**
+    * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
+    * is less than this value, only then the solver handles it. This is for reducing computational
+    * burden.
+    */
+   private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   /** Sets the maximum number of collisions to create YoVariables for. */
+   private final int numberOfCollisionsToVisualize = 20;
+   /** Debug variable. */
+   private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
+   /** Debug variable. */
+   private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   /** Debug variable. */
+   private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   /** Debug variable. */
+   private final YoFramePose3D[] collisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
+   /** Timer to debug computational load. */
+   private final ThreadTimer threadTimer;
 
+   /**
+    * @param commandInputManager     the message/command barrier used by this controller. Submit
+    *                                messages or commands to be processed to the
+    *                                {@code commandInputManager} from outside the controller.
+    * @param statusOutputManager     the output interface used by this controller.
+    * @param rootJoint               the underactuated floating root joint of the multi-body system.
+    *                                Can be {@code null} in the case all the joints are actuated.
+    * @param oneDoFJoints            the actuated joints of the system. The inverse kinematics will
+    *                                only use these joints during the optimization.
+    * @param controllableRigidBodies the sublist of rigid-bodies that can be controlled by the user.
+    *                                Can be {@code null} in the case all rigid-body should be
+    *                                controllable.
+    * @param updateDT                the period of one optimization tick.
+    * @param yoGraphicsListRegistry  registry to register visualization to.
+    * @param parentRegistry          registry to attach {@code YoVariable}s to.
+    */
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -261,6 +311,71 @@ public class KinematicsToolboxController extends ToolboxController
 
       publishSolutionPeriod.set(0.01);
       preserveUserCommandHistory.set(true);
+
+      threadTimer = new ThreadTimer("timer", updateDT, registry);
+
+      enableCollisionAvoidance.set(true);
+      collisionActivationDistanceThreshold.set(0.10);
+      setupCollisionVisualization();
+   }
+
+   /**
+    * Creates the debug variables and graphics for the collisions.
+    */
+   private void setupCollisionVisualization()
+   {
+      Random random = new Random();
+
+      for (int i = 0; i < numberOfCollisionsToVisualize; i++)
+      {
+         YoDouble collisionDistance = new YoDouble("collision_" + i + "_distance", registry);
+         YoFramePoint3D collisionPointA = new YoFramePoint3D("collision_" + i + "_pointA" + i, worldFrame, registry);
+         YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
+         YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
+
+         AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
+         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+         yoGraphicsListRegistry.registerYoGraphic("Collisions",
+                                                  new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+
+         collisionDistances[i] = collisionDistance;
+         collisionPointAs[i] = collisionPointA;
+         collisionPointBs[i] = collisionPointB;
+         collisionFramePoses[i] = collisionFramePose;
+      }
+   }
+
+   /**
+    * Registers a new collidable to be used with this solver for preventing collisions.
+    * 
+    * @param collidable the new collidable to consider.
+    */
+   public void registerCollidable(KinematicsCollidable collidable)
+   {
+      robotCollidables.add(collidable);
+   }
+
+   /**
+    * Registers new collidables to be used with this solver for preventing collisions.
+    * 
+    * @param collidables the new collidables to consider.
+    */
+   public void registerCollidables(KinematicsCollidable... collidables)
+   {
+      for (KinematicsCollidable collidable : collidables)
+         robotCollidables.add(collidable);
+   }
+
+   /**
+    * Registers new collidables to be used with this solver for preventing collisions.
+    * 
+    * @param collidables the new collidables to consider.
+    */
+   public void registerCollidables(Iterable<? extends KinematicsCollidable> collidables)
+   {
+      for (KinematicsCollidable collidable : collidables)
+         robotCollidables.add(collidable);
    }
 
    /**
@@ -422,9 +537,13 @@ public class KinematicsToolboxController extends ToolboxController
       snapPrivilegedConfigurationToCurrent();
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+      // It is required to update the tools now as it is only done at the end of each iteration.
+      updateTools();
 
       return true;
    }
+
+   private List<KinematicsCollisionResult> collisions = Collections.emptyList();
 
    /**
     * This is the control loop called periodically only when the user requested a solution for a
@@ -436,8 +555,8 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
+      threadTimer.start();
       // Updating the reference frames and twist calculator.
-      updateTools();
 
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
@@ -454,6 +573,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
+      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisions));
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
@@ -476,6 +596,14 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
       MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+      /*
+       * Update tools for the next iteration. Only need to do it 1 per iteration and since it is updated
+       * in the initialization method, it can be done at the end of the control tick. By doing this at the
+       * end and computing collisions at the end, when visualizing the collisions they are exactly in sync
+       * with the robot configuration.
+       */
+      updateTools();
+      collisions = computeCollisions();
 
       timeSinceLastSolutionPublished.add(updateDT);
 
@@ -484,6 +612,7 @@ public class KinematicsToolboxController extends ToolboxController
          reportMessage(inverseKinematicsSolution);
          timeSinceLastSolutionPublished.set(0.0);
       }
+      threadTimer.stop();
    }
 
    /**
@@ -535,6 +664,10 @@ public class KinematicsToolboxController extends ToolboxController
          else
             activeOptimizationSettings.setJointAccelerationWeight(command.getJointAccelerationWeight());
 
+         if (command.getDisableCollisionAvoidance())
+            enableCollisionAvoidance.set(false);
+         if (command.getEnableCollisionAvoidance())
+            enableCollisionAvoidance.set(true);
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
@@ -563,6 +696,97 @@ public class KinematicsToolboxController extends ToolboxController
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
+   }
+
+   /**
+    * Evaluates the collision between each possible pair of collidables that can collide.
+    * 
+    * @return the result of the evaluation.
+    */
+   private List<KinematicsCollisionResult> computeCollisions()
+   {
+      if (robotCollidables.isEmpty() || !enableCollisionAvoidance.getValue())
+         return Collections.emptyList();
+
+      int collisionIndex = 0;
+      List<KinematicsCollisionResult> collisions = new ArrayList<>();
+
+      for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
+      {
+         KinematicsCollidable collidableA = robotCollidables.get(collidableAIndex);
+
+         for (int collidableBIndex = collidableAIndex + 1; collidableBIndex < robotCollidables.size(); collidableBIndex++)
+         {
+            KinematicsCollidable collidableB = robotCollidables.get(collidableBIndex);
+
+            if (!collidableA.isCollidableWith(collidableB))
+               continue;
+
+            KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
+
+            if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+               continue;
+
+            if (collisionIndex < numberOfCollisionsToVisualize)
+            {
+               collisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
+               collisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
+               collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+            }
+
+            collisions.add(collisionResult);
+            collisionIndex++;
+         }
+      }
+
+      return collisions;
+   }
+
+   /**
+    * Calculates and sets up the list of constraints to submit to the solver to prevent collisions.
+    * 
+    * @param collisions the previously computed collisions.
+    * @return the constraints to submit to the controller core.
+    */
+   public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
+   {
+      if (collisions.isEmpty() || !enableCollisionAvoidance.getValue())
+         return null;
+
+      int collisionIndex = 0;
+      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
+
+      for (int i = 0; i < collisions.size(); i++)
+      {
+         KinematicsCollisionResult collision = collisions.get(i);
+         KinematicsCollidable collidableA = collision.getCollidableA();
+         KinematicsCollidable collidableB = collision.getCollidableB();
+
+         RigidBodyBasics bodyA = collidableA.getRigidBody();
+
+         double sigma = -collision.getSignedDistance();
+         double sigmaDot = sigma / updateDT;
+
+         ReferenceFrame collisionFrame = KinematicsToolboxHelper.collisionFrame(collision, true, "collisionFrame" + collisionIndex);
+         if (collisionIndex < numberOfCollisionsToVisualize)
+            collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
+
+         SpatialVelocityCommand command = new SpatialVelocityCommand();
+         command.set(bodyA, collidableB.getRigidBody());
+         command.getControlFramePose().setFromReferenceFrame(collisionFrame);
+         SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
+         selectionMatrix.clearSelection();
+         selectionMatrix.selectLinearZ(true);
+         selectionMatrix.setSelectionFrames(null, collisionFrame);
+
+         command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+         command.getDesiredLinearVelocity().setZ(sigmaDot);
+         commandList.addCommand(command);
+
+         collisionIndex++;
+      }
+
+      return commandList;
    }
 
    /**
@@ -705,5 +929,10 @@ public class KinematicsToolboxController extends ToolboxController
    public void setPreserveUserCommandHistory(boolean value)
    {
       preserveUserCommandHistory.set(value);
+   }
+
+   public double getUpdateDT()
+   {
+      return updateDT;
    }
 }

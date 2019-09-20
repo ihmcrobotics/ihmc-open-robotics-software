@@ -6,12 +6,14 @@ import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -72,6 +74,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       stateMachine = createStateMachine(time);
    }
 
+   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   {
+      tools.getIKController().setCollisionModel(collisionModel);
+   }
+
    private StateMachine<KSTState, State> createStateMachine(DoubleProvider timeProvider)
    {
       StateMachineFactory<KSTState, State> factory = new StateMachineFactory<>(KSTState.class);
@@ -104,6 +111,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       if (initialTimestamp == -1L)
          initialTimestamp = System.nanoTime();
       time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
+
+      if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
+      { // Forwarding commands for the IK to the IK.
+         tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
+      }
 
       stateMachine.doActionAndTransition();
    }
@@ -139,6 +151,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       tools.updateCapturabilityBasedStatus(newStatus);
+   }
+
+   public KSTTools getTools()
+   {
+      return tools;
    }
 
    public FullHumanoidRobotModel getDesiredFullRobotModel()
