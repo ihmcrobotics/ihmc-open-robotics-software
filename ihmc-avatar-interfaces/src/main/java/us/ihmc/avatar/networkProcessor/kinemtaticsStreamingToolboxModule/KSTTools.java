@@ -25,7 +25,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -125,8 +124,8 @@ public class KSTTools
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      for (RobotSide robotSide : RobotSide.values)
-         outputConverter.computeArmTrajectoryMessage(robotSide);
+      outputConverter.computeHandTrajectoryMessages();
+      outputConverter.computeArmTrajectoryMessages();
       outputConverter.computeHeadTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
