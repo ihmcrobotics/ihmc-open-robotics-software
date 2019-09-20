@@ -26,6 +26,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTStreamingState implements State
 {
+   private static final double defautlInitialBlendDuration = 5.0;
+   private static final double defaultAngularMaxRate = 35.0;
+   private static final double defaultLinearMaxRate = 2.0;
    private static final double defaultMessageWeight = 1.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -47,7 +50,7 @@ public class KSTStreamingState implements State
 
    private final YoBoolean isStreaming, wasStreaming;
    private final YoBoolean isRateLimiting;
-   private final YoDouble rateLimitLinear, rateLimitAngular;
+   private final YoDouble linearRateLimit, angularRateLimit;
 
    private final YoDouble defaultLinearWeight, defaultAngularWeight;
 
@@ -93,14 +96,14 @@ public class KSTStreamingState implements State
       wasStreaming = new YoBoolean("wasStreaming", registry);
       isRateLimiting = new YoBoolean("isRateLimiting", registry);
       isRateLimiting.set(true);
-      rateLimitLinear = new YoDouble("rateLimitLinear", registry);
-      rateLimitLinear.set(2.0);
-      rateLimitAngular = new YoDouble("rateLimitAngular", registry);
-      rateLimitAngular.set(35.0);
+      linearRateLimit = new YoDouble("linearRateLimit", registry);
+      linearRateLimit.set(defaultLinearMaxRate);
+      angularRateLimit = new YoDouble("angularRateLimit", registry);
+      angularRateLimit.set(defaultAngularMaxRate);
 
       streamingStartTime = new YoDouble("steamingStartTime", registry);
       streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
-      streamingBlendingDuration.set(5.0);
+      streamingBlendingDuration.set(defautlInitialBlendDuration);
       initialRobotState = new KinematicsToolboxOutputStatus(tools.getIKController().getSolution());
       blendedRobotState = new KinematicsToolboxOutputStatus(tools.getIKController().getSolution());
    }
@@ -116,8 +119,8 @@ public class KSTStreamingState implements State
       timeSinceLastMessageToController.set(Double.POSITIVE_INFINITY);
       ikSolverGains.setPositionProportionalGains(50.0);
       ikSolverGains.setOrientationProportionalGains(50.0);
-      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(rateLimitLinear.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(rateLimitAngular.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
       ikCommandInputManager.submitMessage(configurationMessage);
 
@@ -150,10 +153,22 @@ public class KSTStreamingState implements State
             ikCommandInputManager.submitMessage(defaultChestMessage);
 
          isStreaming.set(latestInput.getStreamToController());
+         if (latestInput.getStreamInitialBlendDuration() > 0.0)
+            streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
+         else
+            streamingBlendingDuration.set(defautlInitialBlendDuration);
+         if (latestInput.getAngularRateLimitation() > 0.0)
+            angularRateLimit.set(latestInput.getAngularRateLimitation());
+         else
+            angularRateLimit.set(defaultAngularMaxRate);
+         if (latestInput.getLinearRateLimitation() > 0.0)
+            linearRateLimit.set(latestInput.getLinearRateLimitation());
+         else
+            linearRateLimit.set(defaultLinearMaxRate);
       }
 
-      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(rateLimitLinear.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(rateLimitAngular.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       tools.getIKController().updateInternal();
 
       if (isStreaming.getValue())
