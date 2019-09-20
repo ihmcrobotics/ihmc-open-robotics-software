@@ -64,6 +64,8 @@ testDependencies {
    compile("us.ihmc:ihmc-avatar-interfaces-test:source")
 }
 
+tasks.getByPath("installDist").dependsOn("compositeJar")
+
 application.mainClassName = ""
 
 val joystickApplication by tasks.creating(CreateStartScripts::class.java) {
