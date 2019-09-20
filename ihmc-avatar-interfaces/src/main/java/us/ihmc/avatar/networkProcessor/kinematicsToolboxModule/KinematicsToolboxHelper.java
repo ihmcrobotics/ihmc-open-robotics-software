@@ -10,6 +10,7 @@ import org.ejml.ops.NormOps;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -21,19 +22,25 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -361,5 +368,91 @@ public class KinematicsToolboxHelper
 
       // Returning the Euclidean norm of the error computed as the command quality
       return NormOps.normP2(errorSubspace);
+   }
+
+   /**
+    * Creates a reference frame defined as follows:
+    * <ul>
+    * <li>Its z-axis is aligned with the collision direction and pointing outward the collidable A or B
+    * depending on the value of {@code centerFrameAtA}.
+    * <li>Its origin is at the collision point on the collidable A or B depending on the value of
+    * {@code centerFrameAtA}.
+    * <li>
+    * </ul>
+    * 
+    * @param collision      collision used to extract the collision information.
+    * @param centerFrameAtA whether the frame should on the collidable A or B.
+    * @param frameName      the name of the new frame.
+    * @return the collision frame.
+    */
+   public static ReferenceFrame collisionFrame(KinematicsCollisionResult collision, boolean centerFrameAtA, String frameName)
+   {
+      MovingReferenceFrame parentFrame;
+      FramePoint3D origin, otherShapePoint;
+      FrameVector3D normal, otherShapeNormal;
+   
+      if (centerFrameAtA)
+      {
+         parentFrame = collision.getCollidableA().getRigidBody().getBodyFixedFrame();
+         origin = new FramePoint3D(collision.getPointOnA());
+         otherShapePoint = new FramePoint3D(collision.getPointOnB());
+         normal = new FrameVector3D(collision.getNormalOnA());
+         otherShapeNormal = new FrameVector3D(collision.getNormalOnB());
+      }
+      else
+      {
+         parentFrame = collision.getCollidableB().getRigidBody().getBodyFixedFrame();
+         origin = new FramePoint3D(collision.getPointOnB());
+         otherShapePoint = new FramePoint3D(collision.getPointOnA());
+         normal = new FrameVector3D(collision.getNormalOnB());
+         otherShapeNormal = new FrameVector3D(collision.getNormalOnA());
+      }
+   
+      FrameVector3D collisionAxis = new FrameVector3D(parentFrame);
+   
+      if (!normal.containsNaN())
+      {
+         normal.changeFrame(parentFrame);
+         collisionAxis.set(normal);
+      }
+      else if (!otherShapeNormal.containsNaN())
+      {
+         otherShapeNormal.changeFrame(parentFrame);
+         collisionAxis.set(otherShapeNormal);
+         collisionAxis.negate();
+      }
+      else
+      {
+         origin.changeFrame(parentFrame);
+         otherShapePoint.changeFrame(parentFrame);
+         collisionAxis.sub(otherShapePoint, origin);
+         if (collision.areShapesColliding())
+            collisionAxis.negate();
+      }
+   
+      return KinematicsToolboxHelper.newFrameFromOriginAndZAxis(parentFrame, frameName, origin, collisionAxis);
+   }
+
+   /**
+    * Creates a reference frame given the position of its origin and the direction of its z-axis.
+    * 
+    * @param parentFrame the parent of the new frame.
+    * @param name        the name of the new frame.
+    * @param origin      the location of the new frame's origin.
+    * @param zAxis       the direction of the new frame's z-axis.
+    * @return the new frame.
+    */
+   public static ReferenceFrame newFrameFromOriginAndZAxis(ReferenceFrame parentFrame, String name, FramePoint3DReadOnly origin, FrameVector3DReadOnly zAxis)
+   {
+      FramePoint3D originLocal = new FramePoint3D(origin);
+      originLocal.changeFrame(parentFrame);
+      FrameVector3D zAxisLocal = new FrameVector3D(zAxis);
+      zAxisLocal.changeFrame(parentFrame);
+   
+      RigidBodyTransform frameTransform = new RigidBodyTransform();
+      frameTransform.setTranslation(originLocal);
+      EuclidCoreMissingTools.rotationMatrix3DFromZUpToVector3D(zAxisLocal, frameTransform.getRotation());
+   
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, parentFrame, frameTransform);
    }
 }

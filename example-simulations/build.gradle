@@ -13,8 +13,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid-frame:0.12.0")
-   compile("us.ihmc:euclid-shape:0.12.0")
+   compile("us.ihmc:euclid-frame:0.12.1")
+   compile("us.ihmc:euclid-shape:0.12.1")
    compile("us.ihmc:ihmc-yovariables:0.3.11")
    compile("org.ejml:dense64:0.30")
    compile("org.ejml:core:0.30")

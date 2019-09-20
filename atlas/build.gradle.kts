@@ -36,7 +36,7 @@ mainDependencies {
    compile("org.ros.rosjava_messages:geometry_msgs:1.11.9")
    compile("org.boofcv:recognition:0.24.1")
 
-   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
    compile("us.ihmc:ihmc-yovariables:0.3.11")
    compile("us.ihmc:ihmc-commons:0.26.6")
    compile("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
