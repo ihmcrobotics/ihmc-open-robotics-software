@@ -147,7 +147,7 @@ public class LinearDynamicSystem
 
    public int getInputSize()
    {
-      return matrixB.getRowDimension();
+      return matrixB.getColumnDimension();
    }
 
    public int getOutputSize()

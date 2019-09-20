@@ -54,6 +54,10 @@ class TransferFunctionToStateSpaceConverterTest
    {
       TransferFunction transferFunction = new TransferFunction(numeratorPolynomial, denominatorPolynomial);
       LinearDynamicSystem dynamicSystem = TransferFunctionToStateSpaceConverter.convertTransferFunctionToStateSpaceObservableCanonicalForm(transferFunction);
+      assertEquals(denominatorPolynomial.getOrder(), dynamicSystem.getOrder());
+      assertEquals(1, dynamicSystem.getInputSize());
+      assertEquals(1, dynamicSystem.getOutputSize());
+      
       checkTransferFunctionsRemainTheSame(transferFunction, dynamicSystem);
 
       LinearDynamicSystem dynamicSystemTwo = TransferFunctionToStateSpaceConverter.convertTransferFunctionToStateSpaceControllableCanonicalForm(transferFunction);
