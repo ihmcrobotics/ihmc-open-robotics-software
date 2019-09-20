@@ -20,7 +20,7 @@ mainDependencies {
    compile("net.sf.trove4j:trove4j:3.0.3")
    compile("org.ojalgo:ojalgo:40.0.0")
 
-   compile("us.ihmc:IHMCOptimizerWrappers:0.0.26")
+   compile("us.ihmc:ihmc-optimizer-wrappers:0.0.28")
    compile("us.ihmc:ihmc-yovariables:0.3.11")
    compile("us.ihmc:ihmc-commons:0.26.6")
    compile("us.ihmc:ihmc-java-toolkit:source")
