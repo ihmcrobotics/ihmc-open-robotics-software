@@ -34,7 +34,7 @@ mainDependencies {
    compile("org.ros.rosjava_messages:tf2_msgs:0.5.9")
    compile("org.ros.rosjava_messages:tf:1.10.8")
 
-   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
    compile("us.ihmc:ihmc-commons:0.26.6")
    compile("us.ihmc:ihmc-communication:source")
    compile("us.ihmc:ihmc-robotics-toolkit:source")

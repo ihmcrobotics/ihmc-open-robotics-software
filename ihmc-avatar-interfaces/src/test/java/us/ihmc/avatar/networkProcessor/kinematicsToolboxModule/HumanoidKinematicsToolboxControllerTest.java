@@ -132,10 +132,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
+      double updateDT = 1.0e-3;
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
-                                                                  yoGraphicsListRegistry,
+                                                                  updateDT, yoGraphicsListRegistry,
                                                                   mainRegistry);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);

@@ -33,8 +33,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid:0.12.0")
-   compile("us.ihmc:euclid-geometry:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
+   compile("us.ihmc:euclid-geometry:0.12.1")
    compile("us.ihmc:ihmc-pub-sub:0.10.2")
    compile("us.ihmc:ros2-common-interfaces:0.13.4")
    compile("us.ihmc:ihmc-commons:0.26.6")

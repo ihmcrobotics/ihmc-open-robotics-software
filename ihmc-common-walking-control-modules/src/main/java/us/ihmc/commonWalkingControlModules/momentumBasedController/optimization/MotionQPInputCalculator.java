@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -55,6 +56,7 @@ public class MotionQPInputCalculator
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
+   private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
@@ -86,9 +88,25 @@ public class MotionQPInputCalculator
                                   JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoVariableRegistry parentRegistry)
    {
+      this(centerOfMassFrame, null, centroidalMomentumRateCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
+   }
+
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
+                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                  YoVariableRegistry parentRegistry)
+   {
+      this(centerOfMassFrame, centroidalMomentumCalculator, null, jointIndexHandler, jointPrivilegedConfigurationParameters, parentRegistry);
+   }
+
+   private MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumCalculator,
+                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator, JointIndexHandler jointIndexHandler,
+                                   JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
+   {
       this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
+      this.centroidalMomentumCalculator = centroidalMomentumCalculator;
       this.centroidalMomentumRateCalculator = centroidalMomentumRateCalculator;
+
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
@@ -112,7 +130,10 @@ public class MotionQPInputCalculator
 
    public void initialize()
    {
-      centroidalMomentumRateCalculator.reset();
+      if (centroidalMomentumRateCalculator != null)
+         centroidalMomentumRateCalculator.reset();
+      else
+         centroidalMomentumCalculator.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
    }
 
@@ -392,48 +413,55 @@ public class MotionQPInputCalculator
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, qpInputToPack.taskJacobian);
 
-      if (primaryBase == null)
-      { // No primary base provided for this task.
-        // Record the resulting Jacobian matrix for the privileged configuration.
-         recordTaskJacobian(qpInputToPack.taskJacobian);
-         // We're done!
-      }
-      else
-      { // A primary base has been provided, two things are happening here:
-        // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
-        // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
-         tempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
+      /*
+       * The following is relevant only for objective inputs: i- privileged cannot affect QP inputs that
+       * are constraints, ii- constraints have no weight.
+       */
+      if (constraintType == ConstraintType.OBJECTIVE)
+      {
+         if (primaryBase == null)
+         { // No primary base provided for this task.
+           // Record the resulting Jacobian matrix for the privileged configuration.
+            recordTaskJacobian(qpInputToPack.taskJacobian);
+            // We're done!
+         }
+         else
+         { // A primary base has been provided, two things are happening here:
+           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+           // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+            tempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
 
-         boolean isJointUpstreamOfPrimaryBase = false;
-         for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
-         {
-            JointReadOnly joint = jointsUsedInTask.get(i);
+            boolean isJointUpstreamOfPrimaryBase = false;
+            for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
+            {
+               JointReadOnly joint = jointsUsedInTask.get(i);
 
-            if (joint.getSuccessor() == primaryBase)
-               isJointUpstreamOfPrimaryBase = true;
+               if (joint.getSuccessor() == primaryBase)
+                  isJointUpstreamOfPrimaryBase = true;
 
-            if (isJointUpstreamOfPrimaryBase)
-            { // The current joint is located between the base and the primary base:
-              // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
-               int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+               if (isJointUpstreamOfPrimaryBase)
+               { // The current joint is located between the base and the primary base:
+                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+                  int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
-               for (int dofIndex : jointIndices)
-               {
-                  double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
-                  if (commandToConvert.scaleSecondaryTaskJointWeight())
-                     scaleFactor = commandToConvert.getSecondaryTaskJointWeightScale();
+                  for (int dofIndex : jointIndices)
+                  {
+                     double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
+                     if (commandToConvert.scaleSecondaryTaskJointWeight())
+                        scaleFactor = commandToConvert.getSecondaryTaskJointWeightScale();
 
-                  // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(scaleFactor, dofIndex, qpInputToPack.taskJacobian);
-                  // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
-                  MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
+                     // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
+                     MatrixTools.scaleColumn(scaleFactor, dofIndex, qpInputToPack.taskJacobian);
+                     // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
+                     MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
+                  }
                }
             }
-         }
 
-         // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
-         recordTaskJacobian(tempPrimaryTaskJacobian);
-         // We're done!
+            // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
+            recordTaskJacobian(tempPrimaryTaskJacobian);
+            // We're done!
+         }
       }
 
       return true;
@@ -722,7 +750,10 @@ public class MotionQPInputCalculator
 
    public DenseMatrix64F getCentroidalMomentumMatrix()
    {
-      return centroidalMomentumRateCalculator.getCentroidalMomentumMatrix();
+      if (centroidalMomentumCalculator != null)
+         return centroidalMomentumCalculator.getCentroidalMomentumMatrix();
+      else
+         return centroidalMomentumRateCalculator.getCentroidalMomentumMatrix();
    }
 
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
@@ -742,7 +773,10 @@ public class MotionQPInputCalculator
 
    public MomentumReadOnly computeCentroidalMomentumFromSolution(DenseMatrix64F jointVelocities)
    {
-      centroidalMomentumRateCalculator.getMomentum(jointVelocities, momentum);
+      if (centroidalMomentumCalculator != null)
+         centroidalMomentumCalculator.getMomentum(jointVelocities, momentum);
+      else
+         centroidalMomentumRateCalculator.getMomentum(jointVelocities, momentum);
       return momentum;
    }
 }

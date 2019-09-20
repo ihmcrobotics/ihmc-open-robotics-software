@@ -590,7 +590,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       FullHumanoidRobotModel desiredFullRobotModel = getRobotModel().createFullRobotModel();
 
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
-      HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel,
+      double updateDT = 1.0e-3;
+      HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, updateDT,
                                                                                          new YoGraphicsListRegistry(), new YoVariableRegistry("dummy"));
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelWithArmsAtMidRange();

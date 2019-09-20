@@ -28,15 +28,16 @@ public class PawCliffDetectionTools
          return true;
 
       Point3D highestNearbyPoint = new Point3D();
-      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(planarRegionsList, pawInWorld, pawYaw, highestNearbyPoint, forward, backward, left, right);
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, pawInWorld, pawYaw, highestNearbyPoint, forward, backward, left, right);
 
       return maximumCliffZInSoleFrame > cliffHeightToAvoid;
    }
 
-   private static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, Point3DBasics highestNearbyPointToPack,
-                                                double minimumDistanceFromCliffBottoms)
+   public static PlanarRegion findHighestNearbyRegion(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, Point3DBasics highestNearbyPointToPack,
+                                                      double minimumDistanceFromCliffBottoms)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+      PlanarRegion highestRegion = null;
+      highestNearbyPointToPack.setZ( Double.NEGATIVE_INFINITY);
 
       List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools
             .filterPlanarRegionsWithBoundingCircle(new Point2D(pawInWorld), minimumDistanceFromCliffBottoms, planarRegionsList.getPlanarRegionsAsList());
@@ -48,35 +49,42 @@ public class PawCliffDetectionTools
          double heightOfPointFromPaw = closestPointInWorld.getZ() - pawInWorld.getZ();
          double distanceToPoint = pawInWorld.distanceXY(closestPointInWorld);
 
-         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromPaw > maxZInSoleFrame)
+         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromPaw > highestNearbyPointToPack.getZ())
          {
-            maxZInSoleFrame = heightOfPointFromPaw;
+            highestRegion = intersectingRegion;
             highestNearbyPointToPack.set(closestPointInWorld);
          }
       }
 
-      return maxZInSoleFrame;
+      return highestRegion;
    }
 
-   public static double findHighestNearbyPoint2(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw,
-                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
+   public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw,
+                                               Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
       transformToRegion.setRotationYaw(pawYaw);
 
+      ConvexPolygon2D avoidanceRegion = new ConvexPolygon2D();
+      avoidanceRegion.addVertex(forward, left);
+      avoidanceRegion.addVertex(forward, right);
+      avoidanceRegion.addVertex(backward, left);
+      avoidanceRegion.addVertex(backward, right);
+      avoidanceRegion.update();
+      avoidanceRegion.applyTransform(transformToRegion);
+      avoidanceRegion.translate(pawInWorld.getX(), pawInWorld.getY());
 
-      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-      tempPolygon.addVertex(forward, left);
-      tempPolygon.addVertex(forward, right);
-      tempPolygon.addVertex(backward, left);
-      tempPolygon.addVertex(backward, right);
-      tempPolygon.update();
-      tempPolygon.applyTransform(transformToRegion);
-      tempPolygon.translate(pawInWorld.getX(), pawInWorld.getY());
+      return findHighestNearbyPoint(planarRegionsList, pawInWorld, highestNearbyPointToPack, avoidanceRegion);
 
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+   }
+
+   public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, Point3DBasics highestNearbyPointToPack,
+                                               ConvexPolygon2D avoidanceRegion)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+
+
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(avoidanceRegion, planarRegionsList.getPlanarRegionsAsList());
 
       for (PlanarRegion intersectingRegion : intersectingRegions)
       {
@@ -84,7 +92,7 @@ public class PawCliffDetectionTools
 
          double heightOfPointFromPaw = closestPointInWorld.getZ() - pawInWorld.getZ();
 
-         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()) && heightOfPointFromPaw > maxZInSoleFrame)
+         if (avoidanceRegion.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()) && heightOfPointFromPaw > maxZInSoleFrame)
          {
             maxZInSoleFrame = heightOfPointFromPaw;
             highestNearbyPointToPack.set(closestPointInWorld);

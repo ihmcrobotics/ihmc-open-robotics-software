@@ -17,6 +17,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -651,5 +652,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ValkyrieCalibrationParameters getCalibrationParameters()
    {
       return calibrationParameters;
+   }
+
+   @Override
+   public HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   {
+      return new ValkyrieKinematicsCollisionModel();
    }
 }
