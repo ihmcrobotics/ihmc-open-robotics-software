@@ -66,6 +66,15 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * A value of -1 will result in the solver using its default value.
             */
    public double joint_acceleration_weight_ = -1.0;
+   /**
+            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+            * In case it has undesirable effects, use this flag to disable it.
+            */
+   public boolean disable_collision_avoidance_;
+   /**
+            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+            */
+   public boolean enable_collision_avoidance_;
 
    public KinematicsToolboxConfigurationMessage()
    {
@@ -102,6 +111,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       joint_velocity_weight_ = other.joint_velocity_weight_;
 
       joint_acceleration_weight_ = other.joint_acceleration_weight_;
+
+      disable_collision_avoidance_ = other.disable_collision_avoidance_;
+
+      enable_collision_avoidance_ = other.enable_collision_avoidance_;
 
    }
 
@@ -265,6 +278,38 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return joint_acceleration_weight_;
    }
 
+   /**
+            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+            * In case it has undesirable effects, use this flag to disable it.
+            */
+   public void setDisableCollisionAvoidance(boolean disable_collision_avoidance)
+   {
+      disable_collision_avoidance_ = disable_collision_avoidance;
+   }
+   /**
+            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+            * In case it has undesirable effects, use this flag to disable it.
+            */
+   public boolean getDisableCollisionAvoidance()
+   {
+      return disable_collision_avoidance_;
+   }
+
+   /**
+            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+            */
+   public void setEnableCollisionAvoidance(boolean enable_collision_avoidance)
+   {
+      enable_collision_avoidance_ = enable_collision_avoidance;
+   }
+   /**
+            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+            */
+   public boolean getEnableCollisionAvoidance()
+   {
+      return enable_collision_avoidance_;
+   }
+
 
    public static Supplier<KinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
@@ -303,6 +348,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_acceleration_weight_, other.joint_acceleration_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_collision_avoidance_, other.disable_collision_avoidance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_collision_avoidance_, other.enable_collision_avoidance_, epsilon)) return false;
+
 
       return true;
    }
@@ -333,6 +382,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if(this.joint_velocity_weight_ != otherMyClass.joint_velocity_weight_) return false;
 
       if(this.joint_acceleration_weight_ != otherMyClass.joint_acceleration_weight_) return false;
+
+      if(this.disable_collision_avoidance_ != otherMyClass.disable_collision_avoidance_) return false;
+
+      if(this.enable_collision_avoidance_ != otherMyClass.enable_collision_avoidance_) return false;
 
 
       return true;
@@ -365,7 +418,11 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append("joint_velocity_weight=");
       builder.append(this.joint_velocity_weight_);      builder.append(", ");
       builder.append("joint_acceleration_weight=");
-      builder.append(this.joint_acceleration_weight_);
+      builder.append(this.joint_acceleration_weight_);      builder.append(", ");
+      builder.append("disable_collision_avoidance=");
+      builder.append(this.disable_collision_avoidance_);      builder.append(", ");
+      builder.append("enable_collision_avoidance=");
+      builder.append(this.enable_collision_avoidance_);
       builder.append("}");
       return builder.toString();
    }

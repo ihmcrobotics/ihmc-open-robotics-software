@@ -25,6 +25,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private double jointVelocityWeight = -1.0;
    private double jointAccelerationWeight = -1.0;
 
+   private boolean disableCollisionAvoidance = false;
+   private boolean enableCollisionAvoidance = false;
+
    @Override
    public void clear()
    {
@@ -37,6 +40,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       privilegedGain = -1.0;
       jointVelocityWeight = -1.0;
       jointAccelerationWeight = -1.0;
+      disableCollisionAvoidance = false;
+      enableCollisionAvoidance = false;
    }
 
    @Override
@@ -71,6 +76,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       jointVelocityWeight = other.jointVelocityWeight;
       jointAccelerationWeight = other.jointAccelerationWeight;
+
+      disableCollisionAvoidance = other.disableCollisionAvoidance;
+      enableCollisionAvoidance = other.enableCollisionAvoidance;
    }
 
    @Override
@@ -107,6 +115,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       jointVelocityWeight = message.getJointVelocityWeight();
       jointAccelerationWeight = message.getJointAccelerationWeight();
+
+      disableCollisionAvoidance = message.getDisableCollisionAvoidance();
+      enableCollisionAvoidance = message.getEnableCollisionAvoidance();
    }
 
    public boolean hasPrivilegedRootJointPosition()
@@ -162,6 +173,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public double getJointAccelerationWeight()
    {
       return jointAccelerationWeight;
+   }
+
+   public boolean getDisableCollisionAvoidance()
+   {
+      return disableCollisionAvoidance;
+   }
+
+   public boolean getEnableCollisionAvoidance()
+   {
+      return enableCollisionAvoidance;
    }
 
    @Override
