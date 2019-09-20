@@ -1,8 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.Arrays;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,38 +14,70 @@ class TransferFunctionToStateSpaceConverterTest
    @Test
    void testTransferFunctionToStateSpaceConverter()
    {
+      boolean plotResponse = false;
+
       Polynomial numeratorPolynomial = new Polynomial(1.0);
       Polynomial denominatorPolynomial = new Polynomial(1.0, 1.0);
       checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
       double wn = 2.0 * Math.PI;
-      double zeta = 0.01;
+      double zeta = 0.1;
       numeratorPolynomial = new Polynomial(wn * wn);
       denominatorPolynomial = new Polynomial(1.0, 2.0 * zeta * wn, wn * wn);
-      checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
+      LinearDynamicSystem dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
 
-      ThreadTools.sleepForever();
+      double[] initialConditions = new double[] {1.0, 0.0};
+      if (plotResponse)
+         simulateAndPlot(denominatorPolynomial, dynamicSystem, initialConditions);
+
+      numeratorPolynomial = new Polynomial(1.2, 0.3, 1.07);
+      denominatorPolynomial = new Polynomial(2.2, 3.3, 4.7, 9.6);
+      dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
+
+      initialConditions = new double[] {1.0, 0.0, 0.0};
+      if (plotResponse)
+         simulateAndPlot(denominatorPolynomial, dynamicSystem, initialConditions);
+
+      numeratorPolynomial = new Polynomial(1.2, 0.3, 1.07, 3.3);
+      denominatorPolynomial = new Polynomial(2.2, 3.3, 4.7, 9.6);
+      dynamicSystem = checkTransferFunctionRemainsTheSame(numeratorPolynomial, denominatorPolynomial);
+
+      initialConditions = new double[] {1.0, 0.0, 0.0};
+      if (plotResponse)
+         simulateAndPlot(denominatorPolynomial, dynamicSystem, initialConditions);
+
+      if (plotResponse)
+         ThreadTools.sleepForever();
    }
 
-   private void checkTransferFunctionRemainsTheSame(Polynomial numeratorPolynomial, Polynomial denominatorPolynomial)
+   private LinearDynamicSystem checkTransferFunctionRemainsTheSame(Polynomial numeratorPolynomial, Polynomial denominatorPolynomial)
    {
       TransferFunction transferFunction = new TransferFunction(numeratorPolynomial, denominatorPolynomial);
       LinearDynamicSystem dynamicSystem = TransferFunctionToStateSpaceConverter.convertTransferFunctionToStateSpaceObservableCanonicalForm(transferFunction);
+      checkTransferFunctionsRemainTheSame(transferFunction, dynamicSystem);
 
-      System.out.println("dynamicSystem = " + dynamicSystem);
+      LinearDynamicSystem dynamicSystemTwo = TransferFunctionToStateSpaceConverter.convertTransferFunctionToStateSpaceControllableCanonicalForm(transferFunction);
+      checkTransferFunctionsRemainTheSame(transferFunction, dynamicSystemTwo);
 
+      return dynamicSystem;
+   }
+
+   private void checkTransferFunctionsRemainTheSame(TransferFunction transferFunction, LinearDynamicSystem dynamicSystem)
+   {
       TransferFunctionMatrix transferFunctionMatrix = dynamicSystem.getTransferFunctionMatrix();
       assertEquals(1, transferFunctionMatrix.getRows());
       assertEquals(1, transferFunctionMatrix.getColumns());
 
       TransferFunction transferFunctionTwo = transferFunctionMatrix.get(0, 0);
-
-      System.out.println("transferFunction = " + transferFunction);
-      System.out.println("transferFunctionTwo = " + transferFunctionTwo);
       assertTrue(transferFunction.epsilonEquals(transferFunctionTwo, 1.0e-7));
+   }
 
-      double[] initialConditions = new double[denominatorPolynomial.getOrder()];
-      initialConditions[0] = 1.0;
+   private void simulateAndPlot(Polynomial denominatorPolynomial, LinearDynamicSystem dynamicSystem, double[] initialConditions)
+   {
+      if (dynamicSystem.getOrder() != initialConditions.length)
+      {
+         throw new RuntimeException("dynamicSystem.getOrder() != initialConditions.length");
+      }
 
       double stepSize = 0.001;
       int numTicks = 5000;
@@ -79,7 +110,7 @@ class TransferFunctionToStateSpaceConverterTest
 
       fig.displayInJFrame();
 
-      if (denominatorPolynomial.getOrder() == 2)
+      if (dynamicSystem.getOrder() >= 2)
       {
          double[] xDot = new double[numTicks];
          for (int i = 0; i < numTicks; i++)
@@ -88,10 +119,10 @@ class TransferFunctionToStateSpaceConverterTest
          }
 
          MatlabChart phasePortrait = new MatlabChart(); // figure('Position',[100 100 640 480]);
-         phasePortrait.plot(x, xDot, "-r", 2.0f, "PhasePortrait"); // plot(x,y1,'-r','LineWidth',2);
+         phasePortrait.plot(x, xDot, "-r", 2.0f, "x vs. xDot"); // plot(x,y1,'-r','LineWidth',2);
          //      fig.plot(time, y2, ":k", 3.0f, "BAC"); // plot(x,y2,':k','LineWidth',3);
          phasePortrait.RenderPlot(); // First render plot before modifying
-         phasePortrait.title("Dynamic System Response"); // title('Stock 1 vs. Stock 2');
+         phasePortrait.title("Dynamic System Response: Phase Portrait"); // title('Stock 1 vs. Stock 2');
          //      fig.xlim(10, 100); // xlim([10 100]);
          //      fig.ylim(200, 300); // ylim([200 300]);
          phasePortrait.xlabel("x"); // xlabel('Days');
