@@ -1,8 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -14,7 +13,7 @@ public class EuclideanDistanceHeuristics extends CostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(FramePose3D pose)
+   protected double computeHeuristics(FramePose3DReadOnly pose)
    {
       return pose.getPositionDistance(goalPose);
    }
