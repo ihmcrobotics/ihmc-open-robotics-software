@@ -26,8 +26,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.RectangleEdge;
 
-import us.ihmc.commons.thread.ThreadTools;
-
 /**
  * Class for drawing Matlab looking charts using JFreeChart. Found at
  * https://stackoverflow.com/questions/38931111/how-to-make-plots-in-java-like-in-matlab-same-syntax
@@ -52,12 +50,12 @@ public class MatlabChart
    public void displayInJFrame()
    {
       JFrame jFrame = new JFrame();
-      
+
       ChartPanel chartPanel = new ChartPanel(chart);
       chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
       chartPanel.setBackground(Color.white);
       jFrame.add(chartPanel);
-      
+
       jFrame.pack();
       jFrame.setVisible(true);
    }
@@ -251,7 +249,7 @@ public class MatlabChart
    {
       CheckExists();
       File file = new File(fileName);
-      
+
       System.out.println("Saving chart to " + file.getAbsolutePath());
       try
       {
@@ -323,7 +321,7 @@ public class MatlabChart
       fig.legend("northeast"); // legend('AAPL','BAC','Location','northeast')
       fig.font("Helvetica", 15); // .. 'FontName','Helvetica','FontSize',15
       //fig.saveas("MyPlot.jpeg", 640, 480); // saveas(gcf,'MyPlot','jpeg');
-      
+
       fig.displayInJFrame();
    }
 }

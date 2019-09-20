@@ -140,6 +140,11 @@ public class LinearDynamicSystem
       return ret;
    }
 
+   public int getOrder()
+   {
+      return matrixA.getColumnDimension();
+   }
+
    public void setMatrixB(Matrix matrixB)
    {
       if (matrixB != null)
@@ -287,4 +292,5 @@ public class LinearDynamicSystem
       return "A = " + Arrays.deepToString(matrixA.getArray()) + "\nB = " + Arrays.deepToString(matrixB.getArray()) + "\nC = "
             + Arrays.deepToString(matrixC.getArray()) + "\nD = " + Arrays.deepToString(matrixD.getArray());
    }
+
 }

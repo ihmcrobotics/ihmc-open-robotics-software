@@ -2,8 +2,80 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import Jama.Matrix;
 
+/**
+ * Converts a TransferFunction to a LinearDynamicSystem using canoncial forms. 
+ * Uses the Controllable and Observable Canonical Forms found at
+ * https://lpsa.swarthmore.edu/Representations/SysRepTransformations/TF2SS.html
+ * 
+ * @author JerryPratt
+ */
 public class TransferFunctionToStateSpaceConverter
 {
+
+   public static LinearDynamicSystem convertTransferFunctionToStateSpaceControllableCanonicalForm(TransferFunction transferFunction)
+   {
+      double[] numeratorCoefficients = transferFunction.getNumeratorCoefficients();
+      double[] denominatorCoefficients = transferFunction.getDenominatorCoefficients();
+
+      int systemOrder = denominatorCoefficients.length - 1;
+      numeratorCoefficients = padZerosOnFront(numeratorCoefficients, denominatorCoefficients.length);
+
+      double a0 = denominatorCoefficients[0];
+      for (int i = 0; i < systemOrder; i++)
+      {
+         denominatorCoefficients[i] = denominatorCoefficients[i] / a0;
+      }
+
+      double[][] elementsA = new double[systemOrder][systemOrder];
+
+      for (int i = 0; i < systemOrder; i++)
+      {
+         for (int j = 0; j < systemOrder; j++)
+         {
+            if (i == systemOrder - 1)
+            {
+               elementsA[i][j] = -denominatorCoefficients[systemOrder - j];
+            }
+            else if (j == i + 1)
+               elementsA[i][j] = 1.0;
+            else
+               elementsA[i][j] = 0.0;
+         }
+      }
+
+      double[][] elementsB = new double[systemOrder][1];
+      for (int i = 0; i < systemOrder; i++)
+      {
+         if (i == systemOrder - 1)
+         {
+            elementsB[i][0] = 1.0;
+         }
+         else
+         {
+            elementsB[i][0] = 0.0;
+         }
+      }
+
+      double b0 = numeratorCoefficients[0];
+
+      double[][] elementsC = new double[1][systemOrder];
+      for (int i = 0; i < systemOrder; i++)
+      {
+         elementsC[0][i] = numeratorCoefficients[systemOrder - i] - b0 * denominatorCoefficients[systemOrder - i];
+      }
+
+      double[][] elementsD = new double[1][1];
+      elementsD[0][0] = b0;
+
+      Matrix matrixA = new Matrix(elementsA);
+      Matrix matrixB = new Matrix(elementsB);
+      Matrix matrixC = new Matrix(elementsC);
+      Matrix matrixD = new Matrix(elementsD);
+
+      LinearDynamicSystem linearDynamicSystem = new LinearDynamicSystem(matrixA, matrixB, matrixC, matrixD);
+
+      return linearDynamicSystem;
+   }
 
    public static LinearDynamicSystem convertTransferFunctionToStateSpaceObservableCanonicalForm(TransferFunction transferFunction)
    {
