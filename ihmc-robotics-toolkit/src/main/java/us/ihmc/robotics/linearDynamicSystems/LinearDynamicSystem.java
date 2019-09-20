@@ -142,7 +142,17 @@ public class LinearDynamicSystem
 
    public int getOrder()
    {
-      return matrixA.getColumnDimension();
+      return matrixA.getRowDimension();
+   }
+
+   public int getInputSize()
+   {
+      return matrixB.getRowDimension();
+   }
+
+   public int getOutputSize()
+   {
+      return matrixC.getRowDimension();
    }
 
    public void setMatrixB(Matrix matrixB)
@@ -233,6 +243,57 @@ public class LinearDynamicSystem
       return ret;
    }
 
+   public double[] eulerIntegrateOneStep(double[] currentState, double[] input, double stepSize)
+   {
+      Matrix currentStateMatrix = new Matrix(currentState, currentState.length);
+      Matrix inputMatrix = new Matrix(input, input.length);
+      
+      Matrix nextStateMatrix = eulerIntegrateOneStep(currentStateMatrix, inputMatrix, stepSize);
+
+      double[] nextState = new double[currentState.length];
+      copyArray(nextStateMatrix, nextState);
+
+      return nextState;
+   }
+
+   public Matrix eulerIntegrateOneStep(Matrix currentState, Matrix input, double stepSize)
+   {
+      Matrix nextState = currentState.copy();
+
+      Matrix aTimesX = matrixA.times(currentState);
+
+      Matrix bTimesU = matrixB.times(input);
+      Matrix aTimesXPlusBTimesU = aTimesX.plus(bTimesU);
+
+      Matrix aTimesXPlusBTimesUTimesStepSize = aTimesXPlusBTimesU.times(stepSize);
+
+      nextState = nextState.plus(aTimesXPlusBTimesUTimesStepSize);
+      
+      return nextState;
+   }
+
+   public Matrix getOutputFromState(Matrix state, Matrix input)
+   {
+      Matrix cTimesX = matrixC.times(state);
+      Matrix dTimesU = matrixD.times(input);
+      
+      Matrix output = cTimesX.plus(dTimesU);
+      return output;
+   }
+
+   public double[] getOutputFromState(double[] state, double[] input)
+   {
+      Matrix stateMatrix = new Matrix(state, state.length);
+      Matrix inputMatrix = new Matrix(input, input.length);
+      
+      Matrix outputMatrix = getOutputFromState(stateMatrix, inputMatrix);
+
+      double[] output = new double[outputMatrix.getRowDimension()];
+      copyArray(outputMatrix, output);
+
+      return output;
+   }
+   
    public double[][] simulateInitialConditions(double[] initialConditions, double stepSize, int numTicks)
    {
       int order = matrixA.getRowDimension();
@@ -245,7 +306,6 @@ public class LinearDynamicSystem
       // Just use Euler integrations for now:
       double[][] ret = new double[numTicks][order];
       Matrix state = new Matrix(order, 1);
-
       copyArray(initialConditions, state);
 
       for (int i = 0; i < numTicks; i++)
