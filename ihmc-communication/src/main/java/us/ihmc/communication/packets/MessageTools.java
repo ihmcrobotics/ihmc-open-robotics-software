@@ -47,8 +47,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -56,6 +58,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -882,6 +885,102 @@ public class MessageTools
       interplateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
 
       return interplateOutputStatus;
+   }
+
+   /**
+    * Interpolates from {@code start} to {@code end} given {@code alpha} &in;[0,1].
+    * 
+    * @param start    the value when {@code alpha = 0}. Not modified.
+    * @param end      the value when {@code alpha = 1}. Not modified.
+    * @param alpha    the interpolation variable.
+    * @param alphaDot the time-derivative of {@code alpha}.
+    * @return the result of the interpolation.
+    */
+   public static KinematicsToolboxOutputStatus interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha,
+                                                           double alphaDot)
+   {
+      KinematicsToolboxOutputStatus interpolated = new KinematicsToolboxOutputStatus();
+      interpolate(start, end, alpha, alphaDot, interpolated);
+      return interpolated;
+   }
+
+   /**
+    * Interpolates from {@code start} to {@code end} given {@code alpha} &in;[0,1].
+    * 
+    * @param start              the value when {@code alpha = 0}. Not modified.
+    * @param end                the value when {@code alpha = 1}. Not modified.
+    * @param alpha              the interpolation variable.
+    * @param alphaDot           the time-derivative of {@code alpha}.
+    * @param interpolatedToPack the message used to store the result of the interpolation. Modified.
+    */
+   public static void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha, double alphaDot,
+                                  KinematicsToolboxOutputStatus interpolatedToPack)
+   {
+      if (start.getJointNameHash() != end.getJointNameHash())
+         throw new IllegalArgumentException("start and end are not compatible");
+
+      interpolatedToPack.setJointNameHash(start.getJointNameHash());
+
+      // 1-DoF joints:
+      Float jointAnglesStart = start.getDesiredJointAngles();
+      Float jointAnglesEnd = end.getDesiredJointAngles();
+      Float jointAnglesInterpolated = interpolatedToPack.getDesiredJointAngles();
+      Float jointVelocitiesStart = start.getDesiredJointVelocities();
+      Float jointVelocitiesEnd = end.getDesiredJointVelocities();
+      Float jointVelocitiesInterpolated = interpolatedToPack.getDesiredJointVelocities();
+
+      if (jointAnglesStart.size() != jointAnglesEnd.size() || jointVelocitiesStart.size() != jointVelocitiesEnd.size())
+         throw new IllegalArgumentException("start and end are not compatible");
+
+      jointAnglesInterpolated.reset();
+      jointVelocitiesInterpolated.reset();
+
+      for (int i = 0; i < jointAnglesStart.size(); i++)
+      {
+         float q = (float) EuclidCoreTools.interpolate(jointAnglesStart.get(i), jointAnglesEnd.get(i), alpha);
+         jointAnglesInterpolated.add(q);
+      }
+
+      for (int i = 0; i < jointVelocitiesStart.size(); i++)
+      {
+         double qDot = alphaDot * (jointAnglesEnd.get(i) - jointAnglesStart.get(i));
+         qDot += EuclidCoreTools.interpolate(jointVelocitiesStart.get(i), jointVelocitiesEnd.get(i), alpha);
+         jointVelocitiesInterpolated.add((float) qDot);
+      }
+
+      // Root joint:
+      Quaternion orientationStart = start.getDesiredRootOrientation();
+      Quaternion orientationEnd = end.getDesiredRootOrientation();
+      Quaternion orientationInterpolated = interpolatedToPack.getDesiredRootOrientation();
+      Vector3D positionStart = start.getDesiredRootTranslation();
+      Vector3D positionEnd = end.getDesiredRootTranslation();
+      Vector3D positionInterpolated = interpolatedToPack.getDesiredRootTranslation();
+
+      Vector3D angularVelocityStart = start.getDesiredRootAngularVelocity();
+      Vector3D angularVelocityEnd = end.getDesiredRootAngularVelocity();
+      Vector3D angularVelocityInterpolated = interpolatedToPack.getDesiredRootAngularVelocity();
+      Vector3D linearVelocityEnd = end.getDesiredRootLinearVelocity();
+      Vector3D linearVelocityStart = start.getDesiredRootLinearVelocity();
+      Vector3D linearVelocityInterpolated = interpolatedToPack.getDesiredRootLinearVelocity();
+
+      // Do configuration
+      orientationInterpolated.interpolate(orientationStart, orientationEnd, alpha);
+      positionInterpolated.interpolate(positionStart, positionEnd, alpha);
+
+      // Root joint velocity
+      Vector4D quaternionDot = new Vector4D();
+      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+      quaternionDot.sub(orientationEnd, orientationStart);
+      quaternionDot.scale(alphaDot);
+      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
+      angularVelocityInterpolated.scaleAdd(1.0 - alpha, angularVelocityStart, angularVelocityInterpolated);
+      angularVelocityInterpolated.scaleAdd(alpha, angularVelocityEnd, angularVelocityInterpolated);
+
+      linearVelocityInterpolated.sub(positionEnd, positionStart);
+      linearVelocityInterpolated.scale(alphaDot);
+      orientationInterpolated.inverseTransform(linearVelocityInterpolated);
+      linearVelocityInterpolated.scaleAdd(1.0 - alpha, linearVelocityStart, linearVelocityInterpolated);
+      linearVelocityInterpolated.scaleAdd(alpha, linearVelocityEnd, linearVelocityInterpolated);
    }
 
    /**
