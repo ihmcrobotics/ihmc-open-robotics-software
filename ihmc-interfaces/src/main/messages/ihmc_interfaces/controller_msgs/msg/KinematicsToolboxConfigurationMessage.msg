@@ -35,3 +35,9 @@ float64 joint_velocity_weight -1
 # Specifying how much high joint acceleration values should be penalized in the optimization problem.
 # A value of -1 will result in the solver using its default value.
 float64 joint_acceleration_weight -1
+
+# If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+# In case it has undesirable effects, use this flag to disable it.
+bool disable_collision_avoidance false
+# In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+bool enable_collision_avoidance false

@@ -29,7 +29,7 @@ mainDependencies {
    compile "org.boofcv:recognition:0.24.1"
 
    compile("us.ihmc:ihmc-video-codecs:2.1.5")
-   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
    compile("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

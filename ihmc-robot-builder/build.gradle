@@ -15,7 +15,7 @@ ihmc {
 mainDependencies {
    compile("io.javaslang:javaslang:2.0.3")
 
-   compile("us.ihmc:euclid:0.12.0")
+   compile("us.ihmc:euclid:0.12.1")
    compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
    compile("us.ihmc:ihmc-robot-description:0.12.7")
    compile("us.ihmc:ihmc-graphics-description:0.12.12")
