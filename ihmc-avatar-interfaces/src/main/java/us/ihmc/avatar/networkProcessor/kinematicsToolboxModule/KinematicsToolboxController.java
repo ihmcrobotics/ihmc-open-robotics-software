@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -112,7 +113,7 @@ public class KinematicsToolboxController extends ToolboxController
     * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final Map<Integer, OneDoFJointBasics> jointHashCodeMap = new HashMap<>();
+   private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center of

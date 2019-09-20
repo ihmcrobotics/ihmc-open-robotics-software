@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.List;
-import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -10,6 +9,7 @@ import org.ejml.ops.NormOps;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
@@ -200,7 +200,7 @@ public class KinematicsToolboxHelper
     * @param oneDoFJoints                       the one degree-of-freedom joints to update. Modified.
     */
    static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
-                                                            FloatingJointBasics desiredRootJoint, Map<Integer, OneDoFJointBasics> jointHashCodeMap)
+                                                            FloatingJointBasics desiredRootJoint, TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap)
    {
       boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
 
