@@ -50,8 +50,11 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -140,7 +143,7 @@ public class MessageTools
     * </p>
     * 
     * @param desiredPosition the position that center of mass should reach. The data is assumed to be
-    *           expressed in world frame. Not modified.
+    *                        expressed in world frame. Not modified.
     */
    public static KinematicsToolboxCenterOfMassMessage createKinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
    {
@@ -184,9 +187,9 @@ public class MessageTools
     * Note that this constructor also sets up the selection matrix for linear control only.
     * </p>
     * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
+    * @param endEffector     the end-effector to solver for in the {@code KinematicsToolboxController}.
     * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    *                        reach. The data is assumed to be expressed in world frame. Not modified.
     */
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition)
    {
@@ -213,9 +216,11 @@ public class MessageTools
     * Note that this constructor also sets up the selection matrix for angular control only.
     * </p>
     * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
+    * @param endEffector        the end-effector to solver for in the
+    *                           {@code KinematicsToolboxController}.
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    *                           reach. The data is assumed to be expressed in world frame. Not
+    *                           modified.
     */
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, QuaternionReadOnly desiredOrientation)
    {
@@ -244,11 +249,14 @@ public class MessageTools
     * control frame can be specified.
     * </p>
     * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param endEffector        the end-effector to solver for in the
+    *                           {@code KinematicsToolboxController}.
+    * @param desiredPosition    the position that {@code endEffector.getBodyFixedFrame()}'s origin
+    *                           should reach. The data is assumed to be expressed in world frame. Not
+    *                           modified.
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    *                           reach. The data is assumed to be expressed in world frame. Not
+    *                           modified.
     */
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Point3DReadOnly desiredPosition,
                                                                                            QuaternionReadOnly desiredOrientation)
@@ -268,13 +276,16 @@ public class MessageTools
     * control frame can be specified.
     * </p>
     * 
-    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
-    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param endEffector        the end-effector to solver for in the
+    *                           {@code KinematicsToolboxController}.
+    * @param controlFrame       specifies the location and orientation of interest for controlling the
+    *                           end-effector.
+    * @param desiredPosition    the position that {@code endEffector.getBodyFixedFrame()}'s origin
+    *                           should reach. The data is assumed to be expressed in world frame. Not
+    *                           modified.
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
-    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    *                           reach. The data is assumed to be expressed in world frame. Not
+    *                           modified.
     */
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, ReferenceFrame controlFrame,
                                                                                            Point3DReadOnly desiredPosition,
@@ -443,16 +454,24 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
-                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
-                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(),
+                                     message.getScanHeight(),
+                                     message.getSweepYawMin(),
+                                     message.getSweepYawMax(),
+                                     message.getHeightPitchMin(),
+                                     message.getHeightPitchMax(),
+                                     message.getTimeIncrement(),
+                                     message.getMinRange(),
+                                     message.getMaxRange(),
+                                     message.getScanTime(),
+                                     message.getTimestamp());
    }
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
     * {@link TByteArrayList#reset()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(TByteArrayList source, TByteArrayList destination)
@@ -472,7 +491,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link TDoubleArrayList#reset()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(TDoubleArrayList source, TDoubleArrayList destination)
@@ -492,7 +511,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link TFloatArrayList#reset()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(TFloatArrayList source, TFloatArrayList destination)
@@ -512,7 +531,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link TIntArrayList#reset()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(TIntArrayList source, TIntArrayList destination)
@@ -532,7 +551,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link TLongArrayList#reset()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(TLongArrayList source, TLongArrayList destination)
@@ -552,11 +571,11 @@ public class MessageTools
     * Performs a deep copy of the data from {@code source} to {@code destination} after calling
     * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
-    * @param source the list containing the data to copy. Not modified.
+    * @param source      the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
-    * @param <T> Should be either {@code Enum}, {@code StringBuilder}, or {@code Settable<T>}.
+    * @param <T>         Should be either {@code Enum}, {@code StringBuilder}, or {@code Settable<T>}.
     * @throws IllegalArgumentException if the type {@code T} is none of the following: {@code Enum},
-    *            {@code StringBuilder}, {@code Settable<T>}.
+    *                                  {@code StringBuilder}, {@code Settable<T>}.
     */
    @SuppressWarnings("unchecked")
    public static <T> void copyData(List<T> source, RecyclingArrayList<T> destination)
@@ -600,7 +619,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
-    * @param source the array containing the data to copy. Not modified.
+    * @param source      the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayList<T> destination)
@@ -628,7 +647,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
-    * @param source the array containing the data to copy. Not modified.
+    * @param source      the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(String[] source, RecyclingArrayList<StringBuilder> destination)
@@ -650,7 +669,7 @@ public class MessageTools
     * Copies data from {@code source} to {@code destination} after calling
     * {@link RecyclingArrayList#clear()} on {@code destination}.
     * 
-    * @param source the array containing the data to copy. Not modified.
+    * @param source      the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
    public static void copyData(StringBuilder[] source, RecyclingArrayList<StringBuilder> destination)
@@ -746,6 +765,20 @@ public class MessageTools
       return colors;
    }
 
+   /**
+    * Reads desired configuration and velocity from {@code kinematicsToolboxOutputStatus} and updates
+    * the state of the given joints.
+    * <p>
+    * Note that for {@code rootJoint} both the linear and angular velocities are assumed to be
+    * expressed in the joint's local coordinate system.
+    * </p>
+    * 
+    * @param kinematicsToolboxOutputStatus the message to get data from. Not modified.
+    * @param rootJointToUpdate             the floating to update configuration & velocity of.
+    *                                      Modified.
+    * @param jointsToUpdate                the 1-DoF joints to update configuration & velocity of.
+    *                                      Modified.
+    */
    public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJointToUpdate,
                                               OneDoFJointBasics[] jointsToUpdate)
    {
@@ -756,30 +789,69 @@ public class MessageTools
 
       for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointAngles().size(); i++)
          jointsToUpdate[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
+      for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointVelocities().size(); i++)
+         jointsToUpdate[i].setQd(kinematicsToolboxOutputStatus.getDesiredJointVelocities().get(i));
 
-      rootJointToUpdate.setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-      rootJointToUpdate.setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      Vector3D desiredRootTranslation = kinematicsToolboxOutputStatus.getDesiredRootTranslation();
+      Quaternion desiredRootOrientation = kinematicsToolboxOutputStatus.getDesiredRootOrientation();
+      Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatus.getDesiredRootLinearVelocity();
+      Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatus.getDesiredRootAngularVelocity();
+      rootJointToUpdate.getJointPose().set(desiredRootTranslation, desiredRootOrientation);
+      rootJointToUpdate.getJointTwist().set(desiredRootAngularVelocity, desiredRootLinearVelocity);
    }
 
-   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJoint,
-                                            OneDoFJointBasics[] newJointData)
+   /**
+    * Packs the configuration and velocity from {@code rootJoint} and each joint in
+    * {@code newJonitData} into {@code kinematicsToolboxOutputStatusToPack}.
+    * <p>
+    * Note that for {@code rootJoint} both the linear and angular velocities are expressed in the
+    * joint's local coordinate system.
+    * </p>
+    * 
+    * @param kinematicsToolboxOutputStatusToPack the message in which the desired joint state
+    *                                            (configuration & velocity) is to be sorted. Modified.
+    * @param rootJoint                           the floating joint to get data from. Not modified.
+    * @param newJointData                        the 1-DoF joints to get data from. Not modified.
+    */
+   public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatusToPack, FloatingJointReadOnly rootJoint,
+                                            OneDoFJointReadOnly[] newJointData)
    {
       int jointNameHash = Arrays.hashCode(newJointData);
 
-      if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
+      if (jointNameHash != kinematicsToolboxOutputStatusToPack.getJointNameHash())
          throw new RuntimeException("The robots are different.");
 
-      kinematicsToolboxOutputStatus.getDesiredJointAngles().reset();
+      kinematicsToolboxOutputStatusToPack.getDesiredJointAngles().reset();
+      kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().reset();
 
       for (int i = 0; i < newJointData.length; i++)
       {
-         kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getQ());
+         OneDoFJointReadOnly joint = newJointData[i];
+         kinematicsToolboxOutputStatusToPack.getDesiredJointAngles().add((float) joint.getQ());
+         kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().add((float) joint.getQd());
       }
+
+      Vector3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootTranslation();
+      Quaternion desiredRootOrientation = kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation();
+      Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity();
+      Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity();
 
       if (rootJoint != null)
       {
-         kinematicsToolboxOutputStatus.getDesiredRootTranslation().set(rootJoint.getJointPose().getPosition());
-         kinematicsToolboxOutputStatus.getDesiredRootOrientation().set(rootJoint.getJointPose().getOrientation());
+         Pose3DReadOnly jointPose = rootJoint.getJointPose();
+         TwistReadOnly jointTwist = rootJoint.getJointTwist();
+
+         desiredRootTranslation.set(jointPose.getPosition());
+         desiredRootOrientation.set(jointPose.getOrientation());
+         desiredRootLinearVelocity.set(jointTwist.getLinearPart());
+         desiredRootAngularVelocity.set(jointTwist.getAngularPart());
+      }
+      else
+      {
+         desiredRootTranslation.setToZero();
+         desiredRootOrientation.setToZero();
+         desiredRootLinearVelocity.setToZero();
+         desiredRootAngularVelocity.setToZero();
       }
    }
 
@@ -824,14 +896,14 @@ public class MessageTools
     * to send the privileged configuration as soon as possible.
     * </p>
     * 
-    * @param rootJointPosition the privileged root joint position. Not modified.
+    * @param rootJointPosition    the privileged root joint position. Not modified.
     * @param rootJointOrientation the privileged root joint orientation. Not modified.
-    * @param jointHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
-    *           {@link OneDoFJointBasics#hashCode()}. Not modified.
-    * @param jointAngles the privileged joint angles. Not modified.
+    * @param jointHashCodes       allows to safely identify to which joint each angle in
+    *                             {@link #privilegedJointAngles} belongs to. The hash code can be
+    *                             obtained from {@link OneDoFJointBasics#hashCode()}. Not modified.
+    * @param jointAngles          the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
-    *            are different.
+    *                                  are different.
     */
    public static void packPrivilegedRobotConfiguration(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage,
                                                        Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, int[] jointHashCodes,
@@ -855,11 +927,11 @@ public class MessageTools
     * </p>
     * 
     * @param jointHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The hash code can be obtained from
-    *           {@link OneDoFJointBasics#hashCode()}. Not modified.
-    * @param jointAngles the privileged joint angles. Not modified.
+    *                       {@link #privilegedJointAngles} belongs to. The hash code can be obtained
+    *                       from {@link OneDoFJointBasics#hashCode()}. Not modified.
+    * @param jointAngles    the privileged joint angles. Not modified.
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
-    *            are different.
+    *                                  are different.
     */
    public static void packPrivilegedJointAngles(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage, int[] jointHashCodes,
                                                 float[] jointAngles)
@@ -914,7 +986,7 @@ public class MessageTools
       scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
       scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
    }
-   
+
    public static Point3D[] unpackScanPoint3ds(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
       int numberOfScanPoints = stereoVisionPointCloudMessage.point_cloud_.size() / 3;
