@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
@@ -46,9 +47,9 @@ public abstract class CostToGoHeuristics
       return weight.getValue() * computeHeuristics(pose);
    }
 
-   abstract double computeHeuristics(FramePose3D pose);
+   abstract double computeHeuristics(FramePose3DReadOnly pose);
 
-   public void setGoalPose(FramePose3D goalPose)
+   public void setGoalPose(FramePose3DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
    }

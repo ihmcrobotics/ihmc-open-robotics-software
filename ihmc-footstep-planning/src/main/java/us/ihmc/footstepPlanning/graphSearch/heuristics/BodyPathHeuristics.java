@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -28,7 +29,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(FramePose3D pose)
+   protected double computeHeuristics(FramePose3DReadOnly pose)
    {
       Pose3D closestPointOnPath = new Pose3D();
 
@@ -60,7 +61,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    }
 
 
-   private double computeReferenceGoalYaw(FramePose3D pose, double pathHeading)
+   private double computeReferenceGoalYaw(FramePose3DReadOnly pose, double pathHeading)
    {
       double distanceToGoal = pose.getPosition().distanceXY(goalPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnBodyPathProximity();
