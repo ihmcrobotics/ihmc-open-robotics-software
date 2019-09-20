@@ -785,6 +785,9 @@ public class MessageTools
    public static void unpackDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingJointBasics rootJointToUpdate,
                                               OneDoFJointBasics[] jointsToUpdate)
    {
+      if (kinematicsToolboxOutputStatus.getDesiredJointAngles().isEmpty())
+         return;
+
       int jointNameHash = Arrays.hashCode(jointsToUpdate);
 
       if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
