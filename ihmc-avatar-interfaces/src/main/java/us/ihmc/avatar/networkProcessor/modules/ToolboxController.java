@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -15,7 +16,7 @@ public abstract class ToolboxController
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final StatusMessageOutputManager statusOutputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
-   
+
    private ScheduledFuture<?> futureToListenTo;
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
@@ -26,8 +27,7 @@ public abstract class ToolboxController
    }
 
    /**
-    * Request this toolbox controller to run {@link #initialize} on the next call of
-    * {@link #update()}.
+    * Request this toolbox controller to run {@link #initialize} on the next call of {@link #update()}.
     */
    public void requestInitialize()
    {
@@ -37,11 +37,11 @@ public abstract class ToolboxController
    /**
     * Initializes once and run the {@link #updateInternal()} of this toolbox controller only if the
     * initialization succeeded.
-    * @throws Exception 
     * 
+    * @throws Exception
     * @see #hasBeenInitialized() The initialization state of this toolbox controller.
     */
-   public void update() 
+   public void update()
    {
       if (initialize.getBooleanValue())
       {
@@ -61,7 +61,7 @@ public abstract class ToolboxController
             e.printStackTrace();
          }
       }
-      
+
       if (futureToListenTo != null)
       {
          if (futureToListenTo.isDone())
@@ -78,15 +78,25 @@ public abstract class ToolboxController
             {
                exception.getCause().printStackTrace();
             }
-            
+
             throw new RuntimeException("Toolbox controller thread crashed.");
          }
       }
    }
-   
+
    public void setFutureToListenTo(ScheduledFuture<?> future)
    {
       futureToListenTo = future;
+   }
+
+   /**
+    * Implement this method to receive notifications when the state of this toolbox is changing.
+    * 
+    * @param newState the new state this toolbox is about to enter.
+    */
+   public void notifyToolboxStateChange(ToolboxState newState)
+   {
+
    }
 
    /**

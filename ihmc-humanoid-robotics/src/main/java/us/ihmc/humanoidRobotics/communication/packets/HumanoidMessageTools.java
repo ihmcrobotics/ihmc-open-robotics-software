@@ -79,6 +79,7 @@ import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.msg.dds.QueueableMessage;
 import controller_msgs.msg.dds.ReachingManifoldMessage;
 import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
@@ -100,6 +101,7 @@ import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WallPosePacket;
 import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
@@ -806,7 +808,8 @@ public class HumanoidMessageTools
    }
 
    public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                                             Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+                                                                                             Vector3DReadOnly desiredAngularVelocity,
+                                                                                             ReferenceFrame trajectoryFrame)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
@@ -1032,15 +1035,18 @@ public class HumanoidMessageTools
     * Use this constructor to go straight to the given end point. The trajectory and data frame are set
     * to world frame Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
-    * @param trajectoryTime how long it takes to reach the desired height.
-    * @param desiredHeight  desired pelvis height expressed in world frame.
-    * @param desiredHeightRate the desired rate of change of height when the  desired height is reached.
+    * @param trajectoryTime    how long it takes to reach the desired height.
+    * @param desiredHeight     desired pelvis height expressed in world frame.
+    * @param desiredHeightRate the desired rate of change of height when the desired height is reached.
     */
    public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight, double desiredHeightRate)
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.getEuclideanTrajectory()
-             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight), new Vector3D(0.0, 0.0, desiredHeightRate), ReferenceFrame.getWorldFrame()));
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime,
+                                                                        new Point3D(0.0, 0.0, desiredHeight),
+                                                                        new Vector3D(0.0, 0.0, desiredHeightRate),
+                                                                        ReferenceFrame.getWorldFrame()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
@@ -1796,6 +1802,46 @@ public class HumanoidMessageTools
                                         trajectoryReferenceFrame.hashCode());
    }
 
+   public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   {
+      configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getRightArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getLeftFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getRightFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getLeftHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getRightHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getSpineTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
+   }
+
+   public static void configureForStreaming(JointspaceTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   {
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+   }
+
+   public static void configureForStreaming(EuclideanTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   {
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+   }
+
+   public static void configureForStreaming(SO3TrajectoryMessage messageToModify, double streamIntegrationDuration)
+   {
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+   }
+
+   public static void configureForStreaming(SE3TrajectoryMessage messageToModify, double streamIntegrationDuration)
+   {
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+   }
+
+   public static void configureForStreaming(QueueableMessage messageToModify, double streamIntegrationDuration)
+   {
+      messageToModify.setExecutionMode(ExecutionMode.STREAM.toByte());
+      messageToModify.setStreamIntegrationDuration(streamIntegrationDuration);
+   }
+
    public static DetectedObjectPacket createDetectedObjectPacket(Pose3D pose, int id)
    {
       DetectedObjectPacket message = new DetectedObjectPacket();
@@ -1965,8 +2011,8 @@ public class HumanoidMessageTools
 
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
 
       if (keyFrameTimes.size() != keyFramePoses.size())
          throw new RuntimeException("Inconsistent list lengths: keyFrameTimes.size() = " + keyFrameTimes.size() + ", keyFramePoses.size() = "
