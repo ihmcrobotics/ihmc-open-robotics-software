@@ -1,8 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -43,13 +45,22 @@ public class KSTStreamingState implements State
    private final RigidBodyBasics pelvis;
    private final RigidBodyBasics chest;
 
-   private YoBoolean isStreaming;
+   private final YoBoolean isStreaming, wasStreaming;
+   private final YoBoolean isRateLimiting;
+   private final YoDouble rateLimitLinear, rateLimitAngular;
 
-   private YoDouble defaultLinearWeight, defaultAngularWeight;
+   private final YoDouble defaultLinearWeight, defaultAngularWeight;
+
+   private final YoDouble streamingStartTime;
+   private final YoDouble streamingBlendingDuration;
+   private final KinematicsToolboxOutputStatus initialRobotState, blendedRobotState;
+
+   private final YoPIDSE3Gains ikSolverGains;
 
    public KSTStreamingState(KSTTools tools)
    {
       this.tools = tools;
+      ikSolverGains = tools.getIKController().getDefaultGains();
       configurationMessage.setJointVelocityWeight(10.0);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
@@ -76,8 +87,22 @@ public class KSTStreamingState implements State
 
       timeSinceLastMessageToController = new YoDouble("timeSinceLastMessageToController", registry);
       publishingPeriod = new YoDouble("publishingPeriod", registry);
-      publishingPeriod.set(2.0 * tools.getWalkingControllerPeriod());
+      publishingPeriod.set(10.0 * tools.getWalkingControllerPeriod());
+
       isStreaming = new YoBoolean("isStreaming", registry);
+      wasStreaming = new YoBoolean("wasStreaming", registry);
+      isRateLimiting = new YoBoolean("isRateLimiting", registry);
+      isRateLimiting.set(true);
+      rateLimitLinear = new YoDouble("rateLimitLinear", registry);
+      rateLimitLinear.set(2.0);
+      rateLimitAngular = new YoDouble("rateLimitAngular", registry);
+      rateLimitAngular.set(35.0);
+
+      streamingStartTime = new YoDouble("steamingStartTime", registry);
+      streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
+      streamingBlendingDuration.set(5.0);
+      initialRobotState = new KinematicsToolboxOutputStatus(tools.getIKController().getSolution());
+      blendedRobotState = new KinematicsToolboxOutputStatus(tools.getIKController().getSolution());
    }
 
    public void setOutputPublisher(OutputPublisher outputPublisher)
@@ -89,11 +114,10 @@ public class KSTStreamingState implements State
    public void onEntry()
    {
       timeSinceLastMessageToController.set(Double.POSITIVE_INFINITY);
-      YoPIDSE3Gains defaultGains = tools.getIKController().getDefaultGains();
-      defaultGains.setPositionProportionalGains(50.0);
-      defaultGains.setPositionMaxFeedbackAndFeedbackRate(2.0, Double.POSITIVE_INFINITY);
-      defaultGains.setOrientationProportionalGains(50.0);
-      defaultGains.setOrientationMaxFeedbackAndFeedbackRate(35.0, Double.POSITIVE_INFINITY);
+      ikSolverGains.setPositionProportionalGains(50.0);
+      ikSolverGains.setOrientationProportionalGains(50.0);
+      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(rateLimitLinear.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(rateLimitAngular.getValue(), Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
       ikCommandInputManager.submitMessage(configurationMessage);
 
@@ -128,15 +152,36 @@ public class KSTStreamingState implements State
          isStreaming.set(latestInput.getStreamToController());
       }
 
+      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(rateLimitLinear.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(rateLimitAngular.getValue(), Double.POSITIVE_INFINITY);
       tools.getIKController().updateInternal();
 
       if (isStreaming.getValue())
       {
+         if (!wasStreaming.getValue())
+         {
+            tools.getCurrentState(initialRobotState);
+            streamingStartTime.set(timeInState);
+         }
+
+         double timeInBlending = timeInState - streamingStartTime.getValue();
+
          timeSinceLastMessageToController.add(tools.getToolboxControllerPeriod());
 
          if (timeSinceLastMessageToController.getValue() >= publishingPeriod.getValue())
          {
-            outputPublisher.publish(tools.convertIKOutput());
+            if (timeInBlending < streamingBlendingDuration.getValue())
+            {
+               double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
+               double alphaDot = 1.0 / streamingBlendingDuration.getValue();
+               MessageTools.interpolate(initialRobotState, tools.getIKController().getSolution(), alpha, alphaDot, blendedRobotState);
+               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(blendedRobotState));
+            }
+            else
+            {
+               outputPublisher.publish(tools.convertIKOutput());
+            }
+
             timeSinceLastMessageToController.set(0.0);
          }
       }
@@ -144,6 +189,8 @@ public class KSTStreamingState implements State
       {
          timeSinceLastMessageToController.set(Double.POSITIVE_INFINITY);
       }
+
+      wasStreaming.set(isStreaming.getValue());
    }
 
    private void setDefaultWeightIfNeeded(SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix)
