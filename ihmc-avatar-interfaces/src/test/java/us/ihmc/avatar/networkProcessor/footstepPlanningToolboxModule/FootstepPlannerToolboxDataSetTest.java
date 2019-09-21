@@ -428,7 +428,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return footstepPlan;
    }
 
-   private String getTimeoutFlag()
+   protected String getTimeoutFlag()
    {
       return getPlannerType().toString().toLowerCase() + "_timeout";
    }
