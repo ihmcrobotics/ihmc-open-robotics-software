@@ -716,7 +716,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
                                                          goalNodes.get(nodeQuadrant).getYIndex(nodeQuadrant), goalNodes.get(nodeQuadrant).getYawIndex(),
                                                          parentNode);
 
-            if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, endNode))
+            if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, parentNode))
                break;
 
             endNode = nodeAtGoal;
