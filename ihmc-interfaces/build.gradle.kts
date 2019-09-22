@@ -61,7 +61,7 @@ tasks.create("generateMessages") {
       var foundDependency = false
 
       copy {
-         for (file in configurations.compile.get().files)
+         for (file in configurations.api.get().files)
          {
             if (file.name.contains("ros2-common-interfaces"))
             {
