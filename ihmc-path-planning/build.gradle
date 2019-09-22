@@ -14,43 +14,43 @@ ihmc {
 }
 
 mainDependencies {
-   compile("org.jgrapht:jgrapht-core:0.9.0")
+   api("org.jgrapht:jgrapht-core:0.9.0")
 
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:euclid-frame:0.12.1")
-   compile("us.ihmc:euclid-shape:0.12.1")
-   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-convex-optimization-adapter:source")
-   compile("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:euclid-frame:0.12.1")
+   api("us.ihmc:euclid-shape:0.12.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-convex-optimization-adapter:source")
+   api("us.ihmc:robot-environment-awareness:source")
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("data-sets")
 
-   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
-   compile("us.ihmc:robot-environment-awareness-application:source")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:robot-environment-awareness-application:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-robot-models-visualizers:source")
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
    compile ihmc.sourceSetProject("data-sets")
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:robot-environment-awareness-application:source")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:robot-environment-awareness-application:source")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 
 dataSetsDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:simulation-construction-set-tools:source")
-   compile("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:robot-environment-awareness:source")
 }
 
 task updateDataSetList {

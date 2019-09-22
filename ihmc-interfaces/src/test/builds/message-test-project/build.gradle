@@ -29,8 +29,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:ihmc-pub-sub:0.10.2")
-   compile("us.ihmc:ros2-common-interfaces:0.13.4")
+   api("us.ihmc:ihmc-pub-sub:0.10.2")
+   api("us.ihmc:ros2-common-interfaces:0.13.4")
 }
 
 def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
