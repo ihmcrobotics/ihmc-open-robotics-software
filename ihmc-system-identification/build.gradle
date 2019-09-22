@@ -13,17 +13,17 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid:0.12.1")
-   compile("org.ddogleg:ddogleg:0.7")
+   api("us.ihmc:euclid:0.12.1")
+   api("org.ddogleg:ddogleg:0.7")
 
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-graphics-description:0.12.12")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

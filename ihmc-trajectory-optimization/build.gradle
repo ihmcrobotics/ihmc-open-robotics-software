@@ -13,17 +13,17 @@ ihmc {
 }
 
 mainDependencies {
-   compile("gov.nist.math:jama:1.0.3")
-   compile("org.ejml:dense64:0.30")
-   compile("org.ejml:core:0.30")
+   api("gov.nist.math:jama:1.0.3")
+   api("org.ejml:dense64:0.30")
+   api("org.ejml:core:0.30")
 
-   compile("us.ihmc:euclid:0.12.1")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 
