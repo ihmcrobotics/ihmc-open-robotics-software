@@ -94,7 +94,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController()
+   public void setupWithWalkingController(RobotController... additionalGhostControllers)
    {
       DRCRobotModel ghostRobotModel = newRobotModel();
       String robotName = ghostRobotModel.getSimpleRobotName();
@@ -162,6 +162,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
             return toolboxRegistry;
          }
       }, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
+
+      if (additionalGhostControllers != null)
+      {
+         for (RobotController ghostController : additionalGhostControllers)
+            ghost.setController(ghostController, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
+      }
 
       toolboxRos2Node.spin();
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());

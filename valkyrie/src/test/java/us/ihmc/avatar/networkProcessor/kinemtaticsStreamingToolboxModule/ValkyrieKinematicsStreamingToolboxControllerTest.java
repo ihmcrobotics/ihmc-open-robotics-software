@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createFullRobotModelAtInitialConfiguration;
@@ -13,6 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.DoubleFunction;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -23,6 +25,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -33,8 +36,14 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFa
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ValkyrieKinematicsStreamingToolboxControllerTest extends KinematicsStreamingToolboxControllerTest
 {
@@ -51,15 +60,102 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
    @Test
    public void testStreamingToController() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      setupWithWalkingController();
+      YoVariableRegistry spyRegistry = new YoVariableRegistry("spy");
+      YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
+      YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
+      
+      setupWithWalkingController(new RobotController()
+      {
+         private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
+               + "HandDesired", worldFrame, spyRegistry));
+         private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
+               + "HandCurrent", worldFrame, spyRegistry));
+         private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
+               + "HandPositionError", spyRegistry));
+         private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
+               + "HandOrientationError", spyRegistry));
+         private YoDouble time;
+         private YoBoolean isStreaming;
+         private YoDouble streamingStartTime;
+         private YoDouble streamingBlendingDuration;
+         private YoDouble mainStateMachineSwitchTime;
+         private YoEnum<KSTState> mainStateMachineCurrentState;
+
+         private boolean needsToInitialize = true;
+
+         @SuppressWarnings("unchecked")
+         @Override
+         public void initialize()
+         {
+            if (!needsToInitialize)
+               return;
+
+            time = (YoDouble) toolboxRegistry.getVariable("time");
+            isStreaming = (YoBoolean) toolboxRegistry.getVariable("isStreaming");
+            streamingStartTime = (YoDouble) toolboxRegistry.getVariable("streamingStartTime");
+            streamingBlendingDuration = (YoDouble) toolboxRegistry.getVariable("streamingBlendingDuration");
+            mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.getVariable("mainStateMachineSwitchTime");
+            mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.getVariable("mainStateMachineCurrentState");
+
+            needsToInitialize = false;
+         }
+
+         private final Mean positionMean = new Mean();
+         private final Mean orientationMean = new Mean();
+
+         @Override
+         public void doControl()
+         {
+            initialize();
+
+            if (mainStateMachineCurrentState.getEnumValue() != KSTState.STREAMING || !isStreaming.getValue())
+            {
+               handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
+               handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               return;
+            }
+
+            double timeInStream = time.getValue() - mainStateMachineSwitchTime.getValue() - streamingStartTime.getValue();
+
+            if (timeInStream < streamingBlendingDuration.getValue() + 10.0 * toolboxControllerPeriod)
+            {
+               handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
+               handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               return;
+            }
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               YoFramePose3D handDesiredPose = handDesiredPoses.get(robotSide);
+               YoFramePose3D handCurrentPose = handCurrentPoses.get(robotSide);
+               YoDouble handPositionError = handPositionErrors.get(robotSide);
+               YoDouble handOrientationError = handOrientationErrors.get(robotSide);
+
+               handDesiredPose.setFromReferenceFrame(desiredFullRobotModel.getHandControlFrame(robotSide));
+               handCurrentPose.setFromReferenceFrame(toolboxController.getTools().getCurrentFullRobotModel().getHandControlFrame(robotSide));
+               handPositionError.set(handDesiredPose.getPositionDistance(handCurrentPose));
+               handOrientationError.set(handDesiredPose.getOrientationDistance(handCurrentPose));
+               positionMean.increment(handPositionError.getValue());
+               orientationMean.increment(handOrientationError.getValue());
+            }
+
+            handPositionMeanError.set(positionMean.getResult());
+            handOrientationMeanError.set(orientationMean.getResult());
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return spyRegistry;
+         }
+      });
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.1, circleMessageGenerator(true));
+      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(true));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       assertTrue(success);
@@ -73,6 +169,13 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       sleepToolbox();
 
       executor.shutdownNow();
+
+      // Asserts that the spy did run and that the toolbox or something did not just hang
+      assertNotEquals(0.0, handPositionMeanError.getValue());
+      assertNotEquals(0.0, handOrientationMeanError.getValue());
+      // TODO Pretty bad assertions here, need to figure out how to improve this test later.
+      assertTrue(handPositionMeanError.getValue() < 0.11);
+      assertTrue(handOrientationMeanError.getValue() < 0.20);
    }
 
    private void wakeupToolbox()
@@ -81,7 +184,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       wakeupMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
       statePublisher.publish(wakeupMessage);
    }
-   
+
    private void sleepToolbox()
    {
       ToolboxStateMessage wakeupMessage = new ToolboxStateMessage();
