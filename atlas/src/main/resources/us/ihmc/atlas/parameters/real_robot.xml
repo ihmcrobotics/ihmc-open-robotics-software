@@ -88,10 +88,10 @@
     </registry>
     <registry name="DRCEstimatorThread">
         <registry name="AtlasHeadPoseEstimator">
-            <parameter name="AngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
-            <parameter name="LinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="3.0E-4"/>
-            <parameter name="MagneticFieldVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-            <parameter name="PositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="AngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+            <parameter name="LinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.2"/>
+            <parameter name="MagneticFieldVariance" type="DoubleParameter" min="0.0" max="1.0" value="100000.0"/>
+            <parameter name="PositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-6"/>
             <parameter name="HeadAngularAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
             <parameter name="HeadLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
         </registry>
