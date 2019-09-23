@@ -5,6 +5,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,11 +27,13 @@ public class QuadrupedStepPlanarRegionProjection
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(100, PlanarRegion::new);
    private final QuadrantDependentList<PlanarRegion> regionMap = new QuadrantDependentList<>();
    private final QuadrantDependentList<MutableBoolean> hasCheckedForRegion = new QuadrantDependentList<>(MutableBoolean::new);
+   private final QuadrantDependentList<MutableBoolean> isInSwing = new QuadrantDependentList<>(MutableBoolean::new);
 
    private final ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
    private final ConvexPolygon2D shrunkPolygon = new ConvexPolygon2D();
 
+   private final FramePoint3D tempFramePoint3D = new FramePoint3D();
    private final Point2D tempPoint2D = new Point2D();
    private final Point3D tempPoint3D = new Point3D();
    private final Vector3D tempVector3D = new Vector3D();
@@ -39,36 +43,40 @@ public class QuadrupedStepPlanarRegionProjection
       parentRegistry.addChild(registry);
    }
 
-   public void project(FramePoint3D goalPosition, RobotQuadrant quadrant)
+   public void project(FramePoint3DBasics goalPositionToProject, RobotQuadrant quadrant)
+   {
+      if (!isInSwing.get(quadrant).getValue())
+         return;
+
+      if (!updateConstraintRegionMap(goalPositionToProject, quadrant))
+         return;
+
+      // project point into associated region
+      doProjection(goalPositionToProject, quadrant);
+   }
+
+   private boolean updateConstraintRegionMap(FramePoint3DReadOnly goalPositionToProject, RobotQuadrant quadrant)
    {
       // regions are unavailable
       if (planarRegions.isEmpty())
-      {
-         return;
-      }
+         return false;
 
       // at the start of the step, assign a region to the quadrant. subsequent projections will always keep the step inside this region
       if (regionMap.get(quadrant) == null && hasCheckedForRegion.get(quadrant).isFalse())
       {
-         regionMap.put(quadrant, findTouchdownRegion(goalPosition));
+         regionMap.put(quadrant, findTouchdownRegion(goalPositionToProject));
          hasCheckedForRegion.get(quadrant).setTrue();
       }
 
       // if no region is found, do nothing
-      if (regionMap.get(quadrant) == null)
-      {
-         return;
-      }
-
-      // project point into associated region
-      doProjection(goalPosition, quadrant);
+      return regionMap.get(quadrant) != null;
    }
 
-   private void doProjection(FramePoint3D goalPosition, RobotQuadrant quadrant)
+   private void doProjection(FramePoint3DBasics goalPositionToProject, RobotQuadrant quadrant)
    {
       PlanarRegion region = regionMap.get(quadrant);
 
-      tempPoint3D.set(goalPosition);
+      tempPoint3D.set(goalPositionToProject);
       region.transformFromWorldToLocal(tempPoint3D);
       tempPoint2D.set(tempPoint3D.getX(), tempPoint3D.getY());
 
@@ -84,19 +92,21 @@ public class QuadrupedStepPlanarRegionProjection
          tempVector3D.sub(tempPoint3D.getX(), tempPoint3D.getY(), 0.0);
          region.transformFromLocalToWorld(tempVector3D);
 
-         goalPosition.add(tempVector3D);
+         goalPositionToProject.add(tempVector3D);
+         double height = region.getPlaneZGivenXY(goalPositionToProject.getX(), goalPositionToProject.getY());
+         goalPositionToProject.setZ(height);
       }
    }
 
-   private PlanarRegion findTouchdownRegion(FramePoint3D goalPosition)
+   private PlanarRegion findTouchdownRegion(FramePoint3DReadOnly goalPosition)
    {
-      ReferenceFrame referenceFrame = goalPosition.getReferenceFrame();
-      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      tempFramePoint3D.setIncludingFrame(goalPosition);
+      tempFramePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
 
       PlanarRegion highestIntersectingRegion = null;
       double highestRegionHeight = Double.NEGATIVE_INFINITY;
-      double x = goalPosition.getX();
-      double y = goalPosition.getY();
+      double x = tempFramePoint3D.getX();
+      double y = tempFramePoint3D.getY();
 
       for (int i = 0; i < planarRegions.size(); i++)
       {
@@ -120,7 +130,6 @@ public class QuadrupedStepPlanarRegionProjection
       }
       else
       {
-         goalPosition.changeFrame(referenceFrame);
          return highestIntersectingRegion;
       }
    }
@@ -146,10 +155,17 @@ public class QuadrupedStepPlanarRegionProjection
       return false;
    }
 
+   public void beganStep(RobotQuadrant quadrant, FramePoint3DReadOnly goalPosition)
+   {
+      updateConstraintRegionMap(goalPosition, quadrant);
+      isInSwing.get(quadrant).setTrue();
+   }
+
    public void completedStep(RobotQuadrant quadrant)
    {
       regionMap.put(quadrant, null);
       hasCheckedForRegion.get(quadrant).setFalse();
+      isInSwing.get(quadrant).setFalse();
    }
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand command)
