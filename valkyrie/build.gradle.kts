@@ -1,10 +1,9 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.26"
-   id("us.ihmc.ihmc-cd") version "1.4"
+   id("us.ihmc.ihmc-cd") version "1.6"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
-   application
 }
 
 ihmc {
@@ -66,24 +65,8 @@ testDependencies {
 
 tasks.getByPath("installDist").dependsOn("compositeJar")
 
-application.mainClassName = ""
-
-val joystickApplication by tasks.creating(CreateStartScripts::class.java) {
-   mainClassName = "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication"
-   applicationName = "IHMCValkyrieJoystickApplication"
-   outputDir = File(project.buildDir, "scripts")
-   classpath = tasks.getByName<Jar>("jar").outputs.files + project.configurations.runtime
-}
-val networkProcessorApplication by tasks.creating(CreateStartScripts::class.java) {
-   mainClassName = "us.ihmc.valkyrie.ValkyrieROSNetworkProcessor"
-   applicationName = "valkyrie-network-processor"
-   outputDir = File(project.buildDir, "scripts")
-   classpath = tasks.getByName<Jar>("jar").outputs.files + project.configurations.runtime
-}
-application.applicationDistribution.into("bin") {
-   from(networkProcessorApplication)
-   from(joystickApplication)
-}
+app.entrypoint("IHMCValkyrieJoystickApplication", "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication")
+app.entrypoint("valkyrie-network-processor", "us.ihmc.valkyrie.ValkyrieROSNetworkProcessor")
 
 tasks.create("deployOCUApplications") {
    dependsOn("installDist")
