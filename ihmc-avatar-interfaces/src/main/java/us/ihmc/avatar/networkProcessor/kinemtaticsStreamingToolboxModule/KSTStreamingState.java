@@ -101,7 +101,7 @@ public class KSTStreamingState implements State
       angularRateLimit = new YoDouble("angularRateLimit", registry);
       angularRateLimit.set(defaultAngularMaxRate);
 
-      streamingStartTime = new YoDouble("steamingStartTime", registry);
+      streamingStartTime = new YoDouble("streamingStartTime", registry);
       streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
       streamingBlendingDuration.set(defautlInitialBlendDuration);
       initialRobotState = new KinematicsToolboxOutputStatus(tools.getIKController().getSolution());

@@ -124,6 +124,7 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
+      // TODO Add the option to define the control frame in the API instead of hardcoding it here.
       MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       FramePose3D desiredPose = pose(handControlFrame, worldFrame);
       SpatialVector desiredSpatialVelocity = spatialVelocity(handControlFrame, worldFrame, enableVelocity);
