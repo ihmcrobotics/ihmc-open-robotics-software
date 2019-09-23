@@ -15,8 +15,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 public class PawNode
 {
    public static double gridSizeXY = 0.06;
-   public static final int yawDivisions = 36; // according to the old calculations, this should be 64 instead
-   public static double gridSizeYaw = 2.0 * Math.PI / yawDivisions;
+   public static final double gridSizeYaw = Math.PI / 18.0;
+   public static final int maxYawIndex = Math.abs((int) Math.round(AngleTools.trimAngleMinusPiToPi(Math.PI) / gridSizeYaw));
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
@@ -221,7 +221,10 @@ public class PawNode
 
    public static int snapToYawGrid(double yaw)
    {
-      return Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions);
+      int yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
+      if (-yawIndex == maxYawIndex)
+         yawIndex = maxYawIndex;
+      return yawIndex;
    }
 
    public static void snapPointToGrid(Point2DBasics pointToSnap)
