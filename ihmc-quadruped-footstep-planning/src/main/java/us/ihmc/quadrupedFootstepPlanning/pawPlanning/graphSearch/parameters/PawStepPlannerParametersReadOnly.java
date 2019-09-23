@@ -184,6 +184,15 @@ public interface PawStepPlannerParametersReadOnly extends StoredPropertySetReadO
       return get(projectInsideDistance);
    }
 
+   /**
+    * If a step can't be projected inside a polygon by {@link #getProjectInsideDistance}, it will attempt to project as close as it can,
+    * with this value being the minimum acceptable project distance. If this is negative, it won't attempt a smaller projection.
+    */
+   default double getMinimumProjectInsideDistance()
+   {
+      return get(minimumProjectInsideDistance);
+   }
+
    default boolean getProjectInsideUsingConvexHull()
    {
       return get(projectInsideUsingConvexHull);
@@ -340,6 +349,7 @@ public interface PawStepPlannerParametersReadOnly extends StoredPropertySetReadO
       packet.setMinXClearanceFromPaw(getMinXClearanceFromPaw());
       packet.setMinYClearanceFromPaw(getMinYClearanceFromPaw());
       packet.setProjectionInsideDistance(getProjectInsideDistance());
+      packet.setMinimumProjectionInsideDistance(getProjectInsideDistance());
       packet.setProjectInsideUsingConvexHull(getProjectInsideUsingConvexHull());
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());

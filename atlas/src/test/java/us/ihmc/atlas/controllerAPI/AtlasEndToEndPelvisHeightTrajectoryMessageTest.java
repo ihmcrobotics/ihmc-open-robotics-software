@@ -11,7 +11,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelvisHeightTrajectoryMessageTest
 {
-
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
@@ -38,5 +37,12 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
    public void testSingleWaypointInUserMode() throws Exception
    {
       super.testSingleWaypointInUserMode();
+   }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
    }
 }

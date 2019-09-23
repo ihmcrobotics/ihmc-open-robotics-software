@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -14,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class ConvexPolygonScaler
 {
@@ -216,7 +218,7 @@ public class ConvexPolygonScaler
    public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distanceInside,
                                                              ConvexPolygon2D scaledPolygonToPack)
    {
-      if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0 -10)
+      if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0e-10)
       {
          scaledPolygonToPack.set(exteriorPolygon);
          return true;
@@ -403,5 +405,43 @@ public class ConvexPolygonScaler
       framePolygonToPack.update();
       scaleConvexPolygon((ConvexPolygon2DReadOnly) polygonQ, distance, (ConvexPolygon2DBasics) framePolygonToPack);
       framePolygonToPack.update();
+   }
+
+   /**
+    * Does a binary search for the maximum possible scale distance. For example, a 1m x 1m has a max of 0.5m,
+    * and a 1m x 0.5m rectangle has a max of 0.25m. Given the precision value, this method computes the maximum
+    * scale distance up to that precision.
+    *
+    * {@param projectionDistanceUpperBound} is the upper bound of the search. If this value is negative an upper bound is calculated.
+    */
+   public double computeMaximumScaleDistance(ConvexPolygon2DReadOnly regionToScale, double projectionDistanceLowerBound, double projectionDistanceUpperBound,
+                                             double precision, int... vertexStartIndicesToNotScale)
+   {
+      int iterations = 0;
+      int maxIterations = 50;
+
+      if (projectionDistanceUpperBound < 0.0)
+      {
+         BoundingBox2DReadOnly boundingBox = regionToScale.getBoundingBox();
+         projectionDistanceUpperBound = Math.max(boundingBox.getMaxX() - boundingBox.getMinX(), boundingBox.getMaxY() - boundingBox.getMinY());
+      }
+
+      if(projectionDistanceLowerBound > projectionDistanceUpperBound)
+      {
+         LogTools.error("Received lower bound that's greater than upper bound");
+         return 0.0;
+      }
+
+      while (projectionDistanceUpperBound - projectionDistanceLowerBound > precision && iterations < maxIterations)
+      {
+         double projectionQuery = 0.5 * (projectionDistanceUpperBound + projectionDistanceLowerBound);
+         boolean success = scaleConvexPolygon(regionToScale, projectionQuery, tempPolygon, vertexStartIndicesToNotScale);
+         if (success)
+            projectionDistanceLowerBound = projectionQuery;
+         else
+            projectionDistanceUpperBound = projectionQuery;
+         iterations++;
+      }
+      return projectionDistanceLowerBound;
    }
 }

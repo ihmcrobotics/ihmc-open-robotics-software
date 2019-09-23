@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,39 +13,39 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "org.ejml", name: "denseC64", version: "0.30"
-   compile group: "com.esotericsoftware.kryo", name: "kryo", version: "2.21"
-   compile group: "com.github.quickhull3d", name: "quickhull3d", version: "1.0.0"
-   compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
-   compile group: "org.georegression", name: "georegression", version: "0.11"
-   compile group: "org.ddogleg", name: "ddogleg", version: "0.7"
-   compile group: "gov.nist.math", name: "jama", version: "1.0.3"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "org.apache.commons", name: "commons-math3", version: "3.3"
-   compile group: "jgraph", name: "jgraph", version: "5.13.0.0"
-   compile group: "org.ejml", name: "core", version: "0.30"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.javassist", name: "javassist", version: "3.18.1-GA"
-   compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
-   compile group: "us.ihmc", name: "log-tools", version: "0.3.1"
+   api("org.ejml:denseC64:0.30")
+   api("com.esotericsoftware.kryo:kryo:2.24.0")
+   api("com.github.quickhull3d:quickhull3d:1.0.0")
+   api("net.sf.trove4j:trove4j:3.0.3")
+   api("org.georegression:georegression:0.11")
+   api("org.ddogleg:ddogleg:0.7")
+   api("gov.nist.math:jama:1.0.3")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.apache.commons:commons-math3:3.3")
+   api("jgraph:jgraph:5.13.0.0")
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
+   api("org.javassist:javassist:3.18.1-GA")
+   api("com.google.guava:guava:18.0")
+   api("org.yaml:snakeyaml:1.17") //1.11
+   api("us.ihmc:log-tools:0.3.1")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
-   compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
-   compile group: "us.ihmc", name: "mecano", version: "0.0.20"
-   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.20"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "simulation-construction-set-utilities", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-native-library-loader", version: "1.1"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:euclid-frame:0.12.1")
+   api("us.ihmc:euclid-shape:0.12.1")
+   api("us.ihmc:mecano:0.0.21")
+   api("us.ihmc:mecano-yovariables:0.0.21")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:simulation-construction-set-utilities:0.12.15")
+   api("us.ihmc:ihmc-native-library-loader:1.1")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
 testDependencies {
-   compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
-   compile group: "org.jfree", name: "jcommon", version: "1.0.21"
+   api("org.jfree:jfreechart:1.0.17")
+   api("org.jfree:jcommon:1.0.21")
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
 }

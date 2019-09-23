@@ -50,7 +50,8 @@ public class HumanoidKinematicsSolver
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
       FullHumanoidRobotModel desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
-      controller = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, yoGraphicsListRegistry, registry);
+      double updateDT = 1.0e-3;
+      controller = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, updateDT, yoGraphicsListRegistry, registry);
 
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 

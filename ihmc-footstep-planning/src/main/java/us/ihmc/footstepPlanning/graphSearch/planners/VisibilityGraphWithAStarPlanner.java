@@ -22,7 +22,7 @@ public class VisibilityGraphWithAStarPlanner extends BodyPathAndFootstepPlannerW
 
       ObstacleAndCliffAvoidanceProcessor pathPostProcessor = new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters);
 
-      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
+      waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, pathPostProcessor, registry);
       footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
                                                       parameters.getAStarHeuristicsWeight(), registry, listeners);
    }

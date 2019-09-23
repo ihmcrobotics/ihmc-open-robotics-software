@@ -1,7 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,17 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -32,16 +37,17 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @Tag("controller-api-2")
@@ -116,10 +122,21 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       assertEquals(2, statusMessages.size());
       Point3D expectedPosition = new Point3D(Double.NaN, Double.NaN, pelvisHeight);
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, "pelvisHeight",
-                                                        statusMessages.remove(0), controllerDT);
-      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime,
-                                                        expectedPosition, null, "pelvisHeight", statusMessages.remove(0), 1.0e-3, controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.STARTED,
+                                                        0.0,
+                                                        "pelvisHeight",
+                                                        statusMessages.remove(0),
+                                                        controllerDT);
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisHeightTrajectoryMessage.getSequenceId(),
+                                                        TrajectoryExecutionStatus.COMPLETED,
+                                                        trajectoryTime,
+                                                        expectedPosition,
+                                                        null,
+                                                        "pelvisHeight",
+                                                        statusMessages.remove(0),
+                                                        1.0e-3,
+                                                        controllerDT);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -245,7 +262,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         Assert.assertEquals(initialPelvisHeight + offset1, pelvisPosition.getZ(), 0.01);
+         assertEquals(initialPelvisHeight + offset1, pelvisPosition.getZ(), 0.01);
 
          // Move pelvis through message
          double desiredHeight = initialPelvisHeight + offset2;
@@ -254,7 +271,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         Assert.assertEquals(desiredHeight, pelvisPosition.getZ(), 0.01);
+         assertEquals(desiredHeight, pelvisPosition.getZ(), 0.01);
       }
    }
 
@@ -295,7 +312,114 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Would be nicer to check desired values but we currently have so many difference height control schemes that that would not be easy.
       referenceFrames.updateFrames();
       double finalPelvisHeight = referenceFrames.getPelvisFrame().getTransformToWorldFrame().getTranslationZ();
-      Assert.assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-5);
+      assertEquals(initialPelvisHeight, finalPelvisHeight, 1.0e-5);
+   }
+
+   @Test
+   public void testStreaming() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      Random random = new Random(54651);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
+      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoVariableRegistry(testRegistry);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      YoDouble startTime = new YoDouble("startTime", testRegistry);
+      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
+                                               .getYoTime();
+      startTime.set(yoTime.getValue());
+      YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
+      trajectoryTime.set(2.0);
+
+      YoDouble initialHeight = new YoDouble("initialHeight", testRegistry);
+      YoDouble finalHeight = new YoDouble("finalHeight", testRegistry);
+      YoDouble desiredHeight = new YoDouble("desiredHeight", testRegistry);
+      YoDouble desiredHeightRate = new YoDouble("desiredHeightRate", testRegistry);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
+      pelvisPosition.changeFrame(worldFrame);
+
+      initialHeight.set(pelvisPosition.getZ());
+      finalHeight.set(pelvisPosition.getZ() + RandomNumbers.nextDouble(random, 0.1));
+
+
+      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      {
+         @Override
+         public void initialize()
+         {
+         }
+
+         private boolean everyOtherTick = false;
+
+         @Override
+         public void doControl()
+         {
+            everyOtherTick = !everyOtherTick;
+
+            if (!everyOtherTick)
+               return;
+
+            double timeInTrajectory = yoTime.getValue() - startTime.getValue();
+            timeInTrajectory = MathTools.clamp(timeInTrajectory, 0.0, trajectoryTime.getValue());
+            double alpha = timeInTrajectory / trajectoryTime.getValue();
+
+            desiredHeight.set(EuclidCoreTools.interpolate(initialHeight.getValue(), finalHeight.getValue(), alpha));
+            if (alpha <= 0.0 || alpha >= 1.0)
+               desiredHeightRate.set(0.0);
+            else
+               desiredHeightRate.set((finalHeight.getValue() - initialHeight.getValue()) / trajectoryTime.getValue());
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.0, desiredHeight.getValue(), desiredHeightRate.getValue());
+            message.getEuclideanTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
+            message.getEuclideanTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
+            drcSimulationTestHelper.publishToController(message);
+         }
+
+         @Override
+         public YoVariableRegistry getYoVariableRegistry()
+         {
+            return null;
+         }
+
+         @Override
+         public String getDescription()
+         {
+            return RobotController.super.getDescription();
+         }
+
+         @Override
+         public String getName()
+         {
+            return RobotController.super.getName();
+         }
+      });
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      assertTrue(success);
+
+      YoDouble controllerHeight = EndToEndTestTools.findYoDouble(CenterOfMassHeightControlState.class.getSimpleName(), "desiredCoMHeightFromTrajectory", scs);
+      YoDouble controllerHeightRate = EndToEndTestTools.findYoDouble("pelvisHeightOffsetSubTrajectoryCubicPolynomialTrajectoryGenerator", "pelvisHeightOffsetSubTrajectoryCurrentVelocity", scs);
+
+      assertEquals(desiredHeight.getValue(), controllerHeight.getValue(), 5.0e-4);
+      assertEquals(desiredHeightRate.getValue(), controllerHeightRate.getValue(), 1.0e-7);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+      assertTrue(success);
+
+      assertEquals(desiredHeight.getValue(), controllerHeight.getValue(), 1.0e-7);
+      assertEquals(desiredHeightRate.getValue(), controllerHeightRate.getValue(), 1.0e-7);
+      // TODO Not performing assertions on the tracking as all the smoothing stuff is ruining it.
    }
 
    @BeforeEach

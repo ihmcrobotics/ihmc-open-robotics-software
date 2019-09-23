@@ -308,9 +308,10 @@ public class QuadrupedBalanceManager
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
    }
 
-   public void beganStep()
+   public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
    {
       dcmPlanner.beganStep();
+      stepAdjustmentController.beganStep(robotQuadrant, goalPosition);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
