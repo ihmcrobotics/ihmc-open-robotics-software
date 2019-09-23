@@ -13,18 +13,18 @@ ihmc {
 }
 
 mainDependencies {
-   compile("com.ibm.watson.developer_cloud:java-sdk:2.10.0")
-   compile("us.ihmc.thirdparty.org.kc7bfi:jflac:1.4.0")
-   compile("commons-io:commons-io:2.6")
+   api("com.ibm.watson.developer_cloud:java-sdk:2.10.0")
+   api("us.ihmc.thirdparty.org.kc7bfi:jflac:1.4.0")
+   api("commons-io:commons-io:2.6")
 
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-humanoid-robotics:source")
-   compile("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

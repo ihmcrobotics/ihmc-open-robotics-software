@@ -13,22 +13,22 @@ ihmc {
 }
 
 mainDependencies {
-    compile("us.ihmc.thirdparty.jinput:jinput:190214")
-    compile("org.ejml:core:0.30")
-    compile("org.ejml:dense64:0.30")
+    api("us.ihmc.thirdparty.jinput:jinput:190214")
+    api("org.ejml:core:0.30")
+    api("org.ejml:dense64:0.30")
 
-    compile("us.ihmc:euclid-frame:0.12.1")
-    compile("us.ihmc:euclid-shape:0.12.1")
-    compile("us.ihmc:ihmc-yovariables:0.3.11")
-    compile("us.ihmc:ihmc-commons:0.26.6")
-    compile("us.ihmc:ihmc-robot-description:0.12.7")
-    compile("us.ihmc:ihmc-robotics-toolkit:source")
-    compile("us.ihmc:ihmc-humanoid-robotics:source")
-    compile("us.ihmc:ihmc-quadruped-basics:source")
-    compile("us.ihmc:robot-environment-awareness:source")
-    compile("us.ihmc:simulation-construction-set-tools-test:source")
-    compile("us.ihmc:ihmc-robot-data-logger:source")
-    compile("us.ihmc:ihmc-path-planning:source")
+    api("us.ihmc:euclid-frame:0.12.1")
+    api("us.ihmc:euclid-shape:0.12.1")
+    api("us.ihmc:ihmc-yovariables:0.3.11")
+    api("us.ihmc:ihmc-commons:0.26.6")
+    api("us.ihmc:ihmc-robot-description:0.12.7")
+    api("us.ihmc:ihmc-robotics-toolkit:source")
+    api("us.ihmc:ihmc-humanoid-robotics:source")
+    api("us.ihmc:ihmc-quadruped-basics:source")
+    api("us.ihmc:robot-environment-awareness:source")
+    api("us.ihmc:simulation-construction-set-tools-test:source")
+    api("us.ihmc:ihmc-robot-data-logger:source")
+    api("us.ihmc:ihmc-path-planning:source")
 }
 
 testDependencies {

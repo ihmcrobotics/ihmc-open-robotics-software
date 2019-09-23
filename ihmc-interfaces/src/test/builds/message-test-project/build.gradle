@@ -29,8 +29,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:ihmc-pub-sub:0.10.2")
-   compile("us.ihmc:ros2-common-interfaces:0.13.4")
+   api("us.ihmc:ihmc-pub-sub:0.10.2")
+   api("us.ihmc:ros2-common-interfaces:0.13.4")
 }
 
 def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
@@ -43,7 +43,7 @@ task generateMessages {
 
       def foundDependency = false
       copy {
-         configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
+         configurations.default.findAll { it.name.contains("ros2-common-interfaces") }.each {
             from zipTree(it)
             foundDependency = true
          }
@@ -52,7 +52,7 @@ task generateMessages {
 
       if (!foundDependency)
       {
-         throw new org.gradle.api.GradleException("Could not find ros2-common-interfaces in configurations.compile!")
+         throw new org.gradle.api.GradleException("Could not find ros2-common-interfaces in configurations.default!")
       }
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath());

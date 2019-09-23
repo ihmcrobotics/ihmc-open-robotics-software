@@ -13,21 +13,21 @@ ihmc {
 }
 
 mainDependencies {
-    compile("us.ihmc:ihmc-quadruped-planning:source")
-    compile("us.ihmc:ihmc-path-planning-data-sets:source")
-    compile("us.ihmc:ihmc-common-walking-control-modules:source")
+    api("us.ihmc:ihmc-quadruped-planning:source")
+    api("us.ihmc:ihmc-path-planning-data-sets:source")
+    api("us.ihmc:ihmc-common-walking-control-modules:source")
 
 }
 
 testDependencies {
     compile ihmc.sourceSetProject("visualizers")
-    compile("us.ihmc:ihmc-quadruped-planning-test:source")
+    api("us.ihmc:ihmc-quadruped-planning-test:source")
 }
 
 visualizersDependencies {
     compile ihmc.sourceSetProject("main")
 
-    compile("us.ihmc:ihmc-robot-models-visualizers:source")
-    compile("us.ihmc:ihmc-path-planning-visualizers:source")
-    compile("us.ihmc:ihmc-common-walking-control-modules:source")
+    api("us.ihmc:ihmc-robot-models-visualizers:source")
+    api("us.ihmc:ihmc-path-planning-visualizers:source")
+    api("us.ihmc:ihmc-common-walking-control-modules:source")
 }

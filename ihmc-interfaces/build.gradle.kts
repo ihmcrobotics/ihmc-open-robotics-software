@@ -33,20 +33,20 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid:0.12.1")
-   compile("us.ihmc:euclid-geometry:0.12.1")
-   compile("us.ihmc:ihmc-pub-sub:0.10.2")
-   compile("us.ihmc:ros2-common-interfaces:0.13.4")
-   compile("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:euclid-geometry:0.12.1")
+   api("us.ihmc:ihmc-pub-sub:0.10.2")
+   api("us.ihmc:ros2-common-interfaces:0.13.4")
+   api("us.ihmc:ihmc-commons:0.26.6")
 }
 
 testDependencies {
-   compile("us.ihmc:ihmc-ros2-library:0.13.4")
+   api("us.ihmc:ihmc-ros2-library:0.13.4")
 }
 
 generatorDependencies {
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ros2-msg-to-pubsub-generator:0.13.4")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.13.4")
 }
 
 val generator = RosInterfaceGenerator()
@@ -61,7 +61,7 @@ tasks.create("generateMessages") {
       var foundDependency = false
 
       copy {
-         for (file in configurations.compile.get().files)
+         for (file in configurations.default.get().files)
          {
             if (file.name.contains("ros2-common-interfaces"))
             {
@@ -74,7 +74,7 @@ tasks.create("generateMessages") {
 
       if (!foundDependency)
       {
-         throw GradleException("Could not find ros2-common-interfaces in configurations.compile!")
+         throw GradleException("Could not find ros2-common-interfaces in configurations.default!")
       }
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath())

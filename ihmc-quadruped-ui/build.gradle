@@ -14,9 +14,9 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:ihmc-quadruped-robotics:source")
-   compile("us.ihmc:ihmc-robot-models-visualizers:source")
-   compile("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
+   api("us.ihmc:ihmc-quadruped-robotics:source")
+   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
 }
 
 testDependencies {
