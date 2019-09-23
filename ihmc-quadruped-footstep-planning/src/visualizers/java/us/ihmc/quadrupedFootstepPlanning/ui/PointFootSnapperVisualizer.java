@@ -57,8 +57,7 @@ public class PointFootSnapperVisualizer
 
       DefaultPawStepPlannerParameters parameters = new DefaultPawStepPlannerParameters();
       Graphics3DObject snappedNodeGraphics = new Graphics3DObject();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull, true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       int minXIndex = (int) Math.round(minX / PawNode.gridSizeXY);

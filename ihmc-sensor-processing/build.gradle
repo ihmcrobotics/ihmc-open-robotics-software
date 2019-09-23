@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,35 +13,35 @@ ihmc {
 }
 
 mainDependencies {
-   compile("org.apache.commons:commons-lang3:3.8.1")
-   compile("commons-collections:commons-collections:3.2.1")
-   compile("org.georegression:georegression:0.11")
-   compile("org.ddogleg:ddogleg:0.7")
-   compile("org.apache.commons:commons-math3:3.3")
-   compile("com.thoughtworks.xstream:xstream:1.4.7")
-   compile("org.jgrapht:jgrapht-core:0.9.0")
-   compile("org.jgrapht:jgrapht-ext:0.9.0")
-   compile("com.github.wendykierp:JTransforms:3.1")
-   compile("org.ejml:dense64:0.30")
-   compile("org.ejml:core:0.30")
-   compile("jgraph:jgraph:5.13.0.0")
-   compile("org.jmonkeyengine:jme3-core:3.2.0-171208")
-   compile "org.boofcv:geo:0.19"
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("commons-collections:commons-collections:3.2.1")
+   api("org.georegression:georegression:0.11")
+   api("org.ddogleg:ddogleg:0.7")
+   api("org.apache.commons:commons-math3:3.3")
+   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("org.jgrapht:jgrapht-core:0.9.0")
+   api("org.jgrapht:jgrapht-ext:0.9.0")
+   api("com.github.wendykierp:JTransforms:3.1")
+   api("org.ejml:dense64:0.30")
+   api("org.ejml:core:0.30")
+   api("jgraph:jgraph:5.13.0.0")
+   api("org.jmonkeyengine:jme3-core:3.2.0-171208")
+   api("org.boofcv:geo:0.19")
 
-   compile("us.ihmc:euclid-frame:0.12.0")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-graphics-description:0.12.12")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-java-toolkit:source")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
-   compile("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:euclid-frame:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-models:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:simulation-construction-set-test:0.12.15")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
-   compile("us.ihmc:simulation-construction-set-tools-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:simulation-construction-set-test:0.12.15")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
 }

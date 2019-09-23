@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,19 +13,19 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc.thirdparty.jinput:jinput:190214")
-   compile("org.ejml:core:0.30")
-   compile("org.ejml:dense64:0.30")
+   api("us.ihmc.thirdparty.jinput:jinput:190214")
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
 
-   compile("us.ihmc:euclid-geometry:0.12.0")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-quadruped-basics:source")
-   compile("us.ihmc:ihmc-quadruped-planning:source")
-   compile("us.ihmc:ihmc-quadruped-footstep-planning:source")
-   compile("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:euclid-geometry:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-quadruped-basics:source")
+   api("us.ihmc:ihmc-quadruped-planning:source")
+   api("us.ihmc:ihmc-quadruped-footstep-planning:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
 }
 
 testDependencies {
-   compile("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
+   api("us.ihmc:ihmc-quadruped-footstep-planning-visualizers:source")
 }

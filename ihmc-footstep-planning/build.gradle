@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,38 +13,38 @@ ihmc {
 }
 
 mainDependencies {
-   compile "org.ejml:core:0.30"
-   compile "org.ejml:dense64:0.30"
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
 
-   compile("us.ihmc:euclid:0.12.0")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-graphics-description:0.12.12")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
-   compile("us.ihmc:ihmc-convex-optimization-adapter:source")
-   compile("us.ihmc:ihmc-path-planning:source")
-   compile("us.ihmc:ihmc-humanoid-robotics:source")
-   compile("us.ihmc:ihmc-common-walking-control-modules:source")
-   compile("us.ihmc:ihmc-path-planning-data-sets:source")
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-convex-optimization-adapter:source")
+   api("us.ihmc:ihmc-path-planning:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-path-planning-data-sets:source")
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
 
-   compile("us.ihmc:ihmc-path-planning-data-sets:source")
-   compile("us.ihmc:simulation-construction-set-test:0.12.15")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
-   compile("us.ihmc:ihmc-path-planning-test:source")
-   compile("us.ihmc:simulation-construction-set-tools-test:source")
+   api("us.ihmc:ihmc-path-planning-data-sets:source")
+   api("us.ihmc:simulation-construction-set-test:0.12.15")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-path-planning-test:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
 }
 
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
-   compile("us.ihmc:robot-environment-awareness-application:source")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-path-planning-visualizers:source")
-   compile("us.ihmc:ihmc-robot-models:source")
-   compile("us.ihmc:ihmc-robot-models-visualizers:source")
-   compile("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:robot-environment-awareness-application:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-path-planning-visualizers:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
 }

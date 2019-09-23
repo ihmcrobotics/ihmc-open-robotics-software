@@ -62,6 +62,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +112,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -138,6 +148,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       cdr.write_type_6(data.getJointAccelerationWeight());
 
+      cdr.write_type_7(data.getDisableCollisionAvoidance());
+
+      cdr.write_type_7(data.getEnableCollisionAvoidance());
+
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -160,6 +174,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       	
       data.setJointAccelerationWeight(cdr.read_type_6());
       	
+      data.setDisableCollisionAvoidance(cdr.read_type_7());
+      	
+      data.setEnableCollisionAvoidance(cdr.read_type_7());
+      	
 
    }
 
@@ -179,6 +197,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       ser.write_type_6("privileged_gain", data.getPrivilegedGain());
       ser.write_type_6("joint_velocity_weight", data.getJointVelocityWeight());
       ser.write_type_6("joint_acceleration_weight", data.getJointAccelerationWeight());
+      ser.write_type_7("disable_collision_avoidance", data.getDisableCollisionAvoidance());
+      ser.write_type_7("enable_collision_avoidance", data.getEnableCollisionAvoidance());
    }
 
    @Override
@@ -197,6 +217,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       data.setPrivilegedGain(ser.read_type_6("privileged_gain"));
       data.setJointVelocityWeight(ser.read_type_6("joint_velocity_weight"));
       data.setJointAccelerationWeight(ser.read_type_6("joint_acceleration_weight"));
+      data.setDisableCollisionAvoidance(ser.read_type_7("disable_collision_avoidance"));
+      data.setEnableCollisionAvoidance(ser.read_type_7("enable_collision_avoidance"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)

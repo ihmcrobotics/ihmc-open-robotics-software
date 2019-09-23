@@ -916,7 +916,8 @@ public class HumanoidMessageTools
     * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+                                                                   ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame));
@@ -1751,15 +1752,15 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
-                                                                 long trajectoryReferenceFrameId)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrameId);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
-                                                                 Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
-                                                                 long trajectoryReferenceFrameId)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation, Vector3DReadOnly desiredLinearVelocity,
+                                                                 Vector3DReadOnly desiredAngularVelocity, long trajectoryReferenceFrameId)
    {
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       message.getTaskspaceTrajectoryPoints().add()
@@ -1784,15 +1785,15 @@ public class HumanoidMessageTools
                                         trajectoryReferenceFrame);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
-                                                                 ReferenceFrame trajectoryReferenceFrame)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrame);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, Orientation3DReadOnly desiredOrientation,
-                                                                 Vector3DReadOnly desiredLinearVelocity, Vector3DReadOnly desiredAngularVelocity,
-                                                                 ReferenceFrame trajectoryReferenceFrame)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation, Vector3DReadOnly desiredLinearVelocity,
+                                                                 Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime,
                                         desiredPosition,

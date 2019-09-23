@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.scs") version "0.4"
@@ -16,31 +16,31 @@ ihmc {
 }
 
 mainDependencies {
-   compile("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
-   compile("org.apache.commons:commons-lang3:3.8.1")
+   api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
+   api("org.apache.commons:commons-lang3:3.8.1")
    
-   compile("us.ihmc:euclid-shape:0.12.0")
-   compile("us.ihmc:joctomap:1.6.13")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-javafx-toolkit:0.12.9")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
-   compile("org.bytedeco:javacv-platform:1.5")
+   api("us.ihmc:euclid-shape:0.12.1")
+   api("us.ihmc:joctomap:1.6.13")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("org.bytedeco:javacv-platform:1.5")
 }
 
 applicationDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile("us.ihmc:ihmc-ros-tools:source")
-   compile("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:ihmc-ros-tools:source")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:simulation-construction-set-tools:source")
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("visualizers")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 
 visualizersDependencies {

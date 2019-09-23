@@ -20,16 +20,27 @@ public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
    protected final Point2D pawPosition = new Point2D();
 
    private final DoubleProvider projectionInsideDelta;
+   private final DoubleProvider minimumProjectionInsideDelta;
    private final BooleanProvider projectInsideUsingConvexHull;
    protected final PlanarRegionPawConstraintDataHolder constraintDataHolder = new PlanarRegionPawConstraintDataHolder();
    protected final PlanarRegionPawConstraintDataParameters constraintDataParameters = new PlanarRegionPawConstraintDataParameters();
 
+   public SimplePlanarRegionPawNodeSnapper(PawStepPlannerParametersReadOnly parameters, boolean enforceTranslationLessThanGridCell)
+   {
+      this(parameters,
+           parameters::getProjectInsideDistance,
+           parameters::getMinimumProjectInsideDistance,
+           parameters::getProjectInsideUsingConvexHull,
+           enforceTranslationLessThanGridCell);
+   }
+
    public SimplePlanarRegionPawNodeSnapper(PawStepPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
-                                           BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
+                                           DoubleProvider minimumProjectionInsideDelta, BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
 
       this.projectionInsideDelta = projectionInsideDelta;
+      this.minimumProjectionInsideDelta = minimumProjectionInsideDelta;
       this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
 
       constraintDataParameters.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
@@ -41,6 +52,7 @@ public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
       super.setPlanarRegions(planarRegionsList);
       constraintDataHolder.clear();
       constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
+      constraintDataParameters.minimumProjectionInsideDelta = minimumProjectionInsideDelta.getValue();
       constraintDataParameters.projectInsideUsingConvexHull = projectInsideUsingConvexHull.getValue();
    }
 
