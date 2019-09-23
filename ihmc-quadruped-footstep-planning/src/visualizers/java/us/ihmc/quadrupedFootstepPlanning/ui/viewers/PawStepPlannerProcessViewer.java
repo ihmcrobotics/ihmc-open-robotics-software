@@ -55,9 +55,7 @@ public class PawStepPlannerProcessViewer extends AnimationTimer
    public PawStepPlannerProcessViewer(Messager messager)
    {
       PawStepPlannerParametersReadOnly parameters = new DefaultPawStepPlannerParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
 
       PawNodeCostBuilder costBuilder = new PawNodeCostBuilder();

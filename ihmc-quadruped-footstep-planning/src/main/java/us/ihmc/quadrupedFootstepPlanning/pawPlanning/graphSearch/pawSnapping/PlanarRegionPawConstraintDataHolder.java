@@ -41,7 +41,7 @@ public class PlanarRegionPawConstraintDataHolder
       }
       else
       {
-         constraintData = new PlanarRegionPawConstraintData(polygonScaler, planarRegion, parameters.projectInsideUsingConvexHull, parameters.projectionInsideDelta);
+         constraintData = new PlanarRegionPawConstraintData(polygonScaler, planarRegion, parameters.projectInsideUsingConvexHull, parameters.projectionInsideDelta, parameters.minimumProjectionInsideDelta);
          planarRegionConstraintData.put(planarRegion, constraintData);
       }
 
