@@ -43,9 +43,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                    parameters::getProjectInsideUsingConvexHull, true);
-
+      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       CompositePawPlanningCostToGoHeuristics costToGoHeuristics = new CompositePawPlanningCostToGoHeuristics(parameters);
 
       bodyPathHeuristics = new BodyPathPawPlanningHeuristics(parameters, this.bodyPathPlanner, xGaitSettings, snapper);
