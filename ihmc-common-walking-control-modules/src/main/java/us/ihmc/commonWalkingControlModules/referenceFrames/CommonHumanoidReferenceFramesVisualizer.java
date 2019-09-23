@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,7 +16,8 @@ public class CommonHumanoidReferenceFramesVisualizer
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                  YoVariableRegistry parentRegistry, ReferenceFrame... additionalFramesToVisualize)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotSide robotSide : RobotSide.values)
@@ -48,6 +50,17 @@ public class CommonHumanoidReferenceFramesVisualizer
       YoGraphicReferenceFrame rightSoleFrame = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT), registry, false, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, rightSoleFrame);
       referenceFramesVisualizers.add(rightSoleFrame);
+
+      if(additionalFramesToVisualize != null && additionalFramesToVisualize.length > 0)
+      {
+         for (ReferenceFrame referenceFrame : additionalFramesToVisualize)
+         {
+            System.out.println("Visualizing additional frame: " + referenceFrame.getName());
+            YoGraphicReferenceFrame yoGraphic = new YoGraphicReferenceFrame(referenceFrame, registry, false, 0.2);
+            yoGraphicsListRegistry.registerYoGraphic(vizName, yoGraphic);
+            referenceFramesVisualizers.add(yoGraphic);
+         }
+      }
 
       parentRegistry.addChild(registry);
    }
