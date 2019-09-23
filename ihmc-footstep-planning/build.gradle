@@ -13,8 +13,8 @@ ihmc {
 }
 
 mainDependencies {
-   compile "org.ejml:core:0.30"
-   compile "org.ejml:dense64:0.30"
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
 
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")

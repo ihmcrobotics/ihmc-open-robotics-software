@@ -26,7 +26,7 @@ mainDependencies {
    api("org.boofcv:feature:0.24.1")
    api("org.boofcv:calibration:0.24.1")
    api("org.boofcv:visualize:0.24.1")
-   compile "org.boofcv:recognition:0.24.1"
+   api("org.boofcv:recognition:0.24.1")
 
    api("us.ihmc:ihmc-video-codecs:2.1.5")
    api("us.ihmc:euclid:0.12.1")

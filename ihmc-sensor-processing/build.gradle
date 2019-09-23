@@ -26,7 +26,7 @@ mainDependencies {
    api("org.ejml:core:0.30")
    api("jgraph:jgraph:5.13.0.0")
    api("org.jmonkeyengine:jme3-core:3.2.0-171208")
-   compile "org.boofcv:geo:0.19"
+   api("org.boofcv:geo:0.19")
 
    api("us.ihmc:euclid-frame:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")
