@@ -17,29 +17,29 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid:0.12.1")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("commons-net:commons-net:3.3")
-   compile("org.yaml:snakeyaml:1.17") //1.11
-   compile("us.ihmc:ihmc-realtime:1.2.6")
-   compile("org.ejml:core:0.30")
-   compile("org.ejml:dense64:0.30")
-   compile("org.apache.commons:commons-lang3:3.8.1")
-   compile("commons-io:commons-io:2.6")
-   compile("org.apache.commons:commons-math3:3.5")
-   compile("com.google.guava:guava:18.0")
-   compile("us.ihmc:ihmc-common-walking-control-modules:source")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-humanoid-robotics:source")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:ihmc-sensor-processing:source")
-   compile("us.ihmc:simulation-construction-set-tools:source")
-   compile("us.ihmc:ihmc-java-toolkit:source")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
-   compile("us.ihmc:ihmc-robot-models:source")
-   compile("us.ihmc:ihmc-graphics-description:0.12.12")
-   compile("us.ihmc:ihmc-robot-data-logger:source")
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("commons-net:commons-net:3.3")
+   api("org.yaml:snakeyaml:1.17") //1.11
+   api("us.ihmc:ihmc-realtime:1.2.6")
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("commons-io:commons-io:2.6")
+   api("org.apache.commons:commons-math3:3.5")
+   api("com.google.guava:guava:18.0")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-sensor-processing:source")
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-robot-data-logger:source")
 }
 
 benchmarksDependencies {
@@ -47,7 +47,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   compile("us.ihmc:ihmc-convex-optimization-adapter:source")
+   api("us.ihmc:ihmc-convex-optimization-adapter:source")
 }
 
 remotes {
