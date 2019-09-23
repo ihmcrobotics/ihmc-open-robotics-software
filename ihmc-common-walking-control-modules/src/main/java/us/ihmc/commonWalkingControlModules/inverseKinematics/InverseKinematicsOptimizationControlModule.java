@@ -21,8 +21,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -77,9 +77,9 @@ public class InverseKinematicsOptimizationControlModule
       }
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
-      ActiveSetQPSolver activeSetQPSolver;
+      ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver;
       if (optimizationSettings == null)
-         activeSetQPSolver = new SimpleEfficientActiveSetQPSolver();
+         activeSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
       else
          activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
 

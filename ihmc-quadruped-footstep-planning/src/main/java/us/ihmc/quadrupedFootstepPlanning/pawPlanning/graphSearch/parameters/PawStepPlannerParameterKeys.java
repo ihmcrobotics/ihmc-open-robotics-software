@@ -47,6 +47,7 @@ public class PawStepPlannerParameterKeys
    public static final DoubleStoredPropertyKey minYClearanceFromPaw                    = keys.addDoubleKey("Min y clearance from paw", 0.05);
    public static final DoubleStoredPropertyKey maxWalkingSpeedMultiplier               = keys.addDoubleKey("Max walking speed multiplier", 0.8);
    public static final DoubleStoredPropertyKey projectInsideDistance                   = keys.addDoubleKey("Project inside distance", 0.02);
+   public static final DoubleStoredPropertyKey minimumProjectInsideDistance            = keys.addDoubleKey("Minimum project inside distance", 0.01);
    public static final BooleanStoredPropertyKey projectInsideUsingConvexHull           = keys.addBooleanKey("Project inside using convex hull", true);
 
    public static final DoubleStoredPropertyKey maximumXYWiggleDistance                 = keys.addDoubleKey("Maximum xy wiggle distance", 0.03);

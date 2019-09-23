@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -14,18 +14,18 @@ ihmc {
 }
 
 mainDependencies {
-   compile("us.ihmc:euclid-frame:0.12.0")
-   compile("us.ihmc:euclid-shape:0.12.0")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:ihmc-parameter-optimization:source")
-   compile("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:euclid-frame:0.12.1")
+   api("us.ihmc:euclid-shape:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-parameter-optimization:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:simulation-construction-set-test:0.12.15")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:simulation-construction-set-test:0.12.15")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

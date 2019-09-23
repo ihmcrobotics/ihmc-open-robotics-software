@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.18.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -15,26 +15,26 @@ ihmc {
 }
 
 mainDependencies {
-   compile("com.martiansoftware:jsap:2.1")
-   compile("net.wimpi:jamod:1.2")
-   compile("commons-collections:commons-collections:3.2.1")
+   api("com.martiansoftware:jsap:2.1")
+   api("net.wimpi:jamod:1.2")
+   api("commons-collections:commons-collections:3.2.1")
 
-   compile("us.ihmc:ihmc-commons:0.26.6")
-   compile("us.ihmc:ihmc-yovariables:0.3.11")
-   compile("us.ihmc:simulation-construction-set:0.12.15")
-   compile("us.ihmc:ihmc-graphics-description:0.12.12")
-   compile("us.ihmc:ihmc-humanoid-robotics:source")
-   compile("us.ihmc:ihmc-avatar-interfaces:source")
-   compile("us.ihmc:ihmc-communication:source")
-   compile("us.ihmc:ihmc-whole-body-controller:source")
-   compile("us.ihmc:ihmc-java-toolkit:source")
-   compile("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-avatar-interfaces:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile("us.ihmc:ihmc-commons-testing:0.26.6")
-   compile("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 applicationName = "RobotiqControlThread"
 mainClassName = "us.ihmc.robotiq.control.RobotiqControlThread"
