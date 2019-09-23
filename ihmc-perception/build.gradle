@@ -35,7 +35,7 @@ mainDependencies {
    api("org.boofcv:calibration:0.24.1")
    api("us.ihmc.ihmcPerception:valvenet:0.0.4")
    api("us.ihmc.ihmcPerception:cuda:7.5")
-   compile "org.ddogleg:ddogleg:0.7"
+   api("org.ddogleg:ddogleg:0.7")
 
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")

@@ -18,7 +18,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.3.11")
    api("org.ejml:dense64:0.30")
    api("org.ejml:core:0.30")
-   compile "org.apache.commons:commons-lang3:3.8.1"
+   api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc.thirdparty.jinput:jinput:190214")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-model-file-loader:source")

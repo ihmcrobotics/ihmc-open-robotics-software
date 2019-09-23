@@ -20,10 +20,10 @@ mainDependencies {
    api("org.georegression:georegression:0.11")
    api("org.boofcv:geo:0.24.1")
    api("org.bytedeco:javacv-platform:1.5")
-   compile "org.boofcv:ip:0.24.1"
-   compile "org.boofcv:io:0.24.1"
-   compile "org.boofcv:recognition:0.24.1"
-   compile "us.ihmc:ihmc-native-library-loader:1.1"
+   api("org.boofcv:ip:0.24.1")
+   api("org.boofcv:io:0.24.1")
+   api("org.boofcv:recognition:0.24.1")
+   api("us.ihmc:ihmc-native-library-loader:1.1")
 
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")
