@@ -64,8 +64,7 @@ public class PawNodeCheckerRenderer extends AnimationTimer
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
 
-      snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                     parameters::getProjectInsideUsingConvexHull, true);
+      snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
 
       SnapBasedPawNodeTransitionChecker snapBasedNodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
       nodeChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));

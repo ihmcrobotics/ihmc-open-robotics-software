@@ -45,9 +45,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
             return 0.0;
          }
       };
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       SnapBasedPawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -185,9 +183,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -292,9 +288,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -401,9 +395,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -511,9 +503,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();

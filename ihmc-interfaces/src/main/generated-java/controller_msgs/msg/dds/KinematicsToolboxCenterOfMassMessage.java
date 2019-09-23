@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC hole-body inverse kinematics module.
+       * This message is part of the IHMC whole-body inverse kinematics module.
        * It holds all the information needed for detailing the type of constraint to apply to the center of mass.
        */
 public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolboxCenterOfMassMessage> implements Settable<KinematicsToolboxCenterOfMassMessage>, EpsilonComparable<KinematicsToolboxCenterOfMassMessage>

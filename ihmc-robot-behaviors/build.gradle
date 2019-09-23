@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,18 +13,18 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "com.ibm.watson.developer_cloud", name: "java-sdk", version: "2.10.0"
-   compile group: "us.ihmc.thirdparty.org.kc7bfi", name: "jflac", version: "1.4.0"
-   compile group: "commons-io", name: "commons-io", version: "2.6"
+   api("com.ibm.watson.developer_cloud:java-sdk:2.10.0")
+   api("us.ihmc.thirdparty.org.kc7bfi:jflac:1.4.0")
+   api("commons-io:commons-io:2.6")
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

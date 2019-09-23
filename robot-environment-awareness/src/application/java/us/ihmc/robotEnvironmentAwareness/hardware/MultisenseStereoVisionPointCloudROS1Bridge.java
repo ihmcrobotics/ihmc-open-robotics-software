@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;

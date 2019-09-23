@@ -7,7 +7,6 @@ import javafx.beans.value.ObservableValue;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-// TODO: Figure out what to actually do with the listeners
 public class FunctionalObservableValue<T> implements ObservableValue<T>
 {
    private final ArrayList<ChangeListener> changeListeners = new ArrayList<>();

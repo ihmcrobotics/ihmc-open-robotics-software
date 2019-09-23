@@ -46,7 +46,7 @@ bool perform_post_processing_node_shifting false
 
 bool introduce_midpoints_in_post_processing true
 
-bool compute_orientations_to_avoid_obstacles true
+bool compute_orientations_to_avoid_obstacles false
 
 float64 heuristic_weight -1.0
 
