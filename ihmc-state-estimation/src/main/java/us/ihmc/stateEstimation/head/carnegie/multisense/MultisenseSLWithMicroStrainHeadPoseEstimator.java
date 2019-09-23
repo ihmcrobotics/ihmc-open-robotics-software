@@ -30,8 +30,8 @@ import java.util.Set;
  */
 public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEstimator
 {
-   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(0.0, Math.PI / 2.0, 0.0),
-                                                                                                       new Vector3D(-0.007, -0.0524, 0.0798));
+   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(0.0, -Math.PI / 2.0, 0.0),
+                                                                                                       new Vector3D(-0.825, 0.0, 0.0787));
    public static final RigidBodyTransform DEFAULT_IMU_TO_MULTISENSE_TRANSFORM = new RigidBodyTransform();
    static
    {
