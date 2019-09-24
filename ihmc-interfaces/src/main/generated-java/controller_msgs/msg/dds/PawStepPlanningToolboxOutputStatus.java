@@ -27,14 +27,14 @@ public class PawStepPlanningToolboxOutputStatus extends Packet<PawStepPlanningTo
    public int plan_id_ = -1;
    public double time_taken_ = -1.0;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
 
    public PawStepPlanningToolboxOutputStatus()
    {
       footstep_data_list_ = new controller_msgs.msg.dds.QuadrupedTimedStepListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
 
    }
@@ -116,7 +116,7 @@ public class PawStepPlanningToolboxOutputStatus extends Packet<PawStepPlanningTo
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getBodyPath()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPath()
    {
       return body_path_;
    }

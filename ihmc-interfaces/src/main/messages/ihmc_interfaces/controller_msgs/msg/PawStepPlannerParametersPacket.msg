@@ -40,6 +40,7 @@ float64 min_y_clearance_from_paw -11.1
 float64 max_walking_speed_multiplier -11.1
 bool project_inside_using_convex_hull
 float64 projection_inside_distance -11.1
+float64 minimum_projection_inside_distance -11.1
 float64 maximum_xy_wiggle_distance -11.1
 float64 minimum_surface_incline_radians -11.1
 float64 cliff_height_to_avoid -11.1

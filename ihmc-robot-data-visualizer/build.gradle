@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -16,28 +16,28 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
-   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
-   compile group: "net.sourceforge.jmatio", name: "jmatio", version: "1.0"
+   api("net.sf.trove4j:trove4j:3.0.3")
+   api("com.martiansoftware:jsap:2.1")
+   api("net.sourceforge.jmatio:jmatio:1.0")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-video-codecs:2.1.5")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-robot-description:0.12.7")
+   api("us.ihmc:ihmc-model-file-loader:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-data-logger:source")
 }
 
 testDependencies {
-    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 
 mainClassName = hasProperty("mainClass") ? mainClass : "us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer"

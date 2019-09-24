@@ -80,4 +80,10 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
       super.testSingleWaypointThenManualChange();
    }
 
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
 }

@@ -116,7 +116,6 @@ public class QuadrupedSwingSpeedUpCalculator
       return deltaTimeToBeAccounted;
    }
 
-
    private boolean wouldPuttingTheFootDownHelpWithErrorRejection(RobotQuadrant robotQuadrant, FramePoint2DReadOnly goalPosition)
    {
       updateSupportPolygon(supportPolygonInWorld, contactStates, null, null);
@@ -243,5 +242,4 @@ public class QuadrupedSwingSpeedUpCalculator
       }
       polygonToPack.update();
    }
-
 }

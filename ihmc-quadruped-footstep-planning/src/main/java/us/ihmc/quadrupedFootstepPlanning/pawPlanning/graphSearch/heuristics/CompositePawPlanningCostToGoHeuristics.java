@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 
@@ -30,12 +31,19 @@ public class CompositePawPlanningCostToGoHeuristics extends PawPlanningCostToGoH
    }
 
    @Override
-   protected double computeHeuristics(PawNode node, PawNode goalNode)
+   protected double computeHeuristics(PawNode node)
    {
       double cost = 0.0;
       for (PawPlanningCostToGoHeuristics pawCost : costToGoHeuristics)
-         cost += pawCost.computeHeuristics(node, goalNode);
+         cost += pawCost.computeHeuristics(node);
 
       return cost;
+   }
+
+   @Override
+   public void setGoalPose(FramePose3DReadOnly goalPose)
+   {
+      for (PawPlanningCostToGoHeuristics pawCost : costToGoHeuristics)
+         pawCost.setGoalPose(goalPose);
    }
 }

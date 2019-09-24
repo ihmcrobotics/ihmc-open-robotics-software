@@ -40,8 +40,7 @@ public class SnapBasedPawNodeCheckerTest
 
       TestParameters parameters = new TestParameters();
       parameters.setDistanceInside(0.5 * cinderWidth);
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull, true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeChecker nodeChecker = new SnapBasedPawNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();

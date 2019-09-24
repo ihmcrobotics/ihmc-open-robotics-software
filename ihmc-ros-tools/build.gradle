@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -15,34 +15,34 @@ ihmc {
 project.sourceSets.main.java.srcDirs += ["generated-src"]
 
 mainDependencies {
-   compile group: "io.netty", name: "netty", version: "3.5.8.Final"
-   compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "org.apache.commons", name: "com.springsource.org.apache.commons.io", version: "1.4.0"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "org.boofcv", name: "geo", version: "0.24.1"
-   compile group: "org.reflections", name: "reflections", version: "0.9.10"
-   compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
-   compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
-   compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
-   compile group: "org.ros.rosjava_messages", name: "test_rosmaster", version: "1.11.10"
-   compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
-   compile group: "org.ros.rosjava_messages", name: "dynamic_reconfigure", version: "1.5.38"
-   compile group: "org.ros.rosjava_messages", name: "multisense_ros", version: "3.4.2"
-   compile group: "org.ros.rosjava_messages", name: "rosgraph_msgs", version: "1.11.1"
-   compile group: "org.ros.rosjava_messages", name: "geometry_msgs", version: "1.11.7"
-   compile group: "org.ros.rosjava_messages", name: "nav_msgs", version: "1.11.7"
-   compile group: "org.ros.rosjava_messages", name: "tf2_msgs", version: "0.5.9"
-   compile group: "org.ros.rosjava_messages", name: "tf", version: "1.10.8"
+   api("io.netty:netty:3.5.8.Final")
+   api("com.google.guava:guava:18.0")
+   api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.boofcv:geo:0.24.1")
+   api("org.reflections:reflections:0.9.10")
+   api("org.ros.rosjava_core:rosjava:0.2.1")
+   api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
+   api("org.ros.rosjava_messages:std_msgs:0.5.9")
+   api("org.ros.rosjava_messages:test_rosmaster:1.11.10")
+   api("org.ros.rosjava_messages:sensor_msgs:1.11.7")
+   api("org.ros.rosjava_messages:dynamic_reconfigure:1.5.38")
+   api("org.ros.rosjava_messages:multisense_ros:3.4.2")
+   api("org.ros.rosjava_messages:rosgraph_msgs:1.11.1")
+   api("org.ros.rosjava_messages:geometry_msgs:1.11.7")
+   api("org.ros.rosjava_messages:nav_msgs:1.11.7")
+   api("org.ros.rosjava_messages:tf2_msgs:0.5.9")
+   api("org.ros.rosjava_messages:tf:1.10.8")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
