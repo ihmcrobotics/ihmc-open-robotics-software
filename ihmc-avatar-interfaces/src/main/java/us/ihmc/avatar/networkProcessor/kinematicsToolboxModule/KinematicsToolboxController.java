@@ -20,6 +20,7 @@ import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -188,6 +189,7 @@ public class KinematicsToolboxController extends ToolboxController
     * quicker.
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
+   private TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap = null;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
@@ -345,6 +347,11 @@ public class KinematicsToolboxController extends ToolboxController
          collisionPointBs[i] = collisionPointB;
          collisionFramePoses[i] = collisionFramePose;
       }
+   }
+
+   public void setDefaultPrivilegedConfiguration(TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap)
+   {
+      this.defaultPrivilegedConfigurationMap = defaultPrivilegedConfigurationMap;
    }
 
    /**
@@ -533,6 +540,14 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+      if (defaultPrivilegedConfigurationMap != null)
+      {
+         defaultPrivilegedConfigurationMap.forEachEntry((joint, q_priv) ->
+         {
+            joint.setQ(q_priv);
+            return true;
+         });
+      }
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
