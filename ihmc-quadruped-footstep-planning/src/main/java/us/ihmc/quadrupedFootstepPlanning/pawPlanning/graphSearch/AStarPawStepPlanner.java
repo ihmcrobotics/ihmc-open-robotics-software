@@ -716,8 +716,10 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
                                                          goalNodes.get(nodeQuadrant).getYIndex(nodeQuadrant), goalNodes.get(nodeQuadrant).getYawIndex(),
                                                          parentNode);
 
-            if (!nodeChecker.isNodeValid(nodeAtGoal)|| !nodeTransitionChecker.isNodeValid(nodeAtGoal, parentNode))
+            if (!nodeChecker.isNodeValid(nodeAtGoal) || !nodeTransitionChecker.isNodeValid(nodeAtGoal, parentNode))
+            {
                break;
+            }
 
             endNode = nodeAtGoal;
             graph.checkAndSetEdge(parentNode, endNode, 0.0);
@@ -725,7 +727,8 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
             parentNode = endNode;
             nodeQuadrant = nodeQuadrant.getNextRegularGaitSwingQuadrant();
          }
-         return true;
+
+         return endNode != null;
       }
 
       return false;
