@@ -160,7 +160,7 @@ public class AtlasBehaviorUIDemo extends Application
    private PlanarRegionsList loadDataSet(String dataSetName)
    {
       Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
+      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/20190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
       return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 
