@@ -7,6 +7,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -196,7 +197,7 @@ public class ControllerBasedBodyPathTest
 
             bodyPath.setWaypoints(waypoints);
 
-            Pose2D pose = new Pose2D();
+            Pose3D pose = new Pose3D();
             for (int i = 0; i < numberOfPoints; i++)
             {
                double percent = (double) i / (double) (numberOfPoints - 1);
@@ -204,9 +205,9 @@ public class ControllerBasedBodyPathTest
                points.get(i).set(pose.getX(), pose.getY(), 0.0);
             }
 
-            Pose2D startPose = new Pose2D();
+            Pose3D startPose = new Pose3D();
             bodyPath.getPointAlongPath(0.0, startPose);
-            Pose2D finalPose = new Pose2D();
+            Pose3D finalPose = new Pose3D();
             bodyPath.getPointAlongPath(1.0, finalPose);
 
             FramePose3D initialMidFootPose = new FramePose3D();

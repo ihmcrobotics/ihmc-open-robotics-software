@@ -95,7 +95,7 @@ public class QuadrupedTurnWalkTurnPathPlanner
       for (int currentWaypointIndex = 0; currentWaypointIndex < bodyPathWaypoints.getNumberOfWaypoints() - 1; currentWaypointIndex++)
       {
          int nextWaypointIndex = currentWaypointIndex + 1;
-         Point2DReadOnly nextWaypoint = new Point2D(bodyPathWaypoints.getWaypoint(nextWaypointIndex));
+         Point2DReadOnly nextWaypoint = new Point2D(bodyPathWaypoints.getWaypoint(nextWaypointIndex).getPosition());
 
          desiredHeading.sub(nextWaypoint, currentPosition);
          desiredHeading.normalize();

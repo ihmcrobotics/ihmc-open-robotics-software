@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -161,7 +162,7 @@ public class PawStepPlannerMessagerAPI
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);
    public static final Topic<String> exportUnitTestPath = Root.child(UnitTest).topic(Path);
 
-   public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
+   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
    public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPath).topic(Show);
 

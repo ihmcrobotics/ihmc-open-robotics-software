@@ -3,6 +3,7 @@ package us.ihmc.quadrupedUI;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -97,7 +98,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Quaternion> Quaternion = apiFactory.createTypedTopicTheme("Quaternion");
    private static final TypedTopicTheme<RobotQuadrant> RobotQuadrant = apiFactory.createTypedTopicTheme("RobotQuadrant");
    private static final TypedTopicTheme<PawStepPlan> FootstepPlan = apiFactory.createTypedTopicTheme("FootstepPlan");
-   private static final TypedTopicTheme<List<? extends Point3DReadOnly>> BodyPathPlan = apiFactory.createTypedTopicTheme("BodyPathPlan");
+   private static final TypedTopicTheme<List<? extends Pose3DReadOnly>> BodyPathPlan = apiFactory.createTypedTopicTheme("BodyPathPlan");
    private static final TypedTopicTheme<Double> Time = apiFactory.createTypedTopicTheme("Time");
    private static final TypedTopicTheme<Double> Length = apiFactory.createTypedTopicTheme("Length");
    private static final TypedTopicTheme<VideoPacket> Video = apiFactory.createTypedTopicTheme("Video");
@@ -181,7 +182,7 @@ public class QuadrupedUIMessagerAPI
 
    /* Body Path Planning */
    public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPathPlanning).child(Result).topic(Show);
-   public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPathPlanning).child(Result).topic(BodyPathPlan);
+   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathDataTopic = Root.child(BodyPathPlanning).child(Result).topic(BodyPathPlan);
 
 
 
