@@ -225,17 +225,17 @@ public class IHMCHumanoidBehaviorManager
       fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
-      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
-      try
-      {
-         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(robotName, ros2Node, yoGraphicsListRegistry);
-         dispatcher.addBehaviorService(objectDetectorBehaviorService);
-      }
-      catch (Exception e)
-      {
-         System.err.println("Error creating valve detection behavior service");
-         e.printStackTrace();
-      }
+//      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
+//      try
+//      {
+//         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(robotName, ros2Node, yoGraphicsListRegistry);
+//         dispatcher.addBehaviorService(objectDetectorBehaviorService);
+//      }
+//      catch (Exception e)
+//      {
+//         System.err.println("Error creating valve detection behavior service");
+//         e.printStackTrace();
+//      }
 
       //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
       //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
@@ -297,12 +297,12 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN,
                              new WalkOverTerrainStateMachineBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames));
 
-      if (objectDetectorBehaviorService != null)
-      {
-         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
-         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
-                                                                                              referenceFrames, fiducialDetectorBehaviorService));
-      }
+//      if (objectDetectorBehaviorService != null)
+//      {
+//         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
+//         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
+//                                                                                              referenceFrames, fiducialDetectorBehaviorService));
+//      }
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE, new BasicPipeLineBehavior(robotName, "pipelineTest", yoTime, ros2Node, fullRobotModel,
                                                                                            referenceFrames, wholeBodyControllerParameters));

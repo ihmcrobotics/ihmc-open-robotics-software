@@ -45,7 +45,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands
  * as pause, resume, stop, etc. DO NOT add smart AI stuff in there, create and register a new
  * behavior in {@link IHMCHumanoidBehaviorManager} instead.
- *
  */
 public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 {
@@ -80,8 +79,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
    //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
-  // public static Messager messager;
-   
+   public static Messager messager;
+
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
@@ -112,26 +111,37 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       requestedBehavior.set(null);
 
-      
       apiFactory.createRootCategory("Root");
 
       parentRegistry.addChild(registry);
-      
-      
+
    }
+
    //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
- //  public void startMessanger()
-//   {
- //     messager = KryoMessager.createServer(getBehaviorAPI(),
- //                                                       NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(), BehaviorDispatcher.class.getSimpleName(), 5);
- //     ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
- //  }
-   
+   public void startMessanger()
+   {
+      Thread kryoMessengerStarter = new Thread(new Runnable()
+      {
+
+         @Override
+         public void run()
+         {
+            messager = KryoMessager.createServer(getBehaviorAPI(),
+                                                 NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(),
+                                                 BehaviorDispatcher.class.getSimpleName(),
+                                                 5);
+            ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         }
+      });
+      kryoMessengerStarter.start();
+
+   }
+
    public MessagerAPI getBehaviorAPI()
    {
       return apiFactory.getAPIAndCloseFactory();
    }
-   
+
    public void requestBehavior(E behaviorEnum)
    {
       requestedBehavior.set(behaviorEnum);
@@ -150,10 +160,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    public void addBehavior(E behaviorKey, AbstractBehavior behaviorToAdd)
    {
-      if(behaviorToAdd.getBehaviorAPI()!=null)
-      apiFactory.includeMessagerAPIs(behaviorToAdd.getBehaviorAPI());
+      if (behaviorToAdd.getBehaviorAPI() != null)
+         apiFactory.includeMessagerAPIs(behaviorToAdd.getBehaviorAPI());
 
-      
       BehaviorAction behaviorStateToAdd = new BehaviorAction(behaviorToAdd);
 
       stateMachineFactory.addState(behaviorKey, behaviorStateToAdd);
@@ -180,9 +189,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    public void finalizeStateMachine()
    {
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
-      
+
       //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
- //     startMessanger();
+      startMessanger();
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
@@ -195,7 +204,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (stateMachine == null)
          finalizeStateMachine();
       stateMachine.initialize();
-      
+
    }
 
    private void doControl()
@@ -206,7 +215,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       callUpdatables();
 
       stateMachine.doControlAndTransitions();
-      if(!stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey)&&stateMachine.getCurrentAction().isDone())
+      if (!stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey) && stateMachine.getCurrentAction().isDone())
       {
          requestedBehavior.set(stopBehaviorKey);
       }
@@ -261,24 +270,24 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       {
          switch (desiredBehaviorControlSubscriber.getRequestedBehaviorControl())
          {
-         case STOP:
-            stateMachine.stop();
-            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
-            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
-            requestedBehavior.set(stopBehaviorKey);
-            break;
-         case PAUSE:
-            stateMachine.pause();
-            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
-            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
-            break;
-         case RESUME:
-            stateMachine.resume();
-            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
-            behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
-            break;
-         default:
-            throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
+            case STOP:
+               stateMachine.stop();
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+               behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+               requestedBehavior.set(stopBehaviorKey);
+               break;
+            case PAUSE:
+               stateMachine.pause();
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
+               behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
+               break;
+            case RESUME:
+               stateMachine.resume();
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
+               behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
+               break;
+            default:
+               throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
          }
 
       }
