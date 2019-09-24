@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -34,20 +35,23 @@ public class PathOrientationCalculator
       this.parameters = parameters;
    }
 
-   public List<? extends Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution)
+   public List<? extends Pose3DReadOnly> computePosesFromPath(List<Point3DReadOnly> path, VisibilityMapSolution visibilityMapSolution,
+                                                              Orientation3DReadOnly startOrientation, Orientation3DReadOnly goalOrientation)
    {
-      List<Pose3DBasics> pathPoses = computeNominalPosesForPath(path);
+      List<Pose3DBasics> pathPoses = computeNominalPosesForPath(path, startOrientation, goalOrientation);
 
       modifyPathOrientationsToAvoidObstacles(pathPoses, visibilityMapSolution);
 
       return pathPoses;
    }
 
-   private List<Pose3DBasics> computeNominalPosesForPath(List<Point3DReadOnly> path)
+   private List<Pose3DBasics> computeNominalPosesForPath(List<Point3DReadOnly> path, Orientation3DReadOnly startOrientation, Orientation3DReadOnly goalOrientation)
    {
       List<Pose3DBasics> nominalPathPoses = new ArrayList<>();
+      if (path.size() < 2)
+         return nominalPathPoses;
 
-      double startHeading = BodyPathPlannerTools.calculateHeading(path.get(0), path.get(1));
+      double startHeading = startOrientation.getYaw();
       nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
 
       int pathIndex = 1;
@@ -60,9 +64,15 @@ public class PathOrientationCalculator
 
          double previousHeading = BodyPathPlannerTools.calculateHeading(previousPosition, currentPosition);
          double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
-         double desiredOrientation = InterpolationTools.linearInterpolate(previousHeading, nextHeading, 0.5);
+         double previousOrientation = previousHeading;
 
-         if (!MathTools.epsilonEquals(previousHeading, nextHeading, 1e-3))
+         // override these orientations if it's the start or goal.
+         if (pathIndex == 1)
+            previousOrientation = startHeading;
+
+         double desiredOrientation = AngleTools.interpolateAngle(previousOrientation, nextHeading, 0.5);
+
+         if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(previousOrientation, nextHeading)) > 1e-3)
          {
             double previousLength = currentPosition.distanceXY(previousPosition);
             double nextLength = currentPosition.distanceXY(nextPosition);
@@ -74,7 +84,7 @@ public class PathOrientationCalculator
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, alpha);
                path.add(pathIndex, waypointPositionToAdd);
-               nominalPathPoses.add(new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
+               nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
                pathIndex++;
             }
@@ -83,12 +93,12 @@ public class PathOrientationCalculator
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, 0.5);
                path.add(pathIndex, waypointPositionToAdd);
-               nominalPathPoses.add(new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
+               nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
                pathIndex++;
             }
 
-            nominalPathPoses.add(new Pose3D(currentPosition, new Quaternion(desiredOrientation, 0.0, 0.0)));
+            nominalPathPoses.add(pathIndex, new Pose3D(currentPosition, new Quaternion(desiredOrientation, 0.0, 0.0)));
             pathIndex++;
 
             // add a point after
@@ -99,7 +109,7 @@ public class PathOrientationCalculator
                waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
                path.add(pathIndex, waypointPositionToAdd);
             }
-            else if (nextHeading > parameters.getObstacleExtrusionDistance())
+            else if (nextLength > parameters.getObstacleExtrusionDistance())
             {
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(currentPosition, nextPosition, 0.5);
@@ -108,16 +118,15 @@ public class PathOrientationCalculator
          }
          else
          {
-            nominalPathPoses.add(new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
+            nominalPathPoses.add(pathIndex, new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
             pathIndex++;
          }
 
       }
 
       int endingSize = path.size();
-      double endHeading = BodyPathPlannerTools.calculateHeading(path.get(endingSize - 2), path.get(endingSize - 1));
 
-      nominalPathPoses.add(new Pose3D(path.get(endingSize - 1), new Quaternion(endHeading, 0.0, 0.0)));
+      nominalPathPoses.add(new Pose3D(path.get(endingSize - 1), goalOrientation));
 
       return nominalPathPoses;
    }
@@ -125,7 +134,10 @@ public class PathOrientationCalculator
    private void modifyPathOrientationsToAvoidObstacles(List<Pose3DBasics> pathPosesToPack, VisibilityMapSolution visibilityMapSolution)
    {
       List<Cluster> allObstacleClusters = new ArrayList<>();
-      visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+      if (parameters.getComputeOrientationsToAvoidObstacles())
+      {
+         visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+      }
 
       for (int pathIndex = 1; pathIndex < pathPosesToPack.size() - 1; pathIndex++)
       {

@@ -93,9 +93,10 @@ public class QuadrupedStepPlanarRegionProjection
          region.transformFromLocalToWorld(tempVector3D);
 
          goalPositionToProject.add(tempVector3D);
-         double height = region.getPlaneZGivenXY(goalPositionToProject.getX(), goalPositionToProject.getY());
-         goalPositionToProject.setZ(height);
       }
+
+      double height = region.getPlaneZGivenXY(goalPositionToProject.getX(), goalPositionToProject.getY());
+      goalPositionToProject.setZ(height);
    }
 
    private PlanarRegion findTouchdownRegion(FramePoint3DReadOnly goalPosition)

@@ -78,5 +78,6 @@ public class PawStepPlannerMessageTools
       packet.setElevationWeight(parameters.getElevationWeight());
       packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
+      packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
    }
 }

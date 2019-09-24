@@ -71,6 +71,8 @@ module controller_msgs
         double elevation_weight;
         @defaultValue(value=-1.0)
         double occluded_goal_edge_weight;
+        @defaultValue(value=-1.0)
+        double weight_for_inter_region_edge;
         boolean return_best_effort_solution;
       };
     };
