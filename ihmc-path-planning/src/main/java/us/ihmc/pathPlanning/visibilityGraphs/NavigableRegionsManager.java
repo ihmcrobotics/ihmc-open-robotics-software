@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -15,6 +16,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NavigableRegionsManager
 {
@@ -215,9 +217,7 @@ public class NavigableRegionsManager
       }
       else
       {
-         path = new ArrayList<>();
-         for (VisibilityGraphNode node : nodePath)
-            path.add(node.getPointInWorld());
+         path = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
       }
 
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);

@@ -311,8 +311,7 @@ public class ParameterBasedNodeExpansionTest
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                    parameters::getProjectInsideUsingConvexHull, true);
+      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       SnapBasedPawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
@@ -418,7 +417,7 @@ public class ParameterBasedNodeExpansionTest
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         PawNodeSnapData snapData = snapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         PawNodeSnapData snapData = snapper.snapPawNode(robotQuadrant, node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant), node.getStepYaw());
          RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          footSnapTransform.transform(stepPosition);

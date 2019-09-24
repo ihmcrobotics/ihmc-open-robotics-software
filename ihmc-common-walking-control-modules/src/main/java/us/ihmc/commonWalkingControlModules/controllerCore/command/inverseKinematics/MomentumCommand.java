@@ -9,10 +9,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
@@ -132,7 +133,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @throws ReferenceFrameMismatchException if {@code angularMomentum} or {@code linearMomentum} is
     *            not expressed in world frame.
     */
-   public void setMomentum(FrameVector3D angularMomentum, FrameVector3D linearMomentum)
+   public void setMomentum(FrameVector3DReadOnly angularMomentum, FrameVector3DReadOnly linearMomentum)
    {
       angularMomentum.checkReferenceFrameMatch(worldFrame);
       linearMomentum.checkReferenceFrameMatch(worldFrame);
@@ -154,7 +155,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @throws ReferenceFrameMismatchException if {@code angularMomentum} is not expressed in world
     *            frame.
     */
-   public void setAngularMomentum(FrameVector3D angularMomentum)
+   public void setAngularMomentum(FrameVector3DReadOnly angularMomentum)
    {
       angularMomentum.checkReferenceFrameMatch(worldFrame);
 
@@ -170,7 +171,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
     *            frame.
     */
-   public void setLinearMomentum(FrameVector3D linearMomentum)
+   public void setLinearMomentum(FrameVector3DReadOnly linearMomentum)
    {
       linearMomentum.checkReferenceFrameMatch(worldFrame);
 
@@ -186,7 +187,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
     *            frame.
     */
-   public void setLinearMomentumXY(FrameVector2D linearMomentum)
+   public void setLinearMomentumXY(FrameVector2DReadOnly linearMomentum)
    {
       linearMomentum.checkReferenceFrameMatch(worldFrame);
 
@@ -515,7 +516,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     *           Modified.
     * @param linearPartToPack frame vector to pack the desired linear momentum. Modified.
     */
-   public void getMomentumRate(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack)
+   public void getMomentumRate(FrameVector3DBasics angularPartToPack, FrameVector3DBasics linearPartToPack)
    {
       angularPartToPack.setIncludingFrame(worldFrame, 0, momentum);
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentum);

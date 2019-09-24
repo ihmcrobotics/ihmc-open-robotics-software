@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
@@ -19,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -37,6 +39,9 @@ public class StereoREAModule implements Runnable
 
    private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
 
+   private final AtomicReference<StereoVisionPointCloudMessage> loadedStereoVisionPointCloudMessage;
+   private final AtomicReference<Image32> loadedImage32Message;
+
    public StereoREAModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
@@ -48,6 +53,9 @@ public class StereoREAModule implements Runnable
 
       planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
                                                                              subscriberTopicNameGenerator);
+
+      loadedStereoVisionPointCloudMessage = reaMessager.createInput(REAModuleAPI.StereoVisionPointCloudState);
+      loadedImage32Message = messager.createInput(LidarImageFusionAPI.ImageState);
 
       initializeREAPlanarRegionPublicNetworkProvider();
    }
@@ -94,6 +102,14 @@ public class StereoREAModule implements Runnable
 
    public void singleRun()
    {
+      StereoVisionPointCloudMessage loadedStereoMessage = loadedStereoVisionPointCloudMessage.getAndSet(null);
+      if (loadedStereoMessage != null)
+         updateLatestStereoVisionPointCloudMessage(loadedStereoMessage);
+
+      Image32 loadedImageMessage = loadedImage32Message.getAndSet(null);
+      if (loadedImageMessage != null)
+         updateLatestBufferedImage(ImageVisualizationHelper.convertImageMessageToBufferedImage(loadedImageMessage));
+
       isRunning.set(true);
       long runningStartTime = System.nanoTime();
 

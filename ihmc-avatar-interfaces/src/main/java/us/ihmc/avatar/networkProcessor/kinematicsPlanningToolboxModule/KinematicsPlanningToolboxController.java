@@ -131,7 +131,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       isDone = new YoBoolean("isDone", parentRegistry);
 
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
-      ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
+      double updateDT = 1.0e-3;
+      ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
+                                                             statusOutputManager,
+                                                             fullRobotModel,
+                                                             updateDT,
+                                                             yoGraphicsListRegistry,
                                                              parentRegistry);
       initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
 
@@ -423,7 +428,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          {
             getDesiredFullRobotModel().updateFrames();
             KinematicsToolboxCenterOfMassMessage comMessage = KinematicsToolboxMessageFactory.holdCenterOfMassCurrentPosition(getDesiredFullRobotModel().getRootBody(),
-                                                                                                                              true, true, false);
+                                                                                                                              true,
+                                                                                                                              true,
+                                                                                                                              false);
 
             ikCenterOfMassMessages.add(comMessage);
          }

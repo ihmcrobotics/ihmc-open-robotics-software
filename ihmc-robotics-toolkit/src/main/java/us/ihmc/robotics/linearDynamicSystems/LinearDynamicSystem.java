@@ -1,233 +1,356 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
 import java.util.ArrayList;
-//~--- JDK imports ------------------------------------------------------------
+// ~--- JDK imports ------------------------------------------------------------
+import java.util.Arrays;
 
-//~--- non-JDK imports --------------------------------------------------------
+// ~--- non-JDK imports --------------------------------------------------------
 
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
-public class LinearDynamicSystem {
-    private final Matrix                 matrixA;
-    private Matrix                       matrixB, matrixC, matrixD;
-    private final TransferFunctionMatrix sIMinusAInverse;
+public class LinearDynamicSystem
+{
+   private final Matrix matrixA;
+   private Matrix matrixB, matrixC, matrixD;
+   private final TransferFunctionMatrix sIMinusAInverse;
 
-    public LinearDynamicSystem(Matrix matrixA, Matrix matrixB, Matrix matrixC, Matrix matrixD) {
-        if (matrixA == null) {
-            throw new RuntimeException("matrixA must be defined. B,C,D can be null");
-        }
+   public LinearDynamicSystem(Matrix matrixA, Matrix matrixB, Matrix matrixC, Matrix matrixD)
+   {
+      if (matrixA == null)
+      {
+         throw new RuntimeException("matrixA must be defined. B,C,D can be null");
+      }
 
-        int order = matrixA.getRowDimension();
+      int order = matrixA.getRowDimension();
 
-        if (matrixA.getColumnDimension() != order) {
-            throw new RuntimeException("matrixA must be square!");
-        }
+      if (matrixA.getColumnDimension() != order)
+      {
+         throw new RuntimeException("matrixA must be square!");
+      }
 
-        this.matrixA = new Matrix(matrixA.getArrayCopy());
-        setMatrixB(matrixB);
-        setMatrixC(matrixC);
-        setMatrixD(matrixD);
-        sIMinusAInverse = computeSIMinusAInverse();
-    }
+      this.matrixA = new Matrix(matrixA.getArrayCopy());
+      setMatrixB(matrixB);
+      setMatrixC(matrixC);
+      setMatrixD(matrixD);
+      sIMinusAInverse = computeSIMinusAInverse();
+   }
 
-    public Matrix getMatrixA() {
-        return new Matrix(matrixA.getArrayCopy());
-    }
+   public Matrix getMatrixA()
+   {
+      return new Matrix(matrixA.getArrayCopy());
+   }
 
-    public Matrix getMatrixB() {
-        return new Matrix(matrixB.getArrayCopy());
-    }
+   public Matrix getMatrixB()
+   {
+      return new Matrix(matrixB.getArrayCopy());
+   }
 
-    public Matrix getMatrixC() {
-        return new Matrix(matrixC.getArrayCopy());
-    }
+   public Matrix getMatrixC()
+   {
+      return new Matrix(matrixC.getArrayCopy());
+   }
 
-    public Matrix getMatrixD() {
-        return new Matrix(matrixD.getArrayCopy());
-    }
+   public Matrix getMatrixD()
+   {
+      return new Matrix(matrixD.getArrayCopy());
+   }
 
-    public LinearDynamicSystem addFullStateFeedback(Matrix matrixK) {
-        if (matrixB == null) {
-            throw new RuntimeException("Matrix B must not be null for addFullStateFeedback!");
-        }
+   public LinearDynamicSystem addFullStateFeedback(Matrix matrixK)
+   {
+      if (matrixB == null)
+      {
+         throw new RuntimeException("Matrix B must not be null for addFullStateFeedback!");
+      }
 
-        Matrix newMatrixA = matrixA.plus(matrixB.times(matrixK.times(-1.0)));
-        Matrix newMatrixB = matrixB.copy();
-        Matrix newMatrixC = null,
-               newMatrixD = null;
+      Matrix newMatrixA = matrixA.plus(matrixB.times(matrixK.times(-1.0)));
+      Matrix newMatrixB = matrixB.copy();
+      Matrix newMatrixC = null, newMatrixD = null;
 
-        if (matrixC != null) {
-            newMatrixC = matrixC;
+      if (matrixC != null)
+      {
+         newMatrixC = matrixC;
 
-            if (matrixD != null) {
-                newMatrixC = matrixC.plus(matrixD.times(matrixK.times(-1.0)));
-                newMatrixD = matrixD.copy();
-            }
-        }
+         if (matrixD != null)
+         {
+            newMatrixC = matrixC.plus(matrixD.times(matrixK.times(-1.0)));
+            newMatrixD = matrixD.copy();
+         }
+      }
 
-        return new LinearDynamicSystem(newMatrixA, newMatrixB, newMatrixC, newMatrixD);
-    }
+      return new LinearDynamicSystem(newMatrixA, newMatrixB, newMatrixC, newMatrixD);
+   }
 
-    public LinearDynamicSystem addOutputStateFeedback(Matrix matrixK) {
-        return addOutputStateFeedback(matrixK, null);
-    }
+   public LinearDynamicSystem addOutputStateFeedback(Matrix matrixK)
+   {
+      return addOutputStateFeedback(matrixK, null);
+   }
 
-    public LinearDynamicSystem addOutputStateFeedback(Matrix matrixK, Matrix matrixFF) {
-        if (matrixB == null) {
-            throw new RuntimeException("Matrix B must not be null for addOutputStateFeedback!");
-        }
+   public LinearDynamicSystem addOutputStateFeedback(Matrix matrixK, Matrix matrixFF)
+   {
+      if (matrixB == null)
+      {
+         throw new RuntimeException("Matrix B must not be null for addOutputStateFeedback!");
+      }
 
-        if (matrixD != null) {
-            throw new RuntimeException("Matrix D must be null for addOutputStateFeedback!");
-        }
+      if (matrixD != null)
+      {
+         throw new RuntimeException("Matrix D must be null for addOutputStateFeedback!");
+      }
 
-        if (matrixC == null) {
-            throw new RuntimeException("Matrix C must not be null for addOutputStateFeedback!");
-        }
+      if (matrixC == null)
+      {
+         throw new RuntimeException("Matrix C must not be null for addOutputStateFeedback!");
+      }
 
-        Matrix newMatrixA = matrixA.plus(matrixB.times(matrixK.times(-1.0)).times(matrixC));
-        Matrix newMatrixB = matrixB.copy();
-        Matrix newMatrixC = matrixC.copy();
+      Matrix newMatrixA = matrixA.plus(matrixB.times(matrixK.times(-1.0)).times(matrixC));
+      Matrix newMatrixB = matrixB.copy();
+      Matrix newMatrixC = matrixC.copy();
 
-        if (matrixFF != null) {
-            newMatrixB = newMatrixB.times(matrixFF);
-        }
+      if (matrixFF != null)
+      {
+         newMatrixB = newMatrixB.times(matrixFF);
+      }
 
-        return new LinearDynamicSystem(newMatrixA, newMatrixB, newMatrixC, null);
-    }
+      return new LinearDynamicSystem(newMatrixA, newMatrixB, newMatrixC, null);
+   }
 
-    public TransferFunctionMatrix getTransferFunctionMatrix() {
+   public TransferFunctionMatrix getTransferFunctionMatrix()
+   {
 
-        // Returns C(sI-A)^(-1)B + D.
-        // If any of C, B, or D are null, then just skip the multiplication.
-        TransferFunctionMatrix ret = sIMinusAInverse;
+      // Returns C(sI-A)^(-1)B + D.
+      // If any of C, B, or D are null, then just skip the multiplication.
+      TransferFunctionMatrix ret = sIMinusAInverse;
 
-        if (matrixC != null) {
-            ret = ret.preMultiply(matrixC);
-        }
+      if (matrixC != null)
+      {
+         ret = ret.preMultiply(matrixC);
+      }
 
-        if (matrixB != null) {
-            ret = ret.times(matrixB);
-        }
+      if (matrixB != null)
+      {
+         ret = ret.times(matrixB);
+      }
 
-        if (matrixD != null) {
-            ret = ret.plus(matrixD);
-        }
+      if (matrixD != null)
+      {
+         ret = ret.plus(matrixD);
+      }
 
-        return ret;
-    }
+      return ret;
+   }
 
-    public void setMatrixB(Matrix matrixB) {
-        if (matrixB != null) {
-            this.matrixB = new Matrix(matrixB.getArrayCopy());
-        }
-    }
+   public int getOrder()
+   {
+      return matrixA.getRowDimension();
+   }
 
-    public void setMatrixC(Matrix matrixC) {
-        if (matrixC != null) {
-            this.matrixC = new Matrix(matrixC.getArrayCopy());
-        }
-    }
+   public int getInputSize()
+   {
+      return matrixB.getColumnDimension();
+   }
 
-    public void setMatrixD(Matrix matrixD) {
-        if (matrixD != null) {
-            this.matrixD = new Matrix(matrixD.getArrayCopy());
-        }
-    }
+   public int getOutputSize()
+   {
+      return matrixC.getRowDimension();
+   }
 
-    private TransferFunctionMatrix computeSIMinusAInverse() {
-        return computeSIMinusAInverseUsingCofactors();
+   public void setMatrixB(Matrix matrixB)
+   {
+      if (matrixB != null)
+      {
+         this.matrixB = new Matrix(matrixB.getArrayCopy());
+      }
+   }
 
-        // return computeSIMinusAInverseUsingEigenvalueDecomposition();
-    }
+   public void setMatrixC(Matrix matrixC)
+   {
+      if (matrixC != null)
+      {
+         this.matrixC = new Matrix(matrixC.getArrayCopy());
+      }
+   }
 
-    private TransferFunctionMatrix computeSIMinusAInverseUsingCofactors() {
-        int              order                  = matrixA.getColumnDimension();
-        PolynomialMatrix sIMinusA               = PolynomialMatrix.constructSIMinusA(matrixA);
-        Polynomial       characteristicEquation = sIMinusA.computeDeterminant();
-        Polynomial[][]   numerators             = new Polynomial[order][order];
+   public void setMatrixD(Matrix matrixD)
+   {
+      if (matrixD != null)
+      {
+         this.matrixD = new Matrix(matrixD.getArrayCopy());
+      }
+   }
 
-        for (int i = 0; i < order; i++) {
-            for (int j = 0; j < order; j++) {
-                numerators[j][i] = sIMinusA.computeCofactor(i, j);
-            }
-        }
+   private TransferFunctionMatrix computeSIMinusAInverse()
+   {
+      return computeSIMinusAInverseUsingCofactors();
 
-        return new TransferFunctionMatrix(numerators, characteristicEquation);
-    }
+      // return computeSIMinusAInverseUsingEigenvalueDecomposition();
+   }
 
-    @SuppressWarnings("unused")
-    private TransferFunctionMatrix computeSIMinusAInverseUsingEigenvalueDecomposition() {
-        EigenvalueDecomposer            eigenvalueDecomposer  = new EigenvalueDecomposer(matrixA);
-        ArrayList<SingleRealMode>       realModes             = eigenvalueDecomposer.getRealModes();
-        ArrayList<ComplexConjugateMode> complexConjugateModes = eigenvalueDecomposer.getComplexConjugateModes();
-        TransferFunctionMatrix          ret                   = null;
+   private TransferFunctionMatrix computeSIMinusAInverseUsingCofactors()
+   {
+      int order = matrixA.getColumnDimension();
+      PolynomialMatrix sIMinusA = PolynomialMatrix.constructSIMinusA(matrixA);
+      Polynomial characteristicEquation = sIMinusA.computeDeterminant();
+      Polynomial[][] numerators = new Polynomial[order][order];
 
-        for (SingleRealMode realMode : realModes) {
-            TransferFunctionMatrix realModeMatrix = realMode.constructTransferFunctionMatrix();
+      for (int i = 0; i < order; i++)
+      {
+         for (int j = 0; j < order; j++)
+         {
+            numerators[j][i] = sIMinusA.computeCofactor(i, j);
+         }
+      }
 
-            if (ret == null) {
-                ret = realModeMatrix;
-            } else {
-                ret = ret.plus(realModeMatrix);
-            }
-        }
+      return new TransferFunctionMatrix(numerators, characteristicEquation);
+   }
 
-        for (ComplexConjugateMode complexConjugateMode : complexConjugateModes) {
-            TransferFunctionMatrix complexConjugateModeMatrix = complexConjugateMode.constructTransferFunctionMatrix();
+   @SuppressWarnings("unused")
+   private TransferFunctionMatrix computeSIMinusAInverseUsingEigenvalueDecomposition()
+   {
+      EigenvalueDecomposer eigenvalueDecomposer = new EigenvalueDecomposer(matrixA);
+      ArrayList<SingleRealMode> realModes = eigenvalueDecomposer.getRealModes();
+      ArrayList<ComplexConjugateMode> complexConjugateModes = eigenvalueDecomposer.getComplexConjugateModes();
+      TransferFunctionMatrix ret = null;
 
-            if (ret == null) {
-                ret = complexConjugateModeMatrix;
-            } else {
-                ret = ret.plus(complexConjugateModeMatrix);
-            }
-        }
+      for (SingleRealMode realMode : realModes)
+      {
+         TransferFunctionMatrix realModeMatrix = realMode.constructTransferFunctionMatrix();
 
-        return ret;
-    }
+         if (ret == null)
+         {
+            ret = realModeMatrix;
+         }
+         else
+         {
+            ret = ret.plus(realModeMatrix);
+         }
+      }
 
-    public double[][] simulateInitialConditions(double[] initialConditions, double stepSize, int numTicks) {
-        int order = matrixA.getRowDimension();
+      for (ComplexConjugateMode complexConjugateMode : complexConjugateModes)
+      {
+         TransferFunctionMatrix complexConjugateModeMatrix = complexConjugateMode.constructTransferFunctionMatrix();
 
-        if (initialConditions.length != order) {
-            throw new RuntimeException("initialConditions.length != order");
-        }
+         if (ret == null)
+         {
+            ret = complexConjugateModeMatrix;
+         }
+         else
+         {
+            ret = ret.plus(complexConjugateModeMatrix);
+         }
+      }
 
-        // Just use Euler integrations for now:
-        double[][] ret   = new double[numTicks][order];
-        Matrix     state = new Matrix(order, 1);
+      return ret;
+   }
 
-        copyArray(initialConditions, state);
+   public double[] eulerIntegrateOneStep(double[] currentState, double[] input, double stepSize)
+   {
+      Matrix currentStateMatrix = new Matrix(currentState, currentState.length);
+      Matrix inputMatrix = new Matrix(input, input.length);
+      
+      Matrix nextStateMatrix = eulerIntegrateOneStep(currentStateMatrix, inputMatrix, stepSize);
 
-        for (int i = 0; i < numTicks; i++) {
-            copyArray(state, ret[i]);
+      double[] nextState = new double[currentState.length];
+      copyArray(nextStateMatrix, nextState);
 
-            Matrix aTimesX              = matrixA.times(state);
-            Matrix aTimesXTimesStepSize = aTimesX.times(stepSize);
+      return nextState;
+   }
 
-            state = state.plus(aTimesXTimesStepSize);
-        }
+   public Matrix eulerIntegrateOneStep(Matrix currentState, Matrix input, double stepSize)
+   {
+      Matrix nextState = currentState.copy();
 
-        return ret;
-    }
+      Matrix aTimesX = matrixA.times(currentState);
 
-    @SuppressWarnings("unused")
-    private void copyArray(double[] in, double[] out) {
-        for (int i = 0; i < in.length; i++) {
-            out[i] = in[i];
-        }
-    }
+      Matrix bTimesU = matrixB.times(input);
+      Matrix aTimesXPlusBTimesU = aTimesX.plus(bTimesU);
 
-    private void copyArray(Matrix vectorIn, double[] out) {
-        for (int i = 0; i < vectorIn.getRowDimension(); i++) {
-            out[i] = vectorIn.get(i, 0);
-        }
-    }
+      Matrix aTimesXPlusBTimesUTimesStepSize = aTimesXPlusBTimesU.times(stepSize);
 
-    private void copyArray(double[] in, Matrix vectorOut) {
-        for (int i = 0; i < vectorOut.getRowDimension(); i++) {
-            vectorOut.set(i, 0, in[i]);
-        }
-    }
+      nextState = nextState.plus(aTimesXPlusBTimesUTimesStepSize);
+      
+      return nextState;
+   }
+
+   public Matrix getOutputFromState(Matrix state, Matrix input)
+   {
+      Matrix cTimesX = matrixC.times(state);
+      Matrix dTimesU = matrixD.times(input);
+      
+      Matrix output = cTimesX.plus(dTimesU);
+      return output;
+   }
+
+   public double[] getOutputFromState(double[] state, double[] input)
+   {
+      Matrix stateMatrix = new Matrix(state, state.length);
+      Matrix inputMatrix = new Matrix(input, input.length);
+      
+      Matrix outputMatrix = getOutputFromState(stateMatrix, inputMatrix);
+
+      double[] output = new double[outputMatrix.getRowDimension()];
+      copyArray(outputMatrix, output);
+
+      return output;
+   }
+   
+   public double[][] simulateInitialConditions(double[] initialConditions, double stepSize, int numTicks)
+   {
+      int order = matrixA.getRowDimension();
+
+      if (initialConditions.length != order)
+      {
+         throw new RuntimeException("initialConditions.length != order");
+      }
+
+      // Just use Euler integrations for now:
+      double[][] ret = new double[numTicks][order];
+      Matrix state = new Matrix(order, 1);
+      copyArray(initialConditions, state);
+
+      for (int i = 0; i < numTicks; i++)
+      {
+         copyArray(state, ret[i]);
+
+         Matrix aTimesX = matrixA.times(state);
+         Matrix aTimesXTimesStepSize = aTimesX.times(stepSize);
+
+         state = state.plus(aTimesXTimesStepSize);
+      }
+
+      return ret;
+   }
+
+   @SuppressWarnings("unused")
+   private void copyArray(double[] in, double[] out)
+   {
+      for (int i = 0; i < in.length; i++)
+      {
+         out[i] = in[i];
+      }
+   }
+
+   private void copyArray(Matrix vectorIn, double[] out)
+   {
+      for (int i = 0; i < vectorIn.getRowDimension(); i++)
+      {
+         out[i] = vectorIn.get(i, 0);
+      }
+   }
+
+   private void copyArray(double[] in, Matrix vectorOut)
+   {
+      for (int i = 0; i < vectorOut.getRowDimension(); i++)
+      {
+         vectorOut.set(i, 0, in[i]);
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return "A = " + Arrays.deepToString(matrixA.getArray()) + "\nB = " + Arrays.deepToString(matrixB.getArray()) + "\nC = "
+            + Arrays.deepToString(matrixC.getArray()) + "\nD = " + Arrays.deepToString(matrixD.getArray());
+   }
+
 }

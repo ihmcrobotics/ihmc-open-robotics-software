@@ -1,8 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class CostToGoHeuristics
@@ -13,9 +17,12 @@ public abstract class CostToGoHeuristics
 
    protected final FramePose3D goalPose = new FramePose3D();
 
-   public CostToGoHeuristics(DoubleProvider weight, FootstepNodeSnapperReadOnly snapper)
+   private final FootstepPlannerParametersReadOnly parameters;
+
+   public CostToGoHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
       this.weight = weight;
+      this.parameters = parameters;
       this.snapper = snapper;
    }
 
@@ -26,15 +33,23 @@ public abstract class CostToGoHeuristics
 
    public double compute(FootstepNode node)
    {
-      pose.setPosition(node.getX(), node.getY(), snapper.getSnapData(node).getSnapTransform().getTranslationZ());
+      double height = 0.0;
+
+      FootstepNodeSnapData snapData = snapper.getSnapData(node);
+      if (snapData != null)
+         height = snapData.getSnapTransform().getTranslationZ();
+
+      Point2DReadOnly midfootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
+
+      pose.setPosition(midfootPoint.getX(), midfootPoint.getY(), height);
       pose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
       return weight.getValue() * computeHeuristics(pose);
    }
 
-   abstract double computeHeuristics(FramePose3D pose);
+   abstract double computeHeuristics(FramePose3DReadOnly pose);
 
-   public void setGoalPose(FramePose3D goalPose)
+   public void setGoalPose(FramePose3DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
    }

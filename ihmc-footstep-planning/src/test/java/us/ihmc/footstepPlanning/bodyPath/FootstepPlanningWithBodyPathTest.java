@@ -9,11 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -30,9 +33,10 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBase
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -67,7 +71,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
-      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
+      WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
       List<Point3D> waypoints = new ArrayList<>();
       waypoints.add(new Point3D(0.0, 0.0, 0.0));
       waypoints.add(new Point3D(goalDistance / 8.0, 2.0, 0.0));
@@ -76,7 +80,6 @@ public class FootstepPlanningWithBodyPathTest
       waypoints.add(new Point3D(goalDistance, 0.0, 0.0));
 
       bodyPath.setWaypoints(waypoints);
-      bodyPath.compute();
 
       FootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
       FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, null, true);
@@ -89,8 +92,8 @@ public class FootstepPlanningWithBodyPathTest
    @Disabled
    public void testMaze(TestInfo testInfo)
    {
-      WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
-      List<Point3D> waypoints = new ArrayList<>();
+      WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
+      List<Pose3D> waypoints = new ArrayList<>();
 
       ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
       Point3D startPos = new Point3D(9.5, 9, 0);
@@ -99,17 +102,20 @@ public class FootstepPlanningWithBodyPathTest
       goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(new DefaultVisibilityGraphParameters());
-      List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
-      for (Point3DReadOnly waypoint3d : path)
-      {
-         waypoints.add(new Point3D(waypoint3d));
-      }
-      bodyPath.setWaypoints(waypoints);
-      bodyPath.compute();
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(new DefaultVisibilityGraphParameters());
+      List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                       new Quaternion(), new Quaternion());
 
-      Pose2D startPose = new Pose2D();
+      for (Pose3DReadOnly waypoint3d : path)
+      {
+         waypoints.add(new Pose3D(waypoint3d));
+      }
+      bodyPath.setPoseWaypoints(path);
+
+      Pose3D startPose = new Pose3D();
       bodyPath.getPointAlongPath(0.0, startPose);
-      Pose2D finalPose = new Pose2D();
+      Pose3D finalPose = new Pose3D();
       bodyPath.getPointAlongPath(1.0, finalPose);
 
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
@@ -142,7 +148,7 @@ public class FootstepPlanningWithBodyPathTest
    }
 
    private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
-                                                           WaypointDefinedBodyPathPlanner bodyPath)
+                                                           WaypointDefinedBodyPathPlanHolder bodyPath)
    {
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);

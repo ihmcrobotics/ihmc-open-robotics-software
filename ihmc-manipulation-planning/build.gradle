@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,26 +13,26 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "javax.vecmath", name: "vecmath", version: "1.5.2"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "org.ejml", name: "core", version: "0.28"
-   compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
-   compile group: "org.georegression", name: "georegression", version: "0.11"
-   compile group: "org.ejml", name: "dense64", version: "0.28"
-   compile group: "org.boofcv", name: "geo", version: "0.24.1"
+   api("javax.vecmath:vecmath:1.5.2")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.ejml:core:0.28")
+   api("net.sf.trove4j:trove4j:3.0.3")
+   api("org.georegression:georegression:0.11")
+   api("org.ejml:dense64:0.28")
+   api("org.boofcv:geo:0.24.1")
 
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-sensor-processing:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-communication-test", version: "source"
+   api("us.ihmc:ihmc-communication-test:source")
 }

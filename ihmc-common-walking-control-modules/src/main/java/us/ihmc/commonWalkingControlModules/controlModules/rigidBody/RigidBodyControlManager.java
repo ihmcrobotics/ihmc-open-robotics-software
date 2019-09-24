@@ -58,6 +58,7 @@ public class RigidBodyControlManager
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
+   private final YoBoolean doPrepareForLocomotion;
 
    public RigidBodyControlManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                   TObjectDoubleHashMap<String> homeConfiguration, Pose3D homePose, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
@@ -72,6 +73,8 @@ public class RigidBodyControlManager
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
 
+      doPrepareForLocomotion = new YoBoolean(namePrefix + "DoPrepareForLocomotion", registry);
+
       jointsToControl = MultiBodySystemTools.createOneDoFJointPath(baseBody, bodyToControl);
 
       initialJointPositions = new double[jointsToControl.length];
@@ -82,8 +85,13 @@ public class RigidBodyControlManager
 
       if (taskspaceAngularWeight != null && taskspaceLinearWeight == null)
       {
-         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl, baseBody, elevator, baseFrame, yoTime,
-                                                                                                   jointControlHelper, parentRegistry);
+         RigidBodyOrientationController taskspaceControlState = new RigidBodyOrientationController(bodyToControl,
+                                                                                                   baseBody,
+                                                                                                   elevator,
+                                                                                                   baseFrame,
+                                                                                                   yoTime,
+                                                                                                   jointControlHelper,
+                                                                                                   parentRegistry);
          if (taskspaceOrientationGains == null)
          {
             throw new RuntimeException("Can not create orientation control manager with null gains for " + bodyName);
@@ -95,8 +103,14 @@ public class RigidBodyControlManager
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
-         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime,
-                                                                                             parentRegistry, graphicsListRegistry);
+         RigidBodyPositionController taskspaceControlState = new RigidBodyPositionController(bodyToControl,
+                                                                                             baseBody,
+                                                                                             elevator,
+                                                                                             controlFrame,
+                                                                                             baseFrame,
+                                                                                             yoTime,
+                                                                                             parentRegistry,
+                                                                                             graphicsListRegistry);
          if (taskspacePositionGains == null)
          {
             throw new RuntimeException("Can not create position control manager with null gains for " + bodyName);
@@ -108,8 +122,15 @@ public class RigidBodyControlManager
       }
       else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
-         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime,
-                                                                                     jointControlHelper, graphicsListRegistry, registry);
+         RigidBodyPoseController taskspaceControlState = new RigidBodyPoseController(bodyToControl,
+                                                                                     baseBody,
+                                                                                     elevator,
+                                                                                     controlFrame,
+                                                                                     baseFrame,
+                                                                                     yoTime,
+                                                                                     jointControlHelper,
+                                                                                     graphicsListRegistry,
+                                                                                     registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
          {
             System.out.println("Orientation gains exist: " + (taskspaceOrientationGains != null));
@@ -130,8 +151,13 @@ public class RigidBodyControlManager
 
       if (contactableBody != null)
       {
-         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, jointControlHelper,
-                                                                        graphicsListRegistry, registry);
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl,
+                                                                        contactableBody,
+                                                                        elevator,
+                                                                        yoTime,
+                                                                        jointControlHelper,
+                                                                        graphicsListRegistry,
+                                                                        registry);
          loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       }
@@ -150,8 +176,8 @@ public class RigidBodyControlManager
       defaultControlMode = defaultControlMode == null ? RigidBodyControlMode.JOINTSPACE : defaultControlMode;
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
-      this.defaultControlMode = new EnumParameter<>(namePrefix + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false,
-                                                    defaultControlMode);
+      this.defaultControlMode = new EnumParameter<>(namePrefix
+            + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
       this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -189,6 +215,16 @@ public class RigidBodyControlManager
    public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
+   }
+
+   /**
+    * Sets the behavior for {@link #prepareForLocomotion()}.
+    * 
+    * @param value whether {@link #prepareForLocomotion()} should be enabled or not.
+    */
+   public void setDoPrepareForLocomotion(boolean value)
+   {
+      doPrepareForLocomotion.set(value);
    }
 
    private static void checkDefaultControlMode(RigidBodyControlMode defaultControlMode, FramePose3D homePose, String bodyName)
@@ -243,7 +279,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid orientation trajectory command.");
          hold();
       }
    }
@@ -256,7 +292,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid pose trajectory command.");
          hold();
       }
    }
@@ -271,7 +307,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid jointspace trajectory command.");
          hold();
       }
    }
@@ -286,7 +322,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
          hold();
       }
    }
@@ -301,7 +337,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SO3 trajectory command.");
          hold();
       }
    }
@@ -314,7 +350,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid desired accelerations command.");
          hold();
       }
    }
@@ -323,9 +359,18 @@ public class RigidBodyControlManager
    {
       if (!externalWrenchManager.handleWrenchTrajectoryCommand(command))
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid wrench trajectory command.");
          externalWrenchManager.clear();
       }
+   }
+
+   /**
+    * When enabled, i.e. {@code doPrepareForLocomotion == true}, it is equivalent to calling
+    * {@link #holdInJointspace()}.
+    */
+   public void prepareForLocomotion()
+   {
+      if (doPrepareForLocomotion.getValue())
+         holdInJointspace();
    }
 
    public void holdInJointspace()
@@ -374,14 +419,14 @@ public class RigidBodyControlManager
    {
       switch (defaultControlMode.getValue())
       {
-      case JOINTSPACE:
-         holdInJointspace();
-         break;
-      case TASKSPACE:
-         holdInTaskspace();
-         break;
-      default:
-         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+         case JOINTSPACE:
+            holdInJointspace();
+            break;
+         case TASKSPACE:
+            holdInTaskspace();
+            break;
+         default:
+            throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
@@ -389,14 +434,14 @@ public class RigidBodyControlManager
    {
       switch (defaultControlMode.getValue())
       {
-      case JOINTSPACE:
-         holdCurrentDesiredInJointspace();
-         break;
-      case TASKSPACE:
-         holdCurrentDesiredInTaskspace();
-         break;
-      default:
-         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+         case JOINTSPACE:
+            holdCurrentDesiredInJointspace();
+            break;
+         case TASKSPACE:
+            holdCurrentDesiredInTaskspace();
+            break;
+         default:
+            throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
@@ -404,16 +449,16 @@ public class RigidBodyControlManager
    {
       switch (defaultControlMode.getValue())
       {
-      case JOINTSPACE:
-         jointspaceControlState.goHomeFromCurrent(trajectoryTime);
-         requestState(jointspaceControlState.getControlMode());
-         break;
-      case TASKSPACE:
-         taskspaceControlState.goToPoseFromCurrent(homePose, trajectoryTime);
-         requestState(taskspaceControlState.getControlMode());
-         break;
-      default:
-         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+         case JOINTSPACE:
+            jointspaceControlState.goHomeFromCurrent(trajectoryTime);
+            requestState(jointspaceControlState.getControlMode());
+            break;
+         case TASKSPACE:
+            taskspaceControlState.goToPoseFromCurrent(homePose, trajectoryTime);
+            requestState(taskspaceControlState.getControlMode());
+            break;
+         default:
+            throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 
@@ -421,17 +466,17 @@ public class RigidBodyControlManager
    {
       switch (defaultControlMode.getValue())
       {
-      case JOINTSPACE:
-         computeDesiredJointPositions(initialJointPositions);
-         jointspaceControlState.goHome(trajectoryTime, initialJointPositions);
-         requestState(jointspaceControlState.getControlMode());
-         break;
-      case TASKSPACE:
-         taskspaceControlState.goToPose(homePose, trajectoryTime);
-         requestState(taskspaceControlState.getControlMode());
-         break;
-      default:
-         throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
+         case JOINTSPACE:
+            computeDesiredJointPositions(initialJointPositions);
+            jointspaceControlState.goHome(trajectoryTime, initialJointPositions);
+            requestState(jointspaceControlState.getControlMode());
+            break;
+         case TASKSPACE:
+            taskspaceControlState.goToPose(homePose, trajectoryTime);
+            requestState(taskspaceControlState.getControlMode());
+            break;
+         default:
+            throw new RuntimeException("Default control mode " + defaultControlMode.getValue() + " is not an implemented option.");
       }
    }
 

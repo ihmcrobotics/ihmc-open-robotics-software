@@ -54,7 +54,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -89,7 +89,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBodyPath().size(); ++i0)
       {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);}
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);}
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);
 

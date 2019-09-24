@@ -34,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -230,7 +231,14 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       enableToolboxUpdater.set(false);
 
       assertNotNull(latestOutput.getValue());
-      assertEquals(dt, latestOutput.getValue().getFrameDt(), EPSILON);
+      double expectedFrameDT = dt;
+
+      if (expectedNumberOfFrames > MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES)
+      {
+         expectedFrameDT = dt * (double) expectedNumberOfFrames / (double) MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+         expectedNumberOfFrames = MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+      }
+      assertEquals(expectedFrameDT, latestOutput.getValue().getFrameDt(), EPSILON);
       int actualNumberOfFrames = latestOutput.getValue().getRobotConfigurations().size();
       assertEquals(expectedNumberOfFrames, actualNumberOfFrames);
    }
@@ -398,7 +406,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          FramePose3D cameraPose = new FramePose3D(pelvisFrame);
          cameraPose.changeFrame(worldFrame);
          Point3D cameraFix = new Point3D(cameraPose.getPosition());
-         cameraPose.getOrientation().setToYawQuaternion(cameraPose.getYaw());
+         cameraPose.getOrientation().setToYawOrientation(cameraPose.getYaw());
          cameraPose.appendTranslation(6.0, 0.0, 0.5);
          drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, new Point3D(cameraPose.getPosition()));
       }

@@ -59,6 +59,10 @@ module controller_msgs
         double can_easily_step_over_height;
         @defaultValue(value=-1.0)
         double length_for_long_inter_region_edge;
+        boolean perform_post_processing_node_shifting;
+        @defaultValue(value=True)
+        boolean introduce_midpoints_in_post_processing;
+        boolean compute_orientations_to_avoid_obstacles;
         @defaultValue(value=-1.0)
         double heuristic_weight;
         @defaultValue(value=-1.0)
@@ -67,6 +71,8 @@ module controller_msgs
         double elevation_weight;
         @defaultValue(value=-1.0)
         double occluded_goal_edge_weight;
+        @defaultValue(value=-1.0)
+        double weight_for_inter_region_edge;
         boolean return_best_effort_solution;
       };
     };

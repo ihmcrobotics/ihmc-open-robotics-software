@@ -46,6 +46,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -68,6 +70,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,6 +80,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    public static void write(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
+
+      cdr.write_type_7(data.getEnableSupportPolygonConstraint());
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
 
@@ -85,6 +92,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    public static void read(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
+      data.setEnableSupportPolygonConstraint(cdr.read_type_7());
       	
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
       	
@@ -97,6 +106,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    public final void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
       ser.write_type_7("hold_support_foot_positions", data.getHoldSupportFootPositions());
    }
@@ -105,6 +115,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
       data.setHoldSupportFootPositions(ser.read_type_7("hold_support_foot_positions"));
    }

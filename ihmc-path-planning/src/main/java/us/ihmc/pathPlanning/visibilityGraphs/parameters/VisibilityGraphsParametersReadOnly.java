@@ -133,6 +133,25 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(lengthForLongInterRegionEdge);
    }
 
+   default double getWeightForInterRegionEdge()
+   {
+      return get(weightForInterRegionEdge);
+   }
+
+   default boolean getPerformPostProcessingNodeShifting()
+   {
+      return get(performPostProcessingNodeShifting);
+   }
+
+   default boolean getIntroduceMidpointsInPostProcessing()
+   {
+      return get(introduceMidpointsInPostProcessing);
+   }
+
+   default boolean getComputeOrientationsToAvoidObstacles()
+   {
+      return get(computeOrientationsToAvoidObstacles);
+   }
 
    default double getHeuristicWeight()
    {
@@ -160,7 +179,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
     */
    default boolean returnBestEffortSolution()
    {
-      return true;
+      return get(returnBestEffortSolution);
    }
 
    /**

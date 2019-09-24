@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
+   id("us.ihmc.ihmc-build") version "0.19.5"
    id("us.ihmc.ihmc-ci") version "4.25"
    id("us.ihmc.ihmc-cd") version "0.1"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -13,76 +13,76 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "com.martiansoftware", name: "jsap", version: "2.1"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "org.apache.poi", name: "poi", version: "3.15" // I/O library for xls files.
-   compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
-   compile group: "org.ros.rosjava_core", name: "rosjava", version: "0.2.1"
-   compile group: "org.ros.rosjava_bootstrap", name: "message_generation", version: "0.2.1"
-   compile group: "org.ejml", name: "core", version: "0.30"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.boofcv", name: "geo", version: "0.24.1"
-   compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
-   compile group: "org.ros.rosjava_messages", name: "geometry_msgs", version: "1.11.7"
-   compile group: "org.jfree", name: "jfreechart", version: "1.0.17"
-   compile group: "com.github.quickhull3d", name: "quickhull3d", version: "1.0.0"
-   compile group: "org.ros.rosjava_messages", name: "sensor_msgs", version: "1.11.7"
-   compile group: "org.ros.rosjava_messages", name: "dynamic_reconfigure", version: "1.5.38"
-   compile group: "org.ros.rosjava_messages", name: "trajectory_msgs", version: "1.11.7"
-   compile group: "com.github.wendykierp", name: "JTransforms", version: "3.1"
-   compile group: "org.reflections", name: "reflections", version: "0.9.10"
+   api("com.martiansoftware:jsap:2.1")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("org.apache.poi:poi:3.15") // I/O library for xls files.
+   api("us.ihmc.thirdparty.jinput:jinput:190214")
+   api("org.ros.rosjava_core:rosjava:0.2.1")
+   api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
+   api("org.boofcv:geo:0.24.1")
+   api("org.ros.rosjava_messages:std_msgs:0.5.9")
+   api("org.ros.rosjava_messages:geometry_msgs:1.11.7")
+   api("org.jfree:jfreechart:1.0.17")
+   api("com.github.quickhull3d:quickhull3d:1.0.0")
+   api("org.ros.rosjava_messages:sensor_msgs:1.11.7")
+   api("org.ros.rosjava_messages:dynamic_reconfigure:1.5.38")
+   api("org.ros.rosjava_messages:trajectory_msgs:1.11.7")
+   api("com.github.wendykierp:JTransforms:3.1")
+   api("org.reflections:reflections:0.9.10")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.15"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
-   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
-   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-perception", version: "source"
-   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
-   compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-behaviors", version: "source"
-   compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
-   compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:robot-environment-awareness-visualizers:source")
+   api("us.ihmc:ihmc-ros-tools:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-robot-data-logger:source")
+   api("us.ihmc:ihmc-model-file-loader:source")
+   api("us.ihmc:ihmc-sensor-processing:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-humanoid-behaviors:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-perception:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-state-estimation:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-behaviors:source")
+   api("us.ihmc:ihmc-mocap:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-simulation-toolkit:source")
+   api("us.ihmc:ihmc-robot-data-visualizer:source")
+   api("us.ihmc:ihmc-footstep-planning:source")
+   api("us.ihmc:simulation-construction-set-tools:source")
 }
 
 behaviorCleanRoomDependencies {
    compile ihmc.sourceSetProject("main")
-   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.1"
+   api("us.ihmc:ihmc-messager-kryo:0.1.1")
 }
 
 behaviorFxUiDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("behavior-clean-room")
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-path-planning-visualizers:source")
+   api("us.ihmc:robot-environment-awareness-visualizers:source")
 }
 
 testDependencies {
    compile ihmc.sourceSetProject("behavior-clean-room")
    compile ihmc.sourceSetProject("behavior-fx-ui")
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-footstep-planning-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-footstep-planning-test:source")
+   api("us.ihmc:ihmc-humanoid-robotics-test:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
 }

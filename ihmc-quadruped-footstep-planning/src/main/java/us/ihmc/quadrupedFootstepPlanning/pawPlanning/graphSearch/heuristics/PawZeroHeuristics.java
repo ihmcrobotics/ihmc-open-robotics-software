@@ -11,7 +11,7 @@ public class PawZeroHeuristics extends PawPlanningCostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(PawNode node, PawNode goalNode)
+   protected double computeHeuristics(PawNode node)
    {
       return 0.0;
    }

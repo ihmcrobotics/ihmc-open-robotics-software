@@ -42,10 +42,14 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double can_duck_under_height_ = -1.0;
    public double can_easily_step_over_height_ = -1.0;
    public double length_for_long_inter_region_edge_ = -1.0;
+   public boolean perform_post_processing_node_shifting_;
+   public boolean introduce_midpoints_in_post_processing_ = true;
+   public boolean compute_orientations_to_avoid_obstacles_;
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
    public double occluded_goal_edge_weight_ = -1.0;
+   public double weight_for_inter_region_edge_ = -1.0;
    public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
@@ -94,6 +98,12 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       length_for_long_inter_region_edge_ = other.length_for_long_inter_region_edge_;
 
+      perform_post_processing_node_shifting_ = other.perform_post_processing_node_shifting_;
+
+      introduce_midpoints_in_post_processing_ = other.introduce_midpoints_in_post_processing_;
+
+      compute_orientations_to_avoid_obstacles_ = other.compute_orientations_to_avoid_obstacles_;
+
       heuristic_weight_ = other.heuristic_weight_;
 
       distance_weight_ = other.distance_weight_;
@@ -101,6 +111,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       elevation_weight_ = other.elevation_weight_;
 
       occluded_goal_edge_weight_ = other.occluded_goal_edge_weight_;
+
+      weight_for_inter_region_edge_ = other.weight_for_inter_region_edge_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
 
@@ -287,6 +299,33 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return length_for_long_inter_region_edge_;
    }
 
+   public void setPerformPostProcessingNodeShifting(boolean perform_post_processing_node_shifting)
+   {
+      perform_post_processing_node_shifting_ = perform_post_processing_node_shifting;
+   }
+   public boolean getPerformPostProcessingNodeShifting()
+   {
+      return perform_post_processing_node_shifting_;
+   }
+
+   public void setIntroduceMidpointsInPostProcessing(boolean introduce_midpoints_in_post_processing)
+   {
+      introduce_midpoints_in_post_processing_ = introduce_midpoints_in_post_processing;
+   }
+   public boolean getIntroduceMidpointsInPostProcessing()
+   {
+      return introduce_midpoints_in_post_processing_;
+   }
+
+   public void setComputeOrientationsToAvoidObstacles(boolean compute_orientations_to_avoid_obstacles)
+   {
+      compute_orientations_to_avoid_obstacles_ = compute_orientations_to_avoid_obstacles;
+   }
+   public boolean getComputeOrientationsToAvoidObstacles()
+   {
+      return compute_orientations_to_avoid_obstacles_;
+   }
+
    public void setHeuristicWeight(double heuristic_weight)
    {
       heuristic_weight_ = heuristic_weight;
@@ -321,6 +360,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double getOccludedGoalEdgeWeight()
    {
       return occluded_goal_edge_weight_;
+   }
+
+   public void setWeightForInterRegionEdge(double weight_for_inter_region_edge)
+   {
+      weight_for_inter_region_edge_ = weight_for_inter_region_edge;
+   }
+   public double getWeightForInterRegionEdge()
+   {
+      return weight_for_inter_region_edge_;
    }
 
    public void setReturnBestEffortSolution(boolean return_best_effort_solution)
@@ -384,6 +432,12 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.length_for_long_inter_region_edge_, other.length_for_long_inter_region_edge_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_post_processing_node_shifting_, other.perform_post_processing_node_shifting_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.introduce_midpoints_in_post_processing_, other.introduce_midpoints_in_post_processing_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compute_orientations_to_avoid_obstacles_, other.compute_orientations_to_avoid_obstacles_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.heuristic_weight_, other.heuristic_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon)) return false;
@@ -391,6 +445,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.elevation_weight_, other.elevation_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.occluded_goal_edge_weight_, other.occluded_goal_edge_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_inter_region_edge_, other.weight_for_inter_region_edge_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
@@ -441,6 +497,12 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.length_for_long_inter_region_edge_ != otherMyClass.length_for_long_inter_region_edge_) return false;
 
+      if(this.perform_post_processing_node_shifting_ != otherMyClass.perform_post_processing_node_shifting_) return false;
+
+      if(this.introduce_midpoints_in_post_processing_ != otherMyClass.introduce_midpoints_in_post_processing_) return false;
+
+      if(this.compute_orientations_to_avoid_obstacles_ != otherMyClass.compute_orientations_to_avoid_obstacles_) return false;
+
       if(this.heuristic_weight_ != otherMyClass.heuristic_weight_) return false;
 
       if(this.distance_weight_ != otherMyClass.distance_weight_) return false;
@@ -448,6 +510,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       if(this.elevation_weight_ != otherMyClass.elevation_weight_) return false;
 
       if(this.occluded_goal_edge_weight_ != otherMyClass.occluded_goal_edge_weight_) return false;
+
+      if(this.weight_for_inter_region_edge_ != otherMyClass.weight_for_inter_region_edge_) return false;
 
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
@@ -495,6 +559,12 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.can_easily_step_over_height_);      builder.append(", ");
       builder.append("length_for_long_inter_region_edge=");
       builder.append(this.length_for_long_inter_region_edge_);      builder.append(", ");
+      builder.append("perform_post_processing_node_shifting=");
+      builder.append(this.perform_post_processing_node_shifting_);      builder.append(", ");
+      builder.append("introduce_midpoints_in_post_processing=");
+      builder.append(this.introduce_midpoints_in_post_processing_);      builder.append(", ");
+      builder.append("compute_orientations_to_avoid_obstacles=");
+      builder.append(this.compute_orientations_to_avoid_obstacles_);      builder.append(", ");
       builder.append("heuristic_weight=");
       builder.append(this.heuristic_weight_);      builder.append(", ");
       builder.append("distance_weight=");
@@ -503,6 +573,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.elevation_weight_);      builder.append(", ");
       builder.append("occluded_goal_edge_weight=");
       builder.append(this.occluded_goal_edge_weight_);      builder.append(", ");
+      builder.append("weight_for_inter_region_edge=");
+      builder.append(this.weight_for_inter_region_edge_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
       builder.append(this.return_best_effort_solution_);
       builder.append("}");

@@ -49,6 +49,7 @@ public class AtlasFootstepPlanBehaviorTest
    double lastYaw = 0.0;
    private RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
+   @Disabled
    @Test
    public void testExecuteFootstepPlan() throws IOException
    {
@@ -132,6 +133,7 @@ public class AtlasFootstepPlanBehaviorTest
       lastYaw = yaw;
    }
 
+   @Disabled
    @Test
    public void testStopWalking() throws IOException
    {
