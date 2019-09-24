@@ -75,6 +75,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.enableLocalControllerCommunicator(false);
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
+         networkProcessorParameters.enableKinematicsStreamingToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
          networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
          networkProcessorParameters.enableKinematicsPlanningToolbox(true);

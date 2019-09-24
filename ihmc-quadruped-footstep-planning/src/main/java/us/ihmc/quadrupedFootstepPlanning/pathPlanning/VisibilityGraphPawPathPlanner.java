@@ -51,6 +51,7 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
          Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3DReadOnly goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
 
+         // FIXME: DO WE WANT TO DO EITHER OF THESE?
          if (startPos == null)
          {
             LogTools.info("adding plane at start pose");
@@ -76,7 +77,8 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
          try
          {
             List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-            List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution());
+            List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                             bodyStartPose.getOrientation(), bodyGoalPose.getOrientation());
 
             waypoints.addAll(path);
          }

@@ -54,6 +54,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -795,6 +796,15 @@ public class CrossRobotCommandRandomTools
       next.setMomentum(RandomMatrices.createRandom(6, 1, random));
       next.getWeightMatrix().set(nextWeightMatrix6D(random, possibleFrames));
       next.getSelectionMatrix().set(nextSelectionMatrix6D(random, possibleFrames));
+      return next;
+   }
+
+   public static LinearMomentumConvexConstraint2DCommand nextLinearMomentumConvexConstraint2DCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      LinearMomentumConvexConstraint2DCommand next = new LinearMomentumConvexConstraint2DCommand();
+      int size = random.nextInt(10);
+      while (next.getLinearMomentumConstraintVertices().size() < size)
+         next.addLinearMomentumConstraintVertex().set(nextVector2D(random));
       return next;
    }
 

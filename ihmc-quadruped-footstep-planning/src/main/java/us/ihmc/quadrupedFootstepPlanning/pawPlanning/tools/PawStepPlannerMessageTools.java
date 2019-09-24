@@ -70,10 +70,14 @@ public class PawStepPlannerMessageTools
       packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
       packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
       packet.setLengthForLongInterRegionEdge(parameters.getLengthForLongInterRegionEdge());
+      packet.setPerformPostProcessingNodeShifting(parameters.getPerformPostProcessingNodeShifting());
+      packet.setIntroduceMidpointsInPostProcessing(parameters.getIntroduceMidpointsInPostProcessing());
+      packet.setComputeOrientationsToAvoidObstacles(parameters.getComputeOrientationsToAvoidObstacles());
       packet.setHeuristicWeight(parameters.getHeuristicWeight());
       packet.setDistanceWeight(parameters.getDistanceWeight());
       packet.setElevationWeight(parameters.getElevationWeight());
       packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
+      packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
    }
 }

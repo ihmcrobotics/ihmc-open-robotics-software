@@ -10,3 +10,4 @@ quadruped_planner_status test
 quadruped_timeout 20.0
 quadruped_start_yaw 3.14
 quadruped_goal_yaw 3.14
+quadruped_goal_position -2.0 -3.9628298719246895 0.05336732177421055

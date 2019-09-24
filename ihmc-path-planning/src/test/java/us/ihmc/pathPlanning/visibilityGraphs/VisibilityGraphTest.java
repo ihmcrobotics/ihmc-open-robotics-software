@@ -310,15 +310,30 @@ public class VisibilityGraphTest
       assertTrue(nodesContainPoint(nodes1, connectionHE));
 
       Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
-      assertEquals(3, crossRegionEdges.size());
+      if (VisibilityGraph.ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      {
+         assertEquals(3, crossRegionEdges.size());
 
-      assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionF));
-      assertFalse(edgeListContains(crossRegionEdges, connectionC, connectionEF));
-      assertFalse(edgeListContains(crossRegionEdges, connectionCD, connectionF));
-      assertTrue(edgeListContains(crossRegionEdges, connectionCD, connectionEF));
-      assertFalse(edgeListContains(crossRegionEdges, connectionCD, connectionE));
-      assertFalse(edgeListContains(crossRegionEdges, connectionD, connectionEF));
-      assertTrue(edgeListContains(crossRegionEdges, connectionD, connectionE));
+         assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionC, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionCD, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionCD, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionCD, connectionE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionD, connectionEF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionD, connectionE));
+      }
+      else
+      {
+         assertEquals(7, crossRegionEdges.size());
+
+         assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionC, connectionEF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionCD, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionCD, connectionEF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionCD, connectionE));
+         assertTrue(edgeListContains(crossRegionEdges, connectionD, connectionEF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionD, connectionE));
+      }
 
       VisibilityMapSolution visibilityMapSolution = visibilityGraph.createVisibilityMapSolution();
 
@@ -343,16 +358,32 @@ public class VisibilityGraphTest
       Set<Connection> connections = interRegionVisibilityMapInWorld.getConnections();
       Set<ConnectionPoint3D> vertices = interRegionVisibilityMapInWorld.getVertices();
 
-      assertEquals(3, connections.size());
       assertEquals(0, vertices.size());
 
-      assertTrue(connectionsContain(connections, connectionC, connectionF));
-      assertFalse(connectionsContain(connections, connectionC, connectionEF));
-      assertFalse(connectionsContain(connections, connectionCD, connectionF));
-      assertTrue(connectionsContain(connections, connectionCD, connectionEF));
-      assertFalse(connectionsContain(connections, connectionCD, connectionE));
-      assertFalse(connectionsContain(connections, connectionD, connectionEF));
-      assertTrue(connectionsContain(connections, connectionD, connectionE));
+      if (VisibilityGraph.ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      {
+         assertEquals(3, crossRegionEdges.size());
+
+         assertTrue(connectionsContain(connections, connectionC, connectionF));
+         assertFalse(connectionsContain(connections, connectionC, connectionEF));
+         assertFalse(connectionsContain(connections, connectionCD, connectionF));
+         assertTrue(connectionsContain(connections, connectionCD, connectionEF));
+         assertFalse(connectionsContain(connections, connectionCD, connectionE));
+         assertFalse(connectionsContain(connections, connectionD, connectionEF));
+         assertTrue(connectionsContain(connections, connectionD, connectionE));
+      }
+      else
+      {
+         assertEquals(7, crossRegionEdges.size());
+
+         assertTrue(connectionsContain(connections, connectionC, connectionF));
+         assertTrue(connectionsContain(connections, connectionC, connectionEF));
+         assertTrue(connectionsContain(connections, connectionCD, connectionF));
+         assertTrue(connectionsContain(connections, connectionCD, connectionEF));
+         assertTrue(connectionsContain(connections, connectionCD, connectionE));
+         assertTrue(connectionsContain(connections, connectionD, connectionEF));
+         assertTrue(connectionsContain(connections, connectionD, connectionE));
+      }
 
       double searchHostEpsilon = 0.01;
       double ceilingHeight = 2.0;
@@ -715,14 +746,29 @@ public class VisibilityGraphTest
       assertEquals(28, internalEdges1.size());
 
       Collection<VisibilityGraphEdge> crossRegionEdges = visibilityGraph.getCrossRegionEdges();
-      assertEquals(24, crossRegionEdges.size());
 
-      assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
-      assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionEF));
-      assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionHE));
-      assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionF));
-      assertTrue(edgeListContains(crossRegionEdges, connectionBC, connectionFG));
-      assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionG));
+      if (VisibilityGraph.ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      {
+         assertEquals(24, crossRegionEdges.size());
+
+         assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionHE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionBC, connectionFG));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionG));
+      }
+      else
+      {
+         assertEquals(32, crossRegionEdges.size());
+
+         assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionHE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionBC, connectionFG));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionG));
+      }
 
       VisibilityMapSolution visibilityMapSolution = visibilityGraph.createVisibilityMapSolution();
 
@@ -752,17 +798,32 @@ public class VisibilityGraphTest
       Set<Connection> interRegionConnections = interRegionVisibilityMapInWorld.getConnections();
       Set<ConnectionPoint3D> interRegionVertices = interRegionVisibilityMapInWorld.getVertices();
 
-      assertEquals(24, interRegionConnections.size());
-
       //TODO: Does it even make sense to hold vertices in these. Check and either remove that, or make it so they actually hold the vertices.
       assertEquals(0, interRegionVertices.size());
 
-      assertTrue(connectionsContain(interRegionConnections, connectionA, connectionE));
-      assertFalse(connectionsContain(interRegionConnections, connectionA, connectionEF));
-      assertFalse(connectionsContain(interRegionConnections, connectionA, connectionHE));
-      assertFalse(connectionsContain(interRegionConnections, connectionBC, connectionF));
-      assertTrue(connectionsContain(interRegionConnections, connectionBC, connectionFG));
-      assertFalse(connectionsContain(interRegionConnections, connectionBC, connectionG));
+
+      if (VisibilityGraph.ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
+      {
+         assertEquals(24, crossRegionEdges.size());
+
+         assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionHE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionBC, connectionFG));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionG));
+      }
+      else
+      {
+         assertEquals(32, crossRegionEdges.size());
+
+         assertTrue(edgeListContains(crossRegionEdges, connectionA, connectionE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionEF));
+         assertFalse(edgeListContains(crossRegionEdges, connectionA, connectionHE));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionF));
+         assertTrue(edgeListContains(crossRegionEdges, connectionBC, connectionFG));
+         assertFalse(edgeListContains(crossRegionEdges, connectionBC, connectionG));
+      }
 
       double ceilingHeight = 2.0;
       double searchHostEpsilon = 0.01;

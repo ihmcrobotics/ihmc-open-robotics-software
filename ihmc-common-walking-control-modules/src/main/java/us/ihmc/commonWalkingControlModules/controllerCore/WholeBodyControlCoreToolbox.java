@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
 
 import java.util.List;
+import java.util.Objects;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
@@ -19,14 +20,14 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,7 +42,7 @@ public class WholeBodyControlCoreToolbox
    private final double controlDT;
    private final double gravityZ;
    private final FloatingJointBasics rootJoint;
-   private final RigidBodyBasics rootBody;
+   private final MultiBodySystemBasics multiBodySystemInput;
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
@@ -49,7 +50,8 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
    private final double totalRobotMass;
-   private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
+   private CentroidalMomentumCalculator centroidalMomentumCalculator;
+   private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
@@ -87,36 +89,37 @@ public class WholeBodyControlCoreToolbox
     * Creates a new toolbox with the required parameters for running any of the controller core
     * modules.
     * <p>
-    * These parameters are necessary but not sufficient. To ensure that this toolbox is setup for
-    * one or more control core module(s), the following methods have to be called depending on the
-    * usage:
+    * These parameters are necessary but not sufficient. To ensure that this toolbox is setup for one
+    * or more control core module(s), the following methods have to be called depending on the usage:
     * <ul>
     * <li>{@link #setupForInverseDynamicsSolver(List)} to complete the parameters necessary and
     * sufficient to run the inverse dynamics module.
     * <li>{@link #setupForInverseKinematicsSolver()} to complete the parameters necessary and
-    * sufficient to run the inverse kinematics module. Not that at the moment this method is empty,
-    * it should be called wherever the inverse kinematics module is called in case in the future new
+    * sufficient to run the inverse kinematics module. Not that at the moment this method is empty, it
+    * should be called wherever the inverse kinematics module is called in case in the future new
     * parameters are added.
-    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics)} to complete the
-    * parameters necessary and sufficient to run the virtual model control module.
+    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics)} to complete the parameters
+    * necessary and sufficient to run the virtual model control module.
     * </ul>
-    * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction
-    * time which module is to be created.
+    * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction time
+    * which module is to be created.
     * </p>
     *
-    * @param controlDT duration of one control tick.
-    * @param gravityZ magnitude of the gravity assumed to be along the z-axis. The parameter is
-    *           assumed to be positive.
-    * @param rootJoint the floating joint of the robot.
-    * @param controlledJoints the set of all the joints to be controlled.
-    * @param centerOfMassFrame the reference frame centered at the robot's center of mass and
-    *           oriented as world frame. This reference is assumed to be updated from outside the
-    *           controller core.
-    * @param controllerCoreOptimizationSettings set of parameters used to initialize the
-    *           optimization problems.
-    * @param yoGraphicsListRegistry the registry in which the {@link YoGraphic}s and
-    *           {@link Artifact}s of the controller core are registered.
-    * @param parentRegistry registry to which this toolbox will attach its own registry.
+    * @param controlDT                          duration of one control tick.
+    * @param gravityZ                           magnitude of the gravity assumed to be along the
+    *                                           z-axis. The parameter is assumed to be positive.
+    * @param rootJoint                          the floating joint of the robot.
+    * @param controlledJoints                   the set of all the joints to be controlled.
+    * @param centerOfMassFrame                  the reference frame centered at the robot's center of
+    *                                           mass and oriented as world frame. This reference is
+    *                                           assumed to be updated from outside the controller core.
+    * @param controllerCoreOptimizationSettings set of parameters used to initialize the optimization
+    *                                           problems.
+    * @param yoGraphicsListRegistry             the registry in which the {@link YoGraphic}s and
+    *                                           {@link Artifact}s of the controller core are
+    *                                           registered.
+    * @param parentRegistry                     registry to which this toolbox will attach its own
+    *                                           registry.
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingJointBasics rootJoint, JointBasics[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, ControllerCoreOptimizationSettings controllerCoreOptimizationSettings,
@@ -129,11 +132,10 @@ public class WholeBodyControlCoreToolbox
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      rootBody = MultiBodySystemTools.getRootBody(controlledJoints[0].getPredecessor());
+      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       jointIndexHandler = new JointIndexHandler(controlledJoints);
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
-      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints), centerOfMassFrame);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(controlledJoints));
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
@@ -143,15 +145,15 @@ public class WholeBodyControlCoreToolbox
    /**
     * Sets the parameters necessary to initialize and enable the joint privileged configuration.
     * <p>
-    * This feature is useful to complete the sets of command given to the controller core such that
-    * if a set of joints remain uncontrolled they will smoothly go to a privileged
-    * configuration/position. This feature slightly affects the desired commands from the high-level
-    * control but is highly beneficial to keep the system in a safe state even if most of it is
-    * uncontrolled and is also useful to escape singularity configurations.
+    * This feature is useful to complete the sets of command given to the controller core such that if
+    * a set of joints remain uncontrolled they will smoothly go to a privileged configuration/position.
+    * This feature slightly affects the desired commands from the high-level control but is highly
+    * beneficial to keep the system in a safe state even if most of it is uncontrolled and is also
+    * useful to escape singularity configurations.
     * </p>
     *
-    * @param jointPrivilegedConfigurationParameters the set of parameters necessary to initialize
-    *           the {@link JointPrivilegedConfigurationHandler}.
+    * @param jointPrivilegedConfigurationParameters the set of parameters necessary to initialize the
+    *                                               {@link JointPrivilegedConfigurationHandler}.
     */
    public void setJointPrivilegedConfigurationParameters(JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
    {
@@ -174,20 +176,22 @@ public class WholeBodyControlCoreToolbox
 
    /**
     * Adds the missing information necessary to enable the inverse dynamics module and notices the
-    * {@link WholeBodyControllerCore} at construction time that the inverse dynamics module has to
-    * be created.
+    * {@link WholeBodyControllerCore} at construction time that the inverse dynamics module has to be
+    * created.
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
     *
-    * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
-    *           weight.
+    * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot weight.
     */
    public void setupForInverseDynamicsSolver(List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       enableInverseDynamicsModule = true;
       // TODO add tools specific to the inverse dynamics module here.
       this.contactablePlaneBodies = contactablePlaneBodies;
+      if (centroidalMomentumCalculator != null)
+         centroidalMomentumCalculator = null;
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(multiBodySystemInput, centerOfMassFrame);
    }
 
    /**
@@ -201,20 +205,21 @@ public class WholeBodyControlCoreToolbox
    {
       enableInverseKinematicsModule = true;
       // TODO add tools specific to the inverse kinematics module here.
+      if (centroidalMomentumRateCalculator == null)
+         centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, centerOfMassFrame);
    }
 
    /**
-    * Adds the missing information necessary to enable the virtual model control module and notices
-    * the {@link WholeBodyControllerCore} at construction time that the virtual model control module
-    * has to be created.
+    * Adds the missing information necessary to enable the virtual model control module and notices the
+    * {@link WholeBodyControllerCore} at construction time that the virtual model control module has to
+    * be created.
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
     *
-    * @param vmcMainBody the main rigid-body of the robot.
-    * @param controlledBodies the set of rigid-bodies that are to be controllable.
-    * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
-    *           weight.
+    * @param vmcMainBody            the main rigid-body of the robot.
+    * @param controlledBodies       the set of rigid-bodies that are to be controllable.
+    * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot weight.
     */
    public void setupForVirtualModelControlSolver(RigidBodyBasics vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
@@ -222,11 +227,13 @@ public class WholeBodyControlCoreToolbox
       // TODO add tools specific to the virtual model control module here.
       this.vmcMainBody = vmcMainBody;
       this.contactablePlaneBodies = contactablePlaneBodies;
+      if (centroidalMomentumCalculator != null)
+         centroidalMomentumCalculator = null;
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(multiBodySystemInput, centerOfMassFrame);
    }
 
    /**
-    * Informs whereas the inverse dynamics module is setup for the controller core using this
-    * toolbox.
+    * Informs whereas the inverse dynamics module is setup for the controller core using this toolbox.
     *
     * @return {@code true} if the inverse dynamics module is setup, {@code false} otherwise.
     */
@@ -261,8 +268,24 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumRateCalculator, jointIndexHandler,
-                                                               jointPrivilegedConfigurationParameters, registry);
+         if (centroidalMomentumRateCalculator != null)
+         {
+            motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
+                                                                  centroidalMomentumRateCalculator,
+                                                                  jointIndexHandler,
+                                                                  jointPrivilegedConfigurationParameters,
+                                                                  registry);
+         }
+         else
+         {
+            Objects.requireNonNull(centroidalMomentumCalculator);
+
+            motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame,
+                                                                  centroidalMomentumCalculator,
+                                                                  jointIndexHandler,
+                                                                  jointPrivilegedConfigurationParameters,
+                                                                  registry);
+         }
       }
       return motionQPInputCalculator;
    }
@@ -310,8 +333,8 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
-    * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick in
-    * {@link MotionQPInputCalculator#initialize()}.
+    * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick
+    * in {@link MotionQPInputCalculator#initialize()}.
     * <p>
     * Gets the {@code CentroidalMomentumRateCalculator} which allows to calculate:
     * <ul>
@@ -340,7 +363,7 @@ public class WholeBodyControlCoreToolbox
 
    public RigidBodyBasics getRootBody()
    {
-      return rootBody;
+      return multiBodySystemInput.getRootBody();
    }
 
    public RigidBodyBasics getVirtualModelControlMainBody()

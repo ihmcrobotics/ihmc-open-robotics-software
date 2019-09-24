@@ -39,6 +39,7 @@ public class ROS2Tools
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
+   public static final String KINEMATICS_STREAMING_TOOLBOX = "/toolbox/ik_streaming";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
    public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
 

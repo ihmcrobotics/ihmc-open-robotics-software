@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -207,7 +208,7 @@ public class FootstepPathCalculatorModule
 
             if (bodyPathPlan != null)
             {
-               List<Point3DReadOnly> bodyPath = new ArrayList<>();
+               List<Pose3DReadOnly> bodyPath = new ArrayList<>();
                for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
                   bodyPath.add(bodyPathPlan.getWaypoint(i));
                messager.submitMessage(BodyPathDataTopic, bodyPath);

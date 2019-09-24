@@ -31,6 +31,8 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -430,7 +432,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
       AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
-      AtomicReference<List<? extends Point3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
+      AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
       AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic);
       AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic);
 
@@ -446,9 +448,14 @@ public class RemoteFootstepPlannerUIMessagingTest
          int planId = RandomNumbers.nextInt(random, 0, 100);
          FootstepPlanningResult result = FootstepPlanningResult.generateRandomResult(random);
          double timeTaken = RandomNumbers.nextDouble(random, 0.0, 1000.0);
-         List<Point3D> bodyPath = new ArrayList<>();
+         List<Pose3DReadOnly> bodyPath = new ArrayList<>();
          for (int i = 2; i < RandomNumbers.nextInt(random, 2, 100); i++)
-            bodyPath.add(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+         {
+            Pose3D pose = new Pose3D();
+            pose.setPosition(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+            pose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
+            bodyPath.add(pose);
+         }
          Point3D lowLevelGoalPosition = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
          Quaternion lowLevelGoalOrientation = EuclidCoreRandomTools.nextQuaternion(random, 100.0);
 
@@ -481,10 +488,17 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Time taken results aren't equal.", timeTaken, timeTakenReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
-         List<? extends Point3DReadOnly> bodyPathResult = bodyPathReference.getAndSet(null);
+         List<? extends Pose3DReadOnly> bodyPathResult = bodyPathReference.getAndSet(null);
          assertEquals("Body path size results aren't equal.", bodyPath.size(), bodyPathResult.size());
          for (int i = 0; i < bodyPath.size(); i++)
-            EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i), bodyPathResult.get(i), epsilon);
+         {
+            EuclidCoreTestTools
+                  .assertPoint3DGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i).getPosition(),
+                                                    bodyPathResult.get(i).getPosition(), epsilon);
+            EuclidCoreTestTools
+                  .assertQuaternionGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i).getOrientation(),
+                                                    bodyPathResult.get(i).getOrientation(), epsilon);
+         }
 
 
          for (int i = 0; i < 100; i++)

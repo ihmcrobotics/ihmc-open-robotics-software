@@ -37,6 +37,9 @@ module controller_msgs
       const octet CUSTOM1 =
       9;
 
+      const octet FALLING_STATE =
+      10;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.

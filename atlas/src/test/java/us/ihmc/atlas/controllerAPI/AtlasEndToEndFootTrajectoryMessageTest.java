@@ -8,11 +8,18 @@ import us.ihmc.avatar.controllerAPI.EndToEndFootTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndFootTrajectoryMessageTest extends EndToEndFootTrajectoryMessageTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+   {
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+      { // FIXME Hack to disable joint damping so it is easier to perform assertions on tracking. It'd be good if that was available at construction of the sim.
+         return createHumanoidFloatingRootJointRobot(createCollisionMeshes, false);
+      };
+   };
 
    @Test
    @Override
@@ -54,6 +61,13 @@ public class AtlasEndToEndFootTrajectoryMessageTest extends EndToEndFootTrajecto
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {
       super.testQueueWithWrongPreviousId();
+   }
+
+   @Test
+   @Override
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
    }
 
    @Override

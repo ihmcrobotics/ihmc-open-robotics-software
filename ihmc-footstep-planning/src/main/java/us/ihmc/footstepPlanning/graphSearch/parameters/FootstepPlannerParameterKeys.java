@@ -48,7 +48,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  bodyBoxBaseY                               = keys.addDoubleKey ("Body box base Y", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseZ                               = keys.addDoubleKey ("Body box base Z", 0.25);
    public static final DoubleStoredPropertyKey  finalTurnProximity                         = keys.addDoubleKey ("Final turn proximity", 1.0);
-   public static final DoubleStoredPropertyKey finalTurnBodyPathProximity                  = keys.addDoubleKey ("Final turn body path proximity", 0.25);
+   public static final DoubleStoredPropertyKey finalTurnBodyPathProximity                  = keys.addDoubleKey ("Final turn body path proximity", 0.2);
    public static final DoubleStoredPropertyKey  finalTurnProximityBlendFactor              = keys.addDoubleKey ("Final turn proximity blend factor", 0.25);
    public static final IntegerStoredPropertyKey numberOfBoundingBoxChecks                  = keys.addIntegerKey("Number of bounding box checks", 1);
 
@@ -72,6 +72,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  footholdAreaWeight                         = keys.addDoubleKey ("Foothold area weight", 0.0);
    public static final DoubleStoredPropertyKey  longStepWeight                             = keys.addDoubleKey ("Long step weight", 1.0);
    public static final DoubleStoredPropertyKey bodyPathViolationWeight                         = keys.addDoubleKey("Body path violation weight", 30.0);
-   public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.2);
+   public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
    public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.2);
 }

@@ -108,6 +108,9 @@ bool project_inside_using_convex_hull
 float64 projection_inside_distance
 
 # Field default value -11.1
+float64 minimum_projection_inside_distance
+
+# Field default value -11.1
 float64 maximum_xy_wiggle_distance
 
 # Field default value -11.1
