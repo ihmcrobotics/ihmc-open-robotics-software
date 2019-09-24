@@ -13,11 +13,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
@@ -60,6 +62,9 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
 
    private final YoFramePoseUsingYawPitchRoll headPose;
 
+   private FullRobotModel fullRobotModel;
+   private YoGraphicsListRegistry yoGraphicListRegistry;
+
    /**
     * Creates a new pose estimator.
     *
@@ -81,7 +86,8 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       linearAccelerationSensor = new LinearAccelerationSensor("LinearAcceleration", dt, headBody, imuFrame, false, registry);
       magneticFieldSensor = new MagneticFieldSensor("MagneticField", dt, headBody, imuFrame, registry);
       positionSensor = new PositionSensor("Position", dt, registry);
-      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor});
+//      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor});
+      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor});
 
       // Create the state and the estimator:
       poseState = new PoseState("Head", dt, headFrame, registry);
@@ -191,6 +197,17 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
          poseState.getTransform(headTransform);
          headPose.set(headTransform);
       }
+   }
+
+   @Override
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      this.fullRobotModel = fullRobotModel;
+   }
+
+   protected FullRobotModel getFullRobotModel()
+   {
+      return this.fullRobotModel;
    }
 
    private void updateRobot()

@@ -56,7 +56,7 @@ public class CommonHumanoidReferenceFramesVisualizer
          for (ReferenceFrame referenceFrame : additionalFramesToVisualize)
          {
             System.out.println("Visualizing additional frame: " + referenceFrame.getName());
-            YoGraphicReferenceFrame yoGraphic = new YoGraphicReferenceFrame(referenceFrame, registry, false, 0.2);
+            YoGraphicReferenceFrame yoGraphic = new YoGraphicReferenceFrame(referenceFrame, registry, true, 0.2);
             yoGraphicsListRegistry.registerYoGraphic(vizName, yoGraphic);
             referenceFramesVisualizers.add(yoGraphic);
          }

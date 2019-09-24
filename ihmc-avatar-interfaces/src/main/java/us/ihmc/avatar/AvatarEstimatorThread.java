@@ -236,7 +236,9 @@ public class AvatarEstimatorThread
 
       if(this.headPoseEstimator != null)
       {
-         estimatorRegistry.addChild(headPoseEstimator.getRegistry());
+         this.headPoseEstimator.configureYoGraphics(yoGraphicsListRegistry);
+         this.headPoseEstimator.setFullRobotModel(estimatorFullRobotModel);
+         estimatorRegistry.addChild(this.headPoseEstimator.getRegistry());
          initializeHeadPoseEstimator.set(true);
       }
 
@@ -343,7 +345,7 @@ public class AvatarEstimatorThread
 
          if(initializeHeadPoseEstimator.getBooleanValue())
          {
-            headPoseEstimator.initialize(estimatorFullRobotModel.getHeadBaseFrame().getTransformToWorldFrame(), null);
+            headPoseEstimator.initialize(estimatorFullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame(), null);
             initializeHeadPoseEstimator.set(false);
          }
          else if(!initializeHeadPoseEstimator.getBooleanValue() && headPoseEstimator != null)

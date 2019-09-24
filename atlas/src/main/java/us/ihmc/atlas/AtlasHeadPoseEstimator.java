@@ -1,7 +1,14 @@
 package us.ihmc.atlas;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -9,6 +16,8 @@ import us.ihmc.stateEstimation.head.carnegie.multisense.MultisenseSLWithMicroStr
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 import java.io.IOException;
@@ -25,31 +34,34 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
    private final String simpleName = getClass().getSimpleName();
 
    private final RigidBodyTransform headRigidBodyTransform = new RigidBodyTransform();
+   private YoFramePose3D estimatedHeadPoseFramePoint;
+   private YoGraphicCoordinateSystem estimatedHeadPoseViz;
 
-   private final YoFrameYawPitchRoll yoFrameYawPitchRoll;
-   private final YoFramePoint3D yoPosition;
-
-   public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, boolean getRobotConfigurationDataFromNetwork, FullHumanoidRobotModel fullRobotModel)
+   public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, boolean getRobotConfigurationDataFromNetwork)
          throws IOException
    {
-      super(fullRobotModel, dt, MultisenseSLWithMicroStrainHeadPoseEstimator.DEFAULT_IMU_TO_MULTISENSE_TRANSFORM, imuListenerPriority, microStrainSerialNumber,
+      super(dt, MultisenseSLWithMicroStrainHeadPoseEstimator.DEFAULT_IMU_TO_MULTISENSE_TRANSFORM, imuListenerPriority, microStrainSerialNumber,
             getRobotConfigurationDataFromNetwork);
 
-      InputStream resourceAsStream = getClass().getResourceAsStream(PARAMETER_FILE);
-      //      ParameterLoaderHelper.loadParameters(this, resourceAsStream, getRegistry());
-      yoFrameYawPitchRoll = new YoFrameYawPitchRoll(simpleName, ReferenceFrame.getWorldFrame(), getRegistry());
-      yoPosition = new YoFramePoint3D(simpleName, ReferenceFrame.getWorldFrame(), getRegistry());
    }
 
-   public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, FullHumanoidRobotModel fullRobotModel)
+   public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber)
          throws IOException
    {
-      this(dt, microStrainSerialNumber, false, fullRobotModel);
+      this(dt, microStrainSerialNumber, false);
    }
 
-   public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, AtlasRobotModel atlasRobotModel) throws IOException
+   @Override
+   public void configureYoGraphics(YoGraphicsListRegistry parentYoGraphicListRegistry)
    {
-      this(dt, microStrainSerialNumber, true, atlasRobotModel.createFullRobotModel());
+      YoGraphicsList graphicsList = new YoGraphicsList("AtlasHeadPoseEstimator");
+      estimatedHeadPoseFramePoint = new YoFramePose3D("EstimatedHeadPoseFramePoint", ReferenceFrame.getWorldFrame(), getRegistry());
+
+      estimatedHeadPoseViz = new YoGraphicCoordinateSystem("EstimatedHeadPoseVizualizer", estimatedHeadPoseFramePoint, 0.2, YoAppearance.DarkGray());
+
+      graphicsList.add(estimatedHeadPoseViz);
+
+      parentYoGraphicListRegistry.registerYoGraphicsList(graphicsList);
    }
 
    @Override
@@ -58,7 +70,9 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
       super.compute();
       getHeadTransform(headRigidBodyTransform);
 
-      yoFrameYawPitchRoll.set(headRigidBodyTransform.getRotation());
-      yoPosition.set(headRigidBodyTransform.getTranslation());
+      if(estimatedHeadPoseViz != null)
+      {
+         estimatedHeadPoseFramePoint.set(headRigidBodyTransform);
+      }
    }
 }
