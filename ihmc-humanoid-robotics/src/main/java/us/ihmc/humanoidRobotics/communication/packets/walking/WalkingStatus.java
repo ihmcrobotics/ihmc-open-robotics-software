@@ -23,13 +23,6 @@ public enum WalkingStatus
       return (byte) ordinal();
    }
 
-   public WalkingStatusMessage createMessage()
-   {
-      WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
-      walkingStatusMessage.setWalkingStatus(toByte());
-      return walkingStatusMessage;
-   }
-
    public static WalkingStatus fromByte(byte enumAsByte)
    {
       return values[enumAsByte];

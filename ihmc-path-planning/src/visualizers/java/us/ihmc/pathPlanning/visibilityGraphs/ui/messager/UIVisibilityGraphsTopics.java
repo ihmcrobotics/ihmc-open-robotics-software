@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -43,6 +44,7 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme Walker = apiFactory.createCategoryTheme("Walker");
    private static final CategoryTheme Offset = apiFactory.createCategoryTheme("Offset");
    private static final CategoryTheme Size = apiFactory.createCategoryTheme("Size");
+   private static final CategoryTheme BoxSize = apiFactory.createCategoryTheme("Box");
    private static final CategoryTheme Collision = apiFactory.createCategoryTheme("Collision");
    private static final CategoryTheme Animation = apiFactory.createCategoryTheme("Animation");
    private static final CategoryTheme Shadow = apiFactory.createCategoryTheme("Shadow");
@@ -58,6 +60,7 @@ public class UIVisibilityGraphsTopics
    private static final TypedTopicTheme<Boolean> ComputePath = apiFactory.createTypedTopicTheme("ComputePath");
    private static final TypedTopicTheme<Boolean> ComputePathWithOcclusions = apiFactory.createTypedTopicTheme("ComputePathWithOcclusions");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
+   private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
    private static final TypedTopicTheme<List<String>> Paths = apiFactory.createTypedTopicTheme("Paths");
@@ -111,8 +114,10 @@ public class UIVisibilityGraphsTopics
    public static final Topic<List<String>> AllDatasetPaths = Root.child(UnitTest).child(Dataset).child(All).topic(Paths);
    public static final Topic<Boolean> EnableWalkerAnimation = Root.child(UnitTest).child(Walker).child(Animation).topic(Enable);
    public static final Topic<Point3D> WalkerPosition = Root.child(UnitTest).child(Walker).topic(Position);
+   public static final Topic<Quaternion> WalkerOrientation = Root.child(UnitTest).child(Walker).topic(Orientation);
    public static final Topic<Double> WalkerOffsetHeight = Root.child(UnitTest).child(Walker).child(Offset).topic(Data);
    public static final Topic<Vector3D> WalkerSize = Root.child(UnitTest).child(Walker).child(Size).topic(Data);
+   public static final Topic<Vector3D> WalkerBoxSize = Root.child(UnitTest).child(Walker).child(BoxSize).child(Size).topic(Data);
    public static final Topic<List<Point3D>> WalkerCollisionLocations = Root.child(UnitTest).child(Walker).child(Collision).topic(Data);
    public static final Topic<Boolean> StopWalker = Root.child(UnitTest).child(Walker).topic(Stop);
    public static final Topic<PlanarRegionsList> ShadowPlanarRegionData = Root.child(PlanarRegion).child(Shadow).topic(Data);

@@ -17,10 +17,10 @@ public class PawSpeedBasedHeuristics extends PawPlanningCostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(PawNode node, PawNode goalNode)
+   protected double computeHeuristics(PawNode node)
    {
-      double bodyDistance = node.euclideanDistance(goalNode);
-      double yawDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), goalNode.getStepYaw()));
+      double bodyDistance = node.getOrComputeXGaitCenterPoint().distanceXY(goalPose.getPosition());
+      double yawDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), goalPose.getYaw()));
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredYawSpeed = xGaitSettings.getMaxYawSpeedFraction() * desiredSpeed;
       double maxYaw = Math.min(desiredYawSpeed * (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration()),

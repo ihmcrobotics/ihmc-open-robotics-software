@@ -3,9 +3,10 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
@@ -25,7 +26,7 @@ import java.util.Arrays;
 
 public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 {
-   private final BodyPathPlanner bodyPathPlanner;
+   private final BodyPathPlanHolder bodyPathPlanner;
    private final PawStepPlanner pawStepPlanner;
 
    private final FramePose3D lowLevelGoal = new FramePose3D();
@@ -36,16 +37,14 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 
    private PawStepPlannerGoal highLevelGoal;
 
-   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanner bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
+   public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
                                        QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                    parameters::getProjectInsideUsingConvexHull, true);
-
+      PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       CompositePawPlanningCostToGoHeuristics costToGoHeuristics = new CompositePawPlanningCostToGoHeuristics(parameters);
 
       bodyPathHeuristics = new BodyPathPawPlanningHeuristics(parameters, this.bodyPathPlanner, xGaitSettings, snapper);
@@ -74,7 +73,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
       planningHorizonLength.set(1.0);
 
       pawStepPlanner = new AStarPawStepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics, expansion, pawNodeCost,
-                                               snapper, snapper, null, registry);
+                                               snapper, null, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -136,15 +135,16 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    @Override
    public PawStepPlanningResult plan()
    {
-      Pose2D goalPose2d = new Pose2D();
+      Pose3D goalPose = new Pose3D();
       double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose);
       bodyPathHeuristics.setGoalAlpha(alpha);
 
       FramePose3D pawPlannerGoal = new FramePose3D();
-      pawPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      pawPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      pawPlannerGoal.set(goalPose);
+//      pawPlannerGoal.setPosition(goalPose.getPosition());
+//      pawPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       if (alpha >= 1.0)
          pawPlannerGoal.setOrientation(highLevelGoal.getTargetPose().getOrientation());

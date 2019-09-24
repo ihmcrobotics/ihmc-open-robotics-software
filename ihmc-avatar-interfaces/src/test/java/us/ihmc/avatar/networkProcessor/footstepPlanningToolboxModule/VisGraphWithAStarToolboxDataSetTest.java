@@ -5,8 +5,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pubsub.DomainFactory;
+
+import java.util.List;
 
 public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
@@ -20,7 +24,17 @@ public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxD
    @Test
    public void testDataSets()
    {
-      super.testDataSets();
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataset ->
+                                                           {
+                                                              if (!dataset.hasPlannerInput())
+                                                                 return false;
+                                                              if (!dataset.getPlannerInput().getStepPlannerIsTestable())
+                                                                 return false;
+                                                              if (dataset.getPlannerInput().getVisGraphIsInDevelopment())
+                                                                 return false;
+                                                              return dataset.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
    @Override
@@ -38,7 +52,7 @@ public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxD
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171216_111326_CrossoverPlatforms);
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171215_214730_CinderBlockField);
 
       ThreadTools.sleepForever();
       test.tearDown();

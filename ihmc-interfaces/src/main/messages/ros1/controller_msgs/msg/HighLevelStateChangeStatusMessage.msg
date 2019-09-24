@@ -18,6 +18,8 @@ int8 CALIBRATION=8
 
 int8 CUSTOM1=9
 
+int8 FALLING_STATE=10
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

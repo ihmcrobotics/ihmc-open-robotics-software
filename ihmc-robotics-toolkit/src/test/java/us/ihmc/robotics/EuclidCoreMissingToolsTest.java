@@ -1,15 +1,15 @@
 package us.ihmc.robotics;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -61,6 +61,27 @@ public class EuclidCoreMissingToolsTest
          fullRotation.multiply(orthogonalRotation, expectedRotation);
          EuclidCoreMissingTools.projectRotationOnAxis(fullRotation, axis, actualRotation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
+      }
+   }
+
+   @Test
+   public void testRotationMatrix3DFromFirstToSecondVector3D()
+   {
+      Random random = new Random(43634);
+
+      for (int i = 0; i < 10000; i++)
+      {
+         Vector3D firstVector = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D secondVector = EuclidCoreRandomTools.nextVector3D(random);
+
+         RotationMatrix actualRotationMatrix = new RotationMatrix();
+         AxisAngle actualAxisAngle = new AxisAngle();
+         AxisAngle expectedAxisAngle = new AxisAngle();
+
+         EuclidCoreMissingTools.rotationMatrix3DFromFirstToSecondVector3D(firstVector, secondVector, actualRotationMatrix);
+         actualAxisAngle.set(actualRotationMatrix);
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(firstVector, secondVector, expectedAxisAngle);
+         EuclidCoreTestTools.assertAxisAngleGeometricallyEquals(expectedAxisAngle, actualAxisAngle, 1.0e-7);
       }
    }
 }

@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Ellipsoid3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,12 +17,14 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
@@ -144,7 +147,10 @@ public class VisibilityGraphOcclusionTest
       Point3D start = new Point3D();
 
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
-      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(new DefaultVisibilityGraphParameters());
+      List<Point3DReadOnly> pathPoints = navigableRegionsManager.calculateBodyPath(start, goal);
+      List<? extends Pose3DReadOnly> path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                       new Quaternion(), new Quaternion());
 
       if(visualize)
       {
@@ -152,7 +158,7 @@ public class VisibilityGraphOcclusionTest
          visualizerApplication.submitGoalToVisualizer(goal);
          visualizerApplication.submitStartToVisualizer(start);
          visualizerApplication.submitNavigableRegionsToVisualizer(navigableRegionsManager.getNavigableRegionsList());
-         messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, path);
+         messager.submitMessage(UIVisibilityGraphsTopics.BodyPathData, pathPoints);
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(navigableRegionsManager.getVisibilityMapSolution());
       }
 
@@ -167,12 +173,12 @@ public class VisibilityGraphOcclusionTest
 
    }
 
-   private String testBodyPath(PlanarRegionsList planarRegionsList, List<Point3DReadOnly> path)
+   private String testBodyPath(PlanarRegionsList planarRegionsList, List<? extends Pose3DReadOnly> path)
    {
       // "Walk" along the body path and assert that the walker does not go through any region.
       int currentSegmentIndex = 0;
-      Point3DReadOnly pathStart = path.get(0);
-      Point3DReadOnly pathEnd = path.get(path.size() - 1);
+      Point3DReadOnly pathStart = path.get(0).getPosition();
+      Point3DReadOnly pathEnd = path.get(path.size() - 1).getPosition();
       Point3D walkerCurrentPosition = new Point3D(pathStart);
       List<Point3D> collisions = new ArrayList<>();
       Ellipsoid3D walkerShape = new Ellipsoid3D();
@@ -193,8 +199,8 @@ public class VisibilityGraphOcclusionTest
          errorMessages += walkerCollisionChecks(walkerShape, planarRegionsList, collisions);
 
          //         walkerCurrentPosition.set(travelAlongBodyPath(walkerMarchingSpeed, walkerCurrentPosition, path));
-         Point3DReadOnly segmentStart = path.get(currentSegmentIndex);
-         Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1);
+         Point3DReadOnly segmentStart = path.get(currentSegmentIndex).getPosition();
+         Point3DReadOnly segmentEnd = path.get(currentSegmentIndex + 1).getPosition();
 
 
          Vector3D segmentDirection = new Vector3D();

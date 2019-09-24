@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -128,6 +129,20 @@ public class KinematicsToolboxOutputConverter
       handTrajectoryMessage.set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation,
                                                                                  trajectoryFrame));
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+   }
+
+   public void computeHeadTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      ReferenceFrame headFrame = fullRobotModelToUseForConversion.getHead().getBodyFixedFrame();
+      Quaternion desiredQuaternion = new Quaternion();
+      FrameQuaternion desiredOrientation = new FrameQuaternion(headFrame);
+      desiredOrientation.changeFrame(worldFrame);
+      desiredQuaternion.set(desiredOrientation);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame,
+                                                                                                        worldFrame);
+      output.getHeadTrajectoryMessage().set(headTrajectoryMessage);
    }
 
    public void computeChestTrajectoryMessage()

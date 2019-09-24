@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawStepPlannerNodeRejectionReason;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.SimplePlanarRegionPawNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.listeners.PawStepPlannerListener;
@@ -31,23 +32,10 @@ public class SnapBasedPawNodeTransitionCheckerTest
    @Test
    public void testStepInPlace()
    {
-      PawStepPlannerParametersReadOnly parameters = new DefaultPawStepPlannerParameters()
-      {
-         @Override
-         public double getMinimumFrontStepLength()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getProjectInsideDistance()
-         {
-            return 0.0;
-         }
-      };
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
+      parameters.setMinimumFrontStepLength(-0.3);
+      parameters.setProjectInsideDistance(0.0);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       SnapBasedPawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -122,7 +110,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       for (int iter = 0; iter < 10; iter++)
       {
          FrameVector2D offsetVector = new FrameVector2D(clearanceVector);
-         double scaleFactor = RandomNumbers.nextDouble(random, 0.8, 0.95);
+         double scaleFactor = RandomNumbers.nextDouble(random, 0.8, 0.9);
          offsetVector.scale(scaleFactor);
          if (RandomNumbers.nextBoolean(random, 0.5))
             offsetVector.setX(-offsetVector.getX());
@@ -137,7 +125,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
          offsetVector.changeFrame(nodeFrame);
          message = "Stepping from " + previousNode + "\n To " + newNode + "\n, clearance amount in the moving foot is only " + offsetVector + "\n";
 
-         assertFalse(nodeChecker.isNodeValid(newNode, previousNode));
+         assertFalse(nodeChecker.isNodeValid(newNode, previousNode), message);
          testListener.assertCorrectRejection(message, newNode, previousNode, PawStepPlannerNodeRejectionReason.STEP_IN_PLACE);
       }
 
@@ -185,9 +173,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -292,9 +278,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -401,9 +385,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -511,9 +493,7 @@ public class SnapBasedPawNodeTransitionCheckerTest
       double stanceLength = 1.0;
       double stanceWidth = 0.5;
       PawStepPlannerParametersReadOnly parameters = new TestParameters();
-      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, parameters::getProjectInsideDistance,
-                                                                                      parameters::getProjectInsideUsingConvexHull,
-                                                                                      true);
+      SimplePlanarRegionPawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters,true);
       PawNodeTransitionChecker nodeChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();

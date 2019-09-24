@@ -3,6 +3,8 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -11,8 +13,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
@@ -45,7 +47,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private final YoDouble timeSpentInPawPlanner;
    private final YoEnum<PawStepPlanningResult> yoResult;
 
-   protected final BodyPathPlanner bodyPathPlanner = new WaypointDefinedBodyPathPlanner();
+   protected final BodyPathPlanHolder bodyPathPlanner = new WaypointDefinedBodyPathPlanHolder();
    protected WaypointsForPawStepPlanner waypointPathPlanner;
    protected PawStepPlanner pawStepPlanner;
 
@@ -181,7 +183,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
          return yoResult.getEnumValue();
       }
 
-      List<Point3D> waypoints = waypointPathPlanner.getWaypoints();
+      List<Pose3DReadOnly> waypoints = waypointPathPlanner.getWaypoints();
 
       if (waypoints.size() < 2)
       {
@@ -199,8 +201,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 //         }
       }
 
-      bodyPathPlanner.setWaypoints(waypoints);
-      bodyPathPlanner.compute();
+      bodyPathPlanner.setPoseWaypoints(waypoints);
 
       if (visualizing)
       {
@@ -247,22 +248,12 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 
    private void updateBodyPathVisualization()
    {
-      Pose2D tempPose = new Pose2D();
+      Pose3D tempPose = new Pose3D();
       for (int i = 0; i < bodyPathPointsForVisualization; i++)
       {
          double percent = (double) i / (double) (bodyPathPointsForVisualization - 1);
          bodyPathPlanner.getPointAlongPath(percent, tempPose);
-         Point3D position = new Point3D();
-         position.set(tempPose.getPosition());
-         Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
-         if (projectedPoint != null)
-         {
-            bodyPathPoints.get(i).set(projectedPoint);
-         }
-         else
-         {
-            bodyPathPoints.get(i).setToNaN();
-         }
+         bodyPathPoints.get(i).set(tempPose.getPosition());
       }
    }
 

@@ -26,6 +26,9 @@ public class PointWiggler
                                                                List<Point2DReadOnly> pointsToAvoidByDistanceB, double desiredDistanceA,
                                                                double desiredDistanceB, double minimumDistanceA, double minimumDistanceB)
    {
+      if (pointsToAvoidByDistanceA.size() == 0 && pointsToAvoidByDistanceB.size() == 0)
+         return new Vector2D();
+
       double maxShift = Math.max(desiredDistanceA, desiredDistanceB);
       List<PointInfo> pointsInfoToAvoid = new ArrayList<>();
       for (Point2DReadOnly pointToAvoidByDistanceA : pointsToAvoidByDistanceA)

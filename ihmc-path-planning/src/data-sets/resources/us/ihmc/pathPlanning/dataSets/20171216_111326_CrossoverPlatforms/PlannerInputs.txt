@@ -1,5 +1,7 @@
 start_position 6.774 0.046 -1.000
 goal_position -1.470 -0.063 0.000
+goal_yaw 3.141
+start_yaw 3.141
 vis_graph_status test
 step_planner_status test
 planar_region_bipedal_timeout 5.0

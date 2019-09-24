@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -14,12 +16,12 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 
    public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
    {
-      super(weight, snapper);
+      super(weight, parameters, snapper);
       this.parameters = parameters;
    }
 
    @Override
-   protected double computeHeuristics(FramePose3D pose)
+   protected double computeHeuristics(FramePose3DReadOnly pose)
    {
       double euclideanDistance = pose.getPosition().distanceXY(goalPose.getPosition());
 
@@ -39,7 +41,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + heightCost + parameters.getCostPerStep() * minSteps;
    }
 
-   private double computeReferenceYaw(FramePose3D pose, FramePose3D goalPose)
+   private double computeReferenceYaw(FramePose3DReadOnly pose, FramePose3D goalPose)
    {
       double distanceToGoal = pose.getPosition().distanceXY(goalPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnProximity();
@@ -47,8 +49,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
       double maximumBlendDistance = (1.0 + parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
 
-      double pathHeading = Math.atan2(goalPose.getY() - pose.getY(), goalPose.getX() - pose.getX());
-      pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
+      double pathHeading = BodyPathPlannerTools.calculateHeading(goalPose.getX() - pose.getX(), goalPose.getY() - pose.getY());
 
       double yawMultiplier;
       if (distanceToGoal < minimumBlendDistance)

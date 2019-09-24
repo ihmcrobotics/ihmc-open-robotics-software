@@ -54,6 +54,13 @@ float64 can_easily_step_over_height
 # Field default value -1.0
 float64 length_for_long_inter_region_edge
 
+bool perform_post_processing_node_shifting
+
+# Field default value True
+bool introduce_midpoints_in_post_processing
+
+bool compute_orientations_to_avoid_obstacles
+
 # Field default value -1.0
 float64 heuristic_weight
 
@@ -65,6 +72,9 @@ float64 elevation_weight
 
 # Field default value -1.0
 float64 occluded_goal_edge_weight
+
+# Field default value -1.0
+float64 weight_for_inter_region_edge
 
 bool return_best_effort_solution
 

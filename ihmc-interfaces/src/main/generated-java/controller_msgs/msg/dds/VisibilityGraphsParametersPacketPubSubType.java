@@ -74,6 +74,14 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -148,6 +156,18 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -203,6 +223,12 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getLengthForLongInterRegionEdge());
 
+      cdr.write_type_7(data.getPerformPostProcessingNodeShifting());
+
+      cdr.write_type_7(data.getIntroduceMidpointsInPostProcessing());
+
+      cdr.write_type_7(data.getComputeOrientationsToAvoidObstacles());
+
       cdr.write_type_6(data.getHeuristicWeight());
 
       cdr.write_type_6(data.getDistanceWeight());
@@ -210,6 +236,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       cdr.write_type_6(data.getElevationWeight());
 
       cdr.write_type_6(data.getOccludedGoalEdgeWeight());
+
+      cdr.write_type_6(data.getWeightForInterRegionEdge());
 
       cdr.write_type_7(data.getReturnBestEffortSolution());
 
@@ -251,6 +279,12 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setLengthForLongInterRegionEdge(cdr.read_type_6());
       	
+      data.setPerformPostProcessingNodeShifting(cdr.read_type_7());
+      	
+      data.setIntroduceMidpointsInPostProcessing(cdr.read_type_7());
+      	
+      data.setComputeOrientationsToAvoidObstacles(cdr.read_type_7());
+      	
       data.setHeuristicWeight(cdr.read_type_6());
       	
       data.setDistanceWeight(cdr.read_type_6());
@@ -258,6 +292,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setElevationWeight(cdr.read_type_6());
       	
       data.setOccludedGoalEdgeWeight(cdr.read_type_6());
+      	
+      data.setWeightForInterRegionEdge(cdr.read_type_6());
       	
       data.setReturnBestEffortSolution(cdr.read_type_7());
       	
@@ -284,10 +320,14 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("can_duck_under_height", data.getCanDuckUnderHeight());
       ser.write_type_6("can_easily_step_over_height", data.getCanEasilyStepOverHeight());
       ser.write_type_6("length_for_long_inter_region_edge", data.getLengthForLongInterRegionEdge());
+      ser.write_type_7("perform_post_processing_node_shifting", data.getPerformPostProcessingNodeShifting());
+      ser.write_type_7("introduce_midpoints_in_post_processing", data.getIntroduceMidpointsInPostProcessing());
+      ser.write_type_7("compute_orientations_to_avoid_obstacles", data.getComputeOrientationsToAvoidObstacles());
       ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("elevation_weight", data.getElevationWeight());
       ser.write_type_6("occluded_goal_edge_weight", data.getOccludedGoalEdgeWeight());
+      ser.write_type_6("weight_for_inter_region_edge", data.getWeightForInterRegionEdge());
       ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
@@ -311,10 +351,14 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setCanDuckUnderHeight(ser.read_type_6("can_duck_under_height"));
       data.setCanEasilyStepOverHeight(ser.read_type_6("can_easily_step_over_height"));
       data.setLengthForLongInterRegionEdge(ser.read_type_6("length_for_long_inter_region_edge"));
+      data.setPerformPostProcessingNodeShifting(ser.read_type_7("perform_post_processing_node_shifting"));
+      data.setIntroduceMidpointsInPostProcessing(ser.read_type_7("introduce_midpoints_in_post_processing"));
+      data.setComputeOrientationsToAvoidObstacles(ser.read_type_7("compute_orientations_to_avoid_obstacles"));
       data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setElevationWeight(ser.read_type_6("elevation_weight"));
       data.setOccludedGoalEdgeWeight(ser.read_type_6("occluded_goal_edge_weight"));
+      data.setWeightForInterRegionEdge(ser.read_type_6("weight_for_inter_region_edge"));
       data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 
