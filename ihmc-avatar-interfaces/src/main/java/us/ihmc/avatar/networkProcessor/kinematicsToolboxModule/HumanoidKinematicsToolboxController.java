@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -49,6 +52,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -227,6 +231,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       return listOfControllableRigidBodies;
+   }
+
+   public void setDefaultPrivilegedConfiguration(DRCRobotModel robotModel)
+   {
+      TObjectDoubleHashMap<OneDoFJointBasics> privilegedConfiguration = new TObjectDoubleHashMap<>();
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      defaultRobotInitialSetup.initializeRobot(robot, robotModel.getJointMap());
+
+      for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
+      {
+         double q_priv = robot.getOneDegreeOfFreedomJoint(joint.getName()).getQ();
+         privilegedConfiguration.put(joint, q_priv);
+      }
+
+      setDefaultPrivilegedConfiguration(privilegedConfiguration);
    }
 
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
