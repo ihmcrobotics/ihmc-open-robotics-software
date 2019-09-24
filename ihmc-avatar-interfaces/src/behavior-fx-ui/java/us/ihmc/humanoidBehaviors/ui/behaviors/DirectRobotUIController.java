@@ -5,10 +5,7 @@ import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -19,7 +16,9 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class DirectRobotUIController
 {
@@ -31,6 +30,9 @@ public class DirectRobotUIController
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
    @FXML private Button clearREA;
+   @FXML private Slider stanceHeightSlider;
+   @FXML private Slider leanForwardSlider;
+   @FXML private Slider neckSlider;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
@@ -70,10 +72,14 @@ public class DirectRobotUIController
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));
       enableSupportRegions.setSelected(true);
+
+      stanceHeightSlider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
+         if (wasChanging)
+            LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
+      });
    }
 
-   @FXML
-   public void homeAll()
+   @FXML public void homeAll()
    {
       GoHomeMessage homeLeftArm = new GoHomeMessage();
       homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
@@ -86,20 +92,17 @@ public class DirectRobotUIController
       goHomePublisher.publish(homeRightArm);
    }
 
-   @FXML
-   public void freeze()
+   @FXML public void freeze()
    {
       robotLowLevelMessenger.sendFreezeRequest();
    }
 
-   @FXML
-   public void standPrep()
+   @FXML public void standPrep()
    {
       robotLowLevelMessenger.sendStandRequest();
    }
 
-   @FXML
-   public void shutdown()
+   @FXML public void shutdown()
    {
       robotLowLevelMessenger.sendShutdownRequest();
    }
@@ -109,8 +112,7 @@ public class DirectRobotUIController
       robotLowLevelMessenger.setHydraulicPumpPSI(pumpPSI.getValue());
    }
 
-   @FXML
-   public void sendSupportRegionParameters()
+   @FXML public void sendSupportRegionParameters()
    {
       BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
@@ -118,11 +120,15 @@ public class DirectRobotUIController
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
    }
 
-   @FXML
-   public void clearREA()
+   @FXML public void clearREA()
    {
       REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       clearMessage.setRequestClear(true);
       reaStateRequestPublisher.publish(clearMessage);
+   }
+
+   public void stanceHeightSliderDragged()
+   {
+      LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
    }
 }
