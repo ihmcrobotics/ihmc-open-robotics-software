@@ -74,9 +74,9 @@
                   <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Slider orientation="VERTICAL" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                  <Slider orientation="VERTICAL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-                  <Slider orientation="VERTICAL" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Slider fx:id="stanceHeightSlider" orientation="VERTICAL" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Slider fx:id="leanForwardSlider" orientation="VERTICAL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <Slider fx:id="neckSlider" orientation="VERTICAL" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                   <Label text="Stance&#10;height&#10;" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                      <font>
                         <Font name="System Bold" size="13.0" />
