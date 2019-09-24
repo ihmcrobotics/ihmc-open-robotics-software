@@ -42,7 +42,6 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
    private final MicroStrainUDPPacketListener imuListener;
 
-   private final FullRobotModel fullRobotModel;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FramePoint3D headPositionEstimateFromRobotModel;
 
@@ -55,13 +54,12 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
    */
    private MicroStrainData microStrainData = new MicroStrainData();
 
-   public MultisenseSLWithMicroStrainHeadPoseEstimator(FullRobotModel fullRobotModel, double dt, RigidBodyTransform imuToHeadTransform,
+   public MultisenseSLWithMicroStrainHeadPoseEstimator(double dt, RigidBodyTransform imuToHeadTransform,
                                                        PriorityParameters imuListenerPriority, long microStrainSerialNumber,
                                                        boolean getRobotConfigurationDataFromNetwork)
          throws IOException
    {
       super(dt, imuToHeadTransform, ESTIMATE_ANGULAR_VELOCITY_BIAS);
-      this.fullRobotModel = fullRobotModel;
 
       if(imuListenerPriority != null)
       {
@@ -99,8 +97,10 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
          initialMagneticFieldDirection = magneticFieldDirection;
       }
 
+
       super.initialize(initialHeadTransform, initialMagneticFieldDirection);
    }
+
 
    @Override
    public void compute()
@@ -109,16 +109,16 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
       if (getRobotConfigurationDataFromNetwork)
       {
-         boolean modelUpdatedWithNewData = robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
+         boolean modelUpdatedWithNewData = robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(getFullRobotModel(), null);
          if (modelUpdatedWithNewData)
          {
-            headPositionEstimateFromRobotModel.set(fullRobotModel.getHeadBaseFrame().getTransformToWorldFrame().getTranslation());
+            headPositionEstimateFromRobotModel.set(getFullRobotModel().getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
             super.setEstimatedHeadPosition(headPositionEstimateFromRobotModel);
          }
       }
       else
       {
-         headPositionEstimateFromRobotModel.set(fullRobotModel.getHeadBaseFrame().getTransformToWorldFrame().getTranslation());
+         headPositionEstimateFromRobotModel.set(getFullRobotModel().getHead().getBodyFixedFrame().getTransformToWorldFrame().getTranslation());
          super.setEstimatedHeadPosition(headPositionEstimateFromRobotModel);
       }
 
@@ -126,7 +126,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       {
          super.setImuAngularVelocity(microStrainData.getAngularRate());
          super.setImuLinearAcceleration(microStrainData.getLinearAcceleration());
-         super.setImuMagneticFieldVector(microStrainData.getGeomagneticNorthVector());
+//         super.setImuMagneticFieldVector(microStrainData.getGeomagneticNorthVector());
       }
 
       super.compute();
