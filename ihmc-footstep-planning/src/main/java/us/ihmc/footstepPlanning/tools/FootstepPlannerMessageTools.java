@@ -152,5 +152,6 @@ public class FootstepPlannerMessageTools
       packet.setElevationWeight(parameters.getElevationWeight());
       packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
+      packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
    }
 }

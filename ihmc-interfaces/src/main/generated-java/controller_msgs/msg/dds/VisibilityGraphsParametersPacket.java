@@ -49,6 +49,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
    public double occluded_goal_edge_weight_ = -1.0;
+   public double weight_for_inter_region_edge_ = -1.0;
    public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
@@ -110,6 +111,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       elevation_weight_ = other.elevation_weight_;
 
       occluded_goal_edge_weight_ = other.occluded_goal_edge_weight_;
+
+      weight_for_inter_region_edge_ = other.weight_for_inter_region_edge_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
 
@@ -359,6 +362,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return occluded_goal_edge_weight_;
    }
 
+   public void setWeightForInterRegionEdge(double weight_for_inter_region_edge)
+   {
+      weight_for_inter_region_edge_ = weight_for_inter_region_edge;
+   }
+   public double getWeightForInterRegionEdge()
+   {
+      return weight_for_inter_region_edge_;
+   }
+
    public void setReturnBestEffortSolution(boolean return_best_effort_solution)
    {
       return_best_effort_solution_ = return_best_effort_solution;
@@ -434,6 +446,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.occluded_goal_edge_weight_, other.occluded_goal_edge_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_inter_region_edge_, other.weight_for_inter_region_edge_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
 
@@ -497,6 +511,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.occluded_goal_edge_weight_ != otherMyClass.occluded_goal_edge_weight_) return false;
 
+      if(this.weight_for_inter_region_edge_ != otherMyClass.weight_for_inter_region_edge_) return false;
+
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
 
@@ -557,6 +573,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.elevation_weight_);      builder.append(", ");
       builder.append("occluded_goal_edge_weight=");
       builder.append(this.occluded_goal_edge_weight_);      builder.append(", ");
+      builder.append("weight_for_inter_region_edge=");
+      builder.append(this.weight_for_inter_region_edge_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
       builder.append(this.return_best_effort_solution_);
       builder.append("}");
