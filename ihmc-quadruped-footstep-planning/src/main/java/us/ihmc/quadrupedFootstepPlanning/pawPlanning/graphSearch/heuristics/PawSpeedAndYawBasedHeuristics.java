@@ -25,13 +25,13 @@ public class PawSpeedAndYawBasedHeuristics extends PawPlanningCostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(PawNode node, PawNode goalNode)
+   protected double computeHeuristics(PawNode node)
    {
-      double bodyDistance = node.euclideanDistance(goalNode);
+      double bodyDistance = node.getOrComputeXGaitCenterPoint().distanceXY(goalPose.getPosition());
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = bodyDistance / desiredSpeed;
 
-      double referenceYaw = PawNodeCostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, parameters.getFinalTurnProximity());
+      double referenceYaw = PawNodeCostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalPose, parameters.getFinalTurnProximity());
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
 
@@ -42,29 +42,24 @@ public class PawSpeedAndYawBasedHeuristics extends PawPlanningCostToGoHeuristics
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         int goalNodeXIndex = goalNode.getXIndex(robotQuadrant);
-         int goalNodeYIndex = goalNode.getYIndex(robotQuadrant);
          int nodeXIndex = node.getXIndex(robotQuadrant);
          int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         PawNodeSnapData goalNodeData = snapper.snapPawNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex, goalNode.getStepYaw());
          PawNodeSnapData nodeData = snapper.snapPawNode(robotQuadrant, nodeXIndex, nodeYIndex, node.getStepYaw());
 
-         if (nodeData == null || goalNodeData == null)
+         if (nodeData == null)
          {
             heightCost = 0.0;
             break;
          }
 
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
 
          PawNodeTools.getSnappedNodeTransformToWorld(nodeXIndex, nodeYIndex, nodeData.getSnapTransform(), nodeTransform);
-         PawNodeTools.getSnappedNodeTransformToWorld(goalNodeXIndex, goalNodeYIndex, goalNodeData.getSnapTransform(), goalNodeTransform);
 
-         if (!nodeTransform.containsNaN() && !goalNodeTransform.containsNaN())
+         if (!nodeTransform.containsNaN())
          {
-            double heightChange = goalNodeTransform.getTranslationVector().getZ() - nodeTransform.getTranslationVector().getZ();
+            double heightChange = goalPose.getZ() - nodeTransform.getTranslationVector().getZ();
 
             if (heightChange > 0.0)
                heightCost += parameters.getStepUpWeight() * heightChange;

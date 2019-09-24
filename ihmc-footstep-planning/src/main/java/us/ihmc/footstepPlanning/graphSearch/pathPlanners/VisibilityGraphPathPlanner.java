@@ -69,34 +69,35 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       }
       else
       {
-         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
-         Point3DReadOnly goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         Point3DReadOnly startPosition = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
+         Point3DReadOnly goalPosition = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
          navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-         if (startPos == null)
+         if (startPosition == null)
          {
             LogTools.info("adding plane at start foot");
-            startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
+            startPosition = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY());
          }
-         if (goalPos == null)
+         if (goalPosition == null)
          {
             LogTools.info("adding plane at goal pose");
-            goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
+            goalPosition = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());
          }
 
          if (debug)
          {
             LogTools.info("Starting to plan using " + getClass().getSimpleName());
-            LogTools.info("Body start pose: " + startPos);
-            LogTools.info("Body goal pose:  " + goalPos);
+            LogTools.info("Body start pose: " + startPosition);
+            LogTools.info("Body goal pose:  " + goalPosition);
          }
 
          try
          {
-            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-            List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution());
+            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPosition, goalPosition);
+            List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                                     bodyStartPose.getOrientation(), bodyGoalPose.getOrientation());
 
             waypoints.addAll(posePath);
          }

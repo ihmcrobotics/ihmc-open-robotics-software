@@ -51,6 +51,7 @@ public abstract class PawStepPlannerDataSetTest
 {
    private static final double defaultBestEffortTimeout = 1.0;
    protected static final double bambooTimeScaling = 4.0;
+   private static final double defaultHorizonLength = 100.0;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -213,6 +214,7 @@ public abstract class PawStepPlannerDataSetTest
       messager.submitMessage(PawStepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
       messager.submitMessage(PawStepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
       messager.submitMessage(PawStepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerHorizonLengthTopic, defaultHorizonLength);
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       PawStepPlanningResult pathResult = planner.planPath();
@@ -330,6 +332,7 @@ public abstract class PawStepPlannerDataSetTest
       planner.setGoal(goal);
       planner.setTimeout(timeout);
       planner.setBestEffortTimeout(defaultBestEffortTimeout);
+      planner.setPlanningHorizonLength(defaultHorizonLength);
 
       messager.submitMessage(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, plannerParameters);
@@ -338,6 +341,7 @@ public abstract class PawStepPlannerDataSetTest
       messager.submitMessage(PawStepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
       messager.submitMessage(PawStepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
       messager.submitMessage(PawStepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(PawStepPlannerMessagerAPI.PlannerHorizonLengthTopic, defaultHorizonLength);
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)

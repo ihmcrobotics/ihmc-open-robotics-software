@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
 
@@ -27,9 +25,9 @@ public class LinearDynamicSystemTest
    @BeforeEach
    public void setUp() throws Exception
    {
-      simpleDecayMatrixA = new Matrix(new double[][] { { -1.0 } });
+      simpleDecayMatrixA = new Matrix(new double[][] {{-1.0}});
       simpleDecaySystem = new LinearDynamicSystem(simpleDecayMatrixA, null, null, null);
-      massSpringDamperMatrixA = new Matrix(new double[][] { { -2.0 * zeta * wn, -wn * wn }, { 1.0, 0.0 } });
+      massSpringDamperMatrixA = new Matrix(new double[][] {{-2.0 * zeta * wn, -wn * wn}, {1.0, 0.0}});
       massSpringDamperSystem = new LinearDynamicSystem(massSpringDamperMatrixA, null, null, null);
       simpleNotSquareMatrix = new Matrix(1, 2, 0);
       simpleSquareMatrix = new Matrix(2, 2, 0);
@@ -175,19 +173,19 @@ public class LinearDynamicSystemTest
 
       // From Multivariable Control Systems.
       // J. Pratt Problem Set 3.
-      double[][] elementsA = new double[][] { { 2.0, -2.0, 3.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 3.0, -1.0 } };
+      double[][] elementsA = new double[][] {{2.0, -2.0, 3.0}, {1.0, 1.0, 1.0}, {1.0, 3.0, -1.0}};
       Matrix matrixA = new Matrix(elementsA);
-      double[][] elementsB = new double[][] { { 0.0, 1.0 }, { 1.0, 0.0 }, { 3.0, 2.0 } };
+      double[][] elementsB = new double[][] {{0.0, 1.0}, {1.0, 0.0}, {3.0, 2.0}};
       Matrix matrixB = new Matrix(elementsB);
-      double[][] elementsC = new double[][] { { 1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 } };
+      double[][] elementsC = new double[][] {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}};
       Matrix matrixC = new Matrix(elementsC);
       LinearDynamicSystem linearDynamicSystem = new LinearDynamicSystem(matrixA, null, null, null);
       TransferFunctionMatrix sIMinusAInverseMatrix = linearDynamicSystem.getTransferFunctionMatrix();
 
       // Expected transfer functions:
-      Polynomial sMinusOne = new Polynomial(new double[] { 1.0, -1.0 });
-      Polynomial sMinusThree = new Polynomial(new double[] { 1.0, -3.0 });
-      Polynomial sPlusTwo = new Polynomial(new double[] { 1.0, 2.0 });
+      Polynomial sMinusOne = new Polynomial(new double[] {1.0, -1.0});
+      Polynomial sMinusThree = new Polynomial(new double[] {1.0, -3.0});
+      Polynomial sPlusTwo = new Polynomial(new double[] {1.0, 2.0});
 
       // Note: There is pole/zero cancellation. Using cofactors for inverse does not currently discover them!
       //      Polynomial denominatorOne = sMinusOne.times(sMinusThree);
@@ -210,7 +208,7 @@ public class LinearDynamicSystemTest
       TransferFunction t20 = new TransferFunction(numerator20, denominatorTwo); // denominatorOne);
       TransferFunction t21 = new TransferFunction(numerator21, denominatorTwo);
       TransferFunction t22 = new TransferFunction(numerator22, denominatorTwo);
-      TransferFunction[][] expectedSIMinusATransferFunctions = new TransferFunction[][] { { t00, t01, t02 }, { t10, t11, t12 }, { t20, t21, t22 } };
+      TransferFunction[][] expectedSIMinusATransferFunctions = new TransferFunction[][] {{t00, t01, t02}, {t10, t11, t12}, {t20, t21, t22}};
       TransferFunctionMatrix expectedSIMinusAInverseMatrix = new TransferFunctionMatrix(expectedSIMinusATransferFunctions);
       ComplexNumber complexNumber = new ComplexNumber(0.678, 1.234);
       ComplexMatrix evaluate1 = expectedSIMinusAInverseMatrix.evaluate(complexNumber);
@@ -242,15 +240,15 @@ public class LinearDynamicSystemTest
       linearDynamicSystem.setMatrixC(matrixC);
 
       TransferFunctionMatrix matrixG = linearDynamicSystem.getTransferFunctionMatrix();
-      Polynomial numeratorG00 = new Polynomial(new double[] { 7.0, -8.0 });
-      Polynomial numeratorG01 = new Polynomial(new double[] { 1.0, 6.0, -14.0 });
-      Polynomial numeratorG10 = new Polynomial(new double[] { 1.0, 2.0, -2.0 });
-      Polynomial numeratorG11 = new Polynomial(new double[] { 3.0, 4.0 });
+      Polynomial numeratorG00 = new Polynomial(new double[] {7.0, -8.0});
+      Polynomial numeratorG01 = new Polynomial(new double[] {1.0, 6.0, -14.0});
+      Polynomial numeratorG10 = new Polynomial(new double[] {1.0, 2.0, -2.0});
+      Polynomial numeratorG11 = new Polynomial(new double[] {3.0, 4.0});
       TransferFunction tG00 = new TransferFunction(numeratorG00, denominatorTwo);
       TransferFunction tG01 = new TransferFunction(numeratorG01, denominatorTwo);
       TransferFunction tG10 = new TransferFunction(numeratorG10, denominatorTwo);
       TransferFunction tG11 = new TransferFunction(numeratorG11, denominatorTwo);
-      TransferFunction[][] expectedTransferFunctionsG = new TransferFunction[][] { { tG00, tG01 }, { tG10, tG11 } };
+      TransferFunction[][] expectedTransferFunctionsG = new TransferFunction[][] {{tG00, tG01}, {tG10, tG11}};
       TransferFunctionMatrix expectedMatrixG = new TransferFunctionMatrix(expectedTransferFunctionsG);
 
       // System.out.println("expectedMatrixG = " + expectedMatrixG);
@@ -278,11 +276,11 @@ public class LinearDynamicSystemTest
 
       // From Multivariable Control Systems.
       // J. Pratt Problem Set 5.
-      double[][] elementsA = new double[][] { { 0.0, 0.0, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 }, { -1.0, 1.0, 0.0, 0.0 }, { 1.0, -1.0, 0.0, 0.0 } };
+      double[][] elementsA = new double[][] {{0.0, 0.0, 1.0, 0.0}, {0.0, 0.0, 0.0, 1.0}, {-1.0, 1.0, 0.0, 0.0}, {1.0, -1.0, 0.0, 0.0}};
       Matrix matrixA = new Matrix(elementsA);
-      double[][] elementsB = new double[][] { { 0.0, 0.0 }, { 0.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 } };
+      double[][] elementsB = new double[][] {{0.0, 0.0}, {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}};
       Matrix matrixB = new Matrix(elementsB);
-      double[][] elementsC = new double[][] { { 0.0, 1.0, 0.0, 0.0 } };
+      double[][] elementsC = new double[][] {{0.0, 1.0, 0.0, 0.0}};
       Matrix matrixC = new Matrix(elementsC);
       LinearDynamicSystem linearDynamicSystem = new LinearDynamicSystem(matrixA, null, null, null);
       TransferFunctionMatrix transferFunctionMatrix = linearDynamicSystem.getTransferFunctionMatrix();
@@ -290,7 +288,7 @@ public class LinearDynamicSystemTest
       //      System.out.println("transferFunctionMatrix = \n" + transferFunctionMatrix);
       //      System.out.println("\ntransferFunctionMatrix(1, 3) = \n" + transferFunctionMatrix.get(1,3));
       // Expected transfer functions:
-      Polynomial denominator = new Polynomial(new double[] { 1.0, 0.0, 2.0, 0.0, 0.0 });
+      Polynomial denominator = new Polynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
       TransferFunction[][] expectedTransferFunctions = new TransferFunction[4][4];
 
       expectedTransferFunctions[0][0] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0, 0.0), denominator);
@@ -315,11 +313,11 @@ public class LinearDynamicSystemTest
 
       assertTrue(passed);
 
-      Polynomial numerator0 = new Polynomial(new double[] { 1.0 });
-      Polynomial numerator1 = new Polynomial(new double[] { 1.0, 0.0, 1.0 });
+      Polynomial numerator0 = new Polynomial(new double[] {1.0});
+      Polynomial numerator1 = new Polynomial(new double[] {1.0, 0.0, 1.0});
       TransferFunction t0 = new TransferFunction(numerator0, denominator);
       TransferFunction t1 = new TransferFunction(numerator1, denominator);
-      TransferFunction[][] expectedTransferFunctionsWithBAndC = new TransferFunction[][] { { t0, t1 } };
+      TransferFunction[][] expectedTransferFunctionsWithBAndC = new TransferFunction[][] {{t0, t1}};
 
       linearDynamicSystem = new LinearDynamicSystem(matrixA, matrixB, matrixC, null);
       transferFunctionMatrix = linearDynamicSystem.getTransferFunctionMatrix();
@@ -331,11 +329,11 @@ public class LinearDynamicSystemTest
 
       // Feedback with only one input.
       // Using pole placement to place poles at -1, -1, -5, -5
-      elementsB = new double[][] { { 0.0 }, { 0.0 }, { 1.0 }, { 0.0 } };
+      elementsB = new double[][] {{0.0}, {0.0}, {1.0}, {0.0}};
       matrixB = new Matrix(elementsB);
       linearDynamicSystem = new LinearDynamicSystem(matrixA, matrixB, matrixC, null);
 
-      Matrix matrixG = new Matrix(new double[][] { { 44.0, -19.0, 12.0, 48.0 } });
+      Matrix matrixG = new Matrix(new double[][] {{44.0, -19.0, 12.0, 48.0}});
       LinearDynamicSystem closedLoopSystem = linearDynamicSystem.addFullStateFeedback(matrixG);
 
       closedLoopSystem.getMatrixA();
@@ -349,7 +347,7 @@ public class LinearDynamicSystemTest
       }
 
       // Verify the roots of the characteristic equation are where the poles where place at:
-      Polynomial expectedCharacteristicEquation = new Polynomial(new double[] { 1.0, 12.0, 46.0, 60.0, 25.0 });
+      Polynomial expectedCharacteristicEquation = new Polynomial(new double[] {1.0, 12.0, 46.0, 60.0, 25.0});
 
       assertTrue(characteristicEquation.epsilonEquals(expectedCharacteristicEquation, 1e-7));
 
@@ -370,7 +368,7 @@ public class LinearDynamicSystemTest
    {
 
       // This test is based on the composition propriety of the transfer state function of a LTI System
-      double[] xi = new double[] { 0.1, -0.01 }; // initial state
+      double[] xi = new double[] {0.1, -0.01}; // initial state
       int T1 = 1000; // first time interval
       int T2 = 1000; // second time interval
       int order = massSpringDamperMatrixA.getRowDimension();
@@ -416,7 +414,7 @@ public class LinearDynamicSystemTest
       assertEquals(1, transferFunctions.getColumns());
 
       TransferFunction transferFunction = transferFunctions.get(0, 0);
-      TransferFunction expectedTransferFunction = new TransferFunction(new double[] { 1.0 }, new double[] { 1.0, 1.0 });
+      TransferFunction expectedTransferFunction = new TransferFunction(new double[] {1.0}, new double[] {1.0, 1.0});
 
       assertTrue(transferFunction.epsilonEquals(expectedTransferFunction, 1e-7));
    }
@@ -495,15 +493,15 @@ public class LinearDynamicSystemTest
    @Test
    public void testStateFeedbackMethods()
    {
-      double[][] elementsA = new double[][] { { -10.0 } };
+      double[][] elementsA = new double[][] {{-10.0}};
       Matrix matrixA = new Matrix(elementsA);
-      double[][] elementsB = new double[][] { { 1.0 } };
+      double[][] elementsB = new double[][] {{1.0}};
       Matrix matrixB = new Matrix(elementsB);
-      double[][] elementsC = new double[][] { { 1.0 } };
+      double[][] elementsC = new double[][] {{1.0}};
       Matrix matrixC = new Matrix(elementsC);
-      double[][] elementsK = new double[][] { { -10.0 } };
+      double[][] elementsK = new double[][] {{-10.0}};
       Matrix matrixK = new Matrix(elementsK);
-      double[][] elementsIC = new double[][] { { 0.0 } };
+      double[][] elementsIC = new double[][] {{0.0}};
       Matrix matrixIC = new Matrix(elementsIC);
       double u = 1.5; // system input
       double y; // system output
@@ -534,7 +532,7 @@ public class LinearDynamicSystemTest
       // closedLoopSysA is expected to be a pure integrator dX=u : y=x
       matrixK.set(0, 0, -5.0);
 
-      double[][] elementsKr = new double[][] { { 0.5 } };
+      double[][] elementsKr = new double[][] {{0.5}};
       Matrix matrixKr = new Matrix(elementsKr);
       LinearDynamicSystem closedLoopSysB = sysB.addOutputStateFeedback(matrixK, matrixKr);
 
@@ -571,5 +569,88 @@ public class LinearDynamicSystemTest
       y = closedLoopMatrixC.times(state).get(0, 0);
 
       return y;
+   }
+
+   @Test
+   public void testEulerIntegrateSpringDamper()
+   {
+      double epsilon = 1e-7;
+      
+      double k = 100.0;
+      double b = 10.0;
+
+      double[][] elementsA = new double[][] {{0.0, 1.0}, {-k, -b}};
+      double[][] elementsB = new double[][] {{0.0}, {1.0}};
+      double[][] elementsC = new double[][] {{1.0, 0.0}};
+      double[][] elementsD = new double[][] {{0.0}};
+
+      Matrix matrixA = new Matrix(elementsA);
+      Matrix matrixB = new Matrix(elementsB);
+      Matrix matrixC = new Matrix(elementsC);
+      Matrix matrixD = new Matrix(elementsD);
+
+      LinearDynamicSystem system = new LinearDynamicSystem(matrixA, matrixB, matrixC, matrixD);
+
+      double stepSize = 0.001;
+      double[] currentState = new double[] {1.0, 0.0};
+      double[] input = new double[] {0.0};
+
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      double[] output = system.getOutputFromState(currentState, input);
+
+      assertEquals(1, output.length);
+      assertEquals(1.0, output[0], epsilon);
+      
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      output = system.getOutputFromState(currentState, input);
+      assertEquals(0.9999, output[0], epsilon);
+      
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      output = system.getOutputFromState(currentState, input);
+      assertEquals(0.999701, output[0], epsilon);
+   }
+   
+   @Test
+   public void testEulerIntegrateMIMO()
+   {
+      // 4 state variables. 
+      // 3 input variables.
+      // 2 output variables.
+      // A is 4x4
+      // B is 4x3
+      // C is 2 x 4
+      // D is 2 x 3
+      
+      double epsilon = 1e-7;
+
+      double[][] elementsA = new double[][] {{0.1, 0.2, 0.3, 0.123}, {0.4, 0.5, 0.6, -0.222}, {0.7, 0.8, 0.9, -1.734}, {0.11, 0.22, 0.33, 0.44}};
+      double[][] elementsB = new double[][] {{0.17, 0.94, 0.25}, {0.33, 0.55, -0.66}, {-0.17, 0.45, 0.123}, {0.137, 0.15, 0.223}};
+      double[][] elementsC = new double[][] {{1.0, 2.0, 3.0, -4.0}, {5.0, 6.0, 7.0, 8.0}};
+      double[][] elementsD = new double[][] {{0.123, 0.456, 0.789}, {-0.123, 0.256, -0.189}};
+
+      Matrix matrixA = new Matrix(elementsA);
+      Matrix matrixB = new Matrix(elementsB);
+      Matrix matrixC = new Matrix(elementsC);
+      Matrix matrixD = new Matrix(elementsD);
+
+      LinearDynamicSystem system = new LinearDynamicSystem(matrixA, matrixB, matrixC, matrixD);
+
+      double stepSize = 0.001;
+      double[] currentState = new double[] {1.0, 0.0, 0.0, 0.0};
+      double[] input = new double[] {0.1, 0.2, 0.3};
+
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      double[] output = system.getOutputFromState(currentState, input);
+
+      assertEquals(2, output.length);
+      assertEquals(1.3428173, output[0], epsilon);
+      
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      output = system.getOutputFromState(currentState, input);
+      assertEquals(1.3454372370822003, output[0], epsilon);
+      
+      currentState = system.eulerIntegrateOneStep(currentState, input, stepSize);
+      output = system.getOutputFromState(currentState, input);
+      assertEquals(1.348059813331106, output[0], epsilon);
    }
 }

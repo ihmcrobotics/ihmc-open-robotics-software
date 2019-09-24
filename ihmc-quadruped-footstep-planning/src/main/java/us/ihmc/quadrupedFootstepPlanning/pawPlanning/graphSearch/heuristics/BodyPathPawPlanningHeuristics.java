@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
@@ -39,16 +40,16 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
    }
 
    @Override
-   protected double computeHeuristics(PawNode node, PawNode goalNode)
+   protected double computeHeuristics(PawNode node)
    {
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-      Pose2D closestPointOnPath = new Pose2D();
+      Pose3D closestPointOnPath = new Pose3D();
 
       double alpha = bodyPath.getClosestPoint(xGaitCenterPoint, closestPointOnPath);
       alpha = MathTools.clamp(alpha, 0.0, goalAlpha);
       bodyPath.getPointAlongPath(alpha, closestPointOnPath);
 
-      double distanceToPath = closestPointOnPath.getPosition().distance(xGaitCenterPoint);
+      double distanceToPath = closestPointOnPath.getPosition().distanceXY(xGaitCenterPoint);
       double croppedDistanceToPath = Math.max(0.0, distanceToPath - distanceFromPathTolerance);
 
       double remainingPathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
@@ -56,10 +57,10 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
       double pathDistanceViolationCost = pathViolationWeight * croppedDistanceToPath;
 
 
-      double referenceYaw = computeReferenceGoalYaw(node, goalNode, closestPointOnPath.getYaw());
+      double referenceYaw = computeReferenceGoalYaw(node, closestPointOnPath.getYaw());
 
       double yawDifferenceFromReference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw));
-      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getStepYaw(), referenceYaw));
+      double remainingYawToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalPose.getYaw(), referenceYaw));
 
       double croppedYawDifferenceFromReference = Math.max(0.0, yawDifferenceFromReference - deltaYawFromReferenceTolerance);
 
@@ -73,29 +74,24 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         int goalNodeXIndex = goalNode.getXIndex(robotQuadrant);
-         int goalNodeYIndex = goalNode.getYIndex(robotQuadrant);
          int nodeXIndex = node.getXIndex(robotQuadrant);
          int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         PawNodeSnapData goalNodeData = snapper.snapPawNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex, goalNode.getStepYaw());
          PawNodeSnapData nodeData = snapper.snapPawNode(robotQuadrant, nodeXIndex, nodeYIndex, node.getStepYaw());
 
-         if (nodeData == null || goalNodeData == null)
+         if (nodeData == null)
          {
             heightCost = 0.0;
             break;
          }
 
          RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
 
          PawNodeTools.getSnappedNodeTransformToWorld(nodeXIndex, nodeYIndex, nodeData.getSnapTransform(), nodeTransform);
-         PawNodeTools.getSnappedNodeTransformToWorld(goalNodeXIndex, goalNodeYIndex, goalNodeData.getSnapTransform(), goalNodeTransform);
 
-         if (!nodeTransform.containsNaN() && !goalNodeTransform.containsNaN())
+         if (!nodeTransform.containsNaN())
          {
-            double heightChange = goalNodeTransform.getTranslationVector().getZ() - nodeTransform.getTranslationVector().getZ();
+            double heightChange = goalPose.getZ() - nodeTransform.getTranslationVector().getZ();
 
             if (heightChange > 0.0)
                heightCost += parameters.getStepUpWeight() * heightChange;
@@ -116,9 +112,9 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
       goalAlpha = alpha;
    }
 
-   private double computeReferenceGoalYaw(PawNode node, PawNode goalNode, double pathHeading)
+   private double computeReferenceGoalYaw(PawNode node, double pathHeading)
    {
-      double distanceToGoal = node.euclideanDistance(goalNode);
+      double distanceToGoal = node.getOrComputeXGaitCenterPoint().distanceXY(goalPose.getPosition());
       double finalTurnProximity = this.finalTurnProximity;//parameters.getFinalTurnProximity();
 
       double minimumBlendDistance = 0.75 * finalTurnProximity;
@@ -132,6 +128,6 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
       else
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
-      return AngleTools.interpolateAngle(goalNode.getStepYaw(), pathHeading, yawMultiplier);
+      return AngleTools.interpolateAngle(goalPose.getYaw(), pathHeading, yawMultiplier);
    }
 }
