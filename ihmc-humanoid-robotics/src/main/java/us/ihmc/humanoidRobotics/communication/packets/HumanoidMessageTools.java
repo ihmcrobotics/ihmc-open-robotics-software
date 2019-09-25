@@ -902,7 +902,7 @@ public class HumanoidMessageTools
                                                                      Vector3DReadOnly desiredAngularVelocity, ReferenceFrame dataFrame,
                                                                      ReferenceFrame trajectoryFrame)
    {
-      ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
+      ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame);
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
