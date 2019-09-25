@@ -55,16 +55,16 @@ public class VisibilityGraphsParametersAnchorPaneController
       regionOrthogonalAngleSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
-      javaFXStoredPropertyMap.put(maxInterRegionConnectionLengthSlider.valueProperty(), VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
-      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegionsSlider.valueProperty(), VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
-      javaFXStoredPropertyMap.put(extrusionDistanceSlider.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistance);
-      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStepSlider.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
-      javaFXStoredPropertyMap.put(tooHighToStepDistanceSlider.valueProperty(), VisibilityGraphParametersKeys.tooHighToStepDistance);
-      javaFXStoredPropertyMap.put(clusterResolutionSlider.valueProperty(), VisibilityGraphParametersKeys.clusterResolution);
-      javaFXStoredPropertyMap.put(explorationDistanceFromStartGoalSlider.valueProperty(), VisibilityGraphParametersKeys.explorationDistanceFromStartGoal);
-      javaFXStoredPropertyMap.put(planarRegionMinAreaSlider.valueProperty(), VisibilityGraphParametersKeys.planarRegionMinArea);
-      javaFXStoredPropertyMap.put(planarRegionMinSizeSlider, VisibilityGraphParametersKeys.planarRegionMinSize);
-      javaFXStoredPropertyMap.put(regionOrthogonalAngleSlider.valueProperty(), VisibilityGraphParametersKeys.regionOrthogonalAngle);
+      javaFXStoredPropertyMap.put(maxInterRegionConnectionLengthSlider, VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
+      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegionsSlider, VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
+      javaFXStoredPropertyMap.put(extrusionDistanceSlider, VisibilityGraphParametersKeys.obstacleExtrusionDistance);
+      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStepSlider, VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
+      javaFXStoredPropertyMap.put(tooHighToStepDistanceSlider, VisibilityGraphParametersKeys.tooHighToStepDistance);
+      javaFXStoredPropertyMap.put(clusterResolutionSlider, VisibilityGraphParametersKeys.clusterResolution);
+      javaFXStoredPropertyMap.put(explorationDistanceFromStartGoalSlider, VisibilityGraphParametersKeys.explorationDistanceFromStartGoal);
+      javaFXStoredPropertyMap.put(planarRegionMinAreaSlider, VisibilityGraphParametersKeys.planarRegionMinArea);
+      javaFXStoredPropertyMap.putIntegerSlider(planarRegionMinSizeSlider, VisibilityGraphParametersKeys.planarRegionMinSize);
+      javaFXStoredPropertyMap.put(regionOrthogonalAngleSlider, VisibilityGraphParametersKeys.regionOrthogonalAngle);
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(UIVisibilityGraphsTopics.VisibilityGraphsParameters, parameters ->
