@@ -20,13 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
 
 public class KinematicsStreamingToolboxMessageReplay
 {
-   private static final PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-
    private final List<KinematicsStreamingToolboxMessageSet> messages;
 
    private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
@@ -40,7 +39,7 @@ public class KinematicsStreamingToolboxMessageReplay
    private final IHMCRealtimeROS2Publisher<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
    private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
-   public KinematicsStreamingToolboxMessageReplay(String robotName, File file) throws IOException
+   public KinematicsStreamingToolboxMessageReplay(String robotName, File file, PubSubImplementation pubSubImplementation) throws IOException
    {
       messages = loadMessages(file);
       String name = getClass().getSimpleName();
@@ -99,7 +98,7 @@ public class KinematicsStreamingToolboxMessageReplay
       JsonNode jsonNode = objectMapper.readTree(inputStream);
       int size = jsonNode.size();
 
-      List<KinematicsStreamingToolboxMessageSet> allMessages = new ArrayList<>(size);
+      List<KinematicsStreamingToolboxMessageSet> allMessages = new ArrayList<>();
 
       for (int i = 0; i < size; i++)
       {
@@ -131,9 +130,17 @@ public class KinematicsStreamingToolboxMessageReplay
       return allMessages;
    }
 
-   public List<KinematicsStreamingToolboxMessageSet> getMessages()
+   public RobotConfigurationData getInitialConfiguration()
    {
-      return messages;
+      for (int i = 0; i < messages.size(); i++)
+      {
+         if(messages.get(i).robotConfigurationData != null)
+         {
+            return messages.get(i).robotConfigurationData;
+         }
+      }
+
+      return null;
    }
 
    private class KinematicsStreamingToolboxMessageSet
@@ -160,7 +167,7 @@ public class KinematicsStreamingToolboxMessageReplay
 
       if (chooserState == JFileChooser.APPROVE_OPTION)
       {
-         new KinematicsStreamingToolboxMessageReplay(robotName, fileChooser.getSelectedFile());
+         new KinematicsStreamingToolboxMessageReplay(robotName, fileChooser.getSelectedFile(), PubSubImplementation.FAST_RTPS);
       }
    }
 }
