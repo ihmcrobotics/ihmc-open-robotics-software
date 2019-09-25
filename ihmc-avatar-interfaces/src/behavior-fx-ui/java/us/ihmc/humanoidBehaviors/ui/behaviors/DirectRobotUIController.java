@@ -20,6 +20,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class DirectRobotUIController
 {
    @FXML private Button homeAll;
@@ -73,9 +75,26 @@ public class DirectRobotUIController
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));
       enableSupportRegions.setSelected(true);
 
-      stanceHeightSlider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
+      setupSlider(stanceHeightSlider, () -> LogTools.info("stanceHeightSlider: {}", stanceHeightSlider.getValue()));
+      setupSlider(leanForwardSlider, () -> LogTools.info("leanForwardSlider: {}", leanForwardSlider.getValue()));
+      setupSlider(neckSlider, () -> LogTools.info("neckSlider: {}", neckSlider.getValue()));
+   }
+
+   private void setupSlider(Slider slider, Runnable onChange)
+   {
+      AtomicBoolean changing = new AtomicBoolean(false);
+      slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+         if (!changing.get())
+         {
+            onChange.run();
+         }
+      });
+      slider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
+         changing.set(isChanging);
          if (wasChanging)
-            LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
+         {
+            onChange.run();
+         }
       });
    }
 
