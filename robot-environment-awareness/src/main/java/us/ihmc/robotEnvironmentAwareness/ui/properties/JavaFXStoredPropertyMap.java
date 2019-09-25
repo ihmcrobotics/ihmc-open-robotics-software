@@ -1,22 +1,18 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty.Field;
-import us.ihmc.tools.property.StoredProperty;
 import us.ihmc.tools.property.StoredPropertyBasics;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.HashMap;
 
-public class JavaFXStoredPropertyMap extends HashMap<Property, StoredPropertyBasics>
+public class JavaFXStoredPropertyMap
 {
    private final StoredPropertySetBasics storedPropertySet;
+   private final HashMap<JavaFXPropertyHolder, StoredPropertyBasics> map = new HashMap<>();
 
    public JavaFXStoredPropertyMap(StoredPropertySetBasics storedPropertySet)
    {
@@ -25,71 +21,81 @@ public class JavaFXStoredPropertyMap extends HashMap<Property, StoredPropertyBas
 
    public void put(CheckBox checkBox, StoredPropertyKey<Boolean> booleanKey)
    {
-      put(checkBox.selectedProperty(), storedPropertySet.getProperty(booleanKey));
+      map.put(new JavaFXPropertyHolder<>(() -> checkBox.selectedProperty().getValue(),
+                                         value -> checkBox.selectedProperty().setValue(value),
+                                         runnable -> checkBox.selectedProperty().addListener(observable -> runnable.run())),
+              storedPropertySet.getProperty(booleanKey));
       checkBox.setSelected(storedPropertySet.get(booleanKey));
    }
 
    public <T> void put(Spinner<T> doubleSpinner, StoredPropertyKey<T> doubleKey)
    {
-      put(doubleSpinner.getValueFactory().valueProperty(), doubleKey);
+      map.put(new JavaFXPropertyHolder<>(() -> doubleSpinner.getValueFactory().valueProperty().getValue(),
+                                         value -> doubleSpinner.getValueFactory().valueProperty().setValue(value),
+                                         runnable -> doubleSpinner.getValueFactory().valueProperty().addListener(observable -> runnable.run())),
+              storedPropertySet.getProperty(doubleKey));
+      // TODO should set value here?
    }
 
-   public <T> void put(ObjectProperty<T> property, StoredPropertyKey<T> key)
+   public void put(Slider slider, StoredPropertyKey<Double> doubleKey)
    {
-      put(property, storedPropertySet.getProperty(key));
-      property.setValue(storedPropertySet.get(key));
-   }
-
-   public <T> void put(Property<T> slider, StoredPropertyKey<T> doubleKey)
-   {
-      put(slider, storedPropertySet.getProperty(doubleKey));
+      map.put(new JavaFXPropertyHolder<>(slider::getValue,
+                                         value -> slider.valueProperty().setValue(value),
+                                         runnable -> slider.valueChangingProperty().addListener(
+                                               (observable, wasChanging, isChanging) -> {
+                                                  if (wasChanging)
+                                                  {
+                                                     runnable.run();
+                                                  }
+                                               })),
+              storedPropertySet.getProperty(doubleKey));
       slider.setValue(storedPropertySet.get(doubleKey));
    }
 
-   public void put(Slider slider, StoredPropertyKey<Integer> doubleKey)
+   public void putIntegerSlider(Slider slider, StoredPropertyKey<Integer> integerKey)
    {
-      put(slider.valueProperty(), storedPropertySet.getProperty(doubleKey));
-      slider.setValue(storedPropertySet.get(doubleKey));
+      map.put(new JavaFXPropertyHolder<>(() -> (int) slider.getValue(),
+                                         value -> slider.valueProperty().setValue(value),
+                                         runnable -> slider.valueChangingProperty().addListener(
+                                               (observable, wasChanging, isChanging) -> {
+                                                  if (wasChanging)
+                                                  {
+                                                     runnable.run();
+                                                  }
+                                               })),
+              storedPropertySet.getProperty(integerKey));
+      slider.setValue(storedPropertySet.get(integerKey));
    }
-
-
-   public void put(DoubleProperty valueProperty, StoredPropertyKey<Double> doubleKey)
-   {
-      put(valueProperty, storedPropertySet.getProperty(doubleKey));
-
-      valueProperty.setValue(storedPropertySet.get(doubleKey));
-   }
-         // add more as needed
 
    public void copyJavaFXToStored()
    {
-      for (Property javaFXProperty : keySet())
+      for (JavaFXPropertyHolder javaFXProperty : map.keySet())
       {
-         get(javaFXProperty).set(javaFXProperty.getValue());
+         map.get(javaFXProperty).set(javaFXProperty.getValue());
       }
    }
 
    public void copyStoredToJavaFX()
    {
-      for (Property javaFXProperty : keySet())
+      for (JavaFXPropertyHolder javaFXProperty : map.keySet())
       {
-         javaFXProperty.setValue(get(javaFXProperty).get());
+         javaFXProperty.setValue(map.get(javaFXProperty).get());
       }
    }
 
    public void bindStoredToJavaFXUserInput()
    {
-      for (Property javaFXProperty : keySet())
+      for (JavaFXPropertyHolder javaFXProperty : map.keySet())
       {
-         javaFXProperty.addListener(observable -> get(javaFXProperty).set(javaFXProperty.getValue()));
+         javaFXProperty.addValueChangedListener(() -> map.get(javaFXProperty).set(javaFXProperty.getValue()));
       }
    }
 
    public void bindToJavaFXUserInput(Runnable runnable)
    {
-      for (Property javaFXProperty : keySet())
+      for (JavaFXPropertyHolder javaFXProperty : map.keySet())
       {
-         javaFXProperty.addListener(observable -> runnable.run());
+         javaFXProperty.addValueChangedListener(runnable);
       }
    }
 }
