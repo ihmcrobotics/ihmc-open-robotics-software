@@ -126,7 +126,7 @@ public class KSTTools
 
       outputConverter.computeHandTrajectoryMessages();
       outputConverter.computeArmTrajectoryMessages();
-      outputConverter.computeHeadTrajectoryMessage();
+      outputConverter.computeNeckTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
 
