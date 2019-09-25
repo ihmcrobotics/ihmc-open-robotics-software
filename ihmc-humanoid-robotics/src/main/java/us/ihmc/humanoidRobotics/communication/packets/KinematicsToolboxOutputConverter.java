@@ -40,6 +40,7 @@ public class KinematicsToolboxOutputConverter
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
 
+   private final OneDoFJointBasics[] neckJoints;
    private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
 
    public KinematicsToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
@@ -49,7 +50,10 @@ public class KinematicsToolboxOutputConverter
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
+      RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
+
+      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -134,6 +138,25 @@ public class KinematicsToolboxOutputConverter
       SE3TrajectoryMessage se3Trajectory = handTrajectoryMessage.getSe3Trajectory();
       se3Trajectory.setUseCustomControlFrame(true);
       se3Trajectory.getControlFramePose().set(handControlFrame.getTransformToDesiredFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame()));
+   }
+
+   public void computeNeckTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      int numberOfJoints = neckJoints.length;
+
+      double[] desiredPositions = new double[numberOfJoints];
+      double[] desiredVelocities = new double[numberOfJoints];
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         OneDoFJointBasics joint = neckJoints[i];
+         desiredPositions[i] = MathTools.clamp(joint.getQ(), joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredVelocities[i] = enableVelocity ? joint.getQd() : 0.0;
+      }
+
+      output.getNeckTrajectoryMessage().set(HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryTime, desiredPositions, desiredVelocities, null));
    }
 
    public void computeHeadTrajectoryMessage()
