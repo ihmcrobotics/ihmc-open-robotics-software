@@ -8,6 +8,7 @@ import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JavaFXStoredPropertyMap
 {
@@ -39,30 +40,50 @@ public class JavaFXStoredPropertyMap
 
    public void put(Slider slider, StoredPropertyKey<Double> doubleKey)
    {
+      AtomicBoolean changing = new AtomicBoolean(false); // unfortunately this is necessary for both click and drag to work
       map.put(new JavaFXPropertyHolder<>(slider::getValue,
                                          value -> slider.valueProperty().setValue(value),
-                                         runnable -> slider.valueChangingProperty().addListener(
-                                               (observable, wasChanging, isChanging) -> {
-                                                  if (wasChanging)
-                                                  {
-                                                     runnable.run();
-                                                  }
-                                               })),
+                                         runnable ->
+                                         {
+                                            slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                                               if (!changing.get())
+                                               {
+                                                  runnable.run();
+                                               }
+                                            });
+                                            slider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
+                                               changing.set(isChanging);
+                                               if (wasChanging)
+                                               {
+                                                  runnable.run();
+                                               }
+                                            });
+                                         }),
               storedPropertySet.getProperty(doubleKey));
       slider.setValue(storedPropertySet.get(doubleKey));
    }
 
    public void putIntegerSlider(Slider slider, StoredPropertyKey<Integer> integerKey)
    {
+      AtomicBoolean changing = new AtomicBoolean(false); // unfortunately this is necessary for both click and drag to work
       map.put(new JavaFXPropertyHolder<>(() -> (int) slider.getValue(),
                                          value -> slider.valueProperty().setValue(value),
-                                         runnable -> slider.valueChangingProperty().addListener(
-                                               (observable, wasChanging, isChanging) -> {
-                                                  if (wasChanging)
-                                                  {
-                                                     runnable.run();
-                                                  }
-                                               })),
+                                         runnable ->
+                                         {
+                                            slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                                               if (!changing.get())
+                                               {
+                                                  runnable.run();
+                                               }
+                                            });
+                                            slider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
+                                               changing.set(isChanging);
+                                               if (wasChanging)
+                                               {
+                                                  runnable.run();
+                                               }
+                                            });
+                                         }),
               storedPropertySet.getProperty(integerKey));
       slider.setValue(storedPropertySet.get(integerKey));
    }
