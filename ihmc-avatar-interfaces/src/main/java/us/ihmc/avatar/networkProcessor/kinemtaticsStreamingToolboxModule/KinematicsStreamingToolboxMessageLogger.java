@@ -33,11 +33,13 @@ public class KinematicsStreamingToolboxMessageLogger
    static final String capturabilityBasedStatusName = CapturabilityBasedStatus.class.getSimpleName();
    static final String kinematicsToolboxConfigurationMessageName = KinematicsToolboxConfigurationMessage.class.getSimpleName();
    static final String kinematicsStreamingToolboxInputMessageName = KinematicsStreamingToolboxInputMessage.class.getSimpleName();
+   static final String kinematicsToolboxOutputStatusName = KinematicsToolboxOutputStatus.class.getSimpleName();
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
    private final AtomicReference<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessage = new AtomicReference<>();
    private final AtomicReference<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessage = new AtomicReference<>();
+   private final AtomicReference<KinematicsToolboxOutputStatus> kinematicsToolboxOutputStatus = new AtomicReference<>();
    private final AtomicBoolean firstMessage = new AtomicBoolean();
    private final AtomicBoolean sleepReceived = new AtomicBoolean();
 
@@ -45,6 +47,7 @@ public class KinematicsStreamingToolboxMessageLogger
    private final JSONSerializer<CapturabilityBasedStatus> capturabilityBasedStatusSerializer = new JSONSerializer<>(new CapturabilityBasedStatusPubSubType());
    private final JSONSerializer<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessageSerializer = new JSONSerializer<>(new KinematicsToolboxConfigurationMessagePubSubType());
    private final JSONSerializer<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessageSerializer = new JSONSerializer<>(new KinematicsStreamingToolboxInputMessagePubSubType());
+   private final JSONSerializer<KinematicsToolboxOutputStatus> kinematicsToolboxOutputStatusSerializer = new JSONSerializer<>(new KinematicsToolboxOutputStatusPubSubType());
 
    private final ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
 
@@ -67,6 +70,10 @@ public class KinematicsStreamingToolboxMessageLogger
       MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxSubTopicNameGenerator, s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubTopicNameGenerator, s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
+
+      MessageTopicNameGenerator toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxOutputStatus.class, toolboxPubTopicNameGenerator, s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
+
       ROS2Tools.createCallbackSubscription(ros2Node, ToolboxStateMessage.class, toolboxSubTopicNameGenerator, s ->
       {
          ToolboxStateMessage toolboxStateMessage = s.takeNextData();
@@ -134,6 +141,7 @@ public class KinematicsStreamingToolboxMessageLogger
          writeIfPresent(capturabilityBasedStatus, capturabilityBasedStatusName, capturabilityBasedStatusSerializer, printStream);
          writeIfPresent(kinematicsToolboxConfigurationMessage, kinematicsToolboxConfigurationMessageName, kinematicsToolboxConfigurationMessageSerializer, printStream);
          writeIfPresent(kinematicsStreamingToolboxInputMessage, kinematicsStreamingToolboxInputMessageName, kinematicsStreamingToolboxInputMessageSerializer, printStream);
+         writeIfPresent(kinematicsToolboxOutputStatus, kinematicsToolboxOutputStatusName, kinematicsToolboxOutputStatusSerializer, printStream);
       }
       catch(IOException e)
       {
