@@ -6,7 +6,9 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -37,10 +39,12 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,6 +59,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -136,8 +141,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
-                                                                  updateDT, yoGraphicsListRegistry,
+                                                                  getRobotModel(),
+                                                                  updateDT,
+                                                                  yoGraphicsListRegistry,
                                                                   mainRegistry);
+      toolboxController.setDefaultPrivilegedConfiguration(robotModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -209,7 +217,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    @Test
    public void testHoldBodyPose() throws Exception
    {
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      Random random = new Random(4576488);
+      double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(initialFullRobotModel.getPelvis()));
@@ -236,10 +248,13 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       if (VERBOSE)
          LogTools.info("Entering: testRandomHandPositions");
       Random random = new Random(2135);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
 
       for (int i = 0; i < 10; i++)
       {
@@ -291,10 +306,13 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       if (VERBOSE)
          LogTools.info("Entering: testRandomHandPoses");
       Random random = new Random(2134);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
 
       double averageSolutionQuality = 0.0;
       double worstSolutionQuality = -1.0;
@@ -355,11 +373,14 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    {
       if (VERBOSE)
          LogTools.info("Entering: testSingleSupport");
-      Random random = new Random(2134);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      Random random = new Random(2133);
+      double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotSide supportFootSide = RobotSide.LEFT;
 
       double averageSolutionQuality = 0.0;
@@ -438,7 +459,10 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       Random random = new Random(21651);
 
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel());
+      double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RigidBodyBasics chest = initialFullRobotModel.getChest();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -451,6 +475,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
       }
       initialFullRobotModel.updateFrames();
+      toolboxController.setDefaultPrivilegedConfigurationNameMap(newDefaultPrivilegedConfigurationMap(initialFullRobotModel));
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       double comSafeMargin = toolboxController.getCenterOfMassSafeMargin().getValue();
@@ -515,6 +540,14 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       }
    }
 
+   private static Map<String, Double> newDefaultPrivilegedConfigurationMap(FullRobotModel robotModel)
+   {
+      Map<String, Double> map = new HashMap<>();
+      for (OneDoFJointBasics joint : robotModel.getOneDoFJoints())
+         map.put(joint.getName(), joint.getQ());
+      return map;
+   }
+
    private static KinematicsToolboxRigidBodyMessage shiftBodyMessage(RigidBodyBasics body, Tuple3DReadOnly shift, double weight)
    {
       return shiftBodyMessage(body, shift, weight, true, true);
@@ -570,7 +603,14 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          public void doControl()
          {
             if (!initializationSucceeded.getBooleanValue())
+            {
                initializationSucceeded.set(toolboxController.initialize());
+               if (initializationSucceeded.getValue())
+               { // Finish this tick so the robot state after initialization can be seen in SCS.
+                  jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+                  return;
+               }
+            }
 
             if (initializationSucceeded.getBooleanValue())
             {
@@ -607,14 +647,25 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
    public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel)
    {
+      return createFullRobotModelAtInitialConfiguration(robotModel, 0.0, 0.0);
+   }
+
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel, double groundHeight, double offsetYaw)
+   {
+      return createFullRobotModelAtInitialConfiguration(robotModel, groundHeight, new Point2D(), offsetYaw);
+   }
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel, double groundHeight, Tuple2DReadOnly offset, double offsetYaw)
+   {
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeRobot(robot, robotModel.getJointMap());
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();
       long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
       drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
+      initialFullRobotModel.getRootJoint().getJointPose().prependTranslation(offset.getX(), offset.getY(), 0.0);
+      initialFullRobotModel.updateFrames();
       return initialFullRobotModel;
    }
 

@@ -74,6 +74,7 @@ public class KSTTools
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
+                                                             fullRobotModelFactory,
                                                              toolboxControllerPeriod,
                                                              yoGraphicsListRegistry,
                                                              registry);

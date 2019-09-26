@@ -189,7 +189,11 @@ public class KinematicsToolboxController extends ToolboxController
     * quicker.
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
-   private TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap = null;
+   /**
+    * Defines a robot configuration the this IK start from and also defines the privileged joint
+    * configuration.
+    */
+   protected TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap = null;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
@@ -217,7 +221,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Reference to the most recent robot configuration received from the controller. It is used for
     * initializing the {@link #desiredFullRobotModel} before starting the optimization process.
     */
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   protected final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
 
    /**
     * Map of the commands requested during two initialization phases by the user. It used to memorize
@@ -349,9 +353,33 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
-   public void setDefaultPrivilegedConfiguration(TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap)
+   public void setDefaultPrivilegedConfiguration(Map<OneDoFJointBasics, Double> defaultPrivilegedConfigurationMap)
    {
-      this.defaultPrivilegedConfigurationMap = defaultPrivilegedConfigurationMap;
+      if (defaultPrivilegedConfigurationMap == null)
+      {
+         this.defaultPrivilegedConfigurationMap = null;
+         return;
+      }
+
+      this.defaultPrivilegedConfigurationMap = new TObjectDoubleHashMap<>();
+      defaultPrivilegedConfigurationMap.entrySet().forEach(entry -> this.defaultPrivilegedConfigurationMap.put(entry.getKey(), entry.getValue()));
+   }
+
+   public void setDefaultPrivilegedConfigurationNameMap(Map<String, Double> jointNameToPrivilegedPosition)
+   {
+      if (jointNameToPrivilegedPosition == null)
+      {
+         this.defaultPrivilegedConfigurationMap = null;
+         return;
+      }
+      this.defaultPrivilegedConfigurationMap = new TObjectDoubleHashMap<>();
+
+      for (OneDoFJointBasics joint : oneDoFJoints)
+      {
+         Double q_priv = jointNameToPrivilegedPosition.get(joint.getName());
+         if (q_priv != null)
+            defaultPrivilegedConfigurationMap.put(joint, q_priv);
+      }
    }
 
    /**
