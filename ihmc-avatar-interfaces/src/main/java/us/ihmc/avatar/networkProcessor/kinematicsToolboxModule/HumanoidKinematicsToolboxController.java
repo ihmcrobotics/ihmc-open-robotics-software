@@ -497,7 +497,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private InverseKinematicsCommandList createLinearMomentumConvexConstraint2DCommand()
    {
-      if (!enableSupportPolygonConstraint.getValue())
+      if (!enableSupportPolygonConstraint.getValue() || latestCapturabilityBasedStatusReference.get() == null)
          return null;
 
       ConvexPolygon2D newSupportPolygon = new ConvexPolygon2D();

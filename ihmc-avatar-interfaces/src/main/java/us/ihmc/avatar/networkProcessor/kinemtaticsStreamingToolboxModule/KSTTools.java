@@ -102,6 +102,13 @@ public class KSTTools
       MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
    }
 
+   public void getCurrentState(YoKinematicsToolboxOutputStatus currentStateToPack)
+   {
+      KinematicsToolboxOutputStatus status = currentStateToPack.getStatus();
+      MessageTools.packDesiredJointState(status, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
+      currentStateToPack.set(status);
+   }
+
    private KinematicsStreamingToolboxInputCommand latestInput = null;
 
    public KinematicsStreamingToolboxInputCommand pollInputCommand()

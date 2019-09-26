@@ -867,27 +867,36 @@ public class MessageTools
       if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
          throw new RuntimeException("Output status are not compatible.");
 
-      KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
+      KinematicsToolboxOutputStatus interpolateOutputStatus = new KinematicsToolboxOutputStatus();
 
       TFloatArrayList jointAngles1 = outputStatusOne.getDesiredJointAngles();
       TFloatArrayList jointAngles2 = outputStatusTwo.getDesiredJointAngles();
+      TFloatArrayList jointVelocities1 = outputStatusOne.getDesiredJointVelocities();
+      TFloatArrayList jointVelocities2 = outputStatusTwo.getDesiredJointVelocities();
 
       for (int i = 0; i < jointAngles1.size(); i++)
       {
-         interplateOutputStatus.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
+         interpolateOutputStatus.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
+         interpolateOutputStatus.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
       }
 
       Vector3D rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
       Vector3D rootTranslation2 = outputStatusTwo.getDesiredRootTranslation();
       Quaternion rootOrientation1 = outputStatusOne.getDesiredRootOrientation();
       Quaternion rootOrientation2 = outputStatusTwo.getDesiredRootOrientation();
+      Vector3D rootLinearVelocity1 = outputStatusOne.getDesiredRootLinearVelocity();
+      Vector3D rootLinearVelocity2 = outputStatusTwo.getDesiredRootLinearVelocity();
+      Vector3D rootAngularVelocity1 = outputStatusOne.getDesiredRootAngularVelocity();
+      Vector3D rootAngularVelocity2 = outputStatusTwo.getDesiredRootAngularVelocity();
 
-      interplateOutputStatus.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
-      interplateOutputStatus.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
+      interpolateOutputStatus.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
+      interpolateOutputStatus.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
+      interpolateOutputStatus.getDesiredRootLinearVelocity().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
+      interpolateOutputStatus.getDesiredRootAngularVelocity().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
 
-      interplateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
+      interpolateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
 
-      return interplateOutputStatus;
+      return interpolateOutputStatus;
    }
 
    /**
