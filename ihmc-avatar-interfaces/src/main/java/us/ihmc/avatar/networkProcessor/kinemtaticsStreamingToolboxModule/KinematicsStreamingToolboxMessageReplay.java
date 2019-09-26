@@ -48,12 +48,14 @@ public class KinematicsStreamingToolboxMessageReplay
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;
 
+   private final RealtimeRos2Node ros2Node;
+
    public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
    {
       messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
+      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotConfigurationData.class, controllerPubGenerator);
@@ -107,7 +109,7 @@ public class KinematicsStreamingToolboxMessageReplay
          return false;
 
       double nextMessageTime = Conversions.nanosecondsToSeconds(messages.get(counter.getValue()).timestamp) + timeOffsetSeconds;
-      if(nextMessageTime >= timeSeconds)
+      if(nextMessageTime < timeSeconds)
       {
          sendMessagesAtIndex(counter.getValue());
          counter.increment();
@@ -119,6 +121,11 @@ public class KinematicsStreamingToolboxMessageReplay
    public void conclude()
    {
       sendToolboxStateMessage(ToolboxState.SLEEP);
+   }
+
+   public void close()
+   {
+      ros2Node.destroy();
    }
 
    private void sendMessagesAtIndex(int i)
