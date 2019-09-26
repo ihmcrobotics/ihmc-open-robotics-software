@@ -39,6 +39,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
+                                                                            robotModel,
                                                                             Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                                             yoGraphicsListRegistry,
                                                                             registry);

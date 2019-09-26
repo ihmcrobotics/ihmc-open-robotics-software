@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
@@ -38,20 +38,25 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -70,6 +75,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * controllers.
     */
    private final FullHumanoidRobotModel desiredFullRobotModel;
+   private final CommonHumanoidReferenceFrames desiredReferenceFrames;
+   /**
+    * Robot model used to represent the current robot configuration as measured from
+    * {@link RobotConfigurationData}.
+    */
+   private final FullHumanoidRobotModel currentFullRobotModel;
+   private final CommonHumanoidReferenceFrames currentReferenceFrames;
+   private final OneDoFJointBasics[] currentOneDoFJoints;
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
 
@@ -149,21 +162,26 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final double robotMass;
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                              YoVariableRegistry parentRegistry)
+                                              FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), updateDT,
-           yoGraphicsListRegistry, parentRegistry);
+      this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), fullRobotModelFactory,
+           updateDT, yoGraphicsListRegistry, parentRegistry);
    }
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel, Collection<? extends RigidBodyBasics> controllableRigidBodyies,
-                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory, double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
+      desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
+      this.currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      currentOneDoFJoints = getAllJointsExcludingHands(currentFullRobotModel);
+      currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
 
       robotMass = TotalMassCalculator.computeSubTreeMass(desiredFullRobotModel.getElevator());
 
@@ -235,7 +253,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    public void setDefaultPrivilegedConfiguration(DRCRobotModel robotModel)
    {
-      TObjectDoubleHashMap<OneDoFJointBasics> privilegedConfiguration = new TObjectDoubleHashMap<>();
+      Map<OneDoFJointBasics, Double> privilegedConfiguration = new HashMap<>();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       defaultRobotInitialSetup.initializeRobot(robot, robotModel.getJointMap());
@@ -281,6 +299,53 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          for (RobotSide robotside : RobotSide.values)
             isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
+      }
+
+      if (defaultPrivilegedConfigurationMap != null)
+      {
+         /*
+          * Default initial configuration was provided and is set in the super class. The goal here, is to
+          * recompute the pose of the root joint such that our initial configuration has its support feet as
+          * close as possible to the current robot support feet. This affects the CoM task.
+          */
+         RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, currentFullRobotModel.getRootJoint(), currentOneDoFJoints);
+         currentReferenceFrames.updateFrames();
+         rootJoint.getJointPose().setToZero();
+         desiredReferenceFrames.updateFrames();
+
+         MovingReferenceFrame currentFrame, desiredFrame;
+
+         if (isFootInSupport.get(RobotSide.LEFT).getValue())
+         {
+            if (isFootInSupport.get(RobotSide.RIGHT).getValue())
+            {
+               currentFrame = currentReferenceFrames.getMidFootZUpGroundFrame();
+               desiredFrame = desiredReferenceFrames.getMidFootZUpGroundFrame();
+            }
+            else
+            {
+               currentFrame = currentReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+               desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+            }
+         }
+         else if (isFootInSupport.get(RobotSide.RIGHT).getValue())
+         {
+            currentFrame = currentReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
+            desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
+         }
+         else
+         {
+            throw new IllegalArgumentException("We have a flying robot here, such scenario is not handled.");
+         }
+         RigidBodyTransform rootJointTransform = currentFrame.getTransformToDesiredFrame(desiredFrame);
+         // Any yaw-rotation needs to be applied at the desiredFrame's origin. rotationRelocation is used to relocate where the rotation is happening.
+         RigidBodyTransform rotationRelocation = desiredFrame.getTransformToDesiredFrame(rootJoint.getFrameAfterJoint());
+         rootJointTransform.multiplyInvertOther(rotationRelocation);
+         rootJointTransform.preMultiply(rotationRelocation);
+         rootJoint.getJointPose().set(rootJointTransform);
+         updateTools();
+         desiredReferenceFrames.updateFrames();
       }
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
