@@ -3,27 +3,33 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger.*;
 
+/**
+ * Loads and replays messages from file. There are two ways to do replay:
+ * 1. Calling {@link #replayAllMessages} will immediately stream all messages, using wall time to determine when to send
+ * 2. To use as this as a callback based on an external clock, first call {@link #initialize}, then successive calls to {@link #update}, then {@link #conclude}
+ */
 public class KinematicsStreamingToolboxMessageReplay
 {
    private final List<KinematicsStreamingToolboxMessageSet> messages;
@@ -39,9 +45,12 @@ public class KinematicsStreamingToolboxMessageReplay
    private final IHMCRealtimeROS2Publisher<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
    private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
-   public KinematicsStreamingToolboxMessageReplay(String robotName, File file, PubSubImplementation pubSubImplementation) throws IOException
+   private final MutableInt counter = new MutableInt();
+   private double timeOffsetSeconds;
+
+   public KinematicsStreamingToolboxMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
    {
-      messages = loadMessages(file);
+      messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
@@ -58,42 +67,83 @@ public class KinematicsStreamingToolboxMessageReplay
       ros2Node.spin();
    }
 
-   public void replayMessages()
+   public void replayAllMessages()
    {
-      // send wakeup packet
-      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-      toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
-      toolboxStatePublisher.publish(toolboxStateMessage);
+      sendToolboxStateMessage(ToolboxState.WAKE_UP);
       ThreadTools.sleep(1);
 
       for (int i = 0; i < messages.size(); i++)
       {
-         KinematicsStreamingToolboxMessageSet messageSet = messages.get(i);
-
-         if(messageSet.kinematicsToolboxConfigurationMessage != null)
-         {
-            kinematicsToolboxConfigurationPublisher.publish(messageSet.kinematicsToolboxConfigurationMessage);
-         }
-         if(messageSet.kinematicsStreamingToolboxInputMessage != null)
-         {
-            kinematicsStreamingToolboxInputPublisher.publish(messageSet.kinematicsStreamingToolboxInputMessage);
-         }
+         sendMessagesAtIndex(i);
 
          if(i != messages.size() - 1)
          {
-            long timeDifferenceNanos = messages.get(i + 1).timestamp - messages.get(i).timestamp;
-            ThreadTools.sleep(0, (int) timeDifferenceNanos);
+            int timeDifferenceMillis = (int) (1e-6 * (messages.get(i + 1).timestamp - messages.get(i).timestamp));
+            ThreadTools.sleep(timeDifferenceMillis);
          }
       }
 
       // send sleep packet
-      toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
+      sendToolboxStateMessage(ToolboxState.SLEEP);
+   }
+
+   /**
+    * Initializes replay as a callback given an external time source.
+    */
+   public void initialize(double timeSeconds)
+   {
+      sendToolboxStateMessage(ToolboxState.WAKE_UP);
+      counter.setValue(0);
+      timeOffsetSeconds = timeSeconds - Conversions.nanosecondsToSeconds(messages.get(0).timestamp);
+   }
+
+   /**
+    * Broadcasts a message according to the given time. Must be preceeded by a call to initialize
+    * Returns whether there is a subsequent message available
+    */
+   public boolean update(double timeSeconds)
+   {
+      if(counter.getValue() >= messages.size())
+         return false;
+
+      double nextMessageTime = Conversions.nanosecondsToSeconds(messages.get(counter.getValue()).timestamp) + timeOffsetSeconds;
+      if(nextMessageTime >= timeSeconds)
+      {
+         sendMessagesAtIndex(counter.getValue());
+         counter.increment();
+      }
+
+      return counter.getValue() < messages.size();
+   }
+
+   public void conclude()
+   {
+      sendToolboxStateMessage(ToolboxState.SLEEP);
+   }
+
+   private void sendMessagesAtIndex(int i)
+   {
+      KinematicsStreamingToolboxMessageSet messageSet = messages.get(i);
+
+      if(messageSet.kinematicsToolboxConfigurationMessage != null)
+      {
+         kinematicsToolboxConfigurationPublisher.publish(messageSet.kinematicsToolboxConfigurationMessage);
+      }
+      if(messageSet.kinematicsStreamingToolboxInputMessage != null)
+      {
+         kinematicsStreamingToolboxInputPublisher.publish(messageSet.kinematicsStreamingToolboxInputMessage);
+      }
+   }
+
+   private void sendToolboxStateMessage(ToolboxState toolboxState)
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(toolboxState.toByte());
       toolboxStatePublisher.publish(toolboxStateMessage);
    }
 
-   private List<KinematicsStreamingToolboxMessageSet> loadMessages(File file) throws IOException
+   private List<KinematicsStreamingToolboxMessageSet> loadMessages(InputStream inputStream) throws IOException
    {
-      InputStream inputStream = new FileInputStream(file);
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode jsonNode = objectMapper.readTree(inputStream);
       int size = jsonNode.size();
@@ -103,7 +153,7 @@ public class KinematicsStreamingToolboxMessageReplay
       for (int i = 0; i < size; i++)
       {
          JsonNode childNode = jsonNode.get(i);
-         KinematicsStreamingToolboxMessageSet messageSet = new KinematicsStreamingToolboxMessageSet(jsonNode.get(timestampName).asLong());
+         KinematicsStreamingToolboxMessageSet messageSet = new KinematicsStreamingToolboxMessageSet(childNode.get(timestampName).asLong());
 
          if (childNode.has(robotConfigurationDataName))
          {
@@ -167,7 +217,9 @@ public class KinematicsStreamingToolboxMessageReplay
 
       if (chooserState == JFileChooser.APPROVE_OPTION)
       {
-         new KinematicsStreamingToolboxMessageReplay(robotName, fileChooser.getSelectedFile(), PubSubImplementation.FAST_RTPS);
+
+         InputStream inputStream = new FileInputStream(fileChooser.getSelectedFile());
+         new KinematicsStreamingToolboxMessageReplay(robotName, inputStream, PubSubImplementation.FAST_RTPS).replayAllMessages();
       }
    }
 }
