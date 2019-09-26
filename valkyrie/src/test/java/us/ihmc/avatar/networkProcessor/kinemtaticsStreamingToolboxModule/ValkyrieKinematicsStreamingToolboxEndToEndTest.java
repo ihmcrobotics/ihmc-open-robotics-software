@@ -7,11 +7,13 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsStreamingToolboxEndToEndTest
 {
+   private static final String RESOURCE_DIRECTORY = "us/ihmc/kinematicsStreamingToolboxLogs";
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -19,8 +21,32 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
    }
 
    @Test
-   public void testMessageReplay() throws IOException, SimulationExceededMaximumTimeException
+   public void testSimpleArmMotions() throws IOException, SimulationExceededMaximumTimeException
    {
-      runTest(new File("20190925_144316_ValkyrieKinematicsStreamingToolbox.json"));
+      String fileName = "20190926_102802_ValkyrieKinematicsStreamingToolbox_SimpleArmMotions.json";
+      InputStream inputStream = loadInputStream(fileName);
+      runTest(inputStream);
+   }
+
+   @Test
+   public void testArmCollisions() throws IOException, SimulationExceededMaximumTimeException
+   {
+      String fileName = "20190926_101146_ValkyrieKinematicsStreamingToolbox_ArmCollisions.json";
+      InputStream inputStream = loadInputStream(fileName);
+      runTest(inputStream);
+   }
+
+   @Test
+   public void testCrazyInputsLog() throws IOException, SimulationExceededMaximumTimeException
+   {
+      String fileName = "20190926_103042_ValkyrieKinematicsStreamingToolbox_CrazyInputs.json";
+      InputStream inputStream = loadInputStream(fileName);
+      runTest(inputStream);
+   }
+
+   private InputStream loadInputStream(String fileName)
+   {
+      String resourcePath = RESOURCE_DIRECTORY + "/" + fileName;
+      return ValkyrieKinematicsStreamingToolboxEndToEndTest.class.getClassLoader().getResourceAsStream(resourcePath);
    }
 }
