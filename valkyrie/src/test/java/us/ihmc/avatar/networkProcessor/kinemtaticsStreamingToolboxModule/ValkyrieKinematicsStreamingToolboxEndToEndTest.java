@@ -15,7 +15,7 @@ public class ValkyrieKinematicsStreamingToolboxEndToEndTest extends KinematicsSt
    private static final String RESOURCE_DIRECTORY = "us/ihmc/kinematicsStreamingToolboxLogs";
 
    @Override
-   public DRCRobotModel getRobotModel()
+   public DRCRobotModel newRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
