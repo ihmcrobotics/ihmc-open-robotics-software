@@ -121,8 +121,6 @@ public class AvatarKinematicsSimulation
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
-   private final CommandInputManager kinematicsSimulationInputManager; // TODO: Unify these input managers
-
    private final CommandInputManager walkingInputManager = new CommandInputManager("walking_preview_internal",
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(
@@ -173,21 +171,8 @@ public class AvatarKinematicsSimulation
                                                         robotModel.getSimpleRobotName(),
                                                         ROS2Tools.HUMANOID_CONTROLLER);
 
-      new ROS2Callback<>(ros2Node,
-                         FootstepDataListMessage.class,
-                         robotModel.getSimpleRobotName(),
-                         ROS2Tools.HUMANOID_CONTROLLER,
-                         this::acceptFootstepDataListMessage);
-
-      new ROS2Callback<>(ros2Node,
-                         NeckTrajectoryMessage.class,
-                         robotModel.getSimpleRobotName(),
-                         ROS2Tools.HUMANOID_CONTROLLER,
-                         this::acceptNeckTrajectoryMessage);
-
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-      kinematicsSimulationInputManager = new CommandInputManager("ik_simulation", ControllerAPIDefinition.getControllerSupportedCommands());
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -411,9 +396,9 @@ public class AvatarKinematicsSimulation
 
    public void doControl()
    {
-      if (kinematicsSimulationInputManager.isNewCommandAvailable(FootstepDataListCommand.class)) // TODO: listen to general commands
+      if (walkingInputManager.isNewCommandAvailable(FootstepDataListCommand.class)) // TODO: listen to general commands
       {
-         FootstepDataListCommand foostepCommand = kinematicsSimulationInputManager.pollNewestCommand(FootstepDataListCommand.class);
+         FootstepDataListCommand foostepCommand = walkingInputManager.pollNewestCommand(FootstepDataListCommand.class);
          taskExecutor.submit(new KinematicsWalkingFootstepSequenceTask(fullRobotModel.getRootJoint(),
                                                                        foostepCommand,
                                                                        walkingInputManager,
@@ -506,16 +491,6 @@ public class AvatarKinematicsSimulation
       robotConfigurationDataPublisher.publish(extractRobotConfigurationData(fullRobotModel));
 
       capturabilityBasedStatusPublisher.publish(capturabilityBasedStatus);
-   }
-
-   private void acceptFootstepDataListMessage(FootstepDataListMessage message)
-   {
-      kinematicsSimulationInputManager.submitMessage(message);
-   }
-
-   private void acceptNeckTrajectoryMessage(NeckTrajectoryMessage message)
-   {
-      kinematicsSimulationInputManager.submitMessage(message);
    }
 
    private void createYoVariableServer()
