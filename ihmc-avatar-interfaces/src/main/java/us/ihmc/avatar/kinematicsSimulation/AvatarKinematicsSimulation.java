@@ -97,6 +97,12 @@ public class AvatarKinematicsSimulation
                          ROS2Tools.HUMANOID_CONTROLLER,
                          this::acceptFootstepDataListMessage);
 
+      new ROS2Callback<>(ros2Node,
+                         NeckTrajectoryMessage.class,
+                         robotModel.getSimpleRobotName(),
+                         ROS2Tools.HUMANOID_CONTROLLER,
+                         this::acceptNeckTrajectoryMessage);
+
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
       avatarKinematicsSimulationController = new AvatarKinematicsSimulationController(robotModel,
@@ -124,9 +130,14 @@ public class AvatarKinematicsSimulation
       capturabilityBasedStatusPublisher.publish(avatarKinematicsSimulationController.getCapturabilityBasedStatus());
    }
 
-   private void acceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
+   private void acceptFootstepDataListMessage(FootstepDataListMessage message)
    {
-      avatarKinematicsSimulationController.getInputManager().submitMessage(footstepDataListMessage);
+      avatarKinematicsSimulationController.getInputManager().submitMessage(message);
+   }
+
+   private void acceptNeckTrajectoryMessage(NeckTrajectoryMessage message)
+   {
+      avatarKinematicsSimulationController.getInputManager().submitMessage(message);
    }
 
    private void createYoVariableServer()
