@@ -6,9 +6,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -24,8 +22,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -38,7 +34,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -90,15 +85,14 @@ import java.util.stream.Collectors;
 public class AvatarKinematicsSimulation
 {
    private static final double DT = UnitConversions.hertzToSeconds(70);
-   public static final double PLAYBACK_SPEED = 10.0;
-   public static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double PLAYBACK_SPEED = 10.0;
+   private static final double GRAVITY_Z = 9.81;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DRCRobotModel robotModel;
-   private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
-                                                                                                   DefaultExceptionHandler.PRINT_MESSAGE,
-                                                                                                   5);
-   private final ExceptionHandlingThreadScheduler yoVariableScheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
-                                                                                                             DefaultExceptionHandler.PRINT_MESSAGE,
-                                                                                                             5);
+   private final ExceptionHandlingThreadScheduler scheduler
+                                               = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
+   private final ExceptionHandlingThreadScheduler yoVariableScheduler
+                                               = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final IHMCROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
@@ -110,10 +104,8 @@ public class AvatarKinematicsSimulation
    private YoVariableServer yoVariableServer;
    private ScheduledFuture<?> yoVariableServerScheduled;
 
-   private final double gravityZ = 9.81;
    private final YoDouble yoTime;
 
-   private final FloatingJointBasics rootJoint;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
@@ -198,12 +190,23 @@ public class AvatarKinematicsSimulation
 
       controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
-      setupWalkingMessageHandler(walkingControllerParameters, capturePointPlannerParameters, yoGraphicsListRegistry);
-      rootJoint = fullRobotModel.getRootJoint();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
+                                                                              walkingControllerParameters.getDefaultSwingTime(),
+                                                                              walkingControllerParameters.getDefaultInitialTransferTime(),
+                                                                              walkingControllerParameters.getDefaultFinalTransferTime(),
+                                                                              capturePointPlannerParameters.getSwingDurationShiftFraction(),
+                                                                              capturePointPlannerParameters.getSwingSplitFraction(),
+                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
+                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
+                                                                              controllerToolbox.getContactableFeet(),
+                                                                              walkingOutputManager,
+                                                                              yoTime, yoGraphicsListRegistry,
+                                                                              controllerToolbox.getYoVariableRegistry());
+      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
-                                                       rootJoint,
+                                                       fullRobotModel.getRootJoint(),
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
@@ -234,7 +237,17 @@ public class AvatarKinematicsSimulation
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       realtimeRos2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
+      WholeBodyControlCoreToolbox controlCoreToolbox1 = new WholeBodyControlCoreToolbox(DT, GRAVITY_Z,
+                                                                                        fullRobotModel.getRootJoint(),
+                                                                                        controllerToolbox.getControlledJoints(),
+                                                                                        controllerToolbox.getCenterOfMassFrame(),
+                                                                                        walkingControllerParameters.getMomentumOptimizationSettings(),
+                                                                                        yoGraphicsListRegistry,
+                                                                                        registry);
+      controlCoreToolbox1.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
+      controlCoreToolbox1.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+      controlCoreToolbox1.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
+      WholeBodyControlCoreToolbox controlCoreToolbox = controlCoreToolbox1;
 
       FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
@@ -250,8 +263,7 @@ public class AvatarKinematicsSimulation
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
-                                                                            yoTime,
-                                                                            gravityZ,
+                                                                            yoTime, GRAVITY_Z,
                                                                             controlDT,
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
@@ -276,21 +288,34 @@ public class AvatarKinematicsSimulation
 
    private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      double omega0 = robotModel.getWalkingControllerParameters().getOmega0();
 
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = createContactableBodiesFactory(robotModel);
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory1 = new ContactableBodiesFactory<>();
+
+      contactableBodiesFactory1.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory1.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                        contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory1.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
+                                                             contactPointParameters.getAdditionalContactNames().get(i),
+                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
+
+      contactableBodiesFactory1.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory1.setReferenceFrames(referenceFrames);
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactableBodiesFactory1;
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
-      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
       contactableBodiesFactory.disposeFactory();
 
-      List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(additionalContacts);
+      List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(contactableBodiesFactory.createAdditionalContactPoints());
       allContactableBodies.addAll(feet.values());
-
-      double robotMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide), robotMass, 2, registry);
+         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide),
+                                                                TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()),
+                                                                2,
+                                                                registry);
          footSwitch.setFootContactState(true);
          footSwitches.put(robotSide, footSwitch);
       }
@@ -301,87 +326,14 @@ public class AvatarKinematicsSimulation
                                                     referenceFrames,
                                                     footSwitches,
                                                     null,
-                                                    yoTime,
-                                                    gravityZ,
-                                                    omega0,
+                                                    yoTime, GRAVITY_Z,
+                                                    robotModel.getWalkingControllerParameters().getOmega0(),
                                                     feet,
                                                     DT,
                                                     Collections.emptyList(),
                                                     allContactableBodies,
                                                     yoGraphicsListRegistry,
                                                     jointsToIgnore);
-   }
-
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, ICPPlannerParameters icpPlannerParameters,
-                                           YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
-      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
-      double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
-                                                                              defaultSwingTime,
-                                                                              defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime,
-                                                                              defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction,
-                                                                              defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction,
-                                                                              controllerToolbox.getContactableFeet(),
-                                                                              walkingOutputManager,
-                                                                              yoTime,
-                                                                              yoGraphicsListRegistry,
-                                                                              controllerToolbox.getYoVariableRegistry());
-      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
-   }
-
-   private WholeBodyControlCoreToolbox createControllerCoretoolbox(WalkingControllerParameters walkingControllerParameters,
-                                                                   YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      JointBasics[] controlledJoints = controllerToolbox.getControlledJoints();
-      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
-      FeedbackControllerSettings feedbackControllerSettings = walkingControllerParameters.getFeedbackControllerSettings();
-
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT,
-                                                                                       gravityZ,
-                                                                                       fullRobotModel.getRootJoint(),
-                                                                                       controlledJoints,
-                                                                                       controllerToolbox.getCenterOfMassFrame(),
-                                                                                       momentumOptimizationSettings,
-                                                                                       yoGraphicsListRegistry,
-                                                                                       registry);
-
-      controlCoreToolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
-      controlCoreToolbox.setFeedbackControllerSettings(feedbackControllerSettings);
-      controlCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-
-      return controlCoreToolbox;
-   }
-
-   private ContactableBodiesFactory<RobotSide> createContactableBodiesFactory(DRCRobotModel robotModel)
-   {
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
-      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
-      ArrayList<String> additionaContactNames = contactPointParameters.getAdditionalContactNames();
-      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
-
-      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
-                                                       contactPointParameters.getControllerToeContactLines());
-      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
-                                                            additionaContactNames.get(i),
-                                                            additionalContactTransforms.get(i));
-
-      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory.setReferenceFrames(referenceFrames);
-
-      return contactableBodiesFactory;
    }
 
    public void initialize()
@@ -447,7 +399,7 @@ public class AvatarKinematicsSimulation
          linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
          linearMomentumRateControlModule.computeAchievedCMP();
 
-         rootJoint.setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
+         fullRobotModel.getRootJoint().setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
          JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
 
          for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
