@@ -36,10 +36,13 @@ import static us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisu
 
 public class PlanarRegionSLAMUITabController extends Group
 {
+   boolean showConcaveHullMergerListener = false;
+
    private PlanarRegionSLAMParameters planarRegionSLAMParameters;
 
    private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-   private static final String DATASET_2 = "IntentionallyDrifted";
+   private static final String DATASET_2 = "20190710_174208_PlanarRegion";
+//   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
@@ -158,7 +161,7 @@ public class PlanarRegionSLAMUITabController extends Group
    private void slam()
    {
       PlanarRegionsList newData = livePlanarRegionsGraphic.getLatestPlanarRegionsList();
-      ConcaveHullMergerListener listener = new ConcaveHullGraphicalMergerListener();
+      ConcaveHullMergerListener listener = showConcaveHullMergerListener ? new ConcaveHullGraphicalMergerListener() : null;
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters, listener);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
 
