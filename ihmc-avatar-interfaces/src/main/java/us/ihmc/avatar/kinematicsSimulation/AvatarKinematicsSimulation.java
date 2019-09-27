@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
+import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingPreviewContactStateHolder;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
@@ -16,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -29,22 +32,21 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -83,12 +85,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class AvatarKinematicsSimulation
 {
    private static final double DT = UnitConversions.hertzToSeconds(70);
    public static final double PLAYBACK_SPEED = 10.0;
+   public static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DRCRobotModel robotModel;
    private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
                                                                                                    DefaultExceptionHandler.PRINT_MESSAGE,
@@ -126,7 +130,7 @@ public class AvatarKinematicsSimulation
    private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(
          ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-   private final StateExecutor taskExecutor = new StateExecutor(StateMachineClock.dummyClock()); // should be dummy?
+   private final StateExecutor taskExecutor = new StateExecutor(StateMachineClock.dummyClock()); // should be dummy? // TODO: Do we really need?
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
    private CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
@@ -391,22 +395,15 @@ public class AvatarKinematicsSimulation
       walkingController.initialize();
 
       taskExecutor.clear();
-      taskExecutor.submit(new KinematicsWalkingInitializeTask(walkingController, controllerToolbox.getFootContactStates())); // few ticks to get it going
+      // few ticks to get it going
+      taskExecutor.submit(new InitializeTask());
    }
 
    public void doControl()
    {
       if (walkingInputManager.isNewCommandAvailable(FootstepDataListCommand.class)) // TODO: listen to general commands
       {
-         FootstepDataListCommand foostepCommand = walkingInputManager.pollNewestCommand(FootstepDataListCommand.class);
-         taskExecutor.submit(new KinematicsWalkingFootstepSequenceTask(fullRobotModel.getRootJoint(),
-                                                                       foostepCommand,
-                                                                       walkingInputManager,
-                                                                       walkingOutputManager,
-                                                                       controllerToolbox.getFootContactStates(), balanceManager,
-                                                                       footSwitches,
-                                                                       walkingStatusPublisher,
-                                                                       footstepStatusPublisher));
+         taskExecutor.submit(new FootstepSequenceTask());
       }
       else
       {
@@ -427,16 +424,6 @@ public class AvatarKinematicsSimulation
       }
       else
       {
-         State currentTask = taskExecutor.getCurrentTask();
-         if (currentTask instanceof KinematicsWalkingInitializeTask)
-         {
-
-         }
-         else if (currentTask instanceof KinematicsWalkingFootstepSequenceTask)
-         {
-            KinematicsWalkingFootstepSequenceTask footstepSequenceTask = (KinematicsWalkingFootstepSequenceTask) currentTask;
-         }
-
          taskExecutor.doControl();
 
          walkingController.doAction();
@@ -452,7 +439,7 @@ public class AvatarKinematicsSimulation
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
          if (!taskExecutor.isDone())
          {
-            controllerCoreCommand.addInverseDynamicsCommand(((KinematicsWalkingTask) taskExecutor.getCurrentTask()).getOutput());
+            controllerCoreCommand.addInverseDynamicsCommand(((StateWithOutput) taskExecutor.getCurrentTask()).getOutput());
          }
 
          controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -522,5 +509,157 @@ public class AvatarKinematicsSimulation
       robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
       robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getJointPose().getOrientation());
       return robotConfigurationData;
+   }
+
+   public interface StateWithOutput extends State
+   {
+      InverseDynamicsCommand<?> getOutput();
+   }
+
+   private class InitializeTask implements StateWithOutput
+   {
+      SideDependentList<WalkingPreviewContactStateHolder> contactStateHolders = new SideDependentList<>();
+      InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
+      private int count = 0;
+      private final int numberOfTicksBeforeDone = 2; // 2 ticks seem necessary when reinitializing the controller.
+
+      @Override
+      public void onEntry()
+      {
+         walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
+
+         for (RobotSide robotSide : RobotSide.values)
+            contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+         commandList.clear();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            contactStateHolders.get(robotSide).doControl();
+            commandList.addCommand(contactStateHolders.get(robotSide).getOutput());
+         }
+
+         count++;
+      }
+
+      @Override
+      public void onExit()
+      {
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return count >= numberOfTicksBeforeDone;
+      }
+
+      @Override
+      public InverseDynamicsCommand<?> getOutput()
+      {
+         return commandList;
+      }
+   }
+
+   private class FootstepSequenceTask implements StateWithOutput
+   {
+      FootstepDataListCommand footstepCommand = walkingInputManager.pollNewestCommand(FootstepDataListCommand.class);
+
+      int numberOfFootstepsRemaining;
+      AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
+      SideDependentList<KinematicsWalkingContactStateHolder> contactStateHolders = new SideDependentList<>();
+      InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
+      RobotSide currentSwingSide = null;
+
+      @Override
+      public void onEntry()
+      {
+         for (RobotSide robotSide : RobotSide.values)
+            contactStateHolders.put(robotSide, KinematicsWalkingContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+
+         walkingInputManager.submitCommand(footstepCommand);
+         numberOfFootstepsRemaining = footstepCommand.getNumberOfFootsteps();
+         walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
+         walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
+      }
+
+      private void processFootstepStatus(FootstepStatusMessage statusMessage)
+      {
+         RobotSide side = RobotSide.fromByte(statusMessage.getRobotSide());
+         FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
+         FramePose3D desiredFootstep = new FramePose3D(worldFrame,
+                                                       statusMessage.getDesiredFootPositionInWorld(),
+                                                       statusMessage.getDesiredFootOrientationInWorld());
+
+         switch (status)
+         {
+            case STARTED:
+               contactStateHolders.put(side, null);
+               footSwitches.get(side).setFootContactState(false);
+               currentSwingSide = side;
+               break;
+            case COMPLETED:
+               numberOfFootstepsRemaining--;
+               contactStateHolders.put(side, new KinematicsWalkingContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
+               currentSwingSide = null;
+               break;
+            default:
+               throw new RuntimeException("Unexpected status: " + status);
+         }
+
+         footstepStatusPublisher.publish(statusMessage);
+      }
+
+      private void processWalkingStatus(WalkingStatusMessage status)
+      {
+         latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
+         walkingStatusPublisher.publish(status);
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+         commandList.clear();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            KinematicsWalkingContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
+            if (contactStateHolder == null)
+               continue;
+            contactStateHolder.doControl();
+            commandList.addCommand(contactStateHolder.getOutput());
+         }
+
+         if (currentSwingSide != null)
+         { // Testing for the end of swing purely relying on the swing time:
+            if (balanceManager.isICPPlanDone())
+               footSwitches.get(currentSwingSide).setFootContactState(true);
+         }
+      }
+
+      @Override
+      public void onExit()
+      {
+
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         if (numberOfFootstepsRemaining > 0)
+            return false;
+         if (latestWalkingStatus.get() == null)
+            return false;
+         return latestWalkingStatus.get() == WalkingStatus.COMPLETED && ((FloatingJointReadOnly) fullRobotModel.getRootJoint()).getJointTwist().getLinearPart().length() < 0.005;
+      }
+
+      @Override
+      public InverseDynamicsCommand<?> getOutput()
+      {
+         return commandList;
+      }
    }
 }
