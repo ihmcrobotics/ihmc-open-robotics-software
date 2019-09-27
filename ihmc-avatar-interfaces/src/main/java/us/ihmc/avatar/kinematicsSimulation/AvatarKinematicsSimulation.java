@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
-import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingPreviewContactStateHolder;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
@@ -518,7 +517,7 @@ public class AvatarKinematicsSimulation
 
    private class InitializeTask implements StateWithOutput
    {
-      SideDependentList<WalkingPreviewContactStateHolder> contactStateHolders = new SideDependentList<>();
+      SideDependentList<KinematicsWalkingContactStateHolder> contactStateHolders = new SideDependentList<>();
       InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
       private int count = 0;
       private final int numberOfTicksBeforeDone = 2; // 2 ticks seem necessary when reinitializing the controller.
@@ -529,7 +528,9 @@ public class AvatarKinematicsSimulation
          walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
          for (RobotSide robotSide : RobotSide.values)
-            contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+         {
+            contactStateHolders.put(robotSide, KinematicsWalkingContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+         }
       }
 
       @Override
@@ -578,7 +579,9 @@ public class AvatarKinematicsSimulation
       public void onEntry()
       {
          for (RobotSide robotSide : RobotSide.values)
+         {
             contactStateHolders.put(robotSide, KinematicsWalkingContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+         }
 
          walkingInputManager.submitCommand(footstepCommand);
          numberOfFootstepsRemaining = footstepCommand.getNumberOfFootsteps();
