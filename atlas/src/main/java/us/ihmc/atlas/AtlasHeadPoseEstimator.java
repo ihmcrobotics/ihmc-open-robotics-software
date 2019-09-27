@@ -40,7 +40,7 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
    public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, boolean getRobotConfigurationDataFromNetwork)
          throws IOException
    {
-      super(dt, MultisenseSLWithMicroStrainHeadPoseEstimator.DEFAULT_IMU_TO_MULTISENSE_TRANSFORM, imuListenerPriority, microStrainSerialNumber,
+      super(dt, MultisenseSLWithMicroStrainHeadPoseEstimator.DEFAULT_MULTISENSE_TO_IMU_TRANSFORM, imuListenerPriority, microStrainSerialNumber,
             getRobotConfigurationDataFromNetwork);
 
    }
