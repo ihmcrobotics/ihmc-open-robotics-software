@@ -175,7 +175,14 @@ public class AvatarSimulationFactory
       }
 
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
-      simulationConstructionSet.getGUI().getFrame().setSize(getDimensionForSmallestScreen());
+      try
+      {
+         simulationConstructionSet.getGUI().getFrame().setSize(getDimensionForSmallestScreen());
+      }
+      catch (NullPointerException npe)
+      {
+         // do nothing
+      }
    }
 
    private Dimension getDimensionForSmallestScreen()
