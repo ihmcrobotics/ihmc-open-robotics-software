@@ -237,17 +237,16 @@ public class AvatarKinematicsSimulation
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       realtimeRos2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox1 = new WholeBodyControlCoreToolbox(DT, GRAVITY_Z,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT, GRAVITY_Z,
                                                                                         fullRobotModel.getRootJoint(),
                                                                                         controllerToolbox.getControlledJoints(),
                                                                                         controllerToolbox.getCenterOfMassFrame(),
                                                                                         walkingControllerParameters.getMomentumOptimizationSettings(),
                                                                                         yoGraphicsListRegistry,
                                                                                         registry);
-      controlCoreToolbox1.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
-      controlCoreToolbox1.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-      controlCoreToolbox1.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      WholeBodyControlCoreToolbox controlCoreToolbox = controlCoreToolbox1;
+      controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
+      controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+      controlCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
 
       FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
@@ -288,34 +287,28 @@ public class AvatarKinematicsSimulation
 
    private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory1 = new ContactableBodiesFactory<>();
-
-      contactableBodiesFactory1.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory1.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
-                                                        contactPointParameters.getControllerToeContactLines());
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory1.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
-                                                             contactPointParameters.getAdditionalContactNames().get(i),
-                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
-
-      contactableBodiesFactory1.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory1.setReferenceFrames(referenceFrames);
-
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactableBodiesFactory1;
+      {
+         contactableBodiesFactory.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
+                                                            contactPointParameters.getAdditionalContactNames().get(i),
+                                                            contactPointParameters.getAdditionalContactTransforms().get(i));
+      }
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
-      contactableBodiesFactory.disposeFactory();
-
       List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(contactableBodiesFactory.createAdditionalContactPoints());
       allContactableBodies.addAll(feet.values());
+      contactableBodiesFactory.disposeFactory();
 
+      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       for (RobotSide robotSide : RobotSide.values)
       {
-         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide),
-                                                                TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()),
-                                                                2,
-                                                                registry);
+         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide), totalRobotWeight, 2, registry);
          footSwitch.setFootContactState(true);
          footSwitches.put(robotSide, footSwitch);
       }
