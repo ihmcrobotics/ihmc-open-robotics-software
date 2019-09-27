@@ -219,6 +219,7 @@
             <parameter name="PositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
             <parameter name="HeadAngularAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
             <parameter name="HeadLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="LinearAccelerationBiasVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
         </registry>
     </registry>
 </parameters>
