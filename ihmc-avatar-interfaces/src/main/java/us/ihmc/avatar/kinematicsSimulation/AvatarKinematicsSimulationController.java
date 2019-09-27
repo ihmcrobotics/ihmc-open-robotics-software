@@ -3,6 +3,7 @@ package us.ihmc.avatar.kinematicsSimulation;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
@@ -12,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -27,7 +29,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -44,6 +48,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -53,6 +58,8 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -89,7 +96,7 @@ public class AvatarKinematicsSimulationController
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
-   private final CommandInputManager kinematicsSimulationInputManager;
+   private final CommandInputManager kinematicsSimulationInputManager; // TODO: Unify these input managers
 
    private final CommandInputManager walkingInputManager = new CommandInputManager("walking_preview_internal",
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
@@ -117,6 +124,7 @@ public class AvatarKinematicsSimulationController
       this.footstepStatusPublisher = footstepStatusPublisher;
 
       kinematicsSimulationInputManager = new CommandInputManager("ik_simulation", ControllerAPIDefinition.getControllerSupportedCommands());
+      String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       yoTime = new YoDouble("timeInPreview", registry);
@@ -158,6 +166,22 @@ public class AvatarKinematicsSimulationController
                                                                  walkingControllerParameters,
                                                                  controllerToolbox);
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
+
+      // create controller network subscriber here!!
+      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                           ROS2Tools.HUMANOID_CONTROLLER.getNodeName("atlas"));
+      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator,
+                                                                                                walkingInputManager,
+                                                                                                publisherTopicNameGenerator,
+                                                                                                walkingOutputManager,
+                                                                                                realtimeRos2Node);
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9,
+                                                                       MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
+      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+      realtimeRos2Node.spin();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
 
@@ -318,7 +342,7 @@ public class AvatarKinematicsSimulationController
 
    public void doControl()
    {
-      if (kinematicsSimulationInputManager.isNewCommandAvailable(FootstepDataListCommand.class))
+      if (kinematicsSimulationInputManager.isNewCommandAvailable(FootstepDataListCommand.class)) // TODO: listen to general commands
       {
          FootstepDataListCommand foostepCommand = kinematicsSimulationInputManager.pollNewestCommand(FootstepDataListCommand.class);
          taskExecutor.submit(new KinematicsWalkingFootstepSequenceTask(fullRobotModel.getRootJoint(),
