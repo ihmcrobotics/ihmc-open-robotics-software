@@ -37,8 +37,13 @@ import java.util.Set;
  */
 public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEstimator
 {
-   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform(new YawPitchRoll(0.0, Math.PI / 2.0, 0.0),
-                                                                                                       new Vector3D(-0.825, 0.0, 0.0787));
+   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform();
+
+   static
+   {
+      DEFAULT_MULTISENSE_TO_IMU_TRANSFORM.appendTranslation(-0.0825, 0.0, 0.0787);
+      DEFAULT_MULTISENSE_TO_IMU_TRANSFORM.appendPitchRotation(Math.PI);
+   }
 //   public static final RigidBodyTransform DEFAULT_IMU_TO_MULTISENSE_TRANSFORM = new RigidBodyTransform();
 //
 //   static
@@ -157,14 +162,14 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
          imuAngularVelocity.set(angularRate);
          imuLinearAcceleration.set(linearAcceleration);
-         imuMagneticNorthVector.set(geomagneticNorthVector);
+         imuMagneticNorthVector.set(0.0, 0.0, -(getFullRobotModel().getHeadBaseFrame().getTransformToWorldFrame().getRotation().getYaw()));
 
          imuAngularVelocity.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
          imuLinearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 
          super.setImuAngularVelocity(imuAngularVelocity);
          super.setImuLinearAcceleration(imuLinearAcceleration);
-//         super.setImuMagneticFieldVector(geomagneticNorthVector);
+         super.setImuMagneticFieldVector(imuMagneticNorthVector);
       }
 
       super.compute();
