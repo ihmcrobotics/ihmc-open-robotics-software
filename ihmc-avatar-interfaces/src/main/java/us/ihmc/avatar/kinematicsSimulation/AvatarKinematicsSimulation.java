@@ -517,7 +517,7 @@ public class AvatarKinematicsSimulation
 
    private class InitializeTask implements StateWithOutput
    {
-      SideDependentList<KinematicsWalkingContactStateHolder> contactStateHolders = new SideDependentList<>();
+      SideDependentList<AvatarKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
       InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
       private int count = 0;
       private final int numberOfTicksBeforeDone = 2; // 2 ticks seem necessary when reinitializing the controller.
@@ -529,7 +529,7 @@ public class AvatarKinematicsSimulation
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            contactStateHolders.put(robotSide, KinematicsWalkingContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+            contactStateHolders.put(robotSide, AvatarKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
          }
       }
 
@@ -571,7 +571,7 @@ public class AvatarKinematicsSimulation
 
       int numberOfFootstepsRemaining;
       AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
-      SideDependentList<KinematicsWalkingContactStateHolder> contactStateHolders = new SideDependentList<>();
+      SideDependentList<AvatarKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
       InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
       RobotSide currentSwingSide = null;
 
@@ -580,7 +580,7 @@ public class AvatarKinematicsSimulation
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            contactStateHolders.put(robotSide, KinematicsWalkingContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+            contactStateHolders.put(robotSide, AvatarKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
          }
 
          walkingInputManager.submitCommand(footstepCommand);
@@ -606,7 +606,7 @@ public class AvatarKinematicsSimulation
                break;
             case COMPLETED:
                numberOfFootstepsRemaining--;
-               contactStateHolders.put(side, new KinematicsWalkingContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
+               contactStateHolders.put(side, new AvatarKinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
                currentSwingSide = null;
                break;
             default:
@@ -629,7 +629,7 @@ public class AvatarKinematicsSimulation
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            KinematicsWalkingContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
+            AvatarKinematicsSimulationContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
             if (contactStateHolder == null)
                continue;
             contactStateHolder.doControl();
