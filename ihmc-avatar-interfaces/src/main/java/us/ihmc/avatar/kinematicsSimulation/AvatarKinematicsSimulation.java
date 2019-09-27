@@ -187,9 +187,6 @@ public class AvatarKinematicsSimulation
 
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-      Pose3DReadOnly initialPelvisPose = robotInitialSetup.getInitialPelvisPose(); // TODO: inline these
-      List<Double> initialJointAngles = robotInitialSetup.getInitialJointAngles();
-
       kinematicsSimulationInputManager = new CommandInputManager("ik_simulation", ControllerAPIDefinition.getControllerSupportedCommands());
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -217,8 +214,7 @@ public class AvatarKinematicsSimulation
       rootJoint = fullRobotModel.getRootJoint();
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      KinematicsToolboxHelper.setRobotStateFromRawData(initialPelvisPose,
-                                                       initialJointAngles,
+      KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
                                                        rootJoint,
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
