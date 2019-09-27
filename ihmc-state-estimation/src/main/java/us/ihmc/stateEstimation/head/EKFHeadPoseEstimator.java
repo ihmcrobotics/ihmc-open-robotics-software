@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -21,7 +22,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,6 +50,9 @@ import java.util.List;
 public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoDouble confirmedDt = new YoDouble("confirmedDt", registry);
+   private final YoLong previousCallNanos = new YoLong("previousCallNanos", registry);
 
    private final PoseState poseState;
    private final LinearAccelerationSensor linearAccelerationSensor;
@@ -74,6 +80,9 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
     */
    public EKFHeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias)
    {
+      LogTools.info("EKFHeadPoseEstimator dt = " + dt);
+      previousCallNanos.set(System.nanoTime());
+
       // Creates a simple joint structure representing the head attached to world with a floating joint:
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       headJoint = new SixDoFJoint("head_joint", elevator);
@@ -186,6 +195,11 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
    @Override
    public void compute()
    {
+      long nanoTime = System.nanoTime();
+
+      confirmedDt.set((nanoTime - previousCallNanos.getLongValue()) * 1.0e-9);
+      previousCallNanos.set(nanoTime);
+
       stateEstimator.predict();
       updateRobot();
       stateEstimator.correct();
