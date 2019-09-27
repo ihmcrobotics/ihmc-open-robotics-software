@@ -90,9 +90,9 @@ public class AvatarKinematicsSimulation
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DRCRobotModel robotModel;
    private final ExceptionHandlingThreadScheduler scheduler
-                                               = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
+           = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
    private final ExceptionHandlingThreadScheduler yoVariableScheduler
-                                               = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
+           = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final IHMCROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
@@ -118,8 +118,8 @@ public class AvatarKinematicsSimulation
 
    private final CommandInputManager walkingInputManager = new CommandInputManager("walking_preview_internal",
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
-   private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(
-         ControllerAPIDefinition.getControllerSupportedStatusMessages());
+   private final StatusMessageOutputManager walkingOutputManager
+           = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
    private final StateExecutor taskExecutor = new StateExecutor(StateMachineClock.dummyClock()); // should be dummy? // TODO: Do we really need?
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
@@ -200,7 +200,8 @@ public class AvatarKinematicsSimulation
                                                                               capturePointPlannerParameters.getTransferSplitFraction(),
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
-                                                                              yoTime, yoGraphicsListRegistry,
+                                                                              yoTime,
+                                                                              yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
@@ -231,39 +232,38 @@ public class AvatarKinematicsSimulation
                                                                                                 publisherTopicNameGenerator,
                                                                                                 walkingOutputManager,
                                                                                                 realtimeRos2Node);
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9,
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
+                                                                       9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       realtimeRos2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT, GRAVITY_Z,
-                                                                                        fullRobotModel.getRootJoint(),
-                                                                                        controllerToolbox.getControlledJoints(),
-                                                                                        controllerToolbox.getCenterOfMassFrame(),
-                                                                                        walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                                        yoGraphicsListRegistry,
-                                                                                        registry);
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT,
+                                                                                       GRAVITY_Z,
+                                                                                       fullRobotModel.getRootJoint(),
+                                                                                       controllerToolbox.getControlledJoints(),
+                                                                                       controllerToolbox.getCenterOfMassFrame(),
+                                                                                       walkingControllerParameters.getMomentumOptimizationSettings(),
+                                                                                       yoGraphicsListRegistry,
+                                                                                       registry);
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       controlCoreToolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
 
-      FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
-      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
-
-      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox,
+                                                   managerFactory.createFeedbackControlTemplate(),
+                                                   new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints()),
+                                                   walkingParentRegistry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
-      double controlDT = controllerToolbox.getControlDT();
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames,
-                                                                            contactableFeet,
-                                                                            elevator,
+                                                                            controllerToolbox.getContactableFeet(),
+                                                                            fullRobotModel.getElevator(),
                                                                             walkingControllerParameters,
-                                                                            yoTime, GRAVITY_Z,
-                                                                            controlDT,
+                                                                            controllerToolbox.getYoTime(),
+                                                                            GRAVITY_Z,
+                                                                            controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
 
