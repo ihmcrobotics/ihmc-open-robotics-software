@@ -15,7 +15,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class KinematicsWalkingContactStateHolder
+public class AvatarKinematicsSimulationContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -30,14 +30,14 @@ public class KinematicsWalkingContactStateHolder
 
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
 
-   public static KinematicsWalkingContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static AvatarKinematicsSimulationContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new KinematicsWalkingContactStateHolder(contactStateToHold, desiredPose);
+      return new AvatarKinematicsSimulationContactStateHolder(contactStateToHold, desiredPose);
    }
 
-   public KinematicsWalkingContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public AvatarKinematicsSimulationContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
