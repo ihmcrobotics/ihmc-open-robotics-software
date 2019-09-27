@@ -5,9 +5,11 @@ import java.util.Arrays;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -116,6 +118,30 @@ public class YoKinematicsToolboxOutputStatus
    public void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha, double alphaDot)
    {
       set(MessageTools.interpolate(start, end, alpha, alphaDot));
+   }
+
+   private final Vector4D quaternionDot = new Vector4D();
+   private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+
+   public void setDesiredVelocitiesByFiniteDifference(KinematicsToolboxOutputStatus previous, KinematicsToolboxOutputStatus current, double duration)
+   {
+      if (previous.getJointNameHash() != current.getJointNameHash())
+         throw new RuntimeException("Output status are not compatible.");
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         double qd = (current.getDesiredJointAngles().get(i) - previous.getDesiredJointAngles().get(i)) / duration;
+         desiredJointVelocities[i].set(qd);
+      }
+
+      desiredRootJointVelocity.getLinearPart().sub(current.getDesiredRootTranslation(), current.getDesiredRootTranslation());
+      desiredRootJointVelocity.getLinearPart().scale(1.0 / duration);
+      desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
+      quaternionDot.sub(current.getDesiredRootOrientation(), previous.getDesiredRootOrientation());
+      quaternionDot.scale(1.0 / duration);
+      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(desiredRootJointPose.getOrientation(),
+                                                                quaternionDot,
+                                                                desiredRootJointVelocity.getAngularPart());
    }
 
    public KinematicsToolboxOutputStatus getStatus()
