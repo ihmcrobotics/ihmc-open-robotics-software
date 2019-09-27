@@ -597,7 +597,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return commands;
    }
 
-   public DoubleProvider getCenterOfMassSafeMargin()
+   public YoDouble getMomentumWeight()
+   {
+      return momentumWeight;
+   }
+
+   public YoDouble getCenterOfMassSafeMargin()
    {
       return centerOfMassSafeMargin;
    }

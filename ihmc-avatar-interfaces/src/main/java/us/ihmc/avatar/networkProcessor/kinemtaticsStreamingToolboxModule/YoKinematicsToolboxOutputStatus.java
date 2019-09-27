@@ -120,6 +120,16 @@ public class YoKinematicsToolboxOutputStatus
       set(MessageTools.interpolate(start, end, alpha, alphaDot));
    }
 
+   public void scaleVelocities(double scaleFactor)
+   {
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         desiredJointVelocities[i].set(desiredJointVelocities[i].getValue() * scaleFactor);
+      }
+      desiredRootJointVelocity.scale(scaleFactor);
+      
+   }
+
    private final Vector4D quaternionDot = new Vector4D();
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 

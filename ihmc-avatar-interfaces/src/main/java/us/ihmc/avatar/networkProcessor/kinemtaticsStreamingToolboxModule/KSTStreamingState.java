@@ -1,7 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -60,14 +62,18 @@ public class KSTStreamingState implements State
    private final YoDouble streamingStartTime;
    private final YoDouble streamingBlendingDuration;
    private final YoDouble solutionFilterBreakFrequency;
-   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState;
+   private KinematicsToolboxOutputStatus lastPublished;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, fdRobotState;
 
    private final YoPIDSE3Gains ikSolverGains;
 
    public KSTStreamingState(KSTTools tools)
    {
       this.tools = tools;
-      ikSolverGains = tools.getIKController().getDefaultGains();
+      HumanoidKinematicsToolboxController ikController = tools.getIKController();
+      ikSolverGains = ikController.getDefaultGains();
+      ikController.getCenterOfMassSafeMargin().set(0.05);
+      ikController.getMomentumWeight().set(0.0001);
       configurationMessage.setJointVelocityWeight(10.0);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
@@ -116,6 +122,7 @@ public class KSTStreamingState implements State
       initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
+      fdRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
    }
 
    public void setOutputPublisher(OutputPublisher outputPublisher)
@@ -144,6 +151,7 @@ public class KSTStreamingState implements State
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
       resetFilter = true;
+      lastPublished = null;
    }
 
    @Override
@@ -211,18 +219,27 @@ public class KSTStreamingState implements State
 
          if (timeSinceLastMessageToController.getValue() >= publishingPeriod.getValue())
          {
+            KinematicsToolboxOutputStatus status;
+            fdRobotState.set(filteredRobotState);
+            fdRobotState.scaleVelocities(0.50);
+//            if (lastPublished != null)
+//               fdRobotState.setDesiredVelocitiesByFiniteDifference(lastPublished, filteredRobotState.getStatus(), publishingPeriod.getValue());
+
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
                double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
                double alphaDot = 1.0 / streamingBlendingDuration.getValue();
-               blendedRobotState.interpolate(initialRobotState.getStatus(), filteredRobotState.getStatus(), alpha, alphaDot);
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(blendedRobotState.getStatus()));
+               blendedRobotState.interpolate(initialRobotState.getStatus(), fdRobotState.getStatus(), alpha, alphaDot);
+               status = blendedRobotState.getStatus();
+               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(status));
             }
             else
             {
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(filteredRobotState.getStatus()));
+               status = fdRobotState.getStatus();
+               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(status));
             }
 
+            lastPublished = status;
             timeSinceLastMessageToController.set(0.0);
          }
       }
