@@ -28,11 +28,14 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
@@ -78,7 +81,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
-   //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
    public static Messager messager;
 
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
@@ -117,7 +119,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    }
 
-   //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
    public void startMessanger()
    {
       Thread kryoMessengerStarter = new Thread(new Runnable()
@@ -126,10 +127,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          @Override
          public void run()
          {
-            messager = KryoMessager.createServer(getBehaviorAPI(),
-                                                 NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(),
-                                                 BehaviorDispatcher.class.getSimpleName(),
-                                                 5);
+            messager = KryoMessager.createTCPServer(getBehaviorAPI(),NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT, new IHMCCommunicationKryoNetClassList());
             ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
          }
       });
@@ -190,7 +188,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    {
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
 
-      //TODO jcarff commented out as it blocks behaviors from being recieved for some reason
       startMessanger();
    }
 
