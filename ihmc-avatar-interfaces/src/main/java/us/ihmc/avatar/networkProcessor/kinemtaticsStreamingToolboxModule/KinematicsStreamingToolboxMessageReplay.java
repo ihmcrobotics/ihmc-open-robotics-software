@@ -28,7 +28,7 @@ import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.
 /**
  * Loads and replays messages from file. There are two ways to do replay:
  * 1. Calling {@link #replayAllMessages} will immediately stream all messages, using wall time to determine when to send
- * 2. To use as this as a callback based on an external clock, first call {@link #initialize}, then successive calls to {@link #update}, then {@link #conclude}
+ * 2. To use as this as a callback based on an external clock, first call {@link #initialize}, then successive calls to {@link #update}
  */
 public class KinematicsStreamingToolboxMessageReplay
 {
@@ -94,7 +94,6 @@ public class KinematicsStreamingToolboxMessageReplay
     */
    public void initialize(double timeSeconds)
    {
-      sendToolboxStateMessage(ToolboxState.WAKE_UP);
       counter.setValue(0);
       timeOffsetSeconds = timeSeconds - Conversions.nanosecondsToSeconds(messages.get(0).timestamp);
    }
@@ -116,11 +115,6 @@ public class KinematicsStreamingToolboxMessageReplay
       }
 
       return counter.getValue() < messages.size();
-   }
-
-   public void conclude()
-   {
-      sendToolboxStateMessage(ToolboxState.SLEEP);
    }
 
    public void close()

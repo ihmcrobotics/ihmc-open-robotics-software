@@ -140,17 +140,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       kinematicsStreamingToolboxMessageReplay.initialize(scs.getTime());
 
       AtomicBoolean doneWithReplay = new AtomicBoolean(false);
-      scs.addScript(time ->
-      {
-         boolean done = !kinematicsStreamingToolboxMessageReplay.update(time);
-
-         if (done && !doneWithReplay.get())
-         {
-            kinematicsStreamingToolboxMessageReplay.conclude();
-         }
-
-         doneWithReplay.set(done);
-      });
+      scs.addScript(time -> doneWithReplay.set(!kinematicsStreamingToolboxMessageReplay.update(time)));
       scs.setSimulateDoneCriterion(doneWithReplay::get);
       scs.simulate();
 
