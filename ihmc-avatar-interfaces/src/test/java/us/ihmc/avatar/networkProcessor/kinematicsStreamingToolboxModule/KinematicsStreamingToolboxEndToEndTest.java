@@ -1,18 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.awt.Color;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.junit.jupiter.api.AfterEach;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.junit.jupiter.api.AfterEach;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
@@ -42,6 +34,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public abstract class KinematicsStreamingToolboxEndToEndTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -69,9 +68,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    {
       DRCRobotModel robotModel = newRobotModel();
       String robotName = robotModel.getSimpleRobotName();
-      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName,
-                                                                                                                                    inputStream,
-                                                                                                                                    PubSubImplementation.INTRAPROCESS);
+      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName, inputStream, PubSubImplementation.INTRAPROCESS);
 
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          simulationTestingParameters.setKeepSCSUp(true);
@@ -83,15 +80,11 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxGhost.setGravity(0);
 
       RobotConfigurationData initialRobotConfigurationData = kinematicsStreamingToolboxMessageReplay.getInitialConfiguration();
-      OffsetAndYawRobotInitialSetup initialSimulationSetup = new OffsetAndYawRobotInitialSetup(initialRobotConfigurationData.getRootTranslation().getX(),
-                                                                                               initialRobotConfigurationData.getRootTranslation().getY(),
-                                                                                               0.0,
-                                                                                               initialRobotConfigurationData.getRootOrientation().getYaw());
 
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       environment.addEnvironmentRobot(toolboxGhost);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(initialSimulationSetup);
+      drcSimulationTestHelper.setInitialSetup(new RobotConfigurationDataInitialSetup(initialRobotConfigurationData, newRobotModel().createFullRobotModel()));
 
       toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       createToolboxController(toolboxGhostRobotModel);
