@@ -92,6 +92,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(lengthForLongInterRegionEdge, length);
    }
 
+   default void setWeightForInterRegionEdge(double weight)
+   {
+      set(weightForInterRegionEdge, weight);
+   }
+
    default void setPerformPostProcessingNodeShifting(boolean perform)
    {
       set(performPostProcessingNodeShifting, perform);
@@ -105,6 +110,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
    default void setComputeOrientationsToAvoidObstacles(boolean compute)
    {
       set(computeOrientationsToAvoidObstacles, compute);
+   }
+
+   default void setReturnBestEffortSolution(boolean returnBestEffort)
+   {
+      set(returnBestEffortSolution, returnBestEffort);
    }
 
    default void setHeuristicWeight(double weight)
@@ -161,15 +171,18 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setCanEasilyStepOverHeight(packet.getCanEasilyStepOverHeight());
       if (packet.getLengthForLongInterRegionEdge() != -1.0)
          setLengthForLongInterRegionEdge(packet.getLengthForLongInterRegionEdge());
-      if (packet.getHeuristicWeight() != 1.0)
+      if (packet.getHeuristicWeight() != -1.0)
          setHeuristicWeight(packet.getHeuristicWeight());
-      if (packet.getDistanceWeight() != 1.0)
+      if (packet.getDistanceWeight() != -1.0)
          setDistanceWeight(packet.getDistanceWeight());
-      if (packet.getElevationWeight() != 1.0)
+      if (packet.getElevationWeight() != -1.0)
          setElevationWeight(packet.getElevationWeight());
-      if (packet.getOccludedGoalEdgeWeight() != 1.0)
+      if (packet.getOccludedGoalEdgeWeight() != -1.0)
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
+      if (packet.getWeightForInterRegionEdge() != -1.0)
+         setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
 
+      setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());

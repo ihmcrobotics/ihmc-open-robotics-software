@@ -8,13 +8,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class PawNode
 {
    public static double gridSizeXY = 0.06;
-   public static double gridSizeYaw = 0.1;
+   public static double gridSizeYaw = Math.PI / 18.0;
+   public static final int maxYawIndex = Math.abs((int) Math.round(AngleTools.trimAngleMinusPiToPi(Math.PI) / gridSizeYaw));
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
@@ -219,7 +221,10 @@ public class PawNode
 
    public static int snapToYawGrid(double yaw)
    {
-      return (int) Math.round(yaw / gridSizeYaw);
+      int yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
+      if (-yawIndex == maxYawIndex)
+         yawIndex = maxYawIndex;
+      return yawIndex;
    }
 
    public static void snapPointToGrid(Point2DBasics pointToSnap)

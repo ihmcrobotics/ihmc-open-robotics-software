@@ -67,7 +67,7 @@ public class VisibilityGraphsOcclusionTest
 
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private boolean visualize = true;
+   private boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
@@ -86,7 +86,6 @@ public class VisibilityGraphsOcclusionTest
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
-
    }
 
    @AfterEach
@@ -380,9 +379,12 @@ public class VisibilityGraphsOcclusionTest
 
          if (regions.findPlanarRegionsContainingPoint(currentPosition, maximumFlyingDistance) == null)
          {
-            PrintTools.info("Planner failed: path results in a flying robot.");
-            plannerFailed.set(true);
-            break;
+            if (regions.findPlanarRegionsContainingPointByProjectionOntoXYPlane(currentPosition.getX(), currentPosition.getY()) != null)
+            {
+               PrintTools.info("Planner failed: path results in a flying robot.");
+               plannerFailed.set(true);
+               break;
+            }
          }
       }
 

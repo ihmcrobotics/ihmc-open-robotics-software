@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
@@ -146,15 +147,14 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      Pose2D goalPose2d = new Pose2D();
+      Pose3D goalPose = new Pose3D();
       double pathLength = bodyPathPlanner.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizonLength.getDoubleValue() / pathLength, 0.0, 1.0);
-      bodyPathPlanner.getPointAlongPath(alpha, goalPose2d);
+      bodyPathPlanner.getPointAlongPath(alpha, goalPose);
       heuristics.setGoalAlpha(alpha);
 
       FramePose3D footstepPlannerGoal = new FramePose3D();
-      footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+      footstepPlannerGoal.set(goalPose);
 
       if (alpha >= 1.0)
       {

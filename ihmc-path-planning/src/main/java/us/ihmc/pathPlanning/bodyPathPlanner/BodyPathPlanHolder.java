@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -67,13 +70,13 @@ public interface BodyPathPlanHolder
     * alpha, which goes from 0.0 (start) to 1.0 (goal).
     * This pose's x-axis aligned with the body path
     */
-   void getPointAlongPath(double alpha, Pose2D poseToPack);
+   void getPointAlongPath(double alpha, Pose3DBasics poseToPack);
 
    /**
     * Computes the pose along the curve closest to the given point
     * @return alpha corresponding to the packed point
     */
-   double getClosestPoint(Point2DReadOnly point, Pose2D poseToPack);
+   double getClosestPoint(Point2DReadOnly point, Pose3DBasics poseToPack);
 
    /**
     * Returns arc length of the body path from alpha to the goal point

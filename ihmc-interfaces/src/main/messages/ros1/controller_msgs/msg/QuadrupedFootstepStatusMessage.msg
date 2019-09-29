@@ -18,7 +18,7 @@ uint32 sequence_id
 int8 footstep_status
 
 # footstep_index starts at 0 and monotonically increases during a controller session
-int32 footstep_quadrant
+int32 footstep_index
 
 # The robot quadrant that this footstep status correlates to.
 # Field default value 255

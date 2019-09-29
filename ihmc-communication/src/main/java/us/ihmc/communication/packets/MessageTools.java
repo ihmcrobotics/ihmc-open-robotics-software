@@ -33,6 +33,7 @@ import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -58,7 +59,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public class MessageTools
 {
    public static final boolean DEBUG = false;
-   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 1000;
+   public static final int WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES = 250;
 
    public static TextToSpeechPacket createTextToSpeechPacket(String textToSpeak)
    {
@@ -230,6 +231,11 @@ public class MessageTools
       return message;
    }
 
+   public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBodyBasics endEffector, Pose3DReadOnly desiredPose)
+   {
+      return createKinematicsToolboxRigidBodyMessage(endEffector, desiredPose.getPosition(), desiredPose.getOrientation());
+   }
+
    /**
     * Creates a new rigid-body message for the given end-effector.
     * <p>
@@ -287,10 +293,16 @@ public class MessageTools
 
    public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected)
    {
+      return createSelectionMatrix3DMessage(xSelected, ySelected, zSelected, null);
+   }
+
+   public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected, ReferenceFrame selectionFrame)
+   {
       SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
       message.setXSelected(xSelected);
       message.setYSelected(ySelected);
       message.setZSelected(zSelected);
+      message.setSelectionFrameId(toFrameId(selectionFrame));
       return message;
    }
 
@@ -360,6 +372,7 @@ public class MessageTools
       else
       {
          double outputDT = inputDT * (double) previewFrames.size() / (double) WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+         message.setFrameDt(outputDT);
 
          for (int outputFrameIndex = 0; outputFrameIndex < WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES; outputFrameIndex++)
          {

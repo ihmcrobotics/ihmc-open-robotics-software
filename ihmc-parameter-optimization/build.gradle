@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
-   id("us.ihmc.ihmc-ci") version "4.25"
-   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
+   id("us.ihmc.ihmc-ci") version "5.0"
+   id("us.ihmc.ihmc-cd") version "1.7"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -13,12 +13,12 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

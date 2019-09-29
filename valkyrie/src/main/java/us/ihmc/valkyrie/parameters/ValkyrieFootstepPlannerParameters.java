@@ -14,7 +14,7 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
    {
       super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPlannerParameters.class, projectName, pathToResources);
 
-      setCheckForBodyBoxCollisions(true);
+      setCheckForBodyBoxCollisions(false);
       setIdealFootstepWidth(0.2);
       setIdealFootstepLength(0.2);
       setMaximumStepReach(0.4);
@@ -51,6 +51,12 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setBoundingBoxCost(0.0);
 
       load();
+   }
+
+   @Override
+   public AdaptiveSwingParameters getAdaptiveSwingParameters()
+   {
+      return new ValkyrieAdaptiveSwingParameters();
    }
 
    public static void main(String[] args)

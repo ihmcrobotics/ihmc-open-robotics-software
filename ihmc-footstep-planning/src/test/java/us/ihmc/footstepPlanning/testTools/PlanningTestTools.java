@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.testTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -89,7 +90,7 @@ public class PlanningTestTools
          for (int i = 0; i < markers; i++)
          {
             double alpha = (double) i / (double) (markers - 1);
-            Pose2D pose = new Pose2D();
+            Pose3D pose = new Pose3D();
             bodyPath.getPointAlongPath(alpha, pose);
             YoFramePoint3D yoPoint = new YoFramePoint3D("BodyPathPoint" + i, worldFrame, vizRegistry);
             yoPoint.set(pose.getPosition());

@@ -53,6 +53,11 @@ public class StaticHostListLoader
       ser.setAddTypeAsRootNode(false);
       
       File in = new File(location);
+      if(!in.getParentFile().exists())
+      {
+         in.getParentFile().mkdirs();
+      }
+      
       StaticHostList staticHostList = new StaticHostList();
       for(HTTPDataServerDescription description : list)
       {

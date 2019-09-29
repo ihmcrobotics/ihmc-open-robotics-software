@@ -183,6 +183,11 @@ public interface PawStepPlannerParametersBasics extends PawStepPlannerParameters
       set(projectInsideDistance, projectionInsideDistanceForExpansion);
    }
 
+   default void setMinimumProjectInsideDistance(double minimumProjectInsideDistance)
+   {
+      set(PawStepPlannerParameterKeys.minimumProjectInsideDistance, minimumProjectInsideDistance);
+   }
+
    default void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
    {
       set(PawStepPlannerParameterKeys.projectInsideUsingConvexHull, projectInsideUsingConvexHull);
@@ -338,6 +343,8 @@ public interface PawStepPlannerParametersBasics extends PawStepPlannerParameters
          setMinYClearanceFromPaw(other.getMinYClearanceFromPaw());
       if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
          setProjectInsideDistance(other.getProjectionInsideDistance());
+      if (other.getMinimumProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
+         setMinimumProjectInsideDistance(other.getMinimumProjectionInsideDistance());
       if (other.getMaximumXyWiggleDistance() != other.NO_VALUE_DOUBLE)
          setMaximumXYWiggleDistance(other.getMaximumXyWiggleDistance());
       if (other.getMinimumSurfaceInclineRadians() != other.NO_VALUE_DOUBLE)

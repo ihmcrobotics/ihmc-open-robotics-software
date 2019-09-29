@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -8,6 +10,8 @@ public abstract class PawPlanningCostToGoHeuristics
 {
    private DoubleProvider heuristicsInflationWeight;
    protected final PawStepPlannerParametersReadOnly parameters;
+
+   protected final FramePose3D goalPose = new FramePose3D();
 
    public PawPlanningCostToGoHeuristics(PawStepPlannerParametersReadOnly parameters)
    {
@@ -19,9 +23,9 @@ public abstract class PawPlanningCostToGoHeuristics
       this.heuristicsInflationWeight = heuristicsInflationWeight;
    }
 
-   public double compute(PawNode node, PawNode goalNode)
+   public double compute(PawNode node)
    {
-      return heuristicsInflationWeight.getValue() * computeHeuristics(node, goalNode);
+      return heuristicsInflationWeight.getValue() * computeHeuristics(node);
    }
 
    public double getWeight()
@@ -29,5 +33,10 @@ public abstract class PawPlanningCostToGoHeuristics
       return heuristicsInflationWeight.getValue();
    }
 
-   protected abstract double computeHeuristics(PawNode node, PawNode goalNode);
+   protected abstract double computeHeuristics(PawNode node);
+
+   public void setGoalPose(FramePose3DReadOnly goalPose)
+   {
+      this.goalPose.set(goalPose);
+   }
 }
