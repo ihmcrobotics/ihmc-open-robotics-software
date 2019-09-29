@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.17.1"
-   id("us.ihmc.ihmc-ci") version "4.25"
-   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
+   id("us.ihmc.ihmc-ci") version "5.0"
+   id("us.ihmc.ihmc-cd") version "1.7"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
 }
@@ -14,28 +14,28 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
+   api("org.apache.commons:commons-lang3:3.8.1")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: "source"
-   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-state-estimation", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-sensor-processing:source")
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-model-file-loader:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-state-estimation:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.6"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: "source"
+   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-humanoid-robotics-test:source")
 }

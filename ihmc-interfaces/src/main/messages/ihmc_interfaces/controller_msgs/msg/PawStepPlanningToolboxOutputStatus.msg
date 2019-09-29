@@ -19,5 +19,5 @@ float64 time_taken -1
 
 PlanarRegionsListMessage planar_regions_list
 
-geometry_msgs/Point[] body_path
+geometry_msgs/Pose[] body_path
 geometry_msgs/Pose low_level_planner_goal

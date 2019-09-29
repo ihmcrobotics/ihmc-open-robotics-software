@@ -116,6 +116,11 @@ public class QuadrupedStepAdjustmentController
       parentRegistry.addChild(registry);
    }
 
+   public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
+   {
+      planarRegionProjection.beganStep(robotQuadrant, goalPosition);
+   }
+
    public void completedStep(RobotQuadrant robotQuadrant)
    {
       instantaneousStepAdjustments.get(robotQuadrant).setToNaN();

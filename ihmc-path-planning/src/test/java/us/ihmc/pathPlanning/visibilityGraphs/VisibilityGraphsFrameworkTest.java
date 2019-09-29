@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
@@ -563,7 +564,7 @@ public class VisibilityGraphsFrameworkTest
       try
       {
          pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
-         path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution());
+         path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 //         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }
       catch (Exception e)
@@ -828,14 +829,14 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-//      String dataSetName = "20171218_204953_FlatGroundWithWall";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_220523_SteppingStones";
-//      String dataSetName = "20171218_204917_FlatGround";
+      String dataSetName = "20171218_204917_FlatGround";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
 
+      VISUALIZE = true;
       test.setup();
       if (VISUALIZE)
       {

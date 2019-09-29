@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -79,5 +80,32 @@ public class PawNodeTest
 
          }
       }
+   }
+
+   @Test
+   public void testPiToPiRollOver()
+   {
+      PawNode nodeA = createNodeAtOrigin(Math.PI);
+      PawNode nodeB = createNodeAtOrigin(-Math.PI);
+
+      Assertions.assertTrue(nodeA.equals(nodeB));
+      Assertions.assertTrue(nodeA.hashCode() == nodeB.hashCode());
+
+      nodeA = createNodeAtOrigin(Math.PI - 1e-5);
+      nodeB = createNodeAtOrigin(-Math.PI + 1e-5);
+
+      Assertions.assertTrue(nodeA.equals(nodeB));
+      Assertions.assertTrue(nodeA.hashCode() == nodeB.hashCode());
+
+      nodeA = createNodeAtOrigin(Math.PI + 1e-5);
+      nodeB = createNodeAtOrigin(-Math.PI - 1e-5);
+
+      Assertions.assertTrue(nodeA.equals(nodeB));
+      Assertions.assertTrue(nodeA.hashCode() == nodeB.hashCode());
+   }
+
+   private static PawNode createNodeAtOrigin(double yaw)
+   {
+      return new PawNode(RobotQuadrant.FRONT_LEFT, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, yaw, 1.0, 0.5);
    }
 }

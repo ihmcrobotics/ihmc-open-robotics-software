@@ -1,17 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class PawNodeCostTools
 {
-   public static double computeReferenceYaw(Point2DReadOnly startPoint, double startYaw, PawNode goalNode, double proximity)
+   public static double computeReferenceYaw(Point2DReadOnly startPoint, double startYaw, FramePose3DReadOnly goalPose, double proximity)
    {
-      Point2DReadOnly goalCenterPoint = goalNode.getOrComputeXGaitCenterPoint();
+      Point3DReadOnly goalCenterPoint = goalPose.getPosition();
 
-      double yawMultiplier = computeDistanceToGoalScalar(startPoint.getX(), startPoint.getY(), goalNode, proximity);
+      double yawMultiplier = computeDistanceToGoalScalar(startPoint.getX(), startPoint.getY(), goalPose, proximity);
 
       double pathHeading = Math.atan2(goalCenterPoint.getY() - startPoint.getY(), goalCenterPoint.getX() - startPoint.getX());
       pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
@@ -23,13 +25,13 @@ public class PawNodeCostTools
 
 
       double referenceHeading = yawMultiplier * modifiedPathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
+      referenceHeading += (1.0 - yawMultiplier) * goalPose.getYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 
-   public static double computeDistanceToGoalScalar(double x, double y, PawNode goalNode, double proximity)
+   public static double computeDistanceToGoalScalar(double x, double y, FramePose3DReadOnly goalPose, double proximity)
    {
-      Point2DReadOnly goalCenter = goalNode.getOrComputeXGaitCenterPoint();
+      Point3DReadOnly goalCenter = goalPose.getPosition();
       double distanceToGoal = EuclidCoreTools.norm(x - goalCenter.getX(), y - goalCenter.getY());
 
       double minimumBlendDistance = 0.75 * proximity;

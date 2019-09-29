@@ -23,7 +23,7 @@ int32 plan_id
 
 controller_msgs/PlanarRegionsListMessage planar_regions_list
 
-geometry_msgs/Point[] body_path
+geometry_msgs/Pose[] body_path
 
 geometry_msgs/Pose2D path_planner_start_pose
 

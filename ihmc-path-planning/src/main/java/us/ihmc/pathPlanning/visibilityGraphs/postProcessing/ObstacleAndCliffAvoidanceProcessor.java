@@ -69,7 +69,7 @@ public class ObstacleAndCliffAvoidanceProcessor
          VisibilityGraphNode startVisGraphNode = nodePath.get(pathNodeIndex);
          VisibilityGraphNode endVisGraphNode = nodePath.get(nextPathNodeIndex);
 
-         boolean isGoalNode = pathNodeIndex > nodePath.size() - 2;
+         boolean isGoalNode = nextWaypointIndex > newPathPositions.size() - 2;
 
          NavigableRegion startingRegion = startVisGraphNode.getVisibilityGraphNavigableRegion().getNavigableRegion();
          NavigableRegion endingRegion = endVisGraphNode.getVisibilityGraphNavigableRegion().getNavigableRegion();
