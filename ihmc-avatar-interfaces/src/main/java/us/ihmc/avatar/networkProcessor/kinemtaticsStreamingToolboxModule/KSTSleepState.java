@@ -17,6 +17,7 @@ public class KSTSleepState implements State
    @Override
    public void onEntry()
    {
+      ikController.requestInitialize();
    }
 
    @Override
