@@ -42,7 +42,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 
 public class BipedalSupportPlanarRegionPublisher
 {
-   private static final double defaultScaleFactor = 2.0;
+   public static final double defaultScaleFactor = 2.0;
 
    private static final int LEFT_FOOT_INDEX = 0;
    private static final int RIGHT_FOOT_INDEX = 1;
