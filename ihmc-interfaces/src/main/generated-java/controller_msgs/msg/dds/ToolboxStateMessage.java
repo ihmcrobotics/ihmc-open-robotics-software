@@ -19,6 +19,11 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
             */
    public long sequence_id_;
    public byte requested_toolbox_state_ = (byte) 255;
+   /**
+            * If true and the toolbox supports logging, all messages to and from the toolbox are logged.
+            * Can only be requested for WAKE_UP and REINITIALIZE. SLEEP will automatically end the toolbox log.
+            */
+   public boolean request_logging_;
 
    public ToolboxStateMessage()
    {
@@ -35,6 +40,8 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
       sequence_id_ = other.sequence_id_;
 
       requested_toolbox_state_ = other.requested_toolbox_state_;
+
+      request_logging_ = other.request_logging_;
 
    }
 
@@ -62,6 +69,23 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
       return requested_toolbox_state_;
    }
 
+   /**
+            * If true and the toolbox supports logging, all messages to and from the toolbox are logged.
+            * Can only be requested for WAKE_UP and REINITIALIZE. SLEEP will automatically end the toolbox log.
+            */
+   public void setRequestLogging(boolean request_logging)
+   {
+      request_logging_ = request_logging;
+   }
+   /**
+            * If true and the toolbox supports logging, all messages to and from the toolbox are logged.
+            * Can only be requested for WAKE_UP and REINITIALIZE. SLEEP will automatically end the toolbox log.
+            */
+   public boolean getRequestLogging()
+   {
+      return request_logging_;
+   }
+
 
    public static Supplier<ToolboxStateMessagePubSubType> getPubSubType()
    {
@@ -84,6 +108,8 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_toolbox_state_, other.requested_toolbox_state_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_logging_, other.request_logging_, epsilon)) return false;
+
 
       return true;
    }
@@ -101,6 +127,8 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
 
       if(this.requested_toolbox_state_ != otherMyClass.requested_toolbox_state_) return false;
 
+      if(this.request_logging_ != otherMyClass.request_logging_) return false;
+
 
       return true;
    }
@@ -114,7 +142,9 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("requested_toolbox_state=");
-      builder.append(this.requested_toolbox_state_);
+      builder.append(this.requested_toolbox_state_);      builder.append(", ");
+      builder.append("request_logging=");
+      builder.append(this.request_logging_);
       builder.append("}");
       return builder.toString();
    }
