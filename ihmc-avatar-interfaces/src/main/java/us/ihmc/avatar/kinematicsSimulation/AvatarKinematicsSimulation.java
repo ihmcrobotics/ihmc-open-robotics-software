@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -13,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -125,7 +123,6 @@ public class AvatarKinematicsSimulation
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
    private CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-   private BalanceManager balanceManager;
 
    public static void createForManualTest(DRCRobotModel robotModel, boolean createYoVariableServer)
    {
@@ -266,8 +263,7 @@ public class AvatarKinematicsSimulation
                                                                             controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
-
-      balanceManager = managerFactory.getOrCreateBalanceManager();
+      managerFactory.getOrCreateBalanceManager();
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
 
@@ -357,10 +353,7 @@ public class AvatarKinematicsSimulation
          controllerToolbox.update();
       }
 
-      if (balanceManager != null)
-      {
-         capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
-      }
+      capturabilityBasedStatus = managerFactory.getOrCreateBalanceManager().updateAndReturnCapturabilityBasedStatus();
 
       if (taskExecutor.isDone())  // keep robot from drifting when no tasks are present
       {
@@ -583,7 +576,7 @@ public class AvatarKinematicsSimulation
 
          if (currentSwingSide != null)
          { // Testing for the end of swing purely relying on the swing time:
-            if (balanceManager.isICPPlanDone())
+            if (managerFactory.getOrCreateBalanceManager().isICPPlanDone())
                footSwitches.get(currentSwingSide).setFootContactState(true);
          }
       }
