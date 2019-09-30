@@ -62,7 +62,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.functional.FunctionalTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -185,7 +184,47 @@ public class AvatarKinematicsSimulation
       humanoidHighLevelControllerManagerRegistry.addChild(walkingParentRegistry);
       humanoidHighLevelControllerManagerRegistry.addChild(managerParentRegistry);
 
-      controllerToolbox = createHighLevelControllerToolbox(robotModel, yoGraphicsListRegistry);
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+      {
+         contactableBodiesFactory.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
+                                                            contactPointParameters.getAdditionalContactNames().get(i),
+                                                            contactPointParameters.getAdditionalContactTransforms().get(i));
+      }
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(contactableBodiesFactory.createAdditionalContactPoints());
+      allContactableBodies.addAll(feet.values());
+      contactableBodiesFactory.disposeFactory();
+
+      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide), totalRobotWeight, 2, registry);
+         footSwitch.setFootContactState(true);
+         footSwitches.put(robotSide, footSwitch);
+      }
+
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
+
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                 referenceFrames,
+                                                                 footSwitches,
+                                                                 null,
+                                                                 yoTime,
+                                                                 GRAVITY_Z,
+                                                                 robotModel.getWalkingControllerParameters().getOmega0(),
+                                                                 feet,
+                                                                 DT,
+                                                                 Collections.emptyList(),
+                                                                 allContactableBodies,
+                                                                 yoGraphicsListRegistry,
+                                                                 jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
                                                                               walkingControllerParameters.getDefaultSwingTime(),
@@ -274,55 +313,24 @@ public class AvatarKinematicsSimulation
          throw new RuntimeException("Need to load a default height.");
       }
 
-      FunctionalTools.runIfTrue(createYoVariableServer, this::createYoVariableServer);
+      if (createYoVariableServer)
+      {
+         yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
+         yoVariableServer.setMainRegistry(registry, robotModel.createFullRobotModel().getElevator(), yoGraphicsListRegistry);
+         ThreadTools.startAThread(() -> yoVariableServer.start(), getClass().getSimpleName() + "YoVariableServer");
+         yoVariableServerScheduled = yoVariableScheduler.schedule(() ->
+         {
+            if (!Thread.interrupted())
+            {
+               yoVariableServerTime += Conversions.millisecondsToSeconds(1);
+               yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+            }
+         }, 1, TimeUnit.MILLISECONDS);
+      }
 
       initialize();
 
       scheduler.schedule(this::controllerTick, Conversions.secondsToNanoseconds(DT / PLAYBACK_SPEED), TimeUnit.NANOSECONDS);
-   }
-
-   private HighLevelHumanoidControllerToolbox createHighLevelControllerToolbox(DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
-      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
-                                                       contactPointParameters.getControllerToeContactLines());
-      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-      {
-         contactableBodiesFactory.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
-                                                            contactPointParameters.getAdditionalContactNames().get(i),
-                                                            contactPointParameters.getAdditionalContactTransforms().get(i));
-      }
-      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory.setReferenceFrames(referenceFrames);
-      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
-      List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(contactableBodiesFactory.createAdditionalContactPoints());
-      allContactableBodies.addAll(feet.values());
-      contactableBodiesFactory.disposeFactory();
-
-      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide), totalRobotWeight, 2, registry);
-         footSwitch.setFootContactState(true);
-         footSwitches.put(robotSide, footSwitch);
-      }
-
-      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-
-      return new HighLevelHumanoidControllerToolbox(fullRobotModel,
-                                                    referenceFrames,
-                                                    footSwitches,
-                                                    null,
-                                                    yoTime, GRAVITY_Z,
-                                                    robotModel.getWalkingControllerParameters().getOmega0(),
-                                                    feet,
-                                                    DT,
-                                                    Collections.emptyList(),
-                                                    allContactableBodies,
-                                                    yoGraphicsListRegistry,
-                                                    jointsToIgnore);
    }
 
    public void initialize()
@@ -337,6 +345,15 @@ public class AvatarKinematicsSimulation
       taskExecutor.clear();
       // few ticks to get it going
       taskExecutor.submit(new InitializeTask());
+   }
+
+   private void controllerTick()
+   {
+      doControl();
+
+      robotConfigurationDataPublisher.publish(extractRobotConfigurationData(fullRobotModel));
+
+      capturabilityBasedStatusPublisher.publish(capturabilityBasedStatus);
    }
 
    public void doControl()
@@ -405,33 +422,6 @@ public class AvatarKinematicsSimulation
       {
          joint.setJointAccelerationToZero();
          joint.setJointTwistToZero();
-      }
-   }
-
-   private void controllerTick()
-   {
-      doControl();
-
-      robotConfigurationDataPublisher.publish(extractRobotConfigurationData(fullRobotModel));
-
-      capturabilityBasedStatusPublisher.publish(capturabilityBasedStatus);
-   }
-
-   private void createYoVariableServer()
-   {
-      yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
-      yoVariableServer.setMainRegistry(registry, robotModel.createFullRobotModel().getElevator(), yoGraphicsListRegistry);
-      ThreadTools.startAThread(() -> yoVariableServer.start(), getClass().getSimpleName() + "YoVariableServer");
-
-      yoVariableServerScheduled = yoVariableScheduler.schedule(this::yoVariableUpdateThread, 1, TimeUnit.MILLISECONDS);
-   }
-
-   private void yoVariableUpdateThread()
-   {
-      if (!Thread.interrupted())
-      {
-         yoVariableServerTime += Conversions.millisecondsToSeconds(1);
-         yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
       }
    }
 
