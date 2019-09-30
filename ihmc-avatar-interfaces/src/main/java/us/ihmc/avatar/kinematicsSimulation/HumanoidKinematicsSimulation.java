@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -22,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -34,10 +32,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.pubsub.DomainFactory;
@@ -50,9 +48,6 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachineClock;
-import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -91,9 +86,6 @@ public class HumanoidKinematicsSimulation
            = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, 5);
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-//   private final IHMCROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
-//   private final IHMCROS2Publisher<WalkingStatusMessage> walkingStatusPublisher;
-//   private final IHMCROS2Publisher<FootstepStatusMessage> footstepStatusPublisher;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
@@ -117,10 +109,8 @@ public class HumanoidKinematicsSimulation
 
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
-   private CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
    private AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
    private SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
-   private RobotSide currentSwingSide = null;
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
 
    public static void createForManualTest(DRCRobotModel robotModel, boolean createYoVariableServer)
@@ -147,18 +137,6 @@ public class HumanoidKinematicsSimulation
                                                                 RobotConfigurationData.class,
                                                                 robotModel.getSimpleRobotName(),
                                                                 ROS2Tools.HUMANOID_CONTROLLER);
-//      capturabilityBasedStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
-//                                                                  CapturabilityBasedStatus.class,
-//                                                                  robotModel.getSimpleRobotName(),
-//                                                                  ROS2Tools.HUMANOID_CONTROLLER);
-//      walkingStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
-//                                                       WalkingStatusMessage.class,
-//                                                       robotModel.getSimpleRobotName(),
-//                                                       ROS2Tools.HUMANOID_CONTROLLER);
-//      footstepStatusPublisher = new IHMCROS2Publisher<>(ros2Node,
-//                                                        FootstepStatusMessage.class,
-//                                                        robotModel.getSimpleRobotName(),
-//                                                        ROS2Tools.HUMANOID_CONTROLLER);
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -345,15 +323,6 @@ public class HumanoidKinematicsSimulation
       {
          contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
-
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
-//      }
-
-//      taskExecutor.clear();
-      // few ticks to get it going
-//      taskExecutor.submit(new InitializeTask());
    }
 
    private void controllerTick()
@@ -361,62 +330,26 @@ public class HumanoidKinematicsSimulation
       doControl();
 
       robotConfigurationDataPublisher.publish(extractRobotConfigurationData(fullRobotModel));
-
-//      capturabilityBasedStatusPublisher.publish(capturabilityBasedStatus);
    }
 
    public void doControl()
    {
-      //      if (walkingInputManager.isNewCommandAvailable(FootstepDataListCommand.class)) // TODO: listen to general commands
-      //      {
-      //         taskExecutor.submit(new FootstepSequenceTask());
-      //      }
-      //      else
-      //      {
       yoTime.add(DT);
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       controllerToolbox.update();
-      //      }
-
-      capturabilityBasedStatus = managerFactory.getOrCreateBalanceManager().updateAndReturnCapturabilityBasedStatus();
-
-      //      if (taskExecutor.isDone())  // keep robot from drifting when no tasks are present
-      //      {
-      //         zeroMotion();
-      //      }
-      //      else
-      //      {
-
-      // walking state?
-      //      if (latestWalkingStatus.get() == null || latestWalkingStatus.get() == WalkingStatus.COMPLETED)
-      //      {
-      //
-      //      }
-
-      // update contact state holders
-      //      for (RobotSide robotSide : RobotSide.values)
-      //      {
-      //         contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
-      //      }
-
-      //      if (currentSwingSide != null)
-      //      { // Testing for the end of swing purely relying on the swing time:
-      //         if (managerFactory.getOrCreateBalanceManager().isICPPlanDone())
-      //            footSwitches.get(currentSwingSide).setFootContactState(true);
-      //      }
-      //      else
-      //      {
-      //
-      //      }
-
-      //         taskExecutor.doControl(); // TODO: If not walking, hold contact
 
       inverseDynamicsContactHolderCommandList.clear();
       for (RobotSide side : contactStateHolders.sides())
       {
          contactStateHolders.get(side).doControl();
          inverseDynamicsContactHolderCommandList.addCommand(contactStateHolders.get(side).getOutput());
+      }
+
+      // Trigger footstep completion based on swing time alone
+      if (contactStateHolders.sides().length == 1 && managerFactory.getOrCreateBalanceManager().isICPPlanDone())
+      {
+         footSwitches.get(contactStateHolders.sides()[0].getOppositeSide()).setFootContactState(true);
       }
 
       walkingController.doAction();
@@ -486,23 +419,17 @@ public class HumanoidKinematicsSimulation
          case STARTED:
             contactStateHolders.remove(side);
             footSwitches.get(side).setFootContactState(false);
-            currentSwingSide = side;
             break;
          case COMPLETED:
-//            numberOfFootstepsRemaining--;
             contactStateHolders.put(side, new HumanoidKinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
-            currentSwingSide = null;
             break;
          default:
             throw new RuntimeException("Unexpected status: " + status);
       }
-
-//      footstepStatusPublisher.publish(statusMessage);
    }
 
    private void processWalkingStatus(WalkingStatusMessage status)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
-//      walkingStatusPublisher.publish(status);
    }
 }
