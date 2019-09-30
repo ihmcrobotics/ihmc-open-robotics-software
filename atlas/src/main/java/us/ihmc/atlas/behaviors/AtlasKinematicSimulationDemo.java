@@ -3,13 +3,13 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.kinematicsSimulation.AvatarKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 
 public class AtlasKinematicSimulationDemo
 {
    public AtlasKinematicSimulationDemo()
    {
-      AvatarKinematicsSimulation.createForManualTest(createRobotModel(), true);
+      HumanoidKinematicsSimulation.createForManualTest(createRobotModel(), true);
    }
 
    private AtlasRobotModel createRobotModel()

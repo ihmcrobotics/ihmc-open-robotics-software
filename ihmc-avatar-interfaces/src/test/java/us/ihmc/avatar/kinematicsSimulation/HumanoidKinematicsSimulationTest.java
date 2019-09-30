@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-public abstract class AvatarKinematicsSimulationTest
+public abstract class HumanoidKinematicsSimulationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private AvatarTestYoVariables variables;
@@ -71,6 +71,6 @@ public abstract class AvatarKinematicsSimulationTest
    @AfterAll
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AvatarKinematicsSimulationTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(HumanoidKinematicsSimulationTest.class + " after class.");
    }
 }

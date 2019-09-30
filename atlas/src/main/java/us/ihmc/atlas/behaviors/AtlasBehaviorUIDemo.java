@@ -7,7 +7,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
-import us.ihmc.avatar.kinematicsSimulation.AvatarKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
@@ -81,7 +81,7 @@ public class AtlasBehaviorUIDemo extends Application
          LogTools.info("Creating simulation");
          if (USE_KINEMATIC_SIMULATION)
          {
-            AvatarKinematicsSimulation.createForManualTest(createRobotModel(), CREATE_YO_VARIABLE_SERVER);
+            HumanoidKinematicsSimulation.createForManualTest(createRobotModel(), CREATE_YO_VARIABLE_SERVER);
          }
          else
          {
