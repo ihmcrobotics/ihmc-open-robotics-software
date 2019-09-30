@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -148,10 +149,10 @@ public class InverseKinematicsOptimizationControlModule
          OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double qDDotMin = qDotMinMatrix.get(jointIndex, 0);
-         double qDDotMax = qDotMaxMatrix.get(jointIndex, 0);
-         jointMinimumVelocities.get(joint).set(qDDotMin);
-         jointMaximumVelocities.get(joint).set(qDDotMax);
+         double qDotMin = qDotMinMatrix.get(jointIndex, 0);
+         double qDotMax = qDotMaxMatrix.get(jointIndex, 0);
+         jointMinimumVelocities.get(joint).set(qDotMin);
+         jointMaximumVelocities.get(joint).set(qDotMax);
       }
    }
 
@@ -216,5 +217,7 @@ public class InverseKinematicsOptimizationControlModule
          qpSolver.setVelocityRegularizationWeight(command.getJointVelocityWeight());
       if (command.hasJointAccelerationWeight())
          qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
+      if (command.hashJointVelocityLimitMode())
+         boundCalculator.considerJointVelocityLimits(command.jointVelocityLimitMode == JointVelocityLimitMode.ENABLED);
    }
 }
