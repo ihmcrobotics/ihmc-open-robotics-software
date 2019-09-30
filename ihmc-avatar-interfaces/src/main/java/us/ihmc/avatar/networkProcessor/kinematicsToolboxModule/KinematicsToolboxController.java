@@ -40,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
@@ -712,6 +713,10 @@ public class KinematicsToolboxController extends ToolboxController
             enableCollisionAvoidance.set(false);
          if (command.getEnableCollisionAvoidance())
             enableCollisionAvoidance.set(true);
+         if (command.getDisableJointVelocityLimits())
+            activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.DISABLED);
+         if (command.getEnableJointVelocityLimits())
+            activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.ENABLED);
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
