@@ -85,7 +85,6 @@ public class AvatarKinematicsSimulation
    private static final double PLAYBACK_SPEED = 10.0;
    private static final double GRAVITY_Z = 9.81;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DRCRobotModel robotModel;
    private final ExceptionHandlingThreadScheduler scheduler
            = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.PRINT_MESSAGE, 5);
    private final ExceptionHandlingThreadScheduler yoVariableScheduler
@@ -98,9 +97,7 @@ public class AvatarKinematicsSimulation
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
-   private YoVariableServer yoVariableServer;
    private ScheduledFuture<?> yoVariableServerScheduled;
-
    private final YoDouble yoTime;
 
    private final FullHumanoidRobotModel fullRobotModel;
@@ -113,8 +110,8 @@ public class AvatarKinematicsSimulation
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
-   private final CommandInputManager walkingInputManager = new CommandInputManager("walking_preview_internal",
-                                                                                   ControllerAPIDefinition.getControllerSupportedCommands());
+   private final CommandInputManager walkingInputManager
+           = new CommandInputManager("walking_preview_internal", ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager walkingOutputManager
            = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
@@ -140,8 +137,6 @@ public class AvatarKinematicsSimulation
 
    public AvatarKinematicsSimulation(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
-      this.robotModel = robotModel;
-
       // instantiate some existing controller ROS2 API?
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.HUMANOID_CONTROLLER.getNodeName("kinematic"));
 
@@ -162,15 +157,10 @@ public class AvatarKinematicsSimulation
                                                         robotModel.getSimpleRobotName(),
                                                         ROS2Tools.HUMANOID_CONTROLLER);
 
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       yoTime = new YoDouble("timeInPreview", registry);
-
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       // Create registries to match controller so the XML gets loaded properly.
       YoVariableRegistry drcControllerThreadRegistry = new YoVariableRegistry("DRCControllerThread");
@@ -226,6 +216,8 @@ public class AvatarKinematicsSimulation
                                                                  yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
                                                                               walkingControllerParameters.getDefaultSwingTime(),
                                                                               walkingControllerParameters.getDefaultInitialTransferTime(),
@@ -242,6 +234,7 @@ public class AvatarKinematicsSimulation
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
                                                        fullRobotModel.getRootJoint(),
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
@@ -315,7 +308,7 @@ public class AvatarKinematicsSimulation
 
       if (createYoVariableServer)
       {
-         yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
+         YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          yoVariableServer.setMainRegistry(registry, robotModel.createFullRobotModel().getElevator(), yoGraphicsListRegistry);
          ThreadTools.startAThread(() -> yoVariableServer.start(), getClass().getSimpleName() + "YoVariableServer");
          yoVariableServerScheduled = yoVariableScheduler.schedule(() ->
