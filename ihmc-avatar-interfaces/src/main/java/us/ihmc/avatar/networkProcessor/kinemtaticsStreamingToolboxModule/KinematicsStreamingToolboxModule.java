@@ -41,7 +41,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(30.0);
       controller = new KinematicsStreamingToolboxController(commandInputManager,
                                                             statusOutputManager,
                                                             fullRobotModel,
