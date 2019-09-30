@@ -160,9 +160,9 @@ public class HumanoidKinematicsSimulation
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      yoTime = new YoDouble("timeInPreview", registry);
 
       // Create registries to match controller so the XML gets loaded properly.
+      yoTime = new YoDouble("timeInPreview", registry);
       YoVariableRegistry drcControllerThreadRegistry = new YoVariableRegistry("DRCControllerThread");
       YoVariableRegistry drcMomentumBasedControllerRegistry = new YoVariableRegistry("DRCMomentumBasedController");
       YoVariableRegistry humanoidHighLevelControllerManagerRegistry = new YoVariableRegistry("HumanoidHighLevelControllerManager");
@@ -295,7 +295,6 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
-      managerFactory.getOrCreateBalanceManager();
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
 
