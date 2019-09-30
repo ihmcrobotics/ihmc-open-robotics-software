@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTStreamingState implements State
 {
-   private static final double defautlInitialBlendDuration = 5.0;
+   private static final double defautlInitialBlendDuration = 2.0;
    private static final double defaultAngularMaxRate = 35.0;
    private static final double defaultLinearMaxRate = 2.0;
    private static final double defaultMessageWeight = 1.0;
