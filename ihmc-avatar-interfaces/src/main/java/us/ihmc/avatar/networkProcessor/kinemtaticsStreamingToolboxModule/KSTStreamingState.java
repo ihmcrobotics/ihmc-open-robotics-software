@@ -74,7 +74,6 @@ public class KSTStreamingState implements State
       ikSolverGains = ikController.getDefaultGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
       ikController.getMomentumWeight().set(0.0001);
-      configurationMessage.setJointVelocityWeight(10.0);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -141,6 +140,7 @@ public class KSTStreamingState implements State
       ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
+      configurationMessage.setEnableJointVelocityLimits(true);
       ikCommandInputManager.submitMessage(configurationMessage);
 
       FramePose3D pelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
