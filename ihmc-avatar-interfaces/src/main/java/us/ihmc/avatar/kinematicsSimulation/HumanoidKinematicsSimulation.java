@@ -79,7 +79,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-public class AvatarKinematicsSimulation
+public class HumanoidKinematicsSimulation
 {
    private static final double DT = UnitConversions.hertzToSeconds(70);
    private static final double PLAYBACK_SPEED = 10.0;
@@ -132,10 +132,10 @@ public class AvatarKinematicsSimulation
 
    private static void create(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
-      new AvatarKinematicsSimulation(robotModel, createYoVariableServer, pubSubImplementation);
+      new HumanoidKinematicsSimulation(robotModel, createYoVariableServer, pubSubImplementation);
    }
 
-   public AvatarKinematicsSimulation(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
+   public HumanoidKinematicsSimulation(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       // instantiate some existing controller ROS2 API?
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.HUMANOID_CONTROLLER.getNodeName("kinematic"));
@@ -438,7 +438,7 @@ public class AvatarKinematicsSimulation
 
    private class InitializeTask implements StateWithOutput
    {
-      SideDependentList<AvatarKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
+      SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
       InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
       private int count = 0;
       private final int numberOfTicksBeforeDone = 2; // 2 ticks seem necessary when reinitializing the controller.
@@ -450,7 +450,7 @@ public class AvatarKinematicsSimulation
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            contactStateHolders.put(robotSide, AvatarKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+            contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
          }
       }
 
@@ -492,7 +492,7 @@ public class AvatarKinematicsSimulation
 
       int numberOfFootstepsRemaining;
       AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
-      SideDependentList<AvatarKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
+      SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
       InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
       RobotSide currentSwingSide = null;
 
@@ -501,7 +501,7 @@ public class AvatarKinematicsSimulation
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            contactStateHolders.put(robotSide, AvatarKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+            contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
          }
 
          walkingInputManager.submitCommand(footstepCommand);
@@ -527,7 +527,7 @@ public class AvatarKinematicsSimulation
                break;
             case COMPLETED:
                numberOfFootstepsRemaining--;
-               contactStateHolders.put(side, new AvatarKinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
+               contactStateHolders.put(side, new HumanoidKinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
                currentSwingSide = null;
                break;
             default:
@@ -550,7 +550,7 @@ public class AvatarKinematicsSimulation
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            AvatarKinematicsSimulationContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
+            HumanoidKinematicsSimulationContactStateHolder contactStateHolder = contactStateHolders.get(robotSide);
             if (contactStateHolder == null)
                continue;
             contactStateHolder.doControl();
