@@ -30,6 +30,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    private final KinematicsStreamingToolboxController controller;
    private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
+   private final KinematicsStreamingToolboxMessageLogger logger;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
@@ -54,6 +55,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
+      logger = new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), realtimeRos2Node);
       startYoVariableServer();
    }
 
@@ -130,5 +132,17 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_STREAMING_TOOLBOX, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   protected void startLogging()
+   {
+      logger.startLogging();
+   }
+
+   @Override
+   protected void stopLogging()
+   {
+      logger.stopLogging();
    }
 }
