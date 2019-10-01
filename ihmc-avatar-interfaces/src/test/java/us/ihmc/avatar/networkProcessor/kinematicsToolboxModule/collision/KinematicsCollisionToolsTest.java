@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionTools.changeFrame;
 
@@ -38,7 +37,7 @@ class KinematicsCollisionToolsTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
-   private static final double GJK_EPSILON = 5.0e-6;
+   private static final double EPA_EPSILON = 2.0e-4;
 
    @Test
    public void testChangeFrame()
@@ -156,8 +155,7 @@ class KinematicsCollisionToolsTest
                                                                                                               Function<Random, B> shapeBRandomGenerator,
                                                                                                               FrameChanger<A> shapeAFrameChanger,
                                                                                                               FrameChanger<B> shapeBFrameChanger,
-                                                                                                              boolean testNormal, boolean supportPenetration,
-                                                                                                              double epsilon)
+                                                                                                              boolean testNormal, double epsilon)
    {
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in world frame
@@ -168,25 +166,8 @@ class KinematicsCollisionToolsTest
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = worldFrame;
          evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
-         assertTrue(actual.getFrameA() == frameA);
-         assertTrue(actual.getFrameB() == frameB);
          referenceForTesting.evaluateCollision(shapeA, shapeB, expected);
-         if (!supportPenetration && expected.areShapesColliding())
-         {
-            assertEquals(expected.areShapesColliding(), actual.areShapesColliding());
-            assertTrue(Double.isNaN(actual.getDistance()));
-            assertTrue(Double.isNaN(actual.getSignedDistance()));
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnB());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnB());
-         }
-         else if (!testNormal)
-         {
-            expected.getNormalOnA().setToNaN();
-            expected.getNormalOnB().setToNaN();
-            EuclidShapeTestTools.assertEuclidShape3DCollisionResultEquals(expected, actual, epsilon);
-         }
+         assertCollisionResultsEqual(expected, frameA, frameB, actual, testNormal, epsilon);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -198,8 +179,6 @@ class KinematicsCollisionToolsTest
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = frameA;
          evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
-         assertTrue(actual.getFrameA() == frameA);
-         assertTrue(actual.getFrameB() == frameB);
          referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
                                                shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame),
                                                expected);
@@ -209,22 +188,7 @@ class KinematicsCollisionToolsTest
          actual.getPointOnB().changeFrame(worldFrame);
          actual.getNormalOnA().changeFrame(worldFrame);
          actual.getNormalOnB().changeFrame(worldFrame);
-         if (!supportPenetration && expected.areShapesColliding())
-         {
-            assertEquals(expected.areShapesColliding(), actual.areShapesColliding());
-            assertTrue(Double.isNaN(actual.getDistance()));
-            assertTrue(Double.isNaN(actual.getSignedDistance()));
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnB());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnB());
-         }
-         else if (!testNormal)
-         {
-            expected.getNormalOnA().setToNaN();
-            expected.getNormalOnB().setToNaN();
-            EuclidShapeTestTools.assertEuclidShape3DCollisionResultEquals(expected, actual, epsilon);
-         }
+         assertCollisionResultsEqual(expected, frameA, frameB, actual, testNormal, epsilon);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -236,8 +200,6 @@ class KinematicsCollisionToolsTest
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = EuclidFrameRandomTools.nextReferenceFrame("frameB", random, worldFrame);
          evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
-         assertTrue(actual.getFrameA() == frameA);
-         assertTrue(actual.getFrameB() == frameB);
          referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
                                                shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame),
                                                expected);
@@ -247,23 +209,30 @@ class KinematicsCollisionToolsTest
          actual.getPointOnB().changeFrame(worldFrame);
          actual.getNormalOnA().changeFrame(worldFrame);
          actual.getNormalOnB().changeFrame(worldFrame);
-         if (!supportPenetration && expected.areShapesColliding())
-         {
-            assertEquals(expected.areShapesColliding(), actual.areShapesColliding());
-            assertTrue(Double.isNaN(actual.getDistance()));
-            assertTrue(Double.isNaN(actual.getSignedDistance()));
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getPointOnB());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnA());
-            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(actual.getNormalOnB());
-         }
-         else if (!testNormal)
-         {
-            expected.getNormalOnA().setToNaN();
-            expected.getNormalOnB().setToNaN();
-            EuclidShapeTestTools.assertEuclidShape3DCollisionResultEquals(expected, actual, epsilon);
-         }
+         assertCollisionResultsEqual(expected, frameA, frameB, actual, testNormal, epsilon);
       }
+   }
+
+   private static void assertCollisionResultsEqual(EuclidShape3DCollisionResult expected, ReferenceFrame expectedFrameA, ReferenceFrame expectedFrameB,
+                                                   KinematicsCollisionResult actual, boolean testNormal, double epsilon)
+   {
+      assertTrue(actual.getFrameA() == expectedFrameA);
+      assertTrue(actual.getFrameB() == expectedFrameB);
+
+      if (!testNormal)
+      {
+         expected.getNormalOnA().setToNaN();
+         expected.getNormalOnB().setToNaN();
+      }
+      else
+      {
+         expected.getNormalOnA().normalize();
+         expected.getNormalOnB().normalize();
+         actual.getNormalOnA().normalize();
+         actual.getNormalOnB().normalize();
+      }
+
+      EuclidShapeTestTools.assertEuclidShape3DCollisionResultEquals(expected, actual, epsilon);
    }
 
    @Test
@@ -278,30 +247,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionEPA,
                                              KinematicsCollisionTools.capsule3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.capsule3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -316,30 +282,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DBox3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DBox3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextBox3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextBox3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -354,30 +317,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -392,30 +352,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCylinder3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DCylinder3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -430,30 +387,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DEllipsoid3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DEllipsoid3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -468,30 +422,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DPointShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DPointShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToPointShape3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToPointShape3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -506,30 +457,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DRamp3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DRamp3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextRamp3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextRamp3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -544,30 +492,27 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DSphere3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DSphere3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionGJK,
+                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
                                              KinematicsCollisionTools.pointShape3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              false,
-                                             false,
-                                             GJK_EPSILON);
+                                             EPA_EPSILON);
    }
 
    @Test
@@ -581,7 +526,6 @@ class KinematicsCollisionToolsTest
                                              EuclidShapeRandomTools::nextBox3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
-                                             true,
                                              true,
                                              EPSILON);
    }
@@ -598,7 +542,6 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
    }
 
@@ -613,7 +556,6 @@ class KinematicsCollisionToolsTest
                                              EuclidShapeRandomTools::nextCylinder3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
-                                             true,
                                              true,
                                              EPSILON);
    }
@@ -630,7 +572,6 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
    }
 
@@ -646,7 +587,6 @@ class KinematicsCollisionToolsTest
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
                                              true,
-                                             true,
                                              EPSILON);
    }
 
@@ -661,7 +601,6 @@ class KinematicsCollisionToolsTest
                                              EuclidShapeRandomTools::nextSphere3D,
                                              KinematicsCollisionTools::changeFrame,
                                              KinematicsCollisionTools::changeFrame,
-                                             true,
                                              true,
                                              EPSILON);
    }
