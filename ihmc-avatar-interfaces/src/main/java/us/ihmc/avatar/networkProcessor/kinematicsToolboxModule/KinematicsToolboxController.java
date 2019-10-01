@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -249,6 +249,7 @@ public class KinematicsToolboxController extends ToolboxController
     * handled when this is set to {@code true}.
     */
    private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
+   private final RecyclingArrayList<KinematicsCollisionResult> collisionResults = new RecyclingArrayList<>(KinematicsCollisionResult::new);
    /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
@@ -598,8 +599,6 @@ public class KinematicsToolboxController extends ToolboxController
       return true;
    }
 
-   private List<KinematicsCollisionResult> collisions = Collections.emptyList();
-
    /**
     * This is the control loop called periodically only when the user requested a solution for a
     * desired set of inputs.
@@ -628,7 +627,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
       controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
-      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisions));
+      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisionResults));
 
       // Save all commands used for this control tick for computing the solution quality.
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
@@ -658,7 +657,7 @@ public class KinematicsToolboxController extends ToolboxController
        * with the robot configuration.
        */
       updateTools();
-      collisions = computeCollisions();
+      computeCollisions();
 
       timeSinceLastSolutionPublished.add(updateDT);
 
@@ -758,17 +757,16 @@ public class KinematicsToolboxController extends ToolboxController
    }
 
    /**
-    * Evaluates the collision between each possible pair of collidables that can collide.
-    * 
-    * @return the result of the evaluation.
+    * Evaluates the collision between each possible pair of collidables that can collide and stores the result in {@link #collisionResults}.
     */
-   private List<KinematicsCollisionResult> computeCollisions()
+   private void computeCollisions()
    {
+      collisionResults.clear();
+
       if (robotCollidables.isEmpty() || !enableCollisionAvoidance.getValue())
-         return Collections.emptyList();
+         return;
 
       int collisionIndex = 0;
-      List<KinematicsCollisionResult> collisions = new ArrayList<>();
 
       for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
       {
@@ -781,7 +779,8 @@ public class KinematicsToolboxController extends ToolboxController
             if (!collidableA.isCollidableWith(collidableB))
                continue;
 
-            KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
+            KinematicsCollisionResult collisionResult = collisionResults.add();
+            collidableA.evaluateCollision(collidableB, collisionResult);
 
             if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
                continue;
@@ -793,12 +792,9 @@ public class KinematicsToolboxController extends ToolboxController
                collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
             }
 
-            collisions.add(collisionResult);
             collisionIndex++;
          }
       }
-
-      return collisions;
    }
 
    /**
