@@ -183,7 +183,11 @@ public class StereoVisionPointCloudPublisher
          long rosTimestamp = pointCloudData.getTimestamp();
          robotTimestamp = rosClockCalculator.computeRobotMonotonicTime(rosTimestamp);
          boolean waitForTimestamp = true;
+         if(robotConfigurationDataBuffer.getNewestTimestamp() == -1)
+            return;
+         
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
+
          if (!success)
             return;
       }
