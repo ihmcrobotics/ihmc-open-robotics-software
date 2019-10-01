@@ -247,10 +247,7 @@ public class KinematicsCollisionTools
       pointOnA.changeFrame(frameB);
 
       shapeB.getPose().inverseTransform(shapeA, pointOnA);
-      double distance = EuclidShapeTools.evaluatePoint3DBox3DCollision(pointOnA,
-                                                                       shapeB.getSize(),
-                                                                       pointOnB,
-                                                                       normalOnB);
+      double distance = EuclidShapeTools.evaluatePoint3DBox3DCollision(pointOnA, shapeB.getSize(), pointOnB, normalOnB);
       pointOnB.setReferenceFrame(frameB);
       normalOnB.setReferenceFrame(frameB);
       normalOnA.setReferenceFrame(frameB);
@@ -270,7 +267,34 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DCapsule3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB,
                                                              ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, pointShape3DToCapsule3DEvaluator, pointShape3DFrameChanger, resultToPack);
+      FramePoint3D pointOnA = resultToPack.getPointOnA();
+      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FrameVector3D normalOnA = resultToPack.getNormalOnA();
+      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      pointOnA.changeFrame(frameB);
+
+      double distance = EuclidShapeTools.evaluatePoint3DCapsule3DCollision(pointOnA,
+                                                                           shapeB.getPosition(),
+                                                                           shapeB.getAxis(),
+                                                                           shapeB.getLength(),
+                                                                           shapeB.getRadius(),
+                                                                           pointOnB,
+                                                                           normalOnB);
+      pointOnB.setReferenceFrame(frameB);
+      normalOnA.setReferenceFrame(frameB);
+      normalOnB.setReferenceFrame(frameB);
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      normalOnA.setAndNegate(normalOnB);
+
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+      resultToPack.setFrameA(frameA);
+      resultToPack.setFrameB(frameB);
    }
 
    public static void evaluatePointShape3DCylinder3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB,
