@@ -1132,7 +1132,7 @@ public class ConvexPolygonToolsTest
       aboveYAxisRectangle.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
    }
 
    @Test
@@ -1164,7 +1164,7 @@ public class ConvexPolygonToolsTest
       aboveYAxisRectangle.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
    }
 
    @Test
