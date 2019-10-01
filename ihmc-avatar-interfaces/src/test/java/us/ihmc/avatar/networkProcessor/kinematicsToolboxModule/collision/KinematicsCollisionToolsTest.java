@@ -161,14 +161,16 @@ class KinematicsCollisionToolsTest
    {
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in world frame
+         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = worldFrame;
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = worldFrame;
-         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
-         EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeA, shapeB);
+         referenceForTesting.evaluateCollision(shapeA, shapeB, expected);
          if (!supportPenetration && expected.areShapesColliding())
          {
             assertEquals(expected.areShapesColliding(), actual.areShapesColliding());
@@ -189,15 +191,18 @@ class KinematicsCollisionToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in a random frame (frameA == frameB)
+         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("aFrame", random, worldFrame);
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = frameA;
-         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
-         EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
-                                                                                       shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame));
+         referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
+                                               shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame),
+                                               expected);
          expected.setShapeA(shapeA);
          expected.setShapeB(shapeB);
          actual.getPointOnA().changeFrame(worldFrame);
@@ -224,15 +229,18 @@ class KinematicsCollisionToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in random frames (frameA != frameB)
+         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("frameA", random, worldFrame);
          B shapeB = shapeBRandomGenerator.apply(random);
          ReferenceFrame frameB = EuclidFrameRandomTools.nextReferenceFrame("frameB", random, worldFrame);
-         KinematicsCollisionResult actual = evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB);
+         evaluatorToTest.evaluateCollision(shapeA, frameA, shapeB, frameB, actual);
          assertTrue(actual.getFrameA() == frameA);
          assertTrue(actual.getFrameB() == frameB);
-         EuclidShape3DCollisionResult expected = referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
-                                                                                       shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame));
+         referenceForTesting.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, worldFrame),
+                                               shapeBFrameChanger.changeFrame(shapeB, frameB, worldFrame),
+                                               expected);
          expected.setShapeA(shapeA);
          expected.setShapeB(shapeB);
          actual.getPointOnA().changeFrame(worldFrame);
