@@ -416,7 +416,30 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DSphere3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
                                                             KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, pointShape3DToSphere3DEvaluator, pointShape3DFrameChanger, resultToPack);
+      FramePoint3D pointOnA = resultToPack.getPointOnA();
+      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FrameVector3D normalOnA = resultToPack.getNormalOnA();
+      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      pointOnA.changeFrame(frameB);
+      double distance = EuclidShapeTools.evaluatePoint3DSphere3DCollision(pointOnA,
+                                                                          shapeB.getPosition(),
+                                                                          shapeB.getRadius(),
+                                                                          pointOnB,
+                                                                          normalOnB);
+      pointOnB.setReferenceFrame(frameB);
+      normalOnA.setReferenceFrame(frameB);
+      normalOnB.setReferenceFrame(frameB);
+
+      normalOnA.setAndNegate(normalOnB);
+
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+      resultToPack.setFrameA(frameA);
+      resultToPack.setFrameB(frameB);
    }
 
    public static void evaluateSphere3DBox3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
