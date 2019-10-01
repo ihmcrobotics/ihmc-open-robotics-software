@@ -153,6 +153,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       tools.updateCapturabilityBasedStatus(newStatus);
    }
 
+   public double getTime()
+   {
+      return time.getDoubleValue();
+   }
+
    public KSTTools getTools()
    {
       return tools;

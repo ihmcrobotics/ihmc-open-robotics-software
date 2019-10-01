@@ -1,6 +1,6 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.19.5"
-   id("us.ihmc.ihmc-ci") version "4.26"
+   id("us.ihmc.ihmc-build") version "0.19.6"
+   id("us.ihmc.ihmc-ci") version "5.0"
    id("us.ihmc.ihmc-cd") version "1.7"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -63,10 +63,11 @@ testDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }
 
+ihmc.jarWithLibFolder()
 tasks.getByPath("installDist").dependsOn("compositeJar")
 
 app.entrypoint("IHMCValkyrieJoystickApplication", "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication")
-app.entrypoint("valkyrie-network-processor", "us.ihmc.valkyrie.ValkyrieROSNetworkProcessor")
+app.entrypoint("valkyrie-network-processor", "us.ihmc.valkyrie.ValkyrieNetworkProcessor")
 
 tasks.create("deployOCUApplications") {
    dependsOn("installDist")
@@ -125,11 +126,12 @@ tasks.create("deploy") {
          exec("mkdir -p $directory")
 
          exec("rm -rf $directory/lib")
-         put("build/install/valkyrie/lib", "$directory/lib")
+         put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
          exec("ls -halp $directory/lib")
 
-         put("build/libs/valkyrie-$version.jar", "$directory/ValkyrieController.jar")
-         put("launchScripts", directory)
+         put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
+         put(file("launchScripts").toString(), directory)
+         exec("chmod +x $directory/runNetworkProcessor.sh")
          exec("ls -halp $directory")
       }
 
@@ -154,18 +156,19 @@ fun deployNetworkProcessor()
       exec("rm -rf $directory/bin")
       exec("rm -rf $directory/lib")
 
-      put("build/install/valkyrie/bin", "$directory/bin")
+      put(file("build/install/valkyrie/bin").toString(), "$directory/bin")
       exec("chmod +x $directory/bin/valkyrie-network-processor")
-      put("build/install/valkyrie/lib", "$directory/lib")
+      put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
       exec("ls -halp $directory/lib")
 
-      put("build/libs/valkyrie-$version.jar", "$directory/ValkyrieController.jar")
-      put("launchScripts", directory)
+      put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
+      put(file("launchScripts").toString(), directory)
+      exec("chmod +x $directory/runNetworkProcessor.sh")
       exec("ls -halp $directory")
 
       exec("rm -rf /home/val/.ihmc/Configurations")
       exec("mkdir -p /home/val/.ihmc/Configurations")
-      put("saved-configurations/defaultREAModuleConfiguration.txt", ".ihmc/Configurations")
+      put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
       exec("ls -halp /home/val/.ihmc/Configurations")
    }
 }
