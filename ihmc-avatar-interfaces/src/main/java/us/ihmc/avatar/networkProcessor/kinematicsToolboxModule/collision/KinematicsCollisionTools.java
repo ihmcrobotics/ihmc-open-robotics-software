@@ -420,29 +420,41 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DRamp3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
                                                           KinematicsCollisionResult resultToPack)
    {
+      evaluatePoint3DRamp3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+   }
+
+   private static void evaluatePoint3DRamp3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ramp3DReadOnly ramp3D, ReferenceFrame rampFrame,
+                                                      KinematicsCollisionResult resultToPack)
+   {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
       FrameVector3D normalOnA = resultToPack.getNormalOnA();
       FrameVector3D normalOnB = resultToPack.getNormalOnB();
 
-      pointOnA.setIncludingFrame(frameA, shapeA);
-      shapeB.getPose().inverseTransform(pointOnA);
-      double distance = EuclidShapeTools.evaluatePoint3DRamp3DCollision(pointOnA, shapeB.getSize(), pointOnB, normalOnB);
-      pointOnB.setReferenceFrame(frameB);
-      normalOnA.setReferenceFrame(frameB);
-      normalOnB.setReferenceFrame(frameB);
+      pointOnA.setIncludingFrame(pointFrame, point3D);
+      pointOnA.changeFrame(rampFrame);
 
-      shapeB.transformToWorld(pointOnB);
-      shapeB.transformToWorld(normalOnB);
-      pointOnA.setIncludingFrame(frameA, shapeA);
+      double pointInBBackupX = pointOnA.getX();
+      double pointInBBackupY = pointOnA.getY();
+      double pointInBBackupZ = pointOnA.getZ();
+
+      ramp3D.getPose().inverseTransform(pointOnA);
+      double distance = EuclidShapeTools.evaluatePoint3DRamp3DCollision(pointOnA, ramp3D.getSize(), pointOnB, normalOnB);
+      pointOnB.setReferenceFrame(rampFrame);
+      normalOnA.setReferenceFrame(rampFrame);
+      normalOnB.setReferenceFrame(rampFrame);
+
+      ramp3D.transformToWorld(pointOnB);
+      ramp3D.transformToWorld(normalOnB);
+      pointOnA.setIncludingFrame(rampFrame, pointInBBackupX, pointInBBackupY, pointInBBackupZ);
       normalOnA.setAndNegate(normalOnB);
 
       resultToPack.setShapesAreColliding(distance < 0.0);
       resultToPack.setSignedDistance(distance);
-      resultToPack.setShapeA(shapeA);
-      resultToPack.setShapeB(shapeB);
-      resultToPack.setFrameA(frameA);
-      resultToPack.setFrameB(frameB);
+      resultToPack.setFrameA(pointFrame);
+      resultToPack.setFrameB(rampFrame);
    }
 
    public static void evaluatePointShape3DSphere3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
@@ -529,7 +541,15 @@ public class KinematicsCollisionTools
    public static void evaluateSphere3DRamp3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
                                                       KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, sphere3DToRamp3DEvaluator, sphere3DFrameChanger, resultToPack);
+      evaluatePoint3DRamp3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+
+      resultToPack.getPointOnA().scaleAdd(shapeA.getRadius(), resultToPack.getNormalOnA(), resultToPack.getPointOnA());
+
+      double distance = resultToPack.getSignedDistance() - shapeA.getRadius();
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
    }
 
    public static void evaluateSphere3DSphere3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
