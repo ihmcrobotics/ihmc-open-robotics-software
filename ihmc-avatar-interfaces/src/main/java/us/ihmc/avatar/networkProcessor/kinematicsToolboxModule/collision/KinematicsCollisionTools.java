@@ -300,7 +300,34 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DCylinder3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB,
                                                               ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, pointShape3DToCylinder3DEvaluator, pointShape3DFrameChanger, resultToPack);
+      FramePoint3D pointOnA = resultToPack.getPointOnA();
+      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FrameVector3D normalOnA = resultToPack.getNormalOnA();
+      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      pointOnA.changeFrame(frameB);
+
+      double distance = EuclidShapeTools.evaluatePoint3DCylinder3DCollision(pointOnA,
+                                                                            shapeB.getPosition(),
+                                                                            shapeB.getAxis(),
+                                                                            shapeB.getLength(),
+                                                                            shapeB.getRadius(),
+                                                                            pointOnB,
+                                                                            normalOnB);
+      pointOnB.setReferenceFrame(frameB);
+      normalOnA.setReferenceFrame(frameB);
+      normalOnB.setReferenceFrame(frameB);
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      normalOnA.setAndNegate(normalOnB);
+
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+      resultToPack.setFrameA(frameA);
+      resultToPack.setFrameB(frameB);
    }
 
    public static void evaluatePointShape3DEllipsoid3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB,
