@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
@@ -62,8 +61,7 @@ public class KSTStreamingState implements State
    private final YoDouble streamingStartTime;
    private final YoDouble streamingBlendingDuration;
    private final YoDouble solutionFilterBreakFrequency;
-   private KinematicsToolboxOutputStatus lastPublished;
-   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, fdRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
 
    private final YoPIDSE3Gains ikSolverGains;
 
@@ -121,7 +119,7 @@ public class KSTStreamingState implements State
       initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
-      fdRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+      outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
    }
 
    public void setOutputPublisher(OutputPublisher outputPublisher)
@@ -151,7 +149,6 @@ public class KSTStreamingState implements State
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
       resetFilter = true;
-      lastPublished = null;
    }
 
    @Override
@@ -219,27 +216,21 @@ public class KSTStreamingState implements State
 
          if (timeSinceLastMessageToController.getValue() >= publishingPeriod.getValue())
          {
-            KinematicsToolboxOutputStatus status;
-            fdRobotState.set(filteredRobotState);
-            fdRobotState.scaleVelocities(0.50);
-//            if (lastPublished != null)
-//               fdRobotState.setDesiredVelocitiesByFiniteDifference(lastPublished, filteredRobotState.getStatus(), publishingPeriod.getValue());
+            outputRobotState.set(filteredRobotState);
+            outputRobotState.scaleVelocities(0.50);
 
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
                double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
                double alphaDot = 1.0 / streamingBlendingDuration.getValue();
-               blendedRobotState.interpolate(initialRobotState.getStatus(), fdRobotState.getStatus(), alpha, alphaDot);
-               status = blendedRobotState.getStatus();
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(status));
+               blendedRobotState.interpolate(initialRobotState.getStatus(), outputRobotState.getStatus(), alpha, alphaDot);
+               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(blendedRobotState.getStatus()));
             }
             else
             {
-               status = fdRobotState.getStatus();
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(status));
+               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(outputRobotState.getStatus()));
             }
 
-            lastPublished = status;
             timeSinceLastMessageToController.set(0.0);
          }
       }
