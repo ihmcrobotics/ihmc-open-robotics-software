@@ -361,7 +361,25 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DPointShape3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB,
                                                                 ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, pointShape3DToPointShape3DEvaluator, pointShape3DFrameChanger, resultToPack);
+      FramePoint3D pointOnA = resultToPack.getPointOnA();
+      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FrameVector3D normalOnA = resultToPack.getNormalOnA();
+      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      pointOnA.changeFrame(frameB);
+      pointOnB.setIncludingFrame(frameB, shapeB);
+      normalOnA.setReferenceFrame(frameB);
+      normalOnB.setReferenceFrame(frameB);
+      normalOnA.sub(shapeB, shapeA);
+      normalOnB.sub(shapeA, shapeB);
+
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+      resultToPack.setShapesAreColliding(false);
+      resultToPack.setSignedDistance(pointOnA.distance(shapeB));
+      resultToPack.setFrameA(frameA);
+      resultToPack.setFrameB(frameB);
    }
 
    public static void evaluatePointShape3DRamp3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
