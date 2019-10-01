@@ -355,26 +355,42 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DEllipsoid3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB,
                                                                ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
    {
+      evaluatePoint3DEllipsoid3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+   }
+
+   private static void evaluatePoint3DEllipsoid3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ellipsoid3DReadOnly ellipsoid3D,
+                                                           ReferenceFrame ellipsoidFrame, KinematicsCollisionResult resultToPack)
+   {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
       FrameVector3D normalOnA = resultToPack.getNormalOnA();
       FrameVector3D normalOnB = resultToPack.getNormalOnB();
 
-      pointOnA.setIncludingFrame(frameA, shapeA);
-      shapeB.getPose().inverseTransform(pointOnA);
-      double distance = EuclidShapeTools.evaluatePoint3DEllipsoid3DCollision(pointOnA, shapeB.getRadii(), pointOnB, normalOnB);
-      shapeB.transformToWorld(pointOnB);
-      shapeB.transformToWorld(normalOnB);
+      pointOnA.setIncludingFrame(pointFrame, point3D);
+      pointOnA.changeFrame(ellipsoidFrame);
 
-      pointOnA.set(shapeA);
+      double pointInBBackupX = pointOnA.getX();
+      double pointInBBackupY = pointOnA.getY();
+      double pointInBBackupZ = pointOnA.getZ();
+
+      ellipsoid3D.getPose().inverseTransform(pointOnA);
+
+      double distance = EuclidShapeTools.evaluatePoint3DEllipsoid3DCollision(pointOnA, ellipsoid3D.getRadii(), pointOnB, normalOnB);
+      pointOnB.setReferenceFrame(ellipsoidFrame);
+      normalOnA.setReferenceFrame(ellipsoidFrame);
+      normalOnB.setReferenceFrame(ellipsoidFrame);
+      ellipsoid3D.transformToWorld(pointOnB);
+      ellipsoid3D.transformToWorld(normalOnB);
+
+      pointOnA.setIncludingFrame(ellipsoidFrame, pointInBBackupX, pointInBBackupY, pointInBBackupZ);
       normalOnA.setAndNegate(normalOnB);
 
       resultToPack.setShapesAreColliding(distance < 0.0);
       resultToPack.setSignedDistance(distance);
-      resultToPack.setShapeA(shapeA);
-      resultToPack.setShapeB(shapeB);
-      resultToPack.setFrameA(frameA);
-      resultToPack.setFrameB(frameB);
+      resultToPack.setFrameA(pointFrame);
+      resultToPack.setFrameB(ellipsoidFrame);
    }
 
    public static void evaluatePointShape3DPointShape3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB,
@@ -499,7 +515,15 @@ public class KinematicsCollisionTools
    public static void evaluateSphere3DEllipsoid3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
                                                            KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, sphere3DToEllipsoid3DEvaluator, sphere3DFrameChanger, resultToPack);
+      evaluatePoint3DEllipsoid3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+
+      resultToPack.getPointOnA().scaleAdd(shapeA.getRadius(), resultToPack.getNormalOnA(), resultToPack.getPointOnA());
+
+      double distance = resultToPack.getSignedDistance() - shapeA.getRadius();
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
    }
 
    public static void evaluateSphere3DRamp3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
