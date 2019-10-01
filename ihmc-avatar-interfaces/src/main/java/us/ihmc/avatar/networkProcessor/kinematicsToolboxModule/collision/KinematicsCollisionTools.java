@@ -23,6 +23,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.shape.tools.EuclidShapeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -236,7 +237,34 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DBox3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
                                                          KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, pointShape3DToBox3DEvaluator, pointShape3DFrameChanger, resultToPack);
+      FramePoint3D pointOnA = resultToPack.getPointOnA();
+      FramePoint3D pointOnB = resultToPack.getPointOnB();
+
+      FrameVector3D normalOnA = resultToPack.getNormalOnA();
+      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      pointOnA.changeFrame(frameB);
+
+      shapeB.getPose().inverseTransform(shapeA, pointOnA);
+      double distance = EuclidShapeTools.evaluatePoint3DBox3DCollision(pointOnA,
+                                                                       shapeB.getSize(),
+                                                                       pointOnB,
+                                                                       normalOnB);
+      pointOnB.setReferenceFrame(frameB);
+      normalOnB.setReferenceFrame(frameB);
+      normalOnA.setReferenceFrame(frameB);
+
+      shapeB.transformToWorld(pointOnB);
+      shapeB.transformToWorld(normalOnB);
+      pointOnA.setIncludingFrame(frameA, shapeA);
+      normalOnA.setAndNegate(normalOnB);
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+      resultToPack.setFrameA(frameA);
+      resultToPack.setFrameB(frameB);
    }
 
    public static void evaluatePointShape3DCapsule3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB,
