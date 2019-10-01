@@ -145,7 +145,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
-      toolboxController.setDefaultPrivilegedConfiguration(robotModel);
+      toolboxController.setInitialRobotConfiguration(robotModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -475,7 +475,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
       }
       initialFullRobotModel.updateFrames();
-      toolboxController.setDefaultPrivilegedConfigurationNameMap(newDefaultPrivilegedConfigurationMap(initialFullRobotModel));
+      toolboxController.setInitialRobotConfigurationNamedMap(newInitialConfigurationMap(initialFullRobotModel));
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       double comSafeMargin = toolboxController.getCenterOfMassSafeMargin().getValue();
@@ -540,7 +540,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       }
    }
 
-   private static Map<String, Double> newDefaultPrivilegedConfigurationMap(FullRobotModel robotModel)
+   private static Map<String, Double> newInitialConfigurationMap(FullRobotModel robotModel)
    {
       Map<String, Double> map = new HashMap<>();
       for (OneDoFJointBasics joint : robotModel.getOneDoFJoints())
