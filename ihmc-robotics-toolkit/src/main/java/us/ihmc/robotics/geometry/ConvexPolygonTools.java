@@ -929,24 +929,20 @@ public class ConvexPolygonTools
 
             if (vertex0IsAbove || i > 0)
             {
-               LogTools.debug("Adding v({})", i);
                croppedPolygonToPack.addVertex(polygonToCrop.getVertex(i));
             }
 
             if (vertexAfterIntersectionOne == nextIndex) // encounter 1st intersection, decisions to be made
             {
-               LogTools.debug("Adding i(0)");
                croppedPolygonToPack.addVertex(firstIntersectionToPack);
                if (vertex0IsAbove) // traverse from i(0) to i(1)
                {
-                  LogTools.debug("Adding i(1)");
                   croppedPolygonToPack.addVertex(secondIntersectionToPack);
                   i = vertexAfterIntersectionTwo - 1; // cut across polygon; the for loop i++ will immediately add 1 more
                }
             }
             else if (vertexAfterIntersectionTwo == nextIndex) // here, this is always the last to add
             {
-               LogTools.debug("Adding i(1)");
                croppedPolygonToPack.addVertex(secondIntersectionToPack);
                break;
             }
