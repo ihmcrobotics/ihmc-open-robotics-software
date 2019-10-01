@@ -279,34 +279,39 @@ public class KinematicsCollisionTools
    public static void evaluatePointShape3DCapsule3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB,
                                                              ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
    {
+      evaluatePoint3DCapsule3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+   }
+
+   private static void evaluatePoint3DCapsule3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Capsule3DReadOnly capsule3D,
+                                                         ReferenceFrame capsuleFrame, KinematicsCollisionResult resultToPack)
+   {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
       FrameVector3D normalOnA = resultToPack.getNormalOnA();
       FrameVector3D normalOnB = resultToPack.getNormalOnB();
 
-      pointOnA.setIncludingFrame(frameA, shapeA);
-      pointOnA.changeFrame(frameB);
+      pointOnA.setIncludingFrame(pointFrame, point3D);
+      pointOnA.changeFrame(capsuleFrame);
 
       double distance = EuclidShapeTools.evaluatePoint3DCapsule3DCollision(pointOnA,
-                                                                           shapeB.getPosition(),
-                                                                           shapeB.getAxis(),
-                                                                           shapeB.getLength(),
-                                                                           shapeB.getRadius(),
+                                                                           capsule3D.getPosition(),
+                                                                           capsule3D.getAxis(),
+                                                                           capsule3D.getLength(),
+                                                                           capsule3D.getRadius(),
                                                                            pointOnB,
                                                                            normalOnB);
-      pointOnB.setReferenceFrame(frameB);
-      normalOnA.setReferenceFrame(frameB);
-      normalOnB.setReferenceFrame(frameB);
+      pointOnB.setReferenceFrame(capsuleFrame);
+      normalOnA.setReferenceFrame(capsuleFrame);
+      normalOnB.setReferenceFrame(capsuleFrame);
 
-      pointOnA.setIncludingFrame(frameA, shapeA);
       normalOnA.setAndNegate(normalOnB);
 
       resultToPack.setShapesAreColliding(distance < 0.0);
       resultToPack.setSignedDistance(distance);
-      resultToPack.setShapeA(shapeA);
-      resultToPack.setShapeB(shapeB);
-      resultToPack.setFrameA(frameA);
-      resultToPack.setFrameB(frameB);
+      resultToPack.setFrameA(pointFrame);
+      resultToPack.setFrameB(capsuleFrame);
    }
 
    public static void evaluatePointShape3DCylinder3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB,
@@ -461,7 +466,15 @@ public class KinematicsCollisionTools
    public static void evaluateSphere3DCapsule3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
                                                          KinematicsCollisionResult resultToPack)
    {
-      evaluateFrameCollision(shapeA, frameA, shapeB, frameB, sphere3DToCapsule3DEvaluator, sphere3DFrameChanger, resultToPack);
+      evaluatePoint3DCapsule3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
+      resultToPack.setShapeA(shapeA);
+      resultToPack.setShapeB(shapeB);
+
+      resultToPack.getPointOnA().scaleAdd(shapeA.getRadius(), resultToPack.getNormalOnA(), resultToPack.getPointOnA());
+
+      double distance = resultToPack.getSignedDistance() - shapeA.getRadius();
+      resultToPack.setShapesAreColliding(distance < 0.0);
+      resultToPack.setSignedDistance(distance);
    }
 
    public static void evaluateSphere3DCylinder3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
