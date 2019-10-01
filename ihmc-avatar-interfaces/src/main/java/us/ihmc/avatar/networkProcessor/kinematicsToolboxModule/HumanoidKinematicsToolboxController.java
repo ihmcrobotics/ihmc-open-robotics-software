@@ -58,7 +58,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -251,7 +250,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return listOfControllableRigidBodies;
    }
 
-   public void setDefaultPrivilegedConfiguration(DRCRobotModel robotModel)
+   /**
+    * Convenience method for setting up the initial robot configuration using
+    * {@link DRCRobotModel#getDefaultRobotInitialSetup(double, double)}.
+    * 
+    * @param robotModel the robot model used to configure the initial configuration. The robot model
+    *                   should match the robot used in this solver.
+    */
+   public void setInitialRobotConfiguration(DRCRobotModel robotModel)
    {
       Map<OneDoFJointBasics, Double> privilegedConfiguration = new HashMap<>();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
@@ -264,7 +270,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          privilegedConfiguration.put(joint, q_priv);
       }
 
-      setDefaultPrivilegedConfiguration(privilegedConfiguration);
+      setInitialRobotConfiguration(privilegedConfiguration);
    }
 
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
@@ -301,7 +307,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
       }
 
-      if (defaultPrivilegedConfigurationMap != null)
+      if (initialRobotConfigurationMap != null)
       {
          /*
           * Default initial configuration was provided and is set in the super class. The goal here, is to

@@ -43,7 +43,7 @@ public class KinematicsToolboxModule extends ToolboxModule
                                                                             Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                                             yoGraphicsListRegistry,
                                                                             registry);
-      kinematicsToolBoxController.setDefaultPrivilegedConfiguration(robotModel);
+      kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }

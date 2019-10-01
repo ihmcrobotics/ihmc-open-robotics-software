@@ -194,7 +194,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Defines a robot configuration the this IK start from and also defines the privileged joint
     * configuration.
     */
-   protected TObjectDoubleHashMap<OneDoFJointBasics> defaultPrivilegedConfigurationMap = null;
+   protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
@@ -354,32 +354,42 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
-   public void setDefaultPrivilegedConfiguration(Map<OneDoFJointBasics, Double> defaultPrivilegedConfigurationMap)
+   /**
+    * Sets up the robot configuration this IK should start from when initializing.
+    * 
+    * @param initialRobotConfigurationMap the map from joint to initial joint position.
+    */
+   public void setInitialRobotConfiguration(Map<OneDoFJointBasics, Double> initialRobotConfigurationMap)
    {
-      if (defaultPrivilegedConfigurationMap == null)
+      if (initialRobotConfigurationMap == null)
       {
-         this.defaultPrivilegedConfigurationMap = null;
+         this.initialRobotConfigurationMap = null;
          return;
       }
 
-      this.defaultPrivilegedConfigurationMap = new TObjectDoubleHashMap<>();
-      defaultPrivilegedConfigurationMap.entrySet().forEach(entry -> this.defaultPrivilegedConfigurationMap.put(entry.getKey(), entry.getValue()));
+      this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
+      initialRobotConfigurationMap.entrySet().forEach(entry -> this.initialRobotConfigurationMap.put(entry.getKey(), entry.getValue()));
    }
 
-   public void setDefaultPrivilegedConfigurationNameMap(Map<String, Double> jointNameToPrivilegedPosition)
+   /**
+    * Sets up the robot configuration this IK should start from when initializing.
+    * 
+    * @param jointNameToInitialJointPosition the map from joint name to initial joint position.
+    */
+   public void setInitialRobotConfigurationNamedMap(Map<String, Double> jointNameToInitialJointPosition)
    {
-      if (jointNameToPrivilegedPosition == null)
+      if (jointNameToInitialJointPosition == null)
       {
-         this.defaultPrivilegedConfigurationMap = null;
+         this.initialRobotConfigurationMap = null;
          return;
       }
-      this.defaultPrivilegedConfigurationMap = new TObjectDoubleHashMap<>();
+      this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
 
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
-         Double q_priv = jointNameToPrivilegedPosition.get(joint.getName());
+         Double q_priv = jointNameToInitialJointPosition.get(joint.getName());
          if (q_priv != null)
-            defaultPrivilegedConfigurationMap.put(joint, q_priv);
+            initialRobotConfigurationMap.put(joint, q_priv);
       }
    }
 
@@ -569,9 +579,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-      if (defaultPrivilegedConfigurationMap != null)
+      if (initialRobotConfigurationMap != null)
       {
-         defaultPrivilegedConfigurationMap.forEachEntry((joint, q_priv) ->
+         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
          {
             joint.setQ(q_priv);
             return true;
