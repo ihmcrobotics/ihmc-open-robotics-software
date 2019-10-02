@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCutter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcavePolygonTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -57,7 +57,7 @@ public class PlanarRegionsListCutTool
          concaveHull.addVertex(point2D);
       }
 
-      List<ConcaveHull> resultingConcaveHulls = ConcavePolygonTools.cutPolygonToLeftOfLine(concaveHull, cuttingLine2D);
+      List<ConcaveHull> resultingConcaveHulls = ConcaveHullCutter.cutPolygonToLeftOfLine(concaveHull, cuttingLine2D);
 
       ArrayList<PlanarRegion> resultingRegions = new ArrayList<>();
 
