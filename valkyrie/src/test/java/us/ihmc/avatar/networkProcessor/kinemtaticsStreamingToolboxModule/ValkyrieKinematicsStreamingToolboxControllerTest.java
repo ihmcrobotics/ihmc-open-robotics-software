@@ -63,7 +63,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       YoVariableRegistry spyRegistry = new YoVariableRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
-      
+
       setupWithWalkingController(new RobotController()
       {
          private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
@@ -155,7 +155,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
 
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(true));
+      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(true, 0.125));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       assertTrue(success);
@@ -174,8 +174,9 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       assertNotEquals(0.0, handPositionMeanError.getValue());
       assertNotEquals(0.0, handOrientationMeanError.getValue());
       // TODO Pretty bad assertions here, need to figure out how to improve this test later.
-      assertTrue(handPositionMeanError.getValue() < 0.11);
-      assertTrue(handOrientationMeanError.getValue() < 0.20);
+      System.out.println("Position error avg: " + handPositionMeanError.getValue() + ", orientation error avg: " + handOrientationMeanError.getValue());
+      assertTrue(handPositionMeanError.getValue() < 0.10, "Mean position error is: " + handPositionMeanError.getValue());
+      assertTrue(handOrientationMeanError.getValue() < 0.20, "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
    private void wakeupToolbox()
@@ -212,11 +213,10 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       }, 0, (int) (dt * 1000), TimeUnit.MILLISECONDS);
    }
 
-   private DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(boolean streamToController)
+   private DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(boolean streamToController, double frequency)
    {
       FullHumanoidRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       double circleRadius = 0.25;
-      double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 0.9));
       SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
             : new Vector3D());
@@ -232,7 +232,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
             for (RobotSide robotSide : RobotSide.values)
             {
                FramePoint3D position = circlePositionAt(time,
-                                                        robotSide.negateIfRightSide(circleFrequency),
+                                                        robotSide.negateIfRightSide(frequency),
                                                         circleRadius,
                                                         circleCenters.get(robotSide),
                                                         circleCenterVelocities.get(robotSide));
