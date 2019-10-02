@@ -480,6 +480,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private void addJointLimitReductionCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
       JointLimitReductionCommand jointLimitReductionCommand = bufferToPack.addJointLimitReductionCommand();
+      jointLimitReductionCommand.clear();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
@@ -540,6 +542,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (signedDistanceToEdge > -distanceThreshold)
          {
             LinearMomentumConvexConstraint2DCommand command = bufferToPack.addLinearMomentumConvexConstraint2DCommand();
+            command.clear();
             Vector2D h0 = command.addLinearMomentumConstraintVertex();
             Vector2D h1 = command.addLinearMomentumConstraintVertex();
             h0.sub(vertex, centerOfMass);
