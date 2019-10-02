@@ -142,9 +142,9 @@ public class WholeBodyInverseKinematicsSolver
 
    public void submitInverseKinematicsCommandList(InverseKinematicsCommandList inverseKinematicsCommandList)
    {
-      while (inverseKinematicsCommandList.getNumberOfCommands() > 0)
+      for (int commandIndex = 0; commandIndex < inverseKinematicsCommandList.getNumberOfCommands(); commandIndex++)
       {
-         InverseKinematicsCommand<?> command = inverseKinematicsCommandList.pollCommand();
+         InverseKinematicsCommand<?> command = inverseKinematicsCommandList.getCommand(commandIndex);
 
          switch (command.getCommandType())
          {
@@ -183,6 +183,7 @@ public class WholeBodyInverseKinematicsSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+      inverseKinematicsCommandList.clear();
    }
 
    private void recordMomentumRate(MomentumCommand command)

@@ -31,13 +31,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -94,11 +93,6 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
 
    /**
-    * This name is used with the {@code Map} {@link #userFeedbackCommands} to keep track of the active
-    * set of commands provided by the caller.
-    */
-   private static final String centerOfMassName = "CenterOfMass";
-   /**
     * Indicates the duration of a control tick. It should match the thread period in
     * {@link ToolboxModule}.
     */
@@ -136,7 +130,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The controller core command is the single object used to pass the desired inputs to the
     * controller core.
     */
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+   private final ControllerCoreCommandBuffer controllerCoreCommand = new ControllerCoreCommandBuffer();
    /**
     * This is where the magic is happening. The controller is responsible for performing feedback
     * control to reduce the difference between the desireds sent to the
@@ -224,12 +218,9 @@ public class KinematicsToolboxController extends ToolboxController
     */
    protected final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
 
-   /**
-    * Map of the commands requested during two initialization phases by the user. It used to memorize
-    * active commands such that the caller does not have to send the same commands every control tick
-    * of this solver.
-    */
-   private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
+   private boolean isUserControllingCenterOfMass = false;
+   private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
+   private final RecyclingArrayList<SpatialFeedbackControlCommand> userRigidBodyFeedbackControlCommands = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
 
    /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
@@ -303,6 +294,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
+      controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
@@ -568,7 +560,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected boolean initializeInternal()
    {
-      userFeedbackCommands.clear();
+      clearUserCommands();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
@@ -599,6 +591,12 @@ public class KinematicsToolboxController extends ToolboxController
       return true;
    }
 
+   public void clearUserCommands()
+   {
+      isUserControllingCenterOfMass = false;
+      userRigidBodyFeedbackControlCommands.clear();
+   }
+
    /**
     * This is the control loop called periodically only when the user requested a solution for a
     * desired set of inputs.
@@ -610,27 +608,29 @@ public class KinematicsToolboxController extends ToolboxController
    public void updateInternal()
    {
       threadTimer.start();
-      // Updating the reference frames and twist calculator.
 
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
 
       // Clear the map to forget the user commands previously submitted.
       if (!preserveUserCommandHistory.getValue())
-         userFeedbackCommands.clear();
+         clearUserCommands();
 
-      FeedbackControlCommandList userCommands = consumeCommands();
-      numberOfActiveCommands.set(userCommands.getNumberOfCommands());
-      controllerCoreCommand.addFeedbackControlCommand(userCommands);
-      controllerCoreCommand.addFeedbackControlCommand(getAdditionalFeedbackControlCommands());
+      FeedbackControlCommandBuffer feedbackControlCommandBuffer = controllerCoreCommand.getFeedbackControlCommandList();
+      InverseKinematicsCommandBuffer inverseKinematicsCommandBuffer = controllerCoreCommand.getInverseKinematicsCommandList();
+      consumeUserCommands(feedbackControlCommandBuffer);
+      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + (isUserControllingCenterOfMass ? 1 : 0));
+      getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
-      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
-      controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
-      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisionResults));
+      inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
+      PrivilegedConfigurationCommand privilegedConfigurationCommand = privilegedConfigurationCommandReference.getAndSet(null);
+      if (privilegedConfigurationCommand != null)
+         inverseKinematicsCommandBuffer.addPrivilegedConfigurationCommand().set(privilegedConfigurationCommand);
+      getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
+      computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
 
       // Save all commands used for this control tick for computing the solution quality.
-      FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+      FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(feedbackControlCommandBuffer);
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
@@ -683,9 +683,10 @@ public class KinematicsToolboxController extends ToolboxController
     * Checking if there is any new command available, in which case they polled from the
     * {@link #commandInputManager} and processed to update the state of the current optimization run.
     *
-    * @return the new list of feedback control command to be executed for this control tick.
+    * @param the buffer used to stored the feedback control commands to be executed for this control
+    *            tick.
     */
-   private FeedbackControlCommandList consumeCommands()
+   private void consumeUserCommands(FeedbackControlCommandBuffer commandBufferToPack)
    {
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
       {
@@ -731,33 +732,52 @@ public class KinematicsToolboxController extends ToolboxController
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         userFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains()));
+         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains(), userCoMFeedbackControlCommand);
+         isUserControllingCenterOfMass = true;
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
       {
          List<KinematicsToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxRigidBodyCommand.class);
+
          for (int i = 0; i < commands.size(); i++)
          {
-            SpatialFeedbackControlCommand rigidBodyCommand = KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, gains);
+            RigidBodyBasics endEffector = commands.get(i).getEndEffector();
+            SpatialFeedbackControlCommand rigidBodyCommand = null;
+
+            for (int bufferIndex = 0; bufferIndex < userRigidBodyFeedbackControlCommands.size(); bufferIndex++)
+            {
+               SpatialFeedbackControlCommand candidate = userRigidBodyFeedbackControlCommands.get(bufferIndex);
+               if (candidate.getEndEffector() == endEffector)
+                  rigidBodyCommand = candidate;
+            }
+
+            if (rigidBodyCommand == null)
+               rigidBodyCommand = userRigidBodyFeedbackControlCommands.add();
+
+            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, gains, rigidBodyCommand);
             rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
-            String endEffectorName = rigidBodyCommand.getEndEffector().getName();
-            userFeedbackCommands.put(endEffectorName, rigidBodyCommand);
          }
       }
 
-      FeedbackControlCommandList inputs = new FeedbackControlCommandList();
+      // TODO fix the doc
       /*
        * By using the map, we ensure that there is only one command per end-effector (including the center
        * of mass). The map is also useful for remembering commands received during the previous control
        * ticks of the same run.
        */
-      userFeedbackCommands.values().forEach(inputs::addCommand);
-      return inputs;
+      if (isUserControllingCenterOfMass)
+         commandBufferToPack.addCenterOfMassFeedbackControlCommand().set(userCoMFeedbackControlCommand);
+
+      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      {
+         commandBufferToPack.addSpatialFeedbackControlCommand().set(userRigidBodyFeedbackControlCommands.get(i));
+      }
    }
 
    /**
-    * Evaluates the collision between each possible pair of collidables that can collide and stores the result in {@link #collisionResults}.
+    * Evaluates the collision between each possible pair of collidables that can collide and stores the
+    * result in {@link #collisionResults}.
     */
    private void computeCollisions()
    {
@@ -800,16 +820,15 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Calculates and sets up the list of constraints to submit to the solver to prevent collisions.
     * 
-    * @param collisions the previously computed collisions.
-    * @return the constraints to submit to the controller core.
+    * @param collisions   the previously computed collisions.
+    * @param bufferToPack buffer used to store the constraints to submit to the controller core.
     */
-   public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
+   public void computeCollisionCommands(List<KinematicsCollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
    {
       if (collisions.isEmpty() || !enableCollisionAvoidance.getValue())
-         return null;
+         return;
 
       int collisionIndex = 0;
-      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
 
       for (int i = 0; i < collisions.size(); i++)
       {
@@ -826,7 +845,7 @@ public class KinematicsToolboxController extends ToolboxController
          if (collisionIndex < numberOfCollisionsToVisualize)
             collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
-         SpatialVelocityCommand command = new SpatialVelocityCommand();
+         SpatialVelocityCommand command = bufferToPack.addSpatialVelocityCommand();
          command.set(bodyA, collidableB.getRigidBody());
          command.getControlFramePose().setFromReferenceFrame(collisionFrame);
          SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
@@ -836,12 +855,9 @@ public class KinematicsToolboxController extends ToolboxController
 
          command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
          command.getDesiredLinearVelocity().setZ(sigmaDot);
-         commandList.addCommand(command);
 
          collisionIndex++;
       }
-
-      return commandList;
    }
 
    /**
@@ -921,17 +937,17 @@ public class KinematicsToolboxController extends ToolboxController
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
-      return isUserControllingRigidBody(rigidBody.getName());
-   }
-
-   public boolean isUserControllingRigidBody(String rigidBodyName)
-   {
-      return userFeedbackCommands.containsKey(rigidBodyName);
+      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      {
+         if (userRigidBodyFeedbackControlCommands.get(i).getEndEffector() == rigidBody)
+            return true;
+      }
+      return false;
    }
 
    public boolean isUserControllingCenterOfMass()
    {
-      return userFeedbackCommands.containsKey(centerOfMassName);
+      return isUserControllingCenterOfMass;
    }
 
    public YoPIDSE3Gains getDefaultGains()
@@ -939,14 +955,12 @@ public class KinematicsToolboxController extends ToolboxController
       return gains;
    }
 
-   protected FeedbackControlCommandList getAdditionalFeedbackControlCommands()
+   protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      return null;
    }
 
-   protected InverseKinematicsCommandList getAdditionalInverseKinematicsCommands()
+   protected void getAdditionalInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
-      return null;
    }
 
    @Override

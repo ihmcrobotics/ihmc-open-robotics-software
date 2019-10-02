@@ -64,11 +64,17 @@ public class KinematicsToolboxHelper
    static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains)
    {
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
-      feedbackControlCommand.setGains(gains);
-      feedbackControlCommand.setWeightsForSolver(command.getWeightVector());
-      feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommand.setInverseKinematics(command.getDesiredPosition(), zeroVector3D);
+      consumeCenterOfMassCommand(command, gains, feedbackControlCommand);
       return feedbackControlCommand;
+   }
+
+   static void consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains,
+                                                  CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
+   {
+      feedbackControlCommandToPack.setGains(gains);
+      feedbackControlCommandToPack.setWeightsForSolver(command.getWeightVector());
+      feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
+      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), zeroVector3D);
    }
 
    /**
@@ -83,13 +89,19 @@ public class KinematicsToolboxHelper
    static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
-      feedbackControlCommand.set(base, command.getEndEffector());
-      feedbackControlCommand.setGains(gains);
-      feedbackControlCommand.setWeightMatrixForSolver(command.getWeightMatrix());
-      feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommand.setInverseKinematics(command.getDesiredPose(), zeroVector6D);
-      feedbackControlCommand.setControlFrameFixedInEndEffector(command.getControlFramePose());
+      consumeRigidBodyCommand(command, base, gains, feedbackControlCommand);
       return feedbackControlCommand;
+   }
+
+   public static void consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains,
+                                              SpatialFeedbackControlCommand feedbackControlCommandToPack)
+   {
+      feedbackControlCommandToPack.set(base, command.getEndEffector());
+      feedbackControlCommandToPack.setGains(gains);
+      feedbackControlCommandToPack.setWeightMatrixForSolver(command.getWeightMatrix());
+      feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
+      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPose(), zeroVector6D);
+      feedbackControlCommandToPack.setControlFrameFixedInEndEffector(command.getControlFramePose());
    }
 
    /**
