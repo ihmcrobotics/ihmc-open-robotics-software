@@ -610,6 +610,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PelvisTrajectoryMessage.class);
       registerPacketField(SpineTrajectoryMessage.class);
       registerPacketField(FootTrajectoryMessage.class);
+      registerPacketField(NeckTrajectoryMessage.class);
       registerPacketField(HeadTrajectoryMessage.class);
       registerPacketField(SE3TrajectoryMessage.class);
       registerPacketField(SO3TrajectoryMessage.class);
