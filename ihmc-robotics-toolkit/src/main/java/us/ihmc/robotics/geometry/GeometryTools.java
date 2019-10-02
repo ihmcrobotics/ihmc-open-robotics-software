@@ -7,7 +7,10 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Line3DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -453,6 +456,46 @@ public class GeometryTools
       else
          intersectionToPack.set(tempIntersection.get().getX(), tempIntersection.get().getY(), intersectionToPack.getZ());
       return success;
+   }
+
+   /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
+    *
+    * @param plane1
+    * @param plane2
+    * @return line of intersection, or null if planes are parallel
+    */
+   public static Line3D getIntersectionBetweenTwoPlanes(Plane3D plane1, Plane3D plane2)
+   {
+      Line3D intersection = new Line3D();
+      boolean parallel = !getIntersectionBetweenTwoPlanes(plane1, plane2, intersection);
+      if (parallel)
+      {
+         return null;
+      }
+      else
+      {
+         return intersection;
+      }
+   }
+
+   /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
+    *
+    * @param plane1
+    * @param plane2
+    * @param intersectionToPack
+    * @return success (not parallel)
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(Plane3D plane1, Plane3D plane2, Line3DBasics intersectionToPack)
+   {
+      return EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(plane1.getPoint(),
+                                                                plane1.getNormal(),
+                                                                plane2.getPoint(),
+                                                                plane2.getNormal(),
+                                                                1e-8,
+                                                                intersectionToPack.getPoint(),
+                                                                intersectionToPack.getDirection());
    }
 
    /**
