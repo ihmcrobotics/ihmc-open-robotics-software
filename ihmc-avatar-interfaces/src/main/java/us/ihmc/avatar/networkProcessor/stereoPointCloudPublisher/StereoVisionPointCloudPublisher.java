@@ -237,8 +237,6 @@ public class StereoVisionPointCloudPublisher
             return;
       }
 
-      pointCloudData.applyTransform(transformToWorld);
-
       StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
