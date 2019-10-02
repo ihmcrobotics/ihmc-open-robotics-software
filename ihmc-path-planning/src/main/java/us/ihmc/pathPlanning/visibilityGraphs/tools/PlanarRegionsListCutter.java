@@ -40,7 +40,7 @@ public class PlanarRegionsListCutter
    }
 
    /**
-    * Cut a planar region by a plane in 3D world; keeping the pert "above" the plane. (i.e. In the direction the normal points)
+    * Cut a planar region by a plane in 3D world; keeping the part "above" the plane. (i.e. In the direction the normal points)
     *
     * @param plane
     * @param region
