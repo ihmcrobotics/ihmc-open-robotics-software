@@ -29,31 +29,30 @@ public class CircularArrayList<E>
 
    /**
     * Moves the zero point of the circular list by spin amount.
+    *
+    * "Using Cyclic Replacements" approach from https://leetcode.com/articles/rotate-array/
+    *
+    * @param spinAmount
     */
    public void reindexTo(int spinAmount)
    {
-      int wrappedSpinAmount = wrapIndex(spinAmount);
-
-      ArrayList<E> reindexedList = new ArrayList<>(list.size());
-
-      int i = 0;
-      boolean startAdding = false;
-      while (reindexedList.size() < list.size())
+      spinAmount = spinAmount % list.size();
+      int count = 0;
+      for (int start = 0; count < list.size(); start++)
       {
-         if (!startAdding && i == wrappedSpinAmount)
+         int current = start;
+         E prev = list.get(start);
+         do
          {
-            startAdding = true;
+            int next = (current + spinAmount) % list.size();
+            E temp = list.get(next);
+            list.set(next, prev);
+            prev = temp;
+            current = next;
+            count++;
          }
-
-         if (startAdding)
-         {
-            reindexedList.add(list.get(i));
-         }
-
-         i = getNextIndex(i);
+         while (start != current);
       }
-
-      list = reindexedList;
    }
 
    public int wrapIndex(int index)
