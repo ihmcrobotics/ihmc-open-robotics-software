@@ -43,6 +43,16 @@ public class PlanarRegionsList
       regions.add(region);
    }
 
+   public void addPlanarRegions(List<PlanarRegion> regions)
+   {
+      this.regions.addAll(regions);
+   }
+
+   public void addPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      regions.addAll(planarRegionsList.getPlanarRegionsAsList());
+   }
+
    /**
     * Clears the planar regions list.
     */
