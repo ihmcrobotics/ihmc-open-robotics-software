@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
+package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
 import us.ihmc.robotics.geometry.PlanarRegion;
 
