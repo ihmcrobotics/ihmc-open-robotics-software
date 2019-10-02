@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.geometry.ConvexPolygonCropResult;
+import us.ihmc.robotics.geometry.ConvexPolygonCutResult;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
 import java.util.*;
@@ -59,10 +59,10 @@ public class ConcavePolygonTools
          }
          convexPolygonToCrop.update();
          ConvexPolygon2D croppedPolygonToPack = new ConvexPolygon2D();
-         ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(convexPolygonToCrop,
+         ConvexPolygonCutResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(convexPolygonToCrop,
                                                                                     cuttingLine,
                                                                                     croppedPolygonToPack);
-         if (result != ConvexPolygonCropResult.REMOVE_ALL)
+         if (result != ConvexPolygonCutResult.REMOVE_ALL)
          {
             ConcaveHull concaveHullToReturn = new ConcaveHull(croppedPolygonToPack.getVertexBufferView());
             resultingConcaveHulls.add(concaveHullToReturn);
