@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -241,6 +242,15 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
    private final RecyclingArrayList<KinematicsCollisionResult> collisionResults = new RecyclingArrayList<>(KinematicsCollisionResult::new);
+   private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(new Supplier<KinematicsCollisionFrame>()
+   {
+      int collisionIndex = 0;
+      @Override
+      public KinematicsCollisionFrame get()
+      {
+         return new KinematicsCollisionFrame("collisionFrame" + (collisionIndex++), worldFrame);
+      }
+   });
    /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
@@ -250,13 +260,13 @@ public class KinematicsToolboxController extends ToolboxController
    /** Sets the maximum number of collisions to create YoVariables for. */
    private final int numberOfCollisionsToVisualize = 20;
    /** Debug variable. */
-   private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
+   private final YoDouble[] yoCollisionDistances = new YoDouble[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] yoCollisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] yoCollisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePose3D[] collisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
+   private final YoFramePose3D[] yoCollisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
    /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
 
@@ -340,10 +350,10 @@ public class KinematicsToolboxController extends ToolboxController
          yoGraphicsListRegistry.registerYoGraphic("Collisions",
                                                   new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
 
-         collisionDistances[i] = collisionDistance;
-         collisionPointAs[i] = collisionPointA;
-         collisionPointBs[i] = collisionPointB;
-         collisionFramePoses[i] = collisionFramePose;
+         yoCollisionDistances[i] = collisionDistance;
+         yoCollisionPointAs[i] = collisionPointA;
+         yoCollisionPointBs[i] = collisionPointB;
+         yoCollisionFramePoses[i] = collisionFramePose;
       }
    }
 
@@ -807,9 +817,9 @@ public class KinematicsToolboxController extends ToolboxController
 
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
-               collisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
-               collisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
-               collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+               yoCollisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
+               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
+               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
             }
 
             collisionIndex++;
@@ -829,6 +839,7 @@ public class KinematicsToolboxController extends ToolboxController
          return;
 
       int collisionIndex = 0;
+      collisionFrames.clear();
 
       for (int i = 0; i < collisions.size(); i++)
       {
@@ -841,9 +852,10 @@ public class KinematicsToolboxController extends ToolboxController
          double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
 
-         ReferenceFrame collisionFrame = KinematicsToolboxHelper.collisionFrame(collision, true, "collisionFrame" + collisionIndex);
+         KinematicsCollisionFrame collisionFrame = collisionFrames.add();
+         collisionFrame.update(collision, true);
          if (collisionIndex < numberOfCollisionsToVisualize)
-            collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
+            yoCollisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
          SpatialVelocityCommand command = bufferToPack.addSpatialVelocityCommand();
          command.set(bodyA, collidableB.getRigidBody());
