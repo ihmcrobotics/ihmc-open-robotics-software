@@ -21,10 +21,9 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
@@ -408,14 +407,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * is not created.
     * </p>
     *
-    * @return the commands for holding the support foot/feet in place.
+    * @param bufferToPack the buffer used to store the commands for holding the support foot/feet in
+    *                     place.
     */
-   private FeedbackControlCommand<?> createHoldSupportFootCommands()
+   private void addHoldSupportFootCommands(FeedbackControlCommandBuffer bufferToPack)
    {
       if (!holdSupportFootPose.getBooleanValue())
-         return null;
-
-      FeedbackControlCommandList inputs = new FeedbackControlCommandList();
+         return;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -430,15 +428,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          FramePose3D poseToHold = new FramePose3D(initialFootPoses.get(robotSide));
 
-         SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
+         SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
          feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
          feedbackControlCommand.setGains(getDefaultGains());
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.setInverseKinematics(poseToHold, KinematicsToolboxHelper.zeroVector6D);
-         inputs.addCommand(feedbackControlCommand);
       }
-      return inputs;
    }
 
    /**
@@ -450,39 +446,40 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * {@code null}.
     * </p>
     *
-    * @return the commands for holding the center of mass x and y coordinates in place.
+    * @param bufferToPack the buffer used to store the command for holding the center of mass x and y
+    *                     coordinates in place.
     */
-   private FeedbackControlCommand<?> createHoldCenterOfMassXYCommand()
+   private void addHoldCenterOfMassXYCommand(FeedbackControlCommandBuffer bufferToPack)
    {
       if (!holdCenterOfMassXYPosition.getBooleanValue())
-         return null;
+         return;
 
       // Do not hold the CoM position if the user is already controlling it.
       if (isUserControllingCenterOfMass())
       {
          holdCenterOfMassXYPosition.set(false);
-         return null;
+         return;
       }
 
       FramePoint3D positionToHold = new FramePoint3D(initialCenterOfMassPosition);
 
-      CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
+      CenterOfMassFeedbackControlCommand feedbackControlCommand = bufferToPack.addCenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(getDefaultGains().getPositionGains());
       feedbackControlCommand.setWeightForSolver(momentumWeight.getDoubleValue());
       feedbackControlCommand.setSelectionMatrixForLinearXYControl();
       feedbackControlCommand.setInverseKinematics(positionToHold, new FrameVector3D());
-      return feedbackControlCommand;
    }
 
    /**
     * Creates and sets up the {@code JointLimitReductionCommand} from the map
     * {@link #legJointLimitReductionFactors}.
     *
-    * @return the command for reducing the allowed range of motion of the leg joints.
+    * @param bufferToPack the buffer used to store the command for reducing the allowed range of motion
+    *                     of the leg joints.
     */
-   private JointLimitReductionCommand createJointLimitReductionCommand()
+   private void addJointLimitReductionCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
-      JointLimitReductionCommand jointLimitReductionCommand = new JointLimitReductionCommand();
+      JointLimitReductionCommand jointLimitReductionCommand = bufferToPack.addJointLimitReductionCommand();
       for (RobotSide robotSide : RobotSide.values)
       {
          for (LegJointName legJointName : desiredFullRobotModel.getRobotSpecificJointNames().getLegJointNames())
@@ -492,19 +489,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             jointLimitReductionCommand.addReductionFactor(joint, reductionFactor);
          }
       }
-      return jointLimitReductionCommand;
    }
 
    /**
     * Computes the set of constraints for the momentum x and y components such that the center of mass
     * is guaranteed to remain above the shrunken support polygon.
     * 
-    * @return the constraints to submit to the controller core.
+    * @param bufferToPack the buffer used to store the constraints to submit to the controller core.
     */
-   private InverseKinematicsCommandList createLinearMomentumConvexConstraint2DCommand()
+   private void addLinearMomentumConvexConstraint2DCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
       if (!enableSupportPolygonConstraint.getValue() || latestCapturabilityBasedStatusReference.get() == null)
-         return null;
+         return;
 
       ConvexPolygon2D newSupportPolygon = new ConvexPolygon2D();
       newSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(latestCapturabilityBasedStatusReference.get().getLeftFootSupportPolygon2d()));
@@ -533,7 +529,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       FramePoint2D centerOfMass = new FramePoint2D(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
 
-      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
       double distanceThreshold = 0.25 * centerOfMassSafeMargin.getValue();
 
       for (int i = 0; i < shrunkSupportPolygonVertices.size(); i++)
@@ -544,18 +539,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          if (signedDistanceToEdge > -distanceThreshold)
          {
-            LinearMomentumConvexConstraint2DCommand command = new LinearMomentumConvexConstraint2DCommand();
+            LinearMomentumConvexConstraint2DCommand command = bufferToPack.addLinearMomentumConvexConstraint2DCommand();
             Vector2D h0 = command.addLinearMomentumConstraintVertex();
             Vector2D h1 = command.addLinearMomentumConstraintVertex();
             h0.sub(vertex, centerOfMass);
             h1.sub(nextVertex, centerOfMass);
             h0.scale(robotMass / updateDT);
             h1.scale(robotMass / updateDT);
-            commandList.addCommand(command);
          }
       }
-
-      return commandList;
    }
 
    @Override
@@ -586,21 +578,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    @Override
-   protected FeedbackControlCommandList getAdditionalFeedbackControlCommands()
+   protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      FeedbackControlCommandList commands = new FeedbackControlCommandList();
-      commands.addCommand(createHoldSupportFootCommands());
-      commands.addCommand(createHoldCenterOfMassXYCommand());
-      return commands;
+      addHoldSupportFootCommands(bufferToPack);
+      addHoldCenterOfMassXYCommand(bufferToPack);
    }
 
    @Override
-   protected InverseKinematicsCommandList getAdditionalInverseKinematicsCommands()
+   protected void getAdditionalInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
-      InverseKinematicsCommandList commands = new InverseKinematicsCommandList();
-      commands.addCommand(createJointLimitReductionCommand());
-      commands.addCommand(createLinearMomentumConvexConstraint2DCommand());
-      return commands;
+      addJointLimitReductionCommand(bufferToPack);
+      addLinearMomentumConvexConstraint2DCommand(bufferToPack);
    }
 
    public YoDouble getMomentumWeight()
