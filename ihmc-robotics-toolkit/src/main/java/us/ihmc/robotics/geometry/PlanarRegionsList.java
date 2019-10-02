@@ -412,7 +412,7 @@ public class PlanarRegionsList
       return planarRegionsList;
    }
 
-   public static PlanarRegionsList flatGround(double size)
+   public static PlanarRegionsList flatGround(double size, RigidBodyTransform transform)
    {
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region
       double halfSize = size / 2.0;
@@ -421,7 +421,7 @@ public class PlanarRegionsList
       convexPolygon.addVertex(-halfSize, -halfSize);
       convexPolygon.addVertex(halfSize, -halfSize);
       convexPolygon.update();
-      PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), convexPolygon);
+      PlanarRegion groundPlane = new PlanarRegion(transform, convexPolygon);
       return new PlanarRegionsList(groundPlane);
    }
 }
