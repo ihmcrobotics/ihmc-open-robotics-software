@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +13,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMerger;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
@@ -96,9 +96,9 @@ public class PlanarRegionSLAM
                }
 
                ArrayList<PlanarRegion> mergedMapPlanarRegions = ConcaveHullMerger.mergePlanarRegions(mapPlanarRegion,
-                                                                                         newRegion.copy(),
-                                                                                         parameters.getMaximumPointProjectionDistance(),
-                                                                                         listener);
+                                                                                                     newRegion.copy(),
+                                                                                                     parameters.getMaximumPointProjectionDistance(),
+                                                                                                     listener);
 
                if (mergedMapPlanarRegions == null)
                {
