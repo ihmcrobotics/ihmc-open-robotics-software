@@ -32,7 +32,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
@@ -1120,9 +1119,9 @@ public class ConvexPolygonToolsTest
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
+      ConvexPolygonCutResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
 
-      Assertions.assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
+      Assertions.assertEquals(result, ConvexPolygonCutResult.CUT, "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
@@ -1133,7 +1132,7 @@ public class ConvexPolygonToolsTest
       aboveYAxisRectangle.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
    }
 
    @Test
@@ -1152,9 +1151,9 @@ public class ConvexPolygonToolsTest
 
       // cut it above a line
       ConvexPolygon2D croppedResult = new ConvexPolygon2D();
-      ConvexPolygonCropResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
+      ConvexPolygonCutResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
 
-      Assertions.assertEquals(result, ConvexPolygonCropResult.CUT, "supposed to cut");
+      Assertions.assertEquals(result, ConvexPolygonCutResult.CUT, "supposed to cut");
 
       // create the ideal result
       ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
@@ -1165,7 +1164,7 @@ public class ConvexPolygonToolsTest
       aboveYAxisRectangle.update();
 
       // assert equal
-      assertTrue(croppedResult.epsilonEquals(aboveYAxisRectangle, 1e-7));
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
    }
 
    @Test

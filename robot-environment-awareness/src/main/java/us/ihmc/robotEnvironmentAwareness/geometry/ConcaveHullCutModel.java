@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
+import us.ihmc.tools.lists.CircularArrayList;
 
 import java.util.*;
 
