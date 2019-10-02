@@ -165,6 +165,7 @@ public class KinematicsToolboxController extends ToolboxController
     * error for the end-effectors (center of mass included) being actively controlled.
     */
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
+   private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
 
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
@@ -245,6 +246,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(new Supplier<KinematicsCollisionFrame>()
    {
       int collisionIndex = 0;
+
       @Override
       public KinematicsCollisionFrame get()
       {
@@ -651,7 +653,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore.compute();
 
       // Calculating the solution quality based on sum of all the commands' tracking error.
-      solutionQuality.set(KinematicsToolboxHelper.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
+      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
