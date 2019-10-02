@@ -193,6 +193,8 @@ public class WholeBodyTrajectoryPointCalculator
       for (int i = 0; i < robotConfigurations.size(); i++)
       {
          KinematicsToolboxOutputStatus keyFrameSolution = robotConfigurations.get(i);
+         keyFrameSolution.getDesiredJointVelocities().resetQuick();
+
          for (String jointName : jointNames)
          {
             float wayPointVelocity = (float) jointNameToTrajectoryHolderMap.get(jointName).getWaypointVelocity(i);
