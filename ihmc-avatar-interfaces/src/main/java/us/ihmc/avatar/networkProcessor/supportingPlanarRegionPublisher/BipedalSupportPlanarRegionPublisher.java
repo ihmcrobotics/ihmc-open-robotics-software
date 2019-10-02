@@ -38,14 +38,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class BipedalSupportPlanarRegionPublisher
 {
-   private static final double defaultScaleFactor = 2.0;
+   public static final double defaultScaleFactor = 2.0;
 
    private static final int LEFT_FOOT_INDEX = 0;
    private static final int RIGHT_FOOT_INDEX = 1;
@@ -80,14 +77,21 @@ public class BipedalSupportPlanarRegionPublisher
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           (NewMessageListener<CapturabilityBasedStatus>) subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           CapturabilityBasedStatus.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      regionPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                  PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           BipedalSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT),
+                                           s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);
@@ -121,7 +125,9 @@ public class BipedalSupportPlanarRegionPublisher
 
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusMessage.get();
       if (capturabilityBasedStatus == null)
+      {
          return;
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -136,7 +142,9 @@ public class BipedalSupportPlanarRegionPublisher
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationData.get();
       if (robotConfigurationData == null)
+      {
          return;
+      }
 
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
 
