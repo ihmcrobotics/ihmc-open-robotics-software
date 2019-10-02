@@ -36,6 +36,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -66,6 +67,7 @@ public abstract class ToolboxModule
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
    protected final int updatePeriodMilliseconds;
+   protected final YoBoolean isLogging = new YoBoolean("isLogging", registry);
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -251,6 +253,18 @@ public abstract class ToolboxModule
          sleep();
          break;
       }
+
+      if (toolboxTaskScheduled != null)
+      {
+         if(message.getRequestLogging() && !isLogging.getValue())
+         {
+            startLogging();
+         }
+         else if(!message.getRequestLogging() && isLogging.getValue())
+         {
+            stopLogging();
+         }
+      }
    }
 
    public void wakeUp()
@@ -297,6 +311,11 @@ public abstract class ToolboxModule
       getToolboxController().setFutureToListenTo(null);
       toolboxTaskScheduled.cancel(true);
       toolboxTaskScheduled = null;
+
+      if(isLogging.getValue())
+      {
+         stopLogging();
+      }
    }
 
    public void destroy()
@@ -363,6 +382,14 @@ public abstract class ToolboxModule
    private void destroyToolboxRunnable()
    {
       toolboxRunnable = null;
+   }
+
+   protected void startLogging()
+   {
+   }
+
+   protected void stopLogging()
+   {
    }
 
    abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);

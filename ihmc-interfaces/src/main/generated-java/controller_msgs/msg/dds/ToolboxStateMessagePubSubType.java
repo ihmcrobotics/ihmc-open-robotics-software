@@ -44,6 +44,8 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -63,6 +65,9 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +78,8 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_9(data.getRequestedToolboxState());
 
+      cdr.write_type_7(data.getRequestLogging());
+
    }
 
    public static void read(controller_msgs.msg.dds.ToolboxStateMessage data, us.ihmc.idl.CDR cdr)
@@ -80,6 +87,8 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setSequenceId(cdr.read_type_4());
       	
       data.setRequestedToolboxState(cdr.read_type_9());
+      	
+      data.setRequestLogging(cdr.read_type_7());
       	
 
    }
@@ -89,6 +98,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("requested_toolbox_state", data.getRequestedToolboxState());
+      ser.write_type_7("request_logging", data.getRequestLogging());
    }
 
    @Override
@@ -96,6 +106,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRequestedToolboxState(ser.read_type_9("requested_toolbox_state"));
+      data.setRequestLogging(ser.read_type_7("request_logging"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ToolboxStateMessage src, controller_msgs.msg.dds.ToolboxStateMessage dest)

@@ -6,4 +6,4 @@
 uint32 sequence_id
 
 # True to pause walking, false to unpause and resume an existing footstep plan.
- bool pause
+bool pause

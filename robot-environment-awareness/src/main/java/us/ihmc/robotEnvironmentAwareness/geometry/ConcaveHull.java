@@ -200,6 +200,43 @@ public class ConcaveHull implements Iterable<Point2D>
       return !failed;
    }
 
+   /**
+    * Two concave hulls are geometrically equal if they contain the same points in the same order,
+    * but the start/end doesn't need to line up.
+    */
+   public boolean geometricallyEquals(ConcaveHull other, double epsilon)
+   {
+      if (getNumberOfVertices() != other.getNumberOfVertices())
+      {
+         return false;
+      }
+
+      if (getNumberOfVertices() == 0)
+      {
+         return true;
+      }
+
+      int alignmentOffset = 0;
+      boolean failed = true;
+      while (failed && alignmentOffset < getNumberOfVertices())
+      {
+         failed = false;
+         for (int i = 0; i < getNumberOfVertices(); i++)
+         {
+            int compareIndex = (i + alignmentOffset) % getNumberOfVertices();
+            boolean epsilonEquals = hullVertices.get(i).epsilonEquals(other.hullVertices.get(compareIndex), epsilon);
+            if (!epsilonEquals)
+            {
+               failed = true;
+               ++alignmentOffset;
+               break; // optimization
+            }
+         }
+      }
+
+      return !failed;
+   }
+
    public Stream<Point2D> stream()
    {
       return hullVertices.stream();
