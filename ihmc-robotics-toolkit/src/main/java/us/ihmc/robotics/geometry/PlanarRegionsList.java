@@ -412,6 +412,11 @@ public class PlanarRegionsList
       return planarRegionsList;
    }
 
+   public static PlanarRegionsList flatGround(double size)
+   {
+      return flatGround(size, new RigidBodyTransform());
+   }
+
    public static PlanarRegionsList flatGround(double size, RigidBodyTransform transform)
    {
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region

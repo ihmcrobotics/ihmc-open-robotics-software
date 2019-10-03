@@ -70,7 +70,7 @@ public class BehaviorHelper
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
    private final RemoteSyncedRobotModel remoteSyncedRobotModel;
-   private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
+   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
@@ -92,7 +92,7 @@ public class BehaviorHelper
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
       remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
       MessageTopicNameGenerator robotSubscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
       MessageTopicNameGenerator robotPublisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName());
@@ -117,24 +117,14 @@ public class BehaviorHelper
       return remoteSyncedRobotModel.pollFullRobotModel();
    }
 
-   public Pair<FullHumanoidRobotModel, Long> pollFullRobotModelAndTimestamp()
+   public HumanoidRobotState pollHumanoidRobotState()
    {
-      return remoteSyncedRobotModel.pollFullRobotModelAndTimestamp();
-   }
-
-   public HumanoidReferenceFrames pollHumanoidReferenceFrames()
-   {
-      return remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames();
-   }
-
-   public Pair<HumanoidReferenceFrames, Long> pollHumanoidReferenceFramesAndTimestamp()
-   {
-      return remoteSyncedHumanoidFrames.pollHumanoidReferenceFramesAndTimestamp();
+      return remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
    }
 
    public FramePose3DReadOnly quickPollPoseReadOnly(Function<HumanoidReferenceFrames, ReferenceFrame> frameSelector)
    {
-      return remoteSyncedHumanoidFrames.quickPollPoseReadOnly(frameSelector);
+      return remoteSyncedHumanoidRobotState.quickPollPoseReadOnly(frameSelector);
    }
 
    // Robot Action Methods:

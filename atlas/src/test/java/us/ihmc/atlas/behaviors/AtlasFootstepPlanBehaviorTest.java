@@ -14,7 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -78,7 +78,7 @@ public class AtlasFootstepPlanBehaviorTest
             .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
@@ -166,12 +166,12 @@ public class AtlasFootstepPlanBehaviorTest
             .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 
-      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
+      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
       LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
