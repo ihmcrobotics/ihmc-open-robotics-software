@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

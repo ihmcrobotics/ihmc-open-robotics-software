@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.robotEnvironmentAwareness.tools;
 
 import java.util.ArrayList;
 
