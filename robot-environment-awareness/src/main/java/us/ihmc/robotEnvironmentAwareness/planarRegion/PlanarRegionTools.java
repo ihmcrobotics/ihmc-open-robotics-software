@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceFromPoint3DToLineSegment3D;
@@ -31,14 +31,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionTools
 {
