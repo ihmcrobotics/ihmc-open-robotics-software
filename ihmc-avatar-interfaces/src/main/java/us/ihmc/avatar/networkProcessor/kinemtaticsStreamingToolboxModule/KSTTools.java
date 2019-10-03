@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -42,6 +43,7 @@ public class KSTTools
    private final YoVariableRegistry registry;
 
    private final FullHumanoidRobotModel currentFullRobotModel;
+   private final FloatingJointBasics currentRootJoint;
    private final OneDoFJointBasics[] currentOneDoFJoint;
 
    private final HumanoidKinematicsToolboxController ikController;
@@ -68,6 +70,7 @@ public class KSTTools
       this.registry = registry;
 
       currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
 
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(), KinematicsToolboxModule.supportedCommands());
@@ -92,7 +95,15 @@ public class KSTTools
    {
       if (getRobotConfigurationData() != null)
       {
-         updateFullRobotModel(getRobotConfigurationData(), currentFullRobotModel);
+         RobotConfigurationData robotConfigurationData = getRobotConfigurationData();
+
+         for (int jointIndex = 0; jointIndex < currentOneDoFJoint.length; jointIndex++)
+         {
+            currentOneDoFJoint[jointIndex].setQ(robotConfigurationData.getJointAngles().get(jointIndex));
+         }
+
+         Pose3DBasics rootJointPose = currentRootJoint.getJointPose();
+         rootJointPose.set(robotConfigurationData.getRootTranslation(), robotConfigurationData.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
    }

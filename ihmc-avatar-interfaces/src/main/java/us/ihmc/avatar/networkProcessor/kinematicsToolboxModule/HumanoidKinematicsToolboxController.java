@@ -27,24 +27,25 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -108,12 +109,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoBoolean holdSupportFootPose = new YoBoolean("holdSupportFootPose", registry);
+   private final FramePose3D footPoseToHold = new FramePose3D();
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
     * is {@code true} by default but can be disabled using the message
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
+   private final FramePoint3D centerOfMassPositionToHold = new FramePoint3D();
    /**
     * Indicates whether the projection of the center of mass is to be contained inside the support
     * polygon.It is {@code true} by default but can be disabled using the message
@@ -149,9 +152,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
     * the convex horizontal region that the center of mass is constrained to.
     */
-   private final List<Point2D> shrunkSupportPolygonVertices = new ArrayList<>();
+   private final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+   private final ConvexPolygon2D newSupportPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
+   private final FramePoint2D centerOfMass = new FramePoint2D();
    /** Distance to shrink the support polygon for safety purpose. */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
                                                                 "Describes the minimum distance away from the support polygon's edges.",
@@ -426,14 +432,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (isUserControllingRigidBody(foot))
             continue;
 
-         FramePose3D poseToHold = new FramePose3D(initialFootPoses.get(robotSide));
+         footPoseToHold.setIncludingFrame(initialFootPoses.get(robotSide));
 
          SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
          feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
          feedbackControlCommand.setGains(getDefaultGains());
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
-         feedbackControlCommand.setInverseKinematics(poseToHold, KinematicsToolboxHelper.zeroVector6D);
+         feedbackControlCommand.setInverseKinematics(footPoseToHold, KinematicsToolboxHelper.zeroVector6D);
       }
    }
 
@@ -461,13 +467,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return;
       }
 
-      FramePoint3D positionToHold = new FramePoint3D(initialCenterOfMassPosition);
+      centerOfMassPositionToHold.setIncludingFrame(initialCenterOfMassPosition);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = bufferToPack.addCenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(getDefaultGains().getPositionGains());
       feedbackControlCommand.setWeightForSolver(momentumWeight.getDoubleValue());
       feedbackControlCommand.setSelectionMatrixForLinearXYControl();
-      feedbackControlCommand.setInverseKinematics(positionToHold, new FrameVector3D());
+      feedbackControlCommand.setInverseKinematics(centerOfMassPositionToHold, KinematicsToolboxHelper.zeroVector3D);
    }
 
    /**
@@ -504,18 +510,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!enableSupportPolygonConstraint.getValue() || latestCapturabilityBasedStatusReference.get() == null)
          return;
 
-      ConvexPolygon2D newSupportPolygon = new ConvexPolygon2D();
-      newSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(latestCapturabilityBasedStatusReference.get().getLeftFootSupportPolygon2d()));
-      newSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(latestCapturabilityBasedStatusReference.get().getRightFootSupportPolygon2d()));
+      newSupportPolygon.clear();
+      Object<Point3D> leftFootSupportPolygon2d = latestCapturabilityBasedStatusReference.get().getLeftFootSupportPolygon2d();
+      Object<Point3D> rightFootSupportPolygon2d = latestCapturabilityBasedStatusReference.get().getRightFootSupportPolygon2d();
+      for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
+         newSupportPolygon.addVertex(leftFootSupportPolygon2d.get(i));
+      for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
+         newSupportPolygon.addVertex(rightFootSupportPolygon2d.get(i));
       newSupportPolygon.update();
 
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
          supportPolygon.set(newSupportPolygon);
-         ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
          convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkConvexPolygon);
          shrunkSupportPolygonVertices.clear();
-         shrunkConvexPolygon.getPolygonVerticesView().forEach(vertex -> shrunkSupportPolygonVertices.add(new Point2D(vertex)));
+         for (int i = 0; i < shrunkConvexPolygon.getNumberOfVertices(); i++)
+            shrunkSupportPolygonVertices.add().set(shrunkConvexPolygon.getVertex(i));
 
          for (int i = shrunkSupportPolygonVertices.size() - 1; i >= 0; i--)
          { // Filtering vertices that barely expand the polygon.
@@ -528,7 +538,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          }
       }
 
-      FramePoint2D centerOfMass = new FramePoint2D(centerOfMassFrame);
+      centerOfMass.setToZero(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
 
       double distanceThreshold = 0.25 * centerOfMassSafeMargin.getValue();
