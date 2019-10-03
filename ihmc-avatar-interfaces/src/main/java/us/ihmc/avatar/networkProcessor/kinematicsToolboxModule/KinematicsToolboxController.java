@@ -166,6 +166,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
    private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
+   private final FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList();
 
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
@@ -203,6 +204,7 @@ public class KinematicsToolboxController extends ToolboxController
     * here safely.
     */
    protected final CommandInputManager commandInputManager;
+   private final List<RigidBodyBasics> rigidBodiesWithVisualization = new ArrayList<>();
    /**
     * Visualization of the desired end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
@@ -447,6 +449,7 @@ public class KinematicsToolboxController extends ToolboxController
          YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
          YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
 
+         rigidBodiesWithVisualization.add(rigidBody);
          desiredCoodinateSystems.put(rigidBody, desiredCoodinateSystem);
          currentCoodinateSystems.put(rigidBody, currentCoodinateSystem);
 
@@ -642,7 +645,8 @@ public class KinematicsToolboxController extends ToolboxController
       computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
 
       // Save all commands used for this control tick for computing the solution quality.
-      FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(feedbackControlCommandBuffer);
+      allFeedbackControlCommands.clear();
+      allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
@@ -887,6 +891,9 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
+   private final FramePoint3D rigidBodyPosition = new FramePoint3D();
+   private final FrameQuaternion rigidBodyOrientation = new FrameQuaternion();
+
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
     * this control tick.
@@ -894,39 +901,39 @@ public class KinematicsToolboxController extends ToolboxController
    private void updateVisualization()
    {
       boolean hasData;
-      FramePoint3D position = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
 
-      for (RigidBodyBasics endEffector : desiredCoodinateSystems.keySet())
+      for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
+         RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.DESIRED);
+         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.DESIRED);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setPosition(position);
+            coordinateSystem.setPosition(rigidBodyPosition);
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, orientation, Type.DESIRED);
+         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.DESIRED);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setOrientation(orientation);
+            coordinateSystem.setOrientation(rigidBodyOrientation);
       }
 
-      for (RigidBodyBasics endEffector : currentCoodinateSystems.keySet())
+      for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
+         RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.CURRENT);
+         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.CURRENT);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setPosition(position);
+            coordinateSystem.setPosition(rigidBodyPosition);
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, orientation, Type.CURRENT);
+         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.CURRENT);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setOrientation(orientation);
+            coordinateSystem.setOrientation(rigidBodyOrientation);
       }
    }
 
