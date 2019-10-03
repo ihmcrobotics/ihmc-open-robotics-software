@@ -21,6 +21,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KinematicsStreamingToolboxController extends ToolboxController
@@ -52,6 +53,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    private final KSTSleepState sleepState;
    private final KSTStreamingState streamingState;
 
+   private final YoBoolean isDone = new YoBoolean("isDone", registry);
+
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                                double walkingControllerPeriod, double toolboxControllerPeriod, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -72,6 +75,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       streamingState = new KSTStreamingState(tools);
 
       stateMachine = createStateMachine(time);
+      isDone.set(false);
    }
 
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
@@ -100,6 +104,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    @Override
    public boolean initialize()
    {
+      isDone.set(false);
       return true;
    }
 
@@ -108,16 +113,24 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
-      if (initialTimestamp == -1L)
-         initialTimestamp = System.nanoTime();
-      time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
+      try
+      {
+         if (initialTimestamp == -1L)
+            initialTimestamp = System.nanoTime();
+         time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
-      if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
-      { // Forwarding commands for the IK to the IK.
-         tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
+         if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
+         { // Forwarding commands for the IK to the IK.
+            tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
+         }
+         tools.update();
+         stateMachine.doActionAndTransition();
       }
-      tools.update();
-      stateMachine.doActionAndTransition();
+      catch (Throwable e)
+      {
+         e.printStackTrace();
+         isDone.set(true);
+      }
    }
 
    @Override
@@ -130,7 +143,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    @Override
    public boolean isDone()
    {
-      return false;
+      return isDone.getValue();
    }
 
    public static interface OutputPublisher
