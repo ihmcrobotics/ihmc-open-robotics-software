@@ -94,8 +94,8 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
-      parameters.setPerformPostProcessingNodeShifting(true);
-      parameters.setIntroduceMidpointsInPostProcessing(true);
+//      parameters.setPerformPostProcessingNodeShifting(true);
+//      parameters.setIntroduceMidpointsInPostProcessing(true);
 
       return parameters;
    }
