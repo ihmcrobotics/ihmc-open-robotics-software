@@ -136,14 +136,20 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       commandInputManager = new CommandInputManager(WholeBodyTrajectoryToolboxModule.supportedCommands());
       commandConversionHelper = new WholeBodyTrajectoryToolboxCommandConverter(desiredFullRobotModel);
       commandInputManager.registerConversionHelper(commandConversionHelper);
-      commandInputManager.registerMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class, MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
+      commandInputManager.registerMessageUnpacker(WholeBodyTrajectoryToolboxMessage.class,
+                                                  MessageUnpackingTools.createWholeBodyTrajectoryToolboxMessageUnpacker());
 
       converter = new KinematicsToolboxOutputConverter(robotModel);
 
       statusOutputManager = new StatusMessageOutputManager(WholeBodyTrajectoryToolboxModule.supportedStatus());
 
-      toolboxController = new WholeBodyTrajectoryToolboxController(getRobotModel(), desiredFullRobotModel, commandInputManager, statusOutputManager,
-                                                                   mainRegistry, yoGraphicsListRegistry, visualize);
+      toolboxController = new WholeBodyTrajectoryToolboxController(getRobotModel(),
+                                                                   desiredFullRobotModel,
+                                                                   commandInputManager,
+                                                                   statusOutputManager,
+                                                                   mainRegistry,
+                                                                   yoGraphicsListRegistry,
+                                                                   visualize);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -252,8 +258,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                ccw = false;
             else
                ccw = true;
-            FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter, circleOrientation,
-                                                                              handOrientation, ccw, 0.0);
+            FunctionTrajectory handFunction = time -> computeCircleTrajectory(time,
+                                                                              trajectoryTime,
+                                                                              circleRadius,
+                                                                              circleCenter,
+                                                                              circleOrientation,
+                                                                              handOrientation,
+                                                                              ccw,
+                                                                              0.0);
 
             SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
             selectionMatrix.resetSelection();
@@ -272,12 +284,18 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             rigidBodyConfigurations.add(rigidBodyConfiguration);
 
             if (visualize)
-               scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01,
+               scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction,
+                                                                               0.0,
+                                                                               trajectoryTime,
+                                                                               timeResolution,
+                                                                               0.01,
                                                                                YoAppearance.AliceBlue()));
          }
       }
 
-      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null,
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration,
+                                                                                                               handTrajectories,
+                                                                                                               null,
                                                                                                                rigidBodyConfigurations);
 
       // run toolbox
@@ -316,8 +334,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             ccw = false;
          else
             ccw = true;
-         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
-                                                                           handOrientation, ccw, 0.0);
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time,
+                                                                           trajectoryTime,
+                                                                           circleRadius,
+                                                                           circleCenters.get(robotSide),
+                                                                           circleOrientation,
+                                                                           handOrientation,
+                                                                           ccw,
+                                                                           0.0);
 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
@@ -338,7 +362,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null,
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration,
+                                                                                                               handTrajectories,
+                                                                                                               null,
                                                                                                                rigidBodyConfigurations);
 
       // run toolbox
@@ -378,8 +404,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             ccw = false;
          else
             ccw = true;
-         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
-                                                                           handOrientation, ccw, 0.0);
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time,
+                                                                           trajectoryTime,
+                                                                           circleRadius,
+                                                                           circleCenters.get(robotSide),
+                                                                           circleOrientation,
+                                                                           handOrientation,
+                                                                           ccw,
+                                                                           0.0);
 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
@@ -397,7 +429,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
 
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, null,
+      WholeBodyTrajectoryToolboxMessage message = HumanoidMessageTools.createWholeBodyTrajectoryToolboxMessage(configuration,
+                                                                                                               handTrajectories,
+                                                                                                               null,
                                                                                                                rigidBodyConfigurations);
 
       // run toolbox
@@ -539,11 +573,15 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
                Pose3D givenRigidBodyPose = HumanoidMessageTools.unpackPose(trajectory, configurationTime);
 
-               double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose, givenRigidBodyPose,
-                                                                                                      explorationMessage, trajectory);
+               double positionError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryPositionError(solutionRigidBodyPose,
+                                                                                                      givenRigidBodyPose,
+                                                                                                      explorationMessage,
+                                                                                                      trajectory);
 
-               double orientationError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryOrientationError(solutionRigidBodyPose, givenRigidBodyPose,
-                                                                                                            explorationMessage, trajectory);
+               double orientationError = WholeBodyTrajectoryToolboxHelper.computeTrajectoryOrientationError(solutionRigidBodyPose,
+                                                                                                            givenRigidBodyPose,
+                                                                                                            explorationMessage,
+                                                                                                            trajectory);
 
                if (VERBOSE)
                   PrintTools.info("" + positionError + " " + orientationError);
@@ -591,8 +629,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       double updateDT = 1.0e-3;
-      HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, updateDT,
-                                                                                         new YoGraphicsListRegistry(), new YoVariableRegistry("dummy"));
+      HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager,
+                                                                                         statusOutputManager,
+                                                                                         desiredFullRobotModel,
+                                                                                         getRobotModel(),
+                                                                                         updateDT,
+                                                                                         new YoGraphicsListRegistry(),
+                                                                                         new YoVariableRegistry("dummy"));
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelWithArmsAtMidRange();
       whik.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
@@ -709,26 +752,26 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                   / (configurationValueResolution - 1) * configurationIndex[j] + reachingMessage.getManifoldLowerLimits().get(j);
             switch (ConfigurationSpaceName.fromByte(reachingMessage.getManifoldConfigurationSpaceNames().get(j)))
             {
-            case X:
-               originPose.appendTranslation(configurationValues[j], 0.0, 0.0);
-               break;
-            case Y:
-               originPose.appendTranslation(0.0, configurationValues[j], 0.0);
-               break;
-            case Z:
-               originPose.appendTranslation(0.0, 0.0, configurationValues[j]);
-               break;
-            case ROLL:
-               originPose.appendRollRotation(configurationValues[j]);
-               break;
-            case PITCH:
-               originPose.appendPitchRotation(configurationValues[j]);
-               break;
-            case YAW:
-               originPose.appendYawRotation(configurationValues[j]);
-               break;
-            default:
-               break;
+               case X:
+                  originPose.appendTranslation(configurationValues[j], 0.0, 0.0);
+                  break;
+               case Y:
+                  originPose.appendTranslation(0.0, configurationValues[j], 0.0);
+                  break;
+               case Z:
+                  originPose.appendTranslation(0.0, 0.0, configurationValues[j]);
+                  break;
+               case ROLL:
+                  originPose.appendRollRotation(configurationValues[j]);
+                  break;
+               case PITCH:
+                  originPose.appendPitchRotation(configurationValues[j]);
+                  break;
+               case YAW:
+                  originPose.appendYawRotation(configurationValues[j]);
+                  break;
+               default:
+                  break;
             }
          }
 
