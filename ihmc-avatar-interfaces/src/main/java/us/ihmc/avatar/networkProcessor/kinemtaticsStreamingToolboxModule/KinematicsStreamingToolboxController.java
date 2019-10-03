@@ -116,7 +116,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       { // Forwarding commands for the IK to the IK.
          tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
       }
-
+      tools.update();
       stateMachine.doActionAndTransition();
    }
 
