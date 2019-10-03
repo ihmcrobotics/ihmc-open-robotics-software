@@ -254,10 +254,12 @@ public abstract class ToolboxModule
          if(message.getRequestLogging() && !isLogging.getValue())
          {
             startLogging();
+            isLogging.set(true);
          }
          else if(!message.getRequestLogging() && isLogging.getValue())
          {
             stopLogging();
+            isLogging.set(false);
          }
       }
    }
