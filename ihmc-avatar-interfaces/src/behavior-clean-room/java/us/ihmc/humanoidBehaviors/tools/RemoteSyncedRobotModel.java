@@ -9,30 +9,28 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
-import static us.ihmc.communication.ROS2Tools.*;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import static us.ihmc.communication.ROS2Tools.HUMANOID_CONTROLLER;
 
 public class RemoteSyncedRobotModel
 {
    protected final FullHumanoidRobotModel fullRobotModel;
+   protected RobotConfigurationData robotConfigurationData;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
-   private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private long monotonicTime = 0L;
+   private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
       fullRobotModel = robotModel.createFullRobotModel();
+      robotConfigurationData = new RobotConfigurationData();
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
 
-      robotConfigurationData = new ROS2Input<RobotConfigurationData>(ros2Node,
-                                                                     RobotConfigurationData.class,
-                                                                     robotModel.getSimpleRobotName(), HUMANOID_CONTROLLER,
+      robotConfigurationDataInput = new ROS2Input<RobotConfigurationData>(ros2Node,
+                                                                          RobotConfigurationData.class,
+                                                                          robotModel.getSimpleRobotName(), HUMANOID_CONTROLLER,
                                                                      message ->
                                                                      {
                                                                         FullRobotModelUtils.checkJointNameHash(jointNameHash,
@@ -43,15 +41,14 @@ public class RemoteSyncedRobotModel
 
    public FullHumanoidRobotModel pollFullRobotModel()
    {
-      RobotConfigurationData latestRobotConfigurationData = robotConfigurationData.getLatest();
-      monotonicTime = latestRobotConfigurationData.getMonotonicTime();
+      robotConfigurationData = robotConfigurationDataInput.getLatest();
 
-      fullRobotModel.getRootJoint().setJointOrientation(latestRobotConfigurationData.getRootOrientation());
-      fullRobotModel.getRootJoint().setJointPosition(latestRobotConfigurationData.getRootTranslation());
+      fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
+      fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootTranslation());
 
-      for (int i = 0; i < latestRobotConfigurationData.getJointAngles().size(); i++)
+      for (int i = 0; i < robotConfigurationData.getJointAngles().size(); i++)
       {
-         allJoints[i].setQ(latestRobotConfigurationData.getJointAngles().get(i));
+         allJoints[i].setQ(robotConfigurationData.getJointAngles().get(i));
       }
 
       fullRobotModel.getElevator().updateFramesRecursively();
@@ -59,26 +56,13 @@ public class RemoteSyncedRobotModel
       return fullRobotModel;
    }
 
-   public Pair<FullHumanoidRobotModel, Long> pollFullRobotModelAndTimestamp()
-   {
-      FullHumanoidRobotModel fullRobotModel = pollFullRobotModel();
-      ImmutablePair<FullHumanoidRobotModel, Long> modelAndTimestamp = new ImmutablePair<FullHumanoidRobotModel, Long>(fullRobotModel, monotonicTime);
-      return modelAndTimestamp;
-   }
-
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }
 
-   public Pair<FullHumanoidRobotModel, Long> getFullRobotModelAndTimestamp()
-   {
-      ImmutablePair<FullHumanoidRobotModel, Long> modelAndTimestamp = new ImmutablePair<FullHumanoidRobotModel, Long>(fullRobotModel, monotonicTime);
-      return modelAndTimestamp;
-   }
-
    public boolean hasReceivedFirstMessage()
    {
-      return robotConfigurationData.hasReceivedFirstMessage();
+      return robotConfigurationDataInput.hasReceivedFirstMessage();
    }
 }

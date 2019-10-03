@@ -108,7 +108,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void goToSingleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
@@ -128,7 +128,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToRunningManPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -154,7 +154,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid1Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -174,7 +174,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid2Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -200,7 +200,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid3Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -226,7 +226,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToPresentPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame soleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       double trajectoryTime = 5.0;

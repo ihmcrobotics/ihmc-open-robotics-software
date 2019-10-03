@@ -201,7 +201,7 @@ public class PatrolBehavior implements BehaviorInterface
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidReferenceFrames());
+         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidRobotState());
       }
    }
 
@@ -329,7 +329,7 @@ public class PatrolBehavior implements BehaviorInterface
       FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }

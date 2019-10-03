@@ -51,7 +51,7 @@ public class PlanarRegionsGraphic extends Group
       PlanarRegionsList planarRegionsList;
       if (initializeToFlatGround)
       {
-         planarRegionsList = PlanarRegionsList.flatGround(20.0, new RigidBodyTransform());
+         planarRegionsList = PlanarRegionsList.flatGround(20.0);
       }
       else
       {
