@@ -21,7 +21,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.MessengerAPI;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.ros2.Ros2Node;
@@ -265,8 +267,12 @@ public abstract class AbstractBehavior implements RobotController
 
    public void publishTextToSpeech(String textToSpeak)
    {
-      System.err.println("**** "+textToSpeak);
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
+      
+      //a simple test to show 2 different ways that messages can be sent to the UI
+      BehaviorDispatcher.messager.submitMessage(MessengerAPI.State, textToSpeak);
+
+      
    }
 
    public void publishUIPositionCheckerPacket(Point3DReadOnly position)

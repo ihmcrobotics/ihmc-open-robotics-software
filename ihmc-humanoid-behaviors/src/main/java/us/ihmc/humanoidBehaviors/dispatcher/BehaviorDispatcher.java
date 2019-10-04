@@ -28,14 +28,11 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
@@ -43,6 +40,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
 
 /**
  * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands
@@ -127,7 +125,10 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          @Override
          public void run()
          {
-            messager = KryoMessager.createTCPServer(getBehaviorAPI(),NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT, new IHMCCommunicationKryoNetClassList());
+
+            messager = KryoMessager.createServer(getBehaviorAPI(),
+                                                 NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(),
+                                                 new BehaviorMessagerUpdater(BehaviorDispatcher.class.getSimpleName(),5));
             ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
          }
       });
