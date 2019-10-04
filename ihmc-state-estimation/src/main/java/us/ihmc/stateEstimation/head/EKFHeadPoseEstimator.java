@@ -95,8 +95,8 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       linearAccelerationSensor = new LinearAccelerationSensor("LinearAcceleration", dt, headBody, imuFrame, false, registry);
       magneticFieldSensor = new MagneticFieldSensor("MagneticField", dt, headBody, imuFrame, registry);
       positionSensor = new PositionSensor("Position", dt, registry);
-//      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor});
-      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor});
+      List<Sensor> sensors = Arrays.asList(angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor);
+//      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor});
 
       // Create the state and the estimator:
       poseState = new PoseState("Head", dt, headFrame, registry);
