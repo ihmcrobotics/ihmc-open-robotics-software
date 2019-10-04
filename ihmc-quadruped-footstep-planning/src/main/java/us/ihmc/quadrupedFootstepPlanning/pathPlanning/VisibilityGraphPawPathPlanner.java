@@ -10,6 +10,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
@@ -31,8 +32,14 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
 
    public VisibilityGraphPawPathPlanner(String prefix, VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoVariableRegistry registry)
    {
+      this(prefix, visibilityGraphsParameters, null, registry);
+   }
+
+   public VisibilityGraphPawPathPlanner(String prefix, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                        ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry registry)
+   {
       super(prefix, registry);
-      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
+      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);
       this.orientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
 
@@ -89,7 +96,10 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
          }
       }
 
-      yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
+      if (waypoints.size() < 2)
+         yoResult.set(PawStepPlanningResult.PLANNER_FAILED);
+      else
+         yoResult.set(PawStepPlanningResult.SUB_OPTIMAL_SOLUTION);
       return yoResult.getEnumValue();
    }
 

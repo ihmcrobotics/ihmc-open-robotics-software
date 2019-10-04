@@ -5,6 +5,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
@@ -27,26 +28,28 @@ public class QuadrupedStandaloneFootstepPlanner
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
    private QuadrupedSupportPlanarRegionPublisher supportPublisher = null;
 
-   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawStepPlannerParametersBasics pawPlannerParameters,
-                                             QuadrupedXGaitSettings xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters)
+   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                             PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettings xGaitSettings,
+                                             PointFootSnapperParameters pointFootSnapperParameters)
    {
-      this(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
+      this(robotModel, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters,
            DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, PawStepPlannerParametersBasics pawPlannerParameters,
-                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                             DomainFactory.PubSubImplementation pubSubImplementation)
-   {
-      this(robotModel, null, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
-   }
-
-   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, LogModelProvider logModelProvider,
+   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, VisibilityGraphsParametersBasics visibilityGraphsParameters,
                                              PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                              PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                                         pubSubImplementation));
+      this(robotModel, null, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
+   }
+
+   public QuadrupedStandaloneFootstepPlanner(FullQuadrupedRobotModelFactory robotModel, LogModelProvider logModelProvider,
+                                             VisibilityGraphsParametersBasics visibilityGraphsParameters, PawStepPlannerParametersBasics pawPlannerParameters,
+                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                             DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings,
+                                                         pointFootSnapperParameters, logModelProvider, pubSubImplementation));
    }
 
    public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
@@ -71,13 +74,13 @@ public class QuadrupedStandaloneFootstepPlanner
 
 
 
-   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawStepPlannerParametersBasics pawPlannerParameters,
-                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                            LogModelProvider logModelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                            PawStepPlannerParametersBasics pawPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                            PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider logModelProvider,
+                                            DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      modules.add(new PawPlanningModule(modelFactory.getRobotDescription().getName(), null, pawPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                        false, false,
-                                        pubSubImplementation));
+      modules.add(new PawPlanningModule(modelFactory.getRobotDescription().getName(), null, visibilityGraphsParameters, pawPlannerParameters, xGaitSettings,
+                                        pointFootSnapperParameters, logModelProvider, false, false, pubSubImplementation));
    }
 
 
