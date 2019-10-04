@@ -191,6 +191,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
+      continuousPlanningModule.setRootRegistry(testRegistry, null);
       planningFailed = ((YoBoolean) testRegistry.getVariable("planningFailed"));
 
 

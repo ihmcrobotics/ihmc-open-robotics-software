@@ -43,7 +43,8 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      toolboxController = new BipedContinuousPlanningToolboxController(statusOutputManager, footstepPlanningRequestPublisher, registry);
+      toolboxController = new BipedContinuousPlanningToolboxController(statusOutputManager, footstepPlanningRequestPublisher,
+                                                                       footstepPlanningToolboxStatePublisher, registry);
 
       startYoVariableServer();
    }

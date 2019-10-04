@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -55,14 +57,17 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    private final YoInteger receivedPlanId = new YoInteger("receivedPlanId", registry);
 
    private final IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher;
 
    public BipedContinuousPlanningToolboxController(StatusMessageOutputManager statusOutputManager,
                                                    IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher,
+                                                   IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher,
                                                    YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
       this.planningRequestPublisher = planningRequestPublisher;
+      this.plannerStatePublisher = plannerStatePublisher;
 
       broadcastPlanId.set(defaultStartPlanId);
       receivedPlanId.set(-1);
@@ -164,7 +169,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       currentFeetPositions.clear();
       stepQueue.clear();
       footstepStatusBuffer.set(new ArrayList<>());
-      latestPlanarRegions.set(null);
+      latestPlannerOutput.set(null);
       expectedInitialSteppingSide.set(defaultInitialSide);
 
       broadcastPlanId.set(defaultStartPlanId);
@@ -176,9 +181,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       FootstepPlanningRequestPacket planningRequestPacket = new FootstepPlanningRequestPacket();
       BipedContinuousPlanningRequestPacket continuousPlanningRequestPacket = this.planningRequestPacket.get();
 
-      ToolboxStateMessage plannerState = new ToolboxStateMessage();
-      plannerState.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
-      reportMessage(plannerState);
+      plannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       SideDependentList<Pose3DReadOnly> startPositions = new SideDependentList<>();
       if (isInitialSegmentOfPlan.getBooleanValue())
@@ -233,9 +236,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          }
       }
 
-      FootstepDataMessage finalStep = fixedStepQueue.get(fixedStepQueue.size() - 1);
-      if (finalStep != null)
+      if (fixedStepQueue.size() > 0)
       {
+         FootstepDataMessage finalStep = fixedStepQueue.get(fixedStepQueue.size() - 1);
          expectedInitialSteppingSide.set(RobotSide.fromByte(finalStep.getRobotSide()).getOppositeSide());
       }
 
