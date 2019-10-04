@@ -5,10 +5,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -25,6 +29,9 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
 {
    private final BipedContinuousPlanningToolboxController toolboxController;
 
+   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> footstepPlanningToolboxStatePublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+
    public BipedContinuousPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
       this(drcRobotModel, modelProvider, startYoVariableServer, PubSubImplementation.FAST_RTPS);
@@ -36,7 +43,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      toolboxController = new BipedContinuousPlanningToolboxController(statusOutputManager, registry);
+      toolboxController = new BipedContinuousPlanningToolboxController(statusOutputManager, footstepPlanningRequestPublisher, registry);
 
       startYoVariableServer();
    }
@@ -60,6 +67,9 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
 
+      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
+      footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisher(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
    }
 
    @Override
@@ -79,13 +89,9 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> messages = new ArrayList<>();
 
-      messages.put(FootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
-      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
-      messages.put(FootstepDataListMessage.class, getPublisherTopicNameGenerator());
-
-      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      messages.put(FootstepPlanningRequestPacket.class, plannerSubGenerator);
-      messages.put(ToolboxStateMessage.class, plannerSubGenerator);
+      messages.add(FootstepPlanningToolboxOutputStatus.class);
+      messages.add(BodyPathPlanMessage.class);
+      messages.add(FootstepDataListMessage.class);
 
       return messages;
    }
@@ -107,10 +113,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    {
       super.sleep();
 
-      ToolboxStateMessage plannerState = new ToolboxStateMessage();
-      plannerState.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
-
-      statusOutputManager.reportStatusMessage(plannerState);
+      footstepPlanningToolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
    private void processFootstepPlannerOutput(FootstepPlanningToolboxOutputStatus footstepPlannerOutput)
