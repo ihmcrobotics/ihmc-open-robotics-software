@@ -50,6 +50,7 @@ public class SQLBehaviorDatabaseManager
       {
          connection = null;
          connectionSuccessful = false;
+         if(DEBUG)
          System.err.println("Could not connect to database! DB thread will not run");
          //e.printStackTrace();
       }
