@@ -1,16 +1,24 @@
 package us.ihmc.avatar.networkProcessor.continuousPlanningToolboxModule;
 
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.List;
+
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class BipedContinuousPlanningToolboxModule extends ToolboxModule
 {
@@ -35,6 +43,21 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
+      // status messages from the controller
+      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator,
+                                           s -> processFootstepStatusMessage(s.takeNextData()));
+
+      // status messages from the planner
+      MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+                                           s -> processFootstepPlannerOutput(s.takeNextData()));
+
+      // inputs to this module
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, BipedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> processContinuousPlanningRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
 
    }
 
@@ -66,5 +89,32 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
       return null;
+   }
+
+   private void processFootstepPlannerOutput(FootstepPlanningToolboxOutputStatus footstepPlannerOutput)
+   {
+      if (toolboxController != null)
+         toolboxController.processFootstepPlannerOutput(footstepPlannerOutput);
+   }
+
+   private void processContinuousPlanningRequest(BipedContinuousPlanningRequestPacket planningRequestPacket)
+   {
+      if (toolboxController != null)
+      {
+         toolboxController.processContinuousPlanningRequest(planningRequestPacket);
+         wakeUp();
+      }
+   }
+
+   private void processFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
+   {
+      if (toolboxController != null)
+         toolboxController.processFootstepStatusMessage(footstepStatusMessage);
+   }
+
+   private void processPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      if (toolboxController != null)
+         toolboxController.processPlanarRegionListMessage(planarRegionsListMessage);
    }
 }
