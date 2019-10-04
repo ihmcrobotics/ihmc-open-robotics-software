@@ -6,16 +6,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.YoPoint3D;
+import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
@@ -23,10 +28,7 @@ import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.EKFHeadPoseEstimator;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameTuple3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -37,19 +39,8 @@ import java.util.Set;
  */
 public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEstimator
 {
-   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform();
-
-   static
-   {
-      DEFAULT_MULTISENSE_TO_IMU_TRANSFORM.appendTranslation(-0.0825, 0.0, 0.0787);
-      DEFAULT_MULTISENSE_TO_IMU_TRANSFORM.appendPitchRotation(Math.PI);
-   }
-//   public static final RigidBodyTransform DEFAULT_IMU_TO_MULTISENSE_TRANSFORM = new RigidBodyTransform();
-//
-//   static
-//   {
-//      DEFAULT_IMU_TO_MULTISENSE_TRANSFORM.setAndInvert(DEFAULT_MULTISENSE_TO_IMU_TRANSFORM);
-//   }
+   private static final boolean USE_VIRTUAL_MAGNETOMETER = true;
+   public static final RigidBodyTransform DEFAULT_MULTISENSE_TO_IMU_TRANSFORM = new RigidBodyTransform(new Quaternion(0.0, Math.PI/2.0, 0.0), new Vector3D(-0.04, 0.0, 0.0777));
 
    private static final boolean ESTIMATE_ANGULAR_VELOCITY_BIAS = false;
 
@@ -73,6 +64,17 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
    private final YoPoint3D initialHeadPosition;
    private final YoPoint3D initialHeadOrientationYPR;
    private final YoFrameVector3D initialMagneticFieldVector;
+
+   private final FrameVector3D virtualMagnetometerMeasurement = new FrameVector3D();
+
+   private final YoBoolean inErrorState;
+
+   public ReferenceFrame getImuFrame()
+   {
+      return imuFrame;
+   }
+
+   private ReferenceFrame imuFrame;
 
    public MultisenseSLWithMicroStrainHeadPoseEstimator(double dt, RigidBodyTransform imuToHeadTransform, PriorityParameters imuListenerPriority,
                                                        long microStrainSerialNumber, boolean getRobotConfigurationDataFromNetwork) throws IOException
@@ -109,18 +111,39 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       initialHeadOrientationYPR = new YoPoint3D(new YoDouble("EstimatedHeadPoseInitialYaw", registry), new YoDouble("EstimatedHeadPoseInitialPitch", registry), new YoDouble("EstimatedHeadPoseInitialRoll", registry));
       initialMagneticFieldVector = new YoFrameVector3D("EstimatedHeadPose", "InitialMagneticField", ReferenceFrame.getWorldFrame(), registry);
 
+      inErrorState = new YoBoolean("inErrorState", registry);
+      inErrorState.set(false);
+
+   }
+
+   @Override
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      super.setFullRobotModel(fullRobotModel);
+
+      if(USE_VIRTUAL_MAGNETOMETER)
+      {
+         imuFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("VirtualMagnetometerIMUFrame", fullRobotModel.getHead().getBodyFixedFrame(), DEFAULT_MULTISENSE_TO_IMU_TRANSFORM);
+      }
    }
 
    @Override
    public void initialize(RigidBodyTransform initialHeadTransform, FrameVector3D magneticFieldDirection)
    {
-      FrameVector3D initialMagneticFieldDirection;
+      FrameVector3D initialMagneticFieldDirection = null;
       if (magneticFieldDirection == null)
       {
-         microStrainData = imuListener.getLatestData(MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER);
-         Tuple3DBasics geomagneticNorthVector = new Vector3D(microStrainData.getGeomagneticNorthVector());
-         MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD.transform(geomagneticNorthVector);
-         initialMagneticFieldDirection = new FrameVector3D(ReferenceFrame.getWorldFrame(), geomagneticNorthVector);
+         if(!USE_VIRTUAL_MAGNETOMETER)
+         {
+            microStrainData = imuListener.getLatestData(MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER);
+            Tuple3DBasics geomagneticNorthVector = new Vector3D(microStrainData.getGeomagneticNorthVector());
+            MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD.transform(geomagneticNorthVector);
+            initialMagneticFieldDirection = new FrameVector3D(ReferenceFrame.getWorldFrame(), geomagneticNorthVector);
+         }
+         else
+         {
+            initialMagneticFieldDirection = new FrameVector3D(ReferenceFrame.getWorldFrame(), YoIMUMahonyFilter.NORTH_REFERENCE);
+         }
       }
       else
       {
@@ -130,6 +153,8 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       this.initialHeadPosition.set(initialHeadTransform.getTranslation());
       this.initialHeadOrientationYPR.set(initialHeadTransform.getRotation().getYaw(), initialHeadTransform.getRotation().getPitch(), initialHeadTransform.getRotation().getRoll());
       this.initialMagneticFieldVector.set(initialMagneticFieldDirection);
+
+      inErrorState.set(false);
 
       super.initialize(initialHeadTransform, initialMagneticFieldDirection);
    }
@@ -158,21 +183,44 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       {
          Vector3DReadOnly angularRate = microStrainData.getAngularRate();
          Vector3DReadOnly linearAcceleration = microStrainData.getLinearAcceleration();
-         Vector3DReadOnly geomagneticNorthVector = microStrainData.getGeomagneticNorthVector();
+         Vector3DReadOnly geomagneticNorthVector = null;
+
+         if(!USE_VIRTUAL_MAGNETOMETER)
+         {
+           geomagneticNorthVector = microStrainData.getGeomagneticNorthVector();
+           imuMagneticNorthVector.set(geomagneticNorthVector);
+         }
+         else
+         {
+            imuFrame.update();
+            virtualMagnetometerMeasurement.setIncludingFrame(ReferenceFrame.getWorldFrame(), YoIMUMahonyFilter.NORTH_REFERENCE);
+            virtualMagnetometerMeasurement.changeFrame(imuFrame);
+            imuMagneticNorthVector.setMatchingFrame(virtualMagnetometerMeasurement);
+         }
 
          imuAngularVelocity.set(angularRate);
          imuLinearAcceleration.set(linearAcceleration);
-         imuMagneticNorthVector.set(0.0, 0.0, -(getFullRobotModel().getHeadBaseFrame().getTransformToWorldFrame().getRotation().getYaw()));
 
-         imuAngularVelocity.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
          imuLinearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 
          super.setImuAngularVelocity(imuAngularVelocity);
          super.setImuLinearAcceleration(imuLinearAcceleration);
-         super.setImuMagneticFieldVector(imuMagneticNorthVector);
+         super.setImuMagneticFieldVector(virtualMagnetometerMeasurement);
       }
 
-      super.compute();
+      try
+      {
+         super.compute();
+      }
+      catch(Throwable t)
+      {
+         if(!inErrorState.getBooleanValue())
+         {
+            System.err.println("Caught a throwable from the head pose EKF, ignoring.");
+            inErrorState.set(true);
+         }
+      }
+
    }
 
    private void updateRobotConfigurationData(RobotConfigurationData latestData)
