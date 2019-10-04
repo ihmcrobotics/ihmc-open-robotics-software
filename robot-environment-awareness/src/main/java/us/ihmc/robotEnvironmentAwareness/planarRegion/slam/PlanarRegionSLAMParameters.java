@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
@@ -36,7 +36,7 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
       super(keys,
             PlanarRegionSLAMParameters.class,
             "ihmc-open-robotics-software",
-            "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
+            "robot-environment-awareness/src/main/resources");
 
       load();
    }

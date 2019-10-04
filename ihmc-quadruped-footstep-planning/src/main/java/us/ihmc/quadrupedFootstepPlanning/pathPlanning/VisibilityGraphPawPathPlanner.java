@@ -11,11 +11,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavi
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPlanner

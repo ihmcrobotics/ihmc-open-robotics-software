@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 

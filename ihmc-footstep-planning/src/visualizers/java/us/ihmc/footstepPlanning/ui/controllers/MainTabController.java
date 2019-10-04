@@ -216,15 +216,7 @@ public class MainTabController
    private PlanarRegionsList buildFlatGround()
    {
       humanoidReferenceFrames.updateFrames();
-      RigidBodyTransform transformToWorld = humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame();
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
-      convexPolygon.addVertex(10.0, 10.0);
-      convexPolygon.addVertex(-10.0, 10.0);
-      convexPolygon.addVertex(-10.0, -10.0);
-      convexPolygon.addVertex(10.0, -10.0);
-      convexPolygon.update();
-      PlanarRegion groundPlane = new PlanarRegion(transformToWorld, convexPolygon);
-      return new PlanarRegionsList(groundPlane);
+      return PlanarRegionsList.flatGround(20.0, humanoidReferenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
    }
 
    private JavaFXMessager messager;
