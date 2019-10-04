@@ -716,7 +716,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       boolean checkCondition();
    }
 
-   private class TestRobotModel implements DRCRobotModel
+   public class TestRobotModel implements DRCRobotModel
    {
       @Override
       public DRCRobotJointMap getJointMap()
