@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.continuousPlanningToolboxModule;
 
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -16,7 +14,10 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
@@ -70,25 +71,46 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      return null;
+      return new ArrayList<>();
    }
 
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      return null;
+      List<Class<? extends Settable<?>>> messages = new ArrayList<>();
+
+      messages.put(FootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
+      messages.put(FootstepDataListMessage.class, getPublisherTopicNameGenerator());
+
+      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      messages.put(FootstepPlanningRequestPacket.class, plannerSubGenerator);
+      messages.put(ToolboxStateMessage.class, plannerSubGenerator);
+
+      return messages;
    }
 
    @Override
    public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return null;
+      return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return null;
+      return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void sleep()
+   {
+      super.sleep();
+
+      ToolboxStateMessage plannerState = new ToolboxStateMessage();
+      plannerState.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
+
+      statusOutputManager.reportStatusMessage(plannerState);
    }
 
    private void processFootstepPlannerOutput(FootstepPlanningToolboxOutputStatus footstepPlannerOutput)
