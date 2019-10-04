@@ -14,6 +14,7 @@ public class ROS2Input<T>
 {
    private final AtomicReference<T> atomicReference;
    private final MessageFilter<T> messageFilter;
+   private boolean hasReceivedFirstMessage = false;
 
    public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
@@ -69,11 +70,17 @@ public class ROS2Input<T>
       if (messageFilter.accept(incomingData))
       {
          atomicReference.set(incomingData);
+         hasReceivedFirstMessage = true;
       }
    }
 
    public T getLatest()
    {
       return atomicReference.get();
+   }
+
+   public boolean hasReceivedFirstMessage()
+   {
+      return hasReceivedFirstMessage;
    }
 }

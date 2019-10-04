@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceFromPoint3DToLineSegment3D;
@@ -20,6 +20,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -30,14 +31,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionTools
 {
@@ -109,7 +108,7 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, PlanarRegionsList regions)
    {
       if (regions == null)
          return projectPointToPlanesVertically(pointInWorld, (List<PlanarRegion>) null);
@@ -124,7 +123,7 @@ public class PlanarRegionTools
     * <p>
     * Will return null if the is no planar region above or below the point.
     */
-   public static Point3DReadOnly projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
    {
       Point3D highestIntersection = null;
 
@@ -465,6 +464,52 @@ public class PlanarRegionTools
          return false;
       if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, point2))
          return false;
+
+      return true;
+   }
+
+   public static boolean allVerticesAreAbovePlane3D(Plane3D plane, PlanarRegion planarRegion)
+   {
+      Point3D vertexInWorld = new Point3D();
+      RigidBodyTransformReadOnly regionToWorld = planarRegion.getTransformToWorld();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+         {
+            Point2DReadOnly vertex = convexPolygon.getVertex(i);
+            vertexInWorld.set(vertex.getX(), vertex.getY(), 0.0);
+            vertexInWorld.applyTransform(regionToWorld);
+
+            if (!EuclidGeometryTools.isPoint3DAbovePlane3D(vertexInWorld, plane.getPoint(), plane.getNormal()))
+            {
+               return false;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   public static boolean allVerticesAreBelowPlane3D(Plane3D plane, PlanarRegion planarRegion)
+   {
+      Point3D vertexInWorld = new Point3D();
+      RigidBodyTransformReadOnly regionToWorld = planarRegion.getTransformToWorld();
+
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+      {
+         for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+         {
+            Point2DReadOnly vertex = convexPolygon.getVertex(i);
+            vertexInWorld.set(vertex.getX(), vertex.getY(), 0.0);
+            vertexInWorld.applyTransform(regionToWorld);
+
+            if (!EuclidGeometryTools.isPoint3DBelowPlane3D(vertexInWorld, plane.getPoint(), plane.getNormal()))
+            {
+               return false;
+            }
+         }
+      }
 
       return true;
    }

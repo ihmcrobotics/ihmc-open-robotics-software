@@ -1,8 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
@@ -10,16 +13,18 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -35,6 +40,9 @@ public class KSTTools
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
+
+   private final FullHumanoidRobotModel currentFullRobotModel;
+   private final OneDoFJointBasics[] currentOneDoFJoint;
 
    private final HumanoidKinematicsToolboxController ikController;
    private final KinematicsToolboxOutputConverter outputConverter;
@@ -59,10 +67,14 @@ public class KSTTools
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
 
+      currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
+
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(), KinematicsToolboxModule.supportedCommands());
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
+                                                             fullRobotModelFactory,
                                                              toolboxControllerPeriod,
                                                              yoGraphicsListRegistry,
                                                              registry);
@@ -74,6 +86,27 @@ public class KSTTools
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
       streamIntegrationDuration.set(0.1);
+   }
+
+   public void update()
+   {
+      if (getRobotConfigurationData() != null)
+      {
+         updateFullRobotModel(getRobotConfigurationData(), currentFullRobotModel);
+         currentFullRobotModel.updateFrames();
+      }
+   }
+
+   public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
+   {
+      MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
+   }
+
+   public void getCurrentState(YoKinematicsToolboxOutputStatus currentStateToPack)
+   {
+      KinematicsToolboxOutputStatus status = currentStateToPack.getStatus();
+      MessageTools.packDesiredJointState(status, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
+      currentStateToPack.set(status);
    }
 
    private KinematicsStreamingToolboxInputCommand latestInput = null;
@@ -89,13 +122,19 @@ public class KSTTools
 
    public WholeBodyTrajectoryMessage convertIKOutput()
    {
-      outputConverter.updateFullRobotModel(ikController.getSolution());
+      return setupWholeBodyTrajectoryMessage(ikController.getSolution());
+   }
+
+   public WholeBodyTrajectoryMessage setupWholeBodyTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   {
+      outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.0);
+      outputConverter.setEnableVelocity(true);
 
-      for (RobotSide robotSide : RobotSide.values)
-         outputConverter.computeArmTrajectoryMessage(robotSide);
-      outputConverter.computeHeadTrajectoryMessage();
+      outputConverter.computeHandTrajectoryMessages();
+      outputConverter.computeArmTrajectoryMessages();
+      outputConverter.computeNeckTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
 
@@ -155,6 +194,11 @@ public class KSTTools
       return outputConverter;
    }
 
+   public FullHumanoidRobotModel getCurrentFullRobotModel()
+   {
+      return currentFullRobotModel;
+   }
+
    public HumanoidKinematicsToolboxController getIKController()
    {
       return ikController;
@@ -197,5 +241,13 @@ public class KSTTools
 
       Pose3DBasics rootJointPose = fullRobotModelToUpdate.getRootJoint().getJointPose();
       rootJointPose.set(robotConfigurationData.getRootTranslation(), robotConfigurationData.getRootOrientation());
+   }
+
+   public static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination, JointStateType stateSelection)
+   {
+      MultiBodySystemTools.copyJointsState(Collections.singletonList(source.getRootJoint()),
+                                           Collections.singletonList(destination.getRootJoint()),
+                                           stateSelection);
+      MultiBodySystemTools.copyJointsState(Arrays.asList(source.getOneDoFJoints()), Arrays.asList(destination.getOneDoFJoints()), stateSelection);
    }
 }

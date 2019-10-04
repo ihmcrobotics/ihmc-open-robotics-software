@@ -44,6 +44,12 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -66,6 +72,15 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getInputs().size(); ++i0)
       {
@@ -81,6 +96,12 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       cdr.write_type_7(data.getStreamToController());
 
+      cdr.write_type_6(data.getStreamInitialBlendDuration());
+
+      cdr.write_type_6(data.getAngularRateLimitation());
+
+      cdr.write_type_6(data.getLinearRateLimitation());
+
       if(data.getInputs().size() <= 10)
       cdr.write_type_e(data.getInputs());else
           throw new RuntimeException("inputs field exceeds the maximum length");
@@ -93,6 +114,12 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       	
       data.setStreamToController(cdr.read_type_7());
       	
+      data.setStreamInitialBlendDuration(cdr.read_type_6());
+      	
+      data.setAngularRateLimitation(cdr.read_type_6());
+      	
+      data.setLinearRateLimitation(cdr.read_type_6());
+      	
       cdr.read_type_e(data.getInputs());	
 
    }
@@ -102,6 +129,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("stream_to_controller", data.getStreamToController());
+      ser.write_type_6("stream_initial_blend_duration", data.getStreamInitialBlendDuration());
+      ser.write_type_6("angular_rate_limitation", data.getAngularRateLimitation());
+      ser.write_type_6("linear_rate_limitation", data.getLinearRateLimitation());
       ser.write_type_e("inputs", data.getInputs());
    }
 
@@ -110,6 +140,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setStreamToController(ser.read_type_7("stream_to_controller"));
+      data.setStreamInitialBlendDuration(ser.read_type_6("stream_initial_blend_duration"));
+      data.setAngularRateLimitation(ser.read_type_6("angular_rate_limitation"));
+      data.setLinearRateLimitation(ser.read_type_6("linear_rate_limitation"));
       ser.read_type_e("inputs", data.getInputs());
    }
 
