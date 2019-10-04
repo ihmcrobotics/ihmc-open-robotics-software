@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,6 +58,42 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       numberOfStepsToLeaveUnchanged.set(defaultNumberOfStepsToLeaveUnchanged);
    }
 
+   public void processFootstepPlannerOutput(FootstepPlanningToolboxOutputStatus message)
+   {
+      FootstepPlanningResult result = FootstepPlanningResult.fromByte(message.getFootstepPlanningResult());
+      if (!result.validForExecution())
+      {
+         LogTools.info(("Planner result failed. Terminating because of " + result));
+         resetForNewPlan();
+         planningFailed.set(true);
+      }
+      latestPlannerOutput.set(message);
+      receivedPlanId.set(message.getPlanId());
+      waitingForPlan.set(false);
+   }
+
+   public void processContinuousPlanningRequest(BipedContinuousPlanningRequestPacket message)
+   {
+      resetForNewPlan();
+      planningRequestPacket.set(message);
+   }
+
+   public void processFootstepStatusMessage(FootstepStatusMessage message)
+   {
+      List<FootstepStatusMessage> messages = footstepStatusBuffer.get();
+      messages.add(message);
+      footstepStatusBuffer.set(messages);
+      if (FootstepStatus.fromByte(message.getFootstepStatus()) == FootstepStatus.COMPLETED)
+      {
+         currentFeetPositions.put(RobotSide.fromByte(message.getRobotSide()), message.getActualFootPositionInWorld());
+      }
+   }
+
+   public void processPlanarRegionListMessage(PlanarRegionsListMessage message)
+   {
+      latestPlanarRegions.set(message);
+   }
+
    @Override
    public boolean initialize()
    {
@@ -103,6 +141,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
       planningFailed.set(false);
       hasReachedGoal.set(false);
+      // TODO don't clear the fixed step queue.
       fixedStepQueue.clear();
       currentFeetPositions.clear();
       stepQueue.clear();
