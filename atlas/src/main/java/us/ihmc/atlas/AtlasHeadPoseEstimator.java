@@ -36,6 +36,7 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
    private final RigidBodyTransform headRigidBodyTransform = new RigidBodyTransform();
    private YoFramePose3D estimatedHeadPoseFramePoint;
    private YoGraphicCoordinateSystem estimatedHeadPoseViz;
+   private YoGraphicCoordinateSystem imuFrame;
 
    public AtlasHeadPoseEstimator(double dt, long microStrainSerialNumber, boolean getRobotConfigurationDataFromNetwork)
          throws IOException
@@ -59,7 +60,10 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
 
       estimatedHeadPoseViz = new YoGraphicCoordinateSystem("EstimatedHeadPoseVizualizer", estimatedHeadPoseFramePoint, 0.2, YoAppearance.DarkGray());
 
+      imuFrame = new YoGraphicCoordinateSystem("HeadIMUFrame", new YoFramePose3D("HeadIMUPose", ReferenceFrame.getWorldFrame(), getRegistry()), 0.2);
+
       graphicsList.add(estimatedHeadPoseViz);
+      graphicsList.add(imuFrame);
 
       parentYoGraphicListRegistry.registerYoGraphicsList(graphicsList);
    }
@@ -69,6 +73,8 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
    {
       super.compute();
       getHeadTransform(headRigidBodyTransform);
+
+      imuFrame.setToReferenceFrame(getImuFrame());
 
       if(estimatedHeadPoseViz != null)
       {
