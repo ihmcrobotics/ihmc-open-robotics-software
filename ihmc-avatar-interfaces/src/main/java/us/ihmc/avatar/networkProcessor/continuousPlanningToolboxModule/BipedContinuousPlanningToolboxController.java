@@ -107,15 +107,18 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
-      clearCompletedSteps();
+      if (!clearCompletedSteps())
+         return;
 
       checkIfLastPlanFulfilledRequest();
 
       if (!waitingForPlan.getBooleanValue() && !hasReachedGoal.getBooleanValue() && fixedStepQueue.size() < numberOfStepsToLeaveUnchanged.getValue())
       {
-         updateStepQueueFromNewPlan();
+         if (!updateStepQueueFromNewPlan())
+            return;
 
-         updateFixedStepQueue();
+         if (!updateFixedStepQueue())
+            return;
 
          updateHasReachedGoal();
 
@@ -159,7 +162,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    }
 
 
-   private void clearCompletedSteps()
+   private boolean clearCompletedSteps()
    {
       List<FootstepStatusMessage> footstepStatusBuffer = this.footstepStatusBuffer.get();
 
@@ -173,12 +176,16 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
                LogTools.warn("The completed step was not the next step in the queue. Killing the module.");
                resetForNewPlan();
                planningFailed.set(true);
+
+               return false;
             }
          }
       }
 
       footstepStatusBuffer.clear();
       this.footstepStatusBuffer.set(footstepStatusBuffer);
+
+      return true;
    }
 
    private void checkIfLastPlanFulfilledRequest()
@@ -193,15 +200,15 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       receivedPlanForLastRequest.set(broadcastPlanId.getIntegerValue() == receivedPlanId.getIntegerValue());
    }
 
-   private void updateStepQueueFromNewPlan()
+   private boolean updateStepQueueFromNewPlan()
    {
       FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
       if (plannerOutput == null)
-         return;
+         return false;
 
       // ignore this plan, it's out of date
       if (plannerOutput.getPlanId() != broadcastPlanId.getValue())
-         return;
+         return false;
 
       currentPlannerOutput.set(plannerOutput);
       List<FootstepDataMessage> stepList = plannerOutput.getFootstepDataList().getFootstepDataList();
@@ -215,9 +222,13 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
                               RobotSide.fromByte(stepQueue.get(0).getRobotSide()));
          resetForNewPlan();
          planningFailed.set(true);
+
+         return false;
       }
 
       isInitialSegmentOfPlan.set(false);
+
+      return true;
    }
 
    private boolean updateFixedStepQueue()
@@ -239,10 +250,14 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
                                     RobotSide.fromByte(footstepToAdd.getRobotSide()) + ", but " + expectedInitialSide.get() + " was requested for starting.");
                resetForNewPlan();
                planningFailed.set(true);
+
+               return false;
             }
          }
          fixedStepQueue.add(footstepToAdd);
       }
+
+      return true;
    }
 
    private void broadcastLatestPlan()
