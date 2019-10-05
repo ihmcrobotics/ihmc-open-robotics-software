@@ -58,6 +58,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
+   private static final boolean debug = false;
+
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
 
@@ -455,6 +457,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
+      if (debug)
+      {
+         String message = "Received new planning request. ";
+         message += waitingForPlanningRequest.getBooleanValue() ? " Starting this request." : "Not starting because we should be planning.";
+
+         LogTools.info(message);
+      }
+
       if (!waitingForPlanningRequest.getBooleanValue())
          return;
 
