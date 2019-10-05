@@ -162,7 +162,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    public FootstepPlannerParametersBasics getTestFootstepPlannerParameters()
    {
       FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
-      parameters.setReturnBestEffortPlan(true);
+      parameters.setReturnBestEffortPlan(false);
       parameters.setMinimumStepsForBestEffortPlan(3);
 
       return parameters;
@@ -1101,7 +1101,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
+      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 

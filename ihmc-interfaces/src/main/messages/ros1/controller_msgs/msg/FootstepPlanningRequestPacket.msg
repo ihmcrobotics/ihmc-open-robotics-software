@@ -49,6 +49,9 @@ float64 goal_yaw_proximity
 # Timeout in seconds
 float64 timeout
 
+# Best effort timeout in seconds
+float64 best_effort_timeout
+
 # Max body path length if using body path
 float64 horizon_length
 

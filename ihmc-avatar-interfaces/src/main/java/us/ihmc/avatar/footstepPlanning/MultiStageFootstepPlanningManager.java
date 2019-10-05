@@ -85,6 +85,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoDouble timeSpentBeforeFootstepPlanner = new YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new YoDouble("timeSpentInFootstepPlanner", registry);
    private final YoDouble timeout = new YoDouble("PlannerTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("PlannerBestEffortTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
    private final YoInteger globalPathSequenceIndex = new YoInteger("globalPathSequenceIndex", registry);
    private final YoInteger globalStepSequenceIndex = new YoInteger("globalStepSequenceIndex", registry);
@@ -596,6 +597,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       else
       {
          mainObjective.setTimeout(Double.POSITIVE_INFINITY);
+      }
+
+      double bestEffortTimeout = request.getBestEffortTimeout();
+      if (bestEffortTimeout > 0.0 && Double.isFinite(bestEffortTimeout))
+      {
+         mainObjective.setBestEffortTimeout(bestEffortTimeout);
+         this.bestEffortTimeout.set(bestEffortTimeout);
+      }
+      else
+      {
+         mainObjective.setBestEffortTimeout(Double.POSITIVE_INFINITY);
       }
 
       if (requestedPlannerType.plansPath())

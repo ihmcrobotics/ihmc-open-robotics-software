@@ -121,6 +121,12 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    }
 
    @Override
+   public void setBestEffortTimeout(double timeout)
+   {
+      footstepPlanner.setBestEffortTimeout(timeout);
+   }
+
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       footstepPlanner.setPlanarRegions(planarRegionsList);
