@@ -47,6 +47,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
@@ -162,7 +164,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    public FootstepPlannerParametersBasics getTestFootstepPlannerParameters()
    {
       FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
-      parameters.setReturnBestEffortPlan(false);
+      parameters.setReturnBestEffortPlan(true);
       parameters.setMinimumStepsForBestEffortPlan(3);
 
       return parameters;
@@ -408,10 +410,10 @@ public class BipedContinuousPlanningToolboxDataSetTest
    {
       Quaternion startOrientation = new Quaternion();
       Quaternion goalOrientation = new Quaternion();
-      if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
-         startOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
-      if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
-         goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
+      if (dataset.getPlannerInput().hasStartOrientation())
+         startOrientation.setYawPitchRoll(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0);
+      if (dataset.getPlannerInput().hasGoalOrientation())
+         goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0);
 
       PlannerInput plannerInput = dataset.getPlannerInput();
 
@@ -430,14 +432,14 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       BipedContinuousPlanningRequestPacket requestPacket = new BipedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(dataset.getPlannerInput().getQuadrupedTimeout());
+      requestPacket.setTimeout(dataset.getPlannerInput().getTimeoutFlag(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toString().toLowerCase()));
       requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
-      requestPacket.getGoalPositionInWorld().set(plannerInput.getQuadrupedGoalPosition());
+      requestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
 
       SideDependentList<FramePose3D> feetPoses = new SideDependentList<>();
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
-      startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataset.getPlannerInput().getQuadrupedStartPosition()));
+      startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataset.getPlannerInput().getStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -455,9 +457,9 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       requestPublisher.publish(requestPacket);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getQuadrupedGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getQuadrupedStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getStartPosition());
 
 
       if (DEBUG)
@@ -492,9 +494,9 @@ public class BipedContinuousPlanningToolboxDataSetTest
       SideDependentList<FramePose3D> feetPoses = new SideDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getQuadrupedStartYaw());
+         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getStartYaw());
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
-      startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getQuadrupedStartPosition()));
+      startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -545,7 +547,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
             statusMessage.setRobotSide(currentStep.getRobotSide());
             statusMessage.getDesiredFootPositionInWorld().set(currentStep.getLocation());
             statusMessage.getDesiredFootOrientationInWorld().set(currentStep.getOrientation());
-            statusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
+            statusMessage.setFootstepStatus(FootstepStatus.STARTED.toByte());
 
             if (DEBUG)
             {
@@ -558,8 +560,12 @@ public class BipedContinuousPlanningToolboxDataSetTest
          }
          else if (isDoneWithSwing)
          {
+            if (wasInTransfer)
+               throw new RuntimeException("This shouldn't happen.");
+
 //            stepList.getFootstepDataList().remove(currentStep);
             timeAtStartOfState = currentTime;
+            stepList.getFootstepDataList().remove(currentStep);
 
             FootstepStatusMessage statusMessage = new FootstepStatusMessage();
             statusMessage.setRobotSide(currentStep.getRobotSide());
@@ -567,7 +573,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
             statusMessage.getDesiredFootOrientationInWorld().set(currentStep.getOrientation());
             statusMessage.getActualFootPositionInWorld().set(currentStep.getLocation());
             statusMessage.getActualFootOrientationInWorld().set(currentStep.getOrientation());
-            statusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
+            statusMessage.setFootstepStatus(FootstepStatus.COMPLETED.toByte());
 
             if (DEBUG)
             {
@@ -612,7 +618,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       if (outputFromPlannerReference.get() != null)
       {
          Point3DReadOnly pointReached = outputFromPlannerReference.get().getLowLevelPlannerGoal().getPosition();
-         Point3DReadOnly goalPosition = dataSet.getPlannerInput().getQuadrupedGoalPosition();
+         Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
          if (pointReached.distanceXY(goalPosition) > LatticeNode.gridSizeXY)
          {
             message += "Final goal pose was not correct, meaning it did not reach the goal.\n";
@@ -645,8 +651,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       List<Pose3D> pathPlan = planResult.getBodyPath();
       Pose3DReadOnly actualGoal = pathPlan.get(pathPlan.size() - 1);
-      Point3DReadOnly goalPosition = dataSet.getPlannerInput().getQuadrupedGoalPosition();
-      double goalYaw = dataSet.getPlannerInput().getQuadrupedGoalYaw();
+      Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
+      double goalYaw = dataSet.getPlannerInput().getGoalYaw();
 
       if (goalPosition.distanceXY(actualGoal.getPosition()) > 3.0 * LatticeNode.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + actualGoal.getPosition() + ", trying to get to " + new Point3D(goalPosition);

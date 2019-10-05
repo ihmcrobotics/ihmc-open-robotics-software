@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.continuousPlanningToolboxModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -26,10 +27,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class BipedContinuousPlanningToolboxController extends ToolboxController
 {
    private static final boolean debug = false;
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
-   private static final double defaultTransferDuration = 3.0;
-   private static final double defaultSwingDuration = 5.0;
+   private static final double defaultTransferDuration = 0.6;
+   private static final double defaultSwingDuration = 1.0;
 
    private static final RobotSide defaultInitialSide = RobotSide.LEFT;
 
@@ -47,6 +48,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegions = new AtomicReference<>();
 
    private final SideDependentList<Pose3DReadOnly> currentFeetPositions = new SideDependentList<>();
+   private final List<FootstepDataMessage> completedSteps = new ArrayList<>();
    private final List<FootstepDataMessage> fixedStepQueue = new ArrayList<>();
    private final List<FootstepDataMessage> stepQueue = new ArrayList<>();
 
@@ -109,15 +111,26 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
    public void processFootstepStatusMessage(FootstepStatusMessage message)
    {
-      List<FootstepStatusMessage> messages = footstepStatusBuffer.get();
-      messages.add(message);
-      footstepStatusBuffer.set(messages);
       if (FootstepStatus.fromByte(message.getFootstepStatus()) == FootstepStatus.COMPLETED)
       {
+         List<FootstepStatusMessage> oldBuffer = footstepStatusBuffer.getAndSet(null);
+         List<FootstepStatusMessage> newBuffer = new ArrayList<>();
+
+         if (oldBuffer != null)
+            newBuffer.addAll(oldBuffer);
+         newBuffer.add(message);
+
+         footstepStatusBuffer.set(newBuffer);
+
          Pose3D footPose = new Pose3D();
          footPose.setOrientation(message.getActualFootOrientationInWorld());
          footPose.setPosition(message.getActualFootPositionInWorld());
          currentFeetPositions.put(RobotSide.fromByte(message.getRobotSide()), footPose);
+
+         if (verbose)
+         {
+            LogTools.info("Received completed step: " + RobotSide.fromByte(message.getRobotSide()) + " at " + message.getActualFootPositionInWorld());
+         }
       }
    }
 
@@ -173,6 +186,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    {
       waitingForPlan.set(true);
       isInitialSegmentOfPlan.set(true);
+      completedSteps.clear();
 
       planningFailed.set(false);
       hasReachedGoal.set(false);
@@ -180,7 +194,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       fixedStepQueue.clear();
       currentFeetPositions.clear();
       stepQueue.clear();
-      footstepStatusBuffer.set(new ArrayList<>());
+      footstepStatusBuffer.set(null);
       latestPlannerOutput.set(null);
       expectedInitialSteppingSide.set(defaultInitialSide);
 
@@ -194,6 +208,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       BipedContinuousPlanningRequestPacket continuousPlanningRequestPacket = this.planningRequestPacket.get();
 
       plannerStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+
+      // sleep for a minute to let the toolbox wake up.
+      ThreadTools.sleep(100);
 
       SideDependentList<Pose3DReadOnly> startPositions = new SideDependentList<>();
       if (isInitialSegmentOfPlan.getBooleanValue())
@@ -263,7 +280,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       planningRequestPacket.getStanceFootPositionInWorld().set(stancePose.getPosition());
       planningRequestPacket.getStanceFootOrientationInWorld().set(stancePose.getOrientation());
       planningRequestPacket.setTimeout(continuousPlanningRequestPacket.getTimeout());
-//      planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getBestEffortTimeout());
+      planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getBestEffortTimeout());
       planningRequestPacket.getGoalPositionInWorld().set(continuousPlanningRequestPacket.getGoalPositionInWorld());
       planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());
@@ -271,39 +288,75 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       broadcastPlanId.increment();
       planningRequestPacket.setPlannerRequestId(broadcastPlanId.getIntegerValue());
 
+      waitingForPlan.set(true);
+      planningRequestPublisher.publish(planningRequestPacket);
+
       if (debug || verbose)
       {
          LogTools.info("Planning #" + broadcastPlanId.getValue() + " to " + continuousPlanningRequestPacket.getGoalPositionInWorld() + ", starting with " + expectedInitialSteppingSide
                .get());
       }
-      waitingForPlan.set(true);
-      planningRequestPublisher.publish(planningRequestPacket);
    }
 
 
    private boolean clearCompletedSteps()
    {
-      List<FootstepStatusMessage> statusMessages = this.footstepStatusBuffer.getAndSet(new ArrayList<>());
+      List<FootstepStatusMessage> statusMessages = this.footstepStatusBuffer.getAndSet(null);
+      if (statusMessages == null)
+         return true;
 
       for (FootstepStatusMessage footstepStatusMessage : statusMessages)
       {
-         if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+         if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
          {
-            FootstepDataMessage stepToRemove = fixedStepQueue.remove(0);
-            if (stepToRemove.getRobotSide() != footstepStatusMessage.getRobotSide())
+            FootstepDataMessage stepToRemove = getStepFromQueue(footstepStatusMessage, fixedStepQueue);
+            if (stepToRemove == null)
             {
-               LogTools.warn("The completed step was not the next step in the queue. Killing the module.");
+               stepToRemove = getStepFromQueue(footstepStatusMessage, stepQueue);
+            }
+            else
+            {
+               fixedStepQueue.remove(stepToRemove);
+               completedSteps.add(stepToRemove);
+
+               continue;
+            }
+
+
+            if (stepToRemove == null)
+            {
+               LogTools.warn("The completed step was not in the queue. Killing the module.");
                resetForNewPlan();
                planningFailed.set(true);
 
                return false;
             }
+
+            stepQueue.remove(stepToRemove);
+            completedSteps.add(stepToRemove);
          }
       }
 
-//      this.footstepStatusBuffer.set(new ArrayList<>());
-
       return true;
+   }
+
+   private FootstepDataMessage getStepFromQueue(FootstepStatusMessage statusMessage, List<FootstepDataMessage> stepList)
+   {
+      for (FootstepDataMessage step : stepList)
+      {
+         if (step.getRobotSide() != statusMessage.getRobotSide())
+            continue;
+
+         if (!step.getLocation().epsilonEquals(statusMessage.getDesiredFootPositionInWorld(), 1e-2))
+            continue;
+
+         if (!step.getOrientation().epsilonEquals(statusMessage.getDesiredFootOrientationInWorld(), 1e-2))
+            continue;
+
+         return step;
+      }
+
+      return null;
    }
 
    private void checkIfLastPlanFulfilledRequest()
