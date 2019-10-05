@@ -16,6 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -26,6 +27,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 {
    private static final boolean debug = false;
    private static final boolean verbose = true;
+
+   private static final double defaultTransferDuration = 3.0;
+   private static final double defaultSwingDuration = 5.0;
 
    private static final RobotSide defaultInitialSide = RobotSide.LEFT;
 
@@ -56,6 +60,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    private final YoInteger broadcastPlanId = new YoInteger("broadcastPlanId", registry);
    private final YoInteger receivedPlanId = new YoInteger("receivedPlanId", registry);
 
+   private final YoDouble transferDuration = new YoDouble("transferDuration", registry);
+   private final YoDouble swingDuration = new YoDouble("swingDuration", registry);
+
    private final IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
    private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher;
 
@@ -73,6 +80,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       receivedPlanId.set(-1);
 
       numberOfStepsToLeaveUnchanged.set(defaultNumberOfStepsToLeaveUnchanged);
+
+      transferDuration.set(defaultTransferDuration);
+      swingDuration.set(defaultSwingDuration);
    }
 
    public void processFootstepPlannerOutput(FootstepPlanningToolboxOutputStatus message)
@@ -83,6 +93,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          LogTools.info(("Planner result failed. Terminating because of " + result));
          resetForNewPlan();
          planningFailed.set(true);
+
+         return;
       }
       latestPlannerOutput.set(message);
       receivedPlanId.set(message.getPlanId());
@@ -154,7 +166,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    @Override
    public boolean isDone()
    {
-      return false;
+      return hasReachedGoal.getBooleanValue() || planningFailed.getBooleanValue();
    }
 
    private void resetForNewPlan()
@@ -271,9 +283,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
    private boolean clearCompletedSteps()
    {
-      List<FootstepStatusMessage> footstepStatusBuffer = this.footstepStatusBuffer.get();
+      List<FootstepStatusMessage> statusMessages = this.footstepStatusBuffer.getAndSet(new ArrayList<>());
 
-      for (FootstepStatusMessage footstepStatusMessage : footstepStatusBuffer)
+      for (FootstepStatusMessage footstepStatusMessage : statusMessages)
       {
          if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
          {
@@ -289,8 +301,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          }
       }
 
-      footstepStatusBuffer.clear();
-      this.footstepStatusBuffer.set(footstepStatusBuffer);
+//      this.footstepStatusBuffer.set(new ArrayList<>());
 
       return true;
    }
@@ -309,7 +320,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
    private boolean updateStepQueueFromNewPlan()
    {
-      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
+//      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
+      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.get();
       if (plannerOutput == null)
          return false;
 
@@ -321,7 +333,12 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       List<FootstepDataMessage> stepList = plannerOutput.getFootstepDataList().getFootstepDataList();
       stepQueue.clear();
       for (int i = 0; i < stepList.size(); i++)
-         stepQueue.add(new FootstepDataMessage(stepList.get(i)));
+      {
+         FootstepDataMessage step = new FootstepDataMessage(stepList.get(i));
+         step.setTransferDuration(transferDuration.getDoubleValue());
+         step.setSwingDuration(swingDuration.getDoubleValue());
+         stepQueue.add(step);
+      }
 
       if (stepQueue.get(0).getRobotSide() != expectedInitialSteppingSide.get().toByte())
       {
@@ -333,6 +350,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          return false;
       }
 
+//      latestPlannerOutput.set(null);
       isInitialSegmentOfPlan.set(false);
 
       return true;
@@ -386,6 +404,9 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       {
          isPlannedGoalTheFinalGoal = currentPlannerOutput.get().getLowLevelPlannerGoal().getPosition().distanceXY(planningRequestPacket.get().getGoalPositionInWorld()) < proximityGoal;
       }
-      hasReachedGoal.set(!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && stepQueue.isEmpty());
+      if (!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && stepQueue.isEmpty())
+         hasReachedGoal.set(true);
+      else
+         hasReachedGoal.set(false);
    }
 }
