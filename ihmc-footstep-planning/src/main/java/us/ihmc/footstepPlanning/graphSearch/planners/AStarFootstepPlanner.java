@@ -56,7 +56,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final String name = getClass().getSimpleName();
@@ -440,7 +440,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          long timeInNano = System.nanoTime();
          double planningTime = Conversions.nanosecondsToSeconds(timeInNano - planningStartTime);
          boolean hardTimeout = planningTime > timeout.getDoubleValue();
-         boolean bestEffortTimedOut = parameters.getReturnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue();
+         boolean bestEffortTimedOut = parameters.getReturnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue() && endNode != null;
          if (hardTimeout || bestEffortTimedOut || abortPlanning.getBooleanValue())
          {
             if (abortPlanning.getBooleanValue())
