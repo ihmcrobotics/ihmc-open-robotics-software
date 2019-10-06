@@ -120,7 +120,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    }
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
+   protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = true;
@@ -674,6 +674,9 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
    private static String checkStepOrder(String datasetName, List<FootstepDataMessage> plannedSteps)
    {
+      if (plannedSteps.size() < 1)
+         return "";
+
       String errorMessage = "";
       RobotSide previousMovingSide = RobotSide.fromByte(plannedSteps.get(0).getRobotSide());
       for (int i = 1; i < plannedSteps.size(); i++)
@@ -1107,7 +1110,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      String errorMessage = test.runAssertions(DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 

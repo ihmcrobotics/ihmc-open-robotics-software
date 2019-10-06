@@ -373,8 +373,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
    private boolean updateStepQueueFromNewPlan()
    {
-//      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
-      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.get();
+      FootstepPlanningToolboxOutputStatus plannerOutput = latestPlannerOutput.getAndSet(null);
       if (plannerOutput == null)
          return false;
 
@@ -403,7 +402,6 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          return false;
       }
 
-//      latestPlannerOutput.set(null);
       isInitialSegmentOfPlan.set(false);
 
       return true;
@@ -414,7 +412,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       if (fixedStepQueue.size() > numberOfStepsToLeaveUnchanged.getValue() || stepQueue.size() == 0)
          return false;
 
-      while (fixedStepQueue.size() < numberOfStepsToLeaveUnchanged.getIntegerValue())
+      while (fixedStepQueue.size() < numberOfStepsToLeaveUnchanged.getIntegerValue() && stepQueue.size() > 0)
       {
          FootstepDataMessage footstepToAdd = stepQueue.remove(0);
          if (fixedStepQueue.size() > 0)
@@ -422,7 +420,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
             byte lastSide = fixedStepQueue.get(fixedStepQueue.size() - 1).getRobotSide();
             if (lastSide == footstepToAdd.getRobotSide())
             {
-               LogTools.error("The next quadrant when appending would be out of order. The fixed queue size " + fixedStepQueue.size() +
+               LogTools.error("The next side when appending would be out of order. The fixed queue size " + fixedStepQueue.size() +
                                     " ends with a step on the " + RobotSide.fromByte(lastSide) + ", meaning it should start with " +
                                     RobotSide.fromByte(lastSide).getOppositeSide() + ". \nIt actually starts with " +
                                     RobotSide.fromByte(footstepToAdd.getRobotSide()) + ", but " + expectedInitialSteppingSide.get() + " was requested for starting.");
