@@ -693,6 +693,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
    private static String checkStepPositions(String datasetName, List<FootstepDataMessage> plannedSteps, FootstepPlannerParametersReadOnly parameters)
    {
+      double heightChangeFromWiggling = Math.sqrt(2) * parameters.getMaximumXYWiggleDistance() / Math.sin(parameters.getMinimumSurfaceInclineRadians());
       String errorMessage = "";
       SideDependentList<FootstepDataMessage> previousSteps = new SideDependentList<>();
       for (int i = 0; i < plannedSteps.size(); i++)
@@ -704,7 +705,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          if (previousStep != null)
          {
             double heightChange = Math.abs(step.getLocation().getZ() - previousStep.getLocation().getZ());
-            if (heightChange > parameters.getMaximumStepZ())
+            if (heightChange > parameters.getMaximumStepZ() + 2.0 * heightChangeFromWiggling)
                errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much. Max is " + parameters.getMaximumStepZ();
          }
 
@@ -1110,7 +1111,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
+      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 
