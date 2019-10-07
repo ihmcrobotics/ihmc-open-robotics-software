@@ -164,10 +164,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
    }
 
-   default void setBodyGroundClearance(double bodyGroundClearance)
-   {
-      set(FootstepPlannerParameterKeys.bodyGroundClearance, bodyGroundClearance);
-   }
 
    default void setBodyBoxHeight(double bodyBoxHeight)
    {

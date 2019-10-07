@@ -40,7 +40,6 @@ public class FootstepPlannerParameterKeys
    public static final IntegerStoredPropertyKey minimumStepsForBestEffortPlan              = keys.addIntegerKey("Min steps for best effort plan", 3);
    public static final DoubleStoredPropertyKey  minXClearanceFromStance                    = keys.addDoubleKey ("Min X clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  minYClearanceFromStance                    = keys.addDoubleKey ("Min Y clearance from stance", 0.0);
-   public static final DoubleStoredPropertyKey  bodyGroundClearance                        = keys.addDoubleKey ("Body ground clearance", 0.25);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                               = keys.addDoubleKey ("Body box width", 0.7);
    public static final DoubleStoredPropertyKey  bodyBoxHeight                              = keys.addDoubleKey ("Body box height", 1.5);
    public static final DoubleStoredPropertyKey  bodyBoxDepth                               = keys.addDoubleKey ("Body box depth", 0.3);
