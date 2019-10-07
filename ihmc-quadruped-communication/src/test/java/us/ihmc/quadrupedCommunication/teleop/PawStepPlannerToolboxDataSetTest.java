@@ -29,6 +29,8 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -107,11 +109,18 @@ public abstract class PawStepPlannerToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
+      VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
+//      visibilityGraphsParameters.setPerformPostProcessingNodeShifting(true);
+//      visibilityGraphsParameters.setComputeOrientationsToAvoidObstacles(true);
+
       PawStepPlannerParametersBasics parameters = new DefaultPawStepPlannerParameters();
       parameters.setXGaitWeight(0.0);
       parameters.setDesiredVelocityWeight(0.0);
+      parameters.setYawWeight(2.0);
+      parameters.setMaximumStepYawOutward(0.5);
+      parameters.setMaximumStepYawInward(-0.5);
 
-      footstepPlanningModule = new PawPlanningModule(robotName, null, parameters, xGaitSettings,
+      footstepPlanningModule = new PawPlanningModule(robotName, null, visibilityGraphsParameters, parameters, xGaitSettings,
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
 
 
@@ -142,6 +151,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
 
       messager.submitMessage(PawStepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(PawStepPlannerMessagerAPI.PlannerParametersTopic, parameters);
+      messager.submitMessage(PawStepPlannerMessagerAPI.VisibilityGraphsParametersTopic, visibilityGraphsParameters);
 
 
       ThreadTools.sleep(1000);

@@ -24,6 +24,8 @@ import us.ihmc.robotics.geometry.AngleTools;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.stream.Collectors;
+
 public class PathOrientationCalculator
 {
    private static final double epsilon = 5e-2;
@@ -52,7 +54,7 @@ public class PathOrientationCalculator
          return nominalPathPoses;
 
       double startHeading = startOrientation.getYaw();
-      nominalPathPoses.add(new Pose3D(path.get(0), new Quaternion(startHeading, 0.0, 0.0)));
+      nominalPathPoses.add(new Pose3D(path.get(0), startOrientation));
 
       int pathIndex = 1;
 
@@ -121,7 +123,6 @@ public class PathOrientationCalculator
             nominalPathPoses.add(pathIndex, new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
             pathIndex++;
          }
-
       }
 
       int endingSize = path.size();

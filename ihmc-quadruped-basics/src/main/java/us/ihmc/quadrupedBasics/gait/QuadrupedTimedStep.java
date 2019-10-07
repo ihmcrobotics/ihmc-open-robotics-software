@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedBasics.gait;
 
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.TimeIntervalMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
@@ -37,6 +39,11 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       this(other.getRobotQuadrant(), other.getGoalPositionInternal(), other.getGroundClearance(), other.getTimeInterval());
    }
 
+   public QuadrupedTimedStep(QuadrupedTimedStepMessage message)
+   {
+      set(message);
+   }
+
    @Override
    public TimeIntervalBasics getTimeInterval()
    {
@@ -53,6 +60,11 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       command.getTimeInterval(getTimeInterval());
    }
 
+   public void setTimeInterval(TimeIntervalMessage message)
+   {
+      getTimeInterval().setInterval(message.getStartTime(), message.getEndTime());
+   }
+
    public void set(QuadrupedTimedStep other)
    {
       super.set(other);
@@ -63,6 +75,12 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    {
       super.set(command.getStepCommand());
       setTimeInterval(command.getTimeIntervalCommand());
+   }
+
+   public void set(QuadrupedTimedStepMessage message)
+   {
+      super.set(message.getQuadrupedStepMessage());
+      setTimeInterval(message.getTimeInterval());
    }
 
    public void get(QuadrupedTimedStep other)
