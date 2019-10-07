@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -77,28 +76,24 @@ public abstract class ToolboxModule
    private YoVariableServer yoVariableServer;
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this.robotName = robotName;
 
@@ -259,10 +254,12 @@ public abstract class ToolboxModule
          if(message.getRequestLogging() && !isLogging.getValue())
          {
             startLogging();
+            isLogging.set(true);
          }
          else if(!message.getRequestLogging() && isLogging.getValue())
          {
             stopLogging();
+            isLogging.set(false);
          }
       }
    }

@@ -29,8 +29,6 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    protected final static boolean debug = false;
    private static final double defaultFallbackRegionSize = 0.3;
 
-
-
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
 

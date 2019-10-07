@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools.isPointInsideConvexPolygon2D;
+import static us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools.isPointInsideConvexPolygon2D;
 
 public class NavigableRegionTools
 {

@@ -19,6 +19,8 @@ import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -38,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
@@ -112,7 +115,7 @@ public class KinematicsToolboxController extends ToolboxController
     * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final Map<Integer, OneDoFJointBasics> jointHashCodeMap = new HashMap<>();
+   private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center of
@@ -188,6 +191,11 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    /**
+    * Defines a robot configuration the this IK start from and also defines the privileged joint
+    * configuration.
+    */
+   protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
+   /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
     * usually updated once right after the initialization phase.
@@ -214,7 +222,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Reference to the most recent robot configuration received from the controller. It is used for
     * initializing the {@link #desiredFullRobotModel} before starting the optimization process.
     */
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   protected final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
 
    /**
     * Map of the commands requested during two initialization phases by the user. It used to memorize
@@ -343,6 +351,45 @@ public class KinematicsToolboxController extends ToolboxController
          collisionPointAs[i] = collisionPointA;
          collisionPointBs[i] = collisionPointB;
          collisionFramePoses[i] = collisionFramePose;
+      }
+   }
+
+   /**
+    * Sets up the robot configuration this IK should start from when initializing.
+    * 
+    * @param initialRobotConfigurationMap the map from joint to initial joint position.
+    */
+   public void setInitialRobotConfiguration(Map<OneDoFJointBasics, Double> initialRobotConfigurationMap)
+   {
+      if (initialRobotConfigurationMap == null)
+      {
+         this.initialRobotConfigurationMap = null;
+         return;
+      }
+
+      this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
+      initialRobotConfigurationMap.entrySet().forEach(entry -> this.initialRobotConfigurationMap.put(entry.getKey(), entry.getValue()));
+   }
+
+   /**
+    * Sets up the robot configuration this IK should start from when initializing.
+    * 
+    * @param jointNameToInitialJointPosition the map from joint name to initial joint position.
+    */
+   public void setInitialRobotConfigurationNamedMap(Map<String, Double> jointNameToInitialJointPosition)
+   {
+      if (jointNameToInitialJointPosition == null)
+      {
+         this.initialRobotConfigurationMap = null;
+         return;
+      }
+      this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
+
+      for (OneDoFJointBasics joint : oneDoFJoints)
+      {
+         Double q_priv = jointNameToInitialJointPosition.get(joint.getName());
+         if (q_priv != null)
+            initialRobotConfigurationMap.put(joint, q_priv);
       }
    }
 
@@ -532,6 +579,14 @@ public class KinematicsToolboxController extends ToolboxController
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+      if (initialRobotConfigurationMap != null)
+      {
+         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+         {
+            joint.setQ(q_priv);
+            return true;
+         });
+      }
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
@@ -668,6 +723,10 @@ public class KinematicsToolboxController extends ToolboxController
             enableCollisionAvoidance.set(false);
          if (command.getEnableCollisionAvoidance())
             enableCollisionAvoidance.set(true);
+         if (command.getDisableJointVelocityLimits())
+            activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.DISABLED);
+         if (command.getEnableJointVelocityLimits())
+            activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.ENABLED);
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))

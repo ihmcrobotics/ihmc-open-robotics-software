@@ -45,6 +45,14 @@ float64 joint_velocity_weight
 # Field default value -1.0
 float64 joint_acceleration_weight
 
+# When true, the solver will enforce the joint velocity limits as defined in the robot model.
+# Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+bool enable_joint_velocity_limits
+
+# When true, the solver will ignore the joint velocity limits.
+# Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+bool disable_joint_velocity_limits
+
 # If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
 # In case it has undesirable effects, use this flag to disable it.
 bool disable_collision_avoidance

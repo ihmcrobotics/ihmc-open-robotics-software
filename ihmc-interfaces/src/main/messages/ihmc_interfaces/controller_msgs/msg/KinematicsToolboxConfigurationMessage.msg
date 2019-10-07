@@ -35,6 +35,12 @@ float64 joint_velocity_weight -1
 # Specifying how much high joint acceleration values should be penalized in the optimization problem.
 # A value of -1 will result in the solver using its default value.
 float64 joint_acceleration_weight -1
+# When true, the solver will enforce the joint velocity limits as defined in the robot model.
+# Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+bool enable_joint_velocity_limits false
+# When true, the solver will ignore the joint velocity limits.
+# Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+bool disable_joint_velocity_limits false
 
 # If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
 # In case it has undesirable effects, use this flag to disable it.

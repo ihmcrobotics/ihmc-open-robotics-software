@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.vividsolutions.jts.geomgraph.Quadrant;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -18,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -61,6 +62,7 @@ public class StartGoalPawPositionViewer extends AnimationTimer
    private AtomicReference<Quaternion> goalOrientationReference = null;
    private AtomicReference<Point3D> lowLevelGoalPositionReference = null;
    private AtomicReference<PlanarRegionsList> planarRegionsList = null;
+   private AtomicReference<QuadrantDependentList<Point3D>> startFeetPositionReference = null;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
    private Topic<Boolean> startEditModeEnabledTopic;
@@ -103,25 +105,27 @@ public class StartGoalPawPositionViewer extends AnimationTimer
 
    public StartGoalPawPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
                                      Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
-                                     Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
+                                     Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic, Topic<QuadrantDependentList<Point3D>> startFeetPositionsTopic,
                                      Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic, Topic<PlanarRegionsList> planarRegionDataTopic)
    {
       this(messager);
 
       setEditStartGoalTopics(startEditModeEnabledTopic, goalEditModeEnabledTopic);
-      setPositionStartGoalTopics(startPositionTopic, startOrientationTopic, lowLevelGoalPositionTopic, goalPositionTopic, goalOrientationTopic);
+      setPositionStartGoalTopics(startPositionTopic, startOrientationTopic, lowLevelGoalPositionTopic, goalPositionTopic, goalOrientationTopic,
+                                 startFeetPositionsTopic);
       setXGaitSettingsTopic(xGaitSettingsTopic);
       setPlanarRegionDataTopic(planarRegionDataTopic);
    }
 
    public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
-                                          Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
+                                          Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic, Topic<QuadrantDependentList<Point3D>> startFeetPositionsTopic)
    {
       startPositionReference = messager.createInput(startPositionTopic, new Point3D());
       startOrientationReference = messager.createInput(startOrientationTopic, new Quaternion());
       lowLevelGoalPositionReference = messager.createInput(lowLevelGoalPositionTopic, new Point3D());
       goalPositionReference = messager.createInput(goalPositionTopic, new Point3D());
       goalOrientationReference = messager.createInput(goalOrientationTopic, new Quaternion());
+      startFeetPositionReference = messager.createInput(startFeetPositionsTopic, new QuadrantDependentList<>());
    }
 
    // TODO
@@ -180,7 +184,12 @@ public class StartGoalPawPositionViewer extends AnimationTimer
             startFeetSpheres.get(robotQuadrant).setMaterial(startOpaqueMaterial);
       }
 
-      if (startPositionReference != null)
+      if (startFeetPositionReference != null && startFeetPositionReference.get() != null)
+      {
+         QuadrantDependentList<Point3D> startFeetPositions = startFeetPositionReference.get();
+         setStartPosition(startFeetPositions);
+      }
+      else if (startPositionReference != null)
       {
          Point3D startPosition = startPositionReference.get();
          if (startPosition != null)
@@ -246,6 +255,38 @@ public class StartGoalPawPositionViewer extends AnimationTimer
          startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
          startFeetSpheres.get(robotQuadrant).setTranslateZ(footPosition.getZ());
       }
+   }
+
+   private void setStartPosition(QuadrantDependentList<Point3D> feetPositions)
+   {
+      QuadrantDependentList<FramePoint3D> feetInWorld = new QuadrantDependentList<>();
+
+      Point3D averagePosition = new Point3D();
+      int feetInContact = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         Point3D footPosition = feetPositions.get(robotQuadrant);
+         if (footPosition != null)
+         {
+            averagePosition.add(footPosition);
+            feetInWorld.put(robotQuadrant, new FramePoint3D(worldFrame, footPosition));
+            feetInContact++;
+
+            startFeetSpheres.get(robotQuadrant).setVisible(true);
+
+            startFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
+            startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
+            startFeetSpheres.get(robotQuadrant).setTranslateZ(footPosition.getZ());
+         }
+         else
+         {
+            startFeetSpheres.get(robotQuadrant).setVisible(false);
+         }
+      }
+      averagePosition.scale(1.0 / feetInContact);
+      startSphere.setTranslateX(averagePosition.getX());
+      startSphere.setTranslateY(averagePosition.getY());
+      startSphere.setTranslateZ(averagePosition.getZ());
    }
 
    private void setGoalPosition(Point3DReadOnly position, QuaternionReadOnly orientation)
