@@ -530,6 +530,9 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       if (!graph.doesNodeExist(endNode))
          return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
 
+      if (!goalNodes.get(endNode.getRobotSide()).equals(endNode))
+         return FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+
       if (heuristics.getWeight() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
 
