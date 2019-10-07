@@ -3,7 +3,6 @@ package us.ihmc.stateEstimation.head.carnegie.multisense;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -12,9 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
@@ -26,13 +22,12 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.EKFHeadPoseEstimator;
-import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
