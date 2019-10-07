@@ -451,11 +451,13 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
    private void updateHasReachedGoal()
    {
       boolean isPlannedGoalTheFinalGoal = false;
+      boolean doesThePlanReachTheFinalGoal = false;
       if (currentPlannerOutput.get() != null)
       {
          isPlannedGoalTheFinalGoal = currentPlannerOutput.get().getLowLevelPlannerGoal().getPosition().distanceXY(planningRequestPacket.get().getGoalPositionInWorld()) < proximityGoal;
+         doesThePlanReachTheFinalGoal = FootstepPlanningResult.fromByte(currentPlannerOutput.get().getFootstepPlanningResult()) != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
       }
-      if (!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && stepQueue.isEmpty())
+      if (!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && doesThePlanReachTheFinalGoal && stepQueue.isEmpty())
          hasReachedGoal.set(true);
       else
          hasReachedGoal.set(false);
