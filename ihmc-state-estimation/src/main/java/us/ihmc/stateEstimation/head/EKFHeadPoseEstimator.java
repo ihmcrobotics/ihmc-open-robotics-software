@@ -13,7 +13,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -69,7 +68,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
    private final YoFramePoseUsingYawPitchRoll headPose;
 
    private FullRobotModel fullRobotModel;
-   private YoGraphicsListRegistry yoGraphicListRegistry;
 
    /**
     * Creates a new pose estimator.
@@ -96,7 +94,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       magneticFieldSensor = new MagneticFieldSensor("MagneticField", dt, headBody, imuFrame, registry);
       positionSensor = new PositionSensor("Position", dt, registry);
       List<Sensor> sensors = Arrays.asList(angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor);
-//      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor});
 
       // Create the state and the estimator:
       poseState = new PoseState("Head", dt, headFrame, registry);
