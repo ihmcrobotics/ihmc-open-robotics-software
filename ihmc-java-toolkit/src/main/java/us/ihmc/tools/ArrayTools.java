@@ -13,7 +13,6 @@ public class ArrayTools
    //
 
    /**
-    *
     * @param stringSource String
     * @return double[]
     * @throws IOException
@@ -52,7 +51,6 @@ public class ArrayTools
    }
 
    /**
-    *
     * @param bufferedReader BufferedReader
     * @return double[]
     * @throws IOException
@@ -65,7 +63,6 @@ public class ArrayTools
    }
 
    /**
-    *
     * @param stringSource String
     * @return double[]
     * @throws IOException
@@ -101,7 +98,6 @@ public class ArrayTools
    }
 
    /**
-    *
     * @param bufferedReader BufferedReader
     * @return double[]
     * @throws IOException
@@ -134,8 +130,9 @@ public class ArrayTools
          return null;
       }
 
-      StringTokenizer tokenizer = new StringTokenizer(line.replace("{", "").replace("[", "").replace("}", "").replace("]", "").replace(" ", "").replace(System.getProperty("line.separator"),
-                                     "").replace("\n", ""), ",");
+      StringTokenizer tokenizer = new StringTokenizer(line.replace("{", "").replace("[", "").replace("}", "").replace("]", "").replace(" ", "")
+                                                          .replace(System.getProperty("line.separator"), "").replace("\n", ""),
+                                                      ",");
       while (tokenizer.hasMoreElements())
       {
          retArray.add(new Integer(Integer.parseInt((String) tokenizer.nextElement())));
@@ -169,15 +166,14 @@ public class ArrayTools
       return ret;
    }
 
-
    /**
     * Use JUnitTools.assertArraysEquals
     */
    public static boolean deltaEquals(double[] a, double[] b, double delta)
    {
-      if(a == null || b == null)
+      if (a == null || b == null)
          return false;
-      
+
       if (a.length != b.length)
          return false;
 
@@ -195,7 +191,7 @@ public class ArrayTools
     */
    public static boolean deltaEquals(float[] a, float[] b, float delta)
    {
-      if(a == null || b == null)
+      if (a == null || b == null)
          return false;
 
       if (a.length != b.length)
@@ -209,9 +205,10 @@ public class ArrayTools
 
       return true;
    }
-   
+
    /**
-    * Copies @param list, splits the list in half at @param newStartIndex, and then pastes the top half under the top half
+    * Copies @param list, splits the list in half at @param newStartIndex, and then pastes the top half
+    * under the top half
     * 
     * @param list
     * @param newStartIndex
@@ -222,7 +219,7 @@ public class ArrayTools
       ArrayList<T> ret = new ArrayList<T>();
 
       int listLength = list.size();
-      
+
       for (int i = newStartIndex; i < listLength; i++)
          ret.add(list.get(i));
 
@@ -279,5 +276,149 @@ public class ArrayTools
    {
       double maxChange = getMaximumAbsoluteChangeBetweenTicks(values);
       return (maxChange < maxAllowedChange);
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(Object[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         Object oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(float[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         float oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(double[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         double oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(byte[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         byte oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(short[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         short oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(int[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         int oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(long[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         long oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
+   }
+
+   /**
+    * Reverses the order of the elements in the specified array.
+    * <p>
+    * This method runs in linear time.
+    * </p>
+    *
+    * @param array the array whose elements are to be reversed.
+    */
+   public static void reverse(boolean[] array)
+   {
+      for (int i = 0, mid = array.length >> 1, j = array.length - 1; i < mid; i++, j--)
+      {
+         boolean oldCoefficient_i = array[i];
+         array[i] = array[j];
+         array[j] = oldCoefficient_i;
+      }
    }
 }
