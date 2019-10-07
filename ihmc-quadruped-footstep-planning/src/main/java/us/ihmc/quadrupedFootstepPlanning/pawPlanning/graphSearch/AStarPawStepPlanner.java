@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.*;
@@ -52,7 +52,7 @@ import java.util.List;
 
 public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
@@ -494,6 +494,19 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          PawNodeSnapData snapData = snapper.getSnapData(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          if (snapData != null)
             position.applyTransform(snapData.getSnapTransform());
+
+         if (debug)
+         {
+            PawNode previousNode = path.get(i - 1);
+            Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
+            PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
+            RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+            previousPosition.applyTransform(previousSnapTransform);
+            if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
+            {
+               LogTools.error("height change error.");
+            }
+         }
 
          newStep.setGoalPosition(position);
 

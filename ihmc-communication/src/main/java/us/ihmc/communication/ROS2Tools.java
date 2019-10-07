@@ -36,6 +36,7 @@ public class ROS2Tools
    public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
 
    public static final String FOOTSTEP_PLANNER_TOOLBOX = FOOTSTEP_PLANNER.getModuleTopicQualifier();
+   public static final String CONTINUOUS_PLANNING_TOOLBOX = "/toolbox/continuous_planning";
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
@@ -504,7 +505,7 @@ public class ROS2Tools
     * <li>result from this method: {@code "rea_status_message"} which conserves the acronym as one
     * word.
     * </p>
-    * 
+    *
     * @param camelCase the camel-case {@code String} to be converted.
     * @return the converted {@code String} using lower-case with underscores.
     */
