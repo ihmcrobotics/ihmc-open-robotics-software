@@ -74,7 +74,7 @@ public class FootstepPlannerMessageToolsTest
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
-            int randomValue = RandomNumbers.nextInt(random, -10, 10);
+            int randomValue = RandomNumbers.nextInt(random, 1, 10);
             footstepPlannerParameters.set(((IntegerStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof BooleanStoredPropertyKey)
