@@ -42,7 +42,7 @@ public class ValkyrieFingerControlParameters
       {
          EnumMap<ValkyrieFingerMotorName, Double> closedDesiredFingerMotorPosition = closedDesiredFingerMotorPositions.get(robotSide);
 
-         closedDesiredFingerMotorPosition.put(ValkyrieFingerMotorName.ThumbMotorRoll, 0.0);
+         closedDesiredFingerMotorPosition.put(ValkyrieFingerMotorName.ThumbMotorRoll, 1.7);
          closedDesiredFingerMotorPosition.put(ValkyrieFingerMotorName.ThumbMotorPitch1, 2.0);
          closedDesiredFingerMotorPosition.put(ValkyrieFingerMotorName.ThumbMotorPitch2, 2.0);
          closedDesiredFingerMotorPosition.put(ValkyrieFingerMotorName.IndexFingerMotorPitch1, 3.6);
