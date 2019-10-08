@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import jdk.internal.org.objectweb.asm.commons.RemappingAnnotationAdapter;
-import org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.jMonkeyEngineToolkit.utils.GraphicsDemoTools.RotateAndScaleNodeRunnable;
 
 import java.util.Random;
 
