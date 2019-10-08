@@ -6,6 +6,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class FootstepNodeTools
@@ -44,6 +46,20 @@ public class FootstepNodeTools
    {
       getNodeTransform(node, transformToPack);
       snapTransform.transform(transformToPack);
+   }
+
+   public static Point3DReadOnly getNodePositionInWorld(FootstepNode node, RigidBodyTransform snapTransform)
+   {
+      Point3D nodeInWorld = new Point3D();
+      getNodePositionInWorld(node, nodeInWorld, snapTransform);
+
+      return nodeInWorld;
+   }
+
+   public static void getNodePositionInWorld(FootstepNode node, Point3DBasics nodeInWorld, RigidBodyTransform snapTransform)
+   {
+      nodeInWorld.set(node.getX(), node.getY(), 0.0);
+      snapTransform.transform(nodeInWorld);
    }
 
    /**
