@@ -131,7 +131,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private static final List<DataSetName> datasetsToIgnore = new ArrayList<>();
    static
    {
-      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
+//      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
    }
 
    // Whether to start the UI or not.
@@ -337,6 +337,26 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                                                                                                     .containsFlag(getTimeoutFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
+   }
+
+   @Disabled
+   @Test
+   public void testDataSetsWithOcclusions()
+   {
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              for (DataSetName nameToIgnore : datasetsToIgnore)
+                                                              {
+                                                                 if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
+                                                                    return false;
+                                                              }
+
+                                                              return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(dataSets, true);
    }
 
    @Disabled
