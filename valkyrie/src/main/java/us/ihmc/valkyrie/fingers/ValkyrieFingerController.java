@@ -39,10 +39,10 @@ public class ValkyrieFingerController implements RobotController
    {
       time = yoTime;
       YoPIDGains thumbRollGains = new YoPIDGains("HandThumbRoll", registry);
-      thumbRollGains.setKp(7.0);
+      thumbRollGains.setKp(100.0);
       thumbRollGains.setKi(3.0);
       thumbRollGains.setKd(0.0);
-      thumbRollGains.setMaximumFeedback(3.0);
+      thumbRollGains.setMaximumFeedback(50.0);
       thumbRollGains.setIntegralLeakRatio(0.999);
       thumbRollGains.setMaximumIntegralError(0.5);
       YoPIDGains defaultGains = new YoPIDGains("Hand", registry);
