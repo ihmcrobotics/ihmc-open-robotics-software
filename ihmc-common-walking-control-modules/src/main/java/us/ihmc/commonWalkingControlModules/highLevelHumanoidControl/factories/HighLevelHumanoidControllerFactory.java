@@ -17,10 +17,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerComma
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -62,8 +62,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
-   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("ihmc_controller", ROS2Tools.HUMANOID_CONTROL_MODULE);
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -312,6 +310,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
    }
 
+   public void useDefaultFallingControlState()
+   {
+      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
+   }
+
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
    {
       controllerStateFactories.add(customControllerStateFactory);
@@ -394,10 +400,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      double defaultSwingDurationShiftFraction = icpPlannerParameters.getSwingDurationShiftFraction();
+      double defaultSwingSplitFraction = icpPlannerParameters.getSwingSplitFraction();
       double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultTransferSplitFraction, feet,
-                                                                              statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction, feet, statusMessageOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);

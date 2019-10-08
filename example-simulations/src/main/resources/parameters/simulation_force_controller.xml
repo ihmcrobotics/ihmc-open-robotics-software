@@ -21,7 +21,7 @@
             </registry>
             <registry name="QuadrupedFallDetector">
                 <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                 <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
                 <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="-10" max="10" value="1"/>
             </registry>

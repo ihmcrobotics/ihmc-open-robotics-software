@@ -4,8 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -16,8 +17,10 @@ public class InverseKinematicsQPSolver
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
+
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final ActiveSetQPSolver qpSolver;
+   private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -42,9 +45,13 @@ public class InverseKinematicsQPSolver
 
    private final int numberOfDoFs;
 
+   private boolean resetActiveSet = false;
+   private boolean useWarmStart = false;
+   private int maxNumberOfIterations = 100;
+
    private final double dt;
 
-   public InverseKinematicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, double dt, YoVariableRegistry parentRegistry)
+   public InverseKinematicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, double dt, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -72,6 +79,28 @@ public class InverseKinematicsQPSolver
       desiredJointVelocities = new DenseMatrix64F(numberOfDoFs, 1);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setUseWarmStart(boolean useWarmStart)
+   {
+      this.useWarmStart = useWarmStart;
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations = maxNumberOfIterations;
+   }
+
+   public void notifyResetActiveSet()
+   {
+      this.resetActiveSet = true;
+   }
+
+   private boolean pollResetActiveSet()
+   {
+      boolean ret = resetActiveSet;
+      resetActiveSet = false;
+      return ret;
    }
 
    public void reset()
@@ -208,7 +237,14 @@ public class InverseKinematicsQPSolver
       numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
       numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
 
+      qpSolverTimer.startMeasurement();
+
       qpSolver.clear();
+
+      qpSolver.setUseWarmStart(useWarmStart);
+      qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
+      if (useWarmStart && pollResetActiveSet())
+         qpSolver.resetActiveConstraints();
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
@@ -216,6 +252,8 @@ public class InverseKinematicsQPSolver
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
+
+      qpSolverTimer.stopMeasurement();
 
       if (MatrixTools.containsNaN(solverOutput))
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());

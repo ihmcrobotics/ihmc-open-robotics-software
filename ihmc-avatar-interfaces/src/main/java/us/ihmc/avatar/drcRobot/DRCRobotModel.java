@@ -8,6 +8,7 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSetting
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -15,10 +16,10 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -78,9 +79,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * <b> This output writer is meant to be used in simulation only.
     * </p>
     * 
-    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing
-    *           to the joints.
-    *
+    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing to
+    *                                       the joints.
     * @return the custom output processor.
     */
    public default DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
@@ -94,9 +94,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * <b> This output writer is meant to be used in simulation only.
     * </p>
     * 
-    * @param JointDesiredOutputWriter The outputWriter to use. If null is returned, no output writer
-    *           is used.
-    *
+    * @param JointDesiredOutputWriter The outputWriter to use. If null is returned, no output writer is
+    *                                 used.
     * @return the custom output writer.
     */
    public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
@@ -118,20 +117,25 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public default FootstepPlannerParameters getFootstepPlannerParameters()
+   public default FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return null;
    }
 
-   default VisibilityGraphsParameters getVisibilityGraphsParameters()
+   default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
    }
 
    public HighLevelControllerParameters getHighLevelControllerParameters();
-   
+
    public default DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
    {
       return new DefaultShapeCollisionSettings();
+   }
+
+   default HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   {
+      return null;
    }
 }

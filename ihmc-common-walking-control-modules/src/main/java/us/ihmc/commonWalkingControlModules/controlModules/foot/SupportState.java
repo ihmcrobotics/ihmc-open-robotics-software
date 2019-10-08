@@ -220,7 +220,7 @@ public class SupportState extends AbstractFootControlState
 
       liftOff = new YoBoolean(prefix + "LiftOff", registry);
       touchDown = new YoBoolean(prefix + "TouchDown", registry);
-      pitchTrajectory = new YoPolynomial(prefix + "PitchTrajectory", 3, registry);
+      pitchTrajectory = new YoPolynomial(prefix + "PitchTrajectory", 4, registry);
       pitchTrajectoryEndTime = new YoDouble(prefix + "PitchTrajectoryEndTime", registry);
       desiredPitch = new YoDouble(prefix + "DesiredPitch", registry);
    }
@@ -255,6 +255,7 @@ public class SupportState extends AbstractFootControlState
       liftOff.set(false);
       touchDown.set(false);
       desiredAngularVelocity.setToZero(worldFrame);
+      desiredAngularAcceleration.setToZero(worldFrame);
    }
 
    @Override
@@ -468,6 +469,7 @@ public class SupportState extends AbstractFootControlState
          desiredPitch.set(pitchTrajectory.getPosition());
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
          desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
+         desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
       }
 
       // If we are tracking a touch down trajectory set the pitch of the desired orientation and the angular velocity accordingly.
@@ -486,12 +488,14 @@ public class SupportState extends AbstractFootControlState
             desiredPitch.set(pitchTrajectory.getPosition());
             desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
             desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
+            desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getAcceleration(), 0.0);
          }
       }
 
       desiredPosition.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
+      desiredAngularAcceleration.changeFrame(worldFrame);
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
 
@@ -501,12 +505,13 @@ public class SupportState extends AbstractFootControlState
     * of the pitch motion.
     *
     * @param finalPitchInSoleZUp is the final desired foot pitch at lift off.
+    * @param finalPitchVelocityInSoleZUp is the final desired foot pitch velocity at lift off.
     * @param duration the time until expected foot lift off.
     */
-   public void liftOff(double finalPitchInSoleZUp, double duration)
+   public void liftOff(double finalPitchInSoleZUp, double finalPitchVelocityInSoleZUp, double duration)
    {
       double currentPitch = computeCurrentFootPitchInSoleZUp();
-      if (!initializePitchTrajectory(currentPitch, finalPitchInSoleZUp, duration))
+      if (!initializePitchTrajectory(currentPitch, 0.0, finalPitchInSoleZUp, finalPitchVelocityInSoleZUp, duration))
       {
          return;
       }
@@ -524,22 +529,23 @@ public class SupportState extends AbstractFootControlState
    }
 
    /**
-    * Will cause the support state to perform a foot touch down. This should be called right after a step is finished (if the foot did
-    * not land flat on the ground) and the final flat foot pitch provided. This method will enable toe or heel contact points depending
-    * on the direction of the pitch motion.
+    * Will cause the support state to perform a foot touch down. This should be called right after a step is finished
+    * (if the foot did not land flat on the ground) and the final flat foot pitch provided. This method will enable toe
+    * or heel contact points depending on the direction of the pitch motion.
     *
+    * @param initialPitchInSoleZUp is the initial pitch at touchdown.
+    * @param initialPitchVelocityInSoleZUp is the initial pitch velocity at touchdown.
     * @param finalPitchInSoleZUp is the final desired foot pitch for full support.
     * @param duration the time until the foot should enter full support.
     */
-   public void touchDown(double finalPitchInSoleZUp, double duration)
+   public void touchDown(double initialPitchInSoleZUp, double initialPitchVelocityInSoleZUp, double finalPitchInSoleZUp, double duration)
    {
-      double currentPitch = computeCurrentFootPitchInSoleZUp();
-      if (!initializePitchTrajectory(currentPitch, finalPitchInSoleZUp, duration))
+      if (!initializePitchTrajectory(initialPitchInSoleZUp, initialPitchVelocityInSoleZUp, finalPitchInSoleZUp, 0.0, duration))
       {
          return;
       }
 
-      if (finalPitchInSoleZUp < currentPitch)
+      if (finalPitchInSoleZUp < initialPitchInSoleZUp)
       {
          PlaneContactState.enableToeContacts(controllerToolbox.getFootContactState(robotSide));
       }
@@ -556,18 +562,18 @@ public class SupportState extends AbstractFootControlState
       return liftOff.getValue() || touchDown.getValue();
    }
 
-   private boolean initializePitchTrajectory(double currentPitchInSoleZUp, double finalPitchInSoleZUp, double duration)
+   private boolean initializePitchTrajectory(double currrentPutch, double currentPitchVelocity, double finalPitch, double finalPitchVelocity, double duration)
    {
       if (isInLiftOffOrTouchDown())
          return false;
       if (Double.isNaN(duration) || duration <= 0.0)
          return false;
-      if (MathTools.epsilonEquals(finalPitchInSoleZUp, currentPitchInSoleZUp, Math.toRadians(5.0)))
+      if (MathTools.epsilonEquals(finalPitch, currrentPutch, Math.toRadians(5.0)))
          return false;
 
       double currentTime = controllerToolbox.getYoTime().getValue();
       pitchTrajectoryEndTime.set(currentTime + duration);
-      pitchTrajectory.setLinear(currentTime, pitchTrajectoryEndTime.getValue(), currentPitchInSoleZUp, finalPitchInSoleZUp);
+      pitchTrajectory.setCubic(currentTime, pitchTrajectoryEndTime.getValue(), currrentPutch, currentPitchVelocity, finalPitch, finalPitchVelocity);
       return true;
    }
 

@@ -22,6 +22,15 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private double privilegedWeight = -1.0;
    private double privilegedGain = -1.0;
 
+   private double jointVelocityWeight = -1.0;
+   private double jointAccelerationWeight = -1.0;
+
+   private boolean disableCollisionAvoidance = false;
+   private boolean enableCollisionAvoidance = false;
+
+   private boolean enableJointVelocityLimits = false;
+   private boolean disableJointVelocityLimits = false;
+
    @Override
    public void clear()
    {
@@ -32,6 +41,12 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       privilegedRootJointOrientation.setToNaN();
       privilegedWeight = -1.0;
       privilegedGain = -1.0;
+      jointVelocityWeight = -1.0;
+      jointAccelerationWeight = -1.0;
+      disableCollisionAvoidance = false;
+      enableCollisionAvoidance = false;
+      enableJointVelocityLimits = false;
+      disableJointVelocityLimits = false;
    }
 
    @Override
@@ -63,19 +78,27 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       privilegedWeight = other.privilegedWeight;
       privilegedGain = other.privilegedGain;
+
+      jointVelocityWeight = other.jointVelocityWeight;
+      jointAccelerationWeight = other.jointAccelerationWeight;
+
+      disableCollisionAvoidance = other.disableCollisionAvoidance;
+      enableCollisionAvoidance = other.enableCollisionAvoidance;
+      enableJointVelocityLimits = other.enableJointVelocityLimits;
+      disableJointVelocityLimits = other.disableJointVelocityLimits;
    }
 
    @Override
    public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
       sequenceId = message.getSequenceId();
-      hasPrivilegedRootJointPosition = message.getPrivilegedRootJointPosition() != null;
+      hasPrivilegedRootJointPosition = message.getUsePrivilegedRootJointPosition();
       if (hasPrivilegedRootJointPosition)
          privilegedRootJointPosition.set(message.getPrivilegedRootJointPosition());
       else
          privilegedRootJointPosition.setToNaN();
 
-      hasPrivilegedRootJointOrientation = message.getPrivilegedRootJointOrientation() != null;
+      hasPrivilegedRootJointOrientation = message.getUsePrivilegedRootJointOrientation();
       if (hasPrivilegedRootJointOrientation)
          privilegedRootJointOrientation.set(message.getPrivilegedRootJointOrientation());
       else
@@ -96,6 +119,14 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       privilegedWeight = message.getPrivilegedWeight();
       privilegedGain = message.getPrivilegedGain();
+
+      jointVelocityWeight = message.getJointVelocityWeight();
+      jointAccelerationWeight = message.getJointAccelerationWeight();
+
+      disableCollisionAvoidance = message.getDisableCollisionAvoidance();
+      enableCollisionAvoidance = message.getEnableCollisionAvoidance();
+      enableJointVelocityLimits = message.getEnableJointVelocityLimits();
+      disableJointVelocityLimits = message.getDisableJointVelocityLimits();
    }
 
    public boolean hasPrivilegedRootJointPosition()
@@ -141,6 +172,36 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public double getPrivilegedGain()
    {
       return privilegedGain;
+   }
+
+   public double getJointVelocityWeight()
+   {
+      return jointVelocityWeight;
+   }
+
+   public double getJointAccelerationWeight()
+   {
+      return jointAccelerationWeight;
+   }
+
+   public boolean getDisableCollisionAvoidance()
+   {
+      return disableCollisionAvoidance;
+   }
+
+   public boolean getEnableCollisionAvoidance()
+   {
+      return enableCollisionAvoidance;
+   }
+
+   public boolean getEnableJointVelocityLimits()
+   {
+      return enableJointVelocityLimits;
+   }
+
+   public boolean getDisableJointVelocityLimits()
+   {
+      return disableJointVelocityLimits;
    }
 
    @Override

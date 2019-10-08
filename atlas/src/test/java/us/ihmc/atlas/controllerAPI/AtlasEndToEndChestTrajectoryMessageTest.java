@@ -123,4 +123,11 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
    {
       super.testStopAllTrajectory();
    }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
+   }
 }

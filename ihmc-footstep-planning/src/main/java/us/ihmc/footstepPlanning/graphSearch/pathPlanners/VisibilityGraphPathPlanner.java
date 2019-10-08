@@ -1,45 +1,61 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPlanner
 {
    private final NavigableRegionsManager navigableRegionsManager;
+   private final PathOrientationCalculator pathOrientationCalculator;
 
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
 
-   public VisibilityGraphPathPlanner(FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
+   {
+      this("", footstepPlannerParameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
+   }
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
+   {
+      this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
+   }
+
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry parentRegistry)
    {
       super(prefix, footstepPlannerParameters, parentRegistry);
 
-      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters);
+      this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);
+      this.pathOrientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
 
    public FootstepPlanningResult planWaypoints()
@@ -48,43 +64,42 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
       if (planarRegionsList == null)
       {
-         waypoints.add(new Point3D(bodyStartPose.getPosition()));
-         waypoints.add(new Point3D(bodyGoalPose.getPosition()));
+         waypoints.add(new Pose3D(bodyStartPose));
+         waypoints.add(new Pose3D(bodyGoalPose));
       }
       else
       {
-         Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
-         Point3DReadOnly goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         Point3DReadOnly startPosition = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
+         Point3DReadOnly goalPosition = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
          navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-         if (startPos == null)
+         if (startPosition == null)
          {
             LogTools.info("adding plane at start foot");
-            startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
+            startPosition = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY());
          }
-         if (goalPos == null)
+         if (goalPosition == null)
          {
             LogTools.info("adding plane at goal pose");
-            goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
+            goalPosition = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());
          }
 
          if (debug)
          {
             LogTools.info("Starting to plan using " + getClass().getSimpleName());
-            LogTools.info("Body start pose: " + startPos);
-            LogTools.info("Body goal pose:  " + goalPos);
+            LogTools.info("Body start pose: " + startPosition);
+            LogTools.info("Body goal pose:  " + goalPosition);
          }
 
          try
          {
-            List<Point3DReadOnly> path = new ArrayList<>(navigableRegionsManager.calculateBodyPath(startPos, goalPos));
+            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPosition, goalPosition);
+            List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                                     bodyStartPose.getOrientation(), bodyGoalPose.getOrientation());
 
-            for (Point3DReadOnly waypoint3d : path)
-            {
-               waypoints.add(new Point3D(waypoint3d));
-            }
+            waypoints.addAll(posePath);
          }
          catch (Exception e)
          {

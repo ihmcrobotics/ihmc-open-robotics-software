@@ -210,7 +210,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.EFFORT, 180.0, 12.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.EFFORT, 180.0, 12.0);
 
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 15.0, 0.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 12.0, 0.0);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 6.0, 0.3);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 6.0, 0.3);
 
@@ -339,8 +339,18 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
-      for (LegJointName legJointName : new LegJointName[] {LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
-      { // Hip joints
+      { // Hip Yaw joints: TODO: Check the odd behavior of the hip yaw joints on unit A.
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setPositionBreakFrequency(0.08);
+         parameters.setVelocityBreakFrequency(2.0);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+         ret.add(new GroupParameter<>(LegJointName.HIP_YAW.getCamelCaseName(), parameters, jointNames));
+      }
+
+      for (LegJointName legJointName : new LegJointName[] {LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
+      { // Hip Pitch & Roll joints
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
          parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9992, 0.004));
          parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.004));

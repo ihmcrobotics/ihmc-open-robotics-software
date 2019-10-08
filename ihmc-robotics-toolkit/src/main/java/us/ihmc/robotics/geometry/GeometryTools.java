@@ -7,7 +7,10 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Line3DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -453,6 +456,46 @@ public class GeometryTools
       else
          intersectionToPack.set(tempIntersection.get().getX(), tempIntersection.get().getY(), intersectionToPack.getZ());
       return success;
+   }
+
+   /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
+    *
+    * @param plane1
+    * @param plane2
+    * @return line of intersection, or null if planes are parallel
+    */
+   public static Line3D getIntersectionBetweenTwoPlanes(Plane3D plane1, Plane3D plane2)
+   {
+      Line3D intersection = new Line3D();
+      boolean parallel = !getIntersectionBetweenTwoPlanes(plane1, plane2, intersection);
+      if (parallel)
+      {
+         return null;
+      }
+      else
+      {
+         return intersection;
+      }
+   }
+
+   /**
+    * Get the Line3D intersection of two planes. Uses EuclidGeometryTools#intersectionBetweenTwoPlane3Ds
+    *
+    * @param plane1
+    * @param plane2
+    * @param intersectionToPack
+    * @return success (not parallel)
+    */
+   public static boolean getIntersectionBetweenTwoPlanes(Plane3D plane1, Plane3D plane2, Line3DBasics intersectionToPack)
+   {
+      return EuclidGeometryTools.intersectionBetweenTwoPlane3Ds(plane1.getPoint(),
+                                                                plane1.getNormal(),
+                                                                plane2.getPoint(),
+                                                                plane2.getNormal(),
+                                                                1e-8,
+                                                                intersectionToPack.getPoint(),
+                                                                intersectionToPack.getDirection());
    }
 
    /**
@@ -1000,32 +1043,39 @@ public class GeometryTools
       rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
    }
 
-   public static Point3D midpoint(Point3DReadOnly a, Point3DReadOnly b)
-   {
-      Point3D midpoint = new Point3D(a);
-      midpoint.interpolate(a, b, 0.5);
-      return midpoint;
-   }
-
-   public static Vector3D vector(Point3DReadOnly from, Point3DReadOnly to)
-   {
-      Vector3D vector = new Vector3D(to);
-      vector.sub(from);
-      return vector;
-   }
-
-   public static Box3D convertBoundingBoxToBox(BoundingBox3DReadOnly boundingBox)
+   /**
+    * Creates a 3D Euclid Box (a Shape) out of a 3D Bounding Box.
+    *
+    * Allocates a new Box3D.
+    *
+    * @param boundingBox
+    * @return box
+    */
+   public static Box3D convertBoundingBox3DToBox3D(BoundingBox3DReadOnly boundingBox)
    {
       Point3DReadOnly minPoint = boundingBox.getMinPoint();
       Point3DReadOnly maxPoint = boundingBox.getMaxPoint();
 
-      Point3D boxCenter = GeometryTools.midpoint(minPoint, maxPoint);
-      Vector3D size = GeometryTools.vector(minPoint, maxPoint);
+      Point3D boxCenter = new Point3D();
+      boxCenter.interpolate(minPoint, maxPoint, 0.5);
+      Vector3D size = new Vector3D();
+      size.sub(maxPoint, minPoint);
 
       return new Box3D(boxCenter, new Quaternion(), size.getX(), size.getY(), size.getZ());
    }
 
-   public static BoundingBox2D intersection(BoundingBox2D a, BoundingBox2D b) // TODO: Check, Unit test, JavaDoc, move where BoundingBox union is, and implement for BoundingBox3D.
+   /**
+    * Finds the intersection of two bounding boxes defined by a bounding box
+    *
+    * Allocates a new BoundingBox2D.
+    *
+    * TODO: Check, Unit test, move where BoundingBox union is, and implement for BoundingBox3D.
+    *
+    * @param a
+    * @param b
+    * @return the intersection bounding box, or null if no intersection
+    */
+   public static BoundingBox2D getIntersectionOfTwoBoundingBoxes(BoundingBox2D a, BoundingBox2D b)
    {
       double maxX = Math.min(a.getMaxX(), b.getMaxX());
       double maxY = Math.min(a.getMaxY(), b.getMaxY());

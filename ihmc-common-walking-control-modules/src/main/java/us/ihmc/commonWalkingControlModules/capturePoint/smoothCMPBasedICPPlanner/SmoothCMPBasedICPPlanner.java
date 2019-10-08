@@ -39,6 +39,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
@@ -112,6 +113,12 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                    "Repartition of the swing duration around the exit corner point.", registry);
    protected final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
 
+
+
+   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+   private final YoDouble defaultSwingDurationShiftFraction;
+
+
    /**
     * Repartition of the transfer duration around the entry corner point:
     * <ul>
@@ -125,8 +132,11 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                       "Repartition of the transfer duration around the entry corner point.", registry);
    protected final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
 
-   protected final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
 
+   private final YoDouble defaultTransferWeightDistribution = new YoDouble(namePrefix + "DefaultWeightDistribution", registry);
+   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
+   private final YoDouble finalTransferWeightDistribution = new YoDouble(namePrefix + "FinalTransferWeightDistribution", registry);
 
    /** Time at which the current state was initialized. */
    protected final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
@@ -201,8 +211,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private final ReferenceCoMTrajectoryGenerator referenceCoMGenerator;
    private final AngularMomentumTrajectoryMultiplexer angularMomentumTrajectoryGenerator;
 
-   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
-   private final YoDouble defaultSwingDurationShiftFraction;
 
    private final YoInteger numberOfUpcomingFootsteps;
    private final RecyclingArrayList<FootstepData> upcomingFootstepsData;
@@ -276,6 +284,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                     "Repartition of the transfer duration around the entry corner point.", registry);
          swingDurationAlpha.setToNaN();
          swingDurationAlphas.add(swingDurationAlpha);
+
+         YoDouble weightDistribution = new YoDouble(namePrefix + "TransferWeightDistribution" + i, registry);
+         weightDistribution.setToNaN();
+         transferWeightDistributions.add(weightDistribution);
       }
       YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + maxNumberOfFootstepsToConsider, registry);
       YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + maxNumberOfFootstepsToConsider,
@@ -305,9 +317,15 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          icpPhaseExitCornerPoints.add(new YoMutableFramePoint3D(namePrefix + "ExitCornerPoints" + i, "", registry));
       }
 
+      defaultTransferWeightDistribution.set(0.5);
+      finalTransferWeightDistribution.set(0.5);
+
+
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
                                                                   numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
-                                                                  swingDurationShiftFractions, transferDurationAlphas, debug, numberOfUpcomingFootsteps,
+                                                                  swingDurationShiftFractions, transferDurationAlphas, transferWeightDistributions,
+                                                                  finalTransferWeightDistribution,
+                                                                  debug, numberOfUpcomingFootsteps,
                                                                   upcomingFootstepsData, soleZUpFrames, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
@@ -316,7 +334,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                   yoGraphicsListRegistry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isInitialTransfer, isDoubleSupport, registry);
-      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, registry);
+      boolean createAngularMomentumPredictor = icpPlannerParameters.getAngularMomentumEstimationParameters() != null;
+      angularMomentumTrajectoryGenerator = new AngularMomentumTrajectoryMultiplexer(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, createAngularMomentumPredictor, registry);
 
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
@@ -642,16 +661,30 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void setFinalTransferDuration(double duration)
    {
-      if(duration < Epsilons.ONE_HUNDREDTH)
+      if (duration < Epsilons.ONE_HUNDREDTH)
          return;
+
       defaultFinalTransferDuration.set(duration);
    }
 
    @Override
    public void setFinalTransferDurationAlpha(double durationAlpha)
    {
+      if (!Double.isFinite(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0, false, false))
+         return;
+
       finalTransferDurationAlpha.set(durationAlpha);
    }
+
+   @Override
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
+         return;
+
+      finalTransferWeightDistribution.set(weightDistribution);
+   }
+
 
    @Override
    public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
@@ -761,7 +794,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
       if (footstep == null)
       {
@@ -778,6 +811,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          LogTools.warn("Received bad footstep: " + footstep + ", ignoring");
          return;
       }
+      else if (numberOfUpcomingFootsteps.getValue() == numberFootstepsToConsider.getValue())
+      {
+         return;
+      }
       else
       {
          upcomingFootstepsData.add().set(footstep, timing);
@@ -788,7 +825,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
       double swingDuration = timing.getSwingTime();
       double transferTime = timing.getTransferTime();
-      double transferDurationAlpha = footstep.getTransferSplitFraction();
 
       if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
          swingDuration = 1.0;
@@ -796,18 +832,33 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       if (!Double.isFinite(transferTime) || transferTime < 0.0)
          transferTime = 1.0;
 
-      if (!Double.isFinite(transferDurationAlpha) || transferDurationAlpha < 0.0)
-         transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
-
       swingDurations.get(footstepIndex).set(swingDuration);
       transferDurations.get(footstepIndex).set(transferTime);
 
-      swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
-      swingDurationShiftFractions.get(footstepIndex).set(defaultSwingDurationShiftFraction.getDoubleValue());
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+
+      double swingShiftFraction = shiftFractions.getSwingDurationShiftFraction();
+      double swingDurationAlpha = shiftFractions.getSwingSplitFraction();
+      double transferDurationAlpha = shiftFractions.getTransferSplitFraction();
+
+      if (!Double.isFinite(swingDurationAlpha) || !MathTools.intervalContains(swingDurationAlpha, 0.0, 1.0, false, false))
+         swingDurationAlpha = defaultSwingDurationAlpha.getDoubleValue();
+
+      if (!Double.isFinite(swingShiftFraction) || !MathTools.intervalContains(swingShiftFraction, 0.0, 1.0, false, false))
+         swingShiftFraction = defaultSwingDurationShiftFraction.getDoubleValue();
+
+      if (!Double.isFinite(transferDurationAlpha) || !MathTools.intervalContains(transferDurationAlpha, 0.0, 1.0, false, false))
+         transferDurationAlpha = defaultTransferDurationAlpha.getDoubleValue();
+
+      swingDurationAlphas.get(footstepIndex).set(swingDurationAlpha);
+      swingDurationShiftFractions.get(footstepIndex).set(swingShiftFraction);
       transferDurationAlphas.get(footstepIndex).set(transferDurationAlpha);
 
-      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
-      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
+      double weightDistribution = shiftFractions.getTransferWeightDistribution();
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
+         weightDistribution = defaultTransferWeightDistribution.getDoubleValue();
+
+      transferWeightDistributions.get(footstepIndex).set(weightDistribution);
    }
 
    /** {@inheritDoc} */

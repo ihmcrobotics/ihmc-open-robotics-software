@@ -8,9 +8,11 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -20,8 +22,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -37,7 +39,7 @@ public class InverseKinematicsOptimizationControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
-   private final QPInput motionQPInput;
+   private final QPInput qpInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
@@ -60,7 +62,7 @@ public class InverseKinematicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      motionQPInput = new QPInput(numberOfDoFs);
+      qpInput = new QPInput(numberOfDoFs);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
@@ -76,9 +78,9 @@ public class InverseKinematicsOptimizationControlModule
       }
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
-      ActiveSetQPSolver activeSetQPSolver;
+      ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver;
       if (optimizationSettings == null)
-         activeSetQPSolver = new SimpleEfficientActiveSetQPSolver();
+         activeSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
       else
          activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
 
@@ -147,39 +149,46 @@ public class InverseKinematicsOptimizationControlModule
          OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double qDDotMin = qDotMinMatrix.get(jointIndex, 0);
-         double qDDotMax = qDotMaxMatrix.get(jointIndex, 0);
-         jointMinimumVelocities.get(joint).set(qDDotMin);
-         jointMaximumVelocities.get(joint).set(qDDotMax);
+         double qDotMin = qDotMinMatrix.get(jointIndex, 0);
+         double qDotMax = qDotMaxMatrix.get(jointIndex, 0);
+         jointMinimumVelocities.get(joint).set(qDotMin);
+         jointMaximumVelocities.get(joint).set(qDotMax);
       }
    }
 
    private void computePrivilegedJointVelocities()
    {
-      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(motionQPInput);
+      boolean success = motionQPInputCalculator.computePrivilegedJointVelocities(qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitSpatialVelocityCommand(SpatialVelocityCommand command)
    {
-      boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
    {
-      boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitMomentumCommand(MomentumCommand command)
    {
-      boolean success = motionQPInputCalculator.convertMomentumCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertMomentumCommand(command, qpInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(qpInput);
+   }
+
+   public void submitLinearMomentumConvexConstraint2DCommand(LinearMomentumConvexConstraint2DCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertLinearMomentumConvexConstraint2DCommand(command, qpInput);
+      if (success)
+         qpSolver.addMotionInput(qpInput);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
@@ -208,5 +217,7 @@ public class InverseKinematicsOptimizationControlModule
          qpSolver.setVelocityRegularizationWeight(command.getJointVelocityWeight());
       if (command.hasJointAccelerationWeight())
          qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
+      if (command.hashJointVelocityLimitMode())
+         boundCalculator.considerJointVelocityLimits(command.jointVelocityLimitMode == JointVelocityLimitMode.ENABLED);
    }
 }

@@ -15,7 +15,12 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double defaultSwingDuration;
    private double defaultTransferDuration;
    private double finalTransferDuration;
+   private double defaultSwingSplitFraction;
+   private double defaultSwingDurationShiftFraction;
    private double defaultTransferSplitFraction;
+   private double finalTransferSplitFraction;
+   private double defaultTransferWeightDistribution;
+   private double finalTransferWeightDistribution;
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
@@ -40,7 +45,12 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDuration = 0.0;
       defaultTransferDuration = 0.0;
       finalTransferDuration = 0.0;
-      defaultTransferSplitFraction = 0.0;
+      defaultSwingSplitFraction = Double.NaN;
+      defaultSwingDurationShiftFraction = Double.NaN;
+      defaultTransferSplitFraction = Double.NaN;
+      finalTransferSplitFraction = Double.NaN;
+      defaultTransferWeightDistribution = Double.NaN;
+      finalTransferWeightDistribution = Double.NaN;
       footsteps.clear();
       clearQueuableCommandVariables();
    }
@@ -54,7 +64,12 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDuration = message.getDefaultSwingDuration();
       defaultTransferDuration = message.getDefaultTransferDuration();
       finalTransferDuration = message.getFinalTransferDuration();
+      defaultSwingSplitFraction = message.getDefaultSwingSplitFraction();
+      defaultSwingDurationShiftFraction = message.getDefaultSwingDurationShiftFraction();
       defaultTransferSplitFraction = message.getDefaultTransferSplitFraction();
+      finalTransferSplitFraction = message.getFinalTransferSplitFraction();
+      defaultTransferWeightDistribution = message.getDefaultTransferWeightDistribution();
+      finalTransferWeightDistribution = message.getFinalTransferWeightDistribution();
       executionTiming = ExecutionTiming.fromByte(message.getExecutionTiming());
       trustHeightOfFootsteps = message.getTrustHeightOfFootsteps();
       areFootstepsAdjustable = message.getAreFootstepsAdjustable();
@@ -79,7 +94,12 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDuration = other.defaultSwingDuration;
       defaultTransferDuration = other.defaultTransferDuration;
       finalTransferDuration = other.finalTransferDuration;
+      defaultSwingSplitFraction = other.defaultSwingSplitFraction;
+      defaultSwingDurationShiftFraction = other.defaultSwingDurationShiftFraction;
       defaultTransferSplitFraction = other.defaultTransferSplitFraction;
+      finalTransferSplitFraction = other.finalTransferSplitFraction;
+      defaultTransferWeightDistribution = other.defaultTransferWeightDistribution;
+      finalTransferWeightDistribution = other.finalTransferWeightDistribution;
       executionTiming = other.executionTiming;
       adjustedExecutionTime = other.adjustedExecutionTime;
       trustHeightOfFootsteps = other.trustHeightOfFootsteps;
@@ -135,9 +155,34 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return finalTransferDuration;
    }
 
+   public double getDefaultSwingSplitFraction()
+   {
+      return defaultSwingSplitFraction;
+   }
+
+   public double getDefaultSwingDurationShiftFraction()
+   {
+      return defaultSwingDurationShiftFraction;
+   }
+
    public double getDefaultTransferSplitFraction()
    {
       return defaultTransferSplitFraction;
+   }
+
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction;
+   }
+
+   public double getDefaultTransferWeightDistribution()
+   {
+      return defaultTransferWeightDistribution;
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution;
    }
 
    public ExecutionTiming getExecutionTiming()

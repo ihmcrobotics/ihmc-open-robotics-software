@@ -14,20 +14,20 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -56,8 +56,8 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<FootstepPlannerParameters> plannerParametersReference;
-   private final AtomicReference<VisibilityGraphsParameters> visibilityGraphParametersReference;
+   private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
+   private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
    private final AtomicReference<Point3D> plannerStartPositionReference;
    private final AtomicReference<Quaternion> plannerStartOrientationReference;
    private final AtomicReference<Point3D> plannerGoalPositionReference;
@@ -72,6 +72,8 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Boolean> ignorePartialFootholds;
+   private final AtomicReference<Double> goalDistanceProximity;
+   private final AtomicReference<Double> goalYawProximity;
 
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
@@ -121,6 +123,8 @@ public class RemoteUIMessageConverter
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholdsTopic, false);
+      goalDistanceProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalDistanceProximity, 0.0);
+      goalYawProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalYawProximity, 0.0);
 
       registerPubSubs(ros2Node);
 
@@ -252,7 +256,7 @@ public class RemoteUIMessageConverter
       PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResultTopic, result);
@@ -286,7 +290,7 @@ public class RemoteUIMessageConverter
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      List<? extends Point3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
       if (plannerRequestId > currentPlanRequestId.get())
@@ -335,13 +339,13 @@ public class RemoteUIMessageConverter
          LogTools.info("Told the toolbox to wake up.");
       
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
-      FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
+      FootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
 
       FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
       plannerParametersPublisher.publish(plannerParametersPacket);
 
       VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
-      VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();
+      VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
 
       FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
       visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
@@ -399,6 +403,8 @@ public class RemoteUIMessageConverter
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       packet.setAssumeFlatGround(assumeFlatGround.get());
+      packet.setGoalDistanceProximity(goalDistanceProximity.get());
+      packet.setGoalYawProximity(goalYawProximity.get());
 
       footstepPlanningRequestPublisher.publish(packet);
    }

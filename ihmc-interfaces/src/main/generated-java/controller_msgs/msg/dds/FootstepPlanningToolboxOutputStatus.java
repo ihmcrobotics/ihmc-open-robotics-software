@@ -17,6 +17,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 3;
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 4;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 5;
+   public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 6;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -26,7 +27,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
    public controller_msgs.msg.dds.FootstepPlanningStatistics footstep_planning_statistics_;
 
@@ -34,7 +35,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
       footstep_planning_statistics_ = new controller_msgs.msg.dds.FootstepPlanningStatistics();
 
@@ -107,7 +108,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getBodyPath()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPath()
    {
       return body_path_;
    }

@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
-   id("us.ihmc.ihmc-ci") version "4.25"
-   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
+   id("us.ihmc.ihmc-ci") version "5.0"
+   id("us.ihmc.ihmc-cd") version "1.7"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -13,17 +13,17 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "gov.nist.math", name: "jama", version: "1.0.3"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.ejml", name: "core", version: "0.30"
+   api("gov.nist.math:jama:1.0.3")
+   api("org.ejml:dense64:0.30")
+   api("org.ejml:core:0.30")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
+   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 

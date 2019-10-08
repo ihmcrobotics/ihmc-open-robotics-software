@@ -74,12 +74,15 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
    public static final boolean HAS_FOREARMS_ON = true && ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
    public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
    public static final boolean HAS_LIGHTER_BACKPACK = true;
+
+   public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
 
    private static final String[] torqueControlledJoints;
    static
@@ -155,7 +158,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final double gravity = 9.80665;
 
    public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
-   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = HighLevelHumanoidControllerFactory.ROS2_ID.getNodeName("valkyrie");
+   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = ROS2Tools.HUMANOID_CONTROLLER.getNodeName("valkyrie");
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
@@ -405,6 +408,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       AvatarControllerThread controllerThread = new AvatarControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
                                                                            controllerContextFactory, drcOutputProcessor, controllerRealtimeRos2Node, gravity,
                                                                            estimatorDT);
+      if (!LOG_SECONDARY_HIGH_LEVEL_STATES)
+         detachSecondaryRegistries(controllerThread.getYoVariableRegistry());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
       if (!Precision.equals(robotModel.getControllerDT() / robotModel.getEstimatorDT(), controllerDivisor))
          throw new RuntimeException("Controller DT must be multiple of estimator DT.");
@@ -458,6 +463,29 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       estimatorRealtimeRos2Node.spin();
       controllerRealtimeRos2Node.spin();
       yoVariableServer.start();
+   }
+
+   private void detachSecondaryRegistries(YoVariableRegistry drcControllerThreadRegistry)
+   {
+      YoVariableRegistry drcMomentumBasedControllerRegistry = findChild(drcControllerThreadRegistry,"DRCMomentumBasedController");
+      YoVariableRegistry humanoidHighLevelControllerManagerRegistry = findChild(drcMomentumBasedControllerRegistry, "HumanoidHighLevelControllerManager");
+
+      removeChild(humanoidHighLevelControllerManagerRegistry, "ValkyrieCalibrationControllerState");
+      removeChild(humanoidHighLevelControllerManagerRegistry, "StandPrepControllerState");
+      removeChild(humanoidHighLevelControllerManagerRegistry, "StandReadyControllerState");
+      removeChild(humanoidHighLevelControllerManagerRegistry, "toWalkingSmoothTransitionControllerState");
+      removeChild(humanoidHighLevelControllerManagerRegistry, "exitWalkingSmoothTransitionControllerState");
+      removeChild(humanoidHighLevelControllerManagerRegistry, "LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager");
+   }
+
+   private static YoVariableRegistry findChild(YoVariableRegistry parent, String childName)
+   {
+      return parent.getChildren().stream().filter(child -> child.getName().equals(childName)).findFirst().get();
+   }
+
+   private static void removeChild(YoVariableRegistry parent, String nameOfChildToRemove)
+   {
+      parent.getChildren().remove(findChild(parent, nameOfChildToRemove));
    }
 
    private void processEnvironmentVariables()

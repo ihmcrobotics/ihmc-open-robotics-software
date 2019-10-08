@@ -22,6 +22,7 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -97,7 +98,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
     *           region. Expressed in local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransform transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -769,6 +770,9 @@ public class PlanarRegion implements SupportingVertexHolder
 
    private void checkConcaveHullRepeatVertices(boolean throwException)
    {
+      if (concaveHullsVertices.length < 2)
+         return;
+
       for (int i=0; i<concaveHullsVertices.length; i++)
       {
          int nextIndex = (i + 1) % concaveHullsVertices.length;
@@ -919,6 +923,30 @@ public class PlanarRegion implements SupportingVertexHolder
       transformToPack.set(fromWorldToLocalTransform);
    }
 
+   public RigidBodyTransformReadOnly getTransformToLocal()
+   {
+      return fromWorldToLocalTransform;
+   }
+
+   public RigidBodyTransformReadOnly getTransformToWorld()
+   {
+      return fromLocalToWorldTransform;
+   }
+
+   public RigidBodyTransform getTransformToWorldCopy()
+   {
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      getTransformToWorld(transformToWorld);
+      return transformToWorld;
+   }
+
+   public RigidBodyTransform getTransformToLocalCopy()
+   {
+      RigidBodyTransform transformToLocal = new RigidBodyTransform();
+      getTransformToLocal(transformToLocal);
+      return transformToLocal;
+   }
+
    /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
@@ -1038,6 +1066,12 @@ public class PlanarRegion implements SupportingVertexHolder
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
+   }
+
+   public void setTransformOnly(PlanarRegion other)
+   {
+      fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
+      fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
    }
 
    public void setBoundingBoxEpsilon(double epsilon)

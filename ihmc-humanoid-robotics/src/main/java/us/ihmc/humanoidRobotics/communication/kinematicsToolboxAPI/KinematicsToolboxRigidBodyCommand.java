@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import java.util.Map;
-
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
@@ -9,6 +7,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -56,15 +55,15 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       set(message, null, null);
    }
 
-   public void set(KinematicsToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
+   public void set(KinematicsToolboxRigidBodyMessage message, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       sequenceId = message.getSequenceId();
       endEffectorHashCode = message.getEndEffectorHashCode();
-      if (rigidBodyHashMap == null)
+      if (rigidBodyHashCodeResolver == null)
          endEffector = null;
       else
-         endEffector = rigidBodyHashMap.get(endEffectorHashCode);
+         endEffector = (RigidBodyBasics) rigidBodyHashCodeResolver.getRigidBody(endEffectorHashCode);
       desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());

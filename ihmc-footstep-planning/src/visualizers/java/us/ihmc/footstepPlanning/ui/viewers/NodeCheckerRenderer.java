@@ -17,9 +17,8 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionF
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.messager.Messager;
@@ -44,7 +43,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final AtomicReference<RobotSide> initialSupportSideReference;
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
-   private final SettableFootstepPlannerParameters parameters = new SettableFootstepPlannerParameters(new DefaultFootstepPlanningParameters());
+   private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
    private final FootstepNodeChecker nodeChecker;

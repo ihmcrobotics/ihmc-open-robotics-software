@@ -14,14 +14,8 @@ import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
-import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -58,29 +52,28 @@ public class RemoteRobotControllerInterface
    public RemoteRobotControllerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
-      MessageTopicNameGenerator messageTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
 
-      footTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, FootTrajectoryMessage.class, messageTopicNameGenerator);
-      armTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, ArmTrajectoryMessage.class, messageTopicNameGenerator);
-      chestOrientationTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, ChestTrajectoryMessage.class, messageTopicNameGenerator);
-      pelvisOrientationTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, PelvisOrientationTrajectoryMessage.class, messageTopicNameGenerator);
-      pelvisTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, PelvisTrajectoryMessage.class, messageTopicNameGenerator);
-      goHomeMessagePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, messageTopicNameGenerator);
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, messageTopicNameGenerator);
-      pausePublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, messageTopicNameGenerator);
+      footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, robotName, controllerId);
+      armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, robotName, controllerId);
+      chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, robotName, controllerId);
+      pelvisOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisOrientationTrajectoryMessage.class, robotName, controllerId);
+      pelvisTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisTrajectoryMessage.class, robotName, controllerId);
+      goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, robotName, controllerId);
+      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, robotName, controllerId);
+      pausePublisher = new IHMCROS2Publisher<>(ros2Node, PauseWalkingMessage.class, robotName, controllerId);
 
-      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotModel.getSimpleRobotName(), HighLevelHumanoidControllerFactory.ROS2_ID,
-                         this::acceptWalkingStatus);
+      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotName, controllerId, this::acceptWalkingStatus);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerState = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName(),
-                                        HighLevelHumanoidControllerFactory.ROS2_ID, initialState, this::acceptStatusChange);
+      controllerState = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, robotName, controllerId, initialState, this::acceptStatusChange);
 
       YoVariableRegistry registry = new YoVariableRegistry("swingOver");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(robotModel.getWalkingControllerParameters(), registry,
+      swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(robotModel.getWalkingControllerParameters(),
+                                                                                              registry,
                                                                                               yoGraphicsListRegistry);
    }
 

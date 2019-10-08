@@ -1,4 +1,4 @@
-# This message is part of the IHMC hole-body inverse kinematics module.
+# This message is part of the IHMC whole-body inverse kinematics module.
 # This message contains all the information needed to configure the objectives/constraints to apply on 
 # a given end-effector in the solver.
 

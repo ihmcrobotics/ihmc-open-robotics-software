@@ -12,10 +12,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistan
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -23,7 +23,7 @@ public class NavigableRegionsFactory
 {
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
 
-   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParameters parameters)
+   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParametersReadOnly parameters)
    {
       List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 
@@ -47,7 +47,7 @@ public class NavigableRegionsFactory
       return navigableRegions;
    }
 
-   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParameters parameters)
+   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParametersReadOnly parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
