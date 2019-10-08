@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -12,8 +11,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
@@ -39,7 +38,7 @@ public class RemoteFootstepPlannerInterface
    public static final double DEFAULT_SWING_TIME_FLAT_UP    = 1.2;
    public static final double DEFAULT_SWING_TIME_DOWN       = 1.2;
 
-   private volatile FootstepPlannerParameters footstepPlannerParameters;
+   private volatile FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private volatile double timeout = DEFAULT_TIMEOUT;
    private volatile double transferTimeFlatUp = DEFAULT_TRANSFER_TIME_FLAT_UP;
    private volatile double transferTimeDown   = DEFAULT_TRANSFER_TIME_DOWN   ;
@@ -61,7 +60,7 @@ public class RemoteFootstepPlannerInterface
       {
          messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
          {
-            SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
+            DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);
             footstepPlannerParameters = settableFootstepPlannerParameters;
             timeout = parameters.getTimeout();
@@ -88,7 +87,7 @@ public class RemoteFootstepPlannerInterface
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
                          robotModel.getSimpleRobotName(),
-                         MultiStageFootstepPlanningModule.ROS2_ID,
+                         ROS2Tools.FOOTSTEP_PLANNER,
                          this::acceptFootstepPlannerResult);
    }
 
@@ -137,7 +136,7 @@ public class RemoteFootstepPlannerInterface
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
-      SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
+      DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
       if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
       {
          settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds

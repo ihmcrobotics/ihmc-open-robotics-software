@@ -281,6 +281,8 @@ public class LidarScanPublisher
       {
          long rosTimestamp = scanData.getTimestamp();
          robotTimestamp = rosClockCalculator.computeRobotMonotonicTime(rosTimestamp);
+         if (robotTimestamp == -1L)
+            return null;
          boolean waitForTimestamp = true;
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
          if (!success)
@@ -341,6 +343,7 @@ public class LidarScanPublisher
       float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
 
       LidarScanMessage message = MessageTools.createLidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+
       if (lidarScanPublisher != null)
          lidarScanPublisher.publish(message);
       else

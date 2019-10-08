@@ -10,9 +10,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlannerMessageTools
@@ -49,7 +48,7 @@ public class FootstepPlannerMessageTools
       return message;
    }
 
-   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
+   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParametersReadOnly parameters)
    {
       if (parameters == null)
       {
@@ -57,6 +56,7 @@ public class FootstepPlannerMessageTools
       }
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
+      packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
@@ -83,7 +83,6 @@ public class FootstepPlannerMessageTools
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
       packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
       packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
@@ -92,30 +91,37 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+      packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
+      packet.setFinalTurnBodyPathProximity(parameters.getFinalTurnBodyPathProximity());
+      packet.setFinalTurnProximityBlendFactor(parameters.getFinalTurnProximityBlendFactor());
 
-      FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
+      packet.setUseQuadraticDistanceCost(parameters.useQuadraticDistanceCost());
+      packet.setUseQuadraticHeightCost(parameters.useQuadraticHeightCost());
 
-      packet.getCostParameters().setUseQuadraticDistanceCost(costParameters.useQuadraticDistanceCost());
-      packet.getCostParameters().setUseQuadraticHeightCost(costParameters.useQuadraticHeightCost());
+      packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
+      packet.setVisGraphWithAStarHeuristicsWeight(parameters.getVisGraphWithAStarHeuristicsWeight().getValue());
+      packet.setDepthFirstHeuristicsWeight(parameters.getDepthFirstHeuristicsWeight().getValue());
+      packet.setBodyPathBasedHeuristicsWeight(parameters.getBodyPathBasedHeuristicsWeight().getValue());
 
-      packet.getCostParameters().setAStarHeuristicsWeight(costParameters.getAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setVisGraphWithAStarHeuristicsWeight(costParameters.getVisGraphWithAStarHeuristicsWeight().getValue());
-      packet.getCostParameters().setDepthFirstHeuristicsWeight(costParameters.getDepthFirstHeuristicsWeight().getValue());
-      packet.getCostParameters().setBodyPathBasedHeuristicsWeight(costParameters.getBodyPathBasedHeuristicsWeight().getValue());
-
-      packet.getCostParameters().setYawWeight(costParameters.getYawWeight());
-      packet.getCostParameters().setPitchWeight(costParameters.getPitchWeight());
-      packet.getCostParameters().setRollWeight(costParameters.getRollWeight());
-      packet.getCostParameters().setStepUpWeight(costParameters.getStepUpWeight());
-      packet.getCostParameters().setStepDownWeight(costParameters.getStepDownWeight());
-      packet.getCostParameters().setForwardWeight(costParameters.getForwardWeight());
-      packet.getCostParameters().setLateralWeight(costParameters.getLateralWeight());
-      packet.getCostParameters().setCostPerStep(costParameters.getCostPerStep());
-      packet.getCostParameters().setBoundingBoxCost(costParameters.getBoundingBoxCost());
-      packet.getCostParameters().setMaximum2dDistanceFromBoundingBoxToPenalize(costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      packet.setYawWeight(parameters.getYawWeight());
+      packet.setPitchWeight(parameters.getPitchWeight());
+      packet.setRollWeight(parameters.getRollWeight());
+      packet.setStepUpWeight(parameters.getStepUpWeight());
+      packet.setStepDownWeight(parameters.getStepDownWeight());
+      packet.setForwardWeight(parameters.getForwardWeight());
+      packet.setLateralWeight(parameters.getLateralWeight());
+      packet.setCostPerStep(parameters.getCostPerStep());
+      packet.setBoundingBoxCost(parameters.getBoundingBoxCost());
+      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
+      packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      packet.setLongStepWeight(parameters.getLongStepWeight());
+      packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
+      packet.setBodyPathViolationWeight(parameters.getBodyPathViolationWeight());
+      packet.setDistanceFromPathTolerance(parameters.getDistanceFromPathTolerance());
+      packet.setDeltaYawFromReferenceTolerance(parameters.getDeltaYawFromReferenceTolerance());
    }
 
-   public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
+   public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParametersReadOnly parameters)
    {
       if (parameters == null)
       {
@@ -124,8 +130,10 @@ public class FootstepPlannerMessageTools
 
       packet.setMaxInterRegionConnectionLength(parameters.getMaxInterRegionConnectionLength());
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
-      packet.setExtrusionDistance(parameters.getObstacleExtrusionDistance());
-      packet.setExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
+      packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
+      packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
+      packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
@@ -133,5 +141,17 @@ public class FootstepPlannerMessageTools
       packet.setPlanarRegionMinSize(parameters.getPlanarRegionMinSize());
       packet.setRegionOrthogonalAngle(parameters.getRegionOrthogonalAngle());
       packet.setSearchHostRegionEpsilon(parameters.getSearchHostRegionEpsilon());
+      packet.setCanEasilyStepOverHeight(parameters.getCanEasilyStepOverHeight());
+      packet.setCanDuckUnderHeight(parameters.getCanDuckUnderHeight());
+      packet.setLengthForLongInterRegionEdge(parameters.getLengthForLongInterRegionEdge());
+      packet.setPerformPostProcessingNodeShifting(parameters.getPerformPostProcessingNodeShifting());
+      packet.setIntroduceMidpointsInPostProcessing(parameters.getIntroduceMidpointsInPostProcessing());
+      packet.setComputeOrientationsToAvoidObstacles(parameters.getComputeOrientationsToAvoidObstacles());
+      packet.setHeuristicWeight(parameters.getHeuristicWeight());
+      packet.setDistanceWeight(parameters.getDistanceWeight());
+      packet.setElevationWeight(parameters.getElevationWeight());
+      packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
+      packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
+      packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
    }
 }

@@ -9,7 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -99,10 +98,10 @@ public class PlannerTools
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
                                          PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
+      planner.setPlanningHorizonLength(100.0);
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
@@ -124,18 +123,6 @@ public class PlannerTools
       if (assertPlannerReturnedResult && !result.validForExecution())
          throw new RuntimeException("Planner was not able to provide valid result. Result: " + result);
       return footstepPlan;
-   }
-
-   public static void configureAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide,
-                                                      FramePose3D goalPose, PlanarRegionsList planarRegionsList)
-   {
-      FootstepPlannerGoal goal = new FootstepPlannerGoal();
-      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      goal.setGoalPoseBetweenFeet(goalPose);
-
-      planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
-      planner.setGoal(goal);
-      planner.setPlanarRegions(planarRegionsList);
    }
 
    public static boolean isGoalNextToLastStep(FramePose3D goalPose, FootstepPlan footstepPlan)

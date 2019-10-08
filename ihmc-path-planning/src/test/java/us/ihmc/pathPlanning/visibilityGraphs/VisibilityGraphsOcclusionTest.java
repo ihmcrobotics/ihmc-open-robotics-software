@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -35,7 +35,8 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -54,8 +55,6 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class VisibilityGraphsOcclusionTest
 {
-   private static final int TIMEOUT = 300000; // Integer.MAX_VALUE; //
-
    private static final DefaultVisibilityGraphParameters VISIBILITY_GRAPH_PARAMETERS = new DefaultVisibilityGraphParameters()
    {
       @Override
@@ -67,7 +66,7 @@ public class VisibilityGraphsOcclusionTest
 
    private static final boolean VERBOSE = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private boolean visualize = true;
+   private boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int rays = 5000;
@@ -95,7 +94,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testFlatGround(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -105,7 +103,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testFlatGroundWithWall(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
@@ -124,7 +121,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testSimpleOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -134,7 +130,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testMazeWithOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
@@ -144,7 +139,6 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test
-   @Disabled
    public void testCrazyBridgeEnvironment(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
@@ -308,8 +302,8 @@ public class VisibilityGraphsOcclusionTest
          try
          {
             long startTime = System.currentTimeMillis();
-//            bodyPath = vizGraphs.calculateBodyPath(currentPosition.getPoint3dCopy(), goal);
-            bodyPath = vizGraphs.calculateBodyPathWithOcclusions(currentPosition, goal);
+            bodyPath = vizGraphs.calculateBodyPath(currentPosition, goal);
+//            bodyPath = vizGraphs.calculateBodyPathWithOcclusions(currentPosition, goal);
 
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
@@ -384,9 +378,12 @@ public class VisibilityGraphsOcclusionTest
 
          if (regions.findPlanarRegionsContainingPoint(currentPosition, maximumFlyingDistance) == null)
          {
-            PrintTools.info("Planner failed: path results in a flying robot.");
-            plannerFailed.set(true);
-            break;
+            if (regions.findPlanarRegionsContainingPointByProjectionOntoXYPlane(currentPosition.getX(), currentPosition.getY()) != null)
+            {
+               PrintTools.info("Planner failed: path results in a flying robot.");
+               plannerFailed.set(true);
+               break;
+            }
          }
       }
 
@@ -504,8 +501,8 @@ public class VisibilityGraphsOcclusionTest
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null || intersection.distanceSquared(observer) > rayLengthSquared)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersectionPair == null || intersectionPair.getLeft().distanceSquared(observer) > rayLengthSquared)
          {
             if (rayPointsToPack != null)
             {
@@ -513,6 +510,8 @@ public class VisibilityGraphsOcclusionTest
             }
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
 
          if (rayPointsToPack != null)
          {

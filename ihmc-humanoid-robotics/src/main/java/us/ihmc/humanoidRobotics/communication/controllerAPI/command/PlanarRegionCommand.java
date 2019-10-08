@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.PlanarRegionMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarRegionMessage>
 {
@@ -50,6 +50,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 
       concaveHullsVertices.clear();
+
       int vertexIndex = 0;
       int upperBound = message.getConcaveHullSize();
 
@@ -57,9 +58,11 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
          addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
 
       convexPolygons.clear();
+
       for (int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = convexPolygons.add();
+         convexPolygon.clear();
          upperBound += message.getConvexPolygonsSize().get(polygonIndex);
 
          for (; vertexIndex < upperBound; vertexIndex++)

@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.16.5"
-   id("us.ihmc.ihmc-ci") version "4.25"
-   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.ihmc-build") version "0.19.5"
+   id("us.ihmc.ihmc-ci") version "5.0"
+   id("us.ihmc.ihmc-cd") version "1.7"
    id("us.ihmc.log-tools") version "0.3.1"
    id("us.ihmc.scs") version "0.4"
 
@@ -17,29 +17,29 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "commons-net", name: "commons-net", version: "3.3"
-   compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
-   compile group: "org.ejml", name: "core", version: "0.30"
-   compile group: "org.ejml", name: "dense64", version: "0.30"
-   compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
-   compile group: "commons-io", name: "commons-io", version: "2.6"
-   compile group: "org.apache.commons", name: "commons-math3", version: "3.5"
-   compile group: "com.google.guava", name: "guava", version: "18.0"
-   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-communication", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
-   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
+   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:ihmc-yovariables:0.3.11")
+   api("us.ihmc:ihmc-commons:0.26.6")
+   api("commons-net:commons-net:3.3")
+   api("org.yaml:snakeyaml:1.17") //1.11
+   api("us.ihmc:ihmc-realtime:1.2.6")
+   api("org.ejml:core:0.30")
+   api("org.ejml:dense64:0.30")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("commons-io:commons-io:2.6")
+   api("org.apache.commons:commons-math3:3.5")
+   api("com.google.guava:guava:18.0")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-communication:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-sensor-processing:source")
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-robot-models:source")
+   api("us.ihmc:ihmc-graphics-description:0.12.12")
+   api("us.ihmc:ihmc-robot-data-logger:source")
 }
 
 benchmarksDependencies {
@@ -47,7 +47,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
+   api("us.ihmc:ihmc-convex-optimization-adapter:source")
 }
 
 remotes {

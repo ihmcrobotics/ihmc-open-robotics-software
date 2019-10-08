@@ -10,22 +10,25 @@ import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javaFXVisualizers.RandomColorFunction;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +36,13 @@ import static us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisu
 
 public class PlanarRegionSLAMUITabController extends Group
 {
+   boolean showConcaveHullMergerListener = false;
+
    private PlanarRegionSLAMParameters planarRegionSLAMParameters;
 
    private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-   private static final String DATASET_2 = "IntentionallyDrifted";
+   private static final String DATASET_2 = "20190710_174208_PlanarRegion";
+//   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
@@ -54,10 +60,13 @@ public class PlanarRegionSLAMUITabController extends Group
    @FXML private Label parameterLabel2;
    @FXML private Label parameterLabel3;
    @FXML private Label parameterLabel4;
+   @FXML private Label parameterLabel5;
+
    @FXML private Spinner<Integer> parameterSpinner1;
    @FXML private Spinner<Double> parameterSpinner2;
    @FXML private Spinner<Double> parameterSpinner3;
    @FXML private Spinner<Double> parameterSpinner4;
+   @FXML private Spinner<Double> parameterSpinner5;
 
    private List<RadioButton> datasetSelectionRadioButtons = new ArrayList<>();
 
@@ -86,23 +95,37 @@ public class PlanarRegionSLAMUITabController extends Group
       datasetSelectionRadioButtons.add(dataset3RadioButton);
       datasetSelectionRadioButtons.add(loadFromFileRadioButton);
 
-      parameterLabel1.setText(PlanarRegionSLAMParameters.iterations.getTitleCasedName());
+      parameterLabel1.setText(PlanarRegionSLAMParameters.iterationsForMatching.getTitleCasedName());
       parameterLabel2.setText(PlanarRegionSLAMParameters.minimumNormalDotProduct.getTitleCasedName());
       parameterLabel3.setText(PlanarRegionSLAMParameters.dampedLeastSquaresLambda.getTitleCasedName());
       parameterLabel4.setText(PlanarRegionSLAMParameters.boundingBoxHeight.getTitleCasedName());
+      parameterLabel5.setText(PlanarRegionSLAMParameters.minimumRegionOverlapDistance.getTitleCasedName());
       Platform.runLater(() ->
       {
       parameterSpinner1.setValueFactory(
-            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterations), 1));
+            new IntegerSpinnerValueFactory(0, 100, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.iterationsForMatching), 1));
       parameterSpinner2.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.05));
+            new DoubleSpinnerValueFactory(0.5, 1.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumNormalDotProduct), 0.01));
       parameterSpinner3.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.dampedLeastSquaresLambda), 0.05));
+            new DoubleSpinnerValueFactory(0.0, 100.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.dampedLeastSquaresLambda), 0.5));
       parameterSpinner4.setValueFactory(
-            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.boundingBoxHeight), 0.005));
+            new DoubleSpinnerValueFactory(0.0, 0.2, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.boundingBoxHeight), 0.005));
+      parameterSpinner5.setValueFactory(
+            new DoubleSpinnerValueFactory(-10.0, 10.0, planarRegionSLAMParameters.get(PlanarRegionSLAMParameters.minimumRegionOverlapDistance), 0.01));
+      parameterSpinner1.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.iterationsForMatching, parameterSpinner1.getValue()));
+      parameterSpinner2.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.minimumNormalDotProduct, parameterSpinner2.getValue()));
+      parameterSpinner3.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.dampedLeastSquaresLambda, parameterSpinner3.getValue()));
+      parameterSpinner4.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.boundingBoxHeight, parameterSpinner4.getValue()));
+      parameterSpinner5.getValueFactory().valueProperty().addListener(
+            observable -> planarRegionSLAMParameters.set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, parameterSpinner5.getValue()));
       });
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
+      livePlanarRegionsGraphic.setColorFunction(new RandomColorFunction()); // make incoming regions color always changing
       getChildren().add(livePlanarRegionsGraphic);
 
       mapGraphic = new PlanarRegionsGraphic(false);
@@ -124,8 +147,8 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private PlanarRegionsList loadDataSet(String dataSetName)
    {
-      String prefix = "ihmc-open-robotics-software/robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/";
-      Path path = Paths.get(prefix + dataSetName);
+      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
       return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 
@@ -138,7 +161,8 @@ public class PlanarRegionSLAMUITabController extends Group
    private void slam()
    {
       PlanarRegionsList newData = livePlanarRegionsGraphic.getLatestPlanarRegionsList();
-      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters);
+      ConcaveHullMergerListener listener = showConcaveHullMergerListener ? new ConcaveHullGraphicalMergerListener() : null;
+      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters, listener);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
 
       RigidBodyTransform transformFromIncomingToMap = slamResult.getTransformFromIncomingToMap();

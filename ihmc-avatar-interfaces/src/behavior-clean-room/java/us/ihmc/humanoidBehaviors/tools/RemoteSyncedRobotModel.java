@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -28,15 +27,14 @@ public class RemoteSyncedRobotModel
                                                                            fullRobotModel.getIMUDefinitions());
 
       robotConfigurationData = new ROS2Input<RobotConfigurationData>(ros2Node,
-                                                                       RobotConfigurationData.class,
-                                                                       robotModel.getSimpleRobotName(),
-                                                                       HighLevelHumanoidControllerFactory.ROS2_ID,
-                                                                       message ->
-                                                                       {
-                                                                          FullRobotModelUtils.checkJointNameHash(jointNameHash,
-                                                                                                                 message.getJointNameHash());
-                                                                          return true;
-                                                                       });
+                                                                     RobotConfigurationData.class,
+                                                                     robotModel.getSimpleRobotName(), HUMANOID_CONTROLLER,
+                                                                     message ->
+                                                                     {
+                                                                        FullRobotModelUtils.checkJointNameHash(jointNameHash,
+                                                                                                               message.getJointNameHash());
+                                                                        return true;
+                                                                     });
    }
 
    public FullHumanoidRobotModel pollFullRobotModel()

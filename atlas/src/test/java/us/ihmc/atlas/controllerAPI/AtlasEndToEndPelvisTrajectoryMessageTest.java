@@ -28,16 +28,25 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
    @Test
    public void testSixDoFMovementsOfPelvis() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       super.testSixDoFMovementsOfPelvis();
    }
 
+   @Override
    @Disabled
    @Test
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();
+   }
+
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
    }
 }

@@ -11,11 +11,11 @@ import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGr
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
@@ -184,7 +184,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       graphicsListRegistry = new YoGraphicsListRegistry();
       networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory,
                                                               physicalProperties.getFeetGroundContactPoints(),
-                                                              new GenericQuadrupedFootstepPlannerParameters(),
+                                                              new DefaultVisibilityGraphParameters(),
+                                                              new GenericQuadrupedPawPlannerParameters(),
                                                               xGaitSettings,
                                                               new GenericQuadrupedPointFootSnapperParameters(),
                                                               PubSubImplementation.INTRAPROCESS,

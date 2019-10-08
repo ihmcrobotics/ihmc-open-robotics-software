@@ -104,17 +104,20 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints />
               </rowConstraints>
                <children>
                   <Label fx:id="parameterLabel1" text="Parameter 1" />
                   <Label fx:id="parameterLabel2" text="Parameter 2" GridPane.rowIndex="1" />
                   <Label fx:id="parameterLabel3" text="Parameter 3" GridPane.rowIndex="2" />
+                  <Label fx:id="parameterLabel4" text="Parameter 4" GridPane.rowIndex="3" />
+                  <Label fx:id="parameterLabel5" text="Parameter 5" GridPane.rowIndex="4" />
                   <Spinner fx:id="parameterSpinner1" editable="true" GridPane.columnIndex="1" />
                   <Spinner fx:id="parameterSpinner2" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Spinner fx:id="parameterSpinner3" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label fx:id="parameterLabel4" text="Parameter 4" GridPane.rowIndex="3" />
-                  <Spinner fx:id="parameterSpinner4" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Button fx:id="saveParametersButton" mnemonicParsing="false" text="Save" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                  <Spinner fx:id="parameterSpinner4" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Spinner fx:id="parameterSpinner5" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Button fx:id="saveParametersButton" mnemonicParsing="false" text="Save" onAction="#saveParametersButton" GridPane.columnIndex="2" GridPane.rowIndex="3">
                      <GridPane.margin>
                         <Insets left="10.0" />
                      </GridPane.margin>

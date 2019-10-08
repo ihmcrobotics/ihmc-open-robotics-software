@@ -3,13 +3,12 @@ package us.ihmc.footstepPlanning.flatGroundPlanning;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
@@ -21,7 +20,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private YoVariableRegistry registry;
-   private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
 
    private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -87,7 +85,7 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");
-      parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlannerTools.createDefaultFootPolygons();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 

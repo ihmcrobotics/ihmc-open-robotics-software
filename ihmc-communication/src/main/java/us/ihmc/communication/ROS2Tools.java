@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.RealtimeRos2Subscription;
@@ -23,18 +22,25 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
+   public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
+   public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
+   public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
+   public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
+   public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
+
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
    public static final String INPUT_ROS_TOPIC_PREFIX = "/input";
 
-   // TODO Move these up into application classes; seems bad to define them centrally
-   public static final String HUMANOID_CONTROL_MODULE = "/humanoid_control";
-   public static final String QUADRUPED_CONTROL_MODULE = "/quadruped_control";
+   public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
+   public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
 
-   public static final String FOOTSTEP_PLANNER_TOOLBOX = "/toolbox/footstep_plan";
+   public static final String FOOTSTEP_PLANNER_TOOLBOX = FOOTSTEP_PLANNER.getModuleTopicQualifier();
+   public static final String CONTINUOUS_PLANNING_TOOLBOX = "/toolbox/continuous_planning";
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
+   public static final String KINEMATICS_STREAMING_TOOLBOX = "/toolbox/ik_streaming";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
    public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
 
@@ -43,9 +49,10 @@ public class ROS2Tools
 
    public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
    public static final String BEHAVIOR_MODULE = "/behavior";
-   public static final String REA_MODULE = "/rea";
+   public static final String REA_MODULE = REA.getModuleTopicQualifier();
+   public static final String REA_CUSTOM_REGION_QUALIFIER = "/custom_region";
 
-   public static final String SREA_MODULE = "/srea";
+   public static final String STEREO_REA_MODULE = STEREO_REA.getModuleTopicQualifier();
 
    public enum ROS2TopicQualifier
    {
@@ -307,6 +314,11 @@ public class ROS2Tools
       return createPublisher(ros2Node, messageType, topicName);
    }
 
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
+   {
+      return new IHMCROS2Publisher<>(ros2Node, messageType, robotName, identifier);
+   }
+
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName)
    {
       return createPublisher(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -493,7 +505,7 @@ public class ROS2Tools
     * <li>result from this method: {@code "rea_status_message"} which conserves the acronym as one
     * word.
     * </p>
-    * 
+    *
     * @param camelCase the camel-case {@code String} to be converted.
     * @return the converted {@code String} using lower-case with underscores.
     */

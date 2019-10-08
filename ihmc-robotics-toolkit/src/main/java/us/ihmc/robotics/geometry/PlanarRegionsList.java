@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -41,6 +42,16 @@ public class PlanarRegionsList
    public void addPlanarRegion(PlanarRegion region)
    {
       regions.add(region);
+   }
+
+   public void addPlanarRegions(List<PlanarRegion> regions)
+   {
+      this.regions.addAll(regions);
+   }
+
+   public void addPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      regions.addAll(planarRegionsList.getPlanarRegionsAsList());
    }
 
    /**
@@ -236,7 +247,7 @@ public class PlanarRegionsList
 
    public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(Point2DReadOnly point)
    {
-      return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
+      return findPlanarRegionsContainingPointByVerticalLineIntersection(point.getX(), point.getY());
    }
 
    public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(double x, double y)
@@ -376,7 +387,7 @@ public class PlanarRegionsList
          regions.get(i).transform(rigidBodyTransform);
       }
    }
-   
+
    public void transformByPreMultiply(RigidBodyTransform rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)
@@ -399,5 +410,18 @@ public class PlanarRegionsList
                                                                                                                   numberOfPossiblePointsForPolygons));
       }
       return planarRegionsList;
+   }
+
+   public static PlanarRegionsList flatGround(double size, RigidBodyTransform transform)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region
+      double halfSize = size / 2.0;
+      convexPolygon.addVertex(halfSize, halfSize);
+      convexPolygon.addVertex(-halfSize, halfSize);
+      convexPolygon.addVertex(-halfSize, -halfSize);
+      convexPolygon.addVertex(halfSize, -halfSize);
+      convexPolygon.update();
+      PlanarRegion groundPlane = new PlanarRegion(transform, convexPolygon);
+      return new PlanarRegionsList(groundPlane);
    }
 }

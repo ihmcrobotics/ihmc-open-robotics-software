@@ -33,4 +33,25 @@ public class LatticeNodeTest
       }
    }
 
+   @Test
+   public void testPiToPiRollOver()
+   {
+      LatticeNode nodeA = new LatticeNode(0.0, 0.0, Math.PI);
+      LatticeNode nodeB = new LatticeNode(0.0, 0.0, -Math.PI);
+
+      assertTrue(nodeA.equals(nodeB));
+      assertTrue(nodeA.hashCode() == nodeB.hashCode());
+
+      nodeA = new LatticeNode(0.0, 0.0, Math.PI - 1e-5);
+      nodeB = new LatticeNode(0.0, 0.0, -Math.PI + 1e-5);
+
+      assertTrue(nodeA.equals(nodeB));
+      assertTrue(nodeA.hashCode() == nodeB.hashCode());
+
+      nodeA = new LatticeNode(0.0, 0.0, Math.PI + 1e-5);
+      nodeB = new LatticeNode(0.0, 0.0, -Math.PI - 1e-5);
+
+      assertTrue(nodeA.equals(nodeB));
+      assertTrue(nodeA.hashCode() == nodeB.hashCode());
+   }
 }

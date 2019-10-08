@@ -4,16 +4,14 @@ import javafx.scene.Group;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.ui.graphics.MeshGraphic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMTools.*;
+import static us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools.*;
 import static us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState.*;
 
 public class PlanarRegionSLAMGraphic extends Group
@@ -86,7 +84,7 @@ public class PlanarRegionSLAMGraphic extends Group
                                                                                                          listToMerge,
                                                                                                          parameters.getBoundingBoxHeight());
       Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, 0.9);
-      matchesWithReferencePoints = filterMatchesBasedOn2DBoundingBoxShadow(normalSimilarityFiltered);
+      matchesWithReferencePoints = filterMatchesBasedOn2DBoundingBoxShadow(0.01, 0.03, normalSimilarityFiltered);
 
       meshGraphic.generateMeshesAsync();
 
@@ -101,8 +99,7 @@ public class PlanarRegionSLAMGraphic extends Group
          for (ImmutablePair<PlanarRegion, Point2D> matchedReferencePoint : matchedReferencePoints)
          {
             Point3D matchedReferencePoint3D = new Point3D(matchedReferencePoint.getRight());
-            RigidBodyTransform transformToWorld = PlanarRegionTools.getTransformToWorld(matchedReferencePoint.getLeft());
-            matchedReferencePoint3D.applyTransform(transformToWorld);
+            matchedReferencePoint3D.applyTransform(matchedReferencePoint.getLeft().getTransformToWorld());
             meshBuilder.addSphere(0.01, matchedReferencePoint3D);
          }
       }

@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 
 public class WallTimeBasedROSClockCalculator implements RobotROSClockCalculator
 {
-   private final AtomicLong currentTimestampOffset = new AtomicLong(0);
+   private final AtomicLong currentTimestampOffset = new AtomicLong(-1L);
 
    public WallTimeBasedROSClockCalculator()
    {
@@ -27,6 +27,9 @@ public class WallTimeBasedROSClockCalculator implements RobotROSClockCalculator
    @Override
    public long computeRobotMonotonicTime(long rosTime)
    {
-      return rosTime - currentTimestampOffset.get();
+      if (currentTimestampOffset.get() == -1L)
+         return -1L;
+      else
+         return rosTime - currentTimestampOffset.get();
    }
 }

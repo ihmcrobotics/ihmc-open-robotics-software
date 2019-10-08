@@ -13,16 +13,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,8 +54,8 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       else
          this.executorService = executorService;
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
-      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+      messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      planarRegionsList = messager.createInput(PawStepPlannerMessagerAPI.PlanarRegionDataTopic);
 
       cellPolygon.addVertex(cellWidth, 0.0);
       cellPolygon.addVertex(0.5 * cellWidth, 0.5 * Math.sqrt(3.0) * cellWidth);
@@ -82,21 +79,21 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
       this.reset.set(true);
    }
 
-   public void processNodesToRenderOnThread(Collection<FootstepNode> nodes, Color color)
+   public void processNodesToRenderOnThread(Collection<PawNode> nodes, Color color)
    {
       executorService.execute(() -> processNodesToRender(nodes, color));
    }
 
-   private void processNodesToRender(Collection<FootstepNode> nodes, Color color)
+   private void processNodesToRender(Collection<PawNode> nodes, Color color)
    {
       if (nodes == null || nodes.isEmpty())
          return;
 
-      for (FootstepNode node : nodes)
+      for (PawNode node : nodes)
       {
          RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-         double x = node.getXIndex(movingQuadrant) * FootstepNode.gridSizeXY;
-         double y = node.getYIndex(movingQuadrant) * FootstepNode.gridSizeXY;
+         double x = node.getXIndex(movingQuadrant) * PawNode.gridSizeXY;
+         double y = node.getYIndex(movingQuadrant) * PawNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(x, y, z);

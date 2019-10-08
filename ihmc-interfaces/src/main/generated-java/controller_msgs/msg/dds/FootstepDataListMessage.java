@@ -54,11 +54,41 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
             */
    public double final_transfer_duration_ = -1.0;
    /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public double default_swing_duration_shift_fraction_ = -1.0;
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public double default_swing_split_fraction_ = -1.0;
+   /**
             * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
             * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
             * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
             */
    public double default_transfer_split_fraction_ = -1.0;
+   /**
+            * The final_transfer_split_fraction is the fraction of the final transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double final_transfer_split_fraction_ = -1.0;
+   /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double default_transfer_weight_distribution_ = -1.0;
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double final_transfer_weight_distribution_ = -1.0;
    /**
             * If false the controller adjust each footstep height to be at the support sole height.
             */
@@ -106,7 +136,17 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       final_transfer_duration_ = other.final_transfer_duration_;
 
+      default_swing_duration_shift_fraction_ = other.default_swing_duration_shift_fraction_;
+
+      default_swing_split_fraction_ = other.default_swing_split_fraction_;
+
       default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
+
+      final_transfer_split_fraction_ = other.final_transfer_split_fraction_;
+
+      default_transfer_weight_distribution_ = other.default_transfer_weight_distribution_;
+
+      final_transfer_weight_distribution_ = other.final_transfer_weight_distribution_;
 
       trust_height_of_footsteps_ = other.trust_height_of_footsteps_;
 
@@ -232,6 +272,44 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    }
 
    /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public void setDefaultSwingDurationShiftFraction(double default_swing_duration_shift_fraction)
+   {
+      default_swing_duration_shift_fraction_ = default_swing_duration_shift_fraction;
+   }
+   /**
+            * The swing_duration_shift_fraction is the fraction of the swing duration spent shifting the weight from the heel of the foot to the toe of the foot.
+            * A higher split fraction means that the weight is shifted to the toe slowly, then spends very little time on the toe.
+            * A lower split fraction means that the weight is shifted to the toe quickly, then spends a long time on the toe.
+            */
+   public double getDefaultSwingDurationShiftFraction()
+   {
+      return default_swing_duration_shift_fraction_;
+   }
+
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public void setDefaultSwingSplitFraction(double default_swing_split_fraction)
+   {
+      default_swing_split_fraction_ = default_swing_split_fraction;
+   }
+   /**
+            * The swing_split_fraction is the fraction of the shift portion of swing duration spent shifting the weight from the heel of the foot to the ball of the foot.
+            * A higher split fraction means that the weight is shifted to the ball slowly, then to the toe quickly.
+            * A lower split fraction means that the weight is shifted to the ball quickly, then to the toe slowly.
+            */
+   public double getDefaultSwingSplitFraction()
+   {
+      return default_swing_split_fraction_;
+   }
+
+   /**
             * The transfer_split_fraction is the fraction of the transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
             * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
             * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
@@ -248,6 +326,63 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public double getDefaultTransferSplitFraction()
    {
       return default_transfer_split_fraction_;
+   }
+
+   /**
+            * The final_transfer_split_fraction is the fraction of the final transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public void setFinalTransferSplitFraction(double final_transfer_split_fraction)
+   {
+      final_transfer_split_fraction_ = final_transfer_split_fraction;
+   }
+   /**
+            * The final_transfer_split_fraction is the fraction of the final transfer duration spent shifting the weight from the trailing foot to the middle of the stance.
+            * A higher split fraction means that the weight is shifted to the center slowly, then to the upcoming support foot quickly.
+            * A lower split fraction means that the weight is shifted to the center quickly, then to the upcoming support foot slowly.
+            */
+   public double getFinalTransferSplitFraction()
+   {
+      return final_transfer_split_fraction_;
+   }
+
+   /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public void setDefaultTransferWeightDistribution(double default_transfer_weight_distribution)
+   {
+      default_transfer_weight_distribution_ = default_transfer_weight_distribution;
+   }
+   /**
+            * The transfer_weight_distribution is the fraction through transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double getDefaultTransferWeightDistribution()
+   {
+      return default_transfer_weight_distribution_;
+   }
+
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public void setFinalTransferWeightDistribution(double final_transfer_weight_distribution)
+   {
+      final_transfer_weight_distribution_ = final_transfer_weight_distribution;
+   }
+   /**
+            * The final_transfer_weight_distribution is the fraction through final transfer that the CoP midpoint is located at.
+            * A lower fraction means that the midpoint is located near the trailing foot.
+            * A higher fraction means that the midpoint is located near the leading foot.
+            */
+   public double getFinalTransferWeightDistribution()
+   {
+      return final_transfer_weight_distribution_;
    }
 
    /**
@@ -354,7 +489,17 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_duration_, other.final_transfer_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_swing_duration_shift_fraction_, other.default_swing_duration_shift_fraction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_swing_split_fraction_, other.default_swing_split_fraction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_split_fraction_, other.default_transfer_split_fraction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_split_fraction_, other.final_transfer_split_fraction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_weight_distribution_, other.default_transfer_weight_distribution_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_weight_distribution_, other.final_transfer_weight_distribution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.trust_height_of_footsteps_, other.trust_height_of_footsteps_, epsilon)) return false;
 
@@ -389,7 +534,17 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       if(this.final_transfer_duration_ != otherMyClass.final_transfer_duration_) return false;
 
+      if(this.default_swing_duration_shift_fraction_ != otherMyClass.default_swing_duration_shift_fraction_) return false;
+
+      if(this.default_swing_split_fraction_ != otherMyClass.default_swing_split_fraction_) return false;
+
       if(this.default_transfer_split_fraction_ != otherMyClass.default_transfer_split_fraction_) return false;
+
+      if(this.final_transfer_split_fraction_ != otherMyClass.final_transfer_split_fraction_) return false;
+
+      if(this.default_transfer_weight_distribution_ != otherMyClass.default_transfer_weight_distribution_) return false;
+
+      if(this.final_transfer_weight_distribution_ != otherMyClass.final_transfer_weight_distribution_) return false;
 
       if(this.trust_height_of_footsteps_ != otherMyClass.trust_height_of_footsteps_) return false;
 
@@ -422,8 +577,18 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       builder.append(this.default_transfer_duration_);      builder.append(", ");
       builder.append("final_transfer_duration=");
       builder.append(this.final_transfer_duration_);      builder.append(", ");
+      builder.append("default_swing_duration_shift_fraction=");
+      builder.append(this.default_swing_duration_shift_fraction_);      builder.append(", ");
+      builder.append("default_swing_split_fraction=");
+      builder.append(this.default_swing_split_fraction_);      builder.append(", ");
       builder.append("default_transfer_split_fraction=");
       builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
+      builder.append("final_transfer_split_fraction=");
+      builder.append(this.final_transfer_split_fraction_);      builder.append(", ");
+      builder.append("default_transfer_weight_distribution=");
+      builder.append(this.default_transfer_weight_distribution_);      builder.append(", ");
+      builder.append("final_transfer_weight_distribution=");
+      builder.append(this.final_transfer_weight_distribution_);      builder.append(", ");
       builder.append("trust_height_of_footsteps=");
       builder.append(this.trust_height_of_footsteps_);      builder.append(", ");
       builder.append("are_footsteps_adjustable=");

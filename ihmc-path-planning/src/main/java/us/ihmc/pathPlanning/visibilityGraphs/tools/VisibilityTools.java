@@ -4,17 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
@@ -43,6 +40,38 @@ public class VisibilityTools
          Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   public static boolean isPointVisibleInclusive(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
+                                        boolean closed)
+   {
+      int size = listOfPointsInCluster.size();
+      int endIndex = size - 1;
+      if (closed)
+         endIndex++;
+
+      for (int i = 0; i < endIndex; i++)
+      {
+         Point2DReadOnly first = listOfPointsInCluster.get(i);
+
+         int nextIndex = i + 1;
+         if (nextIndex == size)
+            nextIndex = 0;
+
+         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
+
+         // this will return true if they share a point, which isn't always a good thing
+         boolean sharesAPoint = first.epsilonEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= first.epsilonEquals(observer, 1.0e-10);
+         sharesAPoint |= second.epsilonEquals(targetPoint, 1.0e-10);
+         sharesAPoint |= second.epsilonEquals(observer, 1.0e-10);
+
+         if (!sharesAPoint && EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
             return false;
          }

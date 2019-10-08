@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +35,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -65,7 +65,8 @@ public abstract class ToolboxModule
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
-   protected final int updatePeriodMilliseconds = 1;
+   protected final int updatePeriodMilliseconds;
+   protected final YoBoolean isLogging = new YoBoolean("isLogging", registry);
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -75,34 +76,31 @@ public abstract class ToolboxModule
    private YoVariableServer yoVariableServer;
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this.robotName = robotName;
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
+      this.updatePeriodMilliseconds = updatePeriodMilliseconds;
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
@@ -250,6 +248,20 @@ public abstract class ToolboxModule
          sleep();
          break;
       }
+
+      if (toolboxTaskScheduled != null)
+      {
+         if(message.getRequestLogging() && !isLogging.getValue())
+         {
+            startLogging();
+            isLogging.set(true);
+         }
+         else if(!message.getRequestLogging() && isLogging.getValue())
+         {
+            stopLogging();
+            isLogging.set(false);
+         }
+      }
    }
 
    public void wakeUp()
@@ -282,6 +294,8 @@ public abstract class ToolboxModule
       if (DEBUG)
          LogTools.debug("Going to sleep");
 
+      getToolboxController().notifyToolboxStateChange(ToolboxState.SLEEP);
+
       destroyToolboxRunnable();
 
       if (toolboxTaskScheduled == null)
@@ -294,6 +308,11 @@ public abstract class ToolboxModule
       getToolboxController().setFutureToListenTo(null);
       toolboxTaskScheduled.cancel(true);
       toolboxTaskScheduled = null;
+
+      if(isLogging.getValue())
+      {
+         stopLogging();
+      }
    }
 
    public void destroy()
@@ -360,6 +379,14 @@ public abstract class ToolboxModule
    private void destroyToolboxRunnable()
    {
       toolboxRunnable = null;
+   }
+
+   protected void startLogging()
+   {
+   }
+
+   protected void stopLogging()
+   {
    }
 
    abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);
