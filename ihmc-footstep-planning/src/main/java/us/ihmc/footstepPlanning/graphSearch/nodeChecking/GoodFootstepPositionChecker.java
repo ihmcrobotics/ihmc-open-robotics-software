@@ -133,6 +133,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             Point3D nodePosition = new Point3D(nodeToCheck.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             snapData.getSnapTransform().transform(nodePosition);
 
+            // FIXME this probably doesn't work correctly for non-flat terrain.
             double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentSnappedSoleTransform.getTranslationZ();
             double translationFromGrandparentNode = EuclidCoreTools.norm(nodePosition.getX() - grandparentSnappedSoleTransform.getTranslationX(),
                                                                          nodePosition.getY() - grandparentSnappedSoleTransform.getTranslationY());
