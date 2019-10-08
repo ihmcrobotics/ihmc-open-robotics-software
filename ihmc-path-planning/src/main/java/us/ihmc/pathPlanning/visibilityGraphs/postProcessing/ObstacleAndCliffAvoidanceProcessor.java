@@ -125,9 +125,20 @@ public class ObstacleAndCliffAvoidanceProcessor
    {
       Point2D nextPointInWorld2D = new Point2D(nodeLocationToPack);
 
-      List<Cluster> obstacleClusters = new ArrayList<>(startRegion.getObstacleClusters());
+      List<Cluster> obstacleClusters = new ArrayList<>();
+      for (Cluster potentialCluster : startRegion.getObstacleClusters())
+      {
+         if (potentialCluster.getRawPointsInLocal3D().get(0).getZ() > parameters.getTooHighToStepDistance())
+            obstacleClusters.add(potentialCluster);
+      }
       if (!startRegion.equals(endRegion))
-         obstacleClusters.addAll(endRegion.getObstacleClusters());
+      {
+         for (Cluster potentialCluster : endRegion.getObstacleClusters())
+         {
+            if (potentialCluster.getRawPointsInLocal3D().get(0).getZ() > parameters.getTooHighToStepDistance())
+               obstacleClusters.add(potentialCluster);
+         }
+      }
 
       List<Point2DReadOnly> closestObstacleClusterPoints = getClosestPointOnEachCluster(nextPointInWorld2D, obstacleClusters);
       Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
