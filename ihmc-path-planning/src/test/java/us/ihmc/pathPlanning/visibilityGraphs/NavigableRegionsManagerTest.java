@@ -15,6 +15,7 @@ import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -695,11 +696,19 @@ public class NavigableRegionsManagerTest
       testDataSet(DataSetName._20171215_214801_StairsUpDown);
    }
 
+   @Disabled
+   @Test
+   public void testBodyPathPlannerEnvironment()
+   {
+      testDataSet(DataSetName._20171218_205120_BodyPathPlannerEnvironment);
+   }
+
    private void testDataSet(DataSetName dataSetName)
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
-      VisibilityGraphsParametersReadOnly parameters = new DefaultVisibilityGraphParameters();
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+      parameters.setPerformPostProcessingNodeShifting(true);
 
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
@@ -719,13 +728,20 @@ public class NavigableRegionsManagerTest
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
+      NavigableRegionsManager navigableRegionsManagerNoProcessor = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
+      navigableRegionsManagerNoProcessor.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
+      List<Point3DReadOnly> pathNotProcessed = navigableRegionsManagerNoProcessor.calculateBodyPath(start, goal);
       List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           startOrientation, goalOrientation);
+      List<? extends Pose3DReadOnly> posePathNotProcessed = orientationCalculator.computePosesFromPath(pathNotProcessed, navigableRegionsManagerNoProcessor.getVisibilityMapSolution(),
                                                                                            startOrientation, goalOrientation);
 
       if (visualize)
       {
          visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
+//         visualize(posePathNotProcessed, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
@@ -742,6 +758,44 @@ public class NavigableRegionsManagerTest
       // test straight shot, initially going to one of the nodes
       Point3D start = new Point3D(0.0, 0.0, 0.0);
       Point3D goal = new Point3D(6.0, 30.0, 0.0);
+
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
+      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
+      navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+
+      List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPathWithOcclusions(start, goal);
+      List<? extends Pose3DReadOnly> posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(),
+                                                                                           new Quaternion(), new Quaternion());
+
+      /*
+      if (visualize)
+      {
+         visualize(path, planarRegionsList, start, goal);
+      }
+      */
+
+      if (visualize)
+      {
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
+      }
+
+      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+   }
+
+   @Test
+   public void testGoingAroundAU()
+   {
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
+      parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setIntroduceMidpointsInPostProcessing(false);
+      parameters.setComputeOrientationsToAvoidObstacles(false);
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(createUCornerEnvironment());
+
+      // test straight shot, initially going to one of the nodes
+      Point3D start = new Point3D(-3.0, 0.0, 0.0);
+      Point3D goal = new Point3D(-3.0, 10.0, 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(parameters);
@@ -787,10 +841,10 @@ public class NavigableRegionsManagerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Did not start at the desired location.", start, path.get(0).getPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Did not end at the desired location.", goal, path.get(numberOfPoints - 1).getPosition(), epsilon);
 
-//      for (Pose3DReadOnly point : path)
-//      {
-//         assertFalse(point.containsNaN());
-//      }
+      for (Pose3DReadOnly point : path)
+      {
+         assertFalse(point.containsNaN());
+      }
 
       WaypointDefinedBodyPathPlanHolder calculatedPath = new WaypointDefinedBodyPathPlanHolder();
       calculatedPath.setPoseWaypoints(path);
@@ -1402,6 +1456,45 @@ public class NavigableRegionsManagerTest
       return planarRegions;
    }
 
+   private static List<PlanarRegion> createUCornerEnvironment()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      double width = 1.5;
+      // set up ground plane, 10 x 5
+      Point2D groundPlanePointA = new Point2D(5.0, -width / 2.0);
+      Point2D groundPlanePointB = new Point2D(5.0, width / 2.0);
+      Point2D groundPlanePointC = new Point2D(-5.0, width / 2.0);
+      Point2D groundPlanePointD = new Point2D(-5.0, -width / 2.0);
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      groundTransform.setTranslation(0.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion1 = new PlanarRegion(groundTransform, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      RigidBodyTransform groundTransform2 = new RigidBodyTransform();
+      groundTransform2.setTranslation(0.0, 10.0, 0.0);
+      PlanarRegion groundPlaneRegion2 = new PlanarRegion(groundTransform2, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePointA, groundPlanePointB, groundPlanePointC, groundPlanePointD)));
+
+      Point2D otherGroundPlanePointA = new Point2D(width / 2.0, 5.0 + width / 2.0);
+      Point2D otherGroundPlanePointB = new Point2D(-width / 2.0, 5.0 + width / 2.0);
+      Point2D otherGroundPlanePointC = new Point2D(-width / 2.0, -(5.0 + width / 2.0));
+      Point2D otherGroundPlanePointD = new Point2D(width / 2.0, -(5.0 + width / 2.0));
+
+      RigidBodyTransform groundTransformB = new RigidBodyTransform();
+      groundTransformB.setTranslation(5.0 + width / 2.0 + 0.05, 5.0, 0.0);
+      PlanarRegion groundPlaneRegion3 = new PlanarRegion(groundTransformB, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(otherGroundPlanePointA, otherGroundPlanePointB, otherGroundPlanePointC, otherGroundPlanePointD)));
+
+
+      planarRegions.add(groundPlaneRegion1);
+      planarRegions.add(groundPlaneRegion2);
+      planarRegions.add(groundPlaneRegion3);
+
+      return planarRegions;
+   }
+
 
    private static void visualize(List<? extends Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList,
                                  Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions, VisibilityMapSolution mapSolution)
@@ -1423,7 +1516,7 @@ public class NavigableRegionsManagerTest
       }
    }
 
-   private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
+   private VisibilityGraphsParametersBasics createVisibilityGraphParametersForTest()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters()
       {
@@ -1461,6 +1554,7 @@ public class NavigableRegionsManagerTest
 //      parameters.setClusterResolution(0.501);
       parameters.setIntroduceMidpointsInPostProcessing(true);
       parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setIntroduceMidpointsInPostProcessing(true);
       parameters.setComputeOrientationsToAvoidObstacles(true);
 
       return parameters;
