@@ -35,6 +35,7 @@ public abstract class CostToGoHeuristics
    {
       double height = 0.0;
 
+      // FIXME this probably isn't correct for non-flat terrain
       FootstepNodeSnapData snapData = snapper.getSnapData(node);
       if (snapData != null)
          height = snapData.getSnapTransform().getTranslationZ();

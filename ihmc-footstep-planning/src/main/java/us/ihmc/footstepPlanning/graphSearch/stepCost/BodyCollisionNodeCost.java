@@ -37,6 +37,7 @@ public class BodyCollisionNodeCost implements FootstepCost
       if(snapTransform == null)
          return 0.0;
 
+      // FIXME this probably doesn't work correctly for non-flat terrain.
       double height = snapTransform.getTranslationZ();
       BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, height);
 

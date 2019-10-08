@@ -76,6 +76,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
    }
 
+   // FIXME this probably doesn't work well for non-flat terrain.
    private FootstepNodeSnapData doShiftFromNearCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
    {
       BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());
@@ -101,6 +102,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       return new FootstepNodeSnapData(snapTransform);
    }
 
+   // FIXME this probably isn't correct for non-flat terrain
    private boolean shiftFootToAvoidBodyCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
    {
       if(collisionDetector == null || !parameters.checkForBodyBoxCollisions())
