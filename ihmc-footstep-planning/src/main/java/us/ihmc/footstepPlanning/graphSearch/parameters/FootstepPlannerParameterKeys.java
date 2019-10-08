@@ -11,7 +11,7 @@ public class FootstepPlannerParameterKeys
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey checkForBodyBoxCollisions                  = keys.addBooleanKey("Check for body box collisions", false);
-   public static final BooleanStoredPropertyKey checkForPathCollisions                     = keys.addBooleanKey("Check for path collisions", false);
+   public static final BooleanStoredPropertyKey checkForPathCollisions                     = keys.addBooleanKey("Check for path collisions", true);
    public static final BooleanStoredPropertyKey performHeuristicSearchPolicies             = keys.addBooleanKey("Perform heuristic search policies", true);
    public static final DoubleStoredPropertyKey idealFootstepWidth                         = keys.addDoubleKey ("Ideal footstep width", 0.22);
    public static final DoubleStoredPropertyKey idealFootstepLength                        = keys.addDoubleKey ("Ideal footstep length", 0.3);
