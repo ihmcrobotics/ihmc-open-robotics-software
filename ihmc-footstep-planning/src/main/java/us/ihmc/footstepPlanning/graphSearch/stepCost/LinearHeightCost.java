@@ -33,7 +33,8 @@ public class LinearHeightCost implements FootstepCost
       FootstepNodeTools.getSnappedNodeTransform(startNode, startNodeData.getSnapTransform(), startNodeTransform);
       FootstepNodeTools.getSnappedNodeTransform(endNode, endNodeData.getSnapTransform(), endNodeTransform);
 
-      double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
+      // FIXME this is likely wrong.
+      double heightChange = endNodeTransform.getTranslationZ() - startNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
          return costParameters.getStepUpWeight() * heightChange;
