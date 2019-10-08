@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -18,6 +19,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class GravityCoriolisExternalWrenchMatrixCalculator
 {
@@ -223,5 +225,11 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    public void getJointCoriolisMatrix(JointBasics joint, DenseMatrix64F jointCoriolisMatrixToPack)
    {
       jointCoriolisMatrixToPack.set(coriolisWrenches.get(joint));
+   }
+
+   public void getJointCoriolisMatrix(JointBasics joint, DenseMatrix64F jointCoriolisMatrixToPack, int startRow)
+   {
+      DenseMatrix64F coriolisWrench = coriolisWrenches.get(joint);
+      CommonOps.extract(coriolisWrench, 0, coriolisWrench.getNumRows(), 0, 1, jointCoriolisMatrixToPack, startRow, 0);
    }
 }
