@@ -39,6 +39,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
 
    private final SpatialAcceleration tempAcceleration = new SpatialAcceleration();
    private final Twist tempTwist = new Twist();
+   private final Wrench tempWrench = new Wrench();
 
    private final boolean doVelocityTerms;
 
@@ -155,11 +156,14 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          }
 
          jointWrench.changeFrame(joint.getFrameAfterJoint());
+
+         tempWrench.setIncludingFrame(joint.getJointWrench());
          joint.setJointWrench(jointWrench);
 
          DenseMatrix64F coriolisWrench = coriolisWrenches.get(joint);
          coriolisWrench.zero();
          joint.getJointTau(0, coriolisWrench);
+         joint.setJointWrench(tempWrench);
       }
    }
 
