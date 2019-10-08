@@ -2,7 +2,9 @@ package us.ihmc.robotEnvironmentAwareness.hardware;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +17,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.ros2.Ros2Node;
 
 public class SimulatedStereoVisionPointCloudPublisher extends Application
@@ -27,7 +30,10 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
                                                                                                                     ROS2Tools.getDefaultTopicNameGenerator());
 
    private final List<StereoVisionPointCloudMessage> listOfMessages = new ArrayList<>();
+
    private int indexToPublish = 0;
+   private final List<Long> timestampsInTimeOrder = new ArrayList<>();
+   private final Map<Long, StereoVisionPointCloudMessage> mapTimestampToStereoMessage = new HashMap<Long, StereoVisionPointCloudMessage>();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
 
@@ -42,14 +48,59 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
       File selectedDataFolder = directoryChooser.showDialog(primaryStage);
       File[] listOfFiles = selectedDataFolder.listFiles();
 
+      List<File> sensorPoseFiles = new ArrayList<>();
+      List<File> pointCloudFiles = new ArrayList<>();
+      List<Long> timestamps = new ArrayList<Long>();
+
       for (File file : listOfFiles)
       {
          if (file.isFile())
          {
             String fileName = file.getName(); //TODO: sorting out the time stamp which is before the '.txt'.
-            listOfMessages.add(StereoVisionPointCloudDataLoader.getMessageFromFile(file));
+
+            if (fileName.contains(StereoVisionPointCloudDataExporter.SENSOR_POSE_FILE_NAME_HEADER))
+               sensorPoseFiles.add(file);
+
+            if (fileName.contains(StereoVisionPointCloudDataExporter.POINT_CLOUD_FILE_NAME_HEADER))
+               pointCloudFiles.add(file);
          }
       }
+
+      for (int i = 0; i < sensorPoseFiles.size(); i++)
+      {
+         File sensorPoseFile = sensorPoseFiles.get(i);
+         long sensorPoseTimestamp = extractTimestamp(sensorPoseFile.getName());
+
+         for (int j = 0; j < pointCloudFiles.size(); j++)
+         {
+            File pointCloudFile = pointCloudFiles.get(j);
+            long pointCloudTimestamp = extractTimestamp(pointCloudFile.getName());
+            if (sensorPoseTimestamp == pointCloudTimestamp)
+            {
+               timestamps.add(sensorPoseTimestamp);
+               mapTimestampToStereoMessage.put(sensorPoseTimestamp, StereoVisionPointCloudDataLoader.getMessageFromFile(sensorPoseFile, pointCloudFile));
+            }
+         }
+      }
+
+      int numberOfMessages = timestamps.size();
+      for (int i = 0; i < numberOfMessages; i++)
+      {
+         long minTimestamp = Long.MAX_VALUE;
+         for (int j = 0; j < timestamps.size(); j++)
+         {
+            if (timestamps.get(j) < minTimestamp)
+            {
+               minTimestamp = timestamps.get(j);
+            }
+         }
+
+         if (timestamps.remove(minTimestamp))
+         {
+            timestampsInTimeOrder.add(minTimestamp);
+         }
+      }
+
       System.out.println("Importing Data Is Done " + listOfMessages.size() + " messages.");
       System.out.println("Publishing Is Started.");
 
@@ -60,7 +111,7 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
 
    private void publish()
    {
-      if (indexToPublish == listOfMessages.size())
+      if (timestampsInTimeOrder.size() == indexToPublish)
       {
          try
          {
@@ -75,9 +126,9 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
       }
       else
       {
-         System.out.println("publish "+indexToPublish);
+         System.out.println("publish " + indexToPublish);
       }
-      StereoVisionPointCloudMessage stereoVisionPointCloudMessage = listOfMessages.get(indexToPublish);
+      StereoVisionPointCloudMessage stereoVisionPointCloudMessage = mapTimestampToStereoMessage.get(timestampsInTimeOrder.get(indexToPublish));
       stereoVisionPublisher.publish(stereoVisionPointCloudMessage);
       indexToPublish++;
    }
@@ -85,5 +136,20 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
    public static void main(String[] args)
    {
       launch();
+   }
+
+   private static long extractTimestamp(String fileName)
+   {
+      String[] stringsWithoutSpliter = fileName.split(StereoVisionPointCloudDataExporter.STEREO_DATA_SPLITER);
+      for (String string : stringsWithoutSpliter)
+      {
+         if (string.contains(StereoVisionPointCloudDataExporter.STEREO_DATA_EXTENSION))
+         {
+            String[] timestampWithDot = string.split(StereoVisionPointCloudDataExporter.STEREO_DATA_EXTENSION);
+            long timestamp = Long.parseLong(timestampWithDot[0]);
+            return timestamp;
+         }
+      }
+      return -1;
    }
 }
