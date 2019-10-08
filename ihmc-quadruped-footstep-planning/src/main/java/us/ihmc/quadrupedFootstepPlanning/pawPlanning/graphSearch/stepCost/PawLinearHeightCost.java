@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
@@ -22,9 +23,6 @@ public class PawLinearHeightCost implements PawNodeCost
    @Override
    public double compute(PawNode startNode, PawNode endNode)
    {
-      RigidBodyTransform startNodeTransform = new RigidBodyTransform();
-      RigidBodyTransform endNodeTransform = new RigidBodyTransform();
-
       RobotQuadrant movingQuadrant = endNode.getMovingQuadrant();
 
       int endNodeXIndex = endNode.getXIndex(movingQuadrant);
@@ -38,11 +36,13 @@ public class PawLinearHeightCost implements PawNodeCost
       if (startNodeData == null || endNodeData == null)
          return 0.0;
 
-      PawNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
-      PawNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
+      Point3D snappedStartNode = new Point3D(startNode.getX(movingQuadrant), startNode.getY(movingQuadrant), 0.0);
+      Point3D snappedEndNode = new Point3D(endNode.getX(movingQuadrant), endNode.getY(movingQuadrant), 0.0);
 
-      // FIXME this is likely wrong due to rotation issues
-      double heightChange = endNodeTransform.getTranslationZ() - startNodeTransform.getTranslationZ();
+      startNodeData.getSnapTransform().transform(snappedStartNode);
+      endNodeData.getSnapTransform().transform(snappedEndNode);
+
+      double heightChange = snappedEndNode.getZ() - snappedStartNode.getZ();
 
       if (heightChange > 0.0)
          return parameters.getStepUpWeight() * heightChange;
