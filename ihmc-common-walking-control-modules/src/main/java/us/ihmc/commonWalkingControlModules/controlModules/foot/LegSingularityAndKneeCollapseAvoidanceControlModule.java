@@ -763,6 +763,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && 
                (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()))
          {
+            // Call this twice here to smooth faster. Need to get out of singularity avoidance!
             heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
             heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
 
@@ -1021,6 +1022,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          return;
       }
 
+      //TODO: Delete this once leg singularity stuff is working better and sure you won't want to get this back.
       //+++JEP: Dead code here tries to use the unachieved velocity
       // and acceleration from the trajectory. But that doesn't make much
       // sense as at this point the velocity is not being achieved anyway.
