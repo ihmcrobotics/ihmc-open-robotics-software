@@ -22,7 +22,6 @@ public class PawLinearHeightCost implements PawNodeCost
    @Override
    public double compute(PawNode startNode, PawNode endNode)
    {
-
       RigidBodyTransform startNodeTransform = new RigidBodyTransform();
       RigidBodyTransform endNodeTransform = new RigidBodyTransform();
 
@@ -42,7 +41,8 @@ public class PawLinearHeightCost implements PawNodeCost
       PawNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
       PawNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
 
-      double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
+      // FIXME this is likely wrong due to rotation issues
+      double heightChange = endNodeTransform.getTranslationZ() - startNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
          return parameters.getStepUpWeight() * heightChange;

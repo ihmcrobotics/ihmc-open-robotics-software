@@ -91,7 +91,8 @@ public class BodyPathPawPlanningHeuristics extends PawPlanningCostToGoHeuristics
 
          if (!nodeTransform.containsNaN())
          {
-            double heightChange = goalPose.getZ() - nodeTransform.getTranslationVector().getZ();
+            // FIXME this is likely wrong because of rotations
+            double heightChange = goalPose.getZ() - nodeTransform.getTranslationZ();
 
             if (heightChange > 0.0)
                heightCost += parameters.getStepUpWeight() * heightChange;

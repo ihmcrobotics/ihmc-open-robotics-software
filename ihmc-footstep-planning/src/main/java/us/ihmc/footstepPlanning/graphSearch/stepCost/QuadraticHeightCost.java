@@ -35,7 +35,8 @@ public class QuadraticHeightCost implements FootstepCost
       FootstepNodeTools.getSnappedNodeTransform(startNode, startNodeData.getSnapTransform(), startNodeTransform);
       FootstepNodeTools.getSnappedNodeTransform(endNode, endNodeData.getSnapTransform(), endNodeTransform);
 
-      double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
+      // FIXME this is likely wrong because of orientations
+      double heightChange = endNodeTransform.getTranslationZ() - startNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
          return parameters.getStepUpWeight() * Math.pow(stepHeightScalar * heightChange, 2.0);
