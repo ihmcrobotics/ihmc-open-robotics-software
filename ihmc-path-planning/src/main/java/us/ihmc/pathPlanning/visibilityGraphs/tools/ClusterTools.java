@@ -338,7 +338,8 @@ public class ClusterTools
       return new Point3D(closestPoint);
    }
 
-   public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator calculator)
+   public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator preferredCalculator,
+                                                 NavigableExtrusionDistanceCalculator calculator)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformToWorld);
@@ -347,8 +348,11 @@ public class ClusterTools
       homeRegionCluster.setTransformToWorld(transformToWorld);
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
 
+      double preferredExtrusionDistance = preferredCalculator.computeNavigableExtrusionDistance(homeRegion);
       double extrusionDistance = calculator.computeNavigableExtrusionDistance(homeRegion);
 
+      ObstacleExtrusionDistanceCalculator preferredNonNavigableCalculator = (p, h) -> preferredExtrusionDistance - NAV_TO_NON_NAV_DISTANCE;
+      ObstacleExtrusionDistanceCalculator preferredNavigableCalculator = (p, h) -> preferredExtrusionDistance;
       ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
       ObstacleExtrusionDistanceCalculator navigableCalculator = (p, h) -> extrusionDistance;
 
@@ -360,12 +364,15 @@ public class ClusterTools
       // NonNavigable regions are not treated as boundaries when making 
       // inter region connections...
 
+      homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
+      homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator));
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
       return homeRegionCluster;
    }
 
    public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
+                                                      ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
                                                       ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       List<Cluster> obstacleClusters = new ArrayList<>();
@@ -378,15 +385,16 @@ public class ClusterTools
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
-         Cluster obstacleCluster = createObstacleCluster(homeRegion, extrusionDistanceCalculator, transformFromHomeToWorld, homeRegionSurfaceNormal,
-                                                         zThresholdBeforeOrthogonal, obstacleRegion);
+         Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
+                                                         transformFromHomeToWorld, homeRegionSurfaceNormal, zThresholdBeforeOrthogonal, obstacleRegion);
          obstacleClusters.add(obstacleCluster);
       }
 
       return obstacleClusters;
    }
 
-   private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
+   private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
+                                                ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
                                                 RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion)
    {
@@ -426,6 +434,12 @@ public class ClusterTools
       List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
+      Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
+                                                                                                   verticalObstacle);
+
+      List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
+      List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+
       // Project the points back up to the home region...
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
@@ -433,10 +447,16 @@ public class ClusterTools
                                                                                                               transformFromWorldToHome);
       List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, nonNavigableExtrusionsInFlatWorld,
                                                                                                                  transformFromWorldToHome);
+      List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
+                                                                                                                     transformFromWorldToHome);
+      List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
+                                                                                                                 transformFromWorldToHome);
 
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       cluster.setTransformToWorld(transformFromHomeRegionToWorld);
       cluster.addRawPointsInWorld(obstacleConcaveHullInWorld);
+      cluster.setPreferredNavigableExtrusionsInLocal(preferredNavigableExtrusionsInHomeRegionLocal);
+      cluster.setPreferredNonNavigableExtrusionsInLocal(preferredNonNavigableExtrusionsInHomeRegionLocal);
       cluster.setNavigableExtrusionsInLocal(navigableExtrusionsInHomeRegionLocal);
       cluster.setNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInHomeRegionLocal);
 

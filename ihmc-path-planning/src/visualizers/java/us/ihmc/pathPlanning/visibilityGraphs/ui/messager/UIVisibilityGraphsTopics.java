@@ -29,6 +29,8 @@ public class UIVisibilityGraphsTopics
    private static final CategoryTheme RawPoints = apiFactory.createCategoryTheme("RawPoints");
    private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
    private static final CategoryTheme NavigableRegion = apiFactory.createCategoryTheme("NavigableRegion");
+   private static final CategoryTheme PreferredNavigableExtrusions = apiFactory.createCategoryTheme("PreferredNavigableExtrusions");
+   private static final CategoryTheme PreferredNonNavigableExtrusions = apiFactory.createCategoryTheme("PreferredNonNavigableExtrusions");
    private static final CategoryTheme NavigableExtrusions = apiFactory.createCategoryTheme("NavigableExtrusions");
    private static final CategoryTheme NonNavigableExtrusions = apiFactory.createCategoryTheme("NonNavigableExtrusions");
    private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
@@ -100,6 +102,8 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> ShowBodyPath = Root.child(VisibilityGraphs).child(BodyPath).topic(Show);
    public static final Topic<Boolean> ShowPlanarRegions = Root.child(PlanarRegion).topic(Show);
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(RawPoints).topic(Show);
+   public static final Topic<Boolean> ShowClusterPreferredNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(PreferredNavigableExtrusions).topic(Show);
+   public static final Topic<Boolean> ShowClusterPreferredNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(PreferredNonNavigableExtrusions).topic(Show);
    public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NavigableExtrusions).topic(Show);
    public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigableExtrusions).topic(Show);
    public static final Topic<Boolean> exportUnitTestDataFile = Root.child(UnitTest).topic(Export);

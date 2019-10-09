@@ -200,6 +200,18 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       };
    }
 
+   default NavigableExtrusionDistanceCalculator getPreferredNavigableExtrusionDistanceCalculator()
+   {
+      return new NavigableExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+         {
+            return getObstacleExtrusionDistance();
+         }
+      };
+   }
+
    /**
     * This calculator is used when extruding the projection of an obstacle onto a navigable region.
     *
@@ -219,6 +231,29 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          else
          {
             return getObstacleExtrusionDistance();
+         }
+      };
+   }
+
+   /**
+    * This calculator is used when extruding the projection of an obstacle onto a navigable region.
+    *
+    * @return the calculator use for obstacle extrusion.
+    */
+   default ObstacleExtrusionDistanceCalculator getPreferredObstacleExtrusionDistanceCalculator()
+   {
+      return (pointToExtrude, obstacleHeight) -> {
+         if (obstacleHeight < 0.0)
+         {
+            return 0.0;
+         }
+         else if (obstacleHeight < getTooHighToStepDistance())
+         {
+            return getObstacleExtrusionDistanceIfNotTooHighToStep();
+         }
+         else
+         {
+            return getPreferredObstacleExtrusionDistance();
          }
       };
    }
