@@ -1,7 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -161,7 +163,7 @@ public class ObstacleAndCliffAvoidanceProcessor
 
       // FIXME should be both regions
       List<LineSegment2DReadOnly> cliffEdges = new ArrayList<>();
-      boolean isShiftedPointNearACliff = isNearCliff(nextPointInWorld2D, nodeShiftToAvoidObstacles, maxInterRegionConnectionLength, cliffHeightToAvoid, endRegion,
+      boolean isShiftedPointNearACliff = isNearCliff(shiftedPoint, maxInterRegionConnectionLength, cliffHeightToAvoid, endRegion,
                                                      allNavigableRegions.getNaviableRegionsList(), cliffEdges);
 //      isShiftedPointNearACliff = false;
 
@@ -169,32 +171,20 @@ public class ObstacleAndCliffAvoidanceProcessor
 
       if (isShiftedPointNearACliff)
       {
-         List<Cluster> homeRegionClusters = new ArrayList<>();
-         homeRegionClusters.add(startRegion.getHomeRegionCluster());
-         if (!startRegion.equals(endRegion))
-            homeRegionClusters.add(endRegion.getHomeRegionCluster());
 
          List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>();
+
          for (LineSegment2DReadOnly cliffEdge : cliffEdges)
          {
             Point2D pointOnEdge = new Point2D();
             cliffEdge.orthogonalProjection(nextPointInWorld2D, pointOnEdge);
             closestCliffObstacleClusterPoints.add(pointOnEdge);
-
-            if (pointOnEdge.distanceSquared(nextPointInWorld2D) < 1e-2)
-            {
-               Vector2D normal = new Vector2D();
-               normal.sub(cliffEdge.getSecondEndpoint(), cliffEdge.getFirstEndpoint());
-               EuclidGeometryTools.perpendicularVector2D(normal, normal);
-
-               normal.scale(1e-4, normal.length());
-               pointOnEdge.set(nextPointInWorld2D);
-               pointOnEdge.add(normal);
-            }
          }
 
+
          closestCliffObstacleClusterPoints.addAll(getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
-//         List<Point2DReadOnly> closestCliffObstacleClusterPoints = getClosestPointOnEachCluster(nextPointInWorld2D, homeRegionClusters);
+
+         //         List<Point2DReadOnly> closestCliffObstacleClusterPoints = getClosestPointOnEachCluster(nextPointInWorld2D, homeRegionClusters);
          Vector2DReadOnly newShift = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
                                                                                       desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, minimumDistanceFromObstacleCluster, minimumDistanceFromCliff);
          nodeShift.set(newShift);
@@ -217,17 +207,17 @@ public class ObstacleAndCliffAvoidanceProcessor
       return distanceToClosestObstacle + parameters.getObstacleExtrusionDistance();
    }
 
+
+
+
+
    private static List<Point2DReadOnly> getPointsAlongEdgeOfClusterClosestToPoint(Point2DReadOnly pointToCheck, Cluster cluster)
    {
-      List<Point2DReadOnly> rawPoints = cluster.getRawPointsInWorld2D();
-      List<Point2DReadOnly> closestPointsToReturn = new ArrayList<>();
-      for (int i = 0; i < rawPoints.size(); i++)
-      {
-         int previousIndex = i - 1;
-         if (previousIndex < 0)
-            previousIndex = rawPoints.size() - 1;
+      List<LineSegment2DReadOnly> segments = getClusterEdges(cluster);
 
-         LineSegment2D lineSegment = new LineSegment2D(rawPoints.get(previousIndex), rawPoints.get(i));
+      List<Point2DReadOnly> closestPointsToReturn = new ArrayList<>();
+      for (LineSegment2DReadOnly lineSegment : segments)
+      {
          Point2D closestPoint = new Point2D();
          lineSegment.orthogonalProjection(pointToCheck, closestPoint);
 
@@ -235,6 +225,132 @@ public class ObstacleAndCliffAvoidanceProcessor
       }
 
       return closestPointsToReturn;
+   }
+
+   private static List<LineSegment2DReadOnly> getClusterEdges(Cluster cluster)
+   {
+      List<Point2DReadOnly> rawPoints = cluster.getRawPointsInWorld2D();
+      List<LineSegment2DReadOnly> edges = new ArrayList<>();
+      for (int i = 0; i < rawPoints.size(); i++)
+      {
+         int previousIndex = i - 1;
+         if (previousIndex < 0)
+            previousIndex = rawPoints.size() - 1;
+
+         edges.add(new LineSegment2D(rawPoints.get(previousIndex), rawPoints.get(i)));
+      }
+
+      return edges;
+   }
+
+   private static List<LineSegment3DReadOnly> getClusterEdges3D(Cluster cluster)
+   {
+      List<Point3DReadOnly> rawPoints = cluster.getRawPointsInWorld();
+      List<LineSegment3DReadOnly> edges = new ArrayList<>();
+      for (int i = 0; i < rawPoints.size(); i++)
+      {
+         int previousIndex = i - 1;
+         if (previousIndex < 0)
+            previousIndex = rawPoints.size() - 1;
+
+         edges.add(new LineSegment3D(rawPoints.get(previousIndex), rawPoints.get(i)));
+      }
+
+      return edges;
+   }
+
+   private static List<LineSegment2DReadOnly> filterSegmentsNotNearCliff(List<LineSegment3DReadOnly> segments, NavigableRegion homeRegion,
+                                                                         List<NavigableRegion> otherRegions, double maxConnectionDistance, double maxHeightDelta)
+   {
+
+      List<NavigableRegion> closeEnoughRegions = new ArrayList<>();
+
+      for (NavigableRegion otherRegion : otherRegions)
+      {
+         if (otherRegion == homeRegion)
+            continue;
+
+         List<LineSegment3DReadOnly> otherEdges = getClusterEdges3D(otherRegion.getHomeRegionCluster());
+
+         for (LineSegment3DReadOnly segment : segments)
+         {
+            boolean addedRegion = false;
+            for (LineSegment3DReadOnly otherEdge : otherEdges)
+            {
+               if (segment.distance(otherEdge) < maxConnectionDistance && heightDifferenceBetweenTwoSegments(segment, otherEdge) < maxHeightDelta)
+               {
+                  closeEnoughRegions.add(otherRegion);
+                  addedRegion = true;
+                  break;
+               }
+            }
+
+            if (addedRegion)
+               break;
+         }
+      }
+
+      List<LineSegment2DReadOnly> filteredSegments = new ArrayList<>();
+      for (LineSegment3DReadOnly segment : segments)
+      {
+         Vector2DReadOnly segmentNormal = computeEdgeNormal(segment);
+
+         boolean isACliff = false;
+         for (NavigableRegion closeEnoughRegion : closeEnoughRegions)
+         {
+            List<LineSegment2DReadOnly> closeEnoughEdges = getClusterEdges(closeEnoughRegion.getHomeRegionCluster());
+            HashMap<LineSegment2DReadOnly, Vector2DReadOnly> closeEnoughNormals = computeEdgeNormals(closeEnoughEdges);
+
+            if (isEdgeNearACliff(segmentNormal, closeEnoughEdges, closeEnoughNormals))
+            {
+               isACliff = true;
+               break;
+            }
+         }
+
+         if (isACliff)
+         {
+            filteredSegments.add(new LineSegment2D(segment.getFirstEndpointX(), segment.getFirstEndpointY(), segment.getSecondEndpointX(), segment.getSecondEndpointY()));
+         }
+      }
+
+      return filteredSegments;
+   }
+
+   private static double heightDifferenceBetweenTwoSegments(LineSegment3DReadOnly segmentA, LineSegment3DReadOnly segmentB)
+   {
+      double minHeightChange = Double.POSITIVE_INFINITY;
+
+      Point3D pointToProject = new Point3D(segmentA.getFirstEndpoint());
+      Point3D projectedPoint = new Point3D();
+
+      segmentB.orthogonalProjection(pointToProject, projectedPoint);
+      double heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
+      if (heightChange < minHeightChange)
+         minHeightChange = heightChange;
+
+      pointToProject.set(segmentA.getSecondEndpoint());
+
+      segmentB.orthogonalProjection(pointToProject, projectedPoint);
+      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
+      if (heightChange < minHeightChange)
+         minHeightChange = heightChange;
+
+      pointToProject.set(segmentB.getFirstEndpoint());
+
+      segmentA.orthogonalProjection(pointToProject, projectedPoint);
+      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
+      if (heightChange < minHeightChange)
+         minHeightChange = heightChange;
+
+      pointToProject.set(segmentB.getSecondEndpoint());
+
+      segmentA.orthogonalProjection(pointToProject, projectedPoint);
+      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
+      if (heightChange < minHeightChange)
+         minHeightChange = heightChange;
+
+      return minHeightChange;
    }
 
 
@@ -419,96 +535,87 @@ public class ObstacleAndCliffAvoidanceProcessor
 
    // FIXME this is not working, clearly.
    /** This is the point shifted as if it didn't have to worry about cliff avoidance. */
-   private boolean isNearCliff(Point2DReadOnly point, Vector2DReadOnly pointShiftDirection, double maxConnectionDistance, double maxHeightDelta,
+   private boolean isNearCliff(Point2DReadOnly shiftedPoint, double maxConnectionDistance, double maxHeightDelta,
                                NavigableRegion homeRegion, List<NavigableRegion> navigableRegions, List<LineSegment2DReadOnly> cliffEdgesToPack)
    {
-      Point2D shiftedPoint = new Point2D(point);
-      shiftedPoint.add(pointShiftDirection);
+      return isNearCliff(shiftedPoint, maxConnectionDistance, maxHeightDelta, parameters.getPreferredObstacleExtrusionDistance(), homeRegion, navigableRegions, cliffEdgesToPack);
+   }
 
+   static boolean isNearCliff(Point2DReadOnly shiftedPoint, double maxConnectionDistance, double maxHeightDelta, double desiredDistanceFromCliff,
+                                      NavigableRegion homeRegion, List<NavigableRegion> navigableRegions, List<LineSegment2DReadOnly> cliffEdgesToPack)
+   {
       // if point is sufficiently inside, it is not near a cliff
       Point2D closestPointToThrowAway = new Point2D();
+      Cluster homeCluster = homeRegion.getHomeRegionCluster();
       double distanceToContainingCluster = VisibilityTools
-            .distanceToCluster(shiftedPoint, homeRegion.getHomeRegionCluster().getNavigableExtrusionsInWorld2D(), closestPointToThrowAway, null);
+            .distanceToCluster(shiftedPoint, homeCluster.getNavigableExtrusionsInWorld2D(), closestPointToThrowAway, null);
 
       if (distanceToContainingCluster < -desiredDistanceFromCliff)
          return false;
 
+      List<Point2DReadOnly> homeVertices = homeCluster.getRawPointsInWorld2D();
 
-      List<LineSegment2DReadOnly> homeRegionEdgesContainingPoint = getEdgesContainingPoint(closestPointToThrowAway, homeRegion.getHomeRegionCluster().getNavigableExtrusionsInWorld2D());
-      HashMap<LineSegment2DReadOnly, Vector2DReadOnly> edgeNormals = new HashMap<>();
-
-      for (LineSegment2DReadOnly edge : homeRegionEdgesContainingPoint)
-      {
-         Vector2D normal = new Vector2D();
-         normal.sub(edge.getSecondEndpoint(), edge.getFirstEndpoint());
-         EuclidGeometryTools.perpendicularVector2D(normal, normal);
-         normal.normalize();
-         normal.setX(Math.abs(normal.getX()));
-         normal.setY(Math.abs(normal.getY()));
-         edgeNormals.put(edge, normal);
-      }
+      List<LineSegment2DReadOnly> homeRegionEdgesContainingPoint = getNearbyEdges(shiftedPoint, homeVertices, desiredDistanceFromCliff);
 
       List<NavigableRegion> nearbyRegions = filterNavigableRegionsWithBoundingCircle(shiftedPoint, maxConnectionDistance + desiredDistanceFromCliff, navigableRegions);
       List<NavigableRegion> closeEnoughRegions = filterNavigableRegionsConnectionWithDistanceAndHeightChange(homeRegion, nearbyRegions, maxConnectionDistance,
                                                                                                              maxHeightDelta);
 
+      closeEnoughRegions.remove(homeRegion);
+
+      List<LineSegment2DReadOnly> closeEnoughEdges = new ArrayList<>();
       for (NavigableRegion closeEnoughRegion : closeEnoughRegions)
       {
-         if (closeEnoughRegion.equals(homeRegion))
-            continue;
-
-         VisibilityTools.distanceToCluster(shiftedPoint, closeEnoughRegion.getHomeRegionCluster().getNavigableExtrusionsInWorld2D(), closestPointToThrowAway, null);
-         List<LineSegment2DReadOnly> closeEnoughEdgesContainingClosestPoint = getEdgesContainingPoint(closestPointToThrowAway, closeEnoughRegion.getHomeRegionCluster().getNavigableExtrusionsInWorld2D());
-         HashMap<LineSegment2DReadOnly, Vector2DReadOnly> closeEnoughEdgeNormals = new HashMap<>();
-
-         for (LineSegment2DReadOnly edge : closeEnoughEdgesContainingClosestPoint)
-         {
-            Vector2D normal = new Vector2D();
-            normal.sub(edge.getSecondEndpoint(), edge.getFirstEndpoint());
-            EuclidGeometryTools.perpendicularVector2D(normal, normal);
-            normal.normalize();
-            normal.setX(Math.abs(normal.getX()));
-            normal.setY(Math.abs(normal.getY()));
-            closeEnoughEdgeNormals.put(edge, normal);
-         }
-
-         boolean allNormalsAreGood = true;
-         for (LineSegment2DReadOnly homeEdge : homeRegionEdgesContainingPoint)
-         {
-            Vector2DReadOnly normalToHomeCluster = edgeNormals.get(homeEdge);
-            if (normalToHomeCluster == null)
-               continue;
-
-            boolean closeEnoughIsGood = true;
-            for (LineSegment2DReadOnly closeEnoughEdge : closeEnoughEdgesContainingClosestPoint)
-            {
-               Vector2DReadOnly normalToCloseEnoughCluster = closeEnoughEdgeNormals.get(closeEnoughEdge);
-               double angleBetween = normalToCloseEnoughCluster.angle(normalToHomeCluster);
-               // FIXME this calculation is wrong. The close enough cluster may have more than one edge.
-               if (Math.abs(angleBetween) > Math.toRadians(20.0))
-               {
-                  closeEnoughIsGood = false;
-                  break;
-               }
-            }
-
-            if (closeEnoughIsGood)
-               edgeNormals.remove(homeEdge);
-            else
-            {
-               allNormalsAreGood = false;
-               break;
-            }
-         }
-         if (allNormalsAreGood)
-            return false;
+         List<Point2DReadOnly> closeEnoughVertices = closeEnoughRegion.getHomeRegionCluster().getRawPointsInWorld2D();
+         closeEnoughEdges.addAll(getNearbyEdges(shiftedPoint, closeEnoughVertices, desiredDistanceFromCliff));
       }
 
-      cliffEdgesToPack.addAll(edgeNormals.keySet());
-      return true;
+
+      return isAnyEdgeNearACliff(homeRegionEdgesContainingPoint, closeEnoughEdges, cliffEdgesToPack);
    }
 
-   private static List<LineSegment2DReadOnly> getEdgesContainingPoint(Point2DReadOnly pointToCheck, List<Point2DReadOnly> vertices)
+   private static boolean isAnyEdgeNearACliff(List<LineSegment2DReadOnly> edgesToCheck, List<LineSegment2DReadOnly> closeEnoughEdges, List<LineSegment2DReadOnly> cliffEdgesToPack)
+   {
+      if (closeEnoughEdges.isEmpty())
+      {
+         cliffEdgesToPack.addAll(edgesToCheck);
+         return !cliffEdgesToPack.isEmpty();
+      }
+
+      HashMap<LineSegment2DReadOnly, Vector2DReadOnly> edgeNormals = computeEdgeNormals(edgesToCheck);
+
+      HashMap<LineSegment2DReadOnly, Vector2DReadOnly> closeEnoughEdgeNormals = computeEdgeNormals(closeEnoughEdges);
+
+      for (LineSegment2DReadOnly edge : edgesToCheck)
+      {
+         if (isEdgeNearACliff(edgeNormals.get(edge), closeEnoughEdges, closeEnoughEdgeNormals))
+            cliffEdgesToPack.add(edge);
+      }
+
+      return !cliffEdgesToPack.isEmpty();
+   }
+
+   private static boolean isEdgeNearACliff(Vector2DReadOnly edgeNormal, List<LineSegment2DReadOnly> closeEnoughEdges,
+                                           HashMap<LineSegment2DReadOnly, Vector2DReadOnly> closeEnoughEdgeNormals)
+   {
+      boolean homeEdgeIsACliff = false;
+
+      for (LineSegment2DReadOnly closeEnoughEdge : closeEnoughEdges)
+      {
+         Vector2DReadOnly normalToCloseEnoughCluster = closeEnoughEdgeNormals.get(closeEnoughEdge);
+         double angleBetween = normalToCloseEnoughCluster.angle(edgeNormal);
+         if (Math.abs(angleBetween) > Math.toRadians(20.0))
+         {
+            homeEdgeIsACliff = true;
+            break;
+         }
+      }
+
+      return homeEdgeIsACliff;
+   }
+
+
+   static List<LineSegment2DReadOnly> getNearbyEdges(Point2DReadOnly pointToCheck, List<Point2DReadOnly> vertices, double distance)
    {
       List<LineSegment2DReadOnly> edgesContainingPoints = new ArrayList<>();
 
@@ -523,14 +630,59 @@ public class ObstacleAndCliffAvoidanceProcessor
          LineSegment2D lineSegment = new LineSegment2D();
          lineSegment.set(startVertex, endVertex);
 
-         if (lineSegment.distance(pointToCheck) < 1.0e-5)
+         if (lineSegment.distance(pointToCheck) < distance)
             edgesContainingPoints.add(lineSegment);
       }
 
       return edgesContainingPoints;
    }
 
-   private static List<NavigableRegion> filterNavigableRegionsConnectionWithDistanceAndHeightChange(NavigableRegion homeRegion,
+   private static List<LineSegment2DReadOnly> getEdgesContainingPoint(Point2DReadOnly pointToCheck, List<Point2DReadOnly> vertices)
+   {
+      return getNearbyEdges(pointToCheck, vertices, 1.0e-5);
+   }
+
+   private static HashMap<LineSegment2DReadOnly, Vector2DReadOnly> computeEdgeNormals(List<LineSegment2DReadOnly> edge)
+   {
+      return computeEdgeNormals(edge, true);
+   }
+
+   private static HashMap<LineSegment2DReadOnly, Vector2DReadOnly> computeEdgeNormals(List<LineSegment2DReadOnly> edges, boolean isClockwise)
+   {
+      HashMap<LineSegment2DReadOnly, Vector2DReadOnly> edgeNormals = new HashMap<>();
+
+      for (LineSegment2DReadOnly edge : edges)
+      {
+         edgeNormals.put(edge, computeEdgeNormal(edge));
+      }
+
+      return edgeNormals;
+   }
+
+   private static Vector2DReadOnly computeEdgeNormal(LineSegment2DReadOnly edge)
+   {
+      return computeEdgeNormal(edge.getFirstEndpointX(), edge.getFirstEndpointY(), edge.getSecondEndpointX(), edge.getSecondEndpointY());
+   }
+
+   private static Vector2DReadOnly computeEdgeNormal(LineSegment3DReadOnly edge)
+   {
+      return computeEdgeNormal(edge.getFirstEndpointX(), edge.getFirstEndpointY(), edge.getSecondEndpointX(), edge.getSecondEndpointY());
+   }
+
+   private static Vector2DReadOnly computeEdgeNormal(double firstX, double firstY, double secondX, double secondY)
+   {
+      Vector2D normal = new Vector2D();
+      normal.set(secondX, secondY);
+      normal.sub(firstX, firstY);
+      EuclidGeometryTools.perpendicularVector2D(normal, normal);
+      normal.normalize();
+      normal.setX(Math.abs(normal.getX()));
+      normal.setY(Math.abs(normal.getY()));
+
+      return normal;
+   }
+
+   static List<NavigableRegion> filterNavigableRegionsConnectionWithDistanceAndHeightChange(NavigableRegion homeRegion,
                                                                                                     List<NavigableRegion> navigableRegions,
                                                                                                     double maxConnectionDistance, double maxHeightDelta)
    {
@@ -542,9 +694,15 @@ public class ObstacleAndCliffAvoidanceProcessor
    private static boolean isOtherNavigableRegionWithinDistanceAndHeightDifference(NavigableRegion regionA, NavigableRegion regionB,
                                                                                   double maxConnectionDistance, double maxHeightDelta)
    {
-      for (Point3DReadOnly pointA : regionA.getHomeRegionCluster().getNavigableExtrusionsInWorld())
+      return isOtherNavigableRegionWithinDistanceAndHeightDifference(regionA.getHomeRegionCluster(), regionB.getHomeRegionCluster(), maxConnectionDistance, maxHeightDelta);
+   }
+
+   private static boolean isOtherNavigableRegionWithinDistanceAndHeightDifference(Cluster regionA, Cluster regionB,
+                                                                                  double maxConnectionDistance, double maxHeightDelta)
+   {
+      for (Point3DReadOnly pointA : regionA.getNavigableExtrusionsInWorld())
       {
-         for (Point3DReadOnly pointB : regionB.getHomeRegionCluster().getNavigableExtrusionsInWorld())
+         for (Point3DReadOnly pointB : regionB.getNavigableExtrusionsInWorld())
          {
             if (pointA.distance(pointB) < maxConnectionDistance && Math.abs(pointA.getZ() - pointB.getZ()) < maxHeightDelta)
                return true;
@@ -554,7 +712,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       return false;
    }
 
-   private static List<NavigableRegion> filterNavigableRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius,
+   static List<NavigableRegion> filterNavigableRegionsWithBoundingCircle(Point2DReadOnly circleOrigin, double circleRadius,
                                                                                  List<NavigableRegion> navigableRegions)
    {
       if (!Double.isFinite(circleRadius) || circleRadius < 0.0)
