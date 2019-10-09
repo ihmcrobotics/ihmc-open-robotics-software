@@ -75,7 +75,7 @@ public abstract class ToolboxModule
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
-   private YoVariableServer yoVariableServer;
+   protected YoVariableServer yoVariableServer;
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
