@@ -109,6 +109,9 @@ public class PointWiggler
          numberOfPointsAdded++;
       }
 
+      if (numberOfPointsAdded == 0)
+         return new Vector2D();
+
       // remove unused constraints
       while (CI.getNumRows() > numberOfPointsAdded)
       {
