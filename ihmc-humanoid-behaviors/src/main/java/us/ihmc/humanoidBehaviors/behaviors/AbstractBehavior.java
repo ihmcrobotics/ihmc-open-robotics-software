@@ -21,7 +21,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.MessengerAPI;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,6 +45,8 @@ public abstract class AbstractBehavior implements RobotController
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
+
+   KryoMessager messager;
 
    protected final Ros2Node ros2Node;
    private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
@@ -74,6 +80,8 @@ public abstract class AbstractBehavior implements RobotController
    protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
    protected final MessageTopicNameGenerator kinematicsPlanningToolboxSubGenerator, kinematicsPlanningToolboxPubGenerator;
 
+   private static int behaviorUniqID = 0;
+   
    public AbstractBehavior(String robotName, Ros2Node ros2Node)
    {
       this(robotName, null, ros2Node);
@@ -84,7 +92,7 @@ public abstract class AbstractBehavior implements RobotController
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
+      behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName()+"-"+behaviorUniqID++);
       registry = new YoVariableRegistry(behaviorName);
 
       yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
@@ -112,6 +120,12 @@ public abstract class AbstractBehavior implements RobotController
 
    }
 
+
+   public MessagerAPI getBehaviorAPI()
+   {
+      return null;
+   }
+
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, controllerSubGenerator);
@@ -120,6 +134,11 @@ public abstract class AbstractBehavior implements RobotController
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorPubGenerator);
+   }
+   
+   public <T> IHMCROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
+   {
+      return createPublisher(messageType, behaviorSubGenerator);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
@@ -237,7 +256,6 @@ public abstract class AbstractBehavior implements RobotController
    {
       publishTextToSpeech("Resuming Behavior");
       isPaused.set(false);
-      isPaused.set(false);
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
@@ -250,9 +268,13 @@ public abstract class AbstractBehavior implements RobotController
    public void publishTextToSpeech(String textToSpeak)
    {
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
+      
+      //a simple test to show 2 different ways that messages can be sent to the UI
+      BehaviorDispatcher.messager.submitMessage(MessengerAPI.State, textToSpeak);
+
+      
    }
-   
-   
+
    public void publishUIPositionCheckerPacket(Point3DReadOnly position)
    {
       uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position));
@@ -261,10 +283,9 @@ public abstract class AbstractBehavior implements RobotController
 
    public void publishUIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
    {
-      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position,orientation));
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position, orientation));
 
    }
-
 
    public abstract void onBehaviorResumed();
 
@@ -352,3 +373,4 @@ public abstract class AbstractBehavior implements RobotController
       }
    }
 }
+

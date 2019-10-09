@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -41,7 +42,7 @@ public class AtlasPrimitiveActions
 
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node,
+   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters,
                                 FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames,
                                 YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
@@ -50,7 +51,7 @@ public class AtlasPrimitiveActions
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
-      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters,footstepPlannerParameters, yoTime);
       addPrimitive(walkToLocationPlannedBehavior);
 
       leftArmTrajectoryBehavior = new ArmTrajectoryBehavior(robotName, "left", ros2Node, yoTime);

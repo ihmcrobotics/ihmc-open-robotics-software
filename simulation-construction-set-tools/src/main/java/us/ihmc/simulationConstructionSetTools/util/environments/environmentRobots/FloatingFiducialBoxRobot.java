@@ -14,9 +14,9 @@ public class FloatingFiducialBoxRobot extends Robot
 {
    private final FloatingJoint qrCodeJoint;
 
-   public FloatingFiducialBoxRobot(Fiducial fiducial)
+   public FloatingFiducialBoxRobot(Fiducial fiducial, String id)
    {
-      super("FloatingFiducialBoxRobot");
+      super("FloatingFiducialBoxRobot_"+id);
 
       qrCodeJoint = new FloatingJoint("qrCode", "qrCode", new Vector3D(), this);
       Link qrCodeLink = new Link("qrCode");
