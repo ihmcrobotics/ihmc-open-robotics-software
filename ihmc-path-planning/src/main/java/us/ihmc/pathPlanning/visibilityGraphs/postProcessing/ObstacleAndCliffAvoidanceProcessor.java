@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
@@ -41,7 +43,7 @@ public class ObstacleAndCliffAvoidanceProcessor
    private final double waypointResolution;
    private final IntermediateComparator comparator = new IntermediateComparator();
 
-   private final HashMap<Point3D, ObstacleAndCliffAvoidanceInfo> pointInfos = new HashMap<>();
+   private final List<ObstacleAndCliffAvoidanceInfo> pointInfos = new ArrayList<>();
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
@@ -51,7 +53,7 @@ public class ObstacleAndCliffAvoidanceProcessor
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
       maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
       desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance() - parameters.getNavigableExtrusionDistance();
-      minimumDistanceFromCliff = parameters.getObstacleExtrusionDistance();
+      minimumDistanceFromCliff = parameters.getNavigableExtrusionDistance();
       minimumDistanceFromObstacleCluster = 0.0;
       waypointResolution = 0.1;
    }
@@ -61,8 +63,13 @@ public class ObstacleAndCliffAvoidanceProcessor
       updateParameters();
       pointInfos.clear();
 
-      List<Point3D> newPathPositions = nodePath.parallelStream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
-      newPathPositions.parallelStream().forEach(point -> pointInfos.put(point, new ObstacleAndCliffAvoidanceInfo()));
+      List<Point3D> newPathPositions = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
+      newPathPositions.forEach(point ->
+                                        {
+                                           ObstacleAndCliffAvoidanceInfo info = new ObstacleAndCliffAvoidanceInfo();
+                                           info.setOriginalPosition(point);
+                                           pointInfos.add(info);
+                                        });
 
       int pathNodeIndex = 0;
       int waypointIndex = 0;
@@ -75,6 +82,10 @@ public class ObstacleAndCliffAvoidanceProcessor
          Point3D startPointInWorld = newPathPositions.get(waypointIndex);
          Point3D endPointInWorld = newPathPositions.get(nextWaypointIndex);
 
+         ObstacleAndCliffAvoidanceInfo endPointInfo = null;
+         if (nextWaypointIndex < pointInfos.size() )
+            endPointInfo = pointInfos.get(nextWaypointIndex);
+
          VisibilityGraphNode startVisGraphNode = nodePath.get(pathNodeIndex);
          VisibilityGraphNode endVisGraphNode = nodePath.get(nextPathNodeIndex);
 
@@ -86,7 +97,7 @@ public class ObstacleAndCliffAvoidanceProcessor
 
          if (!isGoalNode)
          {
-            adjustNodePositionToAvoidObstaclesAndCliffs(endPointInWorld, startingRegion, endingRegion, allNavigableRegions);
+            adjustNodePositionToAvoidObstaclesAndCliffs(endPointInfo, endPointInWorld, startingRegion, endingRegion, allNavigableRegions);
          }
 
          if (parameters.getIntroduceMidpointsInPostProcessing())
@@ -97,24 +108,25 @@ public class ObstacleAndCliffAvoidanceProcessor
             removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, waypointResolution);
             removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, waypointResolution);
 
-            // shift all the points around
-            for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
-            {
-               adjustNodePositionToAvoidObstaclesAndCliffs(intermediateWaypointToAdd, startingRegion, endingRegion, allNavigableRegions);
-            }
-
-            // prune duplicated points
-            removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, waypointResolution);
-            removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, waypointResolution);
-
             for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
             {
                waypointIndex++;
                newPathPositions.add(waypointIndex, intermediateWaypointToAdd);
                ObstacleAndCliffAvoidanceInfo pointInfo = new ObstacleAndCliffAvoidanceInfo();
                pointInfo.setWasIntroduced(true);
-               pointInfos.put(intermediateWaypointToAdd, pointInfo);
+               pointInfos.add(waypointIndex, pointInfo);
             }
+
+            // shift all the points around
+            for (Point3D intermediateWaypointToAdd : intermediateWaypointsToAdd)
+            {
+               adjustNodePositionToAvoidObstaclesAndCliffs(null, intermediateWaypointToAdd, startingRegion, endingRegion, allNavigableRegions);
+            }
+
+//             prune duplicated points
+            removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, waypointResolution);
+            removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, waypointResolution);
+
          }
 
          waypointIndex++;
@@ -129,28 +141,25 @@ public class ObstacleAndCliffAvoidanceProcessor
       desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
       maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
       desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance() - parameters.getNavigableExtrusionDistance();
-      minimumDistanceFromCliff = parameters.getObstacleExtrusionDistance();
+      minimumDistanceFromCliff = parameters.getNavigableExtrusionDistance();
    }
 
-   private double adjustNodePositionToAvoidObstaclesAndCliffs(Point3D nodeLocationToPack, NavigableRegion startRegion, NavigableRegion endRegion,
-                                                              NavigableRegions allNavigableRegions)
+   private double adjustNodePositionToAvoidObstaclesAndCliffs(ObstacleAndCliffAvoidanceInfo pointInfo, Point3D nodeLocationToPack, NavigableRegion startRegion,
+                                                              NavigableRegion endRegion, NavigableRegions allNavigableRegions)
    {
-      ObstacleAndCliffAvoidanceInfo pointInfo = pointInfos.get(nodeLocationToPack);
-      pointInfo.setOriginalPosition(nodeLocationToPack);
-
       Point2D nextPointInWorld2D = new Point2D(nodeLocationToPack);
 
       List<Cluster> obstacleClusters = new ArrayList<>();
       for (Cluster potentialCluster : startRegion.getObstacleClusters())
       {
-         if (potentialCluster.getRawPointsInLocal3D().get(0).getZ() > parameters.getTooHighToStepDistance())
+         if (potentialCluster.getRawPointsInLocal3D().stream().anyMatch(point -> point.getZ() > parameters.getTooHighToStepDistance()))
             obstacleClusters.add(potentialCluster);
       }
       if (!startRegion.equals(endRegion))
       {
          for (Cluster potentialCluster : endRegion.getObstacleClusters())
          {
-            if (potentialCluster.getRawPointsInLocal3D().get(0).getZ() > parameters.getTooHighToStepDistance())
+            if (potentialCluster.getRawPointsInLocal3D().stream().anyMatch(point -> point.getZ() > parameters.getTooHighToStepDistance()))
                obstacleClusters.add(potentialCluster);
          }
       }
@@ -159,11 +168,14 @@ public class ObstacleAndCliffAvoidanceProcessor
       Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
                                                                                                     desiredDistanceFromObstacleCluster, minimumDistanceFromObstacleCluster);
 
+      if (pointInfo != null)
+      {
+         pointInfo.setClosestObstacleClusterPoints(closestObstacleClusterPoints);
+         pointInfo.setShiftToAvoidObstacles(nodeShiftToAvoidObstacles);
+      }
+
       if (nodeShiftToAvoidObstacles.containsNaN())
          nodeShiftToAvoidObstacles = new Vector2D();
-
-      pointInfo.setClosestObstacleClusterPoints(closestObstacleClusterPoints);
-      pointInfo.setShiftToAvoidObstacles(nodeShiftToAvoidObstacles);
 
       Point2D shiftedPoint = new Point2D(nodeLocationToPack);
       shiftedPoint.add(nodeShiftToAvoidObstacles);
@@ -172,11 +184,9 @@ public class ObstacleAndCliffAvoidanceProcessor
       bothRegions.add(startRegion);
       bothRegions.add(endRegion);
 
-      // FIXME should be both regions
       List<LineSegment2DReadOnly> cliffEdges = new ArrayList<>();
       boolean isShiftedPointNearACliff = isNearCliff(shiftedPoint, maxInterRegionConnectionLength, cliffHeightToAvoid, endRegion,
                                                      allNavigableRegions.getNaviableRegionsList(), cliffEdges);
-//      isShiftedPointNearACliff = false;
 
       Vector2D nodeShift = new Vector2D();
 
@@ -185,24 +195,26 @@ public class ObstacleAndCliffAvoidanceProcessor
 
          List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>();
 
-         /*
-         for (LineSegment2DReadOnly cliffEdge : cliffEdges)
-         {
-            Point2D pointOnEdge = new Point2D();
-            cliffEdge.orthogonalProjection(nextPointInWorld2D, pointOnEdge);
-            closestCliffObstacleClusterPoints.add(pointOnEdge);
-         }
-         */
-
-
          closestCliffObstacleClusterPoints.addAll(getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
+         if (startRegion != endRegion && EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(nextPointInWorld2D, startRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
+                                                                                                   startRegion.getHomeRegionCluster().getNumberOfRawPoints(), true, 0.0))
+         {
+            closestCliffObstacleClusterPoints.addAll(getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, startRegion.getHomeRegionCluster()));
+         }
+
 
          Vector2DReadOnly newShift = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints, closestCliffObstacleClusterPoints,
                                                                                       desiredDistanceFromObstacleCluster, desiredDistanceFromCliff, minimumDistanceFromObstacleCluster, minimumDistanceFromCliff);
+         if (newShift.containsNaN())
+            newShift = new Vector2D();
+
          nodeShift.set(newShift);
 
-         pointInfo.setClosestCliffClusterPoints(closestCliffObstacleClusterPoints);
-         pointInfo.setShiftToAvoidObstaclesAndCliffs(newShift);
+         if (pointInfo != null)
+         {
+            pointInfo.setClosestCliffClusterPoints(closestCliffObstacleClusterPoints);
+            pointInfo.setShiftToAvoidObstaclesAndCliffs(newShift);
+         }
       }
       else
       {
@@ -439,24 +451,16 @@ public class ObstacleAndCliffAvoidanceProcessor
       return intermediateWaypoints3DToAdd;
    }
 
-   static double minLength = 5e-3;
    private static List<Point2DReadOnly> getClosestPointOnEachCluster(Point2DReadOnly pointInWorld, List<Cluster> clusters)
    {
       List<Point2DReadOnly> closestClusterPoints = new ArrayList<>();
 
       for (Cluster cluster : clusters)
       {
-         List<Point2DReadOnly> clusterPolygon = cluster.getNavigableExtrusionsInWorld2D();
+         List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
 
          Point2D closestPointInCluster = new Point2D();
-         Vector2D normalToPoint = new Vector2D();
-         double distance = VisibilityTools.distanceToCluster(pointInWorld, clusterPolygon, closestPointInCluster, normalToPoint);
-         if (distance < minLength)
-         {
-            normalToPoint.scale(minLength / normalToPoint.length());
-            closestPointInCluster.set(pointInWorld);
-            closestPointInCluster.add(normalToPoint);
-         }
+         VisibilityTools.distanceToCluster(pointInWorld, clusterPolygon, closestPointInCluster, null);
          closestClusterPoints.add(closestPointInCluster);
       }
 
