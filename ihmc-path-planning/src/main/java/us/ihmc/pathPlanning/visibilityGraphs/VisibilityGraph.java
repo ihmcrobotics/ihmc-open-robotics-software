@@ -118,8 +118,11 @@ public class VisibilityGraph
    {
       VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
       sourceVisibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode);
+      sourceVisibilityGraphNavigableRegion.addPreferredInnerRegionEdgesFromSourceNode(sourceNode);
 
       computeInterEdges(sourceNode);
+      // TODO
+//      computePreferredInterEdges(sourceNode);
 
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
