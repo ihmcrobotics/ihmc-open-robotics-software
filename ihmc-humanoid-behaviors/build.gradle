@@ -25,6 +25,7 @@ mainDependencies {
    api("org.boofcv:recognition:0.24.1")
    api("us.ihmc:ihmc-native-library-loader:1.1")
 
+   api("us.ihmc:ihmc-messager-kryo:0.1.1")
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")
    api("us.ihmc:ihmc-commons:0.26.6")
@@ -42,7 +43,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-perception:source")
    api("us.ihmc:ihmc-footstep-planning:source")
-api("org.postgresql:postgresql:42.2.5")
+   api("org.postgresql:postgresql:42.2.5")
 }
 
 testDependencies {
