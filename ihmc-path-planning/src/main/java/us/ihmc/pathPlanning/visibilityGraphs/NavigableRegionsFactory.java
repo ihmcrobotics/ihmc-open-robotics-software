@@ -52,16 +52,20 @@ public class NavigableRegionsFactory
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
+      NavigableExtrusionDistanceCalculator preferredNavigableCalculator = parameters.getPreferredNavigableExtrusionDistanceCalculator();
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
+      ObstacleExtrusionDistanceCalculator preferredObstacleCalculator = parameters.getPreferredObstacleExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
-                                    obstacleCalculator);
+      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
+                                    preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator);
    }
 
    public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                         ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                        NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
                                                         NavigableExtrusionDistanceCalculator navigableCalculator,
+                                                        ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
                                                         ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
@@ -73,8 +77,8 @@ public class NavigableRegionsFactory
       obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
                                                                                              DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
 
-      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, navigableCalculator));
-      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, obstacleCalculator));
+      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator));
+      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator, obstacleCalculator));
 
       for (Cluster cluster : navigableRegion.getAllClusters())
       {
