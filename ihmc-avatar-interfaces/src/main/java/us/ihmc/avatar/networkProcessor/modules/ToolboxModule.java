@@ -124,7 +124,16 @@ public abstract class ToolboxModule
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
+      {
+         private final ToolboxStateMessage message = new ToolboxStateMessage();
+         @Override
+         public void onNewDataMessage(Subscriber<ToolboxStateMessage> s)
+         {
+            s.takeNextData(message, null);
+            receivedPacket(message);
+         }
+      });
       registerExtraPuSubs(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
