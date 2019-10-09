@@ -108,6 +108,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private final boolean setupROSLocationService;
    private final boolean setupROSParameterSetters;
    private final RobotTarget target;
+   
+   public static final double linearVelocityThreshold = 0.2;
+   public static final double angularVelocityThreshold = Math.PI/15;
 
    /**
     * Realsense Parameters

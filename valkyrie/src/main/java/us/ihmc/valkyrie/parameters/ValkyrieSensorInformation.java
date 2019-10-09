@@ -172,6 +172,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
 //    public static final String[] imuSensorsToUse = {middlePelvisIMUSensor, leftTrunkIMUSensor};
    public static final String[] imuSensorsToUse = {rearPelvisIMUSensor, leftTrunkIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
+   
+   public static final double linearVelocityThreshold = 0.15;
+   public static final double angularVelocityThreshold = Math.PI/15;
 
    public ValkyrieSensorInformation(RobotTarget target)
    {
