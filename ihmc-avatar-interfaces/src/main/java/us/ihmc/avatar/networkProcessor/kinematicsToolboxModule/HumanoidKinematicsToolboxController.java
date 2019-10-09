@@ -10,7 +10,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
@@ -30,6 +29,7 @@ import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -144,7 +144,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * Reference to the most recent data received from the controller relative to the balance control.
     * It is used for identifying which foot is in support and thus which foot should be held in place.
     */
-   private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
+   private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
+   private boolean hasCapturabilityBasedStatus = false;
+   private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
 
    /** The active support polygon updated from the most recent robot configuration. */
    private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
@@ -299,17 +301,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       // Using the most recent CapturabilityBasedStatus received from the walking controller to figure out which foot is in support.
-      CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();
+      CapturabilityBasedStatus capturabilityBasedStatus = concurrentCapturabilityBasedStatusCopier.getCopyForReading();
+      hasCapturabilityBasedStatus = capturabilityBasedStatus != null;
+      if (hasCapturabilityBasedStatus)
+         capturabilityBasedStatusInternal.set(capturabilityBasedStatus);
 
-      if (capturabilityBasedStatus == null)
+      if (hasCapturabilityBasedStatus)
       {
-         for (RobotSide robotSide : RobotSide.values)
-            isFootInSupport.get(robotSide).set(true);
+         for (RobotSide robotside : RobotSide.values)
+            isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatusInternal, robotside));
       }
       else
       {
-         for (RobotSide robotside : RobotSide.values)
-            isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
+         for (RobotSide robotSide : RobotSide.values)
+            isFootInSupport.get(robotSide).set(true);
       }
 
       if (initialRobotConfigurationMap != null)
@@ -319,8 +324,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
           * recompute the pose of the root joint such that our initial configuration has its support feet as
           * close as possible to the current robot support feet. This affects the CoM task.
           */
-         RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, currentFullRobotModel.getRootJoint(), currentOneDoFJoints);
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, currentFullRobotModel.getRootJoint(), currentOneDoFJoints);
          currentReferenceFrames.updateFrames();
          rootJoint.getJointPose().setToZero();
          desiredReferenceFrames.updateFrames();
@@ -507,12 +511,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void addLinearMomentumConvexConstraint2DCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
-      if (!enableSupportPolygonConstraint.getValue() || latestCapturabilityBasedStatusReference.get() == null)
+      if (!enableSupportPolygonConstraint.getValue() || !hasCapturabilityBasedStatus)
          return;
 
       newSupportPolygon.clear();
-      Object<Point3D> leftFootSupportPolygon2d = latestCapturabilityBasedStatusReference.get().getLeftFootSupportPolygon2d();
-      Object<Point3D> rightFootSupportPolygon2d = latestCapturabilityBasedStatusReference.get().getRightFootSupportPolygon2d();
+      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatusInternal.getLeftFootSupportPolygon2d();
+      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatusInternal.getRightFootSupportPolygon2d();
       for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
          newSupportPolygon.addVertex(leftFootSupportPolygon2d.get(i));
       for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
@@ -581,7 +585,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
-      latestCapturabilityBasedStatusReference.set(newStatus);
+      concurrentCapturabilityBasedStatusCopier.getCopyForWriting().set(newStatus);
+      concurrentCapturabilityBasedStatusCopier.commit();
    }
 
    @Override

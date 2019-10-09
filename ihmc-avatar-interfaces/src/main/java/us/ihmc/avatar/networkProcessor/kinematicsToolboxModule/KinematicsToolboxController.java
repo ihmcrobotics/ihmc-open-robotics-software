@@ -47,6 +47,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -220,7 +221,8 @@ public class KinematicsToolboxController extends ToolboxController
     * Reference to the most recent robot configuration received from the controller. It is used for
     * initializing the {@link #desiredFullRobotModel} before starting the optimization process.
     */
-   protected final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
+   protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
 
    private boolean isUserControllingCenterOfMass = false;
    private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -577,33 +579,37 @@ public class KinematicsToolboxController extends ToolboxController
    {
       clearUserCommands();
 
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+      RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+      boolean hasRobotConfigurationData = robotConfigurationData != null;
 
-      if (robotConfigurationData == null)
+      if (!hasRobotConfigurationData)
       {
          commandInputManager.clearAllCommands();
-         return false;
       }
-
-      // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-      if (initialRobotConfigurationMap != null)
+      else
       {
-         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+         robotConfigurationDataInternal.set(robotConfigurationData);
+
+         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
+         if (initialRobotConfigurationMap != null)
          {
-            joint.setQ(q_priv);
-            return true;
-         });
+            initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+            {
+               joint.setQ(q_priv);
+               return true;
+            });
+         }
+
+         // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+         snapPrivilegedConfigurationToCurrent();
+         privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         // It is required to update the tools now as it is only done at the end of each iteration.
+         updateTools();
       }
 
-      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
-      snapPrivilegedConfigurationToCurrent();
-      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-      // It is required to update the tools now as it is only done at the end of each iteration.
-      updateTools();
-
-      return true;
+      return hasRobotConfigurationData;
    }
 
    public void clearUserCommands()
@@ -953,7 +959,8 @@ public class KinematicsToolboxController extends ToolboxController
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-      latestRobotConfigurationDataReference.set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.commit();
    }
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
