@@ -408,6 +408,43 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
    }
 
+   @Test
+   public void testTrickyCase2()
+   {
+      List<PlanarRegion> planarRegions = TestEnvironmentTools.createBigToSmallRegions();
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
+
+      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
+
+      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegions, parameters);
+
+
+      double extrusionDistance = parameters.getNavigableExtrusionDistance();
+      double maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
+      double desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance();
+      double cliffHeightToAvoid = 0.10;
+
+
+      Point2D pointOnOutsideSharedEdge = new Point2D(5.0, 0.0);
+      pointOnOutsideSharedEdge.subX(extrusionDistance);
+      NavigableRegion homeRegion = getRegionContainingPoint(pointOnOutsideSharedEdge, navigableRegions);
+
+      List<LineSegment2DReadOnly> cliffEdgesToPack = new ArrayList<>();
+
+      cliffEdgesToPack.clear();
+      boolean isNearCliff = ObstacleAndCliffAvoidanceProcessor.isNearCliff(pointOnOutsideSharedEdge, maxInterRegionConnectionLength, cliffHeightToAvoid, desiredDistanceFromCliff, homeRegion, navigableRegions, cliffEdgesToPack);
+
+      boolean expected = false;
+
+      if (visualize && expected != isNearCliff)
+      {
+         visualize(planarRegionsList, pointOnOutsideSharedEdge, cliffEdgesToPack, parameters, navigableRegions);
+      }
+
+      assertEquals(expected, isNearCliff);
+
+   }
+
    private static NavigableRegion getRegionContainingPoint(Point2DReadOnly point, List<NavigableRegion> navigableRegions)
    {
       NavigableRegion homeRegion = null;
@@ -432,7 +469,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
       NavigableRegion homeRegion = getRegionContainingPoint(point, navigableRegions);
 
-      List<LineSegment2DReadOnly> homeEdges = ObstacleAndCliffAvoidanceProcessor.getNearbyEdges(point, homeRegion.getHomeRegionCluster().getRawPointsInWorld2D(), desiredDistanceFromCliff);
+      List<LineSegment2DReadOnly> homeEdges = ObstacleAndCliffAvoidanceProcessor.getNearbyEdges(point, homeRegion.getHomeRegionCluster(), desiredDistanceFromCliff);
 
       List<NavigableRegion> nearbyRegions = ObstacleAndCliffAvoidanceProcessor.filterNavigableRegionsWithBoundingCircle(point, maxInterRegionConnectionLength + desiredDistanceFromCliff, navigableRegions);
       List<NavigableRegion> closeEnoughRegions = ObstacleAndCliffAvoidanceProcessor.filterNavigableRegionsConnectionWithDistanceAndHeightChange(homeRegion, nearbyRegions, maxInterRegionConnectionLength,
@@ -441,9 +478,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
       for (NavigableRegion closeEnoughRegion : closeEnoughRegions)
       {
-         List<Point2DReadOnly> closeEnoughVertices = closeEnoughRegion.getHomeRegionCluster().getRawPointsInWorld2D();
-
-         nearbyEdges.addAll(ObstacleAndCliffAvoidanceProcessor.getNearbyEdges(point, closeEnoughVertices, desiredDistanceFromCliff));
+         nearbyEdges.addAll(ObstacleAndCliffAvoidanceProcessor.getNearbyEdges(point, closeEnoughRegion.getHomeRegionCluster(), desiredDistanceFromCliff));
       }
 
 

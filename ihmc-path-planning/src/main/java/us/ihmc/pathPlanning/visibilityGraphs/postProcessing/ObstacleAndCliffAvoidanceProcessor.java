@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
@@ -100,6 +101,7 @@ public class ObstacleAndCliffAvoidanceProcessor
             adjustNodePositionToAvoidObstaclesAndCliffs(endPointInfo, endPointInWorld, startingRegion, endingRegion, allNavigableRegions);
          }
 
+         /*
          if (parameters.getIntroduceMidpointsInPostProcessing())
          {
             List<Point3D> intermediateWaypointsToAdd = computeIntermediateWaypointsToAddToAvoidObstacles(new Point2D(startPointInWorld),
@@ -128,6 +130,7 @@ public class ObstacleAndCliffAvoidanceProcessor
             removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPointInWorld, endPointInWorld, waypointResolution);
 
          }
+         */
 
          waypointIndex++;
          pathNodeIndex++;
@@ -192,8 +195,8 @@ public class ObstacleAndCliffAvoidanceProcessor
 
       if (isShiftedPointNearACliff)
       {
-
          List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>();
+
 
          closestCliffObstacleClusterPoints.addAll(getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
          if (startRegion != endRegion && EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(nextPointInWorld2D, startRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
@@ -237,10 +240,14 @@ public class ObstacleAndCliffAvoidanceProcessor
 
 
 
-
    private static List<Point2DReadOnly> getPointsAlongEdgeOfClusterClosestToPoint(Point2DReadOnly pointToCheck, Cluster cluster)
    {
-      List<LineSegment2DReadOnly> segments = getClusterEdges(cluster);
+      return getPointsAlongEdgeOfClusterClosestToPoint(pointToCheck, cluster.getRawPointsInWorld2D());
+   }
+
+   private static List<Point2DReadOnly> getPointsAlongEdgeOfClusterClosestToPoint(Point2DReadOnly pointToCheck, List<Point2DReadOnly> points)
+   {
+      List<LineSegment2DReadOnly> segments = getClusterEdges(points);
 
       List<Point2DReadOnly> closestPointsToReturn = new ArrayList<>();
       for (LineSegment2DReadOnly lineSegment : segments)
@@ -248,7 +255,22 @@ public class ObstacleAndCliffAvoidanceProcessor
          Point2D closestPoint = new Point2D();
          lineSegment.orthogonalProjection(pointToCheck, closestPoint);
 
-         closestPointsToReturn.add(closestPoint);
+         boolean isProjectionVisible = true;
+         for (LineSegment2DReadOnly otherSegment : segments)
+         {
+            if (otherSegment == lineSegment)
+               continue;
+
+            if (null != EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(pointToCheck, closestPoint, otherSegment.getFirstEndpoint(),
+                                                                     otherSegment.getSecondEndpoint()))
+            {
+               isProjectionVisible = false;
+               break;
+            }
+         }
+
+         if (isProjectionVisible)
+            closestPointsToReturn.add(closestPoint);
       }
 
       return closestPointsToReturn;
@@ -256,128 +278,22 @@ public class ObstacleAndCliffAvoidanceProcessor
 
    private static List<LineSegment2DReadOnly> getClusterEdges(Cluster cluster)
    {
-      List<Point2DReadOnly> rawPoints = cluster.getRawPointsInWorld2D();
+      return getClusterEdges(cluster.getRawPointsInWorld2D());
+   }
+
+   private static List<LineSegment2DReadOnly> getClusterEdges(List<Point2DReadOnly> points)
+   {
       List<LineSegment2DReadOnly> edges = new ArrayList<>();
-      for (int i = 0; i < rawPoints.size(); i++)
+      for (int i = 0; i < points.size(); i++)
       {
          int previousIndex = i - 1;
          if (previousIndex < 0)
-            previousIndex = rawPoints.size() - 1;
+            previousIndex = points.size() - 1;
 
-         edges.add(new LineSegment2D(rawPoints.get(previousIndex), rawPoints.get(i)));
+         edges.add(new LineSegment2D(points.get(previousIndex), points.get(i)));
       }
 
       return edges;
-   }
-
-   private static List<LineSegment3DReadOnly> getClusterEdges3D(Cluster cluster)
-   {
-      List<Point3DReadOnly> rawPoints = cluster.getRawPointsInWorld();
-      List<LineSegment3DReadOnly> edges = new ArrayList<>();
-      for (int i = 0; i < rawPoints.size(); i++)
-      {
-         int previousIndex = i - 1;
-         if (previousIndex < 0)
-            previousIndex = rawPoints.size() - 1;
-
-         edges.add(new LineSegment3D(rawPoints.get(previousIndex), rawPoints.get(i)));
-      }
-
-      return edges;
-   }
-
-   private static List<LineSegment2DReadOnly> filterSegmentsNotNearCliff(List<LineSegment3DReadOnly> segments, NavigableRegion homeRegion,
-                                                                         List<NavigableRegion> otherRegions, double maxConnectionDistance, double maxHeightDelta)
-   {
-
-      List<NavigableRegion> closeEnoughRegions = new ArrayList<>();
-
-      for (NavigableRegion otherRegion : otherRegions)
-      {
-         if (otherRegion == homeRegion)
-            continue;
-
-         List<LineSegment3DReadOnly> otherEdges = getClusterEdges3D(otherRegion.getHomeRegionCluster());
-
-         for (LineSegment3DReadOnly segment : segments)
-         {
-            boolean addedRegion = false;
-            for (LineSegment3DReadOnly otherEdge : otherEdges)
-            {
-               if (segment.distance(otherEdge) < maxConnectionDistance && heightDifferenceBetweenTwoSegments(segment, otherEdge) < maxHeightDelta)
-               {
-                  closeEnoughRegions.add(otherRegion);
-                  addedRegion = true;
-                  break;
-               }
-            }
-
-            if (addedRegion)
-               break;
-         }
-      }
-
-      List<LineSegment2DReadOnly> filteredSegments = new ArrayList<>();
-      for (LineSegment3DReadOnly segment : segments)
-      {
-         Vector2DReadOnly segmentNormal = computeEdgeNormal(segment);
-
-         boolean isACliff = false;
-         for (NavigableRegion closeEnoughRegion : closeEnoughRegions)
-         {
-            List<LineSegment2DReadOnly> closeEnoughEdges = getClusterEdges(closeEnoughRegion.getHomeRegionCluster());
-            HashMap<LineSegment2DReadOnly, Vector2DReadOnly> closeEnoughNormals = computeEdgeNormals(closeEnoughEdges);
-
-            if (isEdgeNearACliff(segmentNormal, closeEnoughEdges, closeEnoughNormals))
-            {
-               isACliff = true;
-               break;
-            }
-         }
-
-         if (isACliff)
-         {
-            filteredSegments.add(new LineSegment2D(segment.getFirstEndpointX(), segment.getFirstEndpointY(), segment.getSecondEndpointX(), segment.getSecondEndpointY()));
-         }
-      }
-
-      return filteredSegments;
-   }
-
-   private static double heightDifferenceBetweenTwoSegments(LineSegment3DReadOnly segmentA, LineSegment3DReadOnly segmentB)
-   {
-      double minHeightChange = Double.POSITIVE_INFINITY;
-
-      Point3D pointToProject = new Point3D(segmentA.getFirstEndpoint());
-      Point3D projectedPoint = new Point3D();
-
-      segmentB.orthogonalProjection(pointToProject, projectedPoint);
-      double heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
-      if (heightChange < minHeightChange)
-         minHeightChange = heightChange;
-
-      pointToProject.set(segmentA.getSecondEndpoint());
-
-      segmentB.orthogonalProjection(pointToProject, projectedPoint);
-      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
-      if (heightChange < minHeightChange)
-         minHeightChange = heightChange;
-
-      pointToProject.set(segmentB.getFirstEndpoint());
-
-      segmentA.orthogonalProjection(pointToProject, projectedPoint);
-      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
-      if (heightChange < minHeightChange)
-         minHeightChange = heightChange;
-
-      pointToProject.set(segmentB.getSecondEndpoint());
-
-      segmentA.orthogonalProjection(pointToProject, projectedPoint);
-      heightChange = Math.abs(pointToProject.getZ() - projectedPoint.getZ());
-      if (heightChange < minHeightChange)
-         minHeightChange = heightChange;
-
-      return minHeightChange;
    }
 
 

@@ -479,6 +479,42 @@ public class TestEnvironmentTools
       return planarRegions;
    }
 
+   public static List<PlanarRegion> createBigToSmallRegions()
+   {
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      double length = 10.0;
+      double width = 4.0;
+
+      // set up ground plane, 10 x 5
+      Point2D groundPlanePoint1A = new Point2D(length / 2.0, -width / 2.0);
+      Point2D groundPlanePoint1B = new Point2D(length / 2.0, width / 2.0);
+      Point2D groundPlanePoint1C = new Point2D(-length / 2.0, width / 2.0);
+      Point2D groundPlanePoint1D = new Point2D(-length / 2.0, -width / 2.0);
+
+      RigidBodyTransform groundTransform1 = new RigidBodyTransform();
+      groundTransform1.setTranslation(0.0, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion1 = new PlanarRegion(groundTransform1, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePoint1A, groundPlanePoint1B, groundPlanePoint1C, groundPlanePoint1D)));
+
+      // set up ground plane, 10 x 5
+      width = 1.0;
+      Point2D groundPlanePoint2A = new Point2D(length / 2.0, -width / 2.0);
+      Point2D groundPlanePoint2B = new Point2D(length / 2.0, width / 2.0);
+      Point2D groundPlanePoint2C = new Point2D(-length / 2.0, width / 2.0);
+      Point2D groundPlanePoint2D = new Point2D(-length / 2.0, -width / 2.0);
+
+      RigidBodyTransform groundTransform2 = new RigidBodyTransform();
+      groundTransform2.setTranslation(length, 0.0, 0.0);
+      PlanarRegion groundPlaneRegion2 = new PlanarRegion(groundTransform2, new ConvexPolygon2D(
+            Vertex2DSupplier.asVertex2DSupplier(groundPlanePoint2A, groundPlanePoint2B, groundPlanePoint2C, groundPlanePoint2D)));
+
+      planarRegions.add(groundPlaneRegion1);
+      planarRegions.add(groundPlaneRegion2);
+
+      return planarRegions;
+   }
+
    public static List<PlanarRegion> createUCornerEnvironment()
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
