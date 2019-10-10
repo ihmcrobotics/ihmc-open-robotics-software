@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -21,19 +21,16 @@ public class LinearHeightCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      RigidBodyTransform startNodeTransform = new RigidBodyTransform();
-      RigidBodyTransform endNodeTransform = new RigidBodyTransform();
-
       FootstepNodeSnapData endNodeData = snapper.getSnapData(endNode);
       FootstepNodeSnapData startNodeData = snapper.getSnapData(startNode);
 
       if (startNodeData == null || endNodeData == null)
          return 0.0;
 
-      FootstepNodeTools.getSnappedNodeTransform(startNode, startNodeData.getSnapTransform(), startNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(endNode, endNodeData.getSnapTransform(), endNodeTransform);
+      Point3DReadOnly snappedStartNode = FootstepNodeTools.getNodePositionInWorld(startNode, startNodeData.getSnapTransform());
+      Point3DReadOnly snappedEndNode = FootstepNodeTools.getNodePositionInWorld(endNode, endNodeData.getSnapTransform());
 
-      double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
+      double heightChange = snappedEndNode.getZ() - snappedStartNode.getZ();
 
       if (heightChange > 0.0)
          return costParameters.getStepUpWeight() * heightChange;

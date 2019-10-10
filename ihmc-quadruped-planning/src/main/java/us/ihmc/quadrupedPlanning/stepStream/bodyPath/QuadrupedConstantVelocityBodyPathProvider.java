@@ -183,8 +183,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
       startTime.set(timestamp.getDoubleValue() + firstStepDelay.getValue() + xGaitSettings.getStepDuration());
-      startYaw.set(supportTransform.getRotationMatrix().getYaw());
-      centerStartPoint.set(supportTransform.getTranslationVector());
+      startYaw.set(supportTransform.getRotation().getYaw());
+      centerStartPoint.set(supportTransform.getTranslation());
    }
 
    private void setStartConditionsFromFootstepStatus()

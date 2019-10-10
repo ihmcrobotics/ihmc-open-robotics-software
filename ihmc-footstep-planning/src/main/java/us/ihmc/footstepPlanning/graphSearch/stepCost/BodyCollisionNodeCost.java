@@ -1,11 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
 public class BodyCollisionNodeCost implements FootstepCost
@@ -37,8 +39,8 @@ public class BodyCollisionNodeCost implements FootstepCost
       if(snapTransform == null)
          return 0.0;
 
-      double height = snapTransform.getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, height);
+      Point3DReadOnly snappedEndNode = FootstepNodeTools.getNodePositionInWorld(endNode, snapTransform);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, snappedEndNode.getZ());
 
       if(collisionData.isCollisionDetected())
       {
