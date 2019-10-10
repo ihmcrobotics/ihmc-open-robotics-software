@@ -133,7 +133,7 @@ public class NodeCheckerRenderer extends AnimationTimer
 
       try
       {
-         FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), snappedTransformToWorld);
+         snappedTransformToWorld.set(snapData.getOrComputeSnappedNodeTransform(node));
       }
       catch(NotARotationMatrixException e)
       {

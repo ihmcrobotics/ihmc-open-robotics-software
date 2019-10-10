@@ -39,8 +39,8 @@ public class BodyCollisionNodeCost implements FootstepCost
       if(snapTransform == null)
          return 0.0;
 
-      Point3DReadOnly snappedEndNode = FootstepNodeTools.getNodePositionInWorld(endNode, snapTransform);
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, snappedEndNode.getZ());
+      RigidBodyTransform snappedNodeTransform = snapData.getOrComputeSnappedNodeTransform(endNode);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, snappedNodeTransform.getTranslationZ());
 
       if(collisionData.isCollisionDetected())
       {
