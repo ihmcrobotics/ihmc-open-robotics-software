@@ -19,6 +19,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double normal_z_threshold_for_accessible_regions_ = -1.0;
    public double navigable_extrusion_distance_ = -1.0;
    public double obstacle_extrusion_distance_ = -1.0;
+   public double preferred_navigable_extrusion_distance_ = -1.0;
    public double preferred_obstacle_extrusion_distance_ = -1.0;
    public double obstacle_extrusion_distance_if_not_too_high_to_step_ = -1.0;
    public double too_high_to_step_distance_ = -1.0;
@@ -75,6 +76,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       navigable_extrusion_distance_ = other.navigable_extrusion_distance_;
 
       obstacle_extrusion_distance_ = other.obstacle_extrusion_distance_;
+
+      preferred_navigable_extrusion_distance_ = other.preferred_navigable_extrusion_distance_;
 
       preferred_obstacle_extrusion_distance_ = other.preferred_obstacle_extrusion_distance_;
 
@@ -173,6 +176,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double getObstacleExtrusionDistance()
    {
       return obstacle_extrusion_distance_;
+   }
+
+   public void setPreferredNavigableExtrusionDistance(double preferred_navigable_extrusion_distance)
+   {
+      preferred_navigable_extrusion_distance_ = preferred_navigable_extrusion_distance;
+   }
+   public double getPreferredNavigableExtrusionDistance()
+   {
+      return preferred_navigable_extrusion_distance_;
    }
 
    public void setPreferredObstacleExtrusionDistance(double preferred_obstacle_extrusion_distance)
@@ -432,6 +444,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_, other.obstacle_extrusion_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preferred_navigable_extrusion_distance_, other.preferred_navigable_extrusion_distance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preferred_obstacle_extrusion_distance_, other.preferred_obstacle_extrusion_distance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.obstacle_extrusion_distance_if_not_too_high_to_step_, other.obstacle_extrusion_distance_if_not_too_high_to_step_, epsilon)) return false;
@@ -501,6 +515,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.obstacle_extrusion_distance_ != otherMyClass.obstacle_extrusion_distance_) return false;
 
+      if(this.preferred_navigable_extrusion_distance_ != otherMyClass.preferred_navigable_extrusion_distance_) return false;
+
       if(this.preferred_obstacle_extrusion_distance_ != otherMyClass.preferred_obstacle_extrusion_distance_) return false;
 
       if(this.obstacle_extrusion_distance_if_not_too_high_to_step_ != otherMyClass.obstacle_extrusion_distance_if_not_too_high_to_step_) return false;
@@ -567,6 +583,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.navigable_extrusion_distance_);      builder.append(", ");
       builder.append("obstacle_extrusion_distance=");
       builder.append(this.obstacle_extrusion_distance_);      builder.append(", ");
+      builder.append("preferred_navigable_extrusion_distance=");
+      builder.append(this.preferred_navigable_extrusion_distance_);      builder.append(", ");
       builder.append("preferred_obstacle_extrusion_distance=");
       builder.append(this.preferred_obstacle_extrusion_distance_);      builder.append(", ");
       builder.append("obstacle_extrusion_distance_if_not_too_high_to_step=");
