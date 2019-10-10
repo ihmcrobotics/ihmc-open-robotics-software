@@ -147,6 +147,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final AlphaFilteredYoVariable heightAcceleretionCorrectedFilteredForSingularityAvoidance;
 
    private final YoDouble yoUnachievedSwingTranslation;
+   private final YoDouble timeToCorrectForUnachievedSwingTranslation;
    private final AlphaFilteredYoVariable unachievedSwingTranslationFiltered;
    private final AlphaFilteredYoVariable unachievedSwingVelocityFiltered;
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
@@ -189,6 +190,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaUnreachableFootstep.set(0.25);
 
       yoUnachievedSwingTranslation = new YoDouble(namePrefix + "UnachievedSwingTranslation", registry);
+      timeToCorrectForUnachievedSwingTranslation = new YoDouble(namePrefix + "TimeToCorrectForUnachievedSwingTranslation", registry);
+      timeToCorrectForUnachievedSwingTranslation.set(0.2);
+
       unachievedSwingTranslationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingTranslationFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingVelocityFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingVelocityFiltered", registry, alphaUnreachableFootstep);
       unachievedSwingAccelerationFiltered = new AlphaFilteredYoVariable(namePrefix + "UnachievedSwingAccelerationFiltered", registry, alphaUnreachableFootstep);
@@ -747,11 +751,29 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(heightAcceleretionCorrectedFilteredForSingularityAvoidance.getDoubleValue());
 
+         // If the filtered desired com height caught up to the input one, then stop doing smooth transition.
          if (Math.abs(desiredCenterOfMassHeightPoint.getZ() - heightCorrectedFilteredForSingularityAvoidance.getDoubleValue()) <= 5e-3)
          {
             alphaSupportSingularityAvoidance.set(0.0);
             isSupportSingularityAvoidanceUsed.set(false);
             doSmoothTransitionOutOfSingularityAvoidance.set(false);
+         }
+
+         // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...            
+         else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && 
+               (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()))
+         {
+            // Call this twice here to smooth faster. Need to get out of singularity avoidance!
+            heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
+            heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
+
+            // If leg is bent a lot and singularity avoidance no longer needed, stop smoothing...
+            if (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToDisableSingularityAvoidance.getDoubleValue() - 0.05)
+            {
+               alphaSupportSingularityAvoidance.set(0.0);
+               isSupportSingularityAvoidanceUsed.set(false);
+               doSmoothTransitionOutOfSingularityAvoidance.set(false);
+            }
          }
          return;
       }
@@ -979,33 +1001,51 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          isUnreachableFootstepCompensated.set(true);
          unachievedSwingTranslationFiltered.update(unachievedSwingTranslation.getZ());
          desiredCenterOfMassHeightPoint.setZ(desiredCenterOfMassHeightPoint.getZ() + unachievedSwingTranslationFiltered.getDoubleValue());
+          
          if (USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION)
+         {
             comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
+
+         unachievedSwingVelocityFiltered.update(unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+         unachievedSwingAccelerationFiltered.update(unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+
+         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+         comHeightDataToCorrect
+         .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+         }
       }
       else
       {
          unachievedSwingTranslationFiltered.set(0.0);
-      }
-
-      if (unachievedSwingVelocity.getZ() < 0.0)
-      {
-         unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
-         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
-      }
-      else
-      {
          unachievedSwingVelocityFiltered.set(0.0);
+         unachievedSwingAccelerationFiltered.set(0.0);
+         return;
       }
 
-      if (unachievedSwingAcceleration.getZ() < 0.0)
-      {
-         unachievedSwingAccelerationFiltered.update(unachievedSwingAcceleration.getZ());
-         comHeightDataToCorrect
-               .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
-      }
-      else
-      {
-         unachievedSwingAccelerationFiltered.set(0.0);
-      }
+      //TODO: Delete this once leg singularity stuff is working better and sure you won't want to get this back.
+      //+++JEP: Dead code here tries to use the unachieved velocity
+      // and acceleration from the trajectory. But that doesn't make much
+      // sense as at this point the velocity is not being achieved anyway.
+      // So instead, just drop (leap of faith...)
+//      if (unachievedSwingVelocity.getZ() < 0.0)
+//      {
+//         unachievedSwingVelocityFiltered.update(unachievedSwingVelocity.getZ());
+//         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+//      }
+//      else
+//      {
+//         unachievedSwingVelocityFiltered.set(0.0);
+//      }
+//
+//      if (unachievedSwingAcceleration.getZ() < 0.0)
+//      {
+//         unachievedSwingAccelerationFiltered.update(unachievedSwingAcceleration.getZ());
+//         comHeightDataToCorrect
+//               .setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+//      }
+//      else
+//      {
+//         unachievedSwingAccelerationFiltered.set(0.0);
+//      }
    }
 }
