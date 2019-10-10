@@ -21,6 +21,8 @@ import java.util.List;
 
 public class VisibilityGraph
 {
+   private static final double nonPreferredWeight = 5.0;
+
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
    protected static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
@@ -107,7 +109,11 @@ public class VisibilityGraph
          NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
+         List<VisibilityGraphNode> allPreferredNavigableNodes = targetVisibilityGraphNavigableRegion.getAllPreferredNavigableNodes();
+         // TODO this doesn't account for connecting to the other thing.
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(),
+                                                   targetObstacleClusters, crossRegionEdges, filter, nonPreferredWeight * edgeWeight, parameters.getLengthForLongInterRegionEdge());
+         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allPreferredNavigableNodes, navigableRegions.getNaviableRegionsList(),
                                                    targetObstacleClusters, crossRegionEdges, filter, edgeWeight, parameters.getLengthForLongInterRegionEdge());
       }
 
@@ -121,8 +127,7 @@ public class VisibilityGraph
       sourceVisibilityGraphNavigableRegion.addPreferredInnerRegionEdgesFromSourceNode(sourceNode);
 
       computeInterEdges(sourceNode);
-      // TODO
-//      computePreferredInterEdges(sourceNode);
+      computePreferredInterEdges(sourceNode);
 
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
@@ -147,7 +152,7 @@ public class VisibilityGraph
 
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
-                                                interEdges, parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge());
+                                                interEdges, parameters.getLengthForLongInterRegionEdge(), nonPreferredWeight * parameters.getWeightForInterRegionEdge());
       }
 
       crossRegionEdges.addAll(interEdges);
@@ -193,7 +198,7 @@ public class VisibilityGraph
       {
          if ((sourceNode.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion) && (nodeToAttachToIfInSameRegion.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion))
          {
-            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 2.0);
+            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, nonPreferredWeight);
             visibilityGraphNavigableRegion.addPreferredInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0);
          }
       }
@@ -284,8 +289,7 @@ public class VisibilityGraph
       if (startNode.getEdges().size() < 1)
       { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
          computeInterEdges(startNode);
-         // TODO
-         // computePreferredInterEdges(startNode);
+         computePreferredInterEdges(startNode);
       }
 
       return startNode;
