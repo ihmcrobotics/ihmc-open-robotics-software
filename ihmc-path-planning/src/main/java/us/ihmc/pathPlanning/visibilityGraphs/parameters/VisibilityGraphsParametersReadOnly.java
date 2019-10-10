@@ -187,7 +187,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
     * */
    default double getCostForNonPreferredNode()
    {
-      return get(weightForNonPreferredEdge);
+      return get(costForNonPreferredNode);
    }
 
    /**
