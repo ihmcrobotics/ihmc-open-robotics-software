@@ -175,6 +175,22 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    }
 
    /**
+    * This is the additional weight applied to any edge that ends on a non-preferred node.
+    * */
+   default double getWeightForNonPreferredEdge()
+   {
+      return get(weightForNonPreferredEdge);
+   }
+
+   /**
+    * This a static cost added to any edge that ends on a non-preferred node.
+    * */
+   default double getCostForNonPreferredNode()
+   {
+      return get(weightForNonPreferredEdge);
+   }
+
+   /**
     * This flag says whether or not to return a solution even when the goal is not reached.
     * The solution that is returned is the lowest cost path, including estimated cost to goal.
     */

@@ -50,6 +50,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double elevation_weight_ = -1.0;
    public double occluded_goal_edge_weight_ = -1.0;
    public double weight_for_inter_region_edge_ = -1.0;
+   public double weight_for_non_preferred_edge_ = -1.0;
+   public double cost_for_non_preferred_node_ = -1.0;
    public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
@@ -113,6 +115,10 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       occluded_goal_edge_weight_ = other.occluded_goal_edge_weight_;
 
       weight_for_inter_region_edge_ = other.weight_for_inter_region_edge_;
+
+      weight_for_non_preferred_edge_ = other.weight_for_non_preferred_edge_;
+
+      cost_for_non_preferred_node_ = other.cost_for_non_preferred_node_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
 
@@ -371,6 +377,24 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return weight_for_inter_region_edge_;
    }
 
+   public void setWeightForNonPreferredEdge(double weight_for_non_preferred_edge)
+   {
+      weight_for_non_preferred_edge_ = weight_for_non_preferred_edge;
+   }
+   public double getWeightForNonPreferredEdge()
+   {
+      return weight_for_non_preferred_edge_;
+   }
+
+   public void setCostForNonPreferredNode(double cost_for_non_preferred_node)
+   {
+      cost_for_non_preferred_node_ = cost_for_non_preferred_node;
+   }
+   public double getCostForNonPreferredNode()
+   {
+      return cost_for_non_preferred_node_;
+   }
+
    public void setReturnBestEffortSolution(boolean return_best_effort_solution)
    {
       return_best_effort_solution_ = return_best_effort_solution;
@@ -448,6 +472,10 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_inter_region_edge_, other.weight_for_inter_region_edge_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_non_preferred_edge_, other.weight_for_non_preferred_edge_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_for_non_preferred_node_, other.cost_for_non_preferred_node_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
 
@@ -513,6 +541,10 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.weight_for_inter_region_edge_ != otherMyClass.weight_for_inter_region_edge_) return false;
 
+      if(this.weight_for_non_preferred_edge_ != otherMyClass.weight_for_non_preferred_edge_) return false;
+
+      if(this.cost_for_non_preferred_node_ != otherMyClass.cost_for_non_preferred_node_) return false;
+
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
 
@@ -575,6 +607,10 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.occluded_goal_edge_weight_);      builder.append(", ");
       builder.append("weight_for_inter_region_edge=");
       builder.append(this.weight_for_inter_region_edge_);      builder.append(", ");
+      builder.append("weight_for_non_preferred_edge=");
+      builder.append(this.weight_for_non_preferred_edge_);      builder.append(", ");
+      builder.append("cost_for_non_preferred_node=");
+      builder.append(this.cost_for_non_preferred_node_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
       builder.append(this.return_best_effort_solution_);
       builder.append("}");
