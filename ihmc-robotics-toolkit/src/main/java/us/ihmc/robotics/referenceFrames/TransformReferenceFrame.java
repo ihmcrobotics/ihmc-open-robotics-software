@@ -2,6 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public class TransformReferenceFrame extends ReferenceFrame
 {
@@ -24,7 +25,7 @@ public class TransformReferenceFrame extends ReferenceFrame
       transformToParent.set(this.transform3D);
    }
 
-   public void setTransformAndUpdate(RigidBodyTransform transform)
+   public void setTransformAndUpdate(RigidBodyTransformReadOnly transform)
    {
       this.transform3D.set(transform);
       this.update();

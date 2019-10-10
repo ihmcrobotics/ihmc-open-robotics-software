@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
@@ -27,10 +28,10 @@ public class LinearHeightCost implements FootstepCost
       if (startNodeData == null || endNodeData == null)
          return 0.0;
 
-      Point3DReadOnly snappedStartNode = FootstepNodeTools.getNodePositionInWorld(startNode, startNodeData.getSnapTransform());
-      Point3DReadOnly snappedEndNode = FootstepNodeTools.getNodePositionInWorld(endNode, endNodeData.getSnapTransform());
+      RigidBodyTransform snappedStartNodeTransform = startNodeData.getOrComputeSnappedNodeTransform(startNode);
+      RigidBodyTransform snappedEndNodeTransform = startNodeData.getOrComputeSnappedNodeTransform(endNode);
 
-      double heightChange = snappedEndNode.getZ() - snappedStartNode.getZ();
+      double heightChange = snappedEndNodeTransform.getTranslationZ() - snappedStartNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
          return costParameters.getStepUpWeight() * heightChange;
