@@ -173,7 +173,7 @@ public class NavigableRegionsManager
          {
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
-            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight());
+            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight(), neighboringEdge.getStaticEdgeCost());
             double newCostFromStart = nodeToExpand.getCostFromStart() + connectionCost;
 
             double currentCostFromStart = neighbor.getCostFromStart();
@@ -240,7 +240,7 @@ public class NavigableRegionsManager
       return nodeToExpand.getEdges();
    }
 
-   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight)
+   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight, double staticEdgeCost)
    {
       Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
       Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
@@ -256,7 +256,7 @@ public class NavigableRegionsManager
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
       double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
 
-      return edgeWeight * (distanceCost + elevationCost);
+      return edgeWeight * (distanceCost + elevationCost) + staticEdgeCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)

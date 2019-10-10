@@ -64,7 +64,7 @@ public class VisibilityGraphsFrameworkTest
    private static boolean VISUALIZE = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
-   private static boolean fullyExpandVisibilityGraph = false;
+   private static boolean fullyExpandVisibilityGraph = true;
 
    private static final int maxPointsInRegion = 25000;
    private static final double walkerTotalTime = 60.0;
