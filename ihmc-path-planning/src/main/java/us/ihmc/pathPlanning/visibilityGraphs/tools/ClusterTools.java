@@ -17,8 +17,10 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -68,6 +70,9 @@ public class ClusterTools
 
       List<Point2D> extrusions = new ArrayList<>();
 
+      // gets all the edges, where edge i is the edge that ends at point i.
+      List<LineSegment2DReadOnly> edges = getAllEdges(pointsToExtrude);
+
       for (int i = 0; i < pointsToExtrude.size(); i++)
       {
          Point2DReadOnly previousPoint = ListWrappingIndexTools.getPrevious(i, pointsToExtrude);
@@ -76,12 +81,13 @@ public class ClusterTools
          if (pointToExtrude.distanceSquared(previousPoint) < POPPING_POLYGON_POINTS_THRESHOLD)
             continue;
 
-         Point2DReadOnly nextPoint = ListWrappingIndexTools.getNext(i, pointsToExtrude);
-
          double extrusionDistance = extrusionDistances[i];
 
-         LineSegment2D edgePrev = new LineSegment2D(previousPoint, pointToExtrude);
-         LineSegment2D edgeNext = new LineSegment2D(pointToExtrude, nextPoint);
+         if (checkExtrusionDistance)
+            extrusionDistance = getMaximumExtrusionDistance(extrudeToTheLeft, i, edges, extrusionDistances);
+
+         LineSegment2DReadOnly edgePrev = edges.get(i);
+         LineSegment2DReadOnly edgeNext = ListWrappingIndexTools.getNext(i, edges);
 
          boolean shouldExtrudeCorner;
 
@@ -104,6 +110,75 @@ public class ClusterTools
       }
 
       return extrusions;
+   }
+
+   private static List<LineSegment2DReadOnly> getAllEdges(List<Point2DReadOnly> points)
+   {
+      List<LineSegment2DReadOnly> edges = new ArrayList<>();
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         Point2DReadOnly previousPoint = ListWrappingIndexTools.getPrevious(i, points);
+         Point2DReadOnly pointToExtrude = points.get(i);
+
+         edges.add(new LineSegment2D(previousPoint, pointToExtrude));
+      }
+
+      return edges;
+   }
+
+   private static double getMaximumExtrusionDistance(boolean extrudeToTheLeft, int currentEdgeIndex, List<LineSegment2DReadOnly> allEdges, double[] extrusionDistances)
+   {
+      LineSegment2DReadOnly currentEdge = allEdges.get(currentEdgeIndex);
+
+      Point2DReadOnly currentMidpoint = currentEdge.midpoint();
+      Point2DReadOnly currentMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, currentEdge, extrusionDistances[currentEdgeIndex]);
+      Vector2DBasics currentExtrusionDirection = new Vector2D();
+      currentExtrusionDirection.sub(currentMidpointExtrusion, currentMidpoint);
+
+      double maxExtrusionDistance = extrusionDistances[currentEdgeIndex];
+
+      for (int i = 0; i < allEdges.size(); i++)
+      {
+         if (i == currentEdgeIndex)
+            continue;
+
+         LineSegment2DReadOnly otherEdge = allEdges.get(i);
+         Point2DReadOnly otherMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, otherEdge, extrusionDistances[i]);
+
+         LineSegment2DReadOnly midpointConnection = new LineSegment2D(currentMidpoint, otherEdge.midpoint());
+
+         // FIXME this percentage thing isn't working quite right.
+         double currentPercentAlongSegment = midpointConnection.percentageAlongLineSegment(currentMidpointExtrusion);
+         double otherPercentAlongSegment = midpointConnection.percentageAlongLineSegment(otherMidpointExtrusion);
+
+         if (currentPercentAlongSegment > otherPercentAlongSegment)
+         {
+            double maxPercent = 0.5 * ( currentPercentAlongSegment + otherPercentAlongSegment);
+            if (maxPercent > 1.0 || maxPercent < 0.0)
+               continue;
+
+            double distanceAlongMidpointConnection = maxPercent * midpointConnection.length();
+            double angle = currentExtrusionDirection.angle(midpointConnection.direction(false));
+            double equivalentExtrusionDistance = distanceAlongMidpointConnection / Math.cos(angle);
+            maxExtrusionDistance = Math.min(maxExtrusionDistance, equivalentExtrusionDistance);
+         }
+      }
+
+      return maxExtrusionDistance;
+   }
+
+   private static Point2DReadOnly getMidpointExtrusion(boolean extrudeToTheLeft, LineSegment2DReadOnly edge, double extrusionDistance)
+   {
+      Vector2DBasics currentDirection = edge.direction(true);
+      EuclidGeometryTools.perpendicularVector2D(currentDirection, currentDirection);
+      if (!extrudeToTheLeft)
+         currentDirection.negate();
+      Point2DReadOnly currentMidpoint = edge.midpoint();
+      Point2D extrudedMidpoint = new Point2D();
+      extrudedMidpoint.scaleAdd(extrusionDistance, currentDirection, currentMidpoint);
+
+      return extrudedMidpoint;
    }
 
    public static List<Point2D> extrudeMultiLine(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator, int numberOfExtrusionsAtEndpoints)
@@ -372,7 +447,7 @@ public class ClusterTools
       boolean extrudeToTheLeft = homeRegionCluster.getExtrusionSide() != ExtrusionSide.INSIDE;
 
       //TODO: JEP+++: Why do we add a NonNavigableExtrusion to a home region cluster?
-      // I guess it's for inner region cionnections that cross over empty space.
+      // I guess it's for inner region connections that cross over empty space.
       // Need to make sure they don't. But then also need to make sure these 
       // NonNavigable regions are not treated as boundaries when making 
       // inter region connections...
