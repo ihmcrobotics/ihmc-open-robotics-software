@@ -81,9 +81,17 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
       return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean addOrientationMidpointForObstacleClearance()
    {
       return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSingularityAvoidanceInSupport()
+   {
+      return true;
    }
 }

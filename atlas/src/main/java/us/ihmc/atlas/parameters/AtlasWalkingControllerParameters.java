@@ -464,6 +464,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
+   public boolean usePelvisHeightControllerOnly()
+   {
+      return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public String[] getJointsWithRestrictiveLimits()
    {
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);

@@ -459,6 +459,47 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	}
 
+   @Test
+   public void testWalkingOffOfLargePlatform() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM;
+      
+      System.out.println(selectedLocation.getStartingLocationOffset().getAdditionalOffset());
+
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOffOfLargePlatformTest");
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      setupCameraForWalkingOffOfLargePlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfLargePlatform(scriptedFootstepGenerator);
+      drcSimulationTestHelper.publishToController(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
 	private void setupCameraForWalkingOverSmallPlatform(SimulationConstructionSet scs)
    {
       Point3D cameraFix = new Point3D(-3.0, -4.6, 0.8);
@@ -483,6 +524,13 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
+   private void setupCameraForWalkingOffOfLargePlatform(SimulationConstructionSet scs)
+   {
+      Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
+      Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
 
    private FootstepDataListMessage createFootstepsForSteppingOntoSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
@@ -591,6 +639,16 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations, swingTime, transferTime);
    }
 
+   private FootstepDataListMessage createFootstepsForSteppingOffOfLargePlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   {
+//      -5.500, -7.171,  0.300
+      double[][][] footstepLocationsAndOrientations = new double[][][]
+            {{{-5.5 - 0.3 + 0.15, -7.171 - 0.3 - 0.15, 0.08716704456087025}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
+            {{-5.5 - 0.3 - 0.15, -7.171 - 0.3 + 0.15, 0.08586305720146342}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
+            };
 
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+   }
 
 }
