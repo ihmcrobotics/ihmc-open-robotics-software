@@ -137,6 +137,16 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(occludedGoalEdgeWeight, weight);
    }
 
+   default void setWeightForNonPreferredEdge(double weight)
+   {
+      set(weightForNonPreferredEdge, weight);
+   }
+
+   default void setCostForNonPreferredNode(double cost)
+   {
+      set(costForNonPreferredNode, cost);
+   }
+
    default void set(VisibilityGraphsParametersPacket packet)
    {
       if (packet.getMaxInterRegionConnectionLength() != -1.0)
@@ -181,6 +191,10 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
       if (packet.getWeightForInterRegionEdge() != -1.0)
          setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
+      if (packet.getWeightForNonPreferredEdge() != -1.0)
+         setWeightForNonPreferredEdge(packet.getWeightForNonPreferredEdge());
+      if (packet.getCostForNonPreferredNode() != -1.0)
+         setCostForNonPreferredNode(packet.getCostForNonPreferredNode());
 
       setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
