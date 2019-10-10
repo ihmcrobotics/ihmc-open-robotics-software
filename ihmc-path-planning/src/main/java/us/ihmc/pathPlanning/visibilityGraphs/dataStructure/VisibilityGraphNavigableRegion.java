@@ -317,7 +317,7 @@ public class VisibilityGraphNavigableRegion
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode);
+         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, 2.0);
       }
    }
 
@@ -327,11 +327,11 @@ public class VisibilityGraphNavigableRegion
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode);
+         addPreferredInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, 1.0);
       }
    }
 
-   public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
+   public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight)
    {
       checkNavigableRegionConsistency(sourceNode, targetNode);
 
@@ -344,7 +344,7 @@ public class VisibilityGraphNavigableRegion
 
       if (targetIsVisible)
       {
-         addInnerRegionEdge(sourceNode, targetNode);
+         addInnerRegionEdge(sourceNode, targetNode, weight);
       }
    }
 

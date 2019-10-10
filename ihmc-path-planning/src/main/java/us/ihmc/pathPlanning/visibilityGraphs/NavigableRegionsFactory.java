@@ -83,7 +83,9 @@ public class NavigableRegionsFactory
       for (Cluster cluster : navigableRegion.getAllClusters())
       {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
+         List<Point2DReadOnly> expandListOfPreferred2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getPreferredNavigableExtrusionsInLocal(), clusterResolution);
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
+         cluster.setPreferredNavigableExtrusionsInLocal(expandListOfPreferred2DPoints);
       }
       return navigableRegion;
    }
