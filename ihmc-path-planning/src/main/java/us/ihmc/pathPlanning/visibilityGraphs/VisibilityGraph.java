@@ -112,11 +112,12 @@ public class VisibilityGraph
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          List<VisibilityGraphNode> allPreferredNavigableNodes = targetVisibilityGraphNavigableRegion.getAllPreferredNavigableNodes();
-         // TODO this doesn't account for connecting to the other thing.
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(),
-                                                   targetObstacleClusters, crossRegionEdges, filter, nonPreferredWeight * edgeWeight, parameters.getLengthForLongInterRegionEdge());
+                                                   targetObstacleClusters, crossRegionEdges, filter, nonPreferredWeight * edgeWeight, nonPreferredCost,
+                                                   parameters.getLengthForLongInterRegionEdge());
          createVisibilityConnectionsWhenOnNoRegion(sourceNode, allPreferredNavigableNodes, navigableRegions.getNaviableRegionsList(),
-                                                   targetObstacleClusters, crossRegionEdges, filter, edgeWeight, parameters.getLengthForLongInterRegionEdge());
+                                                   targetObstacleClusters, crossRegionEdges, filter, edgeWeight, 0.0,
+                                                   parameters.getLengthForLongInterRegionEdge());
       }
 
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -425,8 +426,6 @@ public class VisibilityGraph
             if (xyDistance < lengthForLongInterRegionEdge)
             {
                VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-               edge.setEdgeWeight(weightForInterRegionEdge);
-               edge.setStaticEdgeCost(staticEdgeCost);
                potentialEdges.add(edge);
             }
             else // Check if the edge is visible if it is a long one.
@@ -456,8 +455,6 @@ public class VisibilityGraph
                if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
                {
                   VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-                  edge.setEdgeWeight(weightForInterRegionEdge);
-                  edge.setStaticEdgeCost(staticEdgeCost);
                   potentialEdges.add(edge);
                }
             }
@@ -467,11 +464,11 @@ public class VisibilityGraph
       if (onlyUseShortestEdge)
       {
          VisibilityGraphEdge shortestEdgeXY = findShortestEdgeXY(sourceNode, potentialEdges);
-         shortestEdgeXY.setStaticEdgeCost(staticEdgeCost);
-         shortestEdgeXY.setEdgeWeight(weightForInterRegionEdge);
 
          if (shortestEdgeXY != null)
          {
+            shortestEdgeXY.setStaticEdgeCost(staticEdgeCost);
+            shortestEdgeXY.setEdgeWeight(weightForInterRegionEdge);
             shortestEdgeXY.registerEdgeWithNodes();
             edgesToPack.add(shortestEdgeXY);
          }
@@ -480,6 +477,8 @@ public class VisibilityGraph
       {
          for (VisibilityGraphEdge edge : potentialEdges)
          {
+            edge.setEdgeWeight(weightForInterRegionEdge);
+            edge.setStaticEdgeCost(staticEdgeCost);
             edge.registerEdgeWithNodes();
          }
          edgesToPack.addAll(potentialEdges);
@@ -490,16 +489,17 @@ public class VisibilityGraph
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
                                                                 List<VisibilityGraphEdge> edgesToPack, InterRegionConnectionFilter filter, double edgeWeight,
-                                                                double lengthForLongInterRegionEdge)
+                                                                double staticCost, double lengthForLongInterRegionEdge)
    {
       createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, allNavigableRegions, targetObstacleClusters, edgesToPack,
-                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, filter, edgeWeight, lengthForLongInterRegionEdge);
+                                                ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE, filter, edgeWeight, staticCost, lengthForLongInterRegionEdge);
    }
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
                                                                 List<NavigableRegion> allNavigableRegions, List<Cluster> targetObstacleClusters,
                                                                 List<VisibilityGraphEdge> edgesToPack, boolean useOnlyShortestEdge,
-                                                                InterRegionConnectionFilter filter, double edgeWeight, double lengthForLongInterRegionEdge)
+                                                                InterRegionConnectionFilter filter, double edgeWeight, double staticCost,
+                                                                double lengthForLongInterRegionEdge)
    {
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
 
@@ -520,17 +520,13 @@ public class VisibilityGraph
          }
          else // Check if the edge is visible if it is a long one.
          {
-//            PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
             PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
 
             Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
-//            Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
 
             Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
-//            Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, targetHomeRegion);
 
             targetHomeRegion.transformFromWorldToLocal(sourceProjectedVerticallyOntoTarget);
-//            sourceHomeRegion.transformFromWorldToLocal(targetProjectedVerticallyOntoSource);
 
 
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
@@ -585,6 +581,7 @@ public class VisibilityGraph
          {
             shortestEdgeXY.registerEdgeWithNodes();
             shortestEdgeXY.setEdgeWeight(edgeWeight);
+            shortestEdgeXY.setStaticEdgeCost(staticCost);
             edgesToPack.add(shortestEdgeXY);
          }
       }
@@ -594,11 +591,10 @@ public class VisibilityGraph
          {
             edge.registerEdgeWithNodes();
             edge.setEdgeWeight(edgeWeight);
+            edge.setStaticEdgeCost(staticCost);
          }
          edgesToPack.addAll(potentialEdges);
       }
-
-      edgesToPack.addAll(potentialEdges);
    }
 
    private static VisibilityGraphEdge findShortestEdgeXY(VisibilityGraphNode sourceNode, List<VisibilityGraphEdge> potentialEdges)
