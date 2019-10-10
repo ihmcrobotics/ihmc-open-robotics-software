@@ -25,12 +25,16 @@
 
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2"
                               GridPane.rowIndex="1"/>
+                <CheckBox fx:id="showClusterPreferredNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show pref navigable extrusions"
+                          GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                <CheckBox fx:id="showClusterPreferredNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show pref non-navigable extrusions"
+                          GridPane.columnIndex="2" GridPane.rowIndex="3"/>
                 <CheckBox fx:id="showClusterNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show navigable extrusions"
-                              GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                              GridPane.columnIndex="2" GridPane.rowIndex="4"/>
                 <CheckBox fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions"
-                              GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                              GridPane.columnIndex="2" GridPane.rowIndex="5"/>
                 <CheckBox fx:id="showClusterRawPointsToggleButton" mnemonicParsing="false" text="Show cluster raw points" GridPane.columnIndex="2"
-                              GridPane.rowIndex="4"/>
+                              GridPane.rowIndex="6"/>
 
                 <CheckBox fx:id="showGoalMapToggleButton" mnemonicParsing="false" text="Show goal map" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
                 <CheckBox fx:id="showStartMapToggleButton" mnemonicParsing="false" text="Show start map" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
