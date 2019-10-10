@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -63,8 +65,8 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
       Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
-      nodePosition.addZ(snapTransform.getTranslationZ());
-      previousNodePosition.addZ(previousSnapTransform.getTranslationZ());
+      snapTransform.transform(nodePosition);
+      previousSnapTransform.transform(previousNodePosition);
 
       if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
       {
@@ -105,7 +107,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
     * will be aligned with the vector connecting the nodes. It's lower edge will be the specified
     * distance above the higher of the two nodes and the plane will have the specified hight.
     */
-   public static PlanarRegion createBodyRegionFromNodes(Point3D nodeA, Point3D nodeB, double clearance, double height)
+   public static PlanarRegion createBodyRegionFromNodes(Point3DReadOnly nodeA, Point3DReadOnly nodeB, double clearance, double height)
    {
       double lowerZ = Math.max(nodeA.getZ(), nodeB.getZ()) + clearance;
       double higherZ = lowerZ + height;

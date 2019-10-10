@@ -3,9 +3,12 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -33,15 +36,13 @@ public abstract class CostToGoHeuristics
 
    public double compute(FootstepNode node)
    {
-      double height = 0.0;
+      Point3DBasics midfootPoint = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
 
       FootstepNodeSnapData snapData = snapper.getSnapData(node);
       if (snapData != null)
-         height = snapData.getSnapTransform().getTranslationZ();
+         snapData.getSnapTransform().transform(midfootPoint);
 
-      Point2DReadOnly midfootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-
-      pose.setPosition(midfootPoint.getX(), midfootPoint.getY(), height);
+      pose.setPosition(midfootPoint);
       pose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
       return weight.getValue() * computeHeuristics(pose);

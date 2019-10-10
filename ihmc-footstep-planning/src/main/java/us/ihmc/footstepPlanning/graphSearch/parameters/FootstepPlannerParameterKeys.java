@@ -11,7 +11,7 @@ public class FootstepPlannerParameterKeys
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey checkForBodyBoxCollisions                  = keys.addBooleanKey("Check for body box collisions", false);
-   public static final BooleanStoredPropertyKey checkForPathCollisions                     = keys.addBooleanKey("Check for path collisions", false);
+   public static final BooleanStoredPropertyKey checkForPathCollisions                     = keys.addBooleanKey("Check for path collisions", true);
    public static final BooleanStoredPropertyKey performHeuristicSearchPolicies             = keys.addBooleanKey("Perform heuristic search policies", true);
    public static final DoubleStoredPropertyKey idealFootstepWidth                         = keys.addDoubleKey ("Ideal footstep width", 0.22);
    public static final DoubleStoredPropertyKey idealFootstepLength                        = keys.addDoubleKey ("Ideal footstep length", 0.3);
@@ -40,7 +40,6 @@ public class FootstepPlannerParameterKeys
    public static final IntegerStoredPropertyKey minimumStepsForBestEffortPlan              = keys.addIntegerKey("Min steps for best effort plan", 3);
    public static final DoubleStoredPropertyKey  minXClearanceFromStance                    = keys.addDoubleKey ("Min X clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  minYClearanceFromStance                    = keys.addDoubleKey ("Min Y clearance from stance", 0.0);
-   public static final DoubleStoredPropertyKey  bodyGroundClearance                        = keys.addDoubleKey ("Body ground clearance", 0.25);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                               = keys.addDoubleKey ("Body box width", 0.7);
    public static final DoubleStoredPropertyKey  bodyBoxHeight                              = keys.addDoubleKey ("Body box height", 1.5);
    public static final DoubleStoredPropertyKey  bodyBoxDepth                               = keys.addDoubleKey ("Body box depth", 0.3);

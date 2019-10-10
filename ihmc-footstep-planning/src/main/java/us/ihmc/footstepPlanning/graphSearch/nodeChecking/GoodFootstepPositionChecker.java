@@ -126,16 +126,16 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             if (grandparentSnapData == null)
                return true;
 
-            RigidBodyTransform grandparentSnappedSoleTransform = new RigidBodyTransform();
-            FootstepNodeTools.getSnappedNodeTransform(grandparentNode, grandparentSnapData.getSnapTransform(), grandparentSnappedSoleTransform);
+            Point3D grandparentPosition = new Point3D(grandparentNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+            grandparentSnapData.getSnapTransform().transform(grandparentPosition);
             double grandparentTranslationScaleFactor = 1.5;
 
             Point3D nodePosition = new Point3D(nodeToCheck.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             snapData.getSnapTransform().transform(nodePosition);
 
-            double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentSnappedSoleTransform.getTranslationZ();
-            double translationFromGrandparentNode = EuclidCoreTools.norm(nodePosition.getX() - grandparentSnappedSoleTransform.getTranslationX(),
-                                                                         nodePosition.getY() - grandparentSnappedSoleTransform.getTranslationY());
+            double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentPosition.getZ();
+            double translationFromGrandparentNode = EuclidCoreTools.norm(nodePosition.getX() - grandparentPosition.getX(),
+                                                                         nodePosition.getY() - grandparentPosition.getY());
 
             boolean largeStepUp = heightChangeFromGrandparentNode > parameters.getMaximumStepZWhenSteppingUp();
             boolean largeStepDown = heightChangeFromGrandparentNode < -parameters.getMaximumStepZWhenForwardAndDown();
