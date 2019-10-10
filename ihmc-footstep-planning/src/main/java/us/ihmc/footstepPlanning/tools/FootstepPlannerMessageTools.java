@@ -132,6 +132,7 @@ public class FootstepPlannerMessageTools
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
       packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
       packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setPreferredNavigableExtrusionDistance(parameters.getPreferredNavigableExtrusionDistance());
       packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());

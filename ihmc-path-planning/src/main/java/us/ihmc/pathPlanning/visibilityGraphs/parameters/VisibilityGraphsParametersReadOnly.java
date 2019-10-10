@@ -40,6 +40,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(obstacleExtrusionDistance);
    }
 
+   default double getPreferredNavigableExtrusionDistance()
+   {
+      return get(preferredNavigableExtrusionDistance);
+   }
+
    default double getPreferredObstacleExtrusionDistance()
    {
       return get(preferredObstacleExtrusionDistance);
@@ -223,7 +228,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          @Override
          public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
-            return getObstacleExtrusionDistance();
+            return getPreferredNavigableExtrusionDistance();
          }
       };
    }

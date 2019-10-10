@@ -11,6 +11,8 @@ float64 navigable_extrusion_distance -1.0
 
 float64 obstacle_extrusion_distance -1.0
 
+float64 preferred_navigable_extrusion_distance -1.0
+
 float64 preferred_obstacle_extrusion_distance -1.0
 
 float64 obstacle_extrusion_distance_if_not_too_high_to_step -1.0

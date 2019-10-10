@@ -14,6 +14,9 @@ float64 navigable_extrusion_distance
 float64 obstacle_extrusion_distance
 
 # Field default value -1.0
+float64 preferred_navigable_extrusion_distance
+
+# Field default value -1.0
 float64 preferred_obstacle_extrusion_distance
 
 # Field default value -1.0

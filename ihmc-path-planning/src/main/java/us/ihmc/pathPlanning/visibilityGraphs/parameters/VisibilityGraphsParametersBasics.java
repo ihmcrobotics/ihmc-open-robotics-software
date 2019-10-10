@@ -32,6 +32,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(obstacleExtrusionDistance, distance);
    }
 
+   default void setPreferredNavigableExtrusionDistance(double distance)
+   {
+      set(preferredNavigableExtrusionDistance, distance);
+   }
+
    default void setPreferredObstacleExtrusionDistance(double distance)
    {
       set(preferredObstacleExtrusionDistance, distance);
@@ -157,6 +162,8 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setNavigableExtrusionDistance(packet.getNavigableExtrusionDistance());
       if (packet.getObstacleExtrusionDistance() != -1.0)
          setObstacleExtrusionDistance(packet.getObstacleExtrusionDistance());
+      if (packet.getPreferredNavigableExtrusionDistance() != -1.0)
+         setPreferredNavigableExtrusionDistance(packet.getPreferredNavigableExtrusionDistance());
       if (packet.getPreferredObstacleExtrusionDistance() != -1.0)
          setPreferredObstacleExtrusionDistance(packet.getPreferredObstacleExtrusionDistance());
       if (packet.getObstacleExtrusionDistanceIfNotTooHighToStep() != -1.0)
