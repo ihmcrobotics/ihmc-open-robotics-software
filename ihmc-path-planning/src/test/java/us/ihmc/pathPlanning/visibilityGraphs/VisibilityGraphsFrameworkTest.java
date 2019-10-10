@@ -94,7 +94,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
-//      parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setPerformPostProcessingNodeShifting(false);
 //      parameters.setIntroduceMidpointsInPostProcessing(true);
 
       return parameters;
@@ -830,11 +830,11 @@ public class VisibilityGraphsFrameworkTest
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 //      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171215_220523_SteppingStones";
 //      String dataSetName = "20171218_204917_FlatGround";
 //      String dataSetName = "20171215_214730_CinderBlockField";
-//      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
+      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
 
       VISUALIZE = true;
@@ -844,7 +844,7 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
+//         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);

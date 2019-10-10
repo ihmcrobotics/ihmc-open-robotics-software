@@ -155,16 +155,46 @@ public class VisibilityGraph
       sourceNode.setEdgesHaveBeenDetermined(true);
    }
 
+   public void computePreferredInterEdges(VisibilityGraphNode sourceNode)
+   {
+      VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
+
+      NavigableRegion sourceNavigableRegion = sourceVisibilityGraphNavigableRegion.getNavigableRegion();
+      List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getObstacleClusters();
+
+      List<VisibilityGraphEdge> interEdges = new ArrayList<>();
+      for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
+      {
+         if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
+            continue;
+
+         //TOOD: +++JerryPratt: Efficiently add Bounding Box check before going through all combinations. Perhaps have a cached bounding box reachable map?
+
+         NavigableRegion targetNavigableRegion = targetVisibilityGraphNavigableRegion.getNavigableRegion();
+         List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
+
+         List<VisibilityGraphNode> allPreferredNavigableNodes = targetVisibilityGraphNavigableRegion.getAllPreferredNavigableNodes();
+         createInterRegionVisibilityConnections(sourceNode, allPreferredNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
+                                                interEdges, parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge());
+      }
+
+      crossRegionEdges.addAll(interEdges);
+
+      sourceNode.setEdgesHaveBeenDetermined(true);
+   }
+
    public static void connectNodeToInnerRegionNodes(VisibilityGraphNode sourceNode, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
                                                     VisibilityGraphNode nodeToAttachToIfInSameRegion)
    {
       visibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode);
+      visibilityGraphNavigableRegion.addPreferredInnerRegionEdgesFromSourceNode(sourceNode);
 
       if (nodeToAttachToIfInSameRegion != null)
       {
          if ((sourceNode.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion) && (nodeToAttachToIfInSameRegion.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion))
          {
-            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion);
+            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 2.0);
+            visibilityGraphNavigableRegion.addPreferredInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0);
          }
       }
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -254,6 +284,8 @@ public class VisibilityGraph
       if (startNode.getEdges().size() < 1)
       { // the start is contained within a navigable region, but is likely moving between regions because of an obstacle extrusion
          computeInterEdges(startNode);
+         // TODO
+         // computePreferredInterEdges(startNode);
       }
 
       return startNode;
