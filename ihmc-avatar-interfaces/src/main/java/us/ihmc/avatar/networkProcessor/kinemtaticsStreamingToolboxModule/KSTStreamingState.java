@@ -63,6 +63,10 @@ public class KSTStreamingState implements State
    private final YoDouble solutionFilterBreakFrequency;
    private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
 
+   private final YoDouble timeOfLastInput, timeSinceLastInput;
+   private final YoDouble rawInputFrequency;
+   private final AlphaFilteredYoVariable inputFrequency;
+
    private final YoPIDSE3Gains ikSolverGains;
 
    public KSTStreamingState(KSTTools tools)
@@ -120,6 +124,13 @@ public class KSTStreamingState implements State
       blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+
+      timeOfLastInput = new YoDouble("timeOfLastInput", registry);
+      timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
+      rawInputFrequency = new YoDouble("rawInputFrequency", registry);
+      YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
+      inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, tools.getToolboxControllerPeriod()));
+      inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
    }
 
    public void setOutputPublisher(OutputPublisher outputPublisher)
@@ -149,6 +160,9 @@ public class KSTStreamingState implements State
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
       resetFilter = true;
+      timeOfLastInput.set(Double.NaN);
+      timeSinceLastInput.set(Double.NaN);
+      inputFrequency.reset();
    }
 
    @Override
@@ -183,6 +197,22 @@ public class KSTStreamingState implements State
             linearRateLimit.set(latestInput.getLinearRateLimitation());
          else
             linearRateLimit.set(defaultLinearMaxRate);
+      }
+
+      if (tools.hasNewInputCommand())
+      {
+         if (Double.isFinite(timeSinceLastInput.getValue()) && timeSinceLastInput.getValue() > 0.0)
+         {
+            rawInputFrequency.set(1.0 / timeSinceLastInput.getValue());
+            inputFrequency.update();
+         }
+
+         timeOfLastInput.set(timeInState);
+      }
+
+      if (Double.isFinite(timeOfLastInput.getValue()))
+      {
+         timeSinceLastInput.set(timeInState - timeOfLastInput.getValue());
       }
 
       ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);

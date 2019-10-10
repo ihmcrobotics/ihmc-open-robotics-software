@@ -137,14 +137,21 @@ public class KSTTools
    }
 
    private KinematicsStreamingToolboxInputCommand latestInput = null;
+   private boolean hasNewInputCommand = false;
 
    public KinematicsStreamingToolboxInputCommand pollInputCommand()
    {
-      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class))
-      {
+      hasNewInputCommand = commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class);
+
+      if (hasNewInputCommand)
          latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
-      }
+
       return latestInput;
+   }
+
+   public boolean hasNewInputCommand()
+   {
+      return hasNewInputCommand;
    }
 
    public WholeBodyTrajectoryMessage convertIKOutput()
