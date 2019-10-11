@@ -15,6 +15,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -154,25 +155,36 @@ public class KSTTools
       return hasNewInputCommand;
    }
 
-   public WholeBodyTrajectoryMessage convertIKOutput()
-   {
-      return setupWholeBodyTrajectoryMessage(ikController.getSolution());
-   }
-
-   public WholeBodyTrajectoryMessage setupWholeBodyTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
       outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      outputConverter.computeHandTrajectoryMessages();
+      //      outputConverter.computeHandTrajectoryMessages();
+      outputConverter.computeArmTrajectoryMessages();
+      outputConverter.computeNeckTrajectoryMessage();
+      outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+      outputConverter.computePelvisTrajectoryMessage();
+
+      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
+      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
+      return wholeBodyTrajectoryMessage;
+   }
+
+   public WholeBodyTrajectoryMessage setupFinalizeStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   {
+      outputConverter.updateFullRobotModel(solutionToConvert);
+      outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
+      outputConverter.setTrajectoryTime(0.5);
+
+      //      outputConverter.computeHandTrajectoryMessages();
       outputConverter.computeArmTrajectoryMessages();
       outputConverter.computeNeckTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
 
-      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
       return wholeBodyTrajectoryMessage;
    }
 

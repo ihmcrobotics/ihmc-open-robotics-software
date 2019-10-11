@@ -247,18 +247,18 @@ public class KSTStreamingState implements State
          if (timeSinceLastPublished >= publishingPeriod.getValue())
          {
             outputRobotState.set(filteredRobotState);
-            outputRobotState.scaleVelocities(0.50);
+            outputRobotState.scaleVelocities(0.75);
 
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
                double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
                double alphaDot = 1.0 / streamingBlendingDuration.getValue();
                blendedRobotState.interpolate(initialRobotState.getStatus(), outputRobotState.getStatus(), alpha, alphaDot);
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(blendedRobotState.getStatus()));
+               outputPublisher.publish(tools.setupStreamingMessage(blendedRobotState.getStatus()));
             }
             else
             {
-               outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(outputRobotState.getStatus()));
+               outputPublisher.publish(tools.setupStreamingMessage(outputRobotState.getStatus()));
             }
 
             timeOfLastMessageSentToController.set(timeInState);
@@ -266,6 +266,14 @@ public class KSTStreamingState implements State
       }
       else
       {
+         if (wasStreaming.getValue())
+         {
+            outputRobotState.set(filteredRobotState);
+            outputRobotState.scaleVelocities(0.75);
+
+            outputPublisher.publish(tools.setupFinalizeStreamingMessage(blendedRobotState.getStatus()));
+         }
+
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       }
 
