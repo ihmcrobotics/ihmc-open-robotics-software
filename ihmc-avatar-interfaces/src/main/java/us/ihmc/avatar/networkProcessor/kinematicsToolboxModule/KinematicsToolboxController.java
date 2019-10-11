@@ -112,6 +112,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
+   private final Collection<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center of
@@ -300,6 +301,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
+      this.controllableRigidBodies = controllableRigidBodies;
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -1006,6 +1008,11 @@ public class KinematicsToolboxController extends ToolboxController
    public OneDoFJointBasics[] getDesiredOneDoFJoint()
    {
       return oneDoFJoints;
+   }
+
+   public Collection<? extends RigidBodyBasics> getControllableRigidBodies()
+   {
+      return controllableRigidBodies;
    }
 
    public KinematicsToolboxOutputStatus getSolution()
