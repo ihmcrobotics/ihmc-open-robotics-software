@@ -1,7 +1,10 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -68,7 +71,20 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       update(qMeasured);
    }
 
-   public void update(Quaternion qMeasured)
+   public void update(FrameOrientation3DReadOnly rawOrientation)
+   {
+      checkReferenceFrameMatch(rawOrientation);
+      qMeasured.set(rawOrientation);
+      update(qMeasured);
+   }
+
+   public void update(Orientation3DReadOnly rawOrientation)
+   {
+      qMeasured.set(rawOrientation);
+      update(qMeasured);
+   }
+
+   private void update(QuaternionReadOnly qMeasured)
    {
       if (hasBeenCalled.getBooleanValue())
       {
