@@ -19,7 +19,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
@@ -86,19 +86,6 @@ public class ControllerNetworkSubscriber
       createGlobalStatusMessageListener();
    }
 
-   @SuppressWarnings({"unused", "unchecked"})
-   private static <T> void getMessageTopicDataType(T messageInstance, Map<Class<?>, TopicDataType<?>> mapToModify)
-   {
-      Class<T> messageType = (Class<T>) messageInstance.getClass();
-
-      if (mapToModify.containsKey(messageType))
-         return;
-
-      TopicDataType<T> topicDataType = ROS2Tools.newMessageTopicDataTypeInstance(messageType);
-
-      mapToModify.put(messageType, topicDataType);
-   }
-
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
@@ -112,8 +99,19 @@ public class ControllerNetworkSubscriber
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
       String topicName = subscriberTopicNameGenerator.generateTopicName(multipleMessageType);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName,
-                                           s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
+      try
+      {
+         T localInstance = multipleMessageType.newInstance();
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName, s ->
+         {
+            s.takeNextData(localInstance, null);
+            unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
+         });
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
