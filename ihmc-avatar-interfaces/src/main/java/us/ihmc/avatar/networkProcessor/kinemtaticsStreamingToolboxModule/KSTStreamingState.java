@@ -166,6 +166,7 @@ public class KSTStreamingState implements State
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
+      System.gc();
    }
 
    @Override
