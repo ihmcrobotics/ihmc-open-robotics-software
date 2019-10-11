@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -58,8 +59,12 @@ public class KSTTools
    private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
    private boolean hasCapturabilityBasedStatus = false;
    private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
+
    private final double walkingControllerPeriod;
    private final double toolboxControllerPeriod;
+   private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
+
+   private long currentMessageId = 0L;
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod,
@@ -73,6 +78,9 @@ public class KSTTools
       this.toolboxControllerPeriod = toolboxControllerPeriod;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
+
+      walkingControllerMonotonicTime = new YoDouble("walkingControllerMonotonicTime", registry);
+      walkingControllerWallTime = new YoDouble("walkingControllerWallTime", registry);
 
       currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
       currentRootJoint = currentFullRobotModel.getRootJoint();
@@ -114,6 +122,9 @@ public class KSTTools
 
       if (hasRobotDataConfiguration)
       {
+         walkingControllerMonotonicTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getMonotonicTime()));
+         walkingControllerWallTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getWallTime()));
+
          for (int jointIndex = 0; jointIndex < currentOneDoFJoint.length; jointIndex++)
          {
             currentOneDoFJoint[jointIndex].setQ(robotConfigurationDataInternal.getJointAngles().get(jointIndex));
@@ -170,6 +181,7 @@ public class KSTTools
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
       return wholeBodyTrajectoryMessage;
    }
 
@@ -185,7 +197,50 @@ public class KSTTools
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
 
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+
       return wholeBodyTrajectoryMessage;
+   }
+
+   private static void setAllIDs(WholeBodyTrajectoryMessage message, long id)
+   {
+      message.setSequenceId(id);
+      message.getLeftHandTrajectoryMessage().setSequenceId(id);
+      message.getRightHandTrajectoryMessage().setSequenceId(id);
+      message.getLeftArmTrajectoryMessage().setSequenceId(id);
+      message.getRightArmTrajectoryMessage().setSequenceId(id);
+      message.getChestTrajectoryMessage().setSequenceId(id);
+      message.getSpineTrajectoryMessage().setSequenceId(id);
+      message.getPelvisTrajectoryMessage().setSequenceId(id);
+      message.getLeftFootTrajectoryMessage().setSequenceId(id);
+      message.getRightFootTrajectoryMessage().setSequenceId(id);
+      message.getNeckTrajectoryMessage().setSequenceId(id);
+      message.getHeadTrajectoryMessage().setSequenceId(id);
+
+      message.setUniqueId(id);
+      message.getLeftHandTrajectoryMessage().setUniqueId(id);
+      message.getRightHandTrajectoryMessage().setUniqueId(id);
+      message.getLeftArmTrajectoryMessage().setUniqueId(id);
+      message.getRightArmTrajectoryMessage().setUniqueId(id);
+      message.getChestTrajectoryMessage().setUniqueId(id);
+      message.getSpineTrajectoryMessage().setUniqueId(id);
+      message.getPelvisTrajectoryMessage().setUniqueId(id);
+      message.getLeftFootTrajectoryMessage().setUniqueId(id);
+      message.getRightFootTrajectoryMessage().setUniqueId(id);
+      message.getNeckTrajectoryMessage().setUniqueId(id);
+      message.getHeadTrajectoryMessage().setUniqueId(id);
+
+      message.getLeftHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getRightHandTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
+      message.getRightArmTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
+      message.getChestTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getSpineTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
+      message.getPelvisTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getLeftFootTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getRightFootTrajectoryMessage().getSe3Trajectory().getQueueingProperties().setMessageId(id);
+      message.getNeckTrajectoryMessage().getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
+      message.getHeadTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
