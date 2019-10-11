@@ -31,8 +31,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class KSTStreamingState implements State
 {
    private static final double defautlInitialBlendDuration = 2.0;
-   private static final double defaultAngularMaxRate = 35.0;
-   private static final double defaultLinearMaxRate = 2.0;
    private static final double defaultMessageWeight = 1.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,6 +70,7 @@ public class KSTStreamingState implements State
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
    private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
+   private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -86,7 +85,7 @@ public class KSTStreamingState implements State
       HumanoidKinematicsToolboxController ikController = tools.getIKController();
       ikSolverGains = ikController.getDefaultGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
-      ikController.getMomentumWeight().set(0.0001);
+      ikController.getMomentumWeight().set(0.001);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -97,23 +96,30 @@ public class KSTStreamingState implements State
       defaultPelvisMessage.getDesiredOrientationInWorld().setToZero();
       defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
       defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-      defaultPelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
-      defaultPelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
+      MessageTools.packWeightMatrix3DMessage(defaultMessageWeight, defaultPelvisMessage.getLinearWeightMatrix());
+      MessageTools.packWeightMatrix3DMessage(defaultMessageWeight, defaultPelvisMessage.getAngularWeightMatrix());
       chest = desiredFullRobotModel.getChest();
       defaultChestMessage.setEndEffectorHashCode(chest.hashCode());
       defaultChestMessage.getDesiredOrientationInWorld().setToZero();
       defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
       defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-      defaultChestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
+      MessageTools.packWeightMatrix3DMessage(defaultMessageWeight, defaultChestMessage.getAngularWeightMatrix());
+
+      defaultPelvisMessageLinearWeight.set(defaultMessageWeight);
+      defaultPelvisMessageAngularWeight.set(defaultMessageWeight);
+      defaultChestMessageAngularWeight.set(defaultMessageWeight);
 
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
 
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
+      defaultLinearRateLimit.set(0.75);
+      defaultAngularRateLimit.set(5.0);
+
       isRateLimiting.set(true);
-      linearRateLimit.set(defaultLinearMaxRate);
-      angularRateLimit.set(defaultAngularMaxRate);
+
+      outputJointVelocityScale.set(0.75);
 
       streamingBlendingDuration.set(defautlInitialBlendDuration);
       solutionFilterBreakFrequency.set(4.0);
@@ -165,6 +171,10 @@ public class KSTStreamingState implements State
    @Override
    public void doAction(double timeInState)
    {
+      MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLinearWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
+      MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageAngularWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
+      MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
+
       KinematicsStreamingToolboxInputCommand latestInput = tools.pollInputCommand();
 
       if (latestInput != null)
@@ -189,11 +199,11 @@ public class KSTStreamingState implements State
          if (latestInput.getAngularRateLimitation() > 0.0)
             angularRateLimit.set(latestInput.getAngularRateLimitation());
          else
-            angularRateLimit.set(defaultAngularMaxRate);
+            angularRateLimit.set(defaultAngularRateLimit.getValue());
          if (latestInput.getLinearRateLimitation() > 0.0)
             linearRateLimit.set(latestInput.getLinearRateLimitation());
          else
-            linearRateLimit.set(defaultLinearMaxRate);
+            linearRateLimit.set(defaultLinearRateLimit.getValue());
       }
 
       if (tools.hasNewInputCommand())
@@ -244,7 +254,7 @@ public class KSTStreamingState implements State
          if (timeSinceLastPublished >= publishingPeriod.getValue())
          {
             outputRobotState.set(filteredRobotState);
-            outputRobotState.scaleVelocities(0.75);
+            outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
 
             if (timeInBlending < streamingBlendingDuration.getValue())
             {
@@ -266,8 +276,7 @@ public class KSTStreamingState implements State
          if (wasStreaming.getValue())
          {
             outputRobotState.set(filteredRobotState);
-            outputRobotState.scaleVelocities(0.75);
-
+            outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
             outputPublisher.publish(tools.setupFinalizeStreamingMessage(blendedRobotState.getStatus()));
          }
 
