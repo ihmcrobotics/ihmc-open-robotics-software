@@ -49,7 +49,7 @@ public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActi
       }
       else
       {
-         FootstepNodeTools.getSnappedNodeTransform(newValidNode, newNodeSnapData.getSnapTransform(), newNodeTransform);
+         newNodeTransform.set(newNodeSnapData.getOrComputeSnappedNodeTransform(newValidNode));
       }
 
       if(previousSnapData.getSnapTransform().containsNaN())
@@ -59,7 +59,7 @@ public class PlannerGoalAdditionActionPolicy implements PlannerHeuristicNodeActi
       }
       else
       {
-         FootstepNodeTools.getSnappedNodeTransform(newValidParentNode, previousSnapData.getSnapTransform(), previousNodeTransform);
+         previousNodeTransform.set(previousSnapData.getOrComputeSnappedNodeTransform(newValidParentNode));
       }
 
       SideDependentList<SimpleFootstep> doubleFootstepGoal = new SideDependentList<>();

@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
@@ -42,11 +44,11 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
          return true;
       }
 
-      Point3DReadOnly snappedNode = FootstepNodeTools.getNodePositionInWorld(node, snapper.getSnapData(node).getSnapTransform());
-      Point3DReadOnly snappedPreviousNode = FootstepNodeTools.getNodePositionInWorld(previousNode, snapper.getSnapData(previousNode).getSnapTransform());
+      RigidBodyTransformReadOnly snappedNodeTransform = snapper.getSnapData(node).getOrComputeSnappedNodeTransform(node);
+      RigidBodyTransformReadOnly previousSnappedNodeTransform = snapper.getSnapData(previousNode).getOrComputeSnappedNodeTransform(previousNode);
 
-      double snapHeight = snappedNode.getZ();
-      double previousSnapHeight = snappedPreviousNode.getZ();
+      double snapHeight = snappedNodeTransform.getTranslationZ();
+      double previousSnapHeight = previousSnappedNodeTransform.getTranslationZ();
 
       int numberOfBoundingBoxChecks = Math.max(1, parameters.getNumberOfBoundingBoxChecks());
       List<BodyCollisionData> collisionData = collisionDetector.checkForCollision(node, previousNode, snapHeight, previousSnapHeight, numberOfBoundingBoxChecks);
