@@ -92,7 +92,7 @@ public class KSTTools
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
-      streamIntegrationDuration.set(0.1);
+      streamIntegrationDuration.set(0.2);
    }
 
    public void update()
