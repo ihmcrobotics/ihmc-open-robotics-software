@@ -37,12 +37,14 @@ public class KSTStreamingState implements State
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final KSTTools tools;
    private OutputPublisher outputPublisher = m ->
    {
    };
-   private final YoDouble timeOfLastMessageSentToController;
-   private final YoDouble publishingPeriod;
+   private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
+   private final YoDouble publishingPeriod = new YoDouble("publishingPeriod", registry);
    private final KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager ikCommandInputManager;
@@ -51,20 +53,29 @@ public class KSTStreamingState implements State
    private final KinematicsToolboxRigidBodyMessage defaultChestMessage = new KinematicsToolboxRigidBodyMessage();
    private final RigidBodyBasics pelvis;
    private final RigidBodyBasics chest;
+   private final YoDouble defaultPelvisMessageLinearWeight = new YoDouble("defaultPelvisMessageLinearWeight", registry);
+   private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
+   private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
 
-   private final YoBoolean isStreaming, wasStreaming;
-   private final YoBoolean isRateLimiting;
-   private final YoDouble linearRateLimit, angularRateLimit;
+   private final YoBoolean isStreaming = new YoBoolean("isStreaming", registry);
+   private final YoBoolean wasStreaming = new YoBoolean("wasStreaming", registry);
+   private final YoBoolean isRateLimiting = new YoBoolean("isRateLimiting", registry);
+   private final YoDouble linearRateLimit = new YoDouble("linearRateLimit", registry);
+   private final YoDouble angularRateLimit = new YoDouble("angularRateLimit", registry);
+   private final YoDouble defaultLinearRateLimit = new YoDouble("defaultLinearRateLimit", registry);
+   private final YoDouble defaultAngularRateLimit = new YoDouble("defaultAngularRateLimit", registry);
 
-   private final YoDouble defaultLinearWeight, defaultAngularWeight;
+   private final YoDouble defaultLinearWeight = new YoDouble("defaultLinearWeight", registry);
+   private final YoDouble defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
 
-   private final YoDouble streamingStartTime;
-   private final YoDouble streamingBlendingDuration;
-   private final YoDouble solutionFilterBreakFrequency;
+   private final YoDouble streamingStartTime = new YoDouble("streamingStartTime", registry);
+   private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
+   private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
    private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
 
-   private final YoDouble timeOfLastInput, timeSinceLastInput;
-   private final YoDouble rawInputFrequency;
+   private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
+   private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
+   private final YoDouble rawInputFrequency = new YoDouble("rawInputFrequency", registry);
    private final AlphaFilteredYoVariable inputFrequency;
 
    private final YoPIDSE3Gains ikSolverGains;
@@ -78,6 +89,8 @@ public class KSTStreamingState implements State
       ikController.getMomentumWeight().set(0.0001);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
+
+      tools.getRegistry().addChild(registry);
 
       pelvis = desiredFullRobotModel.getPelvis();
       defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
@@ -93,29 +106,16 @@ public class KSTStreamingState implements State
       defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
       defaultChestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(defaultMessageWeight));
 
-      YoVariableRegistry registry = tools.getRegistry();
-      defaultLinearWeight = new YoDouble("defaultLinearWeight", registry);
-      defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
 
-      timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
-      publishingPeriod = new YoDouble("publishingPeriod", registry);
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
-      isStreaming = new YoBoolean("isStreaming", registry);
-      wasStreaming = new YoBoolean("wasStreaming", registry);
-      isRateLimiting = new YoBoolean("isRateLimiting", registry);
       isRateLimiting.set(true);
-      linearRateLimit = new YoDouble("linearRateLimit", registry);
       linearRateLimit.set(defaultLinearMaxRate);
-      angularRateLimit = new YoDouble("angularRateLimit", registry);
       angularRateLimit.set(defaultAngularMaxRate);
 
-      streamingStartTime = new YoDouble("streamingStartTime", registry);
-      streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
       streamingBlendingDuration.set(defautlInitialBlendDuration);
-      solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
       solutionFilterBreakFrequency.set(4.0);
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
@@ -125,9 +125,6 @@ public class KSTStreamingState implements State
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
 
-      timeOfLastInput = new YoDouble("timeOfLastInput", registry);
-      timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
-      rawInputFrequency = new YoDouble("rawInputFrequency", registry);
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
       inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, tools.getToolboxControllerPeriod()));
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
