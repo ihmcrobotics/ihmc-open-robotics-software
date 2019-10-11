@@ -41,7 +41,7 @@ public class KSTStreamingState implements State
    private OutputPublisher outputPublisher = m ->
    {
    };
-   private final YoDouble timeSinceLastMessageToController;
+   private final YoDouble timeOfLastMessageSentToController;
    private final YoDouble publishingPeriod;
    private final KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -99,9 +99,9 @@ public class KSTStreamingState implements State
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
 
-      timeSinceLastMessageToController = new YoDouble("timeSinceLastMessageToController", registry);
+      timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
       publishingPeriod = new YoDouble("publishingPeriod", registry);
-      publishingPeriod.set(10.0 * tools.getWalkingControllerPeriod());
+      publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
       isStreaming = new YoBoolean("isStreaming", registry);
       wasStreaming = new YoBoolean("wasStreaming", registry);
@@ -143,7 +143,7 @@ public class KSTStreamingState implements State
    @Override
    public void onEntry()
    {
-      timeSinceLastMessageToController.set(Double.POSITIVE_INFINITY);
+      timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       ikSolverGains.setPositionProportionalGains(50.0);
       ikSolverGains.setOrientationProportionalGains(50.0);
       ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
@@ -242,9 +242,9 @@ public class KSTStreamingState implements State
 
          double timeInBlending = timeInState - streamingStartTime.getValue();
 
-         timeSinceLastMessageToController.add(tools.getToolboxControllerPeriod());
+         double timeSinceLastPublished = timeInState - timeOfLastMessageSentToController.getValue();
 
-         if (timeSinceLastMessageToController.getValue() >= publishingPeriod.getValue())
+         if (timeSinceLastPublished >= publishingPeriod.getValue())
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(0.50);
@@ -261,12 +261,12 @@ public class KSTStreamingState implements State
                outputPublisher.publish(tools.setupWholeBodyTrajectoryMessage(outputRobotState.getStatus()));
             }
 
-            timeSinceLastMessageToController.set(0.0);
+            timeOfLastMessageSentToController.set(timeInState);
          }
       }
       else
       {
-         timeSinceLastMessageToController.set(Double.POSITIVE_INFINITY);
+         timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       }
 
       wasStreaming.set(isStreaming.getValue());
