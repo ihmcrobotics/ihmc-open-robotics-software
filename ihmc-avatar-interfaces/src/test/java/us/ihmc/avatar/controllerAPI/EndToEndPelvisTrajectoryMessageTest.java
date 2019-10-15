@@ -1403,7 +1403,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                             .getValue());
       currentDesiredTrajectoryPoint = EndToEndChestTrajectoryMessageTest.findCurrentDesiredTrajectoryPoint(scs, pelvis);
 
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPose.getPosition(), controllerDesiredPosition, 1.0e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredPose.getPosition(), controllerDesiredPosition, 1.0e-6);
       EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getLinearPart(), controllerDesiredLinearVelocity, 1.0e-7);
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals(desiredPose.getOrientation(), currentDesiredTrajectoryPoint.getOrientation(), 1.0e-7);
       EuclidCoreTestTools.assertTuple3DEquals(desiredVelocity.getAngularPart(), currentDesiredTrajectoryPoint.getAngularVelocity(), 1.0e-7);
