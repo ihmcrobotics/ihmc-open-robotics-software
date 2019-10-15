@@ -56,7 +56,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
          robot.getOneDegreeOfFreedomJoint(hipPitch).setQ(-0.6);
          robot.getOneDegreeOfFreedomJoint(knee).setQ(1.3);
-         robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.65);
+         robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.70);
          robot.getOneDegreeOfFreedomJoint(hipRoll).setQ(0.0);
          robot.getOneDegreeOfFreedomJoint(ankleRoll).setQ(0.0);
 
