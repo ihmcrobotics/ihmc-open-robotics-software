@@ -12,20 +12,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.commons.math3.util.Precision;
-
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.affinity.Affinity;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.BarrierSchedulerTools;
-import us.ihmc.avatar.ControllerTask;
+import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.factory.BarrierScheduledRobotController;
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.factory.SingleThreadedRobotController;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -36,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Wa
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
@@ -44,12 +33,10 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -62,7 +49,6 @@ import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -71,9 +57,14 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.fingers.ValkyrieHandStateCommunicator;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
+import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
+import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
+import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
@@ -162,9 +153,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
-   private YoVariableServer yoVariableServer;
-   private AvatarEstimatorThread estimatorThread;
-   private RobotController robotController;
+   private MultiThreadedRobotControlElementCoordinator robotController;
 
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
    private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
@@ -345,7 +334,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();
-      yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
 
       /*
        * Create sensors
@@ -385,39 +374,25 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Build controller
        */
-      HumanoidRobotContextDataFactory estimatorContextFactory = new HumanoidRobotContextDataFactory();
+      ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      estimatorThread = new AvatarEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
-                                                  stateEstimatorParameters, sensorReaderFactory, estimatorContextFactory, estimatorRealtimeRos2Node,
-                                                  externalPelvisPoseSubscriber, outputWriter, gravity);
-      yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
-                                       estimatorThread.getYoGraphicsListRegistry());
-
-      // The estimator runs synchronous with the scheduler so its context is the master context.
-      HumanoidRobotContextData masterContext = estimatorThread.getHumanoidRobotContextData();
-      FullHumanoidRobotModel masterFullRobotModel = estimatorThread.getFullRobotModel();
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
+                                                                  stateEstimatorParameters, sensorReaderFactory, threadDataSynchronizer,
+                                                                  estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, outputWriter,
+                                                                  yoVariableServer, gravity);
 
       if (ENABLE_FINGER_JOINTS)
       {
-         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, estimatorThread.getFullRobotModel(),
+         ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(robotName, threadDataSynchronizer.getEstimatorFullRobotModel(),
                                                                                                  robotModel.getHandModel(), estimatorRealtimeRos2Node);
          estimatorThread.addRobotController(handStateCommunicator);
       }
 
-      HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
-      AvatarControllerThread controllerThread = new AvatarControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
-                                                                           controllerContextFactory, drcOutputProcessor, controllerRealtimeRos2Node, gravity,
-                                                                           estimatorDT);
+      DRCControllerThread controllerThread = new DRCControllerThread(robotModel.getSimpleRobotName(), robotModel, sensorInformation, controllerFactory,
+                                                                     threadDataSynchronizer, drcOutputProcessor, controllerRealtimeRos2Node, yoVariableServer,
+                                                                     gravity, estimatorDT);
       if (!LOG_SECONDARY_HIGH_LEVEL_STATES)
          detachSecondaryRegistries(controllerThread.getYoVariableRegistry());
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
-      if (!Precision.equals(robotModel.getControllerDT() / robotModel.getEstimatorDT(), controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of estimator DT.");
-      ControllerTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getEstimatorDT(), masterFullRobotModel);
-      controllerTask.addRunnableOnTaskThread(BarrierSchedulerTools.createProcessorUpdater(drcOutputProcessor, controllerThread));
-      yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
-      controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                           controllerThread.getYoVariableRegistry()));
 
       ValkyrieCalibrationControllerState calibrationControllerState = calibrationStateFactory.getCalibrationControllerState();
       calibrationControllerState.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
@@ -433,36 +408,40 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       PeriodicRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.JVM_STATISTICS_PRIORITY);
       JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, schedulerFactory);
       jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
-
-      List<HumanoidRobotControlTask> tasks = Arrays.asList(controllerTask);
-
-      if (isGazebo)
-      {
-         LogTools.info("Running with blocking synchronous execution between estimator and controller");
-         robotController = new SingleThreadedRobotController<>(robotName, tasks, masterContext);
-      }
-      else
-      {
-         LogTools.info("Running multi-threaded.");
-         PriorityParameters controllerPriority = ValkyriePriorityParameters.CONTROLLER_PRIORITY;
-         RealtimeThread controllerRealtimeThread = new RealtimeThread(controllerPriority, controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
-         robotController = new BarrierScheduledRobotController(robotName, tasks, masterContext, TaskOverrunBehavior.SKIP_TICK, robotModel.getEstimatorDT());
-         if (valkyrieAffinity.setAffinity())
-         {
-            controllerRealtimeThread.setAffinity(valkyrieAffinity.getControlThreadProcessor());
-         }
-         controllerRealtimeThread.start();
-      }
-      controllerThread.getYoVariableRegistry().addChild(robotController.getYoVariableRegistry());
+      jvmStatisticsGenerator.start();
 
       /*
        * Connect all servers
        */
-      robotController.initialize();
-      jvmStatisticsGenerator.start();
       estimatorRealtimeRos2Node.spin();
       controllerRealtimeRos2Node.spin();
       yoVariableServer.start();
+
+      if (isGazebo)
+      {
+         LogTools.info("Running with blocking synchronous execution between estimator and controller");
+         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, wallTimeProvider);
+         coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
+
+         robotController = coordinator;
+      }
+      else
+      {
+         LogTools.info("Running with multi-threaded RT threads for estimator and controller");
+         MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
+         if (valkyrieAffinity.setAffinity())
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, valkyrieAffinity.getControlThreadProcessor());
+         }
+         else
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, null);
+         }
+
+         robotController = coordinator;
+      }
+
+      robotController.start();
    }
 
    private void detachSecondaryRegistries(YoVariableRegistry drcControllerThreadRegistry)
@@ -520,17 +499,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
 
       wallTimeProvider.setTimestamp(rosTime);
-
-      // Read sensor data from robot
-      HumanoidRobotContextData masterContext = estimatorThread.getHumanoidRobotContextData();
-      long newTimestamp = estimatorThread.getSensorReader().read(masterContext.getSensorDataContext());
-      masterContext.setTimestamp(newTimestamp);
-
-      // Run barrier scheduler: this releases the controller thread at the appropriate time
-      robotController.doControl();
-
-      // Run the estimator
-      estimatorThread.run();
-      yoVariableServer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
+      robotController.read();
    }
 }
