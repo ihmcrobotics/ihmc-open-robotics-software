@@ -8,13 +8,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
 {
-   public static final boolean CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE = false;
+   public final boolean createAngularMomentumPredictionModule;
    private final RobotTarget robotTarget;
 
    public ValkyrieSmoothCMPPlannerParameters(RobotTarget robotTarget)
    {
       super(1.0);
       this.robotTarget = robotTarget;
+
+      createAngularMomentumPredictionModule = (robotTarget != RobotTarget.SCS) ? false : true;
 
       endCoPName = CoPPointName.MIDFEET_COP;
       entryCoPName = CoPPointName.ENTRY_COP;
@@ -62,13 +64,13 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public boolean planSwingAngularMomentum()
    {
-      return false;
+      return (robotTarget != RobotTarget.SCS) ? false : true;
    }
 
    @Override
    public boolean planTransferAngularMomentum()
    {
-      return false;
+      return (robotTarget != RobotTarget.SCS) ? false : true;
    }
 
    /** {@inheritDoc} */
@@ -99,7 +101,7 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
    {
-      if (CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE)
+      if (createAngularMomentumPredictionModule)
       {
          return new AngularMomentumEstimationParameters()
          {
