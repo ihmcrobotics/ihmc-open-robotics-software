@@ -94,7 +94,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return target == RobotTarget.REAL_ROBOT;
+      return true;
    }
 
    @Override
@@ -112,7 +112,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return 0.70;
+      return target != RobotTarget.SCS ? 0.70 : 0.30;
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.

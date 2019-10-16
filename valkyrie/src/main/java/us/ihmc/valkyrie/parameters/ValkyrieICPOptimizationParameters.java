@@ -8,13 +8,15 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 /** {@inheritDoc} */
 public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 {
-   private final boolean useAngularMomentum = false;
-   private final boolean useStepAdjustment = false;
+   private final boolean useAngularMomentum;
+   private final boolean useStepAdjustment;
    private final RobotTarget target;
 
    public ValkyrieICPOptimizationParameters(RobotTarget target)
    {
       this.target = target;
+      useAngularMomentum = (target == RobotTarget.REAL_ROBOT) ? false : true;
+      useStepAdjustment = (target == RobotTarget.REAL_ROBOT) ? false : true;
    }
 
    /** {@inheritDoc} */
@@ -42,14 +44,14 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackLateralWeight()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 0.5;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 1.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 0.5;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.5 : 1.5;
    }
    
    /**
@@ -57,7 +59,7 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
     */
    public double getMinICPErrorForStepAdjustment()
    {
-      return 0.04;
+      return (target == RobotTarget.REAL_ROBOT) ? 0.04 : super.getMinICPErrorForStepAdjustment();
    }
 
    /** {@inheritDoc} */
@@ -110,7 +112,7 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean getUseAngularMomentumIntegrator()
    {
-      return false;
+      return (target == RobotTarget.REAL_ROBOT) ? false : true;
    }
 
    /** {@inheritDoc} */
@@ -201,5 +203,4 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
    {
       return false;
    }
-
 }
