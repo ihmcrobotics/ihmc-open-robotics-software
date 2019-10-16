@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+   <registry name="DRCControllerThread">
+      <registry name="DRCMomentumBasedController">
+         <registry name="HumanoidHighLevelControllerManager">
+            <registry name="HighLevelHumanoidControllerFactory">
+               <registry name="HighLevelControlManagerFactory">
+                  <registry name="FeetManager">
+                     <registry name="leftFootControlModule">
+                        <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.0"/>
+                     </registry>
+                     <registry name="rightFootControlModule">
+                        <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.0"/>
+                     </registry>
+                  </registry>
+               </registry>
+            </registry>
+         </registry>
+      </registry>
+   </registry>
+</parameters>
