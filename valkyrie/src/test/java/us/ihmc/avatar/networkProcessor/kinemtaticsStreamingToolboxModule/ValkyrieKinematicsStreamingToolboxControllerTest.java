@@ -176,7 +176,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
       // TODO Pretty bad assertions here, need to figure out how to improve this test later.
       System.out.println("Position error avg: " + handPositionMeanError.getValue() + ", orientation error avg: " + handOrientationMeanError.getValue());
       assertTrue(handPositionMeanError.getValue() < 0.15, "Mean position error is: " + handPositionMeanError.getValue());
-      assertTrue(handOrientationMeanError.getValue() < 0.20, "Mean orientation error is: " + handOrientationMeanError.getValue());
+      assertTrue(handOrientationMeanError.getValue() < 0.25, "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
    private void wakeupToolbox()
