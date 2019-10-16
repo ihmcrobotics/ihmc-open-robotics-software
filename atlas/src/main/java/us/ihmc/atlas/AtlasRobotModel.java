@@ -9,10 +9,11 @@ import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasQuadTreeFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
+import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasPlanarRegionFootstepPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasQuadTreeFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -28,6 +29,7 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -65,7 +67,6 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
@@ -922,4 +923,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return getClass().getResourceAsStream(getParameterResourceName());
    }
 
+   @Override
+   public HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   {
+      return new AtlasKinematicsCollisionModel();
+   }
 }
