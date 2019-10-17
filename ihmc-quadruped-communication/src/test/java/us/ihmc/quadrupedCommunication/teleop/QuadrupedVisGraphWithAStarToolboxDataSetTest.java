@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
@@ -9,6 +11,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 
+@Tag("quad-comm-test-suite-1")
 public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends PawStepPlannerToolboxDataSetTest
 {
    public PawStepPlannerType getPlannerType()
