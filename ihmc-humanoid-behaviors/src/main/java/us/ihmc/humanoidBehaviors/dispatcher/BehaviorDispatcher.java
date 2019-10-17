@@ -11,13 +11,10 @@ import controller_msgs.msg.dds.BehaviorStatusPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -28,10 +25,8 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
@@ -79,7 +74,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
-   public static Messager messager;
 
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
@@ -114,25 +108,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       apiFactory.createRootCategory("Root");
 
       parentRegistry.addChild(registry);
-
-   }
-
-   public void startMessanger()
-   {
-      Thread kryoMessengerStarter = new Thread(new Runnable()
-      {
-
-         @Override
-         public void run()
-         {
-
-            messager = KryoMessager.createServer(getBehaviorAPI(),
-                                                 NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(),
-                                                 new BehaviorMessagerUpdater(BehaviorDispatcher.class.getSimpleName(),5));
-            ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-         }
-      });
-      kryoMessengerStarter.start();
 
    }
 
@@ -188,8 +163,6 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    public void finalizeStateMachine()
    {
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
-
-      startMessanger();
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
