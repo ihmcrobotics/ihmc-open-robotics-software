@@ -285,7 +285,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    @AfterEach
    public void tearDown()
    {
-//      if (simulationTestingParameters.getKeepSCSUp())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
