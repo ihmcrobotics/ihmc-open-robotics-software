@@ -18,6 +18,7 @@ import java.util.function.DoubleFunction;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -88,6 +89,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 
+@Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

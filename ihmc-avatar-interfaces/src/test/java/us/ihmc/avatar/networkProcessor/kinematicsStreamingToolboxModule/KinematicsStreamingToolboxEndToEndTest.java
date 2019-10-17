@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -41,6 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxEndToEndTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

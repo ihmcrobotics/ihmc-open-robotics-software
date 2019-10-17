@@ -1,14 +1,32 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.*;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import com.google.common.util.concurrent.AtomicDouble;
+
+import controller_msgs.msg.dds.PawStepPlannerParametersPacket;
+import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -70,15 +88,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-import static us.ihmc.robotics.Assert.assertTrue;
-
+@Tag("quad-comm-test-suite-2")
 public class ContinuousPlanningToolboxDataSetTest
 {
    private static final double defaultBestEffortTimeout = 0.25;
