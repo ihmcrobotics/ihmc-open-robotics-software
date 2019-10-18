@@ -1,11 +1,11 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
-
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -18,8 +18,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -41,7 +39,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-flat-ground-3")
 public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -49,10 +46,8 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
 
-
    private PushRobotController pushRobotController;
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
-
 
    protected int getNumberOfSteps()
    {
@@ -96,21 +91,23 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setStartingLocation(getStartingLocation());
       drcSimulationTestHelper.createSimulation(className);
 
-
       double z = getForcePointOffsetZInChestFrame();
 
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getPelvis().getParentJoint().getName(), new Vector3D(0, 0, z));
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(),
+                                                    fullRobotModel.getPelvis().getParentJoint().getName(),
+                                                    new Vector3D(0, 0, z));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
-
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         @SuppressWarnings("unchecked") final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs
-               .getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState");
-         @SuppressWarnings("unchecked") final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs
-               .getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(), "walkingCurrentState");
+         @SuppressWarnings("unchecked")
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+                                                                                                    sidePrefix + "FootCurrentState");
+         @SuppressWarnings("unchecked")
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+                                                                                                  "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
       }
    }
@@ -140,14 +137,11 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    {
       setupCameraSideView();
 
-
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       FootstepDataListMessage footMessage = new FootstepDataListMessage();
 
       MovingReferenceFrame stepFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT);
-
-
 
       FramePoint3D footLocation = new FramePoint3D(stepFrame);
       FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
@@ -169,6 +163,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
+   @Tag("humanoid-flat-ground-3")
    @Test
    public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
    {
@@ -179,8 +174,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       FootstepDataListMessage footMessage = new FootstepDataListMessage();
 
       MovingReferenceFrame stepFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT);
-
-
 
       FramePoint3D footLocation = new FramePoint3D(stepFrame);
       FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
@@ -214,7 +207,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       PrintTools.info("Push 1 magnitude = " + magnitude);
       pushRobotController.applyForceDelayed(singleSupportStartConditions.get(RobotSide.LEFT), 0.0, forceDirection, magnitude, pushDuration);
 
-
       YoBoolean leftFootstepWasAdjusted = (YoBoolean) drcSimulationTestHelper.getYoVariable("leftFootSwingFootstepWasAdjusted");
 
       double dt = 0.05;
@@ -247,8 +239,8 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    }
 
    /**
-    * Overwrite this if the force required to trigger a step adjustment is higher. This can happen for example is step adjustment
-    * phase in is used.
+    * Overwrite this if the force required to trigger a step adjustment is higher. This can happen for
+    * example is step adjustment phase in is used.
     *
     * @return multiplier for the push force.
     */
@@ -257,15 +249,12 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       return 1.0;
    }
 
-
    private void setupCameraSideView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-
-
 
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
