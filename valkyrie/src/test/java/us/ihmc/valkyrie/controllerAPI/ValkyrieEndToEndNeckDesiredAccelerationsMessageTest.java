@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndNeckDesiredAccelerationsMessageTest;
@@ -24,6 +25,7 @@ public class ValkyrieEndToEndNeckDesiredAccelerationsMessageTest extends EndToEn
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api-slow-2")
    @Override
    @Test
    public void testSimpleCommands() throws Exception
