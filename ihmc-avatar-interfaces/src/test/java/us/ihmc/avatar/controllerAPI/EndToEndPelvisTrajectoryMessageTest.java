@@ -11,7 +11,6 @@ import java.util.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -93,7 +92,6 @@ import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-@Tag("controller-api-2")
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

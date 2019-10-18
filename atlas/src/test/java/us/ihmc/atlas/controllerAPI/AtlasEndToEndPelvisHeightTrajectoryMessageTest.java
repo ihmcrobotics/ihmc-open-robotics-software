@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -8,6 +9,7 @@ import us.ihmc.avatar.controllerAPI.EndToEndPelvisHeightTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelvisHeightTrajectoryMessageTest
 {
@@ -25,6 +27,7 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleWaypoint() throws Exception
@@ -32,6 +35,7 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
       super.testSingleWaypoint();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleWaypointInUserMode() throws Exception
@@ -39,6 +43,31 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
       super.testSingleWaypointInUserMode();
    }
 
+   @Tag("controller-api-slow-2")
+   @Override
+   @Test
+   public void testSingleWaypointThenManualChange() throws Exception
+   {
+      super.testSingleWaypointThenManualChange();
+   }
+
+   @Tag("controller-api-slow-2")
+   @Override
+   @Test
+   public void testSingleWaypointWithControlFrame() throws SimulationExceededMaximumTimeException
+   {
+      super.testSingleWaypointWithControlFrame();
+   }
+
+   @Tag("controller-api-slow-2")
+   @Override
+   @Test
+   public void testStopAllTrajectory() throws Exception
+   {
+      super.testStopAllTrajectory();
+   }
+
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testStreaming() throws Exception

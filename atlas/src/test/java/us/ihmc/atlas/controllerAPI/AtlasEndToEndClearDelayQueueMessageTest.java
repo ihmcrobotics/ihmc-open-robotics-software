@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -14,6 +15,7 @@ public class AtlasEndToEndClearDelayQueueMessageTest extends EndToEndClearDelayQ
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
+   @Tag("controller-api")
    @Test
    @Override
    public void testClearingQueue() throws SimulationExceededMaximumTimeException

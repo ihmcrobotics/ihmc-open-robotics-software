@@ -8,7 +8,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
@@ -32,7 +31,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("controller-api-2")
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;
