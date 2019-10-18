@@ -1,11 +1,18 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import java.io.IOException;
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
+import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -13,10 +20,6 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 
-import java.io.IOException;
-import java.util.Random;
-
-@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;

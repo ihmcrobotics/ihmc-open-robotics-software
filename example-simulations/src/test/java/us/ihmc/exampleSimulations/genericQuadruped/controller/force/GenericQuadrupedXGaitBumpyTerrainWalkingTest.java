@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -18,6 +19,7 @@ public class GenericQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGait
    }
 
    @Override
+   @Tag("quadruped-xgait-slow")
    @Test
    public void testWalkingOverShallowBumpyTerrain() throws IOException
    {
@@ -25,6 +27,7 @@ public class GenericQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGait
    }
 
    @Override
+   @Tag("quadruped-xgait")
    @Test
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -32,6 +35,7 @@ public class GenericQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGait
    }
 
    @Override
+   @Tag("quadruped-xgait")
    @Test
    public void testTrottingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

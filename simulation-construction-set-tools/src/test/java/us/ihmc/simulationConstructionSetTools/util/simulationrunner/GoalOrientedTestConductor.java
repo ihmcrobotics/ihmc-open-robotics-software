@@ -232,10 +232,10 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    public void concludeTesting(int additionalStackDepthForRelevantCallingMethod)
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
+//      if (simulationTestingParameters.getKeepSCSUp())
+//      {
+//         ThreadTools.sleepForever();
+//      }
       
       if (simulationTestingParameters.getCreateSCSVideos())
       {
