@@ -3,7 +3,6 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -31,7 +30,6 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @Tag("allocation")
    @Test
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
@@ -76,7 +74,6 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @Tag("allocation")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -84,7 +81,6 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @Tag("allocation")
    @Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
