@@ -8,11 +8,11 @@ import java.io.IOException;
 import us.ihmc.commons.Conversions;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.converters.LogFormatUpdater;
+import us.ihmc.robotDataVisualizer.modelLoader.SDFModelLoader;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.yoVariables.variable.YoVariable;
 
