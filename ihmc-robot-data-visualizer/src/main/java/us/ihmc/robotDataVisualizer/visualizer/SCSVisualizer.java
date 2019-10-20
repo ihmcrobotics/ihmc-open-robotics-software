@@ -32,6 +32,7 @@ import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.robotDataVisualizer.modelLoader.SDFModelLoader;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
@@ -273,6 +274,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return scs;
    }
 
+   @SuppressWarnings("unchecked")
    @Override
    public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
@@ -281,10 +283,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       Robot robot = new Robot("DummyRobot");
       if (handshake.getModelLoaderClass() != null)
       {
-         LogModelLoader modelLoader;
+         LogModelLoader<RobotDescription> modelLoader;
          try
          {
-            modelLoader = (LogModelLoader) Class.forName(handshake.getModelLoaderClass()).newInstance();
+            modelLoader = (LogModelLoader<RobotDescription>) Class.forName(handshake.getModelLoaderClass()).newInstance();
          }
          catch (Exception e)
          {

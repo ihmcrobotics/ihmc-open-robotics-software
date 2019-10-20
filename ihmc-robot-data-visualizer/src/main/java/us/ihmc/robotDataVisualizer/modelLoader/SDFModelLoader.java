@@ -22,7 +22,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.ClassLoaderTools;
 
-public class SDFModelLoader implements LogModelLoader
+public class SDFModelLoader implements LogModelLoader<RobotDescription>
 {
    private final static String resourceDirectoryLocation = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "resources";
 
