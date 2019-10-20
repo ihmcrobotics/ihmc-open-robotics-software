@@ -10,9 +10,10 @@ import org.apache.commons.io.IOUtils;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFParameters;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.ClassLoaderTools;
 
-public class SDFLogModelProvider implements LogModelProvider
+public class SDFLogModelProvider implements LogModelProvider<RobotDescription>
 {
    private final String sdfModelName;
    private final byte[] model;
@@ -41,7 +42,7 @@ public class SDFLogModelProvider implements LogModelProvider
    }
 
    @Override
-   public Class<? extends LogModelLoader> getLoader()
+   public Class<? extends LogModelLoader<RobotDescription>> getLoader()
    {
       return SDFModelLoader.class;
    }
