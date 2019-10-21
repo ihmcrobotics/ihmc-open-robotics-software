@@ -59,7 +59,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -67,7 +67,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testMultipleTrajectoryPoints();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -91,7 +91,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testQueueWithWrongPreviousId();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -190,7 +190,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       assertTrue(rotationError.length() < 0.05);
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testStreaming() throws Exception
