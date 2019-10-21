@@ -47,7 +47,9 @@ public class FakeREAModule
       {
          remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-         virtualCameraFOV = new FakeREAVirtualCameraFOV(Math.toRadians(30.0), Math.toRadians(70.0), neckFrame);
+         double verticalFOV = Math.toRadians(180.0); // TODO: Reduce FOV when behaviors support it better
+         double horizontalFOV = Math.toRadians(180.0);
+         virtualCameraFOV = new FakeREAVirtualCameraFOV(verticalFOV, horizontalFOV, neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
