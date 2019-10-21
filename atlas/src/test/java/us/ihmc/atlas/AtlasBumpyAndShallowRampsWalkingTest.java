@@ -11,6 +11,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-obstacle")
 public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRampsWalkingTest
 {
    @Override
@@ -25,7 +26,6 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
    
-   @Tag("humanoid-obstacle-3")
    @Test
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
@@ -34,7 +34,6 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    }
    
    // This has never worked. Would be nice if we can get it to work.")
-   @Tag("humanoid-obstacle-3")
    @Disabled
    @Test
    @Override
@@ -43,7 +42,6 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       super.testDRCOverRandomBlocks();
    }
    
-   @Tag("humanoid-obstacle-3")
    @Test
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
