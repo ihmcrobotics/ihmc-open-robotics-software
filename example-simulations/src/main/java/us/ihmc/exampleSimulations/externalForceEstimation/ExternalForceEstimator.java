@@ -19,6 +19,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialForce;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
@@ -86,6 +87,7 @@ import java.util.stream.IntStream;
    private final PointJacobian pointJacobian;
    private final DenseMatrix64F jacobianMatrix;
    private final DenseMatrix64F jacobianMatrixInverse;
+   private final DenseMatrix64F pointJacobianTranspose;
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
@@ -132,6 +134,7 @@ import java.util.stream.IntStream;
       this.externalForcePointOffset.set(externalForcePointOffset);
       this.geometricJacobian = new GeometricJacobian(baseLink, endEffector, externalForcePointFrame);
       this.pointJacobian = new PointJacobian();
+      this.pointJacobianTranspose = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 3);
 
       this.integrationWindow = (int) (integrationTime / dt);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
@@ -152,8 +155,7 @@ import java.util.stream.IntStream;
       this.qd = new DenseMatrix64F(dofs, 1);
       this.jacobianMatrix = new DenseMatrix64F(6, dofs);
       this.jacobianMatrixInverse = new DenseMatrix64F(dofs, 6);
-
-      this.forceEstimateSolver = new SolvePseudoInverseSvd(dofs, dofs);
+      this.forceEstimateSolver = new DampedLeastSquaresSolver(geometricJacobian.getNumberOfColumns(), 0.005); // new SolvePseudoInverseSvd(dofs, dofs);
       this.yoEstimatedExternalWrench = new YoFixedFrameSpatialForce("estimatedWrench", geometricJacobian.getBaseFrame(), registry);
 
       this.yoObservedExternalJointTorque = new YoDouble[dofs];
@@ -191,7 +193,7 @@ import java.util.stream.IntStream;
             torqueIndicesAlongEndEffectorPath[i] = i;
          }
 
-         ToIntFunction<JointBasics> jointIndexFunction = joint -> IntStream.range(1, joints.length).filter(i -> joint == joints[i]).findFirst().orElse(-1);
+         ToIntFunction<JointBasics> jointIndexFunction = joint -> IntStream.range(1, joints.length).filter(i -> joint == joints[i]).findFirst().orElseThrow(() -> new RuntimeException("Could not find joint"));
          int jointTorqueIndex = 6;
          for (int i = 1; i < jointPathFromBaseToEndEffector.length; i++)
          {
@@ -325,9 +327,7 @@ import java.util.stream.IntStream;
 
       pointJacobian.set(geometricJacobian, externalForcePoint);
       pointJacobian.compute();
-
-      DenseMatrix64F jacobian = pointJacobian.getJacobianMatrix();
-      CommonOps.transpose(jacobian);
+      CommonOps.transpose(pointJacobian.getJacobianMatrix(), pointJacobianTranspose);
 
       for (int i = 0; i < torqueIndicesAlongEndEffectorPath.length; i++)
       {
@@ -335,7 +335,7 @@ import java.util.stream.IntStream;
          observedExternalTorqueAlongEndEffectorPath.set(i, 0, observedExternalJointTorque.get(jointIndex, 0));
       }
 
-      forceEstimateSolver.setA(jacobian);
+      forceEstimateSolver.setA(pointJacobianTranspose);
       forceEstimateSolver.solve(observedExternalTorqueAlongEndEffectorPath, estimatedExternalForceMatrix);
       CommonOps.fill(estimatedExternalWrenchMatrix, 0.0);
       MatrixTools.setMatrixBlock(estimatedExternalWrenchMatrix, 3, 0, estimatedExternalForceMatrix, 0, 0, 3, 1, 1.0);
