@@ -8,6 +8,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
@@ -35,16 +36,17 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
    private final PawPlanningController footstepPlanningController;
 
-   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, PawStepPlannerParametersBasics defaultPawPlannerParameters,
-                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                            LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
-                            DomainFactory.PubSubImplementation pubSubImplementation)
+   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            PawStepPlannerParametersBasics defaultPawPlannerParameters, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                            PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
+                            boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), defaultPawPlannerParameters, defaultXGaitSettings,
-           pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), visibilityGraphsParameters, defaultPawPlannerParameters,
+           defaultXGaitSettings, pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
-   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, PawStepPlannerParametersBasics defaultPawPlannerParameters,
+   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            PawStepPlannerParametersBasics defaultPawPlannerParameters,
                             QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                             LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
@@ -54,10 +56,9 @@ public class PawPlanningModule extends QuadrupedToolboxModule
             pubSubImplementation);
 
 
-      footstepPlanningController = new PawPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(),
-                                                             defaultPawPlannerParameters,
-                                                             pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
-                                                             yoGraphicsListRegistry, updatePeriodMilliseconds);
+      footstepPlanningController = new PawPlanningController(defaultXGaitSettings, visibilityGraphsParameters, defaultPawPlannerParameters,
+                                                             pointFootSnapperParameters, outputManager, robotDataReceiver, registry, yoGraphicsListRegistry,
+                                                             updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
       startYoVariableServer(getClass());
    }
@@ -70,10 +71,6 @@ public class PawPlanningModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
 //      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> footstepPlanningController.setPaused(true));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
@@ -96,18 +93,6 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processRobotTimestamp(timestamp);
-   }
-
-   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processHighLevelStateChangeMessage(message);
-   }
-
-   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processSteppingStateChangeMessage(message);
    }
 
    private void processFootstepPlannerParametersPacket(PawStepPlannerParametersPacket packet)
@@ -187,6 +172,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    @Override
    public void sleep()
    {
+      footstepPlanningController.processPawPlanningRequest(null);
 //      footstepPlanningController.setPaused(true);
 
       super.sleep();

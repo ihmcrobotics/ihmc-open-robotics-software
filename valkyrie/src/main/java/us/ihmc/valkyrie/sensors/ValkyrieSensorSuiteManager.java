@@ -49,8 +49,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final String robotName;
 
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation,
-                                     ValkyrieJointMap jointMap, RobotTarget target)
+                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
+                                     RobotTarget target)
    {
       this.robotName = robotName;
       this.rosClockCalculator = rosClockCalculator;
@@ -121,6 +121,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       if (ENABLE_STEREO_PUBLISHER)
       {
+         stereoVisionPointCloudPublisher.setFilterThreshold(ValkyrieSensorInformation.linearVelocityThreshold,
+                                                            ValkyrieSensorInformation.angularVelocityThreshold);
+         stereoVisionPointCloudPublisher.enableFilter(true);
          stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
          stereoVisionPointCloudPublisher.start();
       }
@@ -142,7 +145,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          private final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink();
 
          @Override
-         public void computeTransformToWorld(FullRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack,
+                                             Pose3DBasics sensorPoseToPack)
          {
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
             neckFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());

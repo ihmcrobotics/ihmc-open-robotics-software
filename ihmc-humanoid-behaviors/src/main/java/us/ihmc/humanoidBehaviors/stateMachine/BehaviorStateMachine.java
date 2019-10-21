@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
+import java.util.Map;
+
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 
 public class BehaviorStateMachine<E extends Enum<E>>
 {
@@ -51,7 +54,7 @@ public class BehaviorStateMachine<E extends Enum<E>>
       currentState.doPostBehaviorCleanup();
    }
 
-   public BehaviorAction getCurrentBehavior()
+   public BehaviorAction getCurrentAction()
    {
       return stateMachine.getCurrentState();
    }
@@ -60,8 +63,10 @@ public class BehaviorStateMachine<E extends Enum<E>>
    {
       return stateMachine.getCurrentStateKey();
    }
+   
+   
 
-   public boolean isCurrentBehaviorTerminal()
+   public boolean isCurrentActionTerminal()
    {
       return stateMachine.isCurrentStateTerminal();
    }

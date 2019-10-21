@@ -6,9 +6,9 @@
 			<parameter name="AngularVelocityVariance" type="DoubleParameter" value="1.0e-8" />
 			<parameter name="LinearAccelerationVariance" type="DoubleParameter" value="1.0e-8" />
 			<parameter name="MagneticFieldVariance" type="DoubleParameter" value="1.0e-8" />
-			<parameter name="AngularVelocityBiasVariance" type="DoubleParameter" value="1.0e-7" />
+			<parameter name="AngularVelocityBiasVariance" type="DoubleParameter" value="3.0e-7" />
 			<parameter name="HeadAngularAccelerationVariance" type="DoubleParameter" value="100.0" />
-			<parameter name="HeadLinearAccelerationVariance" type="DoubleParameter" value="100.0" />
+			<parameter name="HeadLinearAccelerationVariance" type="DoubleParameter" value="10.0" />
 		</registry>
 	</registry>
 </parameters>

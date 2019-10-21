@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;

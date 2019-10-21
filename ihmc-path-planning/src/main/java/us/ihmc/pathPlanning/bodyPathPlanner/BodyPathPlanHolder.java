@@ -45,7 +45,6 @@ public interface BodyPathPlanHolder
       setWaypoints(positionWaypoints, headingWaypoints);
    }
 
-
    /** Adds the position and heading waypoints used by the body path planner. **/
    default void setPoseWaypoints(List<? extends Pose3DReadOnly> poseWaypoints)
    {

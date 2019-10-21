@@ -28,7 +28,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     */
    default boolean checkForPathCollisions()
    {
-      return get(checkForBodyBoxCollisions);
+      return get(checkForPathCollisions);
    }
 
    /**
