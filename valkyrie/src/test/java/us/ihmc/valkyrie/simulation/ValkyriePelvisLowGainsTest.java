@@ -15,7 +15,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @Disabled
-@Tag("humanoid-flat-ground-4")
+@Tag("humanoid-flat-ground")
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
