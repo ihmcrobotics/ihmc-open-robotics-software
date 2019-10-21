@@ -15,7 +15,7 @@ public class AtlasEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTes
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, true);
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testUsingHand() throws SimulationExceededMaximumTimeException
