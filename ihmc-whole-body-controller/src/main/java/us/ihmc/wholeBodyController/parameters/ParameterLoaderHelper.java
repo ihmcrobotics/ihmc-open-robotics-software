@@ -20,7 +20,15 @@ public class ParameterLoaderHelper
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
-      loadParameters(caller, parameterFile, overwriteFile, registry, true);
+      try 
+      {
+         loadParameters(caller, parameterFile, overwriteFile, registry, true);
+      }
+      catch(RuntimeException exception)
+      {
+         LogTools.error(exception.getMessage() + "\n file: " + controllerParameters.getParameterFileName());
+         throw exception;
+      }
    }
 
    public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry)

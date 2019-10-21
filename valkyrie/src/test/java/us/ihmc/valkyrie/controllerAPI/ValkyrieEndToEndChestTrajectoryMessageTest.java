@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
@@ -24,6 +25,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testLookingLeftAndRight() throws Exception
@@ -31,13 +33,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testLookingLeftAndRight();
    }
 
-   @Override
-   @Test
-   public void testSingleTrajectoryPoint() throws Exception
-   {
-      super.testSingleTrajectoryPoint();
-   }
-
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
@@ -45,6 +41,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testLookingLeftAndRightInVariousTrajectoryFrames();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
@@ -52,6 +49,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testMessageWithALotOfTrajectoryPoints();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
@@ -59,6 +57,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -66,6 +65,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testMultipleTrajectoryPoints();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -73,6 +73,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testQueuedMessages();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
@@ -80,6 +81,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testQueueStoppedWithOverrideMessage();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
@@ -87,6 +89,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testQueueWithUsingDifferentTrajectoryFrameWithoutOverride();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
@@ -94,6 +97,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
@@ -101,6 +105,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
@@ -108,6 +113,7 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
@@ -115,6 +121,15 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testSettingWeightMatrixUsingSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api")
+   @Override
+   @Test
+   public void testSingleTrajectoryPoint() throws Exception
+   {
+      super.testSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -122,17 +137,19 @@ public class ValkyrieEndToEndChestTrajectoryMessageTest extends EndToEndChestTra
       super.testStopAllTrajectory();
    }
 
-   @Override
-   @Test
-   public void testStopAllTrajectoryRepeatedly() throws Exception
-   {
-      super.testStopAllTrajectoryRepeatedly();
-   }
-
+   @Tag("controller-api")
    @Override
    @Test
    public void testStreaming() throws Exception
    {
       super.testStreaming();
+   }
+
+   @Tag("controller-api-slow")
+   @Override
+   @Test
+   public void testStopAllTrajectoryRepeatedly() throws Exception
+   {
+      super.testStopAllTrajectoryRepeatedly();
    }
 }

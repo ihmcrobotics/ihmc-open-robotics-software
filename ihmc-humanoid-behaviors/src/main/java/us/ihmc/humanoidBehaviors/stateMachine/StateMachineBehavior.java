@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
+import java.util.Map;
+
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -27,6 +30,8 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       this.timeProvider = timeProvider;
    }
 
+   
+   //TODO JJC this should be called from the onBehaviorEntered method of this class instead of classes that extend it, i need to move it and then test to make sure there was not a reason for this decision.
    protected void setupStateMachine()
    {
       StateMachineFactory<E, BehaviorAction> stateMachineFactory = new StateMachineFactory<>(keyType);
@@ -69,20 +74,20 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    @Override
    public void doControl()
    {
+      
       stateMachine.doControlAndTransitions();
    }
 
    @Override
    public boolean isDone()
-   {
-      //if your current state has finished and there is no transition out of that state... the entire state machine is finished
-
-      if (stateMachine.getCurrentBehavior().isDone() && stateMachine.isCurrentBehaviorTerminal())
+   {      
+      if (stateMachine.getCurrentAction().isDone() && stateMachine.isCurrentActionTerminal())
       {
          return true;
       }
       return false;
 
    }
+
 
 }

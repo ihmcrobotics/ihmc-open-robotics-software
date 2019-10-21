@@ -12,9 +12,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
-@Tag("humanoid-push-recovery-2")
 public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
+   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationNoPush() throws Exception
    {
@@ -23,6 +23,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
    {
@@ -136,6 +137,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps, false);
    }
 
+   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationRandomPushInSwing() throws Exception
    {
@@ -160,6 +162,7 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       validateTest(footsteps);
    }
 
+   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
    {

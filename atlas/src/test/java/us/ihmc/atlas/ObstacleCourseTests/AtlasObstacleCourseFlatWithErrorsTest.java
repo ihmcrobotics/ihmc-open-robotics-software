@@ -1,6 +1,5 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -36,7 +35,6 @@ public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlat
    }
 
    @Override
-   @Tag("allocation")
    @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {

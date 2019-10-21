@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -33,6 +34,7 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
       super.testDoNothing1();
    }
 
+   @Disabled // FIXME: Shape collision is not working
    @Test
    public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
    {

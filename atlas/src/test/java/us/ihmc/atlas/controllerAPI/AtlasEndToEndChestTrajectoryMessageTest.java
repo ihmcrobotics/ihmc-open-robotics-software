@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -26,6 +27,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testLookingLeftAndRight() throws Exception
@@ -33,6 +35,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testLookingLeftAndRight();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
@@ -40,6 +43,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testLookingLeftAndRightInVariousTrajectoryFrames();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
@@ -47,6 +51,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testMessageWithALotOfTrajectoryPoints();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
@@ -54,6 +59,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -61,6 +67,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testMultipleTrajectoryPoints();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -68,6 +75,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testQueuedMessages();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
@@ -75,6 +83,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testQueueStoppedWithOverrideMessage();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
@@ -82,6 +91,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testQueueWithUsingDifferentTrajectoryFrameWithoutOverride();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
@@ -89,6 +99,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
@@ -96,6 +107,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
@@ -103,6 +115,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
@@ -110,6 +123,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testSettingWeightMatrixUsingSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -117,6 +131,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -124,10 +139,18 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
       super.testStopAllTrajectory();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testStreaming() throws Exception
    {
       super.testStreaming();
+   }
+
+   @Tag("controller-api-slow")
+   @Override
+   public void testStopAllTrajectoryRepeatedly() throws Exception
+   {
+      super.testStopAllTrajectoryRepeatedly();
    }
 }

@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -91,6 +92,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-behaviors")
 public class WalkingControllerTest
 {
    private static final boolean profile = false;

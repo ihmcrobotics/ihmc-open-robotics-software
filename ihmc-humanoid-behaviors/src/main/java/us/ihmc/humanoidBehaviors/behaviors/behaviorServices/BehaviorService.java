@@ -10,6 +10,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -36,6 +37,11 @@ public abstract class BehaviorService
 
    public abstract void destroy();
 
+   public MessagerAPI getBehaviorAPI()
+   {
+      return null;
+   }
+   
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       String topicName = controllerSubGenerator.generateTopicName(messageType);

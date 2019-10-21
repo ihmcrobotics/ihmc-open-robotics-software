@@ -22,6 +22,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
