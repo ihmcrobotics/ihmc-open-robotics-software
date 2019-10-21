@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Tag;
+
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarDynamicReachabilityCalculatorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -8,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground")
 public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachabilityCalculatorTest
 {
    @Override
