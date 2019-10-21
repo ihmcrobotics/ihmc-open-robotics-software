@@ -1,11 +1,13 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTrajectoryMessageTest
@@ -24,64 +26,89 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
       super.testHeightUsingMultipleWaypointsWhileWalking();
    }
 
-   @Override
+   @Tag("controller-api-2")
    @Test
+   @Override
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
    }
 
-   @Override
+   @Tag("controller-api-2")
    @Test
+   @Override
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
+   public void testSingleWaypointAndAbort() throws Exception
+   {
+      super.testSingleWaypointAndAbort();
+   }
+
+   @Tag("controller-api-slow-2")
+   @Test
+   @Override
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
    }
 
-   @Override
+   @Tag("controller-api-slow-2")
    @Test
+   @Override
+   public void testSixDoFMovementsOfPelvis() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      super.testSixDoFMovementsOfPelvis();
+   }
+
+   @Tag("controller-api-slow-2")
+   @Test
+   @Override
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();
    }
 
-   @Override
+   @Tag("controller-api-2")
    @Test
+   @Override
    public void testStreaming() throws Exception
    {
       super.testStreaming();

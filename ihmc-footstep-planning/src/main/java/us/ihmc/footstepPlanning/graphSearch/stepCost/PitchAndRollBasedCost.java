@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -27,8 +28,7 @@ public class PitchAndRollBasedCost implements FootstepCost
          return 0.0;
 
       double[] yawPitchRoll = new double[3];
-      RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(endNode, nodeData.getSnapTransform(), nodeTransform);
+      RigidBodyTransformReadOnly nodeTransform = nodeData.getOrComputeSnappedNodeTransform(endNode);
       nodeTransform.getRotationYawPitchRoll(yawPitchRoll);
       double pitch = yawPitchRoll[1];
       double roll = yawPitchRoll[2];

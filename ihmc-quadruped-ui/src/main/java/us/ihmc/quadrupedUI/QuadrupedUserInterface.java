@@ -162,8 +162,8 @@ public class QuadrupedUserInterface
                                                                     QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
                                                                     QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
                                                                     QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
-                                                                    QuadrupedUIMessagerAPI.GoalOrientationTopic, QuadrupedUIMessagerAPI.XGaitSettingsTopic,
-                                                                    QuadrupedUIMessagerAPI.PlanarRegionDataTopic);
+                                                                    QuadrupedUIMessagerAPI.GoalOrientationTopic, QuadrupedUIMessagerAPI.StartFeetPositionTopic,
+                                                                    QuadrupedUIMessagerAPI.XGaitSettingsTopic, QuadrupedUIMessagerAPI.PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalPawOrientationViewer(messager, QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
                                                                           QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic,
                                                                           QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,

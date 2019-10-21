@@ -51,7 +51,13 @@ public class HumanoidKinematicsSolver
       FullHumanoidRobotModel desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
       double updateDT = 1.0e-3;
-      controller = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, updateDT, yoGraphicsListRegistry, registry);
+      controller = new HumanoidKinematicsToolboxController(commandInputManager,
+                                                           statusOutputManager,
+                                                           desiredFullRobotModel,
+                                                           fullRobotModelFactory,
+                                                           updateDT,
+                                                           yoGraphicsListRegistry,
+                                                           registry);
 
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
