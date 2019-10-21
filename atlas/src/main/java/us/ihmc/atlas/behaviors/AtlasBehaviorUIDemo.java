@@ -12,15 +12,16 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.parameterTuner.remote.ParameterTuner;
+import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,9 +52,10 @@ public class AtlasBehaviorUIDemo extends Application
       UP_DOWN_TWO_HIGH_FLAT_IN_BETWEEN,
       UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER,
       SLAM_REAL_DATA,
+      CORRIDOR,
       STAIRS
    }
-   private static final Environment ENVIRONMENT = Environment.SLAM_REAL_DATA;
+   private static final Environment ENVIRONMENT = Environment.CORRIDOR;
 
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
@@ -141,6 +143,8 @@ public class AtlasBehaviorUIDemo extends Application
             return PatrolSimulationRegionFields.createStairs();
          case SLAM_REAL_DATA:
             return slamDataset();
+         case CORRIDOR:
+            return PlannerTestEnvironments.getTrickCorridor();
          case FLAT_GROUND:
          default:
             return PlanarRegionsList.flatGround(10.0);
