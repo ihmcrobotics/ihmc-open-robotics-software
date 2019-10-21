@@ -18,11 +18,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -92,9 +90,9 @@ public class ValkyrieExternalWrenchEstimationSimulation
       HumanoidFloatingRootJointRobot scsRobot = simulationStarter.getSDFRobot();
 
       // Root joint
-//      Vector3D externalForcePointOffset = new Vector3D();
-//      RigidBodyBasics endEffector = controllerFullRobotModel.getRootBody();
-//      Joint scsEndEffector = scsRobot.getRootJoint();
+      Vector3D externalForcePointOffset = new Vector3D(-0.3, 0.3, 0.0);
+      RigidBodyBasics endEffector = controllerFullRobotModel.getRootBody();
+      Joint scsEndEffector = scsRobot.getRootJoint();
 
       // Chest
 //      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.2);
@@ -102,7 +100,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
 //      Joint scsEndEffector = scsRobot.getJoint("torsoRoll");
 
       // Shoulder
-//      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
+//      Vector3D externalForcePointOffset = new Vector3D(0.3, 0.0, 0.0);
 //      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightShoulderRoll").getSuccessor();
 //      Joint scsEndEffector = scsRobot.getJoint("rightShoulderRoll");
 
@@ -116,10 +114,15 @@ public class ValkyrieExternalWrenchEstimationSimulation
 //      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightForearmYaw").getSuccessor();
 //      Joint scsEndEffector = scsRobot.getJoint("rightForearmYaw");
 
-      // Wrist
-      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
-      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightWristPitch").getSuccessor();
-      Joint scsEndEffector = scsRobot.getJoint("rightWristPitch");
+      // Wrist roll
+//      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
+//      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightWristRoll").getSuccessor();
+//      Joint scsEndEffector = scsRobot.getJoint("rightWristRoll");
+
+      // Wrist pitch
+//      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
+//      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightWristPitch").getSuccessor();
+//      Joint scsEndEffector = scsRobot.getJoint("rightWristPitch");
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
       scsEndEffector.addExternalForcePoint(externalForcePoint);
@@ -171,13 +174,14 @@ public class ValkyrieExternalWrenchEstimationSimulation
       ROS2Tools.createCallbackSubscription(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s -> estimationToolboxPlaceHolder.controllerOutput.set(s.takeNextData()));
       scsRobot.setController(estimationToolboxPlaceHolder, (int) (controllerDT / simulationStarter.getSimulationConstructionSet().getDT()));
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), externalForceEstimator.getEstimatedForceVectorGraphic().getScale(), YoAppearance
-            .Red());
+      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), externalForceEstimator.getEstimatedForceVectorGraphic().getScale(), YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.02, YoAppearance.Red());
+      YoGraphicCoordinateSystem yoLinkPose = new YoGraphicCoordinateSystem("linkPoseGraphic", externalForceEstimator.getYoLinkFramePose(), 0.25);
       YoGraphicsList externalForcePointViz = new YoGraphicsList("simulatedExternalForce");
       externalForcePointViz.add(forceVector);
       externalForcePointViz.add(forcePoint);
       externalForcePointViz.add(externalForceEstimator.getEstimatedForceVectorGraphic());
+      externalForcePointViz.add(yoLinkPose);
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);
       simulationStarter.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setDT(simDT, (int) (controllerDT / simDT));
