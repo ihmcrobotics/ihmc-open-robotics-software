@@ -32,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -242,6 +243,7 @@ public class HumanoidKinematicsSimulation
                                                                                                 publisherTopicNameGenerator,
                                                                                                 walkingOutputManager,
                                                                                                 realtimeRos2Node);
+      walkingInputManager.registerConversionHelper(new FrameMessageCommandConverter(controllerToolbox.getReferenceFrameHashCodeResolver()));
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
                                                                        9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
