@@ -17,7 +17,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.WobblySimulationContactPoints;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("humanoid-obstacle")
+@Tag("humanoid-obstacle-slow")
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    private static final double footZWobbleForTests = 0.01;

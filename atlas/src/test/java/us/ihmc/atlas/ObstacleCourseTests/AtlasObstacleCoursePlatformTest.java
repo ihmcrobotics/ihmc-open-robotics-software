@@ -13,7 +13,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-obstacle")
 public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTest
 {
 
@@ -38,6 +37,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testRunsTheSameWayTwiceJustStanding();
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
@@ -45,6 +45,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testSidestepOverSmallPlatform();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
@@ -52,6 +53,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testSidestepOverSmallWall();
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
@@ -59,6 +61,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testWalkingOffOfMediumPlatform();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
@@ -66,6 +69,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testWalkingOffOfMediumPlatformSlowSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOffOfLargePlatform() throws SimulationExceededMaximumTimeException
@@ -73,6 +77,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testWalkingOffOfLargePlatform();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
@@ -80,6 +85,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testWalkingOntoMediumPlatformToesTouching();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
@@ -87,11 +93,11 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
       super.testWalkingOverSmallPlatform();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSmallPlatformQuickly();
    }
-
 }
