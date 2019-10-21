@@ -26,7 +26,7 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Tag("humanoid-obstacle-3")
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
