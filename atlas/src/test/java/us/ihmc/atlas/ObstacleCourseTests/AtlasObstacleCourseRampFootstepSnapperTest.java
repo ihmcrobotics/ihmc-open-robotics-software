@@ -11,7 +11,6 @@ import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTe
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-obstacle-2")
 public class AtlasObstacleCourseRampFootstepSnapperTest extends DRCObstacleCourseRampFootstepSnapperTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -28,11 +27,11 @@ public class AtlasObstacleCourseRampFootstepSnapperTest extends DRCObstacleCours
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampUsingSnapFootsteps();
    }
-
 }

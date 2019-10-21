@@ -12,7 +12,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-@Tag("humanoid-obstacle-2")
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override
@@ -27,6 +26,7 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
