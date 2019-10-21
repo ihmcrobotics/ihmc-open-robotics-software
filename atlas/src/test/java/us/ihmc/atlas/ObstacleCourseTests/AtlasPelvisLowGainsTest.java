@@ -15,7 +15,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("humanoid-flat-ground-4")
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
@@ -42,6 +41,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException

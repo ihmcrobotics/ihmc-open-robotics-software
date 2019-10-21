@@ -54,7 +54,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testStartSecondStepWhileTransitioningToStand();
    }
 
-   @Tag("humanoid-flat-ground-2")
+   @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
    public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
@@ -62,7 +62,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalkingForward();
    }
 
-   @Tag("humanoid-flat-ground-2")
+   @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
@@ -70,7 +70,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalkingInitialTransfer();
    }
 
-   @Tag("humanoid-flat-ground-2")
+   @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException

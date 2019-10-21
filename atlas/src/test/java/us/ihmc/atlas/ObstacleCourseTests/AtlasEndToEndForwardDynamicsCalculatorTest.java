@@ -9,7 +9,7 @@ import us.ihmc.avatar.AvatarEndToEndForwardDynamicsCalculatorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 
-@Tag("humanoid-flat-ground-3")
+@Tag("humanoid-flat-ground-slow-3")
 public class AtlasEndToEndForwardDynamicsCalculatorTest extends AvatarEndToEndForwardDynamicsCalculatorTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
