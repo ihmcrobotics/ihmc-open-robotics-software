@@ -11,7 +11,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@Tag("humanoid-flat-ground-3")
 public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlatWithErrorsTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
@@ -40,6 +39,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       return 0.1;
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
@@ -47,6 +47,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
@@ -54,6 +55,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
@@ -61,6 +63,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSideStepsWithSlipping();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
@@ -68,6 +71,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testStandingWithOscillatingFeet();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
