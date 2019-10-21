@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-flat-ground-2")
+@Tag("humanoid-flat-ground-slow-2")
 public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkingTest
 {
    private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;

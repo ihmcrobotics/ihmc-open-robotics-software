@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-flat-ground-2")
+@Tag("humanoid-flat-ground-slow-2")
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
    private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;

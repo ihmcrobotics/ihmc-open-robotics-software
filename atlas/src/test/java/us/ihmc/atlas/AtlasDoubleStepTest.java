@@ -14,7 +14,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
 
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false);
 
-   @Tag("humanoid-flat-ground-2")
+   @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
    public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
@@ -38,7 +38,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowLongTransferSameSide();
    }
 
-   @Tag("humanoid-flat-ground-2")
+   @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
