@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsWalkingTaskTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-@Tag("humanoid-obstacle")
+@Tag("humanoid-obstacle-slow")
 public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseTrialsWalkingTaskTest
 {
 

@@ -11,7 +11,6 @@ import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-obstacle")
 public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -28,6 +27,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -35,6 +35,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingDownRampWithMediumSteps();
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -42,6 +43,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithMediumSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
@@ -49,6 +51,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
@@ -56,6 +59,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
@@ -66,7 +70,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Override
    protected double getMaxRotationCorruption()
    {
-      return Math.PI/8.0;
+      return Math.PI / 8.0;
    }
 
 }
