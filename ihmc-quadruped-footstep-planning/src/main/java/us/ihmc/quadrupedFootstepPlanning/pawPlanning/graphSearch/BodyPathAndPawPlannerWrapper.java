@@ -2,11 +2,12 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -16,11 +17,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,7 +35,7 @@ import java.util.List;
 
 public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final double defaultTimeout = 5.0;
    private static final double defaultBestEffortTimeout = 0.0;
@@ -57,8 +60,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
-   public BodyPathAndPawPlannerWrapper(String prefix, PawStepPlannerParametersReadOnly parameters, YoVariableRegistry parentRegistry,
-                                       YoGraphicsListRegistry graphicsListRegistry)
+   public BodyPathAndPawPlannerWrapper(String prefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
@@ -112,7 +114,32 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    @Override
    public void setStart(PawStepPlannerStart start)
    {
-      waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
+      if (start.getTargetType() == PawStepPlannerTargetType.POSE_BETWEEN_FEET)
+      {
+         waypointPathPlanner.setInitialBodyPose(start.getTargetPose());
+      }
+      else
+      {
+         int feetInContact = 0;
+         FramePoint3D startPosition = new FramePoint3D();
+         QuadrantDependentList<FramePoint3D> startPositions = new QuadrantDependentList<>();
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            Point3DReadOnly position = start.getPawGoalPosition(robotQuadrant);
+            if (!position.containsNaN())
+            {
+               startPosition.add(position);
+               startPositions.put(robotQuadrant, new FramePoint3D(ReferenceFrame.getWorldFrame(), position));
+               feetInContact++;
+            }
+         }
+
+         startPosition.scale(1.0 / feetInContact);
+         double nominalYaw = QuadrupedSupportPolygon.getNominalYaw(startPositions, feetInContact);
+         FrameQuaternion startOrientation = new FrameQuaternion();
+         startOrientation.setYawPitchRoll(nominalYaw, 0.0, 0.0);
+         waypointPathPlanner.setInitialBodyPose(new FramePose3D(startPosition, startOrientation));
+      }
 
       pawStepPlanner.setStart(start);
 

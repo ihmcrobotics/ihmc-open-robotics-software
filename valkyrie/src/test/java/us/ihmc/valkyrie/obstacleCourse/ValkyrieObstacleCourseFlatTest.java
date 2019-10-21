@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.obstacleCourse;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -47,28 +46,24 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSimpleScripts();
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleQueuedControllerCommands();
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
@@ -90,7 +85,6 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @Tag("allocation-slow")
    @Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {

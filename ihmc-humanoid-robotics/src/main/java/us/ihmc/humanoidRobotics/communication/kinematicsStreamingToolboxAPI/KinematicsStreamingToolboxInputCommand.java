@@ -13,6 +13,9 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    private long sequenceId;
    private final RecyclingArrayList<KinematicsToolboxRigidBodyCommand> inputs = new RecyclingArrayList<>(KinematicsToolboxRigidBodyCommand::new);
    private boolean streamToController = false;
+   private double streamInitialBlendDuration = -1.0;
+   private double angularRateLimitation = -1.0;
+   private double linearRateLimitation = -1.0;
 
    @Override
    public void clear()
@@ -20,6 +23,9 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       sequenceId = 0;
       inputs.clear();
       streamToController = false;
+      streamInitialBlendDuration = -1.0;
+      angularRateLimitation = -1.0;
+      linearRateLimitation = -1.0;
    }
 
    @Override
@@ -30,6 +36,9 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       for (int i = 0; i < other.inputs.size(); i++)
          inputs.add().set(other.inputs.get(i));
       streamToController = other.streamToController;
+      streamInitialBlendDuration = other.streamInitialBlendDuration;
+      angularRateLimitation = other.angularRateLimitation;
+      linearRateLimitation = other.linearRateLimitation;
    }
 
    @Override
@@ -46,6 +55,9 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       for (int i = 0; i < message.getInputs().size(); i++)
          inputs.add().set(message.getInputs().get(i), rigidBodyHashCodeResolver, referenceFrameResolver);
       streamToController = message.getStreamToController();
+      streamInitialBlendDuration = message.getStreamInitialBlendDuration();
+      angularRateLimitation = message.getAngularRateLimitation();
+      linearRateLimitation = message.getLinearRateLimitation();
    }
 
    public int getNumberOfInputs()
@@ -71,6 +83,21 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    public boolean getStreamToController()
    {
       return streamToController;
+   }
+
+   public double getStreamInitialBlendDuration()
+   {
+      return streamInitialBlendDuration;
+   }
+
+   public double getAngularRateLimitation()
+   {
+      return angularRateLimitation;
+   }
+
+   public double getLinearRateLimitation()
+   {
+      return linearRateLimitation;
    }
 
    @Override

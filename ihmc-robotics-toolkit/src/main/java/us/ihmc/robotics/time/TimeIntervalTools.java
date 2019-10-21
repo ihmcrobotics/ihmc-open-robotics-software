@@ -41,7 +41,7 @@ public class TimeIntervalTools
       sort((List<TimeIntervalProvider>) timeIntervalProviders, endTimeComparator.reversed());
    }
 
-   private static <T> void sort(List<T> ts, Comparator<T> comparator)
+   public static <T> void sort(List<T> ts, Comparator<T> comparator)
    {
       boolean ordered = false;
 

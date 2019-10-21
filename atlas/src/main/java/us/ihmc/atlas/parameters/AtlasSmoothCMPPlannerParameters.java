@@ -141,4 +141,10 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return true;
    }
+
+   @Override
+   public boolean useExitCoPOnToesForSteppingDown()
+   {
+      return true;
+   }
 }

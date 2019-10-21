@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,21 +27,23 @@ public class KinematicsToolboxModule extends ToolboxModule
 {
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
       this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
    }
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
+                                                                            robotModel,
                                                                             Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                                             yoGraphicsListRegistry,
                                                                             registry);
+      kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }

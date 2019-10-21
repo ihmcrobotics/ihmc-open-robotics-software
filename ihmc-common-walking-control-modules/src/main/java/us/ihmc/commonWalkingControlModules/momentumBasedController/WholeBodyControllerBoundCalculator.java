@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -85,12 +86,23 @@ public class WholeBodyControllerBoundCalculator
          lowerHardLimits.put(joint, hardLowerLimit);
          upperHardLimits.put(joint, hardUpperLimit);
 
-
          YoDouble velocityGain = new YoDouble("joint_limit_velocity_gain_" + joint.getName(), registry);
          velocityGains.put(joint, velocityGain);
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   /**
+    * Sets whether the joint velocity limits as defined by {@link OneDoFJoint#getVelocityLimitLower()}
+    * and {@link OneDoFJoint#getVelocityLimitUpper()} should be considered.
+    * 
+    * @param value if {@code true} the joint velocity limits will be considered, if {@code false} they
+    *              will be ignored.
+    */
+   public void considerJointVelocityLimits(boolean value)
+   {
+      areJointVelocityLimitsConsidered.set(value);
    }
 
    public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
@@ -145,13 +157,13 @@ public class WholeBodyControllerBoundCalculator
 
          switch (jointLimitTypes.get(joint))
          {
-         case DEFAULT:
-            computeVelocityLimitDefault(joint, qDotMinToPack, qDotMaxToPack);
-            break;
-         case NONE:
-            break;
-         default:
-            throw new RuntimeException("Implement case!");
+            case DEFAULT:
+               computeVelocityLimitDefault(joint, qDotMinToPack, qDotMaxToPack);
+               break;
+            case NONE:
+               break;
+            default:
+               throw new RuntimeException("Implement case!");
          }
       }
    }
@@ -205,16 +217,16 @@ public class WholeBodyControllerBoundCalculator
 
          switch (jointLimitTypes.get(joint))
          {
-         case DEFAULT:
-            computeAccelerationLimitDefault(joint, absoluteMaximumJointAcceleration, qDDotMinToPack, qDDotMaxToPack);
-            break;
-         case RESTRICTIVE:
-            computeAccelerationLimitRestrictive(joint, absoluteMaximumJointAcceleration, qDDotMinToPack, qDDotMaxToPack);
-            break;
-         case NONE:
-            break;
-         default:
-            throw new RuntimeException("Implement case!");
+            case DEFAULT:
+               computeAccelerationLimitDefault(joint, absoluteMaximumJointAcceleration, qDDotMinToPack, qDDotMaxToPack);
+               break;
+            case RESTRICTIVE:
+               computeAccelerationLimitRestrictive(joint, absoluteMaximumJointAcceleration, qDDotMinToPack, qDDotMaxToPack);
+               break;
+            case NONE:
+               break;
+            default:
+               throw new RuntimeException("Implement case!");
          }
       }
    }

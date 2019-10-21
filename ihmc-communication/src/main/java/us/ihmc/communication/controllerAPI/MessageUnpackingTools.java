@@ -2,9 +2,19 @@ package us.ihmc.communication.controllerAPI;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public final class MessageUnpackingTools
 {
@@ -16,29 +26,78 @@ public final class MessageUnpackingTools
    {
       return new MessageUnpacker<WholeBodyTrajectoryMessage>()
       {
+         private final HandHybridJointspaceTaskspaceTrajectoryMessage leftHandHybridJointspaceTaskspaceTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+         private final HandHybridJointspaceTaskspaceTrajectoryMessage rightHandHybridJointspaceTaskspaceTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+
          @Override
          public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<Settable<?>> messagesToPack)
          {
-            if (multipleMessageHolder.getLeftHandTrajectoryMessage() != null && !multipleMessageHolder.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getLeftHandTrajectoryMessage());
-            if (multipleMessageHolder.getRightHandTrajectoryMessage() != null && !multipleMessageHolder.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getRightHandTrajectoryMessage());
-            if (multipleMessageHolder.getLeftArmTrajectoryMessage() != null && !multipleMessageHolder.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getLeftArmTrajectoryMessage());
-            if (multipleMessageHolder.getRightArmTrajectoryMessage() != null && !multipleMessageHolder.getRightArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getRightArmTrajectoryMessage());
-            if (multipleMessageHolder.getChestTrajectoryMessage() != null && !multipleMessageHolder.getChestTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getChestTrajectoryMessage());
-            if (multipleMessageHolder.getSpineTrajectoryMessage() != null && !multipleMessageHolder.getSpineTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getSpineTrajectoryMessage());
-            if (multipleMessageHolder.getPelvisTrajectoryMessage() != null && !multipleMessageHolder.getPelvisTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getPelvisTrajectoryMessage());
-            if (multipleMessageHolder.getHeadTrajectoryMessage() != null && !multipleMessageHolder.getHeadTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getHeadTrajectoryMessage());
-            if (multipleMessageHolder.getLeftFootTrajectoryMessage() != null && !multipleMessageHolder.getLeftFootTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getLeftFootTrajectoryMessage());
-            if (multipleMessageHolder.getRightFootTrajectoryMessage() != null && !multipleMessageHolder.getRightFootTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-               messagesToPack.add(multipleMessageHolder.getRightFootTrajectoryMessage());
+            HandTrajectoryMessage leftHandTrajectoryMessage = multipleMessageHolder.getLeftHandTrajectoryMessage();
+            HandTrajectoryMessage rightHandTrajectoryMessage = multipleMessageHolder.getRightHandTrajectoryMessage();
+            ArmTrajectoryMessage leftArmTrajectoryMessage = multipleMessageHolder.getLeftArmTrajectoryMessage();
+            ArmTrajectoryMessage rightArmTrajectoryMessage = multipleMessageHolder.getRightArmTrajectoryMessage();
+            ChestTrajectoryMessage chestTrajectoryMessage = multipleMessageHolder.getChestTrajectoryMessage();
+            SpineTrajectoryMessage spineTrajectoryMessage = multipleMessageHolder.getSpineTrajectoryMessage();
+            PelvisTrajectoryMessage pelvisTrajectoryMessage = multipleMessageHolder.getPelvisTrajectoryMessage();
+            HeadTrajectoryMessage headTrajectoryMessage = multipleMessageHolder.getHeadTrajectoryMessage();
+            NeckTrajectoryMessage neckTrajectoryMessage = multipleMessageHolder.getNeckTrajectoryMessage();
+            FootTrajectoryMessage leftFootTrajectoryMessage = multipleMessageHolder.getLeftFootTrajectoryMessage();
+            FootTrajectoryMessage rightFootTrajectoryMessage = multipleMessageHolder.getRightFootTrajectoryMessage();
+
+            if (!leftHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+            {
+               if (!leftArmTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               {
+                  leftHandHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(RobotSide.LEFT.toByte());
+                  leftHandHybridJointspaceTaskspaceTrajectoryMessage.setSequenceId(leftHandTrajectoryMessage.getSequenceId());
+                  leftHandHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(leftHandTrajectoryMessage.getSe3Trajectory());
+                  leftHandHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(leftArmTrajectoryMessage.getJointspaceTrajectory());
+                  messagesToPack.add(leftHandHybridJointspaceTaskspaceTrajectoryMessage);
+               }
+               else
+               {
+                  messagesToPack.add(leftHandTrajectoryMessage);
+               }
+            }
+            else if (!leftArmTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+            {
+               messagesToPack.add(leftArmTrajectoryMessage);
+            }
+
+            if (!rightHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+            {
+               if (!rightArmTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               {
+                  rightHandHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(RobotSide.RIGHT.toByte());
+                  rightHandHybridJointspaceTaskspaceTrajectoryMessage.setSequenceId(rightHandTrajectoryMessage.getSequenceId());
+                  rightHandHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(rightHandTrajectoryMessage.getSe3Trajectory());
+                  rightHandHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(rightArmTrajectoryMessage.getJointspaceTrajectory());
+                  messagesToPack.add(rightHandHybridJointspaceTaskspaceTrajectoryMessage);
+               }
+               else
+               {
+                  messagesToPack.add(rightHandTrajectoryMessage);
+               }
+            }
+            else if (!rightArmTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+            {
+               messagesToPack.add(rightArmTrajectoryMessage);
+            }
+
+            if (!chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+               messagesToPack.add(chestTrajectoryMessage);
+            if (!spineTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(spineTrajectoryMessage);
+            if (!pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+               messagesToPack.add(pelvisTrajectoryMessage);
+            if (!neckTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(neckTrajectoryMessage);
+            if (!headTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+               messagesToPack.add(headTrajectoryMessage);
+            if (!leftFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+               messagesToPack.add(leftFootTrajectoryMessage);
+            if (!rightFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+               messagesToPack.add(rightFootTrajectoryMessage);
          }
       };
    }

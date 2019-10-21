@@ -23,6 +23,25 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
             */
    public boolean stream_to_controller_;
    /**
+            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+            * reaches for the current IK configuration.
+            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double stream_initial_blend_duration_ = -1.0;
+   /**
+            * Constraint on the maximum angular velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double angular_rate_limitation_ = -1.0;
+   /**
+            * Constraint on the maximum linear velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double linear_rate_limitation_ = -1.0;
+   /**
             * The list of inputs the solver is to be tracking.
             * When streaming inputs from a VR UI environment, it is convenient to use the fields control_frame_position_in_end_effector and
             * control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
@@ -47,6 +66,12 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       sequence_id_ = other.sequence_id_;
 
       stream_to_controller_ = other.stream_to_controller_;
+
+      stream_initial_blend_duration_ = other.stream_initial_blend_duration_;
+
+      angular_rate_limitation_ = other.angular_rate_limitation_;
+
+      linear_rate_limitation_ = other.linear_rate_limitation_;
 
       inputs_.set(other.inputs_);
    }
@@ -87,6 +112,65 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       return stream_to_controller_;
    }
 
+   /**
+            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+            * reaches for the current IK configuration.
+            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setStreamInitialBlendDuration(double stream_initial_blend_duration)
+   {
+      stream_initial_blend_duration_ = stream_initial_blend_duration;
+   }
+   /**
+            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+            * reaches for the current IK configuration.
+            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getStreamInitialBlendDuration()
+   {
+      return stream_initial_blend_duration_;
+   }
+
+   /**
+            * Constraint on the maximum angular velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setAngularRateLimitation(double angular_rate_limitation)
+   {
+      angular_rate_limitation_ = angular_rate_limitation;
+   }
+   /**
+            * Constraint on the maximum angular velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getAngularRateLimitation()
+   {
+      return angular_rate_limitation_;
+   }
+
+   /**
+            * Constraint on the maximum linear velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setLinearRateLimitation(double linear_rate_limitation)
+   {
+      linear_rate_limitation_ = linear_rate_limitation;
+   }
+   /**
+            * Constraint on the maximum linear velocity resulting from any user inputs.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getLinearRateLimitation()
+   {
+      return linear_rate_limitation_;
+   }
+
 
    /**
             * The list of inputs the solver is to be tracking.
@@ -121,6 +205,12 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.stream_to_controller_, other.stream_to_controller_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stream_initial_blend_duration_, other.stream_initial_blend_duration_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_rate_limitation_, other.angular_rate_limitation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_rate_limitation_, other.linear_rate_limitation_, epsilon)) return false;
+
       if (this.inputs_.size() != other.inputs_.size()) { return false; }
       else
       {
@@ -145,6 +235,12 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
       if(this.stream_to_controller_ != otherMyClass.stream_to_controller_) return false;
 
+      if(this.stream_initial_blend_duration_ != otherMyClass.stream_initial_blend_duration_) return false;
+
+      if(this.angular_rate_limitation_ != otherMyClass.angular_rate_limitation_) return false;
+
+      if(this.linear_rate_limitation_ != otherMyClass.linear_rate_limitation_) return false;
+
       if (!this.inputs_.equals(otherMyClass.inputs_)) return false;
 
       return true;
@@ -160,6 +256,12 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("stream_to_controller=");
       builder.append(this.stream_to_controller_);      builder.append(", ");
+      builder.append("stream_initial_blend_duration=");
+      builder.append(this.stream_initial_blend_duration_);      builder.append(", ");
+      builder.append("angular_rate_limitation=");
+      builder.append(this.angular_rate_limitation_);      builder.append(", ");
+      builder.append("linear_rate_limitation=");
+      builder.append(this.linear_rate_limitation_);      builder.append(", ");
       builder.append("inputs=");
       builder.append(this.inputs_);
       builder.append("}");

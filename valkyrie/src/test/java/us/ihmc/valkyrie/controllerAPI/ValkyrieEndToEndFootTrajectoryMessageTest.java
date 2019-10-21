@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndFootTrajectoryMessageTest;
@@ -21,41 +22,47 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
       };
    };
 
+   @Tag("controller-api-slow")
    @Test
    @Override
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlPoint();
    }
-   
+
+   @Tag("controller-api")
    @Test
    @Override
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
    }
-   
+
+   @Tag("controller-api")
    @Test
    @Override
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
-   
+
+   @Tag("controller-api")
    @Test
    @Override
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
-   
+
+   @Tag("controller-api-slow")
    @Test
    @Override
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       super.testQueueStoppedWithOverrideMessage();
    }
-   
+
+   @Tag("controller-api-slow")
    @Test
    @Override
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
@@ -63,11 +70,20 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api")
    @Test
    @Override
    public void testStreaming() throws Exception
    {
       super.testStreaming();
+   }
+
+   @Tag("controller-api")
+   @Test
+   @Override
+   public void testPickUpAndPutDown() throws SimulationExceededMaximumTimeException
+   {
+      super.testPickUpAndPutDown();
    }
 
    @Override

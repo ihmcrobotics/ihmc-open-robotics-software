@@ -21,6 +21,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    SMALL_PLATFORM,
    MEDIUM_PLATFORM,
    ON_MEDIUM_PLATFORM,
+   ON_LARGE_PLATFORM,
    EASY_STEPPING_STONES,
    STEPPING_STONES,
    STAIRS,
@@ -53,6 +54,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_QUALS, new SquaredUpDRCDemo01Robot(0.0, 1.5, Math.toRadians(-41.1147), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.NARROW_DOORWAY, new SquaredUpDRCDemo01Robot(0.0, 2.7094, Math.toRadians(-89.2852), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotOnPlatformsInitialSetup.createInitialSetupOnNthPlatform(3));
+      addMapping(DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM, SquaredUpDRCDemo01RobotOnPlatformsInitialSetup.createInitialSetupOnNthPlatform(5));
       addMapping(DRCObstacleCourseStartingLocation.RAMP_BOTTOM, new SquaredUpDRCDemo01Robot(0.0, 2.6179, 0.0, 0.0));
       addMapping(DRCObstacleCourseStartingLocation.RAMP_TOP, new SquaredUpDRCDemo01Robot(0.6255, 7.25, 0.0, 0.99*Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.ROCKS, new OffsetAndYawRobotInitialSetup(0.0, 2.044, 0.0));

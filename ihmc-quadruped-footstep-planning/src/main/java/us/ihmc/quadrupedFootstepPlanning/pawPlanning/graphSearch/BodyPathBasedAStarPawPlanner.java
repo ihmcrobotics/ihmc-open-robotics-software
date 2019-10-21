@@ -143,8 +143,6 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
 
       FramePose3D pawPlannerGoal = new FramePose3D();
       pawPlannerGoal.set(goalPose);
-//      pawPlannerGoal.setPosition(goalPose.getPosition());
-//      pawPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
       if (alpha >= 1.0)
          pawPlannerGoal.setOrientation(highLevelGoal.getTargetPose().getOrientation());

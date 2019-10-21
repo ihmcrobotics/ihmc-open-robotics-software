@@ -42,8 +42,8 @@ public class CoMHeightTimeDerivativesSmootherTest
       YoVariableRegistry registry = new YoVariableRegistry("Test");
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData();
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData();
+      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
+      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
 
       double comHeight = 1.2;
       double comHeightVelocity = 0.0;
@@ -86,8 +86,8 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData();
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData();
+      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
+      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
 
       double comHeightIn = 1.0;
       double comHeightVelocityIn = 0.0;
@@ -184,8 +184,8 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData();
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData();
+      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
+      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
 
       double comHeightIn = 0.0; //amplitude.getDoubleValue(); //1.0;
       double comHeightVelocityIn = 2.0 * Math.PI * frequency.getDoubleValue() * amplitude.getDoubleValue();

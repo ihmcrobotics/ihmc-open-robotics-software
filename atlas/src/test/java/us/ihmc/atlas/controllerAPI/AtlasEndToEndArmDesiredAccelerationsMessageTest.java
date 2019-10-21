@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -11,7 +12,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndArmDesiredAccelerationsMessageTest extends EndToEndArmDesiredAccelerationsMessageTest
 {
-
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
@@ -26,6 +26,7 @@ public class AtlasEndToEndArmDesiredAccelerationsMessageTest extends EndToEndArm
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testSimpleCommands() throws Exception
