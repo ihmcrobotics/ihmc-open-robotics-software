@@ -3,8 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -50,20 +52,25 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> expansion)
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      double reachSquared = MathTools.square(parameters.getMaximumStepReach());
+      double maxReachSquared = MathTools.square(parameters.getMaximumStepReach());
+      double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw();
+      double maxYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw();
       for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
       {
          for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
-            if (MathTools.square(x) + MathTools.square(y) > reachSquared)
+            double reachSquared = EuclidCoreTools.normSquared(x, y);
+            if (reachSquared > maxReachSquared)
                continue;
 
             if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
-            {
                continue;
-            }
 
-            for (double yaw = parameters.getMinimumStepYaw(); yaw <= parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
+            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaximumStepReach();
+            double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), minYawAtFullExtension, reachFraction);
+            double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), maxYawAtFullExtension, reachFraction);
+
+            for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticeNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);
