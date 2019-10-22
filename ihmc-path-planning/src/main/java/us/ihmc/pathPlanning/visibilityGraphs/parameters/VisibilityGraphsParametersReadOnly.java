@@ -311,7 +311,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return maxLength;
          }
