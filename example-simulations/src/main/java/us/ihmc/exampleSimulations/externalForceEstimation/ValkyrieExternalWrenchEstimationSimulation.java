@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -39,6 +40,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieMomentumOptimizationSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -68,8 +70,8 @@ public class ValkyrieExternalWrenchEstimationSimulation
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "valkyrie_wrench_estimation_sim");
 
       FullHumanoidRobotModel controllerFullRobotModel = simulationStarter.getAvatarSimulation().getControllerFullRobotModel();
-      JointBasics hokuyoJoint = controllerFullRobotModel.getOneDoFJointByName("hokuyo_joint");
-      JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(controllerFullRobotModel, hokuyoJoint);
+      JointBasics[] jointsToIgnore = new JointBasics[0]; // new JointBasics[]{controllerFullRobotModel.getOneDoFJointByName("hokuyo_joint")}; //
+      JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(controllerFullRobotModel, jointsToIgnore);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame",
                                                                         ReferenceFrame.getWorldFrame(),
                                                                         controllerFullRobotModel.getRootBody());
@@ -89,9 +91,9 @@ public class ValkyrieExternalWrenchEstimationSimulation
       HumanoidFloatingRootJointRobot scsRobot = simulationStarter.getSDFRobot();
 
       // Root joint
-      Vector3D externalForcePointOffset = new Vector3D(-0.3, 0.3, 0.0); // new Vector3D(); //
-      RigidBodyBasics endEffector = controllerFullRobotModel.getRootBody();
-      Joint scsEndEffector = scsRobot.getRootJoint();
+//      Vector3D externalForcePointOffset = new Vector3D(-0.3, 0.3, 0.0); // new Vector3D(); //
+//      RigidBodyBasics endEffector = controllerFullRobotModel.getRootBody();
+//      Joint scsEndEffector = scsRobot.getRootJoint();
 
       // Chest
 //      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.2);
@@ -119,9 +121,9 @@ public class ValkyrieExternalWrenchEstimationSimulation
 //      Joint scsEndEffector = scsRobot.getJoint("rightWristRoll");
 
       // Wrist pitch
-//      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
-//      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightWristPitch").getSuccessor();
-//      Joint scsEndEffector = scsRobot.getJoint("rightWristPitch");
+      Vector3D externalForcePointOffset = new Vector3D(0.0, 0.0, 0.0);
+      RigidBodyBasics endEffector = controllerFullRobotModel.getOneDoFJointByName("rightWristPitch").getSuccessor();
+      Joint scsEndEffector = scsRobot.getJoint("rightWristPitch");
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
       scsEndEffector.addExternalForcePoint(externalForcePoint);
@@ -136,7 +138,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
       }
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
-      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(Arrays.asList(hokuyoJoint), controlCoreToolbox, controlCoreToolbox.getWrenchMatrixCalculator());
+      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(Arrays.asList(jointsToIgnore), controlCoreToolbox, controlCoreToolbox.getWrenchMatrixCalculator());
       final int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       DenseMatrix64F floatingBaseMassMatrix = new DenseMatrix64F(6, degreesOfFreedom);
@@ -184,6 +186,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
       graphicsListRegistry.registerYoGraphicsList(externalForcePointViz);
       simulationStarter.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setDT(simDT, (int) (controllerDT / simDT));
+      simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addScript(t -> externalForcePoint.getOffset(externalForcePointOffset));
 
       JButton resetButton = new JButton("Reset estimator");
       resetButton.addActionListener(e -> externalForceEstimator.requestInitialize());
@@ -244,7 +247,8 @@ public class ValkyrieExternalWrenchEstimationSimulation
 
             for (int i = 0; i < jointDesiredOutputList.size(); i++)
             {
-               qddFromController.set(6 + i, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
+               int offset = (i >= 25) ? 1 : 0;
+               qddFromController.set(6 + i + offset, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
             }
          }
 

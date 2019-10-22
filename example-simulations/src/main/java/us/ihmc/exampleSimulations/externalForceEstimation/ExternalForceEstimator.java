@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
-import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
@@ -10,10 +9,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -31,7 +33,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
@@ -49,7 +50,7 @@ import java.util.stream.IntStream;
    private final int integrationWindow;
    private final boolean hasFloatingBase;
 
-   private static final double integrationTime = 2.0;
+   private static final double integrationTime = 2.5;
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
 
    private final JointReadOnly[] joints;
@@ -61,7 +62,7 @@ import java.util.stream.IntStream;
    // Frame at which external force is expected to be applied. Aligned with world frame
    private final ReferenceFrame externalForcePointFrame;
    private final FramePoint3D externalForcePoint;
-   private final Vector3D externalForcePointOffset = new Vector3D();
+   private final Tuple3DReadOnly externalForcePointOffset;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private final DenseMatrix64F currentIntegrandValue;
@@ -118,11 +119,12 @@ import java.util.stream.IntStream;
       this.endEffector = endEffector;
       this.tauSetter = tauSetter;
       this.dt = dt;
-      this.wrenchEstimationGain.set(3.0);
+      this.wrenchEstimationGain.set(0.7);
       this.dynamicMatrixSetter = dynamicMatrixSetter;
       this.hasFloatingBase = joints[0] instanceof FloatingJointBasics;
 
       RigidBodyBasics baseLink = joints[0].getPredecessor();
+      this.externalForcePointOffset = externalForcePointOffset;
       this.externalForcePoint = new FramePoint3D(endEffector.getParentJoint().getFrameAfterJoint(), externalForcePointOffset);
       this.externalForcePointFrame = new ReferenceFrame("externalForcePointFrame", ReferenceFrame.getWorldFrame(), false, true)
       {
@@ -134,7 +136,6 @@ import java.util.stream.IntStream;
          }
       };
 
-      this.externalForcePointOffset.set(externalForcePointOffset);
       this.geometricJacobian = new GeometricJacobian(baseLink, endEffector, externalForcePointFrame);
       this.pointJacobian = new PointJacobian();
       this.pointJacobianTranspose = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 3);
@@ -159,7 +160,7 @@ import java.util.stream.IntStream;
       this.jacobianMatrix = new DenseMatrix64F(6, dofs);
       this.jacobianMatrixInverse = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 6);
       this.forceEstimateSolver = new DampedLeastSquaresSolver(geometricJacobian.getNumberOfColumns(), 0.05); // new SolvePseudoInverseSvd(dofs, dofs); //
-      this.yoEstimatedExternalWrench = new YoFixedFrameSpatialForce("estimatedWrench", geometricJacobian.getEndEffectorFrame(), registry);
+      this.yoEstimatedExternalWrench = new YoFixedFrameSpatialForce("estimatedWrench", geometricJacobian.getBaseFrame(), registry);
 
       this.yoObservedExternalJointTorque = new YoDouble[dofs];
       this.yoSimulatedTorqueSensingError = new YoDouble[dofs];
@@ -267,7 +268,7 @@ import java.util.stream.IntStream;
 
       for (int i = 0; i < dofs; i++)
       {
-         tau.set(i, 0, tau.get(i, 0) + yoSimulatedTorqueSensingError[i].getValue());
+         tau.set(i, 0, tau.get(i, 0) - yoSimulatedTorqueSensingError[i].getValue());
       }
 
       // update current integral
@@ -300,8 +301,8 @@ import java.util.stream.IntStream;
          observedExternalTorqueAlongEndEffectorPath.set(i, 0, observedExternalJointTorque.get(jointIndex, 0));
       }
 
-      solveUsingFullJacobian();
-      //      solveUsingPointJacobian();
+//      solveUsingFullJacobian();
+      solveUsingPointJacobian();
 
       yoEstimatedExternalWrench.set(estimatedExternalWrench);
 
@@ -327,7 +328,6 @@ import java.util.stream.IntStream;
       CommonOps.multTransA(jacobianMatrixInverse, observedExternalTorqueAlongEndEffectorPath, estimatedExternalWrenchMatrix);
 
       estimatedExternalWrench.setIncludingFrame(geometricJacobian.getBaseFrame(), estimatedExternalWrenchMatrix);
-      estimatedExternalWrench.changeFrame(geometricJacobian.getEndEffectorFrame());
    }
 
    private final DenseMatrix64F estimatedExternalForceMatrix = new DenseMatrix64F(3, 1);
