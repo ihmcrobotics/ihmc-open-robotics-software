@@ -32,13 +32,15 @@ public class VisibilityGraph
 
    private final VisibilityGraphsParametersReadOnly parameters;
    private final InterRegionConnectionFilter interRegionConnectionFilter;
+   private final InterRegionConnectionFilter preferredInterRegionConnectionFilter;
    private final InterRegionConnectionFilter allPassFilter;
 
    public VisibilityGraph(NavigableRegions navigableRegions, InterRegionConnectionFilter interRegionConnectionFilter,
-                          VisibilityGraphsParametersReadOnly parameters)
+                          InterRegionConnectionFilter preferredInterRegionConnectionFilter, VisibilityGraphsParametersReadOnly parameters)
    {
       this.navigableRegions = navigableRegions;
       this.interRegionConnectionFilter = interRegionConnectionFilter;
+      this.preferredInterRegionConnectionFilter = preferredInterRegionConnectionFilter;
       this.parameters = parameters;
 
       allPassFilter = new InterRegionConnectionFilter()
@@ -151,8 +153,9 @@ public class VisibilityGraph
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          List<VisibilityGraphNode> allPreferredNavigableNodes = targetVisibilityGraphNavigableRegion.getAllPreferredNavigableNodes();
 
-         createInterRegionVisibilityConnections(sourceNode, allPreferredNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
-                                                interEdges, parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge(), 0.0);
+         createInterRegionVisibilityConnections(sourceNode, allPreferredNavigableNodes, sourceObstacleClusters, targetObstacleClusters,
+                                                preferredInterRegionConnectionFilter, interEdges, parameters.getLengthForLongInterRegionEdge(),
+                                                parameters.getWeightForInterRegionEdge(), 0.0);
          createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
                                                 interEdges, parameters.getLengthForLongInterRegionEdge(),
                                                 parameters.getWeightForNonPreferredEdge() * parameters.getWeightForInterRegionEdge(),
@@ -217,8 +220,8 @@ public class VisibilityGraph
    public void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
                                                       VisibilityGraphNavigableRegion targetNavigableRegion)
    {
-      createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion, interRegionConnectionFilter, crossRegionEdges,
-                                             parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge(),
+      createInterRegionVisibilityConnections(sourceNavigableRegion, targetNavigableRegion, interRegionConnectionFilter, preferredInterRegionConnectionFilter,
+                                             crossRegionEdges, parameters.getLengthForLongInterRegionEdge(), parameters.getWeightForInterRegionEdge(),
                                              parameters.getWeightForNonPreferredEdge(), parameters.getCostForNonPreferredNode());
    }
 
@@ -324,7 +327,9 @@ public class VisibilityGraph
    }
 
    public static void createInterRegionVisibilityConnections(VisibilityGraphNavigableRegion sourceNavigableRegion,
-                                                             VisibilityGraphNavigableRegion targetNavigableRegion, InterRegionConnectionFilter filter,
+                                                             VisibilityGraphNavigableRegion targetNavigableRegion,
+                                                             InterRegionConnectionFilter interRegionConnectionFilter,
+                                                             InterRegionConnectionFilter preferredInterRegionConnectionFilter,
                                                              List<VisibilityGraphEdge> edgesToPack, double lengthForLongInterRegionEdge,
                                                              double weightForInterRegionEdge, double nonPreferredWeight, double nonPreferredCost)
    {
@@ -341,7 +346,7 @@ public class VisibilityGraph
       BoundingBox3D targetHomeRegionBoundingBox = targetHomePlanarRegion.getBoundingBox3dInWorld();
 
       // If the source and target regions are simply too far apart, then do not check their individual points.
-      if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, filter.getMaximumInterRegionConnectionDistance()))
+      if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, interRegionConnectionFilter.getMaximumInterRegionConnectionDistance()))
       {
          return;
       }
@@ -354,41 +359,47 @@ public class VisibilityGraph
       List<VisibilityGraphNode> sourceRegionNodes = sourceNavigableRegion.getAllNavigableNodes();
       List<VisibilityGraphNode> targetRegionNodes = targetNavigableRegion.getAllNavigableNodes();
 
-      createInterRegionVisibilityConnections(preferredSourceRegionNodes, preferredTargetRegionNodes, sourceRegionNodes, targetRegionNodes, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                             lengthForLongInterRegionEdge, weightForInterRegionEdge, nonPreferredWeight, nonPreferredCost);
+      createInterRegionVisibilityConnections(preferredSourceRegionNodes, preferredTargetRegionNodes, sourceRegionNodes, targetRegionNodes,
+                                             sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
+                                             preferredInterRegionConnectionFilter, edgesToPack, lengthForLongInterRegionEdge, weightForInterRegionEdge,
+                                             nonPreferredWeight, nonPreferredCost);
    }
 
 
-   public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> preferredSourceNodeList, List<VisibilityGraphNode> preferredTargetNodeList,
+   public static void createInterRegionVisibilityConnections(List<VisibilityGraphNode> preferredSourceNodeList,
+                                                             List<VisibilityGraphNode> preferredTargetNodeList,
                                                              List<VisibilityGraphNode> sourceNodeList, List<VisibilityGraphNode> targetNodeList,
                                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters,
-                                                             InterRegionConnectionFilter filter, List<VisibilityGraphEdge> edgesToPack,
+                                                             InterRegionConnectionFilter interRegionConnectionFilter,
+                                                             InterRegionConnectionFilter preferredInterRegionConnectionFilter,
+                                                             List<VisibilityGraphEdge> edgesToPack,
                                                              double lengthForLongInterRegionEdge, double weightForInterRegionEdge, double nonPreferredWeight,
                                                              double nonPreferredCost)
    {
       // preferred to preferred
       for (VisibilityGraphNode sourceNode : preferredSourceNodeList)
       {
-         createInterRegionVisibilityConnections(sourceNode, preferredTargetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                                lengthForLongInterRegionEdge, weightForInterRegionEdge, 0.0);
+         createInterRegionVisibilityConnections(sourceNode, preferredTargetNodeList, sourceObstacleClusters, targetObstacleClusters,
+                                                preferredInterRegionConnectionFilter, edgesToPack, lengthForLongInterRegionEdge, weightForInterRegionEdge, 0.0);
       }
       // non-preferred to preferred
       for (VisibilityGraphNode sourceNode : sourceNodeList)
       {
-         createInterRegionVisibilityConnections(sourceNode, preferredTargetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                                lengthForLongInterRegionEdge, weightForInterRegionEdge, 0.0);
+         createInterRegionVisibilityConnections(sourceNode, preferredTargetNodeList, sourceObstacleClusters, targetObstacleClusters,
+                                                preferredInterRegionConnectionFilter, edgesToPack, lengthForLongInterRegionEdge, weightForInterRegionEdge, 0.0);
       }
       // preferred to non-preferred
       for (VisibilityGraphNode sourceNode : preferredSourceNodeList)
       {
-         createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                                lengthForLongInterRegionEdge, nonPreferredWeight * weightForInterRegionEdge, nonPreferredCost);
+         createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters,
+                                                preferredInterRegionConnectionFilter, edgesToPack, lengthForLongInterRegionEdge,
+                                                nonPreferredWeight * weightForInterRegionEdge, nonPreferredCost);
       }
       // non-preferred to non-preferred
       for (VisibilityGraphNode sourceNode : sourceNodeList)
       {
-         createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, filter, edgesToPack,
-                                                lengthForLongInterRegionEdge, nonPreferredWeight * weightForInterRegionEdge, nonPreferredCost);
+         createInterRegionVisibilityConnections(sourceNode, targetNodeList, sourceObstacleClusters, targetObstacleClusters, interRegionConnectionFilter,
+                                                edgesToPack, lengthForLongInterRegionEdge, nonPreferredWeight * weightForInterRegionEdge, nonPreferredCost);
       }
    }
 

@@ -1457,8 +1457,9 @@ public class NavigableRegionsManagerTest
          };
       parameters.setObstacleExtrusionDistance(obstacleExtrusionDistance);
       parameters.setPreferredObstacleExtrusionDistance(preferredObstacleExtrusionDistance);
+      parameters.setPreferredNavigableExtrusionDistance(1.0);
 //      parameters.setClusterResolution(0.501);
-      parameters.setPerformPostProcessingNodeShifting(true);
+//      parameters.setPerformPostProcessingNodeShifting(true);
       parameters.setComputeOrientationsToAvoidObstacles(true);
 
       return parameters;
