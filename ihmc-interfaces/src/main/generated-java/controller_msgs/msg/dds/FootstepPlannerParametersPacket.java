@@ -145,6 +145,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_z_ = -1.0;
    /**
+            * This is the reduction factor for the max yaw when the step is at max reach.
+            * This means that, when the footstep is at its maximum distance, this is the fraction of the max yaw that is allowed.
+            * 
+            * That is,
+            * modifiedMaxYaw = reach / maxReach * maxYaw + (1.0 - reach / maxReach) * alpha * maxYaw
+            */
+   public double step_yaw_reduction_factor_at_max_reach_ = -1.0;
+   /**
             * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
             * 
             * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
@@ -433,6 +441,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
 
       maximum_step_z_ = other.maximum_step_z_;
+
+      step_yaw_reduction_factor_at_max_reach_ = other.step_yaw_reduction_factor_at_max_reach_;
 
       minimum_foothold_percent_ = other.minimum_foothold_percent_;
 
@@ -889,6 +899,29 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZ()
    {
       return maximum_step_z_;
+   }
+
+   /**
+            * This is the reduction factor for the max yaw when the step is at max reach.
+            * This means that, when the footstep is at its maximum distance, this is the fraction of the max yaw that is allowed.
+            * 
+            * That is,
+            * modifiedMaxYaw = reach / maxReach * maxYaw + (1.0 - reach / maxReach) * alpha * maxYaw
+            */
+   public void setStepYawReductionFactorAtMaxReach(double step_yaw_reduction_factor_at_max_reach)
+   {
+      step_yaw_reduction_factor_at_max_reach_ = step_yaw_reduction_factor_at_max_reach;
+   }
+   /**
+            * This is the reduction factor for the max yaw when the step is at max reach.
+            * This means that, when the footstep is at its maximum distance, this is the fraction of the max yaw that is allowed.
+            * 
+            * That is,
+            * modifiedMaxYaw = reach / maxReach * maxYaw + (1.0 - reach / maxReach) * alpha * maxYaw
+            */
+   public double getStepYawReductionFactorAtMaxReach()
+   {
+      return step_yaw_reduction_factor_at_max_reach_;
    }
 
    /**
@@ -1744,6 +1777,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_yaw_reduction_factor_at_max_reach_, other.step_yaw_reduction_factor_at_max_reach_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_foothold_percent_, other.minimum_foothold_percent_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
@@ -1881,6 +1916,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
 
+      if(this.step_yaw_reduction_factor_at_max_reach_ != otherMyClass.step_yaw_reduction_factor_at_max_reach_) return false;
+
       if(this.minimum_foothold_percent_ != otherMyClass.minimum_foothold_percent_) return false;
 
       if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
@@ -2015,6 +2052,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z=");
       builder.append(this.maximum_step_z_);      builder.append(", ");
+      builder.append("step_yaw_reduction_factor_at_max_reach=");
+      builder.append(this.step_yaw_reduction_factor_at_max_reach_);      builder.append(", ");
       builder.append("minimum_foothold_percent=");
       builder.append(this.minimum_foothold_percent_);      builder.append(", ");
       builder.append("minimum_surface_incline_radians=");
