@@ -47,14 +47,14 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
    private static final boolean DO_ACCELERATION_TERMS = false;
    private static final boolean USE_DESIRED_ACCELERATIONS = true;
 
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, ArrayList<JointBasics> jointsToIgnore, double gravity)
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, List<JointBasics> jointsToIgnore, double gravity)
    {
       this(body,ScrewTools.createGravitationalSpatialAcceleration(MultiBodySystemTools.getRootBody(body), gravity), new LinkedHashMap<>(), jointsToIgnore,
            DEFAULT_DO_VELOCITY_TERMS, DO_ACCELERATION_TERMS);
    }
 
    public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyBasics body, SpatialAccelerationReadOnly rootAcceleration, HashMap<RigidBodyBasics, Wrench> externalWrenches,
-                                                        ArrayList<JointBasics> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
+                                                        List<JointBasics> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
       this(externalWrenches, jointsToIgnore, createSpatialAccelerationCalculator(body, rootAcceleration, doVelocityTerms, doAccelerationTerms));
    }
