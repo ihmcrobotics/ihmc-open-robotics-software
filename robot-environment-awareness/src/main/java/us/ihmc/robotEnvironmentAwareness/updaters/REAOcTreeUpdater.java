@@ -146,6 +146,7 @@ public class REAOcTreeUpdater
             buffer.submitBufferRequest();
 
          NormalOcTree bufferOctree = buffer.pollNewBuffer();
+         Pose3D bufferSensorPose = buffer.pollNewSensorPoseBuffer();
 
          if (bufferOctree != null)
          {
