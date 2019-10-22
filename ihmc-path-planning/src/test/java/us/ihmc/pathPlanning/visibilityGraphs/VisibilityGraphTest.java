@@ -82,7 +82,7 @@ public class VisibilityGraphTest
          }
       };
       // TODO should this use a separate preferred filter?
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, interRegionFilter, interRegionFilter, parameters);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, interRegionFilter, interRegionFilter, interRegionFilter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -258,7 +258,7 @@ public class VisibilityGraphTest
          }
       };
       // TODO should this use a separate preferred filter?
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, parameters);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -489,7 +489,7 @@ public class VisibilityGraphTest
          }
       };
       // TODO should this use a different preferred filter?
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, parameters);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -610,7 +610,7 @@ public class VisibilityGraphTest
          }
       };
       // TODO should this use a separate preferred filter?
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, parameters);
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();

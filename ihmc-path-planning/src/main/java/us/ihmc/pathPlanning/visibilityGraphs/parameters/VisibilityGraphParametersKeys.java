@@ -38,6 +38,6 @@ public class VisibilityGraphParametersKeys
    public static final DoubleStoredPropertyKey occludedGoalEdgeWeight                      = keys.addDoubleKey("Occluded goal edge weight", 50.0);
    public static final DoubleStoredPropertyKey weightForInterRegionEdge                    = keys.addDoubleKey("Weight for inter region edge", 2.0);
    public static final DoubleStoredPropertyKey weightForNonPreferredEdge                   = keys.addDoubleKey("Weight for non preferred edge", 5.0);
-   public static final DoubleStoredPropertyKey costForNonPreferredNode                     = keys.addDoubleKey("Cost for non preferred node", 2.0);
+   public static final DoubleStoredPropertyKey costForNonPreferredNode                     = keys.addDoubleKey("Cost for non preferred node", 5.0);
 
 }
