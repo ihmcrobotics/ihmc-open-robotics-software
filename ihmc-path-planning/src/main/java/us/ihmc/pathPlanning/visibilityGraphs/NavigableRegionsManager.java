@@ -117,7 +117,9 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions();
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(), parameters.getInterRegionPreferredConnectionFilter(),
+      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
+                                            parameters.getPreferredToPreferredInterRegionConnectionFilter(),
+                                            parameters.getPreferredToNonPreferredInterRegionConnectionFilter(),
                                             parameters);
 
       if (fullyExpandVisibilityGraph)

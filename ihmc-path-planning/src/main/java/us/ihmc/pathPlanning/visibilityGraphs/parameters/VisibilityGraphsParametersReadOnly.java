@@ -318,11 +318,38 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       };
    }
 
-   default InterRegionConnectionFilter getInterRegionPreferredConnectionFilter()
+   default InterRegionConnectionFilter getPreferredToPreferredInterRegionConnectionFilter()
    {
       return new InterRegionConnectionFilter()
       {
          private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * (getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance());
+         private final double maxLengthSquared = MathTools.square(maxLength);
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnectionDistance()
+         {
+            return maxLength;
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getPreferredToNonPreferredInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         private final double maxLength = getMaxInterRegionConnectionLength() + getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance();
          private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
