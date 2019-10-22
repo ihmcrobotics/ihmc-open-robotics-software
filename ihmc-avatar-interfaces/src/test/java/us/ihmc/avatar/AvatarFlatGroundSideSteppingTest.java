@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -19,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -36,7 +34,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-flat-ground-2")
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -151,7 +148,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       {
          if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
-            if(currentStep % 2 != 0)
+            if (currentStep % 2 != 0)
             {
                centerStepY += stepLength;
                rootLocations.add(new Point3D(0.0, centerStepY, 0.0));
@@ -190,7 +187,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       {
          if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
-            if(currentStep % 2 != 0)
+            if (currentStep % 2 != 0)
             {
                centerStepY += stepLength;
                rootLocations.add(new Point3D(0.0, centerStepY, 0.0));
@@ -317,7 +314,9 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
 
       double z = getForcePointOffsetZInChestFrame();
 
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, z));
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(),
+                                                    fullRobotModel.getChest().getParentJoint().getName(),
+                                                    new Vector3D(0, 0, z));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
@@ -329,7 +328,8 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
                                                                                                     sidePrefix + "FootCurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(), "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+                                                                                                  "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }

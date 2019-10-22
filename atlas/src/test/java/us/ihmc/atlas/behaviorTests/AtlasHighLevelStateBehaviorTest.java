@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviorTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -32,6 +33,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testWalkingState() throws SimulationExceededMaximumTimeException
@@ -39,6 +41,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
       super.testWalkingState();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
@@ -46,6 +49,7 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
       super.testDoNothingBahviourState();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Disabled
    @Test

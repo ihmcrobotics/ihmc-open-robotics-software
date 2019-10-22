@@ -41,7 +41,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
-   @Tag("controller-api-4")
+   @Tag("controller-api")
    @Test
    @Override
    public void testMultipleTrajectoryPoints() throws Exception
@@ -49,7 +49,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
       super.testMultipleTrajectoryPoints();
    }
 
-   @Tag("controller-api-4")
+   @Tag("controller-api")
    @Test
    @Override
    public void testQueuedMessages() throws Exception

@@ -2,7 +2,6 @@ package us.ihmc.avatar.pushRecovery;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -12,7 +11,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
-   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
    {
@@ -33,7 +31,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
@@ -59,7 +56,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
@@ -80,7 +76,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footstepDataListMessage);
    }
 
-   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
@@ -101,7 +96,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
@@ -122,7 +116,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
@@ -143,7 +136,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery")
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
