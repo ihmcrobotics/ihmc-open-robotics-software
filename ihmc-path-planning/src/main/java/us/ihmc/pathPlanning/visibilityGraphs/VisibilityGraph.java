@@ -209,7 +209,7 @@ public class VisibilityGraph
       {
          if ((sourceNode.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion) && (nodeToAttachToIfInSameRegion.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion))
          {
-            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0, 0.0, true);
+            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0, 0.0, false);
          }
       }
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -497,7 +497,7 @@ public class VisibilityGraph
                Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
-               boolean checkForPreferredVisibility = sourceNode.isPreferredNode() || targetNode.isPreferredNode();
+               boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
 
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
                boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
@@ -583,7 +583,7 @@ public class VisibilityGraph
             targetHomeRegion.transformFromWorldToLocal(sourceProjectedVerticallyOntoTarget);
 
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
-            boolean checkForPreferredCollisions = sourceNode.isPreferredNode() || targetNode.isPreferredNode();
+            boolean checkForPreferredCollisions = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
             boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                         new Point2D(sourceProjectedVerticallyOntoTarget),
                                                                                                         checkForPreferredCollisions);
