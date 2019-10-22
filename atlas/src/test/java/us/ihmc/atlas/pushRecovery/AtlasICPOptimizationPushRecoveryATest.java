@@ -131,7 +131,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
@@ -149,7 +149,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
-   @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
