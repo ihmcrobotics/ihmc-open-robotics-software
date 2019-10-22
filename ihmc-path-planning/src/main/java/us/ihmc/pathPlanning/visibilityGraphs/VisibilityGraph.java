@@ -44,7 +44,7 @@ public class VisibilityGraph
       allPassFilter = new InterRegionConnectionFilter()
       {
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return Double.POSITIVE_INFINITY;
          }
@@ -341,7 +341,7 @@ public class VisibilityGraph
       BoundingBox3D targetHomeRegionBoundingBox = targetHomePlanarRegion.getBoundingBox3dInWorld();
 
       // If the source and target regions are simply too far apart, then do not check their individual points.
-      if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, filter.getMaximumInterRegionConnetionDistance()))
+      if (!sourceHomeRegionBoundingBox.intersectsEpsilon(targetHomeRegionBoundingBox, filter.getMaximumInterRegionConnectionDistance()))
       {
          return;
       }

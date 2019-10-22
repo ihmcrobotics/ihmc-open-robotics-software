@@ -75,7 +75,7 @@ public class VisibilityGraphTest
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return 0.1;
          }
@@ -249,7 +249,7 @@ public class VisibilityGraphTest
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return 0.58;
          }
@@ -478,7 +478,7 @@ public class VisibilityGraphTest
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return 0.58;
          }
@@ -597,7 +597,7 @@ public class VisibilityGraphTest
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
             return 0.58;
          }
