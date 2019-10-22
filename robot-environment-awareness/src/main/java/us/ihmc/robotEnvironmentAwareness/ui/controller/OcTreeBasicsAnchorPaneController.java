@@ -15,6 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceNormalFilterParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.SensorPoseSourceType;
 
 public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 {
@@ -57,6 +58,12 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private ToggleButton preserveOcTreeHistoryButton;
    @FXML
    private ToggleButton enableSurfaceNormalButton;
+   @FXML
+   private ComboBox<SensorPoseSourceType> navigationSourceTypeComboBox;
+   @FXML
+   private Slider navigationFramesSlider;
+   @FXML
+   private ToggleButton showNavigationButton;
 
    private final SurfaceNormalFilterParametersProperty surfaceNormalFilterParametersProperty = new SurfaceNormalFilterParametersProperty(this,
                                                                                                                                          "surfaceNormalFilterParametersProperty");
@@ -75,7 +82,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
          return new Double(newValue.doubleValue());
       }
    };
-   
+
    private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
    {
       @Override
@@ -104,13 +111,17 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       coloringTypeComboBox.setItems(coloringTypeOptions);
       coloringTypeComboBox.setValue(ColoringType.REGION);
       lidarBufferSizeSlider.setLabelFormatter(StringConverterTools.thousandRounding(true));
-      
+
       surfaceNormalUpperBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
       surfaceNormalLowerBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
-      
+
       Tooltip tooltip = new Tooltip();
       tooltip.setText("Press Clear Btn to apply the change of Octree resolution");
       resolutionSlider.setTooltip(tooltip);
+
+      ObservableList<SensorPoseSourceType> sensorPoseSourceTypeOptions = FXCollections.observableArrayList(SensorPoseSourceType.values());
+      navigationSourceTypeComboBox.setItems(sensorPoseSourceTypeOptions);
+      navigationSourceTypeComboBox.setValue(SensorPoseSourceType.STEREO);
    }
 
    @Override
@@ -141,6 +152,8 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, showInputStereoPointCloudButton.selectedProperty(), true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UINavigationShow, showNavigationButton.selectedProperty(), false);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UINavigationFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
 
       showInputLidarScanButton.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
          if (oldValue != newValue && !newValue)
@@ -180,17 +193,23 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
-   
+
    public void setParametersForStereo()
    {
       uiMessager.submitMessageToModule(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.submitMessageToModule(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.submitMessageToModule(REAModuleAPI.OcTreeBoundingBoxEnable, false);
       uiMessager.submitMessageToModule(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
-      
+
       uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
       uiMessager.submitMessageInternal(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+   }
+
+   @FXML
+   public void clearNavigation()
+   {
+      uiMessager.submitMessageInternal(REAModuleAPI.UINavigationClear, true);
    }
 }

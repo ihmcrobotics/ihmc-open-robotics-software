@@ -24,6 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.SensorPoseSourceType;
 
 public class REAModuleAPI
 {
@@ -51,6 +52,7 @@ public class REAModuleAPI
    private static final CategoryTheme Message = apiFactory.createCategoryTheme("Message");
    private static final CategoryTheme Preserve = apiFactory.createCategoryTheme("Preserve");
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
+   private static final CategoryTheme Navigation = apiFactory.createCategoryTheme("Navigation");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -70,6 +72,7 @@ public class REAModuleAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
+   private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
@@ -90,6 +93,8 @@ public class REAModuleAPI
    public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
+   
+   public static final Topic<SensorPoseSourceType> SensorPoseSourceType = ModuleCategory.child(Navigation).topic(Type);
 
    public static final Topic<Boolean> NormalEstimationEnable = ModuleCategory.child(NormalEstimation).topic(Enable);
    public static final Topic<Boolean> NormalEstimationClear = ModuleCategory.child(NormalEstimation).topic(Clear);
@@ -127,6 +132,10 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIStereoVisionShow = Root.child(UI).child(StereoVision).topic(Show);
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
+   
+   public static final Topic<Boolean> UINavigationShow = Root.child(UI).child(Navigation).topic(Enable);
+   public static final Topic<Boolean> UINavigationClear = Root.child(UI).child(Navigation).topic(Clear);
+   public static final Topic<Integer> UINavigationFrames = Root.child(UI).child(Navigation).topic(Size);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);

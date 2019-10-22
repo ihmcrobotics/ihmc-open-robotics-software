@@ -53,6 +53,11 @@ public class REAOcTreeBuffer
    
    private final AtomicReference<Integer> stereoVisionBufferSize;
 
+   public enum SensorPoseSourceType
+   {
+      LIDAR_SCAN, STEREO, TRACKING
+   }
+   
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
                           Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
