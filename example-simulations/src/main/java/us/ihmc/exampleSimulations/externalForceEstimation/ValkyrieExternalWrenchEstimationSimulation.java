@@ -53,6 +53,7 @@ import java.util.function.Consumer;
 public class ValkyrieExternalWrenchEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
+   private static final Vector3D initialForce = new Vector3D(0.0, 0.0, -20.0);
 
    public ValkyrieExternalWrenchEstimationSimulation()
    {
@@ -121,7 +122,8 @@ public class ValkyrieExternalWrenchEstimationSimulation
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
       scsEndEffector.addExternalForcePoint(externalForcePoint);
-
+      externalForcePoint.setForce(initialForce);
+      
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
