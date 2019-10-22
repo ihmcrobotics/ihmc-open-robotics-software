@@ -30,7 +30,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    private final KinematicsStreamingToolboxController controller;
    private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
-   private final JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
@@ -55,8 +54,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
-      jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
-      jvmStatisticsGenerator.start();
+      if (yoVariableServer != null)
+      {
+         JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
+         jvmStatisticsGenerator.start();
+      }
    }
 
    @Override
