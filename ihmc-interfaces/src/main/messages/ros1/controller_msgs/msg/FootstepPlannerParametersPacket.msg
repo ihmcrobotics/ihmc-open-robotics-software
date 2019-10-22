@@ -116,6 +116,14 @@ float64 maximum_step_z_when_forward_and_down
 # Field default value -1.0
 float64 maximum_step_z
 
+# This is the reduction factor for the max yaw when the step is at max reach.
+# This means that, when the footstep is at its maximum distance, this is the fraction of the max yaw that is allowed.
+# 
+# That is,
+# modifiedMaxYaw = reach / maxReach * maxYaw + (1.0 - reach / maxReach) * alpha * maxYaw
+# Field default value -1.0
+float64 step_yaw_reduction_factor_at_max_reach
+
 # Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
 # 
 # If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
