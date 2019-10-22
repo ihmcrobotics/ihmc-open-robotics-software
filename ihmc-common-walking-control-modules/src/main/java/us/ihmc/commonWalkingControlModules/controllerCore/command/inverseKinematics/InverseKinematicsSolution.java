@@ -8,19 +8,22 @@ import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 public class InverseKinematicsSolution
 {
    private final JointBasics[] jointsToOptimizeFor;
-   private final DenseMatrix64F jointVelocities;
-
+   private DenseMatrix64F jointVelocities;
    private MomentumReadOnly centroidalMomentumSolution;
 
-   public InverseKinematicsSolution(JointBasics[] jointsToOptimizeFor, DenseMatrix64F jointVelocities)
+   public InverseKinematicsSolution(JointBasics[] jointsToOptimizeFor)
    {
       this.jointsToOptimizeFor = jointsToOptimizeFor;
-      this.jointVelocities = jointVelocities;
    }
 
    public JointBasics[] getJointsToOptimizeFor()
    {
       return jointsToOptimizeFor;
+   }
+
+   public void setJointVelocities(DenseMatrix64F jointVelocities)
+   {
+      this.jointVelocities = jointVelocities;
    }
 
    public DenseMatrix64F getJointVelocities()
