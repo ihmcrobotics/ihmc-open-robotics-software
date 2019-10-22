@@ -6,6 +6,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelperBuilder;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -21,12 +22,11 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
-   private final Messager messager;
-   public static final MessagerAPI BehaviorModuleAPI = API.create(); // TODO: Is this okay?
+   public static final MessagerAPI MessagerAPI = API.create(); // Assuming MessagerAPI is thread safe
 
    public static BehaviorModule createForBackpack(DRCRobotModel robotModel)
    {
-      KryoMessager messager = KryoMessager.createServer(BehaviorModuleAPI,
+      KryoMessager messager = KryoMessager.createServer(MessagerAPI,
                                                         NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                                         new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
@@ -40,18 +40,16 @@ public class BehaviorModule
 
    private BehaviorModule(DRCRobotModel robotModel, Messager messager)
    {
-      this.messager = messager;
-
       LogTools.info("Starting behavior backpack");
 
       PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
-      BehaviorHelper behaviorHelper = new BehaviorHelper(messager, robotModel, ros2Node);
+      BehaviorHelperBuilder helperBuilder = new BehaviorHelperBuilder(robotModel, messager, ros2Node);
 
       for (BehaviorRegistry behavior : BehaviorRegistry.values())
       {
-         behavior.build(behaviorHelper, messager, robotModel);
+         behavior.build(helperBuilder);
       }
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
@@ -76,7 +74,7 @@ public class BehaviorModule
          return RootCategory.child(BehaviorModuleTheme).topic(apiFactory.createTypedTopicTheme(name));
       }
 
-      public static final MessagerAPI create() // TODO check threading
+      private static synchronized final MessagerAPI create() // TODO check threading
       {
          for (BehaviorRegistry behavior : BehaviorRegistry.values)
          {

@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.fancyPoses;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,6 +31,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class FancyPosesBehavior implements BehaviorInterface
 {
@@ -52,15 +52,18 @@ public class FancyPosesBehavior implements BehaviorInterface
    private final RobotSide supportSide = RobotSide.RIGHT;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double trajectoryTime = 3.0;
+   private final Messager messager;
+   private final PausablePeriodicThread mainThread;
 
-   public FancyPosesBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
+   public FancyPosesBehavior(BehaviorHelper helper)
    {
       LogTools.debug("Initializing FancyPosesBehavior");
 
-      this.behaviorHelper = behaviorHelper;
+      this.behaviorHelper = helper;
+      messager = helper.getMessager();
 
       behaviorHelper.createFootstepStatusCallback(this::acceptFootstepStatus);
-      stepping = behaviorHelper.createBooleanActivationReference(API.Stepping, false, true);
+      stepping = behaviorHelper.createBooleanActivationReference(API.Stepping);
 
       enable = messager.createInput(API.Enable, false);
 
@@ -74,13 +77,15 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       messager.registerTopicListener(API.Abort, this::doOnAbort);
 
-      behaviorHelper.startScheduledThread(getClass().getSimpleName(), this::doBehavior, 1, TimeUnit.SECONDS);
+      mainThread = behaviorHelper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }
 
    @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Fancy poses behavior selected = {}", enabled);
+
+      mainThread.setRunning(enabled);
    }
 
    private void doOnAbort(boolean abort)
@@ -88,7 +93,7 @@ public class FancyPosesBehavior implements BehaviorInterface
       if (abort)
       {
          LogTools.info("Abort received. Shutting down threadScheduler.");
-         behaviorHelper.shutdownScheduledThread();
+         mainThread.stop();
       }
    }
 

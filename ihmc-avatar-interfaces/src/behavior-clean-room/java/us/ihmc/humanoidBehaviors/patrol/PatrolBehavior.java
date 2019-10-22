@@ -15,7 +15,6 @@ import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
@@ -68,7 +67,7 @@ public class PatrolBehavior implements BehaviorInterface
       REPLAN, WALK
    }
 
-   private final BehaviorHelper behaviorHelper;
+   private final BehaviorHelper helper;
 
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
@@ -93,11 +92,10 @@ public class PatrolBehavior implements BehaviorInterface
    private final AtomicReference<Boolean> upDownExplorationEnabled;
    private final AtomicReference<Double> perceiveDuration;
 
-   public PatrolBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
+   public PatrolBehavior(BehaviorHelper helper)
    {
-      this.behaviorHelper = behaviorHelper;
-
-      this.messager = messager;
+      this.helper = helper;
+      messager = helper.getMessager();
 
       LogTools.debug("Initializing patrol behavior");
 
@@ -152,7 +150,7 @@ public class PatrolBehavior implements BehaviorInterface
       perceiveDuration = messager.createInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, behaviorHelper);
+      upDownExplorer = new UpDownExplorer(messager, helper);
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -179,7 +177,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onStopStateEntry()
    {
-      behaviorHelper.pauseWalking();
+      helper.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -201,7 +199,7 @@ public class PatrolBehavior implements BehaviorInterface
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidRobotState());
+         upDownExplorer.onNavigateEntry(helper.pollHumanoidRobotState());
       }
    }
 
@@ -238,18 +236,18 @@ public class PatrolBehavior implements BehaviorInterface
       // update waypoints if UI modified them
       waypointManager.updateToMostRecentData();
 
-      behaviorHelper.abortPlanning();
+      helper.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      FramePose3DReadOnly midFeetZUpPose = helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
       {
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
-      PlanarRegionsListMessage latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionListMessage();
+      PlanarRegionsListMessage latestPlanarRegionList = helper.getLatestPlanarRegionListMessage();
 
-      footstepPlanResultNotification = behaviorHelper.requestPlan(midFeetZUpPose, new FramePose3D(waypointManager.peekNextPose()), latestPlanarRegionList);
+      footstepPlanResultNotification = helper.requestPlan(midFeetZUpPose, new FramePose3D(waypointManager.peekNextPose()), latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
@@ -329,9 +327,9 @@ public class PatrolBehavior implements BehaviorInterface
       FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames humanoidReferenceFrames = helper.pollHumanoidRobotState();
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
+      walkingCompleted = helper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
    private void doWalkStateAction(double timeInState)
@@ -356,7 +354,7 @@ public class PatrolBehavior implements BehaviorInterface
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            FramePose3DReadOnly midFeetZUpPose = behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+            FramePose3DReadOnly midFeetZUpPose = helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
             PlanTravelDistance planType = RemoteFootstepPlannerInterface.decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
 
@@ -385,13 +383,13 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onPerceiveStateEntry()
    {
-      behaviorHelper.clearREA();
+      helper.clearREA();
    }
 
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(behaviorHelper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      upDownExplorer.setMidFeetZUpPose(helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
@@ -418,8 +416,8 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void pollInterrupts()
    {
-      HighLevelControllerName controllerState = behaviorHelper.getLatestControllerState();
-      boolean isWalking = behaviorHelper.isRobotWalking();
+      HighLevelControllerName controllerState = helper.getLatestControllerState();
+      boolean isWalking = helper.isRobotWalking();
 
       if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {
