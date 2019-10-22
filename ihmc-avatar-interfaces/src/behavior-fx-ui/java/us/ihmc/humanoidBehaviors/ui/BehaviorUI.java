@@ -85,7 +85,7 @@ public class BehaviorUI
       
       if (showLivePlanarRegionsGraphic)
       {
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, false));
       }
 
       view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
