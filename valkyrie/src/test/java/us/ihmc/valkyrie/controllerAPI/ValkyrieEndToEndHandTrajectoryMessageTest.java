@@ -64,7 +64,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -72,7 +72,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testMultipleTrajectoryPoints();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -96,7 +96,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testQueueWithWrongPreviousId();
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -180,7 +180,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       assertEquals(testEnvironment.getBallRadius(), ballHeight, 0.01);
    }
 
-   @Tag("controller-api-3")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testStreaming() throws Exception

@@ -92,7 +92,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-behaviors")
+@Tag("humanoid-behaviors-slow")
 public class WalkingControllerTest
 {
    private static final boolean profile = false;
@@ -378,8 +378,11 @@ public class WalkingControllerTest
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
-                         frameLinearVelocity);
+      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(),
+                                       rootJoint.getFrameBeforeJoint(),
+                                       rootJoint.getFrameAfterJoint(),
+                                       frameAngularVelocity,
+                                       frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
@@ -419,8 +422,14 @@ public class WalkingControllerTest
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT,
+                                                                            gravityZ,
+                                                                            rootJoint,
+                                                                            jointsToOptimizeFor,
+                                                                            centerOfMassFrame,
+                                                                            momentumOptimizationSettings,
+                                                                            yoGraphicsListRegistry,
+                                                                            registry);
       toolbox.setupForInverseDynamicsSolver(contactableBodies);
 
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
@@ -449,9 +458,12 @@ public class WalkingControllerTest
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                            additionalContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
@@ -465,8 +477,17 @@ public class WalkingControllerTest
       updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
 
-      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, yoTime,
-                                                                                                    gravityZ, omega0, feet, controlDT, null, contactableBodies,
+      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                                                    referenceFrames,
+                                                                                                    footSwitches,
+                                                                                                    null,
+                                                                                                    yoTime,
+                                                                                                    gravityZ,
+                                                                                                    omega0,
+                                                                                                    feet,
+                                                                                                    controlDT,
+                                                                                                    null,
+                                                                                                    contactableBodies,
                                                                                                     yoGraphicsListRegistry);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
 
@@ -477,18 +498,29 @@ public class WalkingControllerTest
       double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
       double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
       double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction, feet, statusOutputManager, yoTime,
-                                                                              yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
+                                                                              defaultSwingTime,
+                                                                              defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime,
+                                                                              defaultSwingDurationShiftFraction,
+                                                                              defaultSwingSplitFraction,
+                                                                              defaultTransferSplitFraction,
+                                                                              defaultTransferSplitFraction,
+                                                                              feet,
+                                                                              statusOutputManager,
+                                                                              yoTime,
+                                                                              yoGraphicsListRegistry,
+                                                                              registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
 
-      walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+      walkingController = new WalkingHighLevelHumanoidController(commandInputManager,
+                                                                 statusOutputManager,
+                                                                 managerFactory,
+                                                                 walkingControllerParameters,
                                                                  controllerToolbox);
    }
 

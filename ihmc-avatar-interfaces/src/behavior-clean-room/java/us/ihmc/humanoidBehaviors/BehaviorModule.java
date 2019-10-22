@@ -5,10 +5,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.log.LogTools;
@@ -49,10 +45,10 @@ public class BehaviorModule
 
       BehaviorHelper behaviorHelper = new BehaviorHelper(messager, robotModel, ros2Node);
 
-      new StepInPlaceBehavior(behaviorHelper, messager, robotModel);  // TODO don't start threads on construction, but right now not hurting anything
-      new PatrolBehavior(behaviorHelper, messager, robotModel);
-      new FancyPosesBehavior(behaviorHelper, messager, robotModel);
-      new ExploreAreaBehavior(behaviorHelper, messager, robotModel);
+      for (BehaviorRegistry behavior : BehaviorRegistry.values())
+      {
+         behavior.build(behaviorHelper, messager, robotModel);
+      }
    }
 
    public static MessagerAPI getBehaviorAPI()
@@ -60,10 +56,10 @@ public class BehaviorModule
       MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       apiFactory.createRootCategory("Root");
 
-      apiFactory.includeMessagerAPIs(StepInPlaceBehavior.API.create());
-      apiFactory.includeMessagerAPIs(PatrolBehaviorAPI.create());
-      apiFactory.includeMessagerAPIs(FancyPosesBehavior.API.create());
-      apiFactory.includeMessagerAPIs(ExploreAreaBehavior.ExploreAreaBehaviorAPI.create());
+      for (BehaviorRegistry behavior : BehaviorRegistry.values())
+      {
+         apiFactory.includeMessagerAPIs(behavior.getBehaviorAPI());
+      }
 
       return apiFactory.getAPIAndCloseFactory();
    }

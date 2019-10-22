@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -38,6 +39,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       return 0.1;
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
@@ -45,6 +47,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
@@ -52,6 +55,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
@@ -59,6 +63,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testSideStepsWithSlipping();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
@@ -66,6 +71,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
       super.testStandingWithOscillatingFeet();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException

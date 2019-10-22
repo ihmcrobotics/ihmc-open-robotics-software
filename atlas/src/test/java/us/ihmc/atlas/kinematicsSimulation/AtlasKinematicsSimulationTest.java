@@ -6,10 +6,10 @@ import us.ihmc.atlas.behaviors.AtlasBehaviorTestYoVariables;
 import us.ihmc.avatar.AvatarTestYoVariables;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.kinematicsSimulation.AvatarKinematicsSimulationTest;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class AtlasKinematicsSimulationTest extends AvatarKinematicsSimulationTest
+public class AtlasKinematicsSimulationTest extends HumanoidKinematicsSimulationTest
 {
    // under construction
 

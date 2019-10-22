@@ -8,12 +8,12 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -32,21 +32,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -94,11 +95,6 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
 
    /**
-    * This name is used with the {@code Map} {@link #userFeedbackCommands} to keep track of the active
-    * set of commands provided by the caller.
-    */
-   private static final String centerOfMassName = "CenterOfMass";
-   /**
     * Indicates the duration of a control tick. It should match the thread period in
     * {@link ToolboxModule}.
     */
@@ -116,6 +112,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
+   private final Collection<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center of
@@ -136,7 +133,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The controller core command is the single object used to pass the desired inputs to the
     * controller core.
     */
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+   private final ControllerCoreCommandBuffer controllerCoreCommand = new ControllerCoreCommandBuffer();
    /**
     * This is where the magic is happening. The controller is responsible for performing feedback
     * control to reduce the difference between the desireds sent to the
@@ -170,6 +167,8 @@ public class KinematicsToolboxController extends ToolboxController
     * error for the end-effectors (center of mass included) being actively controlled.
     */
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
+   private final KinematicsSolutionQualityCalculator solutionQualityCalculator = new KinematicsSolutionQualityCalculator();
+   private final FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList();
 
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
@@ -207,6 +206,7 @@ public class KinematicsToolboxController extends ToolboxController
     * here safely.
     */
    protected final CommandInputManager commandInputManager;
+   private final List<RigidBodyBasics> rigidBodiesWithVisualization = new ArrayList<>();
    /**
     * Visualization of the desired end-effector poses seen as coordinate systems in the
     * {@code SCSVisualizer}. They are only visible when the end-effector is being actively controlled.
@@ -222,14 +222,12 @@ public class KinematicsToolboxController extends ToolboxController
     * Reference to the most recent robot configuration received from the controller. It is used for
     * initializing the {@link #desiredFullRobotModel} before starting the optimization process.
     */
-   protected final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
+   protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
 
-   /**
-    * Map of the commands requested during two initialization phases by the user. It used to memorize
-    * active commands such that the caller does not have to send the same commands every control tick
-    * of this solver.
-    */
-   private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
+   private boolean isUserControllingCenterOfMass = false;
+   private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
+   private final RecyclingArrayList<SpatialFeedbackControlCommand> userRigidBodyFeedbackControlCommands = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
 
    /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
@@ -249,6 +247,17 @@ public class KinematicsToolboxController extends ToolboxController
     * handled when this is set to {@code true}.
     */
    private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
+   private final RecyclingArrayList<KinematicsCollisionResult> collisionResults = new RecyclingArrayList<>(KinematicsCollisionResult::new);
+   private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(new Supplier<KinematicsCollisionFrame>()
+   {
+      int collisionIndex = 0;
+
+      @Override
+      public KinematicsCollisionFrame get()
+      {
+         return new KinematicsCollisionFrame("collisionFrame" + (collisionIndex++), worldFrame);
+      }
+   });
    /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
@@ -258,13 +267,13 @@ public class KinematicsToolboxController extends ToolboxController
    /** Sets the maximum number of collisions to create YoVariables for. */
    private final int numberOfCollisionsToVisualize = 20;
    /** Debug variable. */
-   private final YoDouble[] collisionDistances = new YoDouble[numberOfCollisionsToVisualize];
+   private final YoDouble[] yoCollisionDistances = new YoDouble[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePoint3D[] collisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] yoCollisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePoint3D[] collisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
+   private final YoFramePoint3D[] yoCollisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
    /** Debug variable. */
-   private final YoFramePose3D[] collisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
+   private final YoFramePose3D[] yoCollisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
    /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
 
@@ -292,6 +301,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
+      this.controllableRigidBodies = controllableRigidBodies;
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -302,6 +312,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
+      controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       controllerCore = createControllerCore(controllableRigidBodies);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
@@ -347,10 +358,10 @@ public class KinematicsToolboxController extends ToolboxController
          yoGraphicsListRegistry.registerYoGraphic("Collisions",
                                                   new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
 
-         collisionDistances[i] = collisionDistance;
-         collisionPointAs[i] = collisionPointA;
-         collisionPointBs[i] = collisionPointB;
-         collisionFramePoses[i] = collisionFramePose;
+         yoCollisionDistances[i] = collisionDistance;
+         yoCollisionPointAs[i] = collisionPointA;
+         yoCollisionPointBs[i] = collisionPointB;
+         yoCollisionFramePoses[i] = collisionFramePose;
       }
    }
 
@@ -442,6 +453,7 @@ public class KinematicsToolboxController extends ToolboxController
          YoGraphicCoordinateSystem desiredCoodinateSystem = createCoodinateSystem(rigidBody, Type.DESIRED, desiredAppearance);
          YoGraphicCoordinateSystem currentCoodinateSystem = createCoodinateSystem(rigidBody, Type.CURRENT, currentAppearance);
 
+         rigidBodiesWithVisualization.add(rigidBody);
          desiredCoodinateSystems.put(rigidBody, desiredCoodinateSystem);
          currentCoodinateSystems.put(rigidBody, currentCoodinateSystem);
 
@@ -567,38 +579,46 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected boolean initializeInternal()
    {
-      userFeedbackCommands.clear();
+      clearUserCommands();
 
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+      RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+      boolean hasRobotConfigurationData = robotConfigurationData != null;
 
-      if (robotConfigurationData == null)
+      if (!hasRobotConfigurationData)
       {
          commandInputManager.clearAllCommands();
-         return false;
       }
-
-      // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-      if (initialRobotConfigurationMap != null)
+      else
       {
-         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+         robotConfigurationDataInternal.set(robotConfigurationData);
+
+         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
+         if (initialRobotConfigurationMap != null)
          {
-            joint.setQ(q_priv);
-            return true;
-         });
+            initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+            {
+               joint.setQ(q_priv);
+               return true;
+            });
+         }
+
+         // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+         snapPrivilegedConfigurationToCurrent();
+         privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         // It is required to update the tools now as it is only done at the end of each iteration.
+         updateTools();
       }
 
-      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
-      snapPrivilegedConfigurationToCurrent();
-      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-      // It is required to update the tools now as it is only done at the end of each iteration.
-      updateTools();
-
-      return true;
+      return hasRobotConfigurationData;
    }
 
-   private List<KinematicsCollisionResult> collisions = Collections.emptyList();
+   public void clearUserCommands()
+   {
+      isUserControllingCenterOfMass = false;
+      userRigidBodyFeedbackControlCommands.clear();
+   }
 
    /**
     * This is the control loop called periodically only when the user requested a solution for a
@@ -611,27 +631,30 @@ public class KinematicsToolboxController extends ToolboxController
    public void updateInternal()
    {
       threadTimer.start();
-      // Updating the reference frames and twist calculator.
 
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
 
       // Clear the map to forget the user commands previously submitted.
       if (!preserveUserCommandHistory.getValue())
-         userFeedbackCommands.clear();
+         clearUserCommands();
 
-      FeedbackControlCommandList userCommands = consumeCommands();
-      numberOfActiveCommands.set(userCommands.getNumberOfCommands());
-      controllerCoreCommand.addFeedbackControlCommand(userCommands);
-      controllerCoreCommand.addFeedbackControlCommand(getAdditionalFeedbackControlCommands());
+      FeedbackControlCommandBuffer feedbackControlCommandBuffer = controllerCoreCommand.getFeedbackControlCommandList();
+      InverseKinematicsCommandBuffer inverseKinematicsCommandBuffer = controllerCoreCommand.getInverseKinematicsCommandList();
+      consumeUserCommands(feedbackControlCommandBuffer);
+      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + (isUserControllingCenterOfMass ? 1 : 0));
+      getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
-      controllerCoreCommand.addInverseKinematicsCommand(activeOptimizationSettings);
-      controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
-      controllerCoreCommand.addInverseKinematicsCommand(getAdditionalInverseKinematicsCommands());
-      controllerCoreCommand.addInverseKinematicsCommand(computeCollisionCommands(collisions));
+      inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
+      PrivilegedConfigurationCommand privilegedConfigurationCommand = privilegedConfigurationCommandReference.getAndSet(null);
+      if (privilegedConfigurationCommand != null)
+         inverseKinematicsCommandBuffer.addPrivilegedConfigurationCommand().set(privilegedConfigurationCommand);
+      getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
+      computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
 
       // Save all commands used for this control tick for computing the solution quality.
-      FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+      allFeedbackControlCommands.clear();
+      allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
@@ -642,7 +665,7 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore.compute();
 
       // Calculating the solution quality based on sum of all the commands' tracking error.
-      solutionQuality.set(KinematicsToolboxHelper.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
+      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
@@ -658,7 +681,7 @@ public class KinematicsToolboxController extends ToolboxController
        * with the robot configuration.
        */
       updateTools();
-      collisions = computeCollisions();
+      computeCollisions();
 
       timeSinceLastSolutionPublished.add(updateDT);
 
@@ -684,9 +707,10 @@ public class KinematicsToolboxController extends ToolboxController
     * Checking if there is any new command available, in which case they polled from the
     * {@link #commandInputManager} and processed to update the state of the current optimization run.
     *
-    * @return the new list of feedback control command to be executed for this control tick.
+    * @param the buffer used to stored the feedback control commands to be executed for this control
+    *            tick.
     */
-   private FeedbackControlCommandList consumeCommands()
+   private void consumeUserCommands(FeedbackControlCommandBuffer commandBufferToPack)
    {
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
       {
@@ -732,43 +756,61 @@ public class KinematicsToolboxController extends ToolboxController
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         userFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains()));
+         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains(), userCoMFeedbackControlCommand);
+         isUserControllingCenterOfMass = true;
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
       {
          List<KinematicsToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxRigidBodyCommand.class);
+
          for (int i = 0; i < commands.size(); i++)
          {
-            SpatialFeedbackControlCommand rigidBodyCommand = KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, gains);
+            RigidBodyBasics endEffector = commands.get(i).getEndEffector();
+            SpatialFeedbackControlCommand rigidBodyCommand = null;
+
+            for (int bufferIndex = 0; bufferIndex < userRigidBodyFeedbackControlCommands.size(); bufferIndex++)
+            {
+               SpatialFeedbackControlCommand candidate = userRigidBodyFeedbackControlCommands.get(bufferIndex);
+               if (candidate.getEndEffector() == endEffector)
+                  rigidBodyCommand = candidate;
+            }
+
+            if (rigidBodyCommand == null)
+               rigidBodyCommand = userRigidBodyFeedbackControlCommands.add();
+
+            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, gains, rigidBodyCommand);
             rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
-            String endEffectorName = rigidBodyCommand.getEndEffector().getName();
-            userFeedbackCommands.put(endEffectorName, rigidBodyCommand);
          }
       }
 
-      FeedbackControlCommandList inputs = new FeedbackControlCommandList();
+      // TODO fix the doc
       /*
        * By using the map, we ensure that there is only one command per end-effector (including the center
        * of mass). The map is also useful for remembering commands received during the previous control
        * ticks of the same run.
        */
-      userFeedbackCommands.values().forEach(inputs::addCommand);
-      return inputs;
+      if (isUserControllingCenterOfMass)
+         commandBufferToPack.addCenterOfMassFeedbackControlCommand().set(userCoMFeedbackControlCommand);
+
+      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      {
+         commandBufferToPack.addSpatialFeedbackControlCommand().set(userRigidBodyFeedbackControlCommands.get(i));
+      }
    }
 
    /**
-    * Evaluates the collision between each possible pair of collidables that can collide.
-    * 
-    * @return the result of the evaluation.
+    * Evaluates the collision between each possible pair of collidables that can collide and stores the
+    * result in {@link #collisionResults}.
     */
-   private List<KinematicsCollisionResult> computeCollisions()
+   private void computeCollisions()
    {
+      collisionResults.clear();
+
       if (robotCollidables.isEmpty() || !enableCollisionAvoidance.getValue())
-         return Collections.emptyList();
+         return;
 
       int collisionIndex = 0;
-      List<KinematicsCollisionResult> collisions = new ArrayList<>();
 
       for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
       {
@@ -781,39 +823,37 @@ public class KinematicsToolboxController extends ToolboxController
             if (!collidableA.isCollidableWith(collidableB))
                continue;
 
-            KinematicsCollisionResult collisionResult = collidableA.evaluateCollision(collidableB);
+            KinematicsCollisionResult collisionResult = collisionResults.add();
+            collidableA.evaluateCollision(collidableB, collisionResult);
 
             if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
                continue;
 
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
-               collisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
-               collisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
-               collisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+               yoCollisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
+               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
+               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
             }
 
-            collisions.add(collisionResult);
             collisionIndex++;
          }
       }
-
-      return collisions;
    }
 
    /**
     * Calculates and sets up the list of constraints to submit to the solver to prevent collisions.
     * 
-    * @param collisions the previously computed collisions.
-    * @return the constraints to submit to the controller core.
+    * @param collisions   the previously computed collisions.
+    * @param bufferToPack buffer used to store the constraints to submit to the controller core.
     */
-   public InverseKinematicsCommand<?> computeCollisionCommands(List<KinematicsCollisionResult> collisions)
+   public void computeCollisionCommands(List<KinematicsCollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
    {
       if (collisions.isEmpty() || !enableCollisionAvoidance.getValue())
-         return null;
+         return;
 
       int collisionIndex = 0;
-      InverseKinematicsCommandList commandList = new InverseKinematicsCommandList();
+      collisionFrames.clear();
 
       for (int i = 0; i < collisions.size(); i++)
       {
@@ -826,11 +866,12 @@ public class KinematicsToolboxController extends ToolboxController
          double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
 
-         ReferenceFrame collisionFrame = KinematicsToolboxHelper.collisionFrame(collision, true, "collisionFrame" + collisionIndex);
+         KinematicsCollisionFrame collisionFrame = collisionFrames.add();
+         collisionFrame.update(collision, true);
          if (collisionIndex < numberOfCollisionsToVisualize)
-            collisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
+            yoCollisionFramePoses[collisionIndex].setFromReferenceFrame(collisionFrame);
 
-         SpatialVelocityCommand command = new SpatialVelocityCommand();
+         SpatialVelocityCommand command = bufferToPack.addSpatialVelocityCommand();
          command.set(bodyA, collidableB.getRigidBody());
          command.getControlFramePose().setFromReferenceFrame(collisionFrame);
          SelectionMatrix6D selectionMatrix = command.getSelectionMatrix();
@@ -840,12 +881,9 @@ public class KinematicsToolboxController extends ToolboxController
 
          command.setConstraintType(ConstraintType.GEQ_INEQUALITY);
          command.getDesiredLinearVelocity().setZ(sigmaDot);
-         commandList.addCommand(command);
 
          collisionIndex++;
       }
-
-      return commandList;
    }
 
    /**
@@ -861,6 +899,9 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
+   private final FramePoint3D rigidBodyPosition = new FramePoint3D();
+   private final FrameQuaternion rigidBodyOrientation = new FrameQuaternion();
+
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
     * this control tick.
@@ -868,39 +909,39 @@ public class KinematicsToolboxController extends ToolboxController
    private void updateVisualization()
    {
       boolean hasData;
-      FramePoint3D position = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
 
-      for (RigidBodyBasics endEffector : desiredCoodinateSystems.keySet())
+      for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
+         RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.DESIRED);
+         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.DESIRED);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setPosition(position);
+            coordinateSystem.setPosition(rigidBodyPosition);
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, orientation, Type.DESIRED);
+         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.DESIRED);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setOrientation(orientation);
+            coordinateSystem.setOrientation(rigidBodyOrientation);
       }
 
-      for (RigidBodyBasics endEffector : currentCoodinateSystems.keySet())
+      for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
+         RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, position, Type.CURRENT);
+         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.CURRENT);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setPosition(position);
+            coordinateSystem.setPosition(rigidBodyPosition);
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, orientation, Type.CURRENT);
+         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.CURRENT);
          if (!hasData)
             coordinateSystem.hide();
          else
-            coordinateSystem.setOrientation(orientation);
+            coordinateSystem.setOrientation(rigidBodyOrientation);
       }
    }
 
@@ -920,22 +961,23 @@ public class KinematicsToolboxController extends ToolboxController
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-      latestRobotConfigurationDataReference.set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.commit();
    }
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
-      return isUserControllingRigidBody(rigidBody.getName());
-   }
-
-   public boolean isUserControllingRigidBody(String rigidBodyName)
-   {
-      return userFeedbackCommands.containsKey(rigidBodyName);
+      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      {
+         if (userRigidBodyFeedbackControlCommands.get(i).getEndEffector() == rigidBody)
+            return true;
+      }
+      return false;
    }
 
    public boolean isUserControllingCenterOfMass()
    {
-      return userFeedbackCommands.containsKey(centerOfMassName);
+      return isUserControllingCenterOfMass;
    }
 
    public YoPIDSE3Gains getDefaultGains()
@@ -943,14 +985,12 @@ public class KinematicsToolboxController extends ToolboxController
       return gains;
    }
 
-   protected FeedbackControlCommandList getAdditionalFeedbackControlCommands()
+   protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      return null;
    }
 
-   protected InverseKinematicsCommandList getAdditionalInverseKinematicsCommands()
+   protected void getAdditionalInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
-      return null;
    }
 
    @Override
@@ -968,6 +1008,11 @@ public class KinematicsToolboxController extends ToolboxController
    public OneDoFJointBasics[] getDesiredOneDoFJoint()
    {
       return oneDoFJoints;
+   }
+
+   public Collection<? extends RigidBodyBasics> getControllableRigidBodies()
+   {
+      return controllableRigidBodies;
    }
 
    public KinematicsToolboxOutputStatus getSolution()
