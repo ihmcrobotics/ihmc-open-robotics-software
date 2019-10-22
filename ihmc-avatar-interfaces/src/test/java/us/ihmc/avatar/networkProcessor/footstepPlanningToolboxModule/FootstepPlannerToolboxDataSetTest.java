@@ -869,8 +869,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
       {
          DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
-         visibilityGraphParameters.setPerformPostProcessingNodeShifting(true);
-         visibilityGraphParameters.setIntroduceMidpointsInPostProcessing(false);
          return visibilityGraphParameters;
       }
    }
