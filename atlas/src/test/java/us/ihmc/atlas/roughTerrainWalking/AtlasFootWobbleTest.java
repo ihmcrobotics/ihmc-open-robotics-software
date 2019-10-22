@@ -3,6 +3,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 import java.io.InputStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -13,6 +14,7 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarFootWobbleTest;
 import us.ihmc.robotics.Assert;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-rough-terrain")
 public class AtlasFootWobbleTest extends AvatarFootWobbleTest
 {
    private DRCRobotModel robotModel;

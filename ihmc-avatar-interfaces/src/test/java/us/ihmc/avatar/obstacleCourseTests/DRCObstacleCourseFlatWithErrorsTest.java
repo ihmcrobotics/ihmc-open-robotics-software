@@ -6,7 +6,6 @@ import java.io.InputStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -33,7 +32,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-@Tag("humanoid-flat-ground-3")
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -63,7 +61,6 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
    @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
@@ -107,7 +104,6 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-
 
    @Test
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
@@ -269,7 +265,6 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       return stateEstimatorDriftator;
    }
 
-
    @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -358,7 +353,6 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
    private void setupCameraForWalkingUpToRamp()
    {
       Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
@@ -374,8 +368,6 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-
-
 
    protected abstract Vector3D getFootSlipVector();
 

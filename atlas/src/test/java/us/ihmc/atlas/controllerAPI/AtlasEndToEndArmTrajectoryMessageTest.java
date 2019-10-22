@@ -41,7 +41,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
-   @Tag("controller-api-4")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -49,7 +49,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testMultipleTrajectoryPoints();
    }
 
-   @Tag("controller-api-4")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -89,7 +89,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testStopAllTrajectory();
    }
 
-   @Tag("controller-api-4")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testStreaming() throws Exception

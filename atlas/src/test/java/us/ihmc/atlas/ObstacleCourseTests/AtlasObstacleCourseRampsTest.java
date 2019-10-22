@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -26,6 +27,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -33,6 +35,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingDownRampWithMediumSteps();
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -40,6 +43,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithMediumSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
@@ -47,6 +51,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
@@ -54,6 +59,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
@@ -64,7 +70,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Override
    protected double getMaxRotationCorruption()
    {
-      return Math.PI/8.0;
+      return Math.PI / 8.0;
    }
 
 }

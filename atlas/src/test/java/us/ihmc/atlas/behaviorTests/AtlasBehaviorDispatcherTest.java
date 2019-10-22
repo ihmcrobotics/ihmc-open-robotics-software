@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviorTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -17,7 +18,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 
    public AtlasBehaviorDispatcherTest()
    {
-      
+
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
    }
 
@@ -32,7 +33,8 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
@@ -40,6 +42,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
       super.testDispatchPelvisPoseBehavior();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Disabled
    @Test
@@ -48,6 +51,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
       super.testDispatchWalkToLocationBehavior();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
@@ -55,6 +59,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException

@@ -1,11 +1,14 @@
 package us.ihmc.valkyrie.simulation;
 
+import org.junit.jupiter.api.Tag;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarToeOffTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@Tag("fast")
 public class ValkyrieToeOffTest extends AvatarToeOffTest
 {
    @Override

@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -53,7 +52,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("humanoid-flat-ground-4")
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -138,8 +136,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet()
-                                                                           .getVariable("LookAheadCoMHeightTrajectoryGenerator", "offsetHeightAboveGround");
+      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("LookAheadCoMHeightTrajectoryGenerator",
+                                                                                                                       "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -270,9 +268,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
-      double perStepDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      double simulationDuration = footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
-            getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double perStepDuration = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
+            + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      double simulationDuration = footstepList.getNumberOfFootsteps() * perStepDuration
+            + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime()
+            + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
 
       footstepList = new FootstepDataListCommand();
       footstepCommand = new FootstepDataCommand();
@@ -303,9 +303,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       queuedControllerCommands.add(footstepList);
 
-      perStepDuration += getRobotModel().getWalkingControllerParameters().getDefaultSwingTime() + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      simulationDuration += footstepList.getNumberOfFootsteps() * perStepDuration + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime() +
-            getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
+      perStepDuration += getRobotModel().getWalkingControllerParameters().getDefaultSwingTime()
+            + getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+      simulationDuration += footstepList.getNumberOfFootsteps() * perStepDuration
+            + getRobotModel().getWalkingControllerParameters().getDefaultFinalTransferTime()
+            + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration + 1.5);
 
@@ -532,7 +534,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
    @Test
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -596,9 +597,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
 
-      double stepDuration =
-            walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultInitialTransferTime() + walkingControllerParameters
-                  .getDefaultFinalTransferTime();
+      double stepDuration = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultInitialTransferTime()
+            + walkingControllerParameters.getDefaultFinalTransferTime();
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(stepDuration + 1.5);
 
@@ -812,8 +812,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    private FootstepDataListMessage createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
-      double[][][] footstepLocationsAndOrientations = new double[][][] {{{0.2148448504580547, -0.09930268518393547, 0.08399999999999999},
-            {3.405174677589428E-21, -6.767715309751755E-21, 0.0025166698394258787, 0.9999968331814453}},
+      double[][][] footstepLocationsAndOrientations = new double[][][] {
+            {{0.2148448504580547, -0.09930268518393547, 0.08399999999999999},
+                  {3.405174677589428E-21, -6.767715309751755E-21, 0.0025166698394258787, 0.9999968331814453}},
             {{0.4481532647842352, 0.10329823409587219, 0.08400000000000005},
                   {-1.705361817083927E-23, 6.776242118837171E-21, 0.0025166698394258787, 0.9999968331814453}},
             {{0.6834821762408051, -0.09551979778612019, 0.08399999999999999},
@@ -850,8 +851,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    private FootstepDataListMessage createFootstepsForWalkingOnFlatLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
-      double[][][] footstepLocationsAndOrientations = new double[][][] {{{0.5909646234016005, 0.10243127081250579, 0.08400000000000002},
-            {3.5805394102331502E-22, -1.0841962601668662E-19, 0.003302464707320093, 0.99999454684856}},
+      double[][][] footstepLocationsAndOrientations = new double[][][] {
+            {{0.5909646234016005, 0.10243127081250579, 0.08400000000000002},
+                  {3.5805394102331502E-22, -1.0841962601668662E-19, 0.003302464707320093, 0.99999454684856}},
             {{1.212701966120992, -0.09394691394679651, 0.084}, {1.0806157207566333E-19, 1.0877767995770995E-19, 0.0033024647073200924, 0.99999454684856}},
             {{1.8317941784239657, 0.11014657591704705, 0.08619322927296164},
                   {8.190550851520344E-19, 1.5693991726842814E-18, 0.003302464707320093, 0.99999454684856}},
@@ -869,8 +871,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    private FootstepDataListMessage createFootstepsForTurningInPlaceAndPassingPI(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
-      double[][][] footstepLocationsAndOrientations = new double[][][] {{{0.053884346896697966, 0.19273164589134978, 0.08574185103923426},
-            {-6.938862977443471E-11, -8.7126898825953E-11, 0.9990480941331229, 0.04362230632342559}},
+      double[][][] footstepLocationsAndOrientations = new double[][][] {
+            {{0.053884346896697966, 0.19273164589134978, 0.08574185103923426},
+                  {-6.938862977443471E-11, -8.7126898825953E-11, 0.9990480941331229, 0.04362230632342559}},
             {{0.05388201845443364, -0.20574623329424319, 0.08574185073944539},
                   {1.6604742582112774E-10, 1.4170466407843545E-10, 0.9990483490180827, -0.04361646849807009}},
             {{0.0017235494647287533, 0.19045456181341558, 0.08574185040535603},
