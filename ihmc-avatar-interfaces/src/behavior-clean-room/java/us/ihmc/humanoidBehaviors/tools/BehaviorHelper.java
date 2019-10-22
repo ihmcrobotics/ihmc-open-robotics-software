@@ -104,7 +104,24 @@ public class BehaviorHelper
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
    }
-   
+
+   /**
+    * TODO: It looks like what we want here are:
+    * Robot:
+    * - Command-only
+    * - Status-only
+    * - Interactive (footstep completion, hand trajectory completion, etc.)
+    *
+    * UI Communication.
+    *
+    * Toolbox comms:
+    * - REA Input/Output
+    * - Footstep planner
+    *
+    * Helper tools (threading, etc.)
+    *
+    */
+
    // Robot Command Methods:
 
    public void publishFootstepList(FootstepDataListMessage footstepList)
