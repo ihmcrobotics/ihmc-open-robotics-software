@@ -427,7 +427,7 @@ public class ClusterTools
    }
 
    public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator preferredCalculator,
-                                                 NavigableExtrusionDistanceCalculator calculator)
+                                                 NavigableExtrusionDistanceCalculator calculator, boolean includePreferredExtrusions)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformToWorld);
@@ -461,7 +461,8 @@ public class ClusterTools
 
    public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
                                                       ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
-                                                      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator)
+                                                      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
+                                                      boolean includePreferredExtrusions)
    {
       List<Cluster> obstacleClusters = new ArrayList<>();
 
@@ -474,7 +475,8 @@ public class ClusterTools
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
          Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
-                                                         transformFromHomeToWorld, homeRegionSurfaceNormal, zThresholdBeforeOrthogonal, obstacleRegion);
+                                                         transformFromHomeToWorld, homeRegionSurfaceNormal, zThresholdBeforeOrthogonal, obstacleRegion,
+                                                         includePreferredExtrusions);
          obstacleClusters.add(obstacleCluster);
       }
 
@@ -484,7 +486,7 @@ public class ClusterTools
    private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
                                                 ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
                                                 RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal, double zThresholdBeforeOrthogonal,
-                                                PlanarRegion obstacleRegion)
+                                                PlanarRegion obstacleRegion, boolean includePreferredExtrusions)
    {
       Point2D[] concaveHull = obstacleRegion.getConcaveHull();
 
@@ -536,9 +538,9 @@ public class ClusterTools
       List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, nonNavigableExtrusionsInFlatWorld,
                                                                                                                  transformFromWorldToHome);
       List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
-                                                                                                                     transformFromWorldToHome);
+                                                                                                                       transformFromWorldToHome);
       List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
-                                                                                                                 transformFromWorldToHome);
+                                                                                                                          transformFromWorldToHome);
 
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       cluster.setTransformToWorld(transformFromHomeRegionToWorld);

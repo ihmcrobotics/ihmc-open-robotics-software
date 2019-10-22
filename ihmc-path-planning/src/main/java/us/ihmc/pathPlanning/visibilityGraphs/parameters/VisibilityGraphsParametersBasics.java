@@ -122,6 +122,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(returnBestEffortSolution, returnBestEffort);
    }
 
+   default void setIncludePreferredExtrusions(boolean include)
+   {
+      set(includePreferredExtrusions, include);
+   }
+
    default void setHeuristicWeight(double weight)
    {
       set(heuristicWeight, weight);
@@ -207,6 +212,7 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());
+      setIncludePreferredExtrusions(packet.getIncludePreferredExtrusions());
    }
 
 }

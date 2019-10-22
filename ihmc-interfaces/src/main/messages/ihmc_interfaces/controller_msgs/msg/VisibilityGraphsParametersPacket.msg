@@ -50,6 +50,8 @@ bool introduce_midpoints_in_post_processing true
 
 bool compute_orientations_to_avoid_obstacles false
 
+bool include_preferred_extrusions true
+
 float64 heuristic_weight -1.0
 
 float64 distance_weight -1.0
