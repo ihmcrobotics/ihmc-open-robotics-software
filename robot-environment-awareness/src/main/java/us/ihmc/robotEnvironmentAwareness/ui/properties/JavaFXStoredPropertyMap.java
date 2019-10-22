@@ -35,7 +35,7 @@ public class JavaFXStoredPropertyMap
                                          value -> doubleSpinner.getValueFactory().valueProperty().setValue(value),
                                          runnable -> doubleSpinner.getValueFactory().valueProperty().addListener(observable -> runnable.run())),
               storedPropertySet.getProperty(doubleKey));
-      // TODO should set value here?
+      doubleSpinner.getValueFactory().setValue(storedPropertySet.get(doubleKey));
    }
 
    public void put(Slider slider, StoredPropertyKey<Double> doubleKey)
