@@ -59,4 +59,9 @@ public class IHMCROS2Publisher<T>
          }
       }
    }
+
+   public void destroy()
+   {
+      publisher.remove();
+   }
 }

@@ -15,6 +15,7 @@ public class ROS2Input<T>
    private final AtomicReference<T> atomicReference;
    private final MessageFilter<T> messageFilter;
    private boolean hasReceivedFirstMessage = false;
+   private ROS2Callback<T> ros2Callback;
 
    public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
@@ -57,7 +58,7 @@ public class ROS2Input<T>
    {
       atomicReference = new AtomicReference<>(initialValue);
       this.messageFilter = messageFilter;
-      new ROS2Callback<>(ros2Node, messageType, robotName, moduleTopicQualifier, ioTopicQualifier, this::messageReceivedCallback);
+      ros2Callback = new ROS2Callback<>(ros2Node, messageType, robotName, moduleTopicQualifier, ioTopicQualifier, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>
@@ -82,5 +83,15 @@ public class ROS2Input<T>
    public boolean hasReceivedFirstMessage()
    {
       return hasReceivedFirstMessage;
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      ros2Callback.setEnabled(enabled);
+   }
+
+   public void destroy()
+   {
+      ros2Callback.destroy();
    }
 }

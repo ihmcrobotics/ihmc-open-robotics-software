@@ -6,6 +6,7 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Subscription;
 
 import java.util.function.Consumer;
 
@@ -17,6 +18,8 @@ import java.util.function.Consumer;
 public class ROS2Callback<T>
 {
    private final Consumer<T> messageCallback;
+   private Ros2Subscription<T> subscription;
+   private volatile boolean enabled = true;
 
    public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
    {
@@ -33,12 +36,7 @@ public class ROS2Callback<T>
     */
    public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, Consumer<T> messageCallback)
    {
-      this(ros2Node,
-           messageType,
-           null,
-           null,
-           null,
-           messageCallback);
+      this(ros2Node, messageType, null, null, null, messageCallback);
    }
 
    public ROS2Callback(Ros2Node ros2Node,
@@ -49,25 +47,44 @@ public class ROS2Callback<T>
                        Consumer<T> messageCallback)
    {
       this.messageCallback = messageCallback;
-      ExceptionTools.handle(() -> ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
-                                                              this::nullOmissionCallback,
-                                                              ROS2Tools.generateDefaultTopicName(messageType,
-                                                                                                 robotName,
-                                                                                                 moduleTopicQualifier,
-                                                                                                 ioTopicQualifier)),
-                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() ->
+      {
+         subscription = ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
+                                                    this::nullOmissionCallback,
+                                                    ROS2Tools.generateDefaultTopicName(messageType,
+                                                                                       robotName,
+                                                                                       moduleTopicQualifier,
+                                                                                       ioTopicQualifier));
+      },
+      DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    private void nullOmissionCallback(Subscriber<T> subscriber)
    {
-      T incomingData = subscriber.takeNextData();
-      if (incomingData != null)
+      if (enabled)
       {
-         messageCallback.accept(incomingData);
+         T incomingData = subscriber.takeNextData();
+         if (incomingData != null)
+         {
+            messageCallback.accept(incomingData);
+         }
+         else
+         {
+            LogTools.warn("Received null from takeNextData()");
+         }
       }
-      else
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
+   }
+
+   public void destroy()
+   {
+      if (subscription != null)
       {
-         LogTools.warn("Received null from takeNextData()");
+         subscription.remove();
       }
    }
 }
