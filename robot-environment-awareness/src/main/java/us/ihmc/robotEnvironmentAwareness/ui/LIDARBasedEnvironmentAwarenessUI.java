@@ -27,6 +27,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorP
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.EstimatedSensorPoseViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LidarFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
 
@@ -39,6 +40,7 @@ public class LIDARBasedEnvironmentAwarenessUI
    private final REAUIMessager uiMessager;
    private final REAMeshViewer reaMeshViewer;
    private final LidarFrameViewer lidarFrameViewer;
+   private final EstimatedSensorPoseViewer estimatedSensorPoseViewer;
 
    @FXML
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
@@ -73,8 +75,9 @@ public class LIDARBasedEnvironmentAwarenessUI
       this.uiMessager = uiMessager;
       uiMessager.startMessager();
 
-      lidarFrameViewer = new LidarFrameViewer(uiMessager);
       reaMeshViewer = new REAMeshViewer(uiMessager);
+      lidarFrameViewer = new LidarFrameViewer(uiMessager);
+      estimatedSensorPoseViewer = new EstimatedSensorPoseViewer(uiMessager);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new StereoVisionPointCloudDataExporter(uiMessager);
@@ -88,6 +91,7 @@ public class LIDARBasedEnvironmentAwarenessUI
 
       view3dFactory.addNodeToView(reaMeshViewer.getRoot());
       view3dFactory.addNodeToView(lidarFrameViewer.getRoot());
+      view3dFactory.addNodeToView(estimatedSensorPoseViewer.getRoot());
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
       uiConnectionHandler.start();
@@ -145,7 +149,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       regionSegmentationAnchorPaneController.setConfigurationFile(configurationFile);
       regionSegmentationAnchorPaneController.attachREAMessager(uiMessager);
       regionSegmentationAnchorPaneController.bindControls();
-      
+
       customRegionMergeAnchorPaneController.setConfigurationFile(configurationFile);
       customRegionMergeAnchorPaneController.attachREAMessager(uiMessager);
       customRegionMergeAnchorPaneController.bindControls();
@@ -175,6 +179,7 @@ public class LIDARBasedEnvironmentAwarenessUI
 
          reaMeshViewer.stop();
          lidarFrameViewer.stop();
+         estimatedSensorPoseViewer.stop();
       }
       catch (Exception e)
       {
@@ -184,14 +189,16 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
+      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+                                                                REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
 
    public static LIDARBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT, REACommunicationProperties.getPrivateNetClassList());
+      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT,
+                                                             REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
