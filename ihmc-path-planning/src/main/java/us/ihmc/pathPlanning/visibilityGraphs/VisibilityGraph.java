@@ -144,6 +144,20 @@ public class VisibilityGraph
       List<Cluster> sourceObstacleClusters = sourceNavigableRegion.getObstacleClusters();
 
       List<VisibilityGraphEdge> interEdges = new ArrayList<>();
+
+      double weightToPreferred;
+      double costToPreferred;
+      if (sourceNode.isPreferredNode())
+      {
+         weightToPreferred = 1.0;
+         costToPreferred = 0.0;
+      }
+      else
+      {
+         weightToPreferred = parameters.getWeightForNonPreferredEdge();
+         costToPreferred = parameters.getCostForNonPreferredNode();
+      }
+
       for (VisibilityGraphNavigableRegion targetVisibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
          if (targetVisibilityGraphNavigableRegion == sourceVisibilityGraphNavigableRegion)
@@ -172,7 +186,8 @@ public class VisibilityGraph
 
          createInterRegionVisibilityConnections(sourceNode, allPreferredNavigableNodes, sourceObstacleClusters, targetObstacleClusters,
                                                 toPreferredNodeFilter, interEdges, parameters.getLengthForLongInterRegionEdge(),
-                                                parameters.getWeightForInterRegionEdge(), 0.0);
+                                                weightToPreferred * parameters.getWeightForInterRegionEdge(), costToPreferred);
+
          createInterRegionVisibilityConnections(sourceNode, allNavigableNodes, sourceObstacleClusters, targetObstacleClusters, toNonPreferredNodeFilter,
                                                 interEdges, parameters.getLengthForLongInterRegionEdge(),
                                                 parameters.getWeightForNonPreferredEdge() * parameters.getWeightForInterRegionEdge(),
@@ -408,7 +423,7 @@ public class VisibilityGraph
       {
          createInterRegionVisibilityConnections(sourceNode, preferredTargetNodeList, sourceObstacleClusters, targetObstacleClusters,
                                                 preferredToNonPreferredInterRegionConnectionFilter, edgesToPack, lengthForLongInterRegionEdge,
-                                                weightForInterRegionEdge, 0.0);
+                                                nonPreferredWeight * weightForInterRegionEdge, nonPreferredCost);
       }
       // preferred to non-preferred
       for (VisibilityGraphNode sourceNode : preferredSourceNodeList)

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
+   private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
@@ -89,7 +90,6 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      boolean fullyExpandVisibilityGraph = false;
       return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
    }
 
@@ -188,6 +188,7 @@ public class NavigableRegionsManager
                double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
+               // FIXME is this check necessary?
                stack.remove(neighbor);
                stack.add(neighbor);
             }
@@ -259,7 +260,7 @@ public class NavigableRegionsManager
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
       double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
 
-      return edgeWeight * (distanceCost + elevationCost) + staticEdgeCost;
+      return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)
