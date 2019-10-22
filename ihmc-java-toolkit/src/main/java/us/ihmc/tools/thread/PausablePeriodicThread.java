@@ -33,4 +33,16 @@ public class PausablePeriodicThread
          scheduled.cancel(false);  // does not block
       }
    }
+
+   public void setRunning(boolean running)
+   {
+      if (running)
+      {
+         start();
+      }
+      else
+      {
+         stop();
+      }
+   }
 }
