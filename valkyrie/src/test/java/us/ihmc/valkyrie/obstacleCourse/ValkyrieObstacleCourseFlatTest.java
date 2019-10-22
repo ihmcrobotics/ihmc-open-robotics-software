@@ -32,6 +32,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    /**
     * Doesn't work with Valkyrie yet. Need to get it working some day.
     */
+   @Tag("fast")
    @Override
    @Disabled
    @Test
@@ -40,6 +41,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
@@ -47,34 +49,35 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
-   @Tag("allocation-slow")
+   @Tag("fast")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSimpleScripts();
    }
 
-   @Tag("allocation-slow")
+   @Tag("humanoid-flat-ground-slow")
    @Test
    public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
 
-   @Tag("allocation-slow")
+   @Tag("humanoid-flat-ground-slow")
    @Test
    public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleQueuedControllerCommands();
    }
 
-   @Tag("allocation-slow")
+   @Tag("humanoid-flat-ground-slow")
    @Test
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleMoreQueuedControllerCommands();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
@@ -82,6 +85,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithShortSteps();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
@@ -89,14 +93,15 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
-   @Tag("allocation-slow")
    @Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       super.testStandingForACoupleSeconds();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
@@ -104,6 +109,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testLongStepsMaxHeightPauseAndResume();
    }
 
+   @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
@@ -111,6 +117,8 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testTurningInPlaceAndPassingPI();
    }
 
+   @Tag("fast")
+   @Disabled // FIXME That test is quite pointless
    @Override
    @Test
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
@@ -118,6 +126,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingOnUnevenTerrainForACoupleSeconds();
    }
 
+   @Tag("humanoid-flat-ground")
    @Override
    @Disabled
    @Test

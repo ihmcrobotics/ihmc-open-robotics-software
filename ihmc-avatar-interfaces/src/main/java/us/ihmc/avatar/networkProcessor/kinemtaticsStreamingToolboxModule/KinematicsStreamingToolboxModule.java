@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,19 +29,19 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    private final KinematicsStreamingToolboxController controller;
    private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
+   private final KinematicsStreamingToolboxMessageLogger logger;
 
-   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
       this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
    }
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(30.0);
+      setTimeWithoutInputsBeforeGoingToSleep(3.0);
       controller = new KinematicsStreamingToolboxController(commandInputManager,
                                                             statusOutputManager,
                                                             fullRobotModel,
@@ -54,6 +53,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
+      logger = new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), realtimeRos2Node);
       startYoVariableServer();
    }
 
@@ -130,5 +130,17 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_STREAMING_TOOLBOX, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   protected void startLogging()
+   {
+      logger.startLogging();
+   }
+
+   @Override
+   protected void stopLogging()
+   {
+      logger.stopLogging();
    }
 }

@@ -31,7 +31,7 @@ public class AStarTurnInPlaceTest
       generator.addRectangle(5.0, 5.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      double timeout = 0.7;
+      double timeout = 2.0;
       FramePose3D startPose = new FramePose3D();
       startPose.setOrientationYawPitchRoll(0.0 * Math.PI, 0.0, 0.0);
       startPose.appendTranslation(0.0, 0.5 * parameters.getIdealFootstepWidth(), 0.0);

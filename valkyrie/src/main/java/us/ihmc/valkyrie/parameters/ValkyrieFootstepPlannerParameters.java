@@ -53,6 +53,12 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       load();
    }
 
+   @Override
+   public AdaptiveSwingParameters getAdaptiveSwingParameters()
+   {
+      return new ValkyrieAdaptiveSwingParameters();
+   }
+
    public static void main(String[] args)
    {
       ValkyrieFootstepPlannerParameters parameters = new ValkyrieFootstepPlannerParameters();

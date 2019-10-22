@@ -1,6 +1,8 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,6 +10,7 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -16,28 +19,25 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-@Tag("humanoid-obstacle-3")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

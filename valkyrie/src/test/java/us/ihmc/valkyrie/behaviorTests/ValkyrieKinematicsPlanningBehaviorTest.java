@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.behaviorTests;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.behaviorTests.KinematicsPlanningBehaviorTest;
@@ -27,6 +28,7 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testReachToDoorKnob() throws SimulationExceededMaximumTimeException, IOException
@@ -34,6 +36,7 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
       super.testReachToDoorKnob();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSingleKeyFrameInput() throws SimulationExceededMaximumTimeException, IOException

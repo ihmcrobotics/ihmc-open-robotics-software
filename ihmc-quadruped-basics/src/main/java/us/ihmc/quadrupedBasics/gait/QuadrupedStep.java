@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedBasics.gait;
 
+import controller_msgs.msg.dds.QuadrupedStepMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -115,6 +116,14 @@ public class QuadrupedStep
       setGoalPosition(command.getGoalPosition());
       setGroundClearance(command.getGroundClearance());
       setTrajectoryType(command.getTrajectoryType());
+   }
+
+   public void set(QuadrupedStepMessage message)
+   {
+      setRobotQuadrant(RobotQuadrant.fromByte(message.getRobotQuadrant()));
+      setGoalPosition(message.getGoalPosition());
+      setGroundClearance(message.getGroundClearance());
+      setTrajectoryType(TrajectoryType.fromByte(message.getTrajectoryType()));
    }
 
    public void get(QuadrupedTimedStep other)

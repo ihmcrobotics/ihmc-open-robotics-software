@@ -27,7 +27,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphPa
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.PlanarRegionFilter;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ClusterToolsTest
