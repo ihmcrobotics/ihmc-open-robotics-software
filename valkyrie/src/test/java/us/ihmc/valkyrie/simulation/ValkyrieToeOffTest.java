@@ -8,7 +8,7 @@ import us.ihmc.avatar.obstacleCourseTests.AvatarToeOffTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@Tag("humanoid-flat-ground")
+@Tag("fast")
 public class ValkyrieToeOffTest extends AvatarToeOffTest
 {
    @Override

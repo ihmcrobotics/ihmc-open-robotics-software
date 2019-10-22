@@ -27,7 +27,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Tag("humanoid-behaviors")
+   @Tag("fast")
    @Override
    @Test
    public void testCloseHand() throws SimulationExceededMaximumTimeException

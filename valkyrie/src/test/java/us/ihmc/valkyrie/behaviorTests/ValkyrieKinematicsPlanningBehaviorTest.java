@@ -28,7 +28,7 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Tag("humanoid-behaviors")
+   @Tag("humanoid-toolbox")
    @Override
    @Test
    public void testReachToDoorKnob() throws SimulationExceededMaximumTimeException, IOException
