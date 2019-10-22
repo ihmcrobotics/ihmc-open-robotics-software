@@ -2,7 +2,6 @@ package us.ihmc.avatar.pushRecovery;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
