@@ -54,10 +54,11 @@ public class ValkyrieExternalWrenchEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
    private static final Vector3D initialForce = new Vector3D(0.0, 0.0, -20.0);
+   private static final String model = "models/val_description/sdf/valkyrie_sim_no_hands.sdf";
 
    public ValkyrieExternalWrenchEstimationSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, true, model);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new FlatGroundProfile());
       simulationStarter.setRunMultiThreaded(true);
