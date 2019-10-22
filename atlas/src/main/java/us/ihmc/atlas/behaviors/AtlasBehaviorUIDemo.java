@@ -13,26 +13,21 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
+import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.parameterTuner.remote.ParameterTuner;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
-import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
-import java.nio.file.Path;
+import java.util.function.Supplier;
 
 /**
  * Runs self contained behavior demo.
@@ -42,21 +37,19 @@ public class AtlasBehaviorUIDemo extends Application
    private static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean USE_KINEMATIC_SIMULATION = true;
-   public static final boolean CREATE_YO_VARIABLE_SERVER = false;
+   private static final boolean CREATE_YO_VARIABLE_SERVER = false;
    private static final boolean LAUNCH_PARAMETER_TUNER = false;
 
-   private enum Environment
-   {
-      FLAT_GROUND,
-      UP_DOWN_OPEN_HOUSE,
-      UP_DOWN_TWO_HIGH_FLAT_IN_BETWEEN,
-      UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER,
-      SLAM_REAL_DATA,
-      CORRIDOR,
-      STAIRS
-   }
-   private static final Environment ENVIRONMENT = Environment.CORRIDOR;
+   // functions to prevent constructing all environments every time
+   private static final Supplier<PlanarRegionsList> FLAT_GROUND = () -> PlanarRegionsList.flatGround(10.0);
+   private static final Supplier<PlanarRegionsList> UP_DOWN_OPEN_HOUSE = BehaviorPlanarRegionEnvironments::createUpDownOpenHouseRegions;
+   private static final Supplier<PlanarRegionsList> UP_DOWN_TWO_HIGH_FLAT_IN_BETWEEN = BehaviorPlanarRegionEnvironments::createUpDownTwoHighWithFlatBetween;
+   private static final Supplier<PlanarRegionsList> UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER = BehaviorPlanarRegionEnvironments::createUpDownFourHighWithFlatCenter;
+   private static final Supplier<PlanarRegionsList> STAIRS = BehaviorPlanarRegionEnvironments::createStairs;
+   private static final Supplier<PlanarRegionsList> SLAM_REAL_DATA = BehaviorPlanarRegionEnvironments::realDataFromAtlasSLAMDataset20190710;
+   private static final Supplier<PlanarRegionsList> CORRIDOR = PlannerTestEnvironments::getTrickCorridor;
 
+   private static final Supplier<PlanarRegionsList> ENVIRONMENT = CORRIDOR;
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
    private final int recordFrequencySpeedup = 10;
@@ -66,11 +59,11 @@ public class AtlasBehaviorUIDemo extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      if (ENVIRONMENT != Environment.FLAT_GROUND)
+      if (ENVIRONMENT != FLAT_GROUND)
       {
          new Thread(() -> {
             LogTools.info("Creating planar region publisher");
-            new FakeREAModule(createPlanarRegions(), createRobotModel()).start();
+            new FakeREAModule(ENVIRONMENT.get(), createRobotModel()).start();
          }).start();
 
          new Thread(() -> {
@@ -87,7 +80,9 @@ public class AtlasBehaviorUIDemo extends Application
          }
          else
          {
-            AtlasBehaviorSimulation.createForManualTest(createRobotModel(), generateEnvironment(), recordFrequencySpeedup).simulate();
+            AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
+                                                        new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
+                                                        recordFrequencySpeedup).simulate();
          }
       }).start();
 
@@ -122,50 +117,6 @@ public class AtlasBehaviorUIDemo extends Application
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
 
-   }
-
-   private CommonAvatarEnvironmentInterface generateEnvironment()
-   {
-      return new PlanarRegionsListDefinedEnvironment(createPlanarRegions(), 0.02, false);
-   }
-
-   private PlanarRegionsList createPlanarRegions()
-   {
-      switch (ENVIRONMENT)
-      {
-         case UP_DOWN_OPEN_HOUSE:
-            return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
-         case UP_DOWN_TWO_HIGH_FLAT_IN_BETWEEN:
-            return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
-         case UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER:
-            return PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter();
-         case STAIRS:
-            return PatrolSimulationRegionFields.createStairs();
-         case SLAM_REAL_DATA:
-            return slamDataset();
-         case CORRIDOR:
-            return PlannerTestEnvironments.getTrickCorridor();
-         case FLAT_GROUND:
-         default:
-            return PlanarRegionsList.flatGround(10.0);
-      }
-   }
-
-   private PlanarRegionsList slamDataset()
-   {
-      PlanarRegionsList map = PlanarRegionsList.flatGround(10.0);
-      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion"), parameters).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted"), parameters).getMergedMap();
-      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion"), parameters).getMergedMap();
-      return map;
-   }
-
-   private PlanarRegionsList loadDataSet(String dataSetName)
-   {
-      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/20190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
-      return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 
    @Override

@@ -1,13 +1,18 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
+import us.ihmc.tools.io.WorkspacePathTools;
 
+import java.nio.file.Path;
 import java.util.Random;
 
-public class PatrolSimulationRegionFields
+public class BehaviorPlanarRegionEnvironments
 {
    public static final double CINDER_SLOPE_ANGLE = 13.0;
    public static final double Z_STEP_UP_PER_ROW = 0.10;
@@ -213,5 +218,22 @@ public class PatrolSimulationRegionFields
                                                                0.0,
                                                                Math.toRadians(0.0),
                                                                0.0);
+   }
+
+   public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()
+   {
+      PlanarRegionsList map = PlanarRegionsList.flatGround(10.0);
+      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174025_PlanarRegion"), parameters).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("IntentionallyDrifted"), parameters).getMergedMap();
+      map = PlanarRegionSLAM.slam(map, loadDataSet("20190710_174422_PlanarRegion"), parameters).getMergedMap();
+      return map;
+   }
+
+   private static PlanarRegionsList loadDataSet(String dataSetName)
+   {
+      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/20190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
+      return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
    }
 }
