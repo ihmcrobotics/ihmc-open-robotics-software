@@ -80,7 +80,7 @@ public class FancyPosesBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      LogTools.info("Fancy poses behavior selected = {}", enabled);
    }
 
    private void doOnAbort(boolean abort)

@@ -17,6 +17,8 @@ public enum BehaviorRegistry
    EXPLORE(ExploreAreaBehavior::new, ExploreAreaBehavior.ExploreAreaBehaviorAPI.create()),
    ;
 
+   public static final BehaviorRegistry[] values = values();
+
    private final BehaviorSupplier behaviorSupplier;
    private final MessagerAPI behaviorAPI;
 

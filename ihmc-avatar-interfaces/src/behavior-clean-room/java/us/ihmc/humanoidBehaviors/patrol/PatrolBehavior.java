@@ -174,7 +174,7 @@ public class PatrolBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      LogTools.info("Patrol behavior selected = {}", enabled);
    }
 
    private void onStopStateEntry()

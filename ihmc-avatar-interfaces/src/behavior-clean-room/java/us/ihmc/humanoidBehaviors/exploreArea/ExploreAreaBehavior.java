@@ -196,7 +196,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      LogTools.info("Explore area behavior selected = {}", enabled);
    }
 
    private void randomPoseUpdate(boolean doRandomPoseUpdate)
