@@ -10,16 +10,16 @@ import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAM;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMParameters;
-import us.ihmc.humanoidBehaviors.tools.perception.PlanarRegionSLAMResult;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisualizationState;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.javaFXVisualizers.RandomColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerListener;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
@@ -36,10 +36,13 @@ import static us.ihmc.humanoidBehaviors.ui.slam.PlanarRegionSLAMGraphic.SLAMVisu
 
 public class PlanarRegionSLAMUITabController extends Group
 {
+   boolean showConcaveHullMergerListener = false;
+
    private PlanarRegionSLAMParameters planarRegionSLAMParameters;
 
    private static final String DATASET_1 = "20190710_174025_PlanarRegion";
-   private static final String DATASET_2 = "IntentionallyDrifted";
+   private static final String DATASET_2 = "20190710_174208_PlanarRegion";
+//   private static final String DATASET_2 = "IntentionallyDrifted";
    private static final String DATASET_3 = "20190710_174422_PlanarRegion";
 
    @FXML private CheckBox acceptNewRegionListsCheckbox;
@@ -158,7 +161,7 @@ public class PlanarRegionSLAMUITabController extends Group
    private void slam()
    {
       PlanarRegionsList newData = livePlanarRegionsGraphic.getLatestPlanarRegionsList();
-      ConcaveHullMergerListener listener = new ConcaveHullGraphicalMergerListener();
+      ConcaveHullMergerListener listener = showConcaveHullMergerListener ? new ConcaveHullGraphicalMergerListener() : null;
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, planarRegionSLAMParameters, listener);
 //      PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.intentionallyDrift(livePlanarRegionsGraphic.getLatestPlanarRegionsList());
 

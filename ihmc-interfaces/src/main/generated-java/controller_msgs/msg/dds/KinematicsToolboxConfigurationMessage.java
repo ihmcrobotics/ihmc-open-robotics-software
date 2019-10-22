@@ -67,6 +67,16 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             */
    public double joint_acceleration_weight_ = -1.0;
    /**
+            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public boolean enable_joint_velocity_limits_;
+   /**
+            * When true, the solver will ignore the joint velocity limits.
+            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public boolean disable_joint_velocity_limits_;
+   /**
             * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
             * In case it has undesirable effects, use this flag to disable it.
             */
@@ -111,6 +121,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       joint_velocity_weight_ = other.joint_velocity_weight_;
 
       joint_acceleration_weight_ = other.joint_acceleration_weight_;
+
+      enable_joint_velocity_limits_ = other.enable_joint_velocity_limits_;
+
+      disable_joint_velocity_limits_ = other.disable_joint_velocity_limits_;
 
       disable_collision_avoidance_ = other.disable_collision_avoidance_;
 
@@ -279,6 +293,40 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    }
 
    /**
+            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public void setEnableJointVelocityLimits(boolean enable_joint_velocity_limits)
+   {
+      enable_joint_velocity_limits_ = enable_joint_velocity_limits;
+   }
+   /**
+            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public boolean getEnableJointVelocityLimits()
+   {
+      return enable_joint_velocity_limits_;
+   }
+
+   /**
+            * When true, the solver will ignore the joint velocity limits.
+            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public void setDisableJointVelocityLimits(boolean disable_joint_velocity_limits)
+   {
+      disable_joint_velocity_limits_ = disable_joint_velocity_limits;
+   }
+   /**
+            * When true, the solver will ignore the joint velocity limits.
+            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+            */
+   public boolean getDisableJointVelocityLimits()
+   {
+      return disable_joint_velocity_limits_;
+   }
+
+   /**
             * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
             * In case it has undesirable effects, use this flag to disable it.
             */
@@ -348,6 +396,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_acceleration_weight_, other.joint_acceleration_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_velocity_limits_, other.enable_joint_velocity_limits_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_joint_velocity_limits_, other.disable_joint_velocity_limits_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_collision_avoidance_, other.disable_collision_avoidance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_collision_avoidance_, other.enable_collision_avoidance_, epsilon)) return false;
@@ -382,6 +434,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if(this.joint_velocity_weight_ != otherMyClass.joint_velocity_weight_) return false;
 
       if(this.joint_acceleration_weight_ != otherMyClass.joint_acceleration_weight_) return false;
+
+      if(this.enable_joint_velocity_limits_ != otherMyClass.enable_joint_velocity_limits_) return false;
+
+      if(this.disable_joint_velocity_limits_ != otherMyClass.disable_joint_velocity_limits_) return false;
 
       if(this.disable_collision_avoidance_ != otherMyClass.disable_collision_avoidance_) return false;
 
@@ -419,6 +475,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append(this.joint_velocity_weight_);      builder.append(", ");
       builder.append("joint_acceleration_weight=");
       builder.append(this.joint_acceleration_weight_);      builder.append(", ");
+      builder.append("enable_joint_velocity_limits=");
+      builder.append(this.enable_joint_velocity_limits_);      builder.append(", ");
+      builder.append("disable_joint_velocity_limits=");
+      builder.append(this.disable_joint_velocity_limits_);      builder.append(", ");
       builder.append("disable_collision_avoidance=");
       builder.append(this.disable_collision_avoidance_);      builder.append(", ");
       builder.append("enable_collision_avoidance=");

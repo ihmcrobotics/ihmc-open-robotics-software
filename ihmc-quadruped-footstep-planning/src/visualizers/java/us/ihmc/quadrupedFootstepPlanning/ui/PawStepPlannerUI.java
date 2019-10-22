@@ -146,7 +146,7 @@ public class PawStepPlannerUI
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPawPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                     StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
-                                                                    GoalOrientationTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
+                                                                    GoalOrientationTopic, StartFeetPositionTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalPawOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
                                                                           StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
                                                                           LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);

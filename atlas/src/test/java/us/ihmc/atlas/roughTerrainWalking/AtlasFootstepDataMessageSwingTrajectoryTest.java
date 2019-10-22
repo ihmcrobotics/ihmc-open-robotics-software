@@ -1,20 +1,22 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import java.io.InputStream;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-rough-terrain")
 public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDataMessageSwingTrajectoryTest
 {
    @Override
@@ -47,35 +49,11 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false)
       {
          @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
+         public InputStream getParameterOverwrites()
          {
-            return new AtlasWalkingControllerParameters(target, getJointMap(), getContactPointParameters())
-            {
-               @Override
-               public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
-               {
-                  return false;
-               }
-
-               @Override
-               public SwingTrajectoryParameters getSwingTrajectoryParameters()
-               {
-                  return new AtlasSwingTrajectoryParameters(target, 1.0)
-                  {
-                     @Override
-                     public double getDesiredTouchdownAcceleration()
-                     {
-                        return 0.0;
-                     }
-
-                     @Override
-                     public double getDesiredTouchdownVelocity()
-                     {
-                        return 0.3;
-                     }
-                  };
-               }
-            };
+            InputStream overwrites = AvatarAbsoluteStepTimingsTest.class.getResourceAsStream("/zero_touchdown_acceleration.xml");
+            Assert.assertNotNull(overwrites);
+            return overwrites;
          }
       };
    }

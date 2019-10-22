@@ -1,19 +1,17 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,7 +23,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@Tag("humanoid-flat-ground-4")
 public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -40,6 +37,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private double transferTime = 0.25;
 
    public abstract double getStepLength();
+
    public abstract int getNumberOfSteps();
 
    @BeforeEach
@@ -67,18 +65,14 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-
-
    @Test
    public void testShortSteps() throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
-
       walkForward(getStepLength(), getNumberOfSteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
-
 
    private void setupTest() throws SimulationExceededMaximumTimeException
    {
@@ -102,7 +96,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       double footstepX, footstepY;
       for (int i = 1; i <= steps; i++)
       {
-         robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+         robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          footstepX = stepLength * i;
          FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);

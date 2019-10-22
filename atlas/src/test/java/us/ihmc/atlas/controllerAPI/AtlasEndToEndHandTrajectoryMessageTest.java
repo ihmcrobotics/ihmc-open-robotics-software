@@ -3,6 +3,7 @@ package us.ihmc.atlas.controllerAPI;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -42,6 +43,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       };
    };
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
@@ -49,6 +51,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testCustomControlFrame();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -56,6 +59,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -63,6 +67,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testMultipleTrajectoryPoints();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -70,6 +75,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testQueuedMessages();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
@@ -77,6 +83,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testQueueStoppedWithOverrideMessage();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
@@ -84,6 +91,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -91,6 +99,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       super.testSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -107,9 +116,11 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    }
 
    /*
-    * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
-    * This bug was due to limiting the angle described by a Quaternion to be in [-Pi; Pi].
+    * Test revealing a bug that was preventing the trajectory from flipping the sign of the final
+    * orientation (necessary to prevent an extra rotation). This bug was due to limiting the angle
+    * described by a Quaternion to be in [-Pi; Pi].
     */
+   @Tag("controller-api-slow-3")
    @Test
    public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
    {
@@ -151,8 +162,14 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       SE3TrajectoryMessage se3Trajectory = handTrajectoryMessage.getSe3Trajectory();
       se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chest.getBodyFixedFrame()));
       se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D()));
-      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add()
+                   .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime,
+                                                                             waypointPosition0,
+                                                                             waypointOrientation0,
+                                                                             new Vector3D(),
+                                                                             new Vector3D()));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0
+            * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
 
       drcSimulationTestHelper.publishToController(handTrajectoryMessage);
 
@@ -166,10 +183,19 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       Vector3D rotationError = EndToEndTestTools.findVector3D(nameSpace, varname, scs);
 
       /*
-       * Checking the tracking error should be enough.
-       * As went the bug is present, the error magnitude goes up to [-0.31, 0.002, -0.027] (as rotation vector) against [-0.03, -0.01, -0.01] without the bug.
+       * Checking the tracking error should be enough. As went the bug is present, the error magnitude
+       * goes up to [-0.31, 0.002, -0.027] (as rotation vector) against [-0.03, -0.01, -0.01] without the
+       * bug.
        */
       assertTrue(rotationError.length() < 0.05);
+   }
+
+   @Tag("controller-api")
+   @Override
+   @Test
+   public void testStreaming() throws Exception
+   {
+      super.testStreaming();
    }
 
    @Override
@@ -189,12 +215,5 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    {
       AtlasPhysicalProperties physicalProperties = new AtlasPhysicalProperties();
       return physicalProperties.getShinLength() + physicalProperties.getThighLength();
-   }
-
-   @Override
-   @Test
-   public void testStreaming() throws Exception
-   {
-      super.testStreaming();
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -24,6 +25,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
@@ -33,6 +35,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
 
    // Moved one of the old push recovery tests to fast so it is checked from time to time.
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
@@ -40,6 +43,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushLeftInitialTransferState();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
@@ -47,6 +51,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightInitialTransferState();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
@@ -54,6 +59,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightLateSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
@@ -62,6 +68,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightThenLeftMidSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
@@ -69,6 +76,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightTransferState();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
@@ -76,6 +84,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushTowardsTheBack();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException

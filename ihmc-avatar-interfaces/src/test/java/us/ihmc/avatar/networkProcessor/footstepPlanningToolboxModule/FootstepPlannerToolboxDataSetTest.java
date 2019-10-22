@@ -860,7 +860,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
       @Override
       public FootstepPlannerParametersBasics getFootstepPlannerParameters()
       {
-         return new DefaultFootstepPlannerParameters();
+         DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+         parameters.setCheckForPathCollisions(true);
+         return parameters;
       }
 
       @Override

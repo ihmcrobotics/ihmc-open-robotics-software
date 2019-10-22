@@ -749,4 +749,13 @@ public abstract class WalkingControllerParameters
    {
       return false;
    }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.25;
+   }
 }

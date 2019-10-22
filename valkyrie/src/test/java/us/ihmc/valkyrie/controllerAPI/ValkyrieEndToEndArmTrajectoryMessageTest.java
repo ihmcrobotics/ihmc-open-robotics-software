@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndArmTrajectoryMessageTest;
@@ -32,57 +33,65 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Override
+   @Tag("controller-api-slow-4")
    @Test
-   public void testSingleTrajectoryPoint() throws Exception
-   {
-      super.testSingleTrajectoryPoint();
-   }
-
    @Override
-   @Test
-   public void testMultipleTrajectoryPoints() throws Exception
-   {
-      super.testMultipleTrajectoryPoints();
-   }
-
-   @Override
-   @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
-   @Override
+   @Tag("controller-api")
    @Test
+   @Override
+   public void testMultipleTrajectoryPoints() throws Exception
+   {
+      super.testMultipleTrajectoryPoints();
+   }
+
+   @Tag("controller-api")
+   @Test
+   @Override
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
    }
 
-   @Override
+   @Tag("controller-api-slow-4")
    @Test
-   public void testQueueWithWrongPreviousId() throws Exception
-   {
-      super.testQueueWithWrongPreviousId();
-   }
-
    @Override
-   @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
    }
 
-   @Override
+   @Tag("controller-api-slow-4")
    @Test
+   @Override
+   public void testQueueWithWrongPreviousId() throws Exception
+   {
+      super.testQueueWithWrongPreviousId();
+   }
+
+   @Tag("controller-api-slow-4")
+   @Test
+   @Override
+   public void testSingleTrajectoryPoint() throws Exception
+   {
+      super.testSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow-4")
+   @Test
+   @Override
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
    }
 
-   @Override
+   @Tag("controller-api-slow-4")
    @Test
+   @Override
    public void testStreaming() throws Exception
    {
       super.testStreaming();

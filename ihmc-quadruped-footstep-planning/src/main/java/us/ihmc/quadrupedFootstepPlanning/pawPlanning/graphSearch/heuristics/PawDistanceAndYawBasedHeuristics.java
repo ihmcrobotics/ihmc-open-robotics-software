@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawNodeCostTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping.PawNodeSnapper;
@@ -46,13 +47,12 @@ public class PawDistanceAndYawBasedHeuristics extends PawPlanningCostToGoHeurist
             break;
          }
 
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
+         Point3D snappedNode = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
+         nodeData.getSnapTransform().transform(snappedNode);
 
-         PawNodeTools.getSnappedNodeTransformToWorld(nodeXIndex, nodeYIndex, nodeData.getSnapTransform(), nodeTransform);
-
-         if (!nodeTransform.containsNaN())
+         if (!snappedNode.containsNaN())
          {
-            double heightChange = goalPose.getZ() - nodeTransform.getTranslationVector().getZ();
+            double heightChange = goalPose.getZ() - snappedNode.getZ();
 
             if (heightChange > 0.0)
                heightCost += parameters.getStepUpWeight() * heightChange;

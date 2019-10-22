@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -253,9 +253,6 @@ public class VisibilityGraph
          computeInterEdges(startNode);
       }
 
-      if (startNode.getEdges().size() == 0)
-         throw new RuntimeException("We have a problem.");
-
       return startNode;
    }
 
@@ -417,6 +414,7 @@ public class VisibilityGraph
                                                                                                            targetInSourceLocal);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
                                                                                                            sourceInTargetLocal);
+
 
                if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
                {

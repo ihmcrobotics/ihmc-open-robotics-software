@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -40,6 +41,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException

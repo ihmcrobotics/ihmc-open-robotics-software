@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -58,10 +59,8 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
       FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(previousNode);
 
-      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
-      RigidBodyTransform previousSnappedSoleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(nodeToCheck, snapData.getSnapTransform(), snappedSoleTransform);
-      FootstepNodeTools.getSnappedNodeTransform(previousNode, previousSnapData.getSnapTransform(), previousSnappedSoleTransform);
+      RigidBodyTransformReadOnly snappedSoleTransform = snapData.getOrComputeSnappedNodeTransform(nodeToCheck);
+      RigidBodyTransformReadOnly previousSnappedSoleTransform = previousSnapData.getOrComputeSnappedNodeTransform(previousNode);
 
       parentSoleFrame.setTransformAndUpdate(previousSnappedSoleTransform);
       parentSoleZupFrame.update();
@@ -126,16 +125,16 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             if (grandparentSnapData == null)
                return true;
 
-            RigidBodyTransform grandparentSnappedSoleTransform = new RigidBodyTransform();
-            FootstepNodeTools.getSnappedNodeTransform(grandparentNode, grandparentSnapData.getSnapTransform(), grandparentSnappedSoleTransform);
+            Point3D grandparentPosition = new Point3D(grandparentNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+            grandparentSnapData.getSnapTransform().transform(grandparentPosition);
             double grandparentTranslationScaleFactor = 1.5;
 
             Point3D nodePosition = new Point3D(nodeToCheck.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             snapData.getSnapTransform().transform(nodePosition);
 
-            double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentSnappedSoleTransform.getTranslationZ();
-            double translationFromGrandparentNode = EuclidCoreTools.norm(nodePosition.getX() - grandparentSnappedSoleTransform.getTranslationX(),
-                                                                         nodePosition.getY() - grandparentSnappedSoleTransform.getTranslationY());
+            double heightChangeFromGrandparentNode = nodePosition.getZ() - grandparentPosition.getZ();
+            double translationFromGrandparentNode = EuclidCoreTools.norm(nodePosition.getX() - grandparentPosition.getX(),
+                                                                         nodePosition.getY() - grandparentPosition.getY());
 
             boolean largeStepUp = heightChangeFromGrandparentNode > parameters.getMaximumStepZWhenSteppingUp();
             boolean largeStepDown = heightChangeFromGrandparentNode < -parameters.getMaximumStepZWhenForwardAndDown();

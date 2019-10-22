@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -25,6 +26,7 @@ public class AtlasEndToEndFootLoadBearingTest extends EndToEndEndFootBearingMess
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testSwitchFootToLoadBearing() throws Exception
