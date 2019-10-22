@@ -46,6 +46,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public boolean perform_post_processing_node_shifting_;
    public boolean introduce_midpoints_in_post_processing_ = true;
    public boolean compute_orientations_to_avoid_obstacles_;
+   public boolean include_preferred_extrusions_ = true;
    public double heuristic_weight_ = -1.0;
    public double distance_weight_ = -1.0;
    public double elevation_weight_ = -1.0;
@@ -108,6 +109,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       introduce_midpoints_in_post_processing_ = other.introduce_midpoints_in_post_processing_;
 
       compute_orientations_to_avoid_obstacles_ = other.compute_orientations_to_avoid_obstacles_;
+
+      include_preferred_extrusions_ = other.include_preferred_extrusions_;
 
       heuristic_weight_ = other.heuristic_weight_;
 
@@ -344,6 +347,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return compute_orientations_to_avoid_obstacles_;
    }
 
+   public void setIncludePreferredExtrusions(boolean include_preferred_extrusions)
+   {
+      include_preferred_extrusions_ = include_preferred_extrusions;
+   }
+   public boolean getIncludePreferredExtrusions()
+   {
+      return include_preferred_extrusions_;
+   }
+
    public void setHeuristicWeight(double heuristic_weight)
    {
       heuristic_weight_ = heuristic_weight;
@@ -476,6 +488,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compute_orientations_to_avoid_obstacles_, other.compute_orientations_to_avoid_obstacles_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.include_preferred_extrusions_, other.include_preferred_extrusions_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.heuristic_weight_, other.heuristic_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon)) return false;
@@ -547,6 +561,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.compute_orientations_to_avoid_obstacles_ != otherMyClass.compute_orientations_to_avoid_obstacles_) return false;
 
+      if(this.include_preferred_extrusions_ != otherMyClass.include_preferred_extrusions_) return false;
+
       if(this.heuristic_weight_ != otherMyClass.heuristic_weight_) return false;
 
       if(this.distance_weight_ != otherMyClass.distance_weight_) return false;
@@ -615,6 +631,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.introduce_midpoints_in_post_processing_);      builder.append(", ");
       builder.append("compute_orientations_to_avoid_obstacles=");
       builder.append(this.compute_orientations_to_avoid_obstacles_);      builder.append(", ");
+      builder.append("include_preferred_extrusions=");
+      builder.append(this.include_preferred_extrusions_);      builder.append(", ");
       builder.append("heuristic_weight=");
       builder.append(this.heuristic_weight_);      builder.append(", ");
       builder.append("distance_weight=");

@@ -58,7 +58,8 @@ public class NavigableRegionsFactory
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
       return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
-                                    preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator);
+                                    preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator,
+                                    parameters.includePreferredExtrusions());
    }
 
    public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
@@ -66,7 +67,8 @@ public class NavigableRegionsFactory
                                                         NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
                                                         NavigableExtrusionDistanceCalculator navigableCalculator,
                                                         ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
-                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator)
+                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator,
+                                                        boolean includePreferredExtrusions)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
@@ -77,8 +79,10 @@ public class NavigableRegionsFactory
       obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
                                                                                              DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
 
-      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator));
-      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator, obstacleCalculator));
+      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator,
+                                                                                includePreferredExtrusions));
+      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
+                                                                              obstacleCalculator, includePreferredExtrusions));
 
       for (Cluster cluster : navigableRegion.getAllClusters())
       {

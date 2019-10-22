@@ -28,6 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -970,7 +971,7 @@ public class VisibilityGraphTest
 
    private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
-      return new DefaultVisibilityGraphParameters()
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters()
       {
          @Override
          public PlanarRegionFilter getPlanarRegionFilter()
@@ -985,11 +986,7 @@ public class VisibilityGraphTest
             };
          }
 
-         @Override
-         public double getClusterResolution()
-         {
-            return 0.501;
-         }
+
 
          @Override
          public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
@@ -1004,6 +1001,9 @@ public class VisibilityGraphTest
             };
          }
       };
+      parameters.setClusterResolution(0.501);
+      parameters.setIncludePreferredExtrusions(false);
+      return parameters;
    }
 
 }

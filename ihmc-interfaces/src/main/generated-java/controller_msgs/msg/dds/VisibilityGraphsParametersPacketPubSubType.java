@@ -82,6 +82,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -174,6 +176,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -246,6 +251,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_7(data.getComputeOrientationsToAvoidObstacles());
 
+      cdr.write_type_7(data.getIncludePreferredExtrusions());
+
       cdr.write_type_6(data.getHeuristicWeight());
 
       cdr.write_type_6(data.getDistanceWeight());
@@ -308,6 +315,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setComputeOrientationsToAvoidObstacles(cdr.read_type_7());
       	
+      data.setIncludePreferredExtrusions(cdr.read_type_7());
+      	
       data.setHeuristicWeight(cdr.read_type_6());
       	
       data.setDistanceWeight(cdr.read_type_6());
@@ -351,6 +360,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_7("perform_post_processing_node_shifting", data.getPerformPostProcessingNodeShifting());
       ser.write_type_7("introduce_midpoints_in_post_processing", data.getIntroduceMidpointsInPostProcessing());
       ser.write_type_7("compute_orientations_to_avoid_obstacles", data.getComputeOrientationsToAvoidObstacles());
+      ser.write_type_7("include_preferred_extrusions", data.getIncludePreferredExtrusions());
       ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("elevation_weight", data.getElevationWeight());
@@ -385,6 +395,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setPerformPostProcessingNodeShifting(ser.read_type_7("perform_post_processing_node_shifting"));
       data.setIntroduceMidpointsInPostProcessing(ser.read_type_7("introduce_midpoints_in_post_processing"));
       data.setComputeOrientationsToAvoidObstacles(ser.read_type_7("compute_orientations_to_avoid_obstacles"));
+      data.setIncludePreferredExtrusions(ser.read_type_7("include_preferred_extrusions"));
       data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setElevationWeight(ser.read_type_6("elevation_weight"));

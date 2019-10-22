@@ -156,5 +156,6 @@ public class FootstepPlannerMessageTools
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
       packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
+      packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

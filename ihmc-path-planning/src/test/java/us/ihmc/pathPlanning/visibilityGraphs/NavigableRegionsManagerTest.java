@@ -56,7 +56,7 @@ import static us.ihmc.robotics.Assert.assertFalse;
 
 public class NavigableRegionsManagerTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
    private static final double epsilon = 1e-4;
    private static final double proximityEpsilon = 6e-2;
 

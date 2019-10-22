@@ -204,6 +204,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(returnBestEffortSolution);
    }
 
+   default boolean includePreferredExtrusions()
+   {
+      return get(includePreferredExtrusions);
+   }
+
    /**
     * The constant extrusion distance to use when extruding the hull of a navigable region.
     *
