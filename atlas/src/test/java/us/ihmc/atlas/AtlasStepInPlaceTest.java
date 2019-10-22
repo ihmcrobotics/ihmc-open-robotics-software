@@ -50,7 +50,7 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
       super.testStepInPlace();
    }
 
-   @Tag("humanoid-flat-ground-3")
+   @Tag("humanoid-flat-ground")
    @Test
    @Override
    public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
