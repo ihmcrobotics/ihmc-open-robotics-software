@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-@Tag("humanoid-flat-ground-4")
+@Tag("humanoid-flat-ground")
 @Disabled
 public class HumanoidBehaviorsICPFaultDetectionTest extends DRCHumanoidBehaviorICPFaultDetectionTest
 {

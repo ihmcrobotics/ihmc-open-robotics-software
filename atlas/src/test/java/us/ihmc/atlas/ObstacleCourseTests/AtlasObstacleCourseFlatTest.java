@@ -54,7 +54,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
 
-   @Tag("humanoid-flat-ground-4")
+   @Tag("humanoid-flat-ground")
    @Override
    // Invoked manually to test memory & thread leaks
    @Disabled
@@ -80,7 +80,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
-   @Tag("humanoid-flat-ground-4")
+   @Tag("humanoid-flat-ground")
    @Override
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
@@ -96,7 +96,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingForACoupleSeconds();
    }
 
-   @Tag("humanoid-flat-ground-4")
+   @Tag("humanoid-flat-ground")
    @Override
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
    @Disabled

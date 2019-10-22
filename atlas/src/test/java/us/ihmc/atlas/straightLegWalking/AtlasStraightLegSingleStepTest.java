@@ -26,7 +26,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@Tag("humanoid-flat-ground-2")
+@Tag("humanoid-flat-ground")
 public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();
