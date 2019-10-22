@@ -451,9 +451,11 @@ public class ClusterTools
       // Need to make sure they don't. But then also need to make sure these 
       // NonNavigable regions are not treated as boundaries when making 
       // inter region connections...
-
-      homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-      homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, true));
+      if (includePreferredExtrusions)
+      {
+         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, true));
+      }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
       return homeRegionCluster;
@@ -524,29 +526,40 @@ public class ClusterTools
       List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
-      Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
-                                                                                                   verticalObstacle);
-
-      List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
-      List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
       // Project the points back up to the home region...
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
       List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
                                                                                                               transformFromWorldToHome);
-      List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, nonNavigableExtrusionsInFlatWorld,
+      List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion,
+                                                                                                                 nonNavigableExtrusionsInFlatWorld,
                                                                                                                  transformFromWorldToHome);
-      List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
-                                                                                                                       transformFromWorldToHome);
-      List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
-                                                                                                                          transformFromWorldToHome);
+
+      List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = null;
+      List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
+      if (includePreferredExtrusions)
+      {
+         Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
+                                                                                                      verticalObstacle);
+
+         List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
+         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+
+         preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
+                                                                                                    transformFromWorldToHome);
+         preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
+                                                                                                       transformFromWorldToHome);
+      }
 
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       cluster.setTransformToWorld(transformFromHomeRegionToWorld);
       cluster.addRawPointsInWorld(obstacleConcaveHullInWorld);
-      cluster.setPreferredNavigableExtrusionsInLocal(preferredNavigableExtrusionsInHomeRegionLocal);
-      cluster.setPreferredNonNavigableExtrusionsInLocal(preferredNonNavigableExtrusionsInHomeRegionLocal);
+      if (includePreferredExtrusions)
+      {
+         cluster.setPreferredNavigableExtrusionsInLocal(preferredNavigableExtrusionsInHomeRegionLocal);
+         cluster.setPreferredNonNavigableExtrusionsInLocal(preferredNonNavigableExtrusionsInHomeRegionLocal);
+      }
       cluster.setNavigableExtrusionsInLocal(navigableExtrusionsInHomeRegionLocal);
       cluster.setNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInHomeRegionLocal);
 
