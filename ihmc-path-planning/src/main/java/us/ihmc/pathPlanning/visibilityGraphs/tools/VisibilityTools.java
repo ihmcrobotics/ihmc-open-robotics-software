@@ -461,11 +461,13 @@ public class VisibilityTools
             }
          }
 
-         List<Point2DReadOnly> outerMostExtrusionsToCheck = checkPreferredExtrusions ? cluster.getPreferredNonNavigableExtrusionsInLocal() : cluster.getNonNavigableExtrusionsInLocal();
          boolean closed = cluster.isClosed();
 
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, outerMostExtrusionsToCheck, closed))
+         if (checkPreferredExtrusions && !VisibilityTools.isPointVisible(observer, targetPoint, cluster.getPreferredNonNavigableExtrusionsInLocal(), closed))
                return false;
+
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
+            return false;
       }
 
       return true;
