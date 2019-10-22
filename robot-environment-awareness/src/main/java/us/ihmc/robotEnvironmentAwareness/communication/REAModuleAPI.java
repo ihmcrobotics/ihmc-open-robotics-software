@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -93,8 +94,9 @@ public class REAModuleAPI
    public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
-   
+
    public static final Topic<SensorPoseSourceType> SensorPoseSourceType = ModuleCategory.child(Navigation).topic(Type);
+   public static final Topic<Pose3D> EstimatedSensorPose = ModuleCategory.child(Navigation).topic(Data);
 
    public static final Topic<Boolean> NormalEstimationEnable = ModuleCategory.child(NormalEstimation).topic(Enable);
    public static final Topic<Boolean> NormalEstimationClear = ModuleCategory.child(NormalEstimation).topic(Clear);
@@ -132,7 +134,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIStereoVisionShow = Root.child(UI).child(StereoVision).topic(Show);
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
-   
+
    public static final Topic<Boolean> UINavigationShow = Root.child(UI).child(Navigation).topic(Enable);
    public static final Topic<Boolean> UINavigationClear = Root.child(UI).child(Navigation).topic(Clear);
    public static final Topic<Integer> UINavigationFrames = Root.child(UI).child(Navigation).topic(Size);

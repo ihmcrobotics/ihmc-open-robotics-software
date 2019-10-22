@@ -50,14 +50,16 @@ public class REAOcTreeBuffer
    private final Topic<Integer> ocTreeCapacityTopic;
    private final Topic<Integer> messageCapacityTopic;
    private final Topic<NormalOcTreeMessage> stateTopic;
-   
+
    private final AtomicReference<Integer> stereoVisionBufferSize;
+
+   private final AtomicReference<SensorPoseSourceType> sensorPoseSourceType;
 
    public enum SensorPoseSourceType
    {
       LIDAR_SCAN, STEREO, TRACKING
    }
-   
+
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
                           Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
@@ -78,8 +80,10 @@ public class REAOcTreeBuffer
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
       stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, NUMBER_OF_SAMPLES);
+
+      sensorPoseSourceType = reaMessager.createInput(REAModuleAPI.SensorPoseSourceType, SensorPoseSourceType.STEREO);
    }
-   
+
    private void sendCurrentState()
    {
       reaMessager.submitMessage(enableBufferTopic, enableBuffer.get());
@@ -132,7 +136,7 @@ public class REAOcTreeBuffer
                return;
             }
 
-            if (newScan == null || newSensorPose == null)   //TODO: check.
+            if (newScan == null || newSensorPose == null) //TODO: check.
                return;
 
             bufferOctree.insertScanCollection(newScan, false);
@@ -188,12 +192,12 @@ public class REAOcTreeBuffer
    {
       return newBuffer.getAndSet(null);
    }
-   
+
    public Pose3D pollNewSensorPoseBuffer()
    {
       return newSensorPoseBuffer.getAndSet(null);
    }
-   
+
    public void setOctreeResolution(double resolution)
    {
       octreeResolution.set(resolution);
@@ -224,6 +228,10 @@ public class REAOcTreeBuffer
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
          scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
+
+         if (sensorPoseSourceType.get() != SensorPoseSourceType.LIDAR_SCAN)
+            return;
+
          Pose3D sensorPose = new Pose3D();
          sensorPose.setPosition(lidarMessage.getLidarPosition());
          sensorPose.setOrientation(lidarMessage.getLidarOrientation());
@@ -238,6 +246,10 @@ public class REAOcTreeBuffer
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
          scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
          // TODO: make NormalOctree constructor with octreeDepth.get().
+
+         if (sensorPoseSourceType.get() != SensorPoseSourceType.STEREO)
+            return;
+
          Pose3D sensorPose = new Pose3D();
          sensorPose.setPosition(stereoMessage.getSensorPosition());
          sensorPose.setOrientation(stereoMessage.getSensorOrientation());

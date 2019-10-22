@@ -144,6 +144,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
                                                                     surfaceNormalLowerBoundSlider.valueProperty());
       surfaceNormalFilterParametersProperty.bindBidirectionalUseFilter(enableSurfaceNormalButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.SurfaceNormalFilterParameters, surfaceNormalFilterParametersProperty);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SensorPoseSourceType, navigationSourceTypeComboBox.valueProperty());
 
       load();
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeDepth, depthSlider.valueProperty(), numberToIntegerConverter, true);

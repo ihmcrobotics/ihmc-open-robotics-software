@@ -26,6 +26,7 @@ public class REAOcTreeUpdater
 {
    private final Messager reaMessager;
    private NormalOcTree referenceOctree;
+   private Pose3D sensorPose = new Pose3D();
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
 
    private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
@@ -61,7 +62,7 @@ public class REAOcTreeUpdater
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
-   
+
    public void initializeReferenceOctree(double octreeResolution)
    {
       referenceOctree = new NormalOcTree(octreeResolution);
@@ -157,6 +158,10 @@ public class REAOcTreeUpdater
             referenceOctree.insertScan(scan, updatedNodes, null);
             hasOcTreeBeenUpdated = true;
          }
+         if (bufferSensorPose != null)
+         {
+            sensorPose.set(bufferSensorPose);
+         }
       }
 
       if (clearNormals.getAndSet(false))
@@ -200,10 +205,15 @@ public class REAOcTreeUpdater
       boundingBox.update(referenceOctree.getResolution(), referenceOctree.getTreeDepth());
       referenceOctree.setBoundingBox(boundingBox);
    }
-   
+
    public NormalOcTree getMainOctree()
    {
       return referenceOctree;
+   }
+
+   public Pose3D getSensorPose()
+   {
+      return sensorPose;
    }
 
    public void handleLidarScanMessage(LidarScanMessage message)
