@@ -129,7 +129,8 @@ public class VisibilityGraph
    public void computeInnerAndInterEdges(VisibilityGraphNode sourceNode)
    {
       VisibilityGraphNavigableRegion sourceVisibilityGraphNavigableRegion = sourceNode.getVisibilityGraphNavigableRegion();
-      sourceVisibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode, parameters.getWeightForNonPreferredEdge(), parameters.getCostForNonPreferredNode());
+      sourceVisibilityGraphNavigableRegion.addInnerRegionEdgesFromSourceNode(sourceNode, parameters.getWeightForNonPreferredEdge(),
+                                                                             parameters.getCostForNonPreferredNode());
 
       computeInterEdges(sourceNode);
 
@@ -208,7 +209,7 @@ public class VisibilityGraph
       {
          if ((sourceNode.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion) && (nodeToAttachToIfInSameRegion.getVisibilityGraphNavigableRegion() == visibilityGraphNavigableRegion))
          {
-            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0, 0.0);
+            visibilityGraphNavigableRegion.addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, nodeToAttachToIfInSameRegion, 1.0, 0.0, true);
          }
       }
       sourceNode.setEdgesHaveBeenDetermined(true);
@@ -496,11 +497,13 @@ public class VisibilityGraph
                Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
                Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
+               boolean checkForPreferredVisibility = sourceNode.isPreferredNode() || targetNode.isPreferredNode();
+
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
                boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
-                                                                                                           targetInSourceLocal);
+                                                                                                           targetInSourceLocal, checkForPreferredVisibility);
                boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
-                                                                                                           sourceInTargetLocal);
+                                                                                                           sourceInTargetLocal, checkForPreferredVisibility);
 
 
                if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
@@ -579,10 +582,11 @@ public class VisibilityGraph
 
             targetHomeRegion.transformFromWorldToLocal(sourceProjectedVerticallyOntoTarget);
 
-
                //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
+            boolean checkForPreferredCollisions = sourceNode.isPreferredNode() || targetNode.isPreferredNode();
             boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
-                                                                                                        new Point2D(sourceProjectedVerticallyOntoTarget));
+                                                                                                        new Point2D(sourceProjectedVerticallyOntoTarget),
+                                                                                                        checkForPreferredCollisions);
 
             if (!sourceIsVisibleThroughTargetObstacles)
             {
