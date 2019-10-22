@@ -36,9 +36,17 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 public class DRCNetworkProcessor
 {
    private final boolean DEBUG = false;
+   private final String[] programArgs;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
+      this(null, robotModel, params);
+   }
+
+   public DRCNetworkProcessor(String[] programArgs, DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      this.programArgs = programArgs;
+
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
       tryToStartModule(() -> setupBehaviorModule(robotModel, params));
@@ -98,7 +106,7 @@ public class DRCNetworkProcessor
       if (params.getKinematicsStreamingToolboxLauncherClass() == null)
          new KinematicsStreamingToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
       else
-         new JavaProcessSpawner(true, true).spawn(params.getKinematicsStreamingToolboxLauncherClass());
+         new JavaProcessSpawner(true, true).spawn(params.getKinematicsStreamingToolboxLauncherClass(), programArgs);
       new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName());
    }
 
