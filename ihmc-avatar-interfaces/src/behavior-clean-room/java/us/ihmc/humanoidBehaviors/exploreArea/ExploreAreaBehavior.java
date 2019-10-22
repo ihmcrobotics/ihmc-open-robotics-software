@@ -104,10 +104,10 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final NavigableRegionsManager navigableRegionsManager;
 
-   public ExploreAreaBehavior(BehaviorHelper behaviorHelper, Messager messager, DRCRobotModel robotModel)
+   public ExploreAreaBehavior(BehaviorHelper helper)
    {
-      this.behaviorHelper = behaviorHelper;
-      this.messager = messager;
+      this.behaviorHelper = helper;
+      messager = helper.getMessager();
 
       explore = messager.createInput(ExploreAreaBehaviorAPI.ExploreArea, false);
       messager.registerTopicListener(ExploreAreaBehaviorAPI.Parameters, parameters::setAllFromStrings);

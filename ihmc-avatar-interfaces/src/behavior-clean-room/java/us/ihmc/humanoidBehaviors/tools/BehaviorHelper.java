@@ -1,11 +1,10 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -36,13 +35,14 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.TopicListener;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
@@ -78,7 +78,8 @@ public class BehaviorHelper
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
-   private PeriodicNonRealtimeThreadScheduler threadScheduler;
+   private final List<ROS2Callback> ros2Callbacks = new ArrayList<>();
+   private final List<MessagerCallback> messagerCallbacks = new ArrayList<>();
 
    public BehaviorHelper(Messager messager, DRCRobotModel robotModel, Ros2Node ros2Node)
    {
@@ -87,6 +88,8 @@ public class BehaviorHelper
       this.ros2Node = ros2Node;
 
       drcRobotJointMap = robotModel.getJointMap();
+
+      // TODO: Remove all this construction until needed
 
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
@@ -110,24 +113,7 @@ public class BehaviorHelper
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
    }
 
-   // Robot Sensing Methods:
-
-   public FullHumanoidRobotModel pollFullRobotModel()
-   {
-      return remoteSyncedRobotModel.pollFullRobotModel();
-   }
-
-   public HumanoidRobotState pollHumanoidRobotState()
-   {
-      return remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
-   }
-
-   public FramePose3DReadOnly quickPollPoseReadOnly(Function<HumanoidReferenceFrames, ReferenceFrame> frameSelector)
-   {
-      return remoteSyncedHumanoidRobotState.quickPollPoseReadOnly(frameSelector);
-   }
-
-   // Robot Action Methods:
+   // Robot Command Methods:
 
    public void publishFootstepList(FootstepDataListMessage footstepList)
    {
@@ -244,14 +230,38 @@ public class BehaviorHelper
 
    // Robot Action Callback and Polling Methods:
 
-   public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
+   public FullHumanoidRobotModel pollFullRobotModel()
    {
-      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER, consumer);
+      return remoteSyncedRobotModel.pollFullRobotModel();
+   }
+
+   public HumanoidRobotState pollHumanoidRobotState()
+   {
+      return remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+   }
+
+   public FramePose3DReadOnly quickPollPoseReadOnly(Function<HumanoidReferenceFrames, ReferenceFrame> frameSelector)
+   {
+      return remoteSyncedHumanoidRobotState.quickPollPoseReadOnly(frameSelector);
+   }
+
+   public ROS2Callback createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
+   {
+      ROS2Callback<FootstepStatusMessage> ros2Callback
+            = new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER, consumer);
+      ros2Callbacks.add(ros2Callback);
+      return ros2Callback;
    }
 
    public HighLevelControllerName getLatestControllerState()
    {
       return remoteRobotControllerInterface.latestControllerState();
+   }
+
+   public boolean isRobotWalking()
+   {
+      HighLevelControllerName controllerState = getLatestControllerState();
+      return (controllerState == HighLevelControllerName.WALKING);
    }
 
    // RobotEnvironmentAwareness Methods:
@@ -293,34 +303,58 @@ public class BehaviorHelper
       remoteFootstepPlannerInterface.abortPlanning();
    }
 
-   // General Helper Methods:
+   // UI Communication Methods:
 
-   public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic, boolean initialValue, boolean activationValue)
+   public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
    {
-      return new ActivationReference<>(messager.createInput(topic, initialValue), activationValue);
+      return new ActivationReference<>(messager.createInput(topic, false), true);
+   }
+
+   public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
+   {
+      MessagerCallback<T> messagerCallback = new MessagerCallback<>(listener);
+      messagerCallbacks.add(messagerCallback);
+      messager.registerTopicListener(topic, messagerCallback);
    }
 
    // Thread and Schedule Methods:
 
-   public void startScheduledThread(String simpleName, Runnable runnable, long period, TimeUnit timeUnit)
+   public PausablePeriodicThread createPausablePeriodicThread(Class<?> clazz, double period, Runnable runnable)
    {
-      threadScheduler = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      threadScheduler.schedule(runnable, period, timeUnit);
+      return createPausablePeriodicThread(clazz.getSimpleName(), period, runnable);
    }
 
-   public void shutdownScheduledThread()
+   public PausablePeriodicThread createPausablePeriodicThread(String name, double period, Runnable runnable)
    {
-      if (threadScheduler != null)
+      return new PausablePeriodicThread(runnable, period, name);
+   }
+
+   // Behavior Helper Stuff:
+
+   public void setCommunicationCallbacksEnabled(boolean enabled)
+   {
+      for (ROS2Callback ros2Callback : ros2Callbacks)
       {
-         threadScheduler.shutdown();
+         ros2Callback.setEnabled(enabled);
+      }
+      for (MessagerCallback messagerCallback : messagerCallbacks)
+      {
+         messagerCallback.setEnabled(enabled);
       }
    }
 
-   public boolean isRobotWalking()
+   public Messager getMessager()
    {
-      HighLevelControllerName controllerState = getLatestControllerState();
-      return (controllerState == HighLevelControllerName.WALKING);
+      return messager;
    }
 
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
 
+   public Ros2Node getRos2Node()
+   {
+      return ros2Node;
+   }
 }
