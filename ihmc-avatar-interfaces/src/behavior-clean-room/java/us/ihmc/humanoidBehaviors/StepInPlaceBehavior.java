@@ -55,7 +55,7 @@ public class StepInPlaceBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      LogTools.info("Step in place behavior selected = {}", enabled);
    }
 
    private void doOnAbort(boolean abort)
