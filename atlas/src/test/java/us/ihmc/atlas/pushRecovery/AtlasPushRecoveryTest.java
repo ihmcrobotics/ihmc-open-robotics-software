@@ -1,5 +1,6 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -17,6 +18,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
@@ -24,6 +26,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testControllerFailureKicksIn();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -31,6 +34,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testLongBackwardPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -38,6 +42,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -45,6 +50,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -52,6 +58,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
@@ -59,6 +66,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushICPOptimiWhileInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
@@ -66,6 +74,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
@@ -73,6 +82,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileInTransfer();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -80,6 +90,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -87,6 +98,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
@@ -94,6 +106,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
       super.testRecoveringWithSwingSpeedUpWhileInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
