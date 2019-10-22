@@ -348,11 +348,16 @@ public class MessageTools
    public static WeightMatrix3DMessage createWeightMatrix3DMessage(double weight)
    {
       WeightMatrix3DMessage message = new WeightMatrix3DMessage();
-      message.setWeightFrameId(MessageTools.toFrameId(null));
-      message.setXWeight(weight);
-      message.setYWeight(weight);
-      message.setZWeight(weight);
+      packWeightMatrix3DMessage(weight, message);
       return message;
+   }
+
+   public static void packWeightMatrix3DMessage(double weight, WeightMatrix3DMessage messageToPack)
+   {
+      messageToPack.setWeightFrameId(MessageTools.toFrameId(null));
+      messageToPack.setXWeight(weight);
+      messageToPack.setYWeight(weight);
+      messageToPack.setZWeight(weight);
    }
 
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJointBasics[] joints)

@@ -206,17 +206,21 @@ public class KinematicsToolboxOutputConverter
 
    public void computeChestTrajectoryMessage()
    {
+      computeChestTrajectoryMessage(referenceFrames.getPelvisZUpFrame());
+   }
+
+   public void computeChestTrajectoryMessage(ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
       MovingReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       desiredOrientation.setToZero(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
       angularVelocity(chestFrame, worldFrame, enableVelocity, desiredAngularVelocity);
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
 
       ChestTrajectoryMessage chestTrajectoryMessage = output.getChestTrajectoryMessage();
       SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
-      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(pelvisZUpFrame.hashCode());
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
       so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
 
       Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
