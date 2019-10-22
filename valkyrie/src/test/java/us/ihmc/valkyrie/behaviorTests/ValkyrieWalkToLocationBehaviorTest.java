@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.behaviorTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.behaviorTests.DRCWalkToLocationBehaviorTest;
@@ -10,6 +11,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@Tag("humanoid-behaviors-slow")
 public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);

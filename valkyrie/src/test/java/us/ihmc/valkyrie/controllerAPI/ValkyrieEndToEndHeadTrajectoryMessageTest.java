@@ -14,7 +14,7 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
-   @Tag("controller-api-3")
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException

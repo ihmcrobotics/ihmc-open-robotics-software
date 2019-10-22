@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.pushRecovery;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryMultiStepTest;
@@ -11,6 +12,7 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@Tag("humanoid-push-recovery")
 @Disabled
 public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
 {

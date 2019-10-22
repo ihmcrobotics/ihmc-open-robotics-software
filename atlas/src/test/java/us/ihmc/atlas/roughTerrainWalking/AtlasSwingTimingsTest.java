@@ -1,6 +1,7 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -11,6 +12,7 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarSwingTimingsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-rough-terrain")
 @Disabled
 public class AtlasSwingTimingsTest extends AvatarSwingTimingsTest
 {

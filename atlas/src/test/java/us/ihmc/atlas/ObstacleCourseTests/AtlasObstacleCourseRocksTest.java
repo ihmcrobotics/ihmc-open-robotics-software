@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -25,11 +26,11 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-obstacle")
    @Override
    @Test
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoRocks();
    }
-
 }

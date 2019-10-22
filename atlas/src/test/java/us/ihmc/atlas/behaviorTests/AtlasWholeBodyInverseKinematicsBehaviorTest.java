@@ -2,6 +2,7 @@ package us.ihmc.atlas.behaviorTests;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -27,6 +28,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       return robotModel.getSimpleRobotName();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
@@ -34,6 +36,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForAHandPose();
    }
 
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
@@ -41,6 +44,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForBothHandPoses();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
@@ -48,6 +52,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForChestAngularControl();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
@@ -55,6 +60,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForHandAngularLinearControl();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
@@ -62,6 +68,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForHandRollConstraint();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
@@ -69,6 +76,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
       super.testSolvingForHandSelectionMatrix();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
