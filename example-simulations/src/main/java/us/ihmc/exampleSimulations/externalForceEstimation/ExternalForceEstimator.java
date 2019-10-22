@@ -301,7 +301,7 @@ import java.util.stream.IntStream;
       }
 
       solveUsingFullJacobian();
-//      solveUsingPointJacobian();
+      //      solveUsingPointJacobian();
 
       yoEstimatedExternalWrench.set(estimatedExternalWrench);
 
@@ -340,7 +340,7 @@ import java.util.stream.IntStream;
       pointJacobian.set(geometricJacobian, externalForcePoint);
       pointJacobian.compute();
       CommonOps.transpose(pointJacobian.getJacobianMatrix(), pointJacobianTranspose);
-
+      
       forceEstimateSolver.setA(pointJacobianTranspose);
       forceEstimateSolver.solve(observedExternalTorqueAlongEndEffectorPath, estimatedExternalForceMatrix);
       CommonOps.fill(estimatedExternalWrenchMatrix, 0.0);
