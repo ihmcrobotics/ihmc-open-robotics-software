@@ -139,7 +139,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotKinematics
 
          RigidBodyBasics torso = fullRobotModel.getChest();
          Capsule3D torsoShapeTop = new Capsule3D(0.15, 0.15);
-         torsoShapeTop.getPosition().set(0.09, 0.0, -0.02);
+         torsoShapeTop.getPosition().set(0.11, 0.0, -0.0);
          torsoShapeTop.getAxis().set(Axis.Y);
          collidables.add(new KinematicsCollidable(torso, collisionMask, collisionGroup, torsoShapeTop, torso.getBodyFixedFrame(), minimumSafeDistance));
       }
