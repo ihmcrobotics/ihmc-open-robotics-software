@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxInterface;
 import us.ihmc.jOctoMap.iterators.OcTreeIterable;
@@ -35,6 +36,8 @@ public class PlanarRegionSegmentationCalculator
    private PlanarRegionSegmentationParameters parameters;
    private SurfaceNormalFilterParameters surfaceNormalFilterParameters;
    private OcTreeBoundingBoxInterface boundingBox;
+
+   private Vector3D estimatedSensorPosition = new Vector3D();
 
    public void compute(NormalOcTreeNode root)
    {
@@ -242,7 +245,7 @@ public class PlanarRegionSegmentationCalculator
    public void growPlanarRegion(NormalOcTreeNode root, PlanarRegionSegmentationNodeData ocTreeNodePlanarRegion, OcTreeBoundingBoxInterface boundingBox,
                                 PlanarRegionSegmentationParameters parameters)
    {
-      Vector3D cameraPosition = new Vector3D();
+      //Vector3D cameraPosition = new Vector3D();
       double searchRadius = parameters.getSearchRadius();
 
       Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>();
@@ -252,12 +255,14 @@ public class PlanarRegionSegmentationCalculator
                                                                                                         boundingBox, parameters);
       if (surfaceNormalFilterParameters.isUseSurfaceNormalFilter())
       {
-         double lowerBound = Math.cos(surfaceNormalFilterParameters.getSurfaceNormalLowerBound());
-         double upperBound = Math.cos(surfaceNormalFilterParameters.getSurfaceNormalUpperBound());
+         double surfaceNormalLowerBound = surfaceNormalFilterParameters.getSurfaceNormalLowerBound();
+         double surfaceNormalUpperBound = surfaceNormalFilterParameters.getSurfaceNormalUpperBound();
+         double lowerBound = Math.cos(surfaceNormalLowerBound) * Math.signum(surfaceNormalLowerBound);
+         double upperBound = Math.cos(surfaceNormalUpperBound) * Math.signum(surfaceNormalUpperBound);
 
          ocTreeNodePlanarRegion.nodeStream() // TODO This should be in parallel, but the previous lambda makes threads share data which is no good.
                                .filter(node -> isNodeInBoundingBox(node, boundingBox)
-                                     && isNodeSurfaceNormalInBoundary(node, cameraPosition, lowerBound, upperBound))
+                                     && isNodeSurfaceNormalInBoundary(node, estimatedSensorPosition, lowerBound, upperBound))
                                .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       }
       else
@@ -353,8 +358,8 @@ public class PlanarRegionSegmentationCalculator
 
       double dotValue = cameraToNode.dot(surfaceNormal);
 
-      boolean isOutOfSight = lowerBound <= dotValue && dotValue < upperBound;
-      return !isOutOfSight;
+      boolean isVisible = lowerBound > dotValue || dotValue > upperBound;
+      return isVisible;
    }
 
    public void setParameters(PlanarRegionSegmentationParameters parameters)
@@ -370,5 +375,10 @@ public class PlanarRegionSegmentationCalculator
    public void setBoundingBox(OcTreeBoundingBoxInterface boundingBox)
    {
       this.boundingBox = boundingBox;
+   }
+
+   public void setSensorPosition(Pose3D estimatedSensorPose)
+   {
+      estimatedSensorPosition.set(estimatedSensorPose.getPosition());
    }
 }

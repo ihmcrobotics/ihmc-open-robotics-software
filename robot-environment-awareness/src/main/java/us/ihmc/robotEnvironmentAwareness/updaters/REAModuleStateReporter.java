@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -21,6 +22,7 @@ public class REAModuleStateReporter
    private final AtomicReference<Boolean> arePlanarRegionsRequested;
    private final AtomicReference<Boolean> isPlanarRegionSegmentationRequested;
    private final AtomicReference<Boolean> arePlanarRegionsIntersectionsRequested;
+   private final AtomicReference<Boolean> showNavigation;
 
    public REAModuleStateReporter(Messager reaMessager)
    {
@@ -30,6 +32,7 @@ public class REAModuleStateReporter
       arePlanarRegionsRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegions, false);
       isPlanarRegionSegmentationRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegionSegmentation, false);
       arePlanarRegionsIntersectionsRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegionsIntersections, false);
+      showNavigation = reaMessager.createInput(REAModuleAPI.UINavigationShow, false);
    }
 
    public void reportOcTreeState(NormalOcTree ocTree)
@@ -38,6 +41,12 @@ public class REAModuleStateReporter
          reaMessager.submitMessage(REAModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       if (isOcTreeBoundingBoxRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(ocTree.getBoundingBox()));
+   }
+
+   public void reportSensorPose(Pose3D estimatedSensorPose)
+   {
+      if (showNavigation.get())
+         reaMessager.submitMessage(REAModuleAPI.EstimatedSensorPose, estimatedSensorPose);
    }
 
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
