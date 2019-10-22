@@ -118,13 +118,13 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
       Quaternion orientation = message.getSensorOrientation();
       Point3D position = message.getSensorPosition();
       latestSensorPoseMapToMessages.get(SensorPoseSourceType.STEREO).set(JavaFXTools.createAffineFromQuaternionAndTuple(orientation, position));
-      addHistory(1.0, position);
+      addHistory(0.0, position);
    }
 
    private void addHistory(double confidence, Point3D newHistory)
    {
       sensorOriginHistory.add(new Point3D(newHistory));
-      confidenceFactorHistory.add(1.0);
+      confidenceFactorHistory.add(confidence);
 
       meshBuilder.clear();
       Point3D32 point = new Point3D32();
