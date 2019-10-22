@@ -9,10 +9,7 @@ import java.util.function.Function;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
-import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.*;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -63,8 +60,10 @@ public class BehaviorHelper
 {
    private final Messager messager;
    private final DRCRobotModel robotModel;
-   private final DRCRobotJointMap drcRobotJointMap;
    private final Ros2Node ros2Node;
+
+   private final String robotName;
+   private final DRCRobotJointMap jointMap;
 
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
@@ -87,7 +86,8 @@ public class BehaviorHelper
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
 
-      drcRobotJointMap = robotModel.getJointMap();
+      robotName = robotModel.getSimpleRobotName();
+      jointMap = robotModel.getJointMap();
 
       // TODO: Remove all this construction until needed
 
@@ -97,22 +97,14 @@ public class BehaviorHelper
       remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
       remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
-      MessageTopicNameGenerator robotSubscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
-      MessageTopicNameGenerator robotPublisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName());
-                     
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                                                            robotSubscriberTopicNameGenerator);
-
-      stampedPosePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                       StampedPosePacket.class,
-                                                       robotSubscriberTopicNameGenerator);
-
+      ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
+      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, robotName, controllerId);
+      stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, robotName, controllerId);
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
    }
-
+   
    // Robot Command Methods:
 
    public void publishFootstepList(FootstepDataListMessage footstepList)
@@ -171,7 +163,7 @@ public class BehaviorHelper
 
    private final ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide side, double trajectoryTime, double[] jointAngles)
    {
-      int numberOfArmJoints = drcRobotJointMap.getArmJointNames().length;
+      int numberOfArmJoints = jointMap.getArmJointNames().length;
       double[] jointAnglesAdjusted = Arrays.copyOfRange(jointAngles, 0, numberOfArmJoints);
       return HumanoidMessageTools.createArmTrajectoryMessage(side, trajectoryTime, jointAnglesAdjusted);
    }
