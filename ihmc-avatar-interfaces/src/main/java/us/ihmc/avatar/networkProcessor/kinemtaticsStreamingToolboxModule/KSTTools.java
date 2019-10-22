@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -14,11 +13,13 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -42,6 +43,7 @@ public class KSTTools
    private final YoVariableRegistry registry;
 
    private final FullHumanoidRobotModel currentFullRobotModel;
+   private final FloatingJointBasics currentRootJoint;
    private final OneDoFJointBasics[] currentOneDoFJoint;
 
    private final HumanoidKinematicsToolboxController ikController;
@@ -49,8 +51,12 @@ public class KSTTools
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private final YoDouble streamIntegrationDuration;
 
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
-   private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
+   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
+   private boolean hasRobotDataConfiguration = false;
+   private final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+   private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
+   private boolean hasCapturabilityBasedStatus = false;
+   private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
    private final double walkingControllerPeriod;
    private final double toolboxControllerPeriod;
 
@@ -68,6 +74,7 @@ public class KSTTools
       this.registry = registry;
 
       currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
 
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(), KinematicsToolboxModule.supportedCommands());
@@ -90,9 +97,29 @@ public class KSTTools
 
    public void update()
    {
-      if (getRobotConfigurationData() != null)
+      RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+      if (newRobotConfigurationData != null)
       {
-         updateFullRobotModel(getRobotConfigurationData(), currentFullRobotModel);
+         robotConfigurationDataInternal.set(newRobotConfigurationData);
+         hasRobotDataConfiguration = true;
+      }
+
+      CapturabilityBasedStatus newCapturabilityBasedStatus = concurrentCapturabilityBasedStatusCopier.getCopyForReading();
+      if (newCapturabilityBasedStatus != null)
+      {
+         capturabilityBasedStatusInternal.set(newCapturabilityBasedStatus);
+         hasCapturabilityBasedStatus = true;
+      }
+
+      if (hasRobotDataConfiguration)
+      {
+         for (int jointIndex = 0; jointIndex < currentOneDoFJoint.length; jointIndex++)
+         {
+            currentOneDoFJoint[jointIndex].setQ(robotConfigurationDataInternal.getJointAngles().get(jointIndex));
+         }
+
+         Pose3DBasics rootJointPose = currentRootJoint.getJointPose();
+         rootJointPose.set(robotConfigurationDataInternal.getRootTranslation(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
    }
@@ -144,13 +171,15 @@ public class KSTTools
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-      latestRobotConfigurationDataReference.set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
+      concurrentRobotConfigurationDataCopier.commit();
       ikController.updateRobotConfigurationData(newConfigurationData);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
-      latestCapturabilityBasedStatusReference.set(newStatus);
+      concurrentCapturabilityBasedStatusCopier.getCopyForWriting().set(newStatus);
+      concurrentCapturabilityBasedStatusCopier.commit();
       ikController.updateCapturabilityBasedStatus(newStatus);
    }
 
@@ -206,12 +235,12 @@ public class KSTTools
 
    public RobotConfigurationData getRobotConfigurationData()
    {
-      return latestRobotConfigurationDataReference.get();
+      return hasRobotDataConfiguration ? robotConfigurationDataInternal : null;
    }
 
    public CapturabilityBasedStatus getCapturabilityBasedStatus()
    {
-      return latestCapturabilityBasedStatusReference.get();
+      return hasCapturabilityBasedStatus ? capturabilityBasedStatusInternal : null;
    }
 
    public double getWalkingControllerPeriod()

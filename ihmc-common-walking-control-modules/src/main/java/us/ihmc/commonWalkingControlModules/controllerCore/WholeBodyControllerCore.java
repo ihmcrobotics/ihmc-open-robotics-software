@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -152,7 +152,7 @@ public class WholeBodyControllerCore
       jointDesiredOutputList.clear();
    }
 
-   public void submitControllerCoreCommand(ControllerCoreCommand controllerCoreCommand)
+   public void submitControllerCoreCommand(ControllerCoreCommandInterface controllerCoreCommand)
    {
       controllerCoreSubmitTimer.startMeasurement();
       reset();
