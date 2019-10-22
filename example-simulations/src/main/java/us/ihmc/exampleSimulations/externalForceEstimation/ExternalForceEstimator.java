@@ -372,6 +372,11 @@ import java.util.stream.IntStream;
       return nextIndex >= size ? 0 : nextIndex;
    }
 
+   public void requestInitialize()
+   {
+      this.requestInitialize.set(true);
+   }
+
    public YoGraphicVector getEstimatedForceVectorGraphic()
    {
       return estimatedForceVectorGraphic;
