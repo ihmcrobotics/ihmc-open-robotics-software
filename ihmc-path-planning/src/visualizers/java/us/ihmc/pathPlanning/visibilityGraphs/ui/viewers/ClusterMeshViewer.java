@@ -258,6 +258,11 @@ public class ClusterMeshViewer extends AnimationTimer
 
       preferredNavigableExtrusionsMeshBuilder
             .addMultiLine(cluster.getPreferredNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
+
+      for (Point3DReadOnly rawPoint : cluster.getPreferredNavigableExtrusionsInWorld())
+      {
+         preferredNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
+      }
    }
  
    private void buildNavigableExtrusion(JavaFXMeshBuilder navigableExtrusionsMeshBuilder, Cluster cluster)
@@ -266,6 +271,11 @@ public class ClusterMeshViewer extends AnimationTimer
       
       navigableExtrusionsMeshBuilder
             .addMultiLine(cluster.getNavigableExtrusionsInWorld(), VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
+
+      for (Point3DReadOnly rawPoint : cluster.getNavigableExtrusionsInWorld())
+      {
+         navigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
+      }
    }
 
    private void buildPreferredNonNavigableExtrusion(JavaFXMeshBuilder preferredNonNavigableExtrusionsMeshBuilder, Cluster cluster)
@@ -274,6 +284,11 @@ public class ClusterMeshViewer extends AnimationTimer
 
       preferredNonNavigableExtrusionsMeshBuilder
             .addMultiLine(cluster.getPreferredNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
+
+      for (Point3DReadOnly rawPoint : cluster.getPreferredNonNavigableExtrusionsInWorld())
+      {
+         preferredNonNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
+      }
    }
    
    private void buildNonNavigableExtrusion(JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder, Cluster cluster)
@@ -282,6 +297,11 @@ public class ClusterMeshViewer extends AnimationTimer
 
       nonNavigableExtrusionsMeshBuilder
             .addMultiLine(cluster.getNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
+
+      for (Point3DReadOnly rawPoint : cluster.getNonNavigableExtrusionsInWorld())
+      {
+         nonNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
+      }
    }
 
    private JavaFXMeshBuilder getOrCreate(Map<Integer, JavaFXMeshBuilder> meshBuilders, int regionId)
