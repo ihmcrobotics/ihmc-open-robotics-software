@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -39,7 +40,7 @@ public class UpDownFlatAreaFinder
    public static final int NUMBER_OF_VERTICES = 6;
    public static final double MINIMUM_NO_HEIGHT_CHANGE_DISTANCE = 0.5;
 
-   private final Messager messager;
+   private final ManagedMessager messager;
    private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final UpDownResult upDownResultForVisualization = new UpDownResult(NUMBER_OF_VERTICES);
@@ -68,7 +69,7 @@ public class UpDownFlatAreaFinder
       ABORTED
    }
 
-   public UpDownFlatAreaFinder(Messager messager)
+   public UpDownFlatAreaFinder(ManagedMessager messager)
    {
       this.messager = messager;
    }
@@ -182,7 +183,7 @@ public class UpDownFlatAreaFinder
 
          LogTools.trace("Polygon center point {}", polygonPoints.getCenterPoint());
 
-         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
+         messager.publish(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
          ThreadTools.sleepSeconds(0.02);
 
       }

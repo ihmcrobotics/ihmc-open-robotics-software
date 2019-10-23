@@ -18,6 +18,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -35,10 +36,10 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 public class FancyPosesBehavior implements BehaviorInterface
 {
    private final BehaviorHelper behaviorHelper;
-   private final AtomicReference<Boolean> enable;
 
    private final ActivationReference<Boolean> stepping;
    private final Notification goToSingleSupportNotification = new Notification();
+   private final Notification goToDoubleSupportNotification = new Notification();
    private final Notification goToRunningManNotification = new Notification();
    private final Notification goToKarateKid1Notification = new Notification();
    private final Notification goToKarateKid2Notification = new Notification();
@@ -51,7 +52,6 @@ public class FancyPosesBehavior implements BehaviorInterface
    private final RobotSide supportSide = RobotSide.RIGHT;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double trajectoryTime = 3.0;
-   private final Messager messager;
    private final PausablePeriodicThread mainThread;
 
    public FancyPosesBehavior(BehaviorHelper helper)
@@ -59,22 +59,20 @@ public class FancyPosesBehavior implements BehaviorInterface
       LogTools.debug("Initializing FancyPosesBehavior");
 
       this.behaviorHelper = helper;
-      messager = helper.getMessager();
 
       behaviorHelper.createFootstepStatusCallback(this::acceptFootstepStatus);
       stepping = behaviorHelper.createBooleanActivationReference(API.Stepping);
 
-      enable = messager.createInput(API.Enable, false);
+      helper.createUICallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
+      helper.createUICallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
+      helper.createUICallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
+      helper.createUICallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
+      helper.createUICallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
+      helper.createUICallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
+      helper.createUICallback(API.GoToPresent, object -> goToPresentNotification.set());
+      helper.createUICallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
 
-      messager.registerTopicListener(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
-      messager.registerTopicListener(API.GoToRunningMan, object -> goToRunningManNotification.set());
-      messager.registerTopicListener(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
-      messager.registerTopicListener(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
-      messager.registerTopicListener(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
-      messager.registerTopicListener(API.GoToPresent, object -> goToPresentNotification.set());
-      messager.registerTopicListener(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
-
-      messager.registerTopicListener(API.Abort, this::doOnAbort);
+      helper.createUICallback(API.Abort, this::doOnAbort);
 
       mainThread = behaviorHelper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }
@@ -85,6 +83,7 @@ public class FancyPosesBehavior implements BehaviorInterface
       LogTools.info("Fancy poses behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
+      behaviorHelper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void doOnAbort(boolean abort)
@@ -98,9 +97,6 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void acceptFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
-      if (!enable.get())
-         return;
-
       LogTools.info("acceptFootstepStatus: " + footstepStatusMessage);
 
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
@@ -117,6 +113,29 @@ public class FancyPosesBehavior implements BehaviorInterface
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
       anklePose.prependTranslation(0.0, supportSide.negateIfLeftSide(0.25), 0.15);
+      anklePose.changeFrame(worldFrame);
+      Point3D position = new Point3D();
+      Quaternion orientation = new Quaternion();
+      anklePose.get(position, orientation);
+
+      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
+      behaviorHelper.requestChestGoHome(trajectoryTime);
+      behaviorHelper.requestPelvisGoHome(trajectoryTime);
+
+      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, leftHandWiderHomeJointAngles);
+      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, rightHandWiderHomeJointAngles);
+
+      behaviorHelper.requestFootLoadBearing(supportSide, LoadBearingRequest.LOAD);
+      behaviorHelper.requestFootLoadBearing(supportSide.getOppositeSide(), LoadBearingRequest.LOAD);
+   }
+
+   private void goToDoubleSupport()
+   {
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+
+      ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
+      anklePose.prependTranslation(0.0, supportSide.negateIfLeftSide(0.25), 0.0);
       anklePose.changeFrame(worldFrame);
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
@@ -277,11 +296,6 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void doBehavior()
    {
-      if (!enable.get())
-      {
-         return;
-      }
-
       if (stepping.poll())
       {
          if (stepping.hasChanged())
@@ -307,6 +321,12 @@ public class FancyPosesBehavior implements BehaviorInterface
       {
          LogTools.info("Going to Single Support!");
          goToSingleSupport();
+      }
+
+      if (goToDoubleSupportNotification.poll())
+      {
+         LogTools.info("Going to Double Support!");
+         goToDoubleSupport();
       }
 
       if (goToRunningManNotification.poll())
@@ -382,6 +402,7 @@ public class FancyPosesBehavior implements BehaviorInterface
       public static final Topic<Boolean> Abort = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Abort"));
       public static final Topic<Boolean> Enable = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("Enable"));
       public static final Topic<Boolean> GoToSingleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToSingleSupport"));
+      public static final Topic<Boolean> GoToDoubleSupport = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToDoubleSupport"));
       public static final Topic<Boolean> GoToRunningMan = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToRunningMan"));
       public static final Topic<Boolean> GoToKarateKid1 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid1"));
       public static final Topic<Boolean> GoToKarateKid2 = FancyPosesCategory.topic(apiFactory.createTypedTopicTheme("GoToKarateKid2"));
