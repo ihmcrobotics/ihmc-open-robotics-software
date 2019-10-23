@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
@@ -44,6 +45,9 @@ import us.ihmc.tools.thread.TypedNotification;
  */
 public class PatrolBehavior implements BehaviorInterface
 {
+
+   private final RemoteHumanoidRobotInterface robot;
+
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
@@ -92,6 +96,7 @@ public class PatrolBehavior implements BehaviorInterface
    public PatrolBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      robot = helper.createRobotInterface();
 
       LogTools.debug("Initializing patrol behavior");
 
@@ -173,7 +178,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onStopStateEntry()
    {
-      helper.pauseWalking();
+      robot.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -195,7 +200,7 @@ public class PatrolBehavior implements BehaviorInterface
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(helper.pollHumanoidRobotState());
+         upDownExplorer.onNavigateEntry(robot.pollHumanoidRobotState());
       }
    }
 
@@ -234,7 +239,7 @@ public class PatrolBehavior implements BehaviorInterface
 
       helper.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
       {
@@ -323,9 +328,9 @@ public class PatrolBehavior implements BehaviorInterface
       FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = helper.pollHumanoidRobotState();
+      HumanoidReferenceFrames humanoidReferenceFrames = robot.pollHumanoidRobotState();
 
-      walkingCompleted = helper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
+      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
    private void doWalkStateAction(double timeInState)
@@ -350,7 +355,7 @@ public class PatrolBehavior implements BehaviorInterface
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            FramePose3DReadOnly midFeetZUpPose = helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+            FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
             PlanTravelDistance planType = RemoteFootstepPlannerInterface.decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
 
@@ -385,7 +390,7 @@ public class PatrolBehavior implements BehaviorInterface
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(helper.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      upDownExplorer.setMidFeetZUpPose(robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
@@ -412,8 +417,8 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void pollInterrupts()
    {
-      HighLevelControllerName controllerState = helper.getLatestControllerState();
-      boolean isWalking = helper.isRobotWalking();
+      HighLevelControllerName controllerState = robot.getLatestControllerState();
+      boolean isWalking = robot.isRobotWalking();
 
       if (!stateMachine.getCurrentStateKey().equals(STOP) && !isWalking) // STOP if robot falls
       {

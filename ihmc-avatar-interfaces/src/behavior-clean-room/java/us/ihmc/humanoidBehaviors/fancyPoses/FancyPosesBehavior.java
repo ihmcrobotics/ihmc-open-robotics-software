@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.fancyPoses;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -16,13 +15,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -35,7 +34,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class FancyPosesBehavior implements BehaviorInterface
 {
-   private final BehaviorHelper behaviorHelper;
+   private final BehaviorHelper helper;
 
    private final ActivationReference<Boolean> stepping;
    private final Notification goToSingleSupportNotification = new Notification();
@@ -53,15 +52,17 @@ public class FancyPosesBehavior implements BehaviorInterface
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double trajectoryTime = 3.0;
    private final PausablePeriodicThread mainThread;
+   private final RemoteHumanoidRobotInterface robot;
 
    public FancyPosesBehavior(BehaviorHelper helper)
    {
       LogTools.debug("Initializing FancyPosesBehavior");
 
-      this.behaviorHelper = helper;
+      this.helper = helper;
+      robot = helper.createRobotInterface();
 
-      behaviorHelper.createFootstepStatusCallback(this::acceptFootstepStatus);
-      stepping = behaviorHelper.createBooleanActivationReference(API.Stepping);
+      robot.createFootstepStatusCallback(this::acceptFootstepStatus);
+      stepping = helper.createBooleanActivationReference(API.Stepping);
 
       helper.createUICallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
       helper.createUICallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
@@ -74,7 +75,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       helper.createUICallback(API.Abort, this::doOnAbort);
 
-      mainThread = behaviorHelper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
+      mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }
 
    @Override
@@ -83,7 +84,7 @@ public class FancyPosesBehavior implements BehaviorInterface
       LogTools.info("Fancy poses behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      behaviorHelper.setCommunicationCallbacksEnabled(enabled);
+      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void doOnAbort(boolean abort)
@@ -108,7 +109,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void goToSingleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
@@ -118,20 +119,20 @@ public class FancyPosesBehavior implements BehaviorInterface
       Quaternion orientation = new Quaternion();
       anklePose.get(position, orientation);
 
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
-      behaviorHelper.requestChestGoHome(trajectoryTime);
-      behaviorHelper.requestPelvisGoHome(trajectoryTime);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
+      robot.requestChestGoHome(trajectoryTime);
+      robot.requestPelvisGoHome(trajectoryTime);
 
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, leftHandWiderHomeJointAngles);
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, rightHandWiderHomeJointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, leftHandWiderHomeJointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, rightHandWiderHomeJointAngles);
 
-      behaviorHelper.requestFootLoadBearing(supportSide, LoadBearingRequest.LOAD);
-      behaviorHelper.requestFootLoadBearing(supportSide.getOppositeSide(), LoadBearingRequest.LOAD);
+      robot.requestFootLoadBearing(supportSide, LoadBearingRequest.LOAD);
+      robot.requestFootLoadBearing(supportSide.getOppositeSide(), LoadBearingRequest.LOAD);
    }
 
    private void goToDoubleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
@@ -141,115 +142,115 @@ public class FancyPosesBehavior implements BehaviorInterface
       Quaternion orientation = new Quaternion();
       anklePose.get(position, orientation);
 
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
-      behaviorHelper.requestChestGoHome(trajectoryTime);
-      behaviorHelper.requestPelvisGoHome(trajectoryTime);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, anklePose);
+      robot.requestChestGoHome(trajectoryTime);
+      robot.requestPelvisGoHome(trajectoryTime);
 
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, leftHandWiderHomeJointAngles);
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, rightHandWiderHomeJointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, leftHandWiderHomeJointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, rightHandWiderHomeJointAngles);
    }
 
    public void goToRunningManPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.setPosition(-0.40, supportSide.negateIfLeftSide(0.25), 0.40);
       footPose.setOrientationYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(20.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(10.0), 0.0);
       pelvisOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
+      robot.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
 
       double[] jointAngles = new double[] {-1.2584547081002637, 0.016489729127989374, 0.0, 1.5707963267948966, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {-0.77, 0.0, 3.0, -1.57, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    public void goToKarateKid1Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.setPosition(0.10, supportSide.negateIfLeftSide(0.25), 0.20);
       footPose.changeFrame(worldFrame);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
-      behaviorHelper.requestChestGoHome(trajectoryTime);
-      behaviorHelper.requestPelvisGoHome(trajectoryTime);
+      robot.requestChestGoHome(trajectoryTime);
+      robot.requestPelvisGoHome(trajectoryTime);
 
       double[] jointAngles = new double[] {0.0, 0.0, 2.35, 0.76, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {0.0, 0.0, 2.35, -0.76, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    public void goToKarateKid2Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.setPosition(0.6, supportSide.negateIfLeftSide(0.25), 0.25);
       footPose.setOrientationYawPitchRoll(0.0, -Math.PI / 4.0, 0.0);
       footPose.changeFrame(worldFrame);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(-5.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(-15), 0.0);
       pelvisOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
+      robot.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
 
       double[] jointAngles = new double[] {-0.63, -0.815, 1.78, 1.40, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {0.63, 0.815, 1.78, -1.40, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    public void goToKarateKid3Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.setPosition(0.00, supportSide.negateIfLeftSide(0.65), 0.2);
       footPose.setOrientationYawPitchRoll(0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(40.0)));
       footPose.changeFrame(worldFrame);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(30.0)));
       chestOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(20.0)));
       pelvisOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
+      robot.requestPelvisOrientationTrajectory(trajectoryTime, pelvisOrientation);
 
       double[] jointAngles = new double[] {-0.02, -0.017, 1.93, 0.10, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {1.28, 0.0, 1.56, -1.57, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    public void goToPresentPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
+      HumanoidReferenceFrames referenceFrames = robot.pollHumanoidRobotState();
 
       ReferenceFrame soleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       double trajectoryTime = 5.0;
@@ -261,37 +262,37 @@ public class FancyPosesBehavior implements BehaviorInterface
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
       footPose.get(position, orientation);
-      behaviorHelper.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
+      robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, position, orientation);
 
       FrameQuaternion chestOrientation = new FrameQuaternion(soleFrame, 0.039, 0.147, 0.398, 0.905);
       chestOrientation.changeFrame(worldFrame);
-      behaviorHelper.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robot.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(soleFrame, 0.014, 0.156, 0.175, 0.972);
       FramePoint3D pelvisPosition = new FramePoint3D(soleFrame, -0.158, -0.048, 0.739);
       pelvisOrientation.changeFrame(worldFrame);
       pelvisPosition.changeFrame(worldFrame);
-      behaviorHelper.requestPelvisTrajectory(trajectoryTime, pelvisPosition, pelvisOrientation);
+      robot.requestPelvisTrajectory(trajectoryTime, pelvisPosition, pelvisOrientation);
 
       double[] jointAngles = new double[] {0.765356719493866, 0.024195531383156776, 2.9822821617126465, 1.6808037757873535, -0.3247416913509369,
             0.67205411195755, 0.15090779960155487};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {0.10722935199737549, -0.23587453365325928, 2.419130802154541, -0.9118338823318481, -2.2621233463287354, -0.5176281929016113,
             0.005108347628265619};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    public void goToShutdownPose()
    {
-      behaviorHelper.requestChestGoHome(trajectoryTime);
-      behaviorHelper.requestPelvisGoHome(trajectoryTime);
+      robot.requestChestGoHome(trajectoryTime);
+      robot.requestPelvisGoHome(trajectoryTime);
 
       double[] jointAngles = new double[] {0.0, -1.4, 0.0, 0.0, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.LEFT, trajectoryTime, jointAngles);
 
       jointAngles = new double[] {0.0, 1.4, 0.0, 0.0, 0.0, 0.0, 0.0};
-      behaviorHelper.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
+      robot.requestArmTrajectory(RobotSide.RIGHT, trajectoryTime, jointAngles);
    }
 
    private void doBehavior()
@@ -307,9 +308,9 @@ public class FancyPosesBehavior implements BehaviorInterface
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = behaviorHelper.pollFullRobotModel();
+            FullHumanoidRobotModel fullRobotModel = robot.pollFullRobotModel();
             FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
-            behaviorHelper.requestWalk(footstepList);
+            robot.requestWalk(footstepList);
          }
       }
       else if (stepping.hasChanged())
