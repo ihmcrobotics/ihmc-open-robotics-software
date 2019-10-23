@@ -66,7 +66,6 @@ public class BehaviorHelper
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
-   private final RemoteSyncedRobotModel remoteSyncedRobotModel;
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
@@ -92,7 +91,6 @@ public class BehaviorHelper
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
-      remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
       remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
       ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
@@ -239,7 +237,7 @@ public class BehaviorHelper
 
    public FullHumanoidRobotModel pollFullRobotModel()
    {
-      return remoteSyncedRobotModel.pollFullRobotModel();
+      return remoteSyncedHumanoidRobotState.pollFullRobotModel();
    }
 
    public HumanoidRobotState pollHumanoidRobotState()
