@@ -95,7 +95,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-      YoVariableRegistry registry = getRegistry();
+      YoVariableRegistry registry = getYoVariableRegistry();
 
       String prefix = "MicroStrainData";
       imuAngularVelocity = new YoFrameVector3D(prefix, "AngularVelocity", ReferenceFrame.getWorldFrame(), registry);

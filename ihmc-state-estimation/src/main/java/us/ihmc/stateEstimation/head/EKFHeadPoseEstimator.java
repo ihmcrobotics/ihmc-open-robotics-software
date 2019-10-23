@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.head;
 
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.ekf.filter.sensor.Sensor;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -20,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
@@ -46,7 +49,7 @@ import java.util.List;
  * @author Georg Wiedebach
  *
  */
-public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
+public class EKFHeadPoseEstimator implements StateEstimatorController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -68,6 +71,8 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
    private final YoFramePoseUsingYawPitchRoll headPose;
 
    private FullRobotModel fullRobotModel;
+   private RigidBodyTransform rootJointTransform = null;
+   private TObjectDoubleMap<String> jointPositions;
 
    /**
     * Creates a new pose estimator.
@@ -103,7 +108,53 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       headPose = new YoFramePoseUsingYawPitchRoll("EstimatedHeadPose", ReferenceFrame.getWorldFrame(), registry);
    }
 
-   public YoVariableRegistry getRegistry()
+   /**
+    * Initializes the root joint pose and joint positions in the estimator.
+    *  @param rootJointTransform the transform of the floating root joint that is estimated.
+    * @param jointPositions a map from joint names to initial joint positions.
+    */
+   @Override
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   {
+      this.rootJointTransform = rootJointTransform;
+      this.jointPositions = jointPositions;
+   }
+
+   @Override
+   public void doControl()
+   {
+      compute();
+   }
+
+   @Override
+   public void initialize()
+   {
+      if(rootJointTransform != null)
+      {
+         initialize(rootJointTransform, null);
+      }
+   }
+
+   /**
+    * Sets the operating mode of the state estimator. This will tell the estimator whether the robot
+    * should be fixed in world or if the position of the robot should be estimated. If the robot is
+    * hanging in the air and drifting away in normal operating mode this method can be used to fix
+    * the robot and avoid the drift.
+    * <p>
+    * The implementation of this method is estimator specific. However, this method needs to be
+    * thread-safe as this might be called from other threads then the one that is running the estimator.
+    * </p>
+    *
+    * @param operatingMode to be set for the estimator.
+    */
+   @Override
+   public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
+   {
+
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
@@ -113,7 +164,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
     *
     * @param headTransform to be packed.
     */
-   @Override
    public void getHeadTransform(RigidBodyTransform headTransform)
    {
       poseState.getTransform(headTransform);
@@ -127,7 +177,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
     * @param initialHeadTransform the initial guess for the head pose.
     * @param magneticFieldDirection the "north" direction in world frame.
     */
-   @Override
    public void initialize(RigidBodyTransform initialHeadTransform, FrameVector3D magneticFieldDirection)
    {
       headTwist.setToZero(headJoint.getFrameAfterJoint(), headJoint.getFrameBeforeJoint(), headJoint.getFrameAfterJoint());
@@ -189,7 +238,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
     * each tick with the newest measurements before calling this method. After the call to this method the newest head
     * pose estimate can be obtained via {@link #getHeadTransform(RigidBodyTransform)}.
     */
-   @Override
    public void compute()
    {
       long nanoTime = System.nanoTime();
@@ -210,7 +258,6 @@ public class EKFHeadPoseEstimator implements AvatarHeadPoseEstimatorInterface
       }
    }
 
-   @Override
    public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
