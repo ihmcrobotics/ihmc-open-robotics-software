@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimator;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.euclid.tuple3D.Vector3D;
