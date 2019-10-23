@@ -1,6 +1,7 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-obstacle")
 public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -39,7 +41,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.07;
-      double stepLength = 0.32;
+      double stepLength = 0.31;
       double stairLength = 0.35;
       setStepDownHeight(stepDownHeight);
       setStairLength(stairLength);

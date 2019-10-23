@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndHeadTrajectoryMessageTest;
@@ -13,11 +14,20 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
+   }
+
+   @Tag("controller-api-slow-3")
+   @Override
+   @Test
+   public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
+   {
+      super.testLookingLeftAndRight();
    }
 
    @Override

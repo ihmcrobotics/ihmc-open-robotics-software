@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -58,9 +59,8 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
          return true;
 
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(node, snapper.getSnapData(node).getSnapTransform(), soleTransform);
-      
+      RigidBodyTransformReadOnly soleTransform = snapper.getSnapData(node).getOrComputeSnappedNodeTransform(node);
+
       ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
       ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
@@ -87,7 +87,7 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       return tooCloseToCliff;
    }
    
-   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
+   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
                                                       Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
      {
         double maxZInSoleFrame = Double.NEGATIVE_INFINITY;

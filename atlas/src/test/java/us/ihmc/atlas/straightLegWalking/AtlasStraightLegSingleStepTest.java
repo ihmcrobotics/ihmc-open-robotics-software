@@ -1,6 +1,7 @@
 package us.ihmc.atlas.straightLegWalking;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
@@ -25,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground")
 public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepTest
 {
    private final AtlasRobotModel atlasRobotModel = new MyAtlasRobotModel();

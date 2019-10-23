@@ -13,7 +13,7 @@ public enum MultisenseInformation
       case CART:
          return "http://10.6.192.14:11311";
       case ATLAS:
-         return "http://10.7.4.100:11311";
+         return "http://172.16.66.100:11311";
       }
       return null;
    }

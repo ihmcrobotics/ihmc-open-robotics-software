@@ -23,6 +23,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
@@ -44,7 +45,7 @@ import us.ihmc.tools.thread.TypedNotification;
 /**
  * Walk through a list of waypoints in order, looping forever.
  */
-public class PatrolBehavior
+public class PatrolBehavior implements BehaviorInterface
 {
    public enum PatrolBehaviorState
    {
@@ -170,6 +171,12 @@ public class PatrolBehavior
          stateMachine.doActionAndTransition();
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    private void onStopStateEntry()
    {
       behaviorHelper.pauseWalking();
@@ -194,7 +201,7 @@ public class PatrolBehavior
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidReferenceFrames());
+         upDownExplorer.onNavigateEntry(behaviorHelper.pollHumanoidRobotState());
       }
    }
 
@@ -322,7 +329,7 @@ public class PatrolBehavior
       FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.peek().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames humanoidReferenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }

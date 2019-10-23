@@ -1,6 +1,7 @@
 package us.ihmc.atlas.controllerAPI;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -13,6 +14,7 @@ public class AtlasEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
 {
    private DRCRobotModel robotModel;
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testGoHomeArms() throws SimulationExceededMaximumTimeException
@@ -20,6 +22,7 @@ public class AtlasEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
       super.testGoHomeArms();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testGoHomeChest() throws SimulationExceededMaximumTimeException
@@ -27,6 +30,7 @@ public class AtlasEndToEndGoHomeMessageTest extends EndToEndGoHomeMessageTest
       super.testGoHomeChest();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testGoHomePelvis() throws SimulationExceededMaximumTimeException

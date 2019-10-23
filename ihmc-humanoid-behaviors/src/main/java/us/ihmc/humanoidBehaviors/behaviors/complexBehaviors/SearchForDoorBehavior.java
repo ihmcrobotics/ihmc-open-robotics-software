@@ -19,27 +19,20 @@ public class SearchForDoorBehavior extends AbstractBehavior
    private boolean recievedNewDoorLocation = false;
 
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
-   private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   private final IHMCROS2Publisher<DoorLocationPacket> publisher;
 
 
    public SearchForDoorBehavior(String robotName,String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, yoNamePrefix, ros2Node);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
-      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix+"SearchForDoorFiducial1", ros2Node, yoGraphicsListRegistry);
-      fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+     
 
-      registry.addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
-      publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
-
-      addBehaviorService(fiducialDetectorBehaviorService);
    }
 
    @Override
    public void onBehaviorEntered()
    {
+      doorLocationQueue.clear();
    }
 
    @Override
@@ -48,49 +41,13 @@ public class SearchForDoorBehavior extends AbstractBehavior
       if (doorLocationQueue.isNewPacketAvailable())
       {
          recievedDoorLocation(doorLocationQueue.getLatestPacket());
-         
       }
-      if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
-      {
-
-         
-                  
-         FramePose3D tmpFP = new FramePose3D();
-         fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
-
-         tmpFP.appendPitchRotation(Math.toRadians(90));
-         tmpFP.appendYawRotation(0);
-         tmpFP.appendRollRotation(Math.toRadians(-90));
-         
-         tmpFP.appendPitchRotation(-tmpFP.getPitch());
-         
-         FramePose3D doorFrame = new FramePose3D(tmpFP);
-         doorFrame.appendTranslation(0.025875,0.68183125, -1.1414125);
-         
-         
-         Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());
-         
-         
-         
-         
-         publishTextToSpeech("Recieved Door Location From fiducial");
-         pose.appendYawRotation(Math.toRadians(-90));
-         
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         pose.get(location, orientation);
-         publishUIPositionCheckerPacket(location,orientation);
-
-         setDoorLocation(pose);
-      }
-      
-
    }
 
    @Override
    public boolean isDone()
    {
-      return recievedNewDoorLocation;
+      return recievedNewDoorLocation&& doorTransformToWorld!=null;
    }
 
    @Override
@@ -106,16 +63,17 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    private void recievedDoorLocation(DoorLocationPacket doorLocationPacket)
    {
-      publishTextToSpeech("Recieved Door Location Confirmation From UI");
+      //publishTextToSpeech("Recieved Door Location");
       setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
    }
    
    public void setDoorLocation(Pose3D pose)
    {
+      
+      System.out.println("SET DOOR LOCATION "+pose);
       doorTransformToWorld = pose;
 
       
-      publisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
       
       recievedNewDoorLocation = true;
 

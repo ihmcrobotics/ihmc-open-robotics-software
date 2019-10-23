@@ -67,17 +67,17 @@ public class VisibilityGraphsParametersUIController
       setupControls();
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
-      javaFXStoredPropertyMap.put(maxInterRegionConnectionLength.valueProperty(), VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
-      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegions.valueProperty(), VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
-      javaFXStoredPropertyMap.put(extrusionDistance.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistance);
-      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStep.valueProperty(), VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
-      javaFXStoredPropertyMap.put(tooHighToStepDistance.valueProperty(), VisibilityGraphParametersKeys.tooHighToStepDistance);
-      javaFXStoredPropertyMap.put(clusterResolution.valueProperty(), VisibilityGraphParametersKeys.clusterResolution);
+      javaFXStoredPropertyMap.put(maxInterRegionConnectionLength, VisibilityGraphParametersKeys.maxInterRegionConnectionLength);
+      javaFXStoredPropertyMap.put(normalZThresholdForAccessibleRegions, VisibilityGraphParametersKeys.normalZThresholdForAccessibleRegions);
+      javaFXStoredPropertyMap.put(extrusionDistance, VisibilityGraphParametersKeys.obstacleExtrusionDistance);
+      javaFXStoredPropertyMap.put(extrusionDistanceIfNotTooHighToStep, VisibilityGraphParametersKeys.obstacleExtrusionDistanceIfNotTooHighToStep);
+      javaFXStoredPropertyMap.put(tooHighToStepDistance, VisibilityGraphParametersKeys.tooHighToStepDistance);
+      javaFXStoredPropertyMap.put(clusterResolution, VisibilityGraphParametersKeys.clusterResolution);
       javaFXStoredPropertyMap.put(explorationDistanceFromStartGoal, VisibilityGraphParametersKeys.explorationDistanceFromStartGoal);
-      javaFXStoredPropertyMap.put(planarRegionMinArea.valueProperty(), VisibilityGraphParametersKeys.planarRegionMinArea);
+      javaFXStoredPropertyMap.put(planarRegionMinArea, VisibilityGraphParametersKeys.planarRegionMinArea);
       javaFXStoredPropertyMap.put(planarRegionMinSize, VisibilityGraphParametersKeys.planarRegionMinSize);
-      javaFXStoredPropertyMap.put(regionOrthogonalAngle.valueProperty(), VisibilityGraphParametersKeys.regionOrthogonalAngle);
-      javaFXStoredPropertyMap.put(searchHostRegionEpsilon.valueProperty(), VisibilityGraphParametersKeys.searchHostRegionEpsilon);
+      javaFXStoredPropertyMap.put(regionOrthogonalAngle, VisibilityGraphParametersKeys.regionOrthogonalAngle);
+      javaFXStoredPropertyMap.put(searchHostRegionEpsilon, VisibilityGraphParametersKeys.searchHostRegionEpsilon);
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, parameters ->

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -43,8 +44,7 @@ public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
    {
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
 
-      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(nodeToCheck, snapData.getSnapTransform(), snappedSoleTransform);
+      RigidBodyTransform snappedSoleTransform = snapData.getOrComputeSnappedNodeTransform(nodeToCheck);
       if (snappedSoleTransform.getM22() < Math.cos(parameters.getMinimumSurfaceInclineRadians()))
       {
          if (DEBUG)

@@ -1,5 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -32,6 +33,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("controller-api-slow-4")
    @Override
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -39,6 +41,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -46,6 +49,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testMultipleTrajectoryPoints();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -53,6 +57,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testQueuedMessages();
    }
 
+   @Tag("controller-api-slow-4")
    @Override
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
@@ -60,6 +65,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testQueueStoppedWithOverrideMessage();
    }
 
+   @Tag("controller-api-slow-4")
    @Override
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
@@ -67,6 +73,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api-slow-4")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -74,6 +81,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow-4")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -81,6 +89,7 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
       super.testStopAllTrajectory();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testStreaming() throws Exception

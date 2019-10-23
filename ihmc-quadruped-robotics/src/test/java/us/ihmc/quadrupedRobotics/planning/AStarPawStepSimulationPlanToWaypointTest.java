@@ -1,27 +1,29 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.*;
+import java.io.IOException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
+
+import controller_msgs.msg.dds.PawStepPlanningRequestPacket;
+import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
-import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
 
-import java.io.IOException;
-
-@Tag("quadruped-planning")
 public abstract class AStarPawStepSimulationPlanToWaypointTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;

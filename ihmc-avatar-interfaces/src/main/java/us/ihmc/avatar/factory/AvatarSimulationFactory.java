@@ -177,12 +177,18 @@ public class AvatarSimulationFactory
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
       try
       {
-         simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+         if (!isWindows())
+            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
       }
       catch (NullPointerException npe)
       {
          // do nothing
       }
+   }
+
+   private static boolean isWindows()
+   {
+      return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
    }
 
    private void setupSensorReaderFactory()
