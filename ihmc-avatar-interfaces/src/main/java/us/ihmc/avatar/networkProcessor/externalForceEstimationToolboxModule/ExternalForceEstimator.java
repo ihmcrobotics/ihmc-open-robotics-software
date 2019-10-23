@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.externalForceEstimation;
+package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -38,7 +38,13 @@ import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
-/*package private*/ class ExternalForceEstimator implements RobotController
+/**
+ * Module to estimate unknown external wrenches, i.e. contacts that are not expected from the controller
+ *
+ * Implementation based on Haddadin, et. al:
+ * <a href="www.repo.uni-hannover.de/bitstream/handle/123456789/3543/VorndammeSchHad2017_accepted.pdf">Collision Detection, Isolation and Identification for Humanoids</a>
+ */
+public class ExternalForceEstimator implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
