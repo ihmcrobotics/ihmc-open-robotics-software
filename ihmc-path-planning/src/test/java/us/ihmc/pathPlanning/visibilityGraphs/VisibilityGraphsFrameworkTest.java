@@ -2,10 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import javafx.util.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -29,6 +26,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
@@ -67,8 +65,14 @@ public class VisibilityGraphsFrameworkTest
    private static boolean fullyExpandVisibilityGraph = false;
 
    private static final int maxPointsInRegion = 25000;
-   private static final double walkerTotalTime = 60.0;
+   private static final double walkerTotalTime = 300.0;
 
+
+   private static final List<DataSetName> fastDatasets = Arrays.asList(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment,
+                                                                       DataSetName._20190514_163532_QuadrupedPlatformEnvironment,
+                                                                       DataSetName._20171114_135559_PartialShallowMaze,
+                                                                       DataSetName._20171115_171243_SimplePlaneAndWall,
+                                                                       DataSetName._20171215_201810_RampSteppingStones_Sim);
 
    // For enabling helpful prints.
    private static boolean DEBUG = true;
@@ -138,10 +142,58 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset), false);
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
+            return false;
+
+         return false;
+      };
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+      runAssertionsOnAllDatasets(dataSets, dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
    @Test
+   @Tag("fast")
+   public void testFewDataSetsNoOcclussionsSimulateDynamicReplanning()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
+      }
+
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
+            return false;
+
+         for (DataSetName namesToTest : fastDatasets)
+         {
+            if (dataSet.getName().equals(namesToTest.name().substring(1)))
+               return true;
+         }
+
+         return false;
+      };
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+      runAssertionsOnAllDatasets(dataSets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false));
+   }
+
+   @Test
+   @Tag("path-planning-slow")
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
       if (VISUALIZE)
@@ -151,7 +203,28 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false), false);
+
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
+            return false;
+
+         for (DataSetName nameToIgnore : fastDatasets)
+         {
+            if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
+               return false;
+         }
+
+         return true;
+      };
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false));
    }
 
    //TODO: Fix and make this pass.
@@ -165,11 +238,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true), true);
-   }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, boolean testWithOcclusions)
-   {
+      boolean testWithOcclusions = true;
       Predicate<DataSet> dataSetFilter = dataSet ->
       {
          if(!dataSet.hasPlannerInput())
@@ -181,6 +251,11 @@ public class VisibilityGraphsFrameworkTest
       };
       List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
 
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
+   private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, Function<DataSet, String> dataSetTester)
+   {
       if (DEBUG)
       {
          LogTools.info("Unit test files found: " + allDatasets.size());
