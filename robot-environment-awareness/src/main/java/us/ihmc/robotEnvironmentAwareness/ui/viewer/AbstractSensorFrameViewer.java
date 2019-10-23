@@ -46,7 +46,7 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
          numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
-      uiMessager.registerTopicListener(REAModuleAPI.UINavigationClear, (c) -> clear());
+      uiMessager.registerTopicListener(REAModuleAPI.UISensorPoseHistoryClear, (c) -> clear());
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
 

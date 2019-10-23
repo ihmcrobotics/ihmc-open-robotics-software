@@ -52,7 +52,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UINavigationFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
    }
 
    @FXML
@@ -78,7 +78,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    @FXML
    public void clearNavigation()
    {
-      uiMessager.submitMessageInternal(REAModuleAPI.UINavigationClear, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.UISensorPoseHistoryClear, true);
    }
 
    public void load()
