@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -34,14 +35,16 @@ public class StepInPlaceBehavior implements BehaviorInterface
    private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
    private final AtomicLong footstepID = new AtomicLong();
    private final PausablePeriodicThread mainThread;
+   private final RemoteHumanoidRobotInterface robot;
 
    public StepInPlaceBehavior(BehaviorHelper helper)
    {
       LogTools.debug("Initializing step in place behavior");
 
       this.helper = helper;
+      robot = helper.createRobotInterface();
 
-      helper.createFootstepStatusCallback(this::consumeFootstepStatus);
+      robot.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = helper.createBooleanActivationReference(API.Stepping);
       helper.createUICallback(API.Abort, this::doOnAbort);
 
@@ -92,9 +95,9 @@ public class StepInPlaceBehavior implements BehaviorInterface
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = helper.pollFullRobotModel();
+            FullHumanoidRobotModel fullRobotModel = robot.pollFullRobotModel();
             FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
-            helper.requestWalk(footstepList);
+            robot.requestWalk(footstepList);
          }
       }
       else if (stepping.hasChanged())
