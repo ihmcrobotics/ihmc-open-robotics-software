@@ -54,13 +54,6 @@ public class REAOcTreeBuffer
 
    private final AtomicReference<Integer> stereoVisionBufferSize;
 
-   private final AtomicReference<SensorPoseSourceType> sensorPoseSourceType;
-
-   public enum SensorPoseSourceType
-   {
-      LIDAR_SCAN, STEREO, TRACKING
-   }
-
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
                           Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
@@ -81,8 +74,6 @@ public class REAOcTreeBuffer
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
       stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, NUMBER_OF_SAMPLES);
-
-      sensorPoseSourceType = reaMessager.createInput(REAModuleAPI.SensorPoseSourceType, SensorPoseSourceType.STEREO);
    }
 
    private void sendCurrentState()
@@ -230,9 +221,6 @@ public class REAOcTreeBuffer
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
          scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
 
-         if (sensorPoseSourceType.get() != SensorPoseSourceType.LIDAR_SCAN)
-            return;
-
          Pose3D sensorPose = new Pose3D();
          sensorPose.setPosition(lidarMessage.getLidarPosition());
          sensorPose.setOrientation(lidarMessage.getLidarOrientation());
@@ -247,9 +235,6 @@ public class REAOcTreeBuffer
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
          scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
          // TODO: make NormalOctree constructor with octreeDepth.get().
-
-         if (sensorPoseSourceType.get() != SensorPoseSourceType.STEREO)
-            return;
 
          Pose3D sensorPose = new Pose3D();
          sensorPose.setPosition(stereoMessage.getSensorPosition());

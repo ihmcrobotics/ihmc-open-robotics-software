@@ -23,7 +23,6 @@ public class REAModuleStateReporter
    private final AtomicReference<Boolean> arePlanarRegionsRequested;
    private final AtomicReference<Boolean> isPlanarRegionSegmentationRequested;
    private final AtomicReference<Boolean> arePlanarRegionsIntersectionsRequested;
-   private final AtomicReference<Boolean> showNavigation;
 
    public REAModuleStateReporter(Messager reaMessager)
    {
@@ -33,7 +32,6 @@ public class REAModuleStateReporter
       arePlanarRegionsRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegions, false);
       isPlanarRegionSegmentationRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegionSegmentation, false);
       arePlanarRegionsIntersectionsRequested = reaMessager.createInput(REAModuleAPI.RequestPlanarRegionsIntersections, false);
-      showNavigation = reaMessager.createInput(REAModuleAPI.UINavigationShow, false);
    }
 
    public void reportOcTreeState(NormalOcTree ocTree)
@@ -46,8 +44,7 @@ public class REAModuleStateReporter
 
    public void reportSensorPose(Pose3DReadOnly estimatedSensorPose)
    {
-      if (showNavigation.get())
-         reaMessager.submitMessage(REAModuleAPI.EstimatedSensorPose, new Pose3D(estimatedSensorPose));
+      reaMessager.submitMessage(REAModuleAPI.EstimatedSensorPose, new Pose3D(estimatedSensorPose));
    }
 
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)

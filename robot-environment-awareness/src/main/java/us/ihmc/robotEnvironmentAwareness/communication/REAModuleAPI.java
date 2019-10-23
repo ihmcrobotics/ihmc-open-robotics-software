@@ -25,7 +25,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAOcTreeBuffer.SensorPoseSourceType;
 
 public class REAModuleAPI
 {
@@ -95,7 +94,6 @@ public class REAModuleAPI
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
 
-   public static final Topic<SensorPoseSourceType> SensorPoseSourceType = ModuleCategory.child(Navigation).topic(Type);
    public static final Topic<Pose3D> EstimatedSensorPose = ModuleCategory.child(Navigation).topic(Data);
 
    public static final Topic<Boolean> NormalEstimationEnable = ModuleCategory.child(NormalEstimation).topic(Enable);
@@ -135,7 +133,6 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
 
-   public static final Topic<Boolean> UINavigationShow = Root.child(UI).child(Navigation).topic(Enable);
    public static final Topic<Boolean> UINavigationClear = Root.child(UI).child(Navigation).topic(Clear);
    public static final Topic<Integer> UINavigationFrames = Root.child(UI).child(Navigation).topic(Size);
 
