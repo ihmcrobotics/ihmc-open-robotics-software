@@ -82,13 +82,12 @@
                   <ToggleButton fx:id="showInputLidarScanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input scan" />
                </children>
             </VBox>
-            <VBox prefHeight="160.0" prefWidth="450.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="160.0" prefWidth="300.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <GridPane>
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
@@ -104,11 +103,6 @@
                            </font>
                         </Label>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Surface Normal Filter" textAlignment="CENTER" GridPane.columnIndex="1">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefWidth="104.0" text="Navigation" textAlignment="CENTER" GridPane.columnIndex="2">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -133,19 +127,6 @@
                         <ToggleButton fx:id="enableSurfaceNormalButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Filter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" GridPane.rowIndex="3" />
                         <ToggleButton fx:id="showInputStereoPointCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input pointcloud" GridPane.rowIndex="4" />
-                        <ComboBox fx:id="navigationSourceTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <ToggleButton fx:id="showNavigationButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Visualize" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                           <children>
-                              <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="79.0" text="Frames" textAlignment="CENTER" />
-                              <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0">
-                                 <tooltip>
-                                    <Tooltip text="Set number of frames to visualize" />
-                                 </tooltip>
-                              </Slider>
-                           </children>
-                        </HBox>
                      </children>
                   </GridPane>
                </children>
