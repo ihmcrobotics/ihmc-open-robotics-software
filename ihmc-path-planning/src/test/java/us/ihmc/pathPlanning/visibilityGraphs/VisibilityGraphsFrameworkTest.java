@@ -151,7 +151,7 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), false);
+      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false), false);
    }
 
    //TODO: Fix and make this pass.
