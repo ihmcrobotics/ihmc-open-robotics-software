@@ -49,7 +49,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
-import us.ihmc.stateEstimation.head.AvatarHeadPoseEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -60,10 +59,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 public class AvatarEstimatorThread
 {
@@ -80,7 +76,6 @@ public class AvatarEstimatorThread
    private final StateEstimatorController drcStateEstimator;
    private final StateEstimatorController ekfStateEstimator;
    private final YoBoolean reinitializeEKF;
-   private final YoBoolean initializeHeadPoseEstimator;
 
    private final SensorReader sensorReader;
 
@@ -98,18 +93,30 @@ public class AvatarEstimatorThread
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
-   private AvatarHeadPoseEstimatorInterface headPoseEstimator;
+   private final StateEstimatorController[] additionalStateEstimatorKeys;
+   private final Map<String, YoBoolean> additionalEstimatorInitFlags = new HashMap<>();
 
    @SuppressWarnings("unused")
    public AvatarEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation,
                                 RobotContactPointParameters<RobotSide> contactPointParameters, DRCRobotModel robotModel,
                                 StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
                                 HumanoidRobotContextDataFactory contextDataFactory, RealtimeRos2Node realtimeRos2Node,
-                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, AvatarHeadPoseEstimatorInterface headPoseEstimator,
-                                JointDesiredOutputWriter outputWriter, double gravity)
+                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber,
+                                JointDesiredOutputWriter outputWriter, double gravity, StateEstimatorController... additionalStateEstimators)
    {
       estimatorFullRobotModel = robotModel.createFullRobotModel();
-      this.headPoseEstimator = headPoseEstimator;
+      this.additionalStateEstimatorKeys = additionalStateEstimators;
+
+      if(additionalStateEstimators != null && additionalStateEstimators.length > 0)
+      {
+         for (StateEstimatorController estimator : additionalStateEstimators)
+         {
+            YoBoolean initializeYoVariable = new YoBoolean("initialize" + estimator.getName(), estimatorRegistry);
+            initializeYoVariable.set(true);
+            estimatorRegistry.addChild(estimator.getYoVariableRegistry());
+            additionalEstimatorInitFlags.put(estimator.getName(), initializeYoVariable);
+         }
+      }
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
@@ -231,17 +238,6 @@ public class AvatarEstimatorThread
          }
       }
 
-      initializeHeadPoseEstimator = new YoBoolean("initializeHeadPoseEstimator", estimatorRegistry);
-      initializeHeadPoseEstimator.set(false);
-
-      if(this.headPoseEstimator != null)
-      {
-         this.headPoseEstimator.configureYoGraphics(yoGraphicsListRegistry);
-         this.headPoseEstimator.setFullRobotModel(estimatorFullRobotModel);
-         estimatorRegistry.addChild(this.headPoseEstimator.getRegistry());
-         initializeHeadPoseEstimator.set(true);
-      }
-
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
 
       // Create EKF Estimator:
@@ -343,14 +339,19 @@ public class AvatarEstimatorThread
             forceSensorStateUpdater.updateForceSensorState();
          }
 
-         if(initializeHeadPoseEstimator.getBooleanValue())
+         for (int i = 0; i < this.additionalStateEstimatorKeys.length; i++)
          {
-            headPoseEstimator.initialize(estimatorFullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame(), null);
-            initializeHeadPoseEstimator.set(false);
-         }
-         else if(!initializeHeadPoseEstimator.getBooleanValue() && headPoseEstimator != null)
-         {
-            headPoseEstimator.compute();
+            StateEstimatorController estimator = this.additionalStateEstimatorKeys[i];
+            YoBoolean initFlag = this.additionalEstimatorInitFlags.get(estimator.getName());
+            if(initFlag.getBooleanValue())
+            {
+               estimator.initialize();
+               initFlag.set(false);
+            }
+            else
+            {
+               estimator.doControl();
+            }
          }
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());

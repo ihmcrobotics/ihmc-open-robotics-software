@@ -41,23 +41,30 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
       this(dt, microStrainSerialNumber, false);
    }
 
-   @Override
+//   @Override
    public void configureYoGraphics(YoGraphicsListRegistry parentYoGraphicListRegistry)
    {
       if (DEBUG)
       {
          YoGraphicsList graphicsList = new YoGraphicsList("AtlasHeadPoseEstimator");
-         estimatedHeadPoseFramePoint = new YoFramePose3D("EstimatedHeadPoseFramePoint", ReferenceFrame.getWorldFrame(), getRegistry());
+         estimatedHeadPoseFramePoint = new YoFramePose3D("EstimatedHeadPoseFramePoint", ReferenceFrame.getWorldFrame(), getYoVariableRegistry());
 
          estimatedHeadPoseViz = new YoGraphicCoordinateSystem("EstimatedHeadPoseVizualizer", estimatedHeadPoseFramePoint, 0.2, YoAppearance.DarkGray());
 
-         imuFrame = new YoGraphicCoordinateSystem("HeadIMUFrame", new YoFramePose3D("HeadIMUPose", ReferenceFrame.getWorldFrame(), getRegistry()), 0.2);
+         imuFrame = new YoGraphicCoordinateSystem("HeadIMUFrame", new YoFramePose3D("HeadIMUPose", ReferenceFrame.getWorldFrame(), getYoVariableRegistry()), 0.2);
 
          graphicsList.add(estimatedHeadPoseViz);
          graphicsList.add(imuFrame);
 
          parentYoGraphicListRegistry.registerYoGraphicsList(graphicsList);
       }
+   }
+
+   @Override
+   public void initialize()
+   {
+      initializeEstimator(getFullRobotModel().getHead().getBodyFixedFrame().getTransformToWorldFrame());
+      super.initialize();
    }
 
    @Override

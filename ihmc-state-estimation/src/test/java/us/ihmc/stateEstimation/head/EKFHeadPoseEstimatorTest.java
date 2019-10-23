@@ -75,7 +75,7 @@ public class EKFHeadPoseEstimatorTest
 
       // Create an EKF based orientation estimator:
       EKFHeadPoseEstimator poseEstimator = new EKFHeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true);
-      registry.addChild(poseEstimator.getRegistry());
+      registry.addChild(poseEstimator.getYoVariableRegistry());
       XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
       Set<String> defaultParameters = new HashSet<>();
       Set<String> unmatchedParameters = new HashSet<>();
