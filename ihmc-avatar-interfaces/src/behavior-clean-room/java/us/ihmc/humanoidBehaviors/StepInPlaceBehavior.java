@@ -94,7 +94,7 @@ public class StepInPlaceBehavior implements BehaviorInterface
 
             FullHumanoidRobotModel fullRobotModel = helper.pollFullRobotModel();
             FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
-            helper.publishFootstepList(footstepList);
+            helper.requestWalk(footstepList);
          }
       }
       else if (stepping.hasChanged())

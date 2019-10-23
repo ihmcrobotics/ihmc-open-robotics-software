@@ -22,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -101,22 +100,22 @@ public class RemoteRobotControllerInterface
       }
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan)
    {
-      return requestWalk(footstepPlan, humanoidReferenceFrames, false, null);
+      return requestWalk(footstepPlan, null, false, null);
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames,
-                                                              boolean swingOverPlanarRegions, PlanarRegionsList planarRegionsList)
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
+                                                              HumanoidReferenceFrames humanoidReferenceFrames,
+                                                              boolean swingOverPlanarRegions,
+                                                              PlanarRegionsList planarRegionsList)
    {
-
       if (swingOverPlanarRegions && planarRegionsList != null && decidePlanDistance(footstepPlan, humanoidReferenceFrames) == PlanTravelDistance.FAR)
       {
          footstepPlan = calculateSwingOverTrajectoryExpansions(footstepPlan, humanoidReferenceFrames, planarRegionsList);
       }
 
       LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlan.getFootstepDataList().size());
-
       footstepDataListPublisher.publish(footstepPlan);
 
       TypedNotification<WalkingStatusMessage> walkingCompletedNotification = new TypedNotification<>();
