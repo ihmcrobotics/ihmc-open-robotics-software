@@ -71,13 +71,14 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       solePositionInParentZUpFrame.changeFrame(parentSoleZupFrame);
 
       RobotSide robotSide = nodeToCheck.getRobotSide();
-      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) <  parameters.getMinimumStepWidth())
+      double sidedWidth = robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY());
+      if (sidedWidth <  parameters.getMinimumStepWidth())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
          return false;
       }
 
-      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) > parameters.getMaximumStepWidth())
+      if (sidedWidth > parameters.getMaximumStepWidth())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
          return false;
@@ -96,12 +97,25 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
-      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()) && (solePositionInParentZUpFrame.getZ() < -Math
-            .abs(parameters.getMaximumStepZWhenForwardAndDown())))
+      if (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
-         return false;
+         // TODO is the min check necessary, because it should be getting called anyways?
+         double maxXWhenForwardAndDown = Math.min(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepReach());
+
+         if ((solePositionInParentZUpFrame.getX() > maxXWhenForwardAndDown))
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
+            return false;
+         }
+
+         double maxYWhenForwardAndDown = Math.min(parameters.getMaximumStepYWhenForwardAndDown(), parameters.getMaximumStepWidth());
+         if (sidedWidth > maxYWhenForwardAndDown)
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
+            return false;
+         }
       }
+
 
       double stepReach = EuclidCoreTools.norm(solePositionInParentZUpFrame.getX(), solePositionInParentZUpFrame.getY());
       if (stepReach > parameters.getMaximumStepReach())
@@ -110,10 +124,22 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
-      if (stepReach > parameters.getMaximumStepReachWhenSteppingUp() && solePositionInParentZUpFrame.getZ() > parameters.getMaximumStepZWhenSteppingUp())
+      if (solePositionInParentZUpFrame.getZ() > parameters.getMaximumStepZWhenSteppingUp())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-         return false;
+         // TODO is the min check necessary, because it should be getting called anyways?
+         double maxReachWhenUp = Math.min(parameters.getMaximumStepReach(), parameters.getMaximumStepReachWhenSteppingUp());
+         if (stepReach > maxReachWhenUp)
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
+            return false;
+         }
+
+         double maxYWhenUp = Math.min(parameters.getMaximumStepWidthWhenSteppingUp(), parameters.getMaximumStepReachWhenSteppingUp());
+         if (sidedWidth > maxYWhenUp)
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
+            return false;
+         }
       }
 
       if (graph != null)
