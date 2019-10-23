@@ -19,6 +19,6 @@ public class BehaviorHelperBuilder
 
    public BehaviorHelper build()
    {
-      return new BehaviorHelper(messager, robotModel, ros2Node);
+      return new BehaviorHelper(robotModel, messager, ros2Node);
    }
 }
