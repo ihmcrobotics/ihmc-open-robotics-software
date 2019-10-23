@@ -2,22 +2,12 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -33,30 +23,35 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class RemoteRobotControllerInterface
+public class RemoteHumanoidRobotInterface
 {
    //TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
    private final IHMCROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<FootLoadBearingMessage> footLoadBearingMessagePublisher;
    private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<ChestTrajectoryMessage> chestOrientationTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headOrientationTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<PelvisOrientationTrajectoryMessage> pelvisOrientationTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<PelvisTrajectoryMessage> pelvisTrajectoryMessagePublisher;
    private final IHMCROS2Publisher<GoHomeMessage> goHomeMessagePublisher;
+   private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
    private final ROS2Input<HighLevelStateChangeStatusMessage> controllerState;
 
-   public RemoteRobotControllerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
+   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+
+   public RemoteHumanoidRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
       ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
       
       footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, robotName, controllerId);
+      footLoadBearingMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootLoadBearingMessage.class, robotName, controllerId);
       armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, robotName, controllerId);
       chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, robotName, controllerId);
       headOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, HeadTrajectoryMessage.class, robotName, controllerId);
@@ -65,6 +60,7 @@ public class RemoteRobotControllerInterface
       goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, robotName, controllerId);
       footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, robotName, controllerId);
       pausePublisher = new IHMCROS2Publisher<>(ros2Node, PauseWalkingMessage.class, robotName, controllerId);
+      stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, robotName, controllerId);
 
       new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotName, controllerId, this::acceptWalkingStatus);
 
@@ -78,6 +74,8 @@ public class RemoteRobotControllerInterface
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(robotModel.getWalkingControllerParameters(),
                                                                                               registry,
                                                                                               yoGraphicsListRegistry);
+
+      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
    }
 
    private boolean acceptStatusChange(HighLevelStateChangeStatusMessage message)
@@ -128,6 +126,11 @@ public class RemoteRobotControllerInterface
       footTrajectoryMessagePublisher.publish(message);
    }
 
+   public void requestFootLoadBearing(FootLoadBearingMessage message)
+   {
+      footLoadBearingMessagePublisher.publish(message);
+   }
+
    public void requestArmTrajectory(ArmTrajectoryMessage message)
    {
       armTrajectoryMessagePublisher.publish(message);
@@ -156,6 +159,17 @@ public class RemoteRobotControllerInterface
    public void requestGoHome(GoHomeMessage goHomeMessage)
    {
       goHomeMessagePublisher.publish(goHomeMessage);
+   }
+
+   public void publishPose(Pose3D pose, double confidenceFactor, long timestamp)
+   {
+      StampedPosePacket stampedPosePacket = new StampedPosePacket();
+      stampedPosePacket.pose_.set(pose);
+      stampedPosePacket.setTimestamp(timestamp);
+      stampedPosePacket.setConfidenceFactor(confidenceFactor);
+
+      LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
+      stampedPosePublisher.publish(stampedPosePacket);
    }
 
    private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
@@ -228,4 +242,8 @@ public class RemoteRobotControllerInterface
       return HighLevelControllerName.fromByte(controllerState.getLatest().getEndHighLevelControllerName());
    }
 
+   public RemoteSyncedHumanoidRobotState getRobotState()
+   {
+      return remoteSyncedHumanoidRobotState;
+   }
 }

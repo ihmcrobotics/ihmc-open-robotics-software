@@ -58,7 +58,7 @@ public class FakeREAModule
                          ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
                          this::acceptAdditionalRegionList);
 
-      thread = new PausablePeriodicThread(this::process, 0.5, getClass().getSimpleName());
+      thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 
    public void start()

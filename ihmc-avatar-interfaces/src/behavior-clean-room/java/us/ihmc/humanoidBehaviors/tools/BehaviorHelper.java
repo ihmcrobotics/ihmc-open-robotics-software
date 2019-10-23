@@ -3,10 +3,12 @@ package us.ihmc.humanoidBehaviors.tools;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.*;
@@ -21,14 +23,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -53,30 +55,38 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
  * clean the Behaviors themselves. The public interface of this class should be a joy to work with.
  * The internals and all the things it relies on might be a nightmare, but the public API should not
  * be.
+ *
+ * Open question: Trust vs. power vs. safety for/from behavior authors
+ *
+ * Robot:
+ * - Command-only
+ * - Status-only
+ * - Interactive (footstep completion, hand trajectory completion, etc.)
+ *
+ * UI Communication.
+ *
+ * Toolbox comms:
+ * - REA Input/Output
+ * - Footstep planner
+ *
+ * Helper tools (threading, etc.)
  */
 public class BehaviorHelper
 {
-   private final Messager messager;
+   private final ManagedMessager messager;
    private final DRCRobotModel robotModel;
    private final Ros2Node ros2Node;
 
    private final String robotName;
    private final DRCRobotJointMap jointMap;
 
-   private final RemoteRobotControllerInterface remoteRobotControllerInterface;
+   private final RemoteHumanoidRobotInterface remoteHumanoidRobotInterface;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
-
-   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
-   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
-
-   private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
-
-   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final RemoteREAInterface remoteREAInterface;
 
    private final List<ROS2Callback> ros2Callbacks = new ArrayList<>();
-   private final List<Pair<Topic, TopicListener>> topicListeners = new ArrayList<>();
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, ManagedMessager messager, Ros2Node ros2Node)
    {
       this.messager = messager;
       this.robotModel = robotModel;
@@ -88,55 +98,30 @@ public class BehaviorHelper
       // TODO: Remove all this construction until needed
 
       // TODO: Create enable/disable support for these
-      remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel); // robot commands
-      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node); // robot state
+      remoteHumanoidRobotInterface = new RemoteHumanoidRobotInterface(ros2Node, robotModel); // robot commands, status, interaction
 
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager); // planner toolbox API
+      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager); // planner toolbox
+      remoteREAInterface = new RemoteREAInterface(ros2Node); // REA toolbox
 
-      // TODO: Move these into classes
-      ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
-      stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, robotName, controllerId);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
-
-      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      // TODO: Extract UI comms class
 
       // TODO: Make accessors to classes; interface?
    }
 
-   /**
-    * TODO: It looks like what we want here are:
-    * Robot:
-    * - Command-only
-    * - Status-only
-    * - Interactive (footstep completion, hand trajectory completion, etc.)
-    *
-    * UI Communication.
-    *
-    * Toolbox comms:
-    * - REA Input/Output
-    * - Footstep planner
-    *
-    * Helper tools (threading, etc.)
-    *
-    * @return
-    */
+   // Construction-only methods:
+
+   // TODO
 
    // Robot Command Methods:
 
    public void publishPose(Pose3D pose, double confidenceFactor, long timestamp)
    {
-      StampedPosePacket stampedPosePacket = new StampedPosePacket();
-      stampedPosePacket.pose_.set(pose);
-      stampedPosePacket.setTimestamp(timestamp);
-      stampedPosePacket.setConfidenceFactor(confidenceFactor);
-
-      LogTools.info("Publishing Pose " + pose + " with timestamp " + timestamp);
-      stampedPosePublisher.publish(stampedPosePacket);
+      remoteHumanoidRobotInterface.publishPose(pose, confidenceFactor, timestamp);
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepList)
    {
-      return remoteRobotControllerInterface.requestWalk(footstepList);
+      return remoteHumanoidRobotInterface.requestWalk(footstepList);
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
@@ -144,19 +129,19 @@ public class BehaviorHelper
                                                               boolean swingOverPlanarRegions,
                                                               PlanarRegionsList planarRegionsList)
    {
-      return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
+      return remoteHumanoidRobotInterface.requestWalk(footstepPlan, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalkWithSwingOvers(FootstepDataListMessage footstepPlan,
                                                                             HumanoidReferenceFrames humanoidReferenceFrames,
                                                                             PlanarRegionsList planarRegionsList)
    {
-      return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, true, planarRegionsList);
+      return remoteHumanoidRobotInterface.requestWalk(footstepPlan, humanoidReferenceFrames, true, planarRegionsList);
    }
 
    public void pauseWalking()
    {
-      remoteRobotControllerInterface.pauseWalking();
+      remoteHumanoidRobotInterface.pauseWalking();
    }
 
    public void requestFootTrajectory(RobotSide robotSide, double trajectoryTime, FramePose3D footPose)
@@ -171,14 +156,21 @@ public class BehaviorHelper
    {
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
       footTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestFootTrajectory(footTrajectoryMessage);
+      remoteHumanoidRobotInterface.requestFootTrajectory(footTrajectoryMessage);
+   }
+
+   public void requestFootLoadBearing(RobotSide robotSide, LoadBearingRequest loadBearingRequest)
+   {
+      FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, loadBearingRequest);
+      message.setDestination(PacketDestination.CONTROLLER.ordinal());
+      remoteHumanoidRobotInterface.requestFootLoadBearing(message);
    }
 
    public void requestArmTrajectory(RobotSide robotSide, double trajectoryTime, double[] jointAngles)
    {
       ArmTrajectoryMessage armTrajectoryMessage = createArmTrajectoryMessage(robotSide, trajectoryTime, jointAngles);
       armTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestArmTrajectory(armTrajectoryMessage);
+      remoteHumanoidRobotInterface.requestArmTrajectory(armTrajectoryMessage);
    }
 
    private final ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide side, double trajectoryTime, double[] jointAngles)
@@ -192,14 +184,14 @@ public class BehaviorHelper
    {
       GoHomeMessage chestGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime);
       chestGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestGoHome(chestGoHomeMessage);
+      remoteHumanoidRobotInterface.requestGoHome(chestGoHomeMessage);
    }
 
    public void requestPelvisGoHome(double trajectoryTime)
    {
       GoHomeMessage pelvisGoHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
       pelvisGoHomeMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestGoHome(pelvisGoHomeMessage);
+      remoteHumanoidRobotInterface.requestGoHome(pelvisGoHomeMessage);
    }
 
    public void requestChestOrientationTrajectory(double trajectoryTime, FrameQuaternion chestOrientation, ReferenceFrame dataFrame,
@@ -210,7 +202,7 @@ public class BehaviorHelper
                                                                                                          dataFrame,
                                                                                                          trajectoryFrame);
       chestOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestChestOrientationTrajectory(chestOrientationMessage);
+      remoteHumanoidRobotInterface.requestChestOrientationTrajectory(chestOrientationMessage);
    }
 
    public void requestHeadOrientationTrajectory(double trajectoryTime, FrameQuaternion headOrientation, ReferenceFrame dataFrame,
@@ -221,7 +213,7 @@ public class BehaviorHelper
                                                                                                          dataFrame,
                                                                                                          trajectoryFrame);
       headOrientationMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestHeadOrientationTrajectory(headOrientationMessage);
+      remoteHumanoidRobotInterface.requestHeadOrientationTrajectory(headOrientationMessage);
    }
 
    public void requestPelvisOrientationTrajectory(double trajectoryTime, FrameQuaternion pelvisOrientation)
@@ -230,31 +222,31 @@ public class BehaviorHelper
       PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime,
                                                                                                                                             pelvisOrientation);
       pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);
+      remoteHumanoidRobotInterface.requestPelvisOrientationTrajectory(pelvisOrientationTrajectoryMessage);
    }
 
    public void requestPelvisTrajectory(double trajectoryTime, FramePoint3DReadOnly pelvisPosition, FrameQuaternionReadOnly pelvisOrientation)
    {
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPosition, pelvisOrientation);
       pelvisTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
-      remoteRobotControllerInterface.requestPelvisTrajectory(pelvisTrajectoryMessage);
+      remoteHumanoidRobotInterface.requestPelvisTrajectory(pelvisTrajectoryMessage);
    }
 
    // Robot Action Callback and Polling Methods:
 
    public FullHumanoidRobotModel pollFullRobotModel()
    {
-      return remoteSyncedHumanoidRobotState.pollFullRobotModel();
+      return remoteHumanoidRobotInterface.getRobotState().pollFullRobotModel();
    }
 
    public HumanoidRobotState pollHumanoidRobotState()
    {
-      return remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+      return remoteHumanoidRobotInterface.getRobotState().pollHumanoidRobotState();
    }
 
    public FramePose3DReadOnly quickPollPoseReadOnly(Function<HumanoidReferenceFrames, ReferenceFrame> frameSelector)
    {
-      return remoteSyncedHumanoidRobotState.quickPollPoseReadOnly(frameSelector);
+      return remoteHumanoidRobotInterface.getRobotState().quickPollPoseReadOnly(frameSelector);
    }
 
    public ROS2Callback createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
@@ -267,7 +259,7 @@ public class BehaviorHelper
 
    public HighLevelControllerName getLatestControllerState()
    {
-      return remoteRobotControllerInterface.latestControllerState();
+      return remoteHumanoidRobotInterface.latestControllerState();
    }
 
    public boolean isRobotWalking()
@@ -280,19 +272,17 @@ public class BehaviorHelper
 
    public PlanarRegionsList getLatestPlanarRegionList()
    {
-      return PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest());
+      return remoteREAInterface.getLatestPlanarRegionList();
    }
 
    public PlanarRegionsListMessage getLatestPlanarRegionListMessage()
    {
-      return planarRegionsList.getLatest();
+      return remoteREAInterface.getLatestPlanarRegionListMessage();
    }
 
    public void clearREA()
    {
-      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-      clearMessage.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearMessage);
+      remoteREAInterface.clearREA();
    }
 
    // Planning Methods:
@@ -317,58 +307,58 @@ public class BehaviorHelper
 
    // UI Communication Methods:
 
+   public <T> void publishToUI(Topic<T> topic, T message)
+   {
+      messager.publish(topic, message);
+   }
+
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
    {
-      return new ActivationReference<>(messager.createInput(topic, false), true);
+      return messager.createBooleanActivationReference(topic);
    }
 
    public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
    {
-      topicListeners.add(Pair.of(topic, listener));
-      messager.registerTopicListener(topic, listener);
+      messager.registerCallback(topic, listener);
+   }
+
+   public <T> AtomicReference<T> createUIInput(Topic<T> topic, T initialValue)
+   {
+      return messager.createInput(topic, initialValue);
    }
 
    // Thread and Schedule Methods:
+   // TODO: Track and auto start/stop threads?
 
    public PausablePeriodicThread createPausablePeriodicThread(Class<?> clazz, double period, Runnable runnable)
    {
-      return createPausablePeriodicThread(clazz.getSimpleName(), period, runnable);
+      return createPausablePeriodicThread(clazz.getSimpleName(), period, 0, runnable);
    }
 
-   public PausablePeriodicThread createPausablePeriodicThread(String name, double period, Runnable runnable)
+   public PausablePeriodicThread createPausablePeriodicThread(Class<?> clazz, double period, int crashesBeforeGivingUp, Runnable runnable)
    {
-      return new PausablePeriodicThread(runnable, period, name);
+      return createPausablePeriodicThread(clazz.getSimpleName(), period, crashesBeforeGivingUp, runnable);
+   }
+
+   public PausablePeriodicThread createPausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, Runnable runnable)
+   {
+      return new PausablePeriodicThread(name, period, crashesBeforeGivingUp, runnable);
    }
 
    // Behavior Helper Stuff:
 
+   // TODO: Extract to behavior manager in general?
    public void setCommunicationCallbacksEnabled(boolean enabled)
    {
       for (ROS2Callback ros2Callback : ros2Callbacks)
       {
          ros2Callback.setEnabled(enabled);
       }
-      for (Pair<Topic, TopicListener> listenerPair : topicListeners)
-      {
-         if (enabled)
-            messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
-         else
-            messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
-      }
+      messager.setEnabled(enabled);
    }
 
-   public Messager getMessager()
+   public ManagedMessager getMessager()
    {
       return messager;
-   }
-
-   public DRCRobotModel getRobotModel()
-   {
-      return robotModel;
-   }
-
-   public Ros2Node getRos2Node()
-   {
-      return ros2Node;
    }
 }

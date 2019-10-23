@@ -4,7 +4,6 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -16,7 +15,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,13 +30,13 @@ import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
 /**
@@ -69,8 +67,8 @@ public class PatrolBehavior implements BehaviorInterface
 
    private final BehaviorHelper helper;
 
-   private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
+   private final PausablePeriodicThread mainThread;
 
    private final UpDownExplorer upDownExplorer;
 
@@ -84,7 +82,6 @@ public class PatrolBehavior implements BehaviorInterface
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final WaypointManager waypointManager;
-   private final AtomicReference<Boolean> enable;
 
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
@@ -95,7 +92,6 @@ public class PatrolBehavior implements BehaviorInterface
    public PatrolBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      messager = helper.getMessager();
 
       LogTools.debug("Initializing patrol behavior");
 
@@ -122,57 +118,57 @@ public class PatrolBehavior implements BehaviorInterface
 
       factory.getFactory().addStateChangedListener((from, to) ->
       {
-         messager.submitMessage(CurrentState, to);
+         helper.publishToUI(CurrentState, to);
          LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 
-      waypointManager = WaypointManager.createForModule(messager,
+      waypointManager = WaypointManager.createForModule(helper.getMessager(),
                                                         WaypointsToModule,
                                                         WaypointsToUI,
                                                         GoToWaypoint,
                                                         CurrentWaypointIndexStatus,
                                                         goNotification);
 
-      messager.registerTopicListener(Stop, object -> stopNotification.set());
-      messager.registerTopicListener(PlanReviewResult, message ->
+      // TODO: Use helper
+      helper.createUICallback(Stop, object -> stopNotification.set());
+      helper.createUICallback(PlanReviewResult, message ->
       {
          planReviewResult.add(message);
       });
-      messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
+      helper.createUICallback(SkipPerceive, object -> skipPerceive.set());
 
-      enable = messager.createInput(Enable, false);
-      loop = messager.createInput(Loop, false);
-      swingOvers = messager.createInput(SwingOvers, false);
-      planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
-      upDownExplorationEnabled = messager.createInput(UpDownExplorationEnabled, false);
-      perceiveDuration = messager.createInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
-      messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
+      // TODO: Use helper
+      loop = helper.createUIInput(Loop, false);
+      swingOvers = helper.createUIInput(SwingOvers, false);
+      planReviewEnabled = helper.createUIInput(PlanReviewEnabled, false);
+      upDownExplorationEnabled = helper.createUIInput(UpDownExplorationEnabled, false);
+      perceiveDuration = helper.createUIInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
+      helper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, helper);
-      messager.registerTopicListener(CancelPlanning, object ->
+      upDownExplorer = new UpDownExplorer(helper);
+      helper.createUICallback(CancelPlanning, object ->
       {
          cancelPlanning.set();
          upDownExplorer.abortPlanning();
       });
 
-      ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
-                                                                                           DefaultExceptionHandler.PRINT_STACKTRACE,
-                                                                                           5);
-      patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
+      mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, this::patrolThread);
    }
 
-   private void patrolThread()   // pretty much just updating whichever state is active
+   private void patrolThread()   // update the active state
    {
-      if (enable.get())
-         stateMachine.doActionAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Patrol behavior selected = {}", enabled);
+
+      mainThread.setRunning(enabled);
+      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void onStopStateEntry()
@@ -443,6 +439,6 @@ public class PatrolBehavior implements BehaviorInterface
          footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
-      messager.submitMessage(CurrentFootstepPlan, footstepLocations);
+      helper.publishToUI(CurrentFootstepPlan, footstepLocations);
    }
 }

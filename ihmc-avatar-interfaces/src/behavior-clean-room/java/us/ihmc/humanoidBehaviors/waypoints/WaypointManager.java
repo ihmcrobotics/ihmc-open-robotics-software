@@ -3,13 +3,14 @@ package us.ihmc.humanoidBehaviors.waypoints;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class WaypointManager // should handle comms of waypointsequence, unique id management (creating waypoints)
 {
-   private final Messager messager;
+   private final ManagedMessager messager;
    private final Topic<WaypointSequence> sendTopic;
 
    private volatile WaypointSequence activeSequence = new WaypointSequence();
@@ -20,7 +21,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    private final boolean delayUpdate; // for module to
    private volatile WaypointSequence delayedUpdateSequence = new WaypointSequence(); // prevent NPE
 
-   public static WaypointManager createForModule(Messager messager,
+   public static WaypointManager createForModule(ManagedMessager messager,
                                                  Topic<WaypointSequence> receiveTopic,
                                                  Topic<WaypointSequence> sendTopic,
                                                  Topic<Integer> goToWaypointTopic,
@@ -33,7 +34,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                                                             waypointIndexUIUpdateTopic,
                                                             null,
                                                             true);
-      messager.registerTopicListener(goToWaypointTopic, goToWaypointIndex -> // easy to put here, so do
+      messager.registerCallback(goToWaypointTopic, goToWaypointIndex -> // easy to put here, so do
       {
          LogTools.info("Recieved GoToWaypoint {}", goToWaypointIndex);
          waypointManager.updateToMostRecentData();
@@ -48,7 +49,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                                              Topic<WaypointSequence> sendTopic,
                                              Runnable receivedListener) // accept listenerForUI
    {
-      WaypointManager waypointManager = new WaypointManager(messager,
+      WaypointManager waypointManager = new WaypointManager(new ManagedMessager(messager),
                                                             receiveTopic,
                                                             sendTopic,
                                                             null,
@@ -57,7 +58,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       return waypointManager;
    }
 
-   public WaypointManager(Messager messager,
+   public WaypointManager(ManagedMessager messager,
                           Topic<WaypointSequence> receiveTopic,
                           Topic<WaypointSequence> sendTopic,
                           Topic<Integer> waypointIndexUIUpdateTopic,
@@ -69,7 +70,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       this.waypointIndexUIUpdateTopic = waypointIndexUIUpdateTopic;
       this.delayUpdate = delayUpdate;
 
-      messager.registerTopicListener(receiveTopic, newSequence ->
+      messager.registerCallback(receiveTopic, newSequence ->
       {
          LogTools.info("Received {} updated waypoints.", newSequence.size());
          if (delayUpdate)
@@ -96,7 +97,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                     activeSequence.size(),
                     activeSequence.size() > 0 ? activeSequence.peekNext().getUniqueId() : -1,
                     activeSequence);
-      messager.submitMessage(sendTopic, activeSequence);
+      messager.publish(sendTopic, activeSequence);
    }
 
    public void clearWaypoints()
@@ -121,7 +122,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    {
       if (waypointIndexUIUpdateTopic != null)
       {
-         messager.submitMessage(waypointIndexUIUpdateTopic, activeSequence.peekNextIndex());
+         messager.publish(waypointIndexUIUpdateTopic, activeSequence.peekNextIndex());
       }
    }
 

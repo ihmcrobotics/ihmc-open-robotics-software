@@ -60,13 +60,13 @@ public class UpDownExplorer
    private UpDownState state = UpDownState.TRAVERSING;
    private Notification plannerFailedOnLastRun = new Notification();
 
-   public UpDownExplorer(Messager messager, BehaviorHelper behaviorHelper)
+   public UpDownExplorer(BehaviorHelper behaviorHelper)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
 
-      messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
-      upDownCenter = messager.createInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
+      behaviorHelper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
+      upDownCenter = behaviorHelper.createUIInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry(HumanoidReferenceFrames humanoidReferenceFrames)

@@ -15,8 +15,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
@@ -53,12 +53,12 @@ public class RemoteFootstepPlannerInterface
 
    private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
-   public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
+   public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, ManagedMessager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
       {
-         messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
+         messager.registerCallback(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
          {
             DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters(); // TODO: This might not be thread safe
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);              // TODO: Clean this up  - @dcalvert
