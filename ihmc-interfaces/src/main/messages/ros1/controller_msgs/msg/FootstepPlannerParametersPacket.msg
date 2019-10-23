@@ -117,10 +117,12 @@ float64 maximum_step_z_when_forward_and_down
 float64 maximum_step_z
 
 # This is the reduction factor for the max yaw when the step is at max reach.
-# This means that, when the footstep is at its maximum distance, this is the fraction of the max yaw that is allowed.
+# This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
+# If this returns 0.0, the max yaw is not modified, even at full reach.
+# If this returns 1.0, the max yaw is 0 at full reach.
 # 
 # That is,
-# modifiedMaxYaw = reach / maxReach * maxYaw + (1.0 - reach / maxReach) * alpha * maxYaw
+# modifiedMaxYaw = (1.0 - reach / maxReach) * maxYaw + reach / maxReach * (1.0 - alpha) * maxYaw
 # Field default value -1.0
 float64 step_yaw_reduction_factor_at_max_reach
 
