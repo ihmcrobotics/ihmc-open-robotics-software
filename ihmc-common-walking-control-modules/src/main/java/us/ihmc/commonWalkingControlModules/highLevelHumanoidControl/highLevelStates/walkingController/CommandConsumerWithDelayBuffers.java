@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class CommandConsumerWithDelayBuffers
 {
-   public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 10;
+   public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 16;
 
    private final YoDouble yoTime;
    private final CommandInputManager commandInputManager;

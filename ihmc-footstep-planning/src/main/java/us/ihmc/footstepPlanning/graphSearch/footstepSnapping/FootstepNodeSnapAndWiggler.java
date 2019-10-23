@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -78,7 +79,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    private FootstepNodeSnapData doShiftFromNearCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
    {
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());
+      Point3DReadOnly snappedNode = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snappedNode.getZ());
       double distanceOfClosestPointInFront = collisionData.getDistanceOfClosestPointInFront();
       double distanceOfClosestPointInBack = collisionData.getDistanceOfClosestPointInBack();
 
@@ -106,7 +108,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if(collisionDetector == null || !parameters.checkForBodyBoxCollisions())
          return false;
 
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());
+      Point3DReadOnly footstepInWorld = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, footstepInWorld.getZ());
       return !Double.isNaN(collisionData.getDistanceOfClosestPointInFront()) || !Double.isNaN(collisionData.getDistanceOfClosestPointInBack());
    }
 

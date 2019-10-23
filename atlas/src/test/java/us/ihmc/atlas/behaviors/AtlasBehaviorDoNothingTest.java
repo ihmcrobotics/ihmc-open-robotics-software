@@ -1,6 +1,11 @@
 package us.ihmc.atlas.behaviors;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -11,7 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@Tag("humanoid-behaviors")
+@Tag("humanoid-behaviors-slow")
 public class AtlasBehaviorDoNothingTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

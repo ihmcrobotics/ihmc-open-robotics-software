@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -55,7 +54,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-@Tag("controller-api-4")
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;

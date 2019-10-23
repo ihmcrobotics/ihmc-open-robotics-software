@@ -69,4 +69,52 @@ public class StereoVisionPointCloudDataLoader
       StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(System.nanoTime(), resizedPointCloudBuffer, resizedColorBuffer);
       return message;
    }
+
+   public static StereoVisionPointCloudMessage getMessageFromFile(File sensorPoseFile, File pointCloudFile)
+   {
+      if (!sensorPoseFile.canRead() || !pointCloudFile.canRead())
+         new NullPointerException("No dataFile");
+
+      BufferedReader bufferedReader = null;
+      try
+      {
+         bufferedReader = new BufferedReader(new FileReader(sensorPoseFile));
+      }
+      catch (FileNotFoundException e1)
+      {
+         e1.printStackTrace();
+      }
+
+      String lineJustFetched = null;
+      String[] positionQuaternianArray;
+      try
+      {
+         lineJustFetched = bufferedReader.readLine();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      if (lineJustFetched == null)
+      {
+         return null;
+      }
+      else
+      {
+         positionQuaternianArray = lineJustFetched.split("\t");
+         double px = Double.parseDouble(positionQuaternianArray[0]);
+         double py = Double.parseDouble(positionQuaternianArray[1]);
+         double pz = Double.parseDouble(positionQuaternianArray[2]);
+
+         double ox = Double.parseDouble(positionQuaternianArray[3]);
+         double oy = Double.parseDouble(positionQuaternianArray[4]);
+         double oz = Double.parseDouble(positionQuaternianArray[5]);
+         double os = Double.parseDouble(positionQuaternianArray[6]);
+
+         StereoVisionPointCloudMessage message = getMessageFromFile(pointCloudFile);
+         message.getSensorPosition().set(px, py, pz);
+         message.getSensorOrientation().set(ox, oy, oz, os);
+         return message;
+      }
+   }
 }

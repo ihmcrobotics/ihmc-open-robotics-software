@@ -348,11 +348,16 @@ public class MessageTools
    public static WeightMatrix3DMessage createWeightMatrix3DMessage(double weight)
    {
       WeightMatrix3DMessage message = new WeightMatrix3DMessage();
-      message.setWeightFrameId(MessageTools.toFrameId(null));
-      message.setXWeight(weight);
-      message.setYWeight(weight);
-      message.setZWeight(weight);
+      packWeightMatrix3DMessage(weight, message);
       return message;
+   }
+
+   public static void packWeightMatrix3DMessage(double weight, WeightMatrix3DMessage messageToPack)
+   {
+      messageToPack.setWeightFrameId(MessageTools.toFrameId(null));
+      messageToPack.setXWeight(weight);
+      messageToPack.setYWeight(weight);
+      messageToPack.setZWeight(weight);
    }
 
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJointBasics[] joints)
@@ -864,10 +869,19 @@ public class MessageTools
    public static KinematicsToolboxOutputStatus interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo,
                                                                    double alpha)
    {
+      KinematicsToolboxOutputStatus interpolated = new KinematicsToolboxOutputStatus();
+      interpolateMessages(outputStatusOne, outputStatusTwo, alpha, interpolated);
+      return interpolated;
+   }
+
+   public static void interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo, double alpha,
+                                          KinematicsToolboxOutputStatus interpolatedToPack)
+   {
       if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
          throw new RuntimeException("Output status are not compatible.");
 
-      KinematicsToolboxOutputStatus interpolateOutputStatus = new KinematicsToolboxOutputStatus();
+      interpolatedToPack.getDesiredJointAngles().reset();
+      interpolatedToPack.getDesiredJointVelocities().reset();
 
       TFloatArrayList jointAngles1 = outputStatusOne.getDesiredJointAngles();
       TFloatArrayList jointAngles2 = outputStatusTwo.getDesiredJointAngles();
@@ -876,8 +890,8 @@ public class MessageTools
 
       for (int i = 0; i < jointAngles1.size(); i++)
       {
-         interpolateOutputStatus.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
-         interpolateOutputStatus.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
+         interpolatedToPack.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
+         interpolatedToPack.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
       }
 
       Vector3D rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
@@ -889,14 +903,12 @@ public class MessageTools
       Vector3D rootAngularVelocity1 = outputStatusOne.getDesiredRootAngularVelocity();
       Vector3D rootAngularVelocity2 = outputStatusTwo.getDesiredRootAngularVelocity();
 
-      interpolateOutputStatus.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
-      interpolateOutputStatus.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
-      interpolateOutputStatus.getDesiredRootLinearVelocity().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
-      interpolateOutputStatus.getDesiredRootAngularVelocity().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
+      interpolatedToPack.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
+      interpolatedToPack.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
+      interpolatedToPack.getDesiredRootLinearVelocity().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
+      interpolatedToPack.getDesiredRootAngularVelocity().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
 
-      interpolateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
-
-      return interpolateOutputStatus;
+      interpolatedToPack.setJointNameHash(outputStatusOne.getJointNameHash());
    }
 
    /**

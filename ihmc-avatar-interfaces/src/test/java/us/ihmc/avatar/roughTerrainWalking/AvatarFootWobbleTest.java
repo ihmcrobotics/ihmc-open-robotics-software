@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -32,7 +31,6 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
-@Tag("humanoid-rough-terrain")
 public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;

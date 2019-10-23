@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -44,10 +43,9 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-@Tag("humanoid-obstacle-3")
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushRobotController;

@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviorTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -31,6 +32,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testSideStepping() throws SimulationExceededMaximumTimeException
@@ -38,6 +40,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
       super.testSideStepping();
    }
 
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
@@ -45,6 +48,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
       super.testStepLongerThanMaxStepLength();
    }
 
+   @Tag("humanoid-behaviors")
    @Override
    @Test
    public void testStop() throws SimulationExceededMaximumTimeException
@@ -52,6 +56,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
       super.testStop();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException

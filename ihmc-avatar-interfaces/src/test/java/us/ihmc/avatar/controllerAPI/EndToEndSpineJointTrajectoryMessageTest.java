@@ -11,7 +11,6 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
@@ -55,7 +54,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
-@Tag("controller-api-2")
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final double DESIRED_EPSILON = 1.0E-10;

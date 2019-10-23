@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground-slow-2")
 public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppingTest
 {
    private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;

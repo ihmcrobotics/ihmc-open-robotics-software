@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
@@ -41,6 +42,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testCloseAndStopAndOpen() throws SimulationExceededMaximumTimeException
@@ -48,6 +50,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       super.testCloseAndStopAndOpen();
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testCloseAndOpenFingers() throws SimulationExceededMaximumTimeException
@@ -55,6 +58,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       super.testCloseAndOpenFingers();
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testClose() throws SimulationExceededMaximumTimeException
@@ -105,7 +109,8 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
 
    private double[] getExpectedHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger, double desiredPosition)
    {
-      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().get(indexOfFinger));
+      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames()
+                                                                                                                .get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
       ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);
@@ -122,7 +127,8 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
 
    private double[] getCurrentHandJointPosition(ValkyrieHandFingerTrajectoryMessage valkyrieFingerTrajectoryMessage, int indexOfFinger)
    {
-      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames().get(indexOfFinger));
+      ValkyrieFingerMotorName fingerMotorName = ValkyrieFingerMotorName.fromByte(valkyrieFingerTrajectoryMessage.getValkyrieFingerMotorNames()
+                                                                                                                .get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
       ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);

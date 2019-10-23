@@ -1,15 +1,14 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
-import controller_msgs.msg.dds.QuadrupedStepMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import org.junit.jupiter.api.Test;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedContinuousPlanningControllerTest
 {

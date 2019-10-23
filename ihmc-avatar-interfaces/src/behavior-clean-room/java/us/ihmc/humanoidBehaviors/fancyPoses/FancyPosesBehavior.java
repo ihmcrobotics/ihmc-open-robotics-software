@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -32,7 +33,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 
-public class FancyPosesBehavior
+public class FancyPosesBehavior implements BehaviorInterface
 {
    private final BehaviorHelper behaviorHelper;
    private final AtomicReference<Boolean> enable;
@@ -76,6 +77,12 @@ public class FancyPosesBehavior
       behaviorHelper.startScheduledThread(getClass().getSimpleName(), this::doBehavior, 1, TimeUnit.SECONDS);
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    private void doOnAbort(boolean abort)
    {
       if (abort)
@@ -101,7 +108,7 @@ public class FancyPosesBehavior
 
    private void goToSingleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
@@ -121,7 +128,7 @@ public class FancyPosesBehavior
 
    public void goToRunningManPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -147,7 +154,7 @@ public class FancyPosesBehavior
 
    public void goToKarateKid1Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -167,7 +174,7 @@ public class FancyPosesBehavior
 
    public void goToKarateKid2Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -193,7 +200,7 @@ public class FancyPosesBehavior
 
    public void goToKarateKid3Pose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
@@ -219,7 +226,7 @@ public class FancyPosesBehavior
 
    public void goToPresentPose()
    {
-      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidReferenceFrames();
+      HumanoidReferenceFrames referenceFrames = behaviorHelper.pollHumanoidRobotState();
 
       ReferenceFrame soleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
       double trajectoryTime = 5.0;
