@@ -80,7 +80,7 @@ public class LIDARBasedEnvironmentAwarenessUI
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
       lidarFrameViewer = new LidarFrameViewer(uiMessager, REAModuleAPI.LidarScanState);
-      stereoFrameViewer = new StereoFrameViewer(uiMessager, REAModuleAPI.StereoVisionPointCloudState, REAModuleAPI.UINavigationFrames);
+      stereoFrameViewer = new StereoFrameViewer(uiMessager, REAModuleAPI.StereoVisionPointCloudState, REAModuleAPI.UISensorPoseHistoryFrames);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new StereoVisionPointCloudDataExporter(uiMessager);
