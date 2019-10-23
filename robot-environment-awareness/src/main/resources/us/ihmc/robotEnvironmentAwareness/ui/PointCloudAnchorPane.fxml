@@ -82,7 +82,7 @@
                   <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="79.0" text="Frames" textAlignment="CENTER" />
-                        <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" max="200.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="20.0">
+                        <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" min="1" max="200.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="20.0">
                            <tooltip>
                               <Tooltip text="Set number of frames to visualize" />
                            </tooltip>
