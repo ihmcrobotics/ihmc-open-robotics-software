@@ -339,18 +339,21 @@ public class AvatarEstimatorThread
             forceSensorStateUpdater.updateForceSensorState();
          }
 
-         for (int i = 0; i < this.additionalStateEstimatorKeys.length; i++)
+         if(this.additionalStateEstimatorKeys != null && this.additionalStateEstimatorKeys.length > 0)
          {
-            StateEstimatorController estimator = this.additionalStateEstimatorKeys[i];
-            YoBoolean initFlag = this.additionalEstimatorInitFlags.get(estimator.getName());
-            if(initFlag.getBooleanValue())
+            for (int i = 0; i < this.additionalStateEstimatorKeys.length; i++)
             {
-               estimator.initialize();
-               initFlag.set(false);
-            }
-            else
-            {
-               estimator.doControl();
+               StateEstimatorController estimator = this.additionalStateEstimatorKeys[i];
+               YoBoolean initFlag = this.additionalEstimatorInitFlags.get(estimator.getName());
+               if(initFlag.getBooleanValue())
+               {
+                  estimator.initialize();
+                  initFlag.set(false);
+               }
+               else
+               {
+                  estimator.doControl();
+               }
             }
          }
 
