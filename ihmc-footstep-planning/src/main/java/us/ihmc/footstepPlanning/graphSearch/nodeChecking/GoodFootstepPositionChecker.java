@@ -146,7 +146,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
 
             Point3D grandparentPosition = new Point3D(grandparentNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             grandparentSnapData.getSnapTransform().transform(grandparentPosition);
-            double grandparentTranslationScaleFactor = 1.5;
+            double grandparentTranslationScaleFactor = parameters.getTranslationScaleFromGrandparentNode();
 
             Point3D nodePosition = new Point3D(nodeToCheck.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             snapData.getSnapTransform().transform(nodePosition);
@@ -164,9 +164,9 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
                return false;
             }
 
-            if(largeStepDown && translationFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
+            if (largeStepDown && translationFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
             {
-               rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
+               rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
                return false;
             }
          }
