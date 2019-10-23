@@ -99,17 +99,13 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
 
       if (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
-         // TODO is the min check necessary, because it should be getting called anyways?
-         double maxXWhenForwardAndDown = Math.min(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepReach());
-
-         if ((solePositionInParentZUpFrame.getX() > maxXWhenForwardAndDown))
+         if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()))
          {
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
             return false;
          }
 
-         double maxYWhenForwardAndDown = Math.min(parameters.getMaximumStepYWhenForwardAndDown(), parameters.getMaximumStepWidth());
-         if (sidedWidth > maxYWhenForwardAndDown)
+         if (sidedWidth > parameters.getMaximumStepYWhenForwardAndDown())
          {
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
             return false;
@@ -126,16 +122,13 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
 
       if (solePositionInParentZUpFrame.getZ() > parameters.getMaximumStepZWhenSteppingUp())
       {
-         // TODO is the min check necessary, because it should be getting called anyways?
-         double maxReachWhenUp = Math.min(parameters.getMaximumStepReach(), parameters.getMaximumStepReachWhenSteppingUp());
-         if (stepReach > maxReachWhenUp)
+         if (stepReach > parameters.getMaximumStepReachWhenSteppingUp())
          {
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
             return false;
          }
 
-         double maxYWhenUp = Math.min(parameters.getMaximumStepWidthWhenSteppingUp(), parameters.getMaximumStepReachWhenSteppingUp());
-         if (sidedWidth > maxYWhenUp)
+         if (sidedWidth > parameters.getMaximumStepReachWhenSteppingUp())
          {
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
             return false;
