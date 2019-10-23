@@ -3,6 +3,8 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import java.io.File;
 import java.io.IOException;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -27,9 +29,10 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorP
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.EstimatedSensorPoseViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.AbstractSensorFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LidarFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.StereoFrameViewer;
 
 public class LIDARBasedEnvironmentAwarenessUI
 {
@@ -39,8 +42,8 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    private final REAUIMessager uiMessager;
    private final REAMeshViewer reaMeshViewer;
-   private final LidarFrameViewer lidarFrameViewer;
-   private final EstimatedSensorPoseViewer estimatedSensorPoseViewer;
+   private final AbstractSensorFrameViewer<LidarScanMessage> lidarFrameViewer;
+   private final AbstractSensorFrameViewer<StereoVisionPointCloudMessage> stereoFrameViewer;
 
    @FXML
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
@@ -76,8 +79,8 @@ public class LIDARBasedEnvironmentAwarenessUI
       uiMessager.startMessager();
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
-      lidarFrameViewer = new LidarFrameViewer(uiMessager);
-      estimatedSensorPoseViewer = new EstimatedSensorPoseViewer(uiMessager);
+      lidarFrameViewer = new LidarFrameViewer(uiMessager, REAModuleAPI.LidarScanState);
+      stereoFrameViewer = new StereoFrameViewer(uiMessager, REAModuleAPI.StereoVisionPointCloudState);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new StereoVisionPointCloudDataExporter(uiMessager);
@@ -91,7 +94,7 @@ public class LIDARBasedEnvironmentAwarenessUI
 
       view3dFactory.addNodeToView(reaMeshViewer.getRoot());
       view3dFactory.addNodeToView(lidarFrameViewer.getRoot());
-      view3dFactory.addNodeToView(estimatedSensorPoseViewer.getRoot());
+      view3dFactory.addNodeToView(stereoFrameViewer.getRoot());
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
       uiConnectionHandler.start();
@@ -179,7 +182,7 @@ public class LIDARBasedEnvironmentAwarenessUI
 
          reaMeshViewer.stop();
          lidarFrameViewer.stop();
-         estimatedSensorPoseViewer.stop();
+         stereoFrameViewer.stop();
       }
       catch (Exception e)
       {

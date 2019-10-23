@@ -1,12 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -15,6 +14,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.JavaFXTools;
@@ -42,8 +42,7 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
 
    private final AtomicReference<MeshView> historyMeshToRender = new AtomicReference<>(null);
 
-   private final ArrayList<Point3D> sensorOriginHistory = new ArrayList<Point3D>();
-   private final TDoubleArrayList confidenceFactorHistory = new TDoubleArrayList();
+   private final LinkedList<SensorOrigin> sensorOriginHistory = new LinkedList<SensorOrigin>();
 
    private final AtomicReference<Boolean> enable;
    private final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -51,7 +50,7 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
    public EstimatedSensorPoseViewer(REAUIMessager uiMessager)
    {
       sensorPoseSourceType = uiMessager.createInput(REAModuleAPI.SensorPoseSourceType, SensorPoseSourceType.STEREO);
-      numberOfFramesToShow = uiMessager.createInput(REAModuleAPI.UINavigationFrames, 30);
+      numberOfFramesToShow = uiMessager.createInput(REAModuleAPI.UINavigationFrames, 10);
 
       for (SensorPoseSourceType sourceType : SensorPoseSourceType.values())
          latestSensorPoseMapToMessages.put(sourceType, new AtomicReference<Affine>());
@@ -123,16 +122,17 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
 
    private void addHistory(double confidence, Point3D newHistory)
    {
-      sensorOriginHistory.add(new Point3D(newHistory));
-      confidenceFactorHistory.add(confidence);
+      sensorOriginHistory.add(new SensorOrigin(newHistory, confidence));
+      if (sensorOriginHistory.size() == numberOfFramesToShow.get())
+         sensorOriginHistory.removeFirst();
 
       meshBuilder.clear();
       Point3D32 point = new Point3D32();
       for (int i = 0; i < sensorOriginHistory.size(); i++)
       {
-         point.set(sensorOriginHistory.get(i));
-         int redScaler = (int) (0xFF * (1 - confidenceFactorHistory.get(i)));
-         int greenScaler = (int) (0xFF * confidenceFactorHistory.get(i));
+         point.set(sensorOriginHistory.get(i).origin);
+         int redScaler = (int) (0xFF * (1 - (sensorOriginHistory.get(i).confidence)));
+         int greenScaler = (int) (0xFF * (sensorOriginHistory.get(i).confidence));
          Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), point, confidenceColor);
       }
@@ -145,7 +145,6 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
    private void clear()
    {
       sensorOriginHistory.clear();
-      confidenceFactorHistory.clear();
 
       historyRoot.getChildren().clear();
    }
@@ -153,5 +152,17 @@ public class EstimatedSensorPoseViewer extends AnimationTimer
    public Node getRoot()
    {
       return root;
+   }
+
+   class SensorOrigin
+   {
+      private final Point3DBasics origin;
+      private final double confidence;
+
+      SensorOrigin(Point3D origin, double confidence)
+      {
+         this.origin = origin;
+         this.confidence = confidence;
+      }
    }
 }
