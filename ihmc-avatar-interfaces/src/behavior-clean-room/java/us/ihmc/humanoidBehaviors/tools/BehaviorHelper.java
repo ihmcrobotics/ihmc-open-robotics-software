@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PacketDestination;
@@ -75,7 +76,7 @@ public class BehaviorHelper
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
    private final List<ROS2Callback> ros2Callbacks = new ArrayList<>();
-   private final List<MessagerCallback> messagerCallbacks = new ArrayList<>();
+   private final List<Pair<Topic, TopicListener>> topicListeners = new ArrayList<>();
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -318,9 +319,8 @@ public class BehaviorHelper
 
    public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
    {
-      MessagerCallback<T> messagerCallback = new MessagerCallback<>(listener);
-      messagerCallbacks.add(messagerCallback);
-      messager.registerTopicListener(topic, messagerCallback);
+      topicListeners.add(Pair.of(topic, listener));
+      messager.registerTopicListener(topic, listener);
    }
 
    // Thread and Schedule Methods:
@@ -343,9 +343,12 @@ public class BehaviorHelper
       {
          ros2Callback.setEnabled(enabled);
       }
-      for (MessagerCallback messagerCallback : messagerCallbacks)
+      for (Pair<Topic, TopicListener> listenerPair : topicListeners)
       {
-         messagerCallback.setEnabled(enabled);
+         if (enabled)
+            messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
+         else
+            messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
       }
    }
 
