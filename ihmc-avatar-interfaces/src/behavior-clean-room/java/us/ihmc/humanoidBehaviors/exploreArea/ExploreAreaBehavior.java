@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -864,7 +863,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       FootstepDataListMessage messageWithOneStep = new FootstepDataListMessage(footstepDataListMessageFromPlan);
       messageWithOneStep.getFootstepDataList().clear();
       messageWithOneStep.getFootstepDataList().add().set(footstepDataMessage);
-      walkingCompleted = behaviorHelper.requestWalk(messageWithOneStep, referenceFrames, planarRegionsListFromPlan);
+      walkingCompleted = behaviorHelper.requestWalk(messageWithOneStep);
 
       LogTools.info("Stepping to " + footstepDataMessage.getLocation());
 
@@ -975,7 +974,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          supportFootFrame = nextStepFrame;
       }
 
-      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageToTurnInPlace, referenceFrames, concatenatedMap);
+      walkingCompleted = behaviorHelper.requestWalk(footstepDataListMessageToTurnInPlace);
    }
 
    private void doTurnInPlaceStateAction(double timeInState)

@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -296,7 +295,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
             FullHumanoidRobotModel fullRobotModel = behaviorHelper.pollFullRobotModel();
             FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
-            behaviorHelper.publishFootstepList(footstepList);
+            behaviorHelper.requestWalk(footstepList);
          }
       }
       else if (stepping.hasChanged())

@@ -70,7 +70,6 @@ public class BehaviorHelper
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
@@ -88,17 +87,20 @@ public class BehaviorHelper
 
       // TODO: Remove all this construction until needed
 
-      remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
+      // TODO: Create enable/disable support for these
+      remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel); // robot commands
+      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node); // robot state
 
-      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager); // planner toolbox API
 
+      // TODO: Move these into classes
       ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
-      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, robotName, controllerId);
       stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, robotName, controllerId);
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+
+      // TODO: Make accessors to classes; interface?
    }
 
    /**
@@ -116,14 +118,10 @@ public class BehaviorHelper
     *
     * Helper tools (threading, etc.)
     *
+    * @return
     */
 
    // Robot Command Methods:
-
-   public void publishFootstepList(FootstepDataListMessage footstepList)
-   {
-      footstepDataListPublisher.publish(footstepList);
-   }
 
    public void publishPose(Pose3D pose, double confidenceFactor, long timestamp)
    {
@@ -136,15 +134,24 @@ public class BehaviorHelper
       stampedPosePublisher.publish(stampedPosePacket);
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames,
-                                                              Boolean swingOverPlanarRegions, PlanarRegionsList planarRegionsList)
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepList)
+   {
+      return remoteRobotControllerInterface.requestWalk(footstepList);
+   }
+
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
+                                                              HumanoidReferenceFrames humanoidReferenceFrames,
+                                                              boolean swingOverPlanarRegions,
+                                                              PlanarRegionsList planarRegionsList)
    {
       return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames, PlanarRegionsList planarRegionsList)
+   public TypedNotification<WalkingStatusMessage> requestWalkWithSwingOvers(FootstepDataListMessage footstepPlan,
+                                                                            HumanoidReferenceFrames humanoidReferenceFrames,
+                                                                            PlanarRegionsList planarRegionsList)
    {
-      return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, false, planarRegionsList);
+      return remoteRobotControllerInterface.requestWalk(footstepPlan, humanoidReferenceFrames, true, planarRegionsList);
    }
 
    public void pauseWalking()
