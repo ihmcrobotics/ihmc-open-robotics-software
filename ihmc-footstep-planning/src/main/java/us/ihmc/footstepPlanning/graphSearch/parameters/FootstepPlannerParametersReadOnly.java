@@ -162,9 +162,12 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Maximum step reach when stepping up.
     *
     * <p>
-    * Long steps forward are rejected by the planner if two criteria are met:
+    * Long steps forward are rejected by the planner if one of two criteria are met:
     * <ul>
-    *    <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
     *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
     * </ul>
     * </p>
@@ -181,12 +184,40 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Maximum step width when stepping up.
+    *
+    * <p>
+    * Long steps forward are rejected by the planner if one of two criteria are met:
+    * <ul>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    *    Large steps forward and up can cause the robot to surpass its torque limits.
+    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    *    it's very close to saturating its torque limits.
+    * </p>
+    */
+   default double getMaximumStepWidthWhenSteppingUp()
+   {
+      return get(maximumStepWidthWhenSteppingUp);
+   }
+
+   /**
     * Step height for considering stepping up.
     *
     * <p>
-    * Long steps forward are rejected by the planner if two criteria are met:
+    * Long steps forward are rejected by the planner if one of two criteria are met:
     * <ul>
-    *    <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
     *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
     * </ul>
     * </p>
@@ -203,12 +234,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Maximum step length when stepping forward and down.
+    * Maximum step width when stepping forward and down.
     *
     * <p>
-    * Large steps forward and down are rejected by the planner if two criteria are met:
+    * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
     * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> - OR - </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> - AND - </li>
     * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
@@ -225,12 +259,40 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Maximum step length when stepping forward and down.
+    *
+    * <p>
+    * Large steps forward and down are rejected by the planner if one of two criteria are met:
+    * <ul>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> - OR - </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> - AND - </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * </ul>
+    * </p>
+    *
+    * <p>
+    * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+    * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+    * it's very close to hitting it's ankle pitch joint limit
+    * </p>
+    */
+   default double getMaximumStepYWhenForwardAndDown()
+   {
+      return get(maximumStepYWhenForwardAndDown);
+   }
+
+   /**
     * Maximum step height when stepping forward and down.
     *
     * <p>
-    * Large steps forward and down are rejected by the planner if two criteria are met:
+    * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
     * <li> The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> - OR - </li>
+    * <li> The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> - AND - </li>
     * <li> The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
