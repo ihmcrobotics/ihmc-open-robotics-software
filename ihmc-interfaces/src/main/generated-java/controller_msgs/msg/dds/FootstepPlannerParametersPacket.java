@@ -179,6 +179,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_z_when_forward_and_down_ = -1.0;
    /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach or width is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public double translation_scale_from_grandparent_node_ = -1.0;
+   /**
             * Maximum vertical distance between consecutive footsteps
             * 
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
@@ -486,6 +495,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_y_when_forward_and_down_ = other.maximum_step_y_when_forward_and_down_;
 
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
+
+      translation_scale_from_grandparent_node_ = other.translation_scale_from_grandparent_node_;
 
       maximum_step_z_ = other.maximum_step_z_;
 
@@ -993,6 +1004,31 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZWhenForwardAndDown()
    {
       return maximum_step_z_when_forward_and_down_;
+   }
+
+   /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach or width is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public void setTranslationScaleFromGrandparentNode(double translation_scale_from_grandparent_node)
+   {
+      translation_scale_from_grandparent_node_ = translation_scale_from_grandparent_node;
+   }
+   /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach or width is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public double getTranslationScaleFromGrandparentNode()
+   {
+      return translation_scale_from_grandparent_node_;
    }
 
    /**
@@ -1898,6 +1934,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_forward_and_down_, other.maximum_step_z_when_forward_and_down_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_scale_from_grandparent_node_, other.translation_scale_from_grandparent_node_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_yaw_reduction_factor_at_max_reach_, other.step_yaw_reduction_factor_at_max_reach_, epsilon)) return false;
@@ -2041,6 +2079,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_z_when_forward_and_down_ != otherMyClass.maximum_step_z_when_forward_and_down_) return false;
 
+      if(this.translation_scale_from_grandparent_node_ != otherMyClass.translation_scale_from_grandparent_node_) return false;
+
       if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
 
       if(this.step_yaw_reduction_factor_at_max_reach_ != otherMyClass.step_yaw_reduction_factor_at_max_reach_) return false;
@@ -2181,6 +2221,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_y_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z_when_forward_and_down=");
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
+      builder.append("translation_scale_from_grandparent_node=");
+      builder.append(this.translation_scale_from_grandparent_node_);      builder.append(", ");
       builder.append("maximum_step_z=");
       builder.append(this.maximum_step_z_);      builder.append(", ");
       builder.append("step_yaw_reduction_factor_at_max_reach=");

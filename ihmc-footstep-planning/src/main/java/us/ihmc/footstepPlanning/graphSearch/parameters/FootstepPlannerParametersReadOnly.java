@@ -309,6 +309,19 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+    * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+    * {@link #getMaximumStepZWhenForwardAndDown()}.
+    *
+    * If that is the case, it checks to see if the reach or width is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+    * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+    */
+   default double getTranslationScaleFromGrandparentNode()
+   {
+      return get(translationScaleFromGrandparentNode);
+   }
+
+   /**
     * Maximum vertical distance between consecutive footsteps
     *
     * <p>
