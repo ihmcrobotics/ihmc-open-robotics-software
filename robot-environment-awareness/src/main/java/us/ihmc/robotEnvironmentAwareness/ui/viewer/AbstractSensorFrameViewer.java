@@ -1,33 +1,64 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
+import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
+import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 {
+   private final AtomicReference<T> latestMessage;
+
    protected final JavaFXCoordinateSystem sensorCoordinateSystem;
    protected final Affine sensorPose = new Affine();
 
-   protected final AtomicReference<Affine> lastAffine = new AtomicReference<>();
+   private static final float ORIGIN_POINT_SIZE = 0.05f;
+   private static final int DEFAULT_NUMBER_OF_FRAMES = 1;
+   private final LinkedList<SensorFrame> sensorOriginHistory = new LinkedList<SensorFrame>();
+   private final AtomicReference<Integer> numberOfFramesToShow;
+
+   private final JavaFXMultiColorMeshBuilder meshBuilder;
 
    private final Group root = new Group();
+   private final Group affineRoot = new Group();
+   private final Group historyRoot = new Group();
 
-   public AbstractSensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState)
+   public AbstractSensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic)
    {
+      if(numberOfFramesTopic == null)
+         numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
+      else
+         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
+      uiMessager.registerTopicListener(REAModuleAPI.UINavigationClear, (c) -> clear());
+
+      meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
+
       sensorCoordinateSystem = new JavaFXCoordinateSystem(0.1);
       sensorCoordinateSystem.getTransforms().add(sensorPose);
-      root.getChildren().add(sensorCoordinateSystem);
+      affineRoot.getChildren().add(sensorCoordinateSystem);
+
+      root.getChildren().add(affineRoot);
+      root.getChildren().add(historyRoot);
       root.setMouseTransparent(true);
 
-      uiMessager.registerTopicListener(messageState, this::handleMessage);
+      latestMessage = uiMessager.createInput(messageState);
       uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
          if (isMessagerOpen)
             start();
@@ -39,9 +70,47 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
    @Override
    public void handle(long now)
    {
-      Affine affine = lastAffine.getAndSet(null);
+      if (latestMessage.get() == null)
+         return;
+
+      SensorFrame latestSensorFrame = extractSensorFrameFromMessage(latestMessage.getAndSet(null));
+
+      Affine affine = latestSensorFrame.getAffine();
       if (affine != null)
          sensorPose.setToTransform(affine);
+
+      sensorOriginHistory.add(latestSensorFrame);
+      if (sensorOriginHistory.size() == numberOfFramesToShow.get() + 1)
+         sensorOriginHistory.removeFirst();
+
+      if (sensorOriginHistory.size() == 0)
+         return;
+
+      meshBuilder.clear();
+      Point3D32 point = new Point3D32();
+      for (int i = 0; i < sensorOriginHistory.size(); i++)
+      {
+         sensorOriginHistory.get(i).getOrigin(point);
+         int redScaler = (int) (0xFF * (1 - (sensorOriginHistory.get(i).confidence)));
+         int greenScaler = (int) (0xFF * (sensorOriginHistory.get(i).confidence));
+         Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), point, confidenceColor);
+      }
+      MeshView historyMeshView = new MeshView(meshBuilder.generateMesh());
+      historyMeshView.setMaterial(meshBuilder.generateMaterial());
+      meshBuilder.clear();
+
+      if (historyMeshView != null)
+      {
+         historyRoot.getChildren().clear();
+         historyRoot.getChildren().add(historyMeshView);
+      }
+   }
+
+   private void clear()
+   {
+      sensorOriginHistory.clear();
+      historyRoot.getChildren().clear();
    }
 
    public Node getRoot()
@@ -49,5 +118,27 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
       return root;
    }
 
-   public abstract void handleMessage(T message);
+   protected abstract SensorFrame extractSensorFrameFromMessage(T message);
+
+   class SensorFrame
+   {
+      private final Affine affine;
+      private final double confidence;
+
+      SensorFrame(Point3DBasics position, QuaternionBasics orientation, double confidence)
+      {
+         this.affine = JavaFXTools.createAffineFromOrientation3DAndTuple(orientation, position);
+         this.confidence = confidence;
+      }
+
+      public Affine getAffine()
+      {
+         return affine;
+      }
+
+      void getOrigin(Point3D32 pointToPack)
+      {
+         pointToPack.set(affine.getTx(), affine.getTy(), affine.getTz());
+      }
+   }
 }
