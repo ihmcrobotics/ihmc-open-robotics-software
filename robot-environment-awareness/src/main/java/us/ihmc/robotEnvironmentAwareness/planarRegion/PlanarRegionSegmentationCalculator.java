@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxInterface;
 import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
@@ -245,7 +245,6 @@ public class PlanarRegionSegmentationCalculator
    public void growPlanarRegion(NormalOcTreeNode root, PlanarRegionSegmentationNodeData ocTreeNodePlanarRegion, OcTreeBoundingBoxInterface boundingBox,
                                 PlanarRegionSegmentationParameters parameters)
    {
-      //Vector3D cameraPosition = new Vector3D();
       double searchRadius = parameters.getSearchRadius();
 
       Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>();
@@ -377,8 +376,8 @@ public class PlanarRegionSegmentationCalculator
       this.boundingBox = boundingBox;
    }
 
-   public void setSensorPosition(Pose3D estimatedSensorPose)
+   public void setSensorPosition(Tuple3DReadOnly estimatedPosition)
    {
-      estimatedSensorPosition.set(estimatedSensorPose.getPosition());
+      estimatedSensorPosition.set(estimatedPosition);
    }
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -26,7 +27,7 @@ public class REAOcTreeBuffer
    private final AtomicReference<LidarScanMessage> latestLidarScanMessage = new AtomicReference<>(null);
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<ScanCollection> newFullScanReference = new AtomicReference<>(null);
-   private final AtomicReference<Pose3D> newSensorPoseReference = new AtomicReference<>(null);
+   private final AtomicReference<Pose3DReadOnly> newSensorPoseReference = new AtomicReference<>(null);
 
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> enableBuffer;
@@ -37,7 +38,7 @@ public class REAOcTreeBuffer
    private final AtomicBoolean isBufferFull = new AtomicBoolean(false);
    private final AtomicBoolean isBufferRequested = new AtomicBoolean(false);
    private final AtomicReference<NormalOcTree> newBuffer = new AtomicReference<>(null);
-   private final AtomicReference<Pose3D> newSensorPoseBuffer = new AtomicReference<>(null);
+   private final AtomicReference<Pose3DReadOnly> newSensorPoseBuffer = new AtomicReference<>(null);
 
    private final AtomicReference<Boolean> isBufferStateRequested;
 
@@ -125,7 +126,7 @@ public class REAOcTreeBuffer
          {
             updateScanCollection();
             ScanCollection newScan = newFullScanReference.getAndSet(null);
-            Pose3D newSensorPose = newSensorPoseReference.getAndSet(null);
+            Pose3DReadOnly newSensorPose = newSensorPoseReference.getAndSet(null);
 
             if (!enable.get() || !enableBuffer.get() || clearBuffer.getAndSet(false))
             {
@@ -193,7 +194,7 @@ public class REAOcTreeBuffer
       return newBuffer.getAndSet(null);
    }
 
-   public Pose3D pollNewSensorPoseBuffer()
+   public Pose3DReadOnly pollNewSensorPoseBuffer()
    {
       return newSensorPoseBuffer.getAndSet(null);
    }

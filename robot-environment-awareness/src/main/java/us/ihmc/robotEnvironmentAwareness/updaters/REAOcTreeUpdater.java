@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -26,7 +28,7 @@ public class REAOcTreeUpdater
 {
    private final Messager reaMessager;
    private NormalOcTree referenceOctree;
-   private Pose3D sensorPose = new Pose3D();
+   private Pose3DBasics sensorPose = new Pose3D();
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
 
    private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
@@ -147,7 +149,7 @@ public class REAOcTreeUpdater
             buffer.submitBufferRequest();
 
          NormalOcTree bufferOctree = buffer.pollNewBuffer();
-         Pose3D bufferSensorPose = buffer.pollNewSensorPoseBuffer();
+         Pose3DReadOnly bufferSensorPose = buffer.pollNewSensorPoseBuffer();
 
          if (bufferOctree != null)
          {
@@ -211,7 +213,7 @@ public class REAOcTreeUpdater
       return referenceOctree;
    }
 
-   public Pose3D getSensorPose()
+   public Pose3DReadOnly getSensorPose()
    {
       return sensorPose;
    }
