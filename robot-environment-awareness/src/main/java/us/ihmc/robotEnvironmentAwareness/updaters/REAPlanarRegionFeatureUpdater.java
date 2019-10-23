@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -63,7 +63,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
    private final AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
-   
+
    public REAPlanarRegionFeatureUpdater(Messager reaMessager)
    {
       this.reaMessager = reaMessager;
@@ -153,7 +153,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update(NormalOcTree octree, Pose3D estimatedSensorPose)
+   public void update(NormalOcTree octree, Pose3DReadOnly estimatedSensorPose)
    {
       if (!isOcTreeEnabled.get())
          return;
@@ -173,12 +173,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
-      segmentationCalculator.setSensorPosition(estimatedSensorPose);
-      
+      segmentationCalculator.setSensorPosition(estimatedSensorPose.getPosition());
+
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      
+
       List<PlanarRegion> unmergedCustomPlanarRegions;
 
       if (clearCustomRegions.getAndSet(false))
@@ -213,12 +213,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    public void registerCustomPlanarRegion(PlanarRegion planarRegion)
    {
-      if(planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
+      if (planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
       {
          // ignore if region id isn't set
          return;
       }
-      else if(planarRegion.isEmpty())
+      else if (planarRegion.isEmpty())
       {
          customPlanarRegions.remove(planarRegion.getRegionId());
       }

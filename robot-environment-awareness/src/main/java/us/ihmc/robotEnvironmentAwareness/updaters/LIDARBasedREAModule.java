@@ -23,7 +23,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -205,7 +205,7 @@ public class LIDARBasedREAModule
       try
       {
          NormalOcTree mainOctree = mainUpdater.getMainOctree();
-         Pose3D sensorPose = mainUpdater.getSensorPose();
+         Pose3DReadOnly sensorPose = mainUpdater.getSensorPose();
          if (clearOcTree.getAndSet(false))
          {
             lidarBufferUpdater.clearBuffer();
