@@ -144,6 +144,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown, maximumStepYWhenForwardAndDown);
    }
 
+   default void setTranslationScaleFromGrandparentNode(double translationScaleFromGrandparentNode)
+   {
+      set(FootstepPlannerParameterKeys.translationScaleFromGrandparentNode, translationScaleFromGrandparentNode);
+   }
+
    default void setIdealFootstepWidth(double idealFootstepWidth)
    {
       set(FootstepPlannerParameterKeys.idealFootstepWidth, idealFootstepWidth);
@@ -369,6 +374,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZWhenForwardAndDown() != -1.0)
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
+      if (parametersPacket.getTranslationScaleFromGrandparentNode() != -1.0)
+         setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
       if (parametersPacket.getMaximumStepZ() != -1.0)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
       if (parametersPacket.getStepYawReductionFactorAtMaxReach() != -1.0)

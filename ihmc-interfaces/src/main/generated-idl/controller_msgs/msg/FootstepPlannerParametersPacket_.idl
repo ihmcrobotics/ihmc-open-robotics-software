@@ -195,6 +195,16 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double maximum_step_z_when_forward_and_down;
         /**
+         * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+         * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+         * {@link #getMaximumStepZWhenForwardAndDown()}.
+         * 
+         * If that is the case, it checks to see if the reach or width is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+         * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+         */
+        @defaultValue(value=-1.0)
+        double translation_scale_from_grandparent_node;
+        /**
          * Maximum vertical distance between consecutive footsteps
          * 
          * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
