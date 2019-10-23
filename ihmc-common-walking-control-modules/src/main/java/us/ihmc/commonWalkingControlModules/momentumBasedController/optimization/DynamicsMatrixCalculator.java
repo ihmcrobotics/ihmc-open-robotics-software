@@ -18,6 +18,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 
@@ -166,6 +167,18 @@ public class DynamicsMatrixCalculator
    public void getBodyContactForceJacobian(DenseMatrix64F bodyContactForceJacobianToPack)
    {
       bodyContactForceJacobianToPack.set(bodyContactForceJacobian);
+   }
+
+   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   {
+      MatrixTools.setMatrixBlock(massMatrixToPack, 0, 0, floatingBaseMassMatrix, 0, 0, floatingBaseMassMatrix.getNumRows(), floatingBaseMassMatrix.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(massMatrixToPack, floatingBaseMassMatrix.getNumRows(), 0, bodyMassMatrix, 0, 0, bodyMassMatrix.getNumRows(), bodyMassMatrix.getNumCols(), 1.0);
+   }
+
+   public void getCoriolisMatrix(DenseMatrix64F coriolisMatrixToPack)
+   {
+      MatrixTools.setMatrixBlock(coriolisMatrixToPack, 0, 0, floatingBaseCoriolisMatrix, 0, 0, floatingBaseCoriolisMatrix.getNumRows(), floatingBaseCoriolisMatrix.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(coriolisMatrixToPack, floatingBaseCoriolisMatrix.getNumRows(), 0, bodyCoriolisMatrix, 0, 0, bodyCoriolisMatrix.getNumRows(), bodyCoriolisMatrix.getNumCols(), 1.0);
    }
 
    public DenseMatrix64F computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
