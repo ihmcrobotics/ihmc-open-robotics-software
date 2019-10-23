@@ -355,6 +355,16 @@ public class ExternalForceEstimator implements RobotController
       estimatedExternalWrench.setIncludingFrame(geometricJacobian.getBaseFrame(), estimatedExternalWrenchMatrix);
    }
 
+   public void setEstimatorGain(double estimatorGain)
+   {
+      this.wrenchEstimationGain.set(estimatorGain);
+   }
+
+   public void setExternalForcePointOffset(Tuple3DReadOnly externalForcePointOffset)
+   {
+      // TODO refactor so that offset is an internal field
+   }
+
    public SpatialForceReadOnly getEstimatedExternalWrench()
    {
       return estimatedExternalWrench;
