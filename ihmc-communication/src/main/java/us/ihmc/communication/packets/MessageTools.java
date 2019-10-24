@@ -109,14 +109,14 @@ public class MessageTools
    }
 
    public static LidarScanMessage createLidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan,
-                                                         double confidence)
+                                                         double sensorPoseConfidence)
    {
       LidarScanMessage message = new LidarScanMessage();
       message.setRobotTimestamp(timestamp);
       message.getLidarPosition().set(lidarPosition);
       message.getLidarOrientation().set(lidarOrientation);
       message.getScan().add(scan);
-      message.setConfidence(confidence);
+      message.setSensorPoseConfidence(sensorPoseConfidence);
       return message;
    }
 
@@ -445,14 +445,14 @@ public class MessageTools
    {
       return createStereoVisionPointCloudMessage(timestamp, pointCloud, colors, 1.0);
    }
-   
-   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors, double confidence)
+
+   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors, double poseConfidence)
    {
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
       message.setTimestamp(timestamp);
       message.getPointCloud().add(pointCloud);
       message.getColors().add(colors);
-      message.setConfidence(confidence);
+      message.setSensorPoseConfidence(poseConfidence);
       return message;
    }
 

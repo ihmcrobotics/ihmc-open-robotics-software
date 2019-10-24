@@ -18,7 +18,12 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public long timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D sensor_position_;
    public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
-   public double confidence_;
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            */
+   public double sensor_pose_confidence_;
+   public double point_cloud_confidence_;
    public us.ihmc.idl.IDLSequence.Float  point_cloud_;
    public us.ihmc.idl.IDLSequence.Integer  colors_;
 
@@ -46,7 +51,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.sensor_position_, sensor_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.sensor_orientation_, sensor_orientation_);
-      confidence_ = other.confidence_;
+      sensor_pose_confidence_ = other.sensor_pose_confidence_;
+
+      point_cloud_confidence_ = other.point_cloud_confidence_;
 
       point_cloud_.set(other.point_cloud_);
       colors_.set(other.colors_);
@@ -88,13 +95,30 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       return sensor_orientation_;
    }
 
-   public void setConfidence(double confidence)
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            */
+   public void setSensorPoseConfidence(double sensor_pose_confidence)
    {
-      confidence_ = confidence;
+      sensor_pose_confidence_ = sensor_pose_confidence;
    }
-   public double getConfidence()
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            */
+   public double getSensorPoseConfidence()
    {
-      return confidence_;
+      return sensor_pose_confidence_;
+   }
+
+   public void setPointCloudConfidence(double point_cloud_confidence)
+   {
+      point_cloud_confidence_ = point_cloud_confidence;
+   }
+   public double getPointCloudConfidence()
+   {
+      return point_cloud_confidence_;
    }
 
 
@@ -133,7 +157,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!this.sensor_position_.epsilonEquals(other.sensor_position_, epsilon)) return false;
       if (!this.sensor_orientation_.epsilonEquals(other.sensor_orientation_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_pose_confidence_, other.sensor_pose_confidence_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.point_cloud_confidence_, other.point_cloud_confidence_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.point_cloud_, other.point_cloud_, epsilon)) return false;
 
@@ -158,7 +184,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!this.sensor_position_.equals(otherMyClass.sensor_position_)) return false;
       if (!this.sensor_orientation_.equals(otherMyClass.sensor_orientation_)) return false;
-      if(this.confidence_ != otherMyClass.confidence_) return false;
+      if(this.sensor_pose_confidence_ != otherMyClass.sensor_pose_confidence_) return false;
+
+      if(this.point_cloud_confidence_ != otherMyClass.point_cloud_confidence_) return false;
 
       if (!this.point_cloud_.equals(otherMyClass.point_cloud_)) return false;
       if (!this.colors_.equals(otherMyClass.colors_)) return false;
@@ -180,8 +208,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       builder.append(this.sensor_position_);      builder.append(", ");
       builder.append("sensor_orientation=");
       builder.append(this.sensor_orientation_);      builder.append(", ");
-      builder.append("confidence=");
-      builder.append(this.confidence_);      builder.append(", ");
+      builder.append("sensor_pose_confidence=");
+      builder.append(this.sensor_pose_confidence_);      builder.append(", ");
+      builder.append("point_cloud_confidence=");
+      builder.append(this.point_cloud_confidence_);      builder.append(", ");
       builder.append("point_cloud=");
       builder.append(this.point_cloud_);      builder.append(", ");
       builder.append("colors=");
