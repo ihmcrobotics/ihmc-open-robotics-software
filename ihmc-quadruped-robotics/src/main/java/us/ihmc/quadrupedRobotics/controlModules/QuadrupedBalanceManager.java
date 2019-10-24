@@ -116,12 +116,14 @@ public class QuadrupedBalanceManager
                                                                                                                          YoAppearance.RGBColor(1, 0.5, 0.0),
                                                                                                                          YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
+   private final DoubleProvider durationToAllowEarlyTouchdown = new DoubleParameter("durationToAllowEarlyTouchdown", registry, 5.0e-2);
+
    public QuadrupedBalanceManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                   YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 
-      feetInContactForPlanner = new FeetInContactForPlanner(controllerToolbox);
+      feetInContactForPlanner = new FeetInContactForPlanner(controllerToolbox, durationToAllowEarlyTouchdown, registry);
 
       numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
