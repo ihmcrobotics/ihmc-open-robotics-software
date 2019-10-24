@@ -41,17 +41,15 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
-   private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private double dt;
+   private final CompositeFootstepPlanPostProcessing postProcessing = new CompositeFootstepPlanPostProcessing();
 
    public FootstepPlanPostProcessingToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
-                                                      YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                                      YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
-      this.dt = dt;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
@@ -61,14 +59,19 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    @Override
    public void updateInternal()
    {
-      toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 20.0)
+      FootstepPlanningToolboxOutputStatus latestOutput = latestFootstepPlan.getAndSet(null);
+
+      PlanarRegionsListMessage planarRegionsListMessage = latestOutput.getPlanarRegionsList();
+      if (planarRegionsListMessage == null)
       {
-         if (DEBUG)
-            LogTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         isDone.set(true);
-         return;
+         this.planarRegionsList = Optional.empty();
       }
+      else
+      {
+         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+         this.planarRegionsList = Optional.of(planarRegionsList);
+      }
+
 
       if (planarRegionsList.isPresent())
       {
@@ -80,8 +83,9 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
          yoGraphicPlanarRegionsList.clear();
       }
 
-      // DO OUR MODIFICATION
+      FootstepPlanningToolboxOutputStatus processedOutputStatus = postProcessing.postProcessFootstepPlan(latestOutput);
 
+      reportMessage(processedOutputStatus);
 
       finishUp();
    }
@@ -98,22 +102,6 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
-      toolboxTime.set(0.0);
-
-      FootstepPlanningToolboxOutputStatus latestOutput = latestFootstepPlan.getAndSet(null);
-
-      PlanarRegionsListMessage planarRegionsListMessage = latestOutput.getPlanarRegionsList();
-      if (planarRegionsListMessage == null)
-      {
-         this.planarRegionsList = Optional.empty();
-      }
-      else
-      {
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         this.planarRegionsList = Optional.of(planarRegionsList);
-      }
-
-
 
       return true;
    }
