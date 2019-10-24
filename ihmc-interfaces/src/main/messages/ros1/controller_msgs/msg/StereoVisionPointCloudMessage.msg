@@ -7,6 +7,8 @@ geometry_msgs/Point sensor_position
 
 geometry_msgs/Quaternion sensor_orientation
 
+float64 confidence
+
 float32[] point_cloud
 
 int32[] colors

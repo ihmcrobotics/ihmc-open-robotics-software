@@ -18,6 +18,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
    public long robot_timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D lidar_position_;
    public us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
+   public double confidence_;
    public us.ihmc.idl.IDLSequence.Float  scan_;
 
    public LidarScanMessage()
@@ -42,6 +43,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.lidar_position_, lidar_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.lidar_orientation_, lidar_orientation_);
+      confidence_ = other.confidence_;
+
       scan_.set(other.scan_);
    }
 
@@ -81,6 +84,15 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       return lidar_orientation_;
    }
 
+   public void setConfidence(double confidence)
+   {
+      confidence_ = confidence;
+   }
+   public double getConfidence()
+   {
+      return confidence_;
+   }
+
 
    public us.ihmc.idl.IDLSequence.Float  getScan()
    {
@@ -111,6 +123,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       if (!this.lidar_position_.epsilonEquals(other.lidar_position_, epsilon)) return false;
       if (!this.lidar_orientation_.epsilonEquals(other.lidar_orientation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.scan_, other.scan_, epsilon)) return false;
 
 
@@ -132,6 +146,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       if (!this.lidar_position_.equals(otherMyClass.lidar_position_)) return false;
       if (!this.lidar_orientation_.equals(otherMyClass.lidar_orientation_)) return false;
+      if(this.confidence_ != otherMyClass.confidence_) return false;
+
       if (!this.scan_.equals(otherMyClass.scan_)) return false;
 
       return true;
@@ -151,6 +167,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       builder.append(this.lidar_position_);      builder.append(", ");
       builder.append("lidar_orientation=");
       builder.append(this.lidar_orientation_);      builder.append(", ");
+      builder.append("confidence=");
+      builder.append(this.confidence_);      builder.append(", ");
       builder.append("scan=");
       builder.append(this.scan_);
       builder.append("}");

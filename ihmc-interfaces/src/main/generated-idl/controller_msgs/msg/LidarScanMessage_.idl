@@ -23,6 +23,7 @@ module controller_msgs
         long long robot_timestamp;
         geometry_msgs::msg::dds::Point lidar_position;
         geometry_msgs::msg::dds::Quaternion lidar_orientation;
+        double confidence;
         sequence<float, 200000> scan;
       };
     };
