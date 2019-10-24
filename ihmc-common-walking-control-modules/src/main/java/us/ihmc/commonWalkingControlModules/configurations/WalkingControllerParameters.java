@@ -502,6 +502,11 @@ public abstract class WalkingControllerParameters
       return false;
    }
 
+   public boolean minimizeAngularMomentumRateZDuringTransfer()
+   {
+      return false;
+   }
+
    /**
     * Determines whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the
     * controller (new feature to be tested with Atlas)
@@ -743,5 +748,14 @@ public abstract class WalkingControllerParameters
    public boolean usePelvisHeightControllerOnly()
    {
       return false;
+   }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.25;
    }
 }

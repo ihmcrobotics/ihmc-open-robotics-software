@@ -37,6 +37,16 @@ public abstract class ToeOffParameters
    }
 
    /**
+    * Maximum distance of the ICP to the toe off support polygon before allowing toe off.
+    *
+    * @return ICP distance (m).
+    */
+   public double getICPProximityForToeOff()
+   {
+      return 0.0;
+   }
+
+   /**
     * Whether or not the location of the CoP in the trailing foot must be close enough to the support polygon before allowing toe off.
     *
     * @return whether or not to check the CoP location.
@@ -152,6 +162,15 @@ public abstract class ToeOffParameters
    public double getKneeLowerLimitToTriggerToeOff()
    {
       return 0.0;
+   }
+
+   /**
+    * If this returns true, the Toe Off Manager will not check if the current desired ICP is in a good enough position to allow toe off.
+    * If this returns false, the Toe Off Manager will not transition to toe off unless the desired ICP is in a good enough position.
+    */
+   public boolean forceToeOffAtJointLimit()
+   {
+      return false;
    }
 
    /**

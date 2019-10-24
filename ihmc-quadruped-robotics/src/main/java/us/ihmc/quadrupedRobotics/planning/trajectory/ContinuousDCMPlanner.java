@@ -87,8 +87,12 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
    private final YoDouble timeInState = new YoDouble("timeInState", registry);
 
+   private final YoBoolean holdPosition = new YoBoolean("holdPosition", registry);
+
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtStartOfState = new YoFrameVector3D("dcmVelocityAtStartOfState", worldFrame, registry);
+
+   private final YoFramePoint3D dcmPositionToHold = new YoFramePoint3D("dcmPositionToHold", worldFrame, registry);
 
    private final YoFramePoint3D desiredDCMPosition = new YoFramePoint3D("plannerDesiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D desiredDCMVelocity = new YoFrameVector3D("plannerDesiredDCMVelocity", worldFrame, registry);
@@ -208,6 +212,16 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    public void completedStep()
    {
       onStateChange();
+   }
+
+   public void setHoldCurrentDesiredPosition(boolean holdPosition)
+   {
+      this.holdPosition.set(holdPosition);
+
+      if (holdPosition)
+      {
+         dcmPositionToHold.set(desiredDCMPosition);
+      }
    }
 
    private void onStateChange()
@@ -366,6 +380,11 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          tempVector.setToZero(supportFrame);
          desiredDCMPosition.setMatchingFrame(tempPoint);
          desiredDCMVelocity.setMatchingFrame(tempVector);
+      }
+      else if (holdPosition.getBooleanValue())
+      {
+         desiredDCMPosition.setMatchingFrame(dcmPositionToHold);
+         desiredDCMVelocity.setToZero();
       }
       else
       {

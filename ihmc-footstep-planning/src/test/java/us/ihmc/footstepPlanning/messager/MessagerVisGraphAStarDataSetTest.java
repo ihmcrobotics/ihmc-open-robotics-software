@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
+
+import java.util.List;
 
 public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
 {
@@ -20,7 +24,17 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
    @Test
    public void testDatasetsWithoutOcclusion()
    {
-      super.testDatasetsWithoutOcclusion();
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if(!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              if(!dataSet.getPlannerInput().getStepPlannerIsTestable())
+                                                                 return false;
+                                                              if (dataSet.getPlannerInput().getVisGraphIsInDevelopment())
+                                                                 return false;
+                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
+                                                           });
+      super.runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
 
    @Override
@@ -36,7 +50,7 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
       MessagerVisGraphAStarDataSetTest test = new MessagerVisGraphAStarDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
       ThreadTools.sleepForever();
       test.tearDown();
    }

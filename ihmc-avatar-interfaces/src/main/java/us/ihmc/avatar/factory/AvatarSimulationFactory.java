@@ -71,6 +71,7 @@ import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
@@ -174,6 +175,20 @@ public class AvatarSimulationFactory
       }
 
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
+      try
+      {
+         if (!isWindows())
+            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+      }
+      catch (NullPointerException npe)
+      {
+         // do nothing
+      }
+   }
+
+   private static boolean isWindows()
+   {
+      return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
    }
 
    private void setupSensorReaderFactory()

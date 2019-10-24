@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -7,11 +8,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
 {
-   public static final boolean CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE = false;
+   public final boolean createAngularMomentumPredictionModule;
+   private final RobotTarget robotTarget;
 
-   public ValkyrieSmoothCMPPlannerParameters()
+   public ValkyrieSmoothCMPPlannerParameters(RobotTarget robotTarget)
    {
       super(1.0);
+      this.robotTarget = robotTarget;
+
+      createAngularMomentumPredictionModule = (robotTarget != RobotTarget.SCS) ? false : true;
 
       endCoPName = CoPPointName.MIDFEET_COP;
       entryCoPName = CoPPointName.ENTRY_COP;
@@ -45,19 +50,27 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public int getNumberOfFootstepsToConsider()
    { // FIXME Workaround to speed up the ICP planner so the controller can meet its deadline.
-      return 2;
+      switch (robotTarget)
+      {
+         case GAZEBO:
+         case REAL_ROBOT:
+            return 2;
+         case SCS:
+         default:
+            return 3;
+      }
    }
 
    @Override
    public boolean planSwingAngularMomentum()
    {
-      return false;
+      return (robotTarget != RobotTarget.SCS) ? false : true;
    }
 
    @Override
    public boolean planTransferAngularMomentum()
    {
-      return false;
+      return (robotTarget != RobotTarget.SCS) ? false : true;
    }
 
    /** {@inheritDoc} */
@@ -88,7 +101,7 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
    {
-      if (CREATE_ANGULAR_MOMETUM_PREDICTION_MODULE)
+      if (createAngularMomentumPredictionModule)
       {
          return new AngularMomentumEstimationParameters()
          {

@@ -48,6 +48,8 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -72,6 +74,9 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +90,8 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPosition(), cdr);
       cdr.write_type_6(data.getGroundClearance());
 
+      cdr.write_type_9(data.getTrajectoryType());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedStepMessage data, us.ihmc.idl.CDR cdr)
@@ -95,6 +102,8 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPosition(), cdr);	
       data.setGroundClearance(cdr.read_type_6());
+      	
+      data.setTrajectoryType(cdr.read_type_9());
       	
 
    }
@@ -107,6 +116,7 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       ser.write_type_a("goal_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPosition());
 
       ser.write_type_6("ground_clearance", data.getGroundClearance());
+      ser.write_type_9("trajectory_type", data.getTrajectoryType());
    }
 
    @Override
@@ -117,6 +127,7 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       ser.read_type_a("goal_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPosition());
 
       data.setGroundClearance(ser.read_type_6("ground_clearance"));
+      data.setTrajectoryType(ser.read_type_9("trajectory_type"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedStepMessage src, controller_msgs.msg.dds.QuadrupedStepMessage dest)

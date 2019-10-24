@@ -62,6 +62,7 @@ public class QuadrupedFallDetector
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoDouble yoDcmDistanceOutsideUpcomingPolygon = new YoDouble("dcmDistanceOutsideUpcomingPolygon", registry);
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
+   private final YoEnum<FallDetectionType> fallDetectionReason = YoEnum.create("fallDetectionReason", "", FallDetectionType.class, registry, true);
    private final GlitchFilteredYoBoolean isFallDetected;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
@@ -123,21 +124,53 @@ public class QuadrupedFallDetector
       {
       case DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT:
          isFallDetectedUnfiltered = detectDcmDistanceOutsideSupportPolygonLimitFailure();
+         if (isFallDetectedUnfiltered)
+            fallDetectionReason.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
+
          break;
       case ROLL_LIMIT:
          isFallDetectedUnfiltered = detectRollLimitFailure();
+         if (isFallDetectedUnfiltered)
+            fallDetectionReason.set(FallDetectionType.ROLL_LIMIT);
          break;
       case PITCH_LIMIT:
          isFallDetectedUnfiltered = detectPitchLimitFailure();
+         if (isFallDetectedUnfiltered)
+            fallDetectionReason.set(FallDetectionType.PITCH_LIMIT);
          break;
       case PITCH_AND_ROLL_LIMIT:
-         isFallDetectedUnfiltered = detectPitchLimitFailure() || detectRollLimitFailure();
+         boolean isPitchLimitFailureDetected = detectPitchLimitFailure();
+         boolean isRollLimitFailureDetected = detectRollLimitFailure();
+         if (isPitchLimitFailureDetected && isRollLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.PITCH_AND_ROLL_LIMIT);
+         else if (isPitchLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.PITCH_LIMIT);
+         else if (isRollLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.ROLL_LIMIT);
+         isFallDetectedUnfiltered = isPitchLimitFailureDetected || isRollLimitFailureDetected;
          break;
       case HEIGHT_LIMIT:
          isFallDetectedUnfiltered = detectHeightLimitFailure();
+         if (isFallDetectedUnfiltered)
+            fallDetectionReason.set(FallDetectionType.HEIGHT_LIMIT);
          break;
       case ALL:
-         isFallDetectedUnfiltered = detectDcmDistanceOutsideSupportPolygonLimitFailure() || detectPitchLimitFailure() || detectRollLimitFailure() || detectHeightLimitFailure();
+         boolean isDCMOutsideSupportPolygon = detectDcmDistanceOutsideSupportPolygonLimitFailure();
+         isPitchLimitFailureDetected = detectPitchLimitFailure();
+         isRollLimitFailureDetected = detectRollLimitFailure();
+         boolean isHeightLimitFailureDetected = detectHeightLimitFailure();
+         if (isDCMOutsideSupportPolygon)
+            fallDetectionReason.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
+         else if (isPitchLimitFailureDetected && isRollLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.PITCH_AND_ROLL_LIMIT);
+         else if (isPitchLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.PITCH_LIMIT);
+         else if (isRollLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.ROLL_LIMIT);
+         else if (isHeightLimitFailureDetected)
+            fallDetectionReason.set(FallDetectionType.HEIGHT_LIMIT);
+
+         isFallDetectedUnfiltered = isDCMOutsideSupportPolygon || isPitchLimitFailureDetected || isRollLimitFailureDetected || isHeightLimitFailureDetected;
          break;
       default:
          isFallDetectedUnfiltered = false;
@@ -149,6 +182,10 @@ public class QuadrupedFallDetector
       {
          for (int i = 0; i < controllerFailureListeners.size(); i++)
             controllerFailureListeners.get(i).controllerFailed(null);
+      }
+      else
+      {
+         fallDetectionReason.set(null);
       }
 
       return isFallDetected.getBooleanValue();

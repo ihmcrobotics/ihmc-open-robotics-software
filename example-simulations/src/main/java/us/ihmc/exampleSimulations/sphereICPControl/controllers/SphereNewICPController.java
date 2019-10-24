@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -257,6 +258,7 @@ public class SphereNewICPController implements GenericSphereController
    }
 
    private final FootstepTiming timing = new FootstepTiming();
+   private final FootstepShiftFractions shiftFractions = new FootstepShiftFractions();
 
    private class SingleSupportState implements State
    {
@@ -283,9 +285,9 @@ public class SphereNewICPController implements GenericSphereController
          controlToolbox.updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 
          timing.setTimings(controlToolbox.getSingleSupportDuration(), controlToolbox.getDoubleSupportDuration());
-         icpPlanner.addFootstepToPlan(nextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+         icpPlanner.addFootstepToPlan(nextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing, shiftFractions);
 
          RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
          icpPlanner.setSupportLeg(supportSide);
@@ -342,9 +344,9 @@ public class SphereNewICPController implements GenericSphereController
          controlToolbox.updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 
          timing.setTimings(controlToolbox.getSingleSupportDuration(), controlToolbox.getDoubleSupportDuration());
-         icpPlanner.addFootstepToPlan(nextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+         icpPlanner.addFootstepToPlan(nextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing, shiftFractions);
 
          RobotSide transferToSide = nextFootstep.getRobotSide().getOppositeSide();
 

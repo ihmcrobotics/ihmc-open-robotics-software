@@ -1,24 +1,24 @@
 package us.ihmc.avatar.icpPlannerTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -48,7 +48,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-@Tag("humanoid-flat-ground")
 public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestInterface
 {
    private final static double defaultSwingTime = 0.6;
@@ -92,7 +91,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test will drop the floor out from underneath the sim randomly while standing. Tests if detection and hold position are working well.
+    * This test will drop the floor out from underneath the sim randomly while standing. Tests if
+    * detection and hold position are working well.
     */
    @Disabled
    @Test
@@ -152,33 +152,44 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
       HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory()
-                                                                                          .getHighLevelHumanoidControllerToolbox();
+                                                                                    .getHighLevelHumanoidControllerToolbox();
 
       int numberOfChanges = 4;
 
-      for (int i=0; i<numberOfChanges; i++)
+      for (int i = 0; i < numberOfChanges; i++)
       {
          ArrayList<Point2D> newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), 0.4);
          changeAppendageGroundContactPointsToNewOffsets(robot, newContactPoints, jointNames.get(robotSide), robotSide);
          success = success & drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-         if (!success) break;
+         if (!success)
+            break;
 
          // check if the found support polygon is close to the actual one
          FrameConvexPolygon2DReadOnly foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
          FrameConvexPolygon2D actualSupport = new FrameConvexPolygon2D(foundSupport.getReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(newContactPoints));
          double epsilon = 5.0; // cm^2
          boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) * 10000 < epsilon;
-         if (!close) {
-            System.out.println("Area expected: " + actualSupport.getArea()*10000 + " [cm^2]");
-            System.out.println("Area found:    " + foundSupport.getArea()*10000  + " [cm^2]");
+         if (!close)
+         {
+            System.out.println("Area expected: " + actualSupport.getArea() * 10000 + " [cm^2]");
+            System.out.println("Area found:    " + foundSupport.getArea() * 10000 + " [cm^2]");
          }
          assertTrue("Support polygon found does not match the actual one.", close);
 
          // step in place to reset robot
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), 0.0, 0.0, 0.0);
          newContactPoints = generateContactPointsForAllOfFoot();
-         success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, newContactPoints, stepLocation, jointNames, true, defaultSwingTime, defaultTransferTime);
-         if (!success) break;
+         success = success && takeAStepOntoNewFootGroundContactPoints(robot,
+                                                                      fullRobotModel,
+                                                                      robotSide,
+                                                                      newContactPoints,
+                                                                      stepLocation,
+                                                                      jointNames,
+                                                                      true,
+                                                                      defaultSwingTime,
+                                                                      defaultTransferTime);
+         if (!success)
+            break;
       }
 
       drcSimulationTestHelper.checkNothingChanged();
@@ -194,7 +205,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
+    * This test pauses walking after the first two steps to check that functionality, and then finishes
+    * the plan.
     */
    @Test
    public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
@@ -235,7 +247,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          }
       });
 
-
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
@@ -263,7 +274,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test pauses walking on the first step to check that functionality, and then finishes the plan.
+    * This test pauses walking on the first step to check that functionality, and then finishes the
+    * plan.
     */
    @Test
    public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
@@ -304,7 +316,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          }
       });
 
-
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
@@ -332,7 +343,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    }
 
    /**
-    * This test pauses walking after the first two steps to check that functionality, and then finishes the plan.
+    * This test pauses walking after the first two steps to check that functionality, and then finishes
+    * the plan.
     */
    @Test
    public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
@@ -373,7 +385,6 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          }
       });
 
-
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
@@ -400,8 +411,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
-   private FootstepDataListMessage createForwardWalkingFootsteps(int numberOfSteps, double length, double stanceWidth, double swingDuration, double transferDuration)
+   private FootstepDataListMessage createForwardWalkingFootsteps(int numberOfSteps, double length, double stanceWidth, double swingDuration,
+                                                                 double transferDuration)
    {
       FootstepDataListMessage footstepListMessage = new FootstepDataListMessage();
 
@@ -470,7 +481,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          if (simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName) instanceof PinJoint)
          {
             PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName);
-            ankleJoint.setVelocityLimits(qd_max , b_vel_limit);
+            ankleJoint.setVelocityLimits(qd_max, b_vel_limit);
          }
          else
          {
@@ -481,7 +492,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          if (simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName) instanceof PinJoint)
          {
             PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName);
-            ankleJoint.setVelocityLimits(qd_max , b_vel_limit);
+            ankleJoint.setVelocityLimits(qd_max, b_vel_limit);
          }
          else
          {
@@ -507,23 +518,38 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-
    private boolean takeAStepOntoNewFootGroundContactPoints(HumanoidFloatingRootJointRobot robot, FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
-         ArrayList<Point2D> contactPointsInAnkleFrame, FramePoint3D placeToStep, SideDependentList<String> jointNames, boolean setPredictedContactPoints, double swingTime, double transferTime)
+                                                           ArrayList<Point2D> contactPointsInAnkleFrame, FramePoint3D placeToStep,
+                                                           SideDependentList<String> jointNames, boolean setPredictedContactPoints, double swingTime,
+                                                           double transferTime)
          throws SimulationExceededMaximumTimeException
    {
-      return takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, robotSide, contactPointsInAnkleFrame, contactPointsInAnkleFrame, placeToStep,
-            jointNames, setPredictedContactPoints, swingTime, transferTime);
+      return takeAStepOntoNewFootGroundContactPoints(robot,
+                                                     fullRobotModel,
+                                                     robotSide,
+                                                     contactPointsInAnkleFrame,
+                                                     contactPointsInAnkleFrame,
+                                                     placeToStep,
+                                                     jointNames,
+                                                     setPredictedContactPoints,
+                                                     swingTime,
+                                                     transferTime);
    }
 
    private boolean takeAStepOntoNewFootGroundContactPoints(HumanoidFloatingRootJointRobot robot, FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
-         ArrayList<Point2D> contactPointsInAnkleFrame, ArrayList<Point2D> predictedContactPointsInAnkleFrame, FramePoint3D placeToStep,
-         SideDependentList<String> jointNames, boolean setPredictedContactPoints, double swingTime, double transferTime) throws SimulationExceededMaximumTimeException
+                                                           ArrayList<Point2D> contactPointsInAnkleFrame, ArrayList<Point2D> predictedContactPointsInAnkleFrame,
+                                                           FramePoint3D placeToStep, SideDependentList<String> jointNames, boolean setPredictedContactPoints,
+                                                           double swingTime, double transferTime)
+         throws SimulationExceededMaximumTimeException
    {
       String jointName = jointNames.get(robotSide);
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
+      FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel,
+                                                                   robotSide,
+                                                                   predictedContactPointsInAnkleFrame,
+                                                                   placeToStep,
+                                                                   setPredictedContactPoints);
       message.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.publishToController(message);
@@ -534,8 +560,9 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return success;
    }
 
-   private FootstepDataMessage createFootstepDataMessage(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, ArrayList<Point2D> contactPointsInAnkleFrame, FramePoint3D placeToStep,
-         boolean setPredictedContactPoints)
+   private FootstepDataMessage createFootstepDataMessage(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
+                                                         ArrayList<Point2D> contactPointsInAnkleFrame, FramePoint3D placeToStep,
+                                                         boolean setPredictedContactPoints)
    {
       ReferenceFrame ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
@@ -557,7 +584,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       return footstepData;
    }
 
-   private void changeAppendageGroundContactPointsToNewOffsets(HumanoidFloatingRootJointRobot robot, ArrayList<Point2D> newContactPoints, String jointName, RobotSide robotSide)
+   private void changeAppendageGroundContactPointsToNewOffsets(HumanoidFloatingRootJointRobot robot, ArrayList<Point2D> newContactPoints, String jointName,
+                                                               RobotSide robotSide)
    {
       double time = robot.getTime();
       System.out.println("Changing contact points at time " + time);
@@ -684,10 +712,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
       double length = percentToKeep * (footLength);
-      double widthAtBack = percentToKeep * footWidth + (1-percentToKeep) * toeWidth;
+      double widthAtBack = percentToKeep * footWidth + (1 - percentToKeep) * toeWidth;
       ret.add(new Point2D(footForwardOffset, toeWidth / 2.0));
-      ret.add(new Point2D(footForwardOffset, - toeWidth / 2.0));
-      ret.add(new Point2D(footForwardOffset - length, - widthAtBack / 2.0));
+      ret.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
+      ret.add(new Point2D(footForwardOffset - length, -widthAtBack / 2.0));
       ret.add(new Point2D(footForwardOffset - length, widthAtBack / 2.0));
       return ret;
    }
@@ -702,10 +730,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
 
       double length = percentToKeep * (footLength);
-      double widthAtFront = percentToKeep * toeWidth + (1-percentToKeep) * footWidth;
+      double widthAtFront = percentToKeep * toeWidth + (1 - percentToKeep) * footWidth;
       ret.add(new Point2D(-footBackwardOffset + length, widthAtFront / 2.0));
-      ret.add(new Point2D(-footBackwardOffset + length, - widthAtFront / 2.0));
-      ret.add(new Point2D(-footBackwardOffset, - footWidth / 2.0));
+      ret.add(new Point2D(-footBackwardOffset + length, -widthAtFront / 2.0));
+      ret.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       ret.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
       return ret;
    }

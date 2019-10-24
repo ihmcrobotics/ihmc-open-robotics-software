@@ -31,6 +31,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public boolean check_for_body_box_collisions_;
    /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public boolean check_for_path_collisions_;
+   /**
             * Sets whether or not to perform the defined heuristic search policies.
             */
    public boolean perform_heuristic_search_policies_;
@@ -229,13 +234,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long minimum_steps_for_best_effort_plan_;
    /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public double body_ground_clearance_ = -1.0;
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -284,13 +282,114 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double min_y_clearance_from_stance_ = -1.0;
    /**
-            * When using a cost based planning approach this value defines the weighting parameters to be used
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
             */
-   public controller_msgs.msg.dds.FootstepPlannerCostParametersPacket cost_parameters_;
+   public double final_turn_proximity_ = -1.0;
+   /**
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+            */
+   public double final_turn_body_path_proximity_ = -1.0;
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double final_turn_proximity_blend_factor_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defined how the yaw of a footstep will be
+            * weighted in comparison to its position.
+            */
+   public double yaw_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the pitch will be weighted.
+            */
+   public double pitch_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the roll will be weighted.
+            */
+   public double roll_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getLateralWeight()}
+            */
+   public double forward_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach, this value defines how the lateral displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getForwardWeight()}
+            */
+   public double lateral_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping up will be
+            * weighted.
+            */
+   public double step_up_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping down will be
+            * weighted.
+            */
+   public double step_down_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double long_step_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double foothold_area_weight_ = -1.0;
+   /**
+            * When using a cost based planning approach this value defines the cost that is added for each step
+            * taken. Setting this value to a high number will favor plans with less steps.
+            */
+   public double cost_per_step_ = -1.0;
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+            */
+   public boolean use_quadratic_distance_cost_;
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+            */
+   public boolean use_quadratic_height_cost_;
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public double a_star_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public double vis_graph_with_a_star_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public double depth_first_heuristics_weight_ = -1.0;
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public double body_path_based_heuristics_weight_ = -1.0;
+   /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public long number_of_bounding_box_checks_ = 1;
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public double maximum_2d_distance_from_bounding_box_to_penalize_ = -1.0;
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public double bounding_box_cost_ = -1.0;
+   public double body_path_violation_weight_ = -1.0;
+   public double distance_from_path_tolerance_ = -1.0;
+   public double delta_yaw_from_reference_tolerance_ = -1.0;
 
    public FootstepPlannerParametersPacket()
    {
-      cost_parameters_ = new controller_msgs.msg.dds.FootstepPlannerCostParametersPacket();
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
@@ -304,6 +403,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       sequence_id_ = other.sequence_id_;
 
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
+
+      check_for_path_collisions_ = other.check_for_path_collisions_;
 
       perform_heuristic_search_policies_ = other.perform_heuristic_search_policies_;
 
@@ -357,8 +458,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
 
-      body_ground_clearance_ = other.body_ground_clearance_;
-
       body_box_height_ = other.body_box_height_;
 
       body_box_depth_ = other.body_box_depth_;
@@ -375,7 +474,56 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
 
-      controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.staticCopy(other.cost_parameters_, cost_parameters_);
+      final_turn_proximity_ = other.final_turn_proximity_;
+
+      final_turn_body_path_proximity_ = other.final_turn_body_path_proximity_;
+
+      final_turn_proximity_blend_factor_ = other.final_turn_proximity_blend_factor_;
+
+      yaw_weight_ = other.yaw_weight_;
+
+      pitch_weight_ = other.pitch_weight_;
+
+      roll_weight_ = other.roll_weight_;
+
+      forward_weight_ = other.forward_weight_;
+
+      lateral_weight_ = other.lateral_weight_;
+
+      step_up_weight_ = other.step_up_weight_;
+
+      step_down_weight_ = other.step_down_weight_;
+
+      long_step_weight_ = other.long_step_weight_;
+
+      foothold_area_weight_ = other.foothold_area_weight_;
+
+      cost_per_step_ = other.cost_per_step_;
+
+      use_quadratic_distance_cost_ = other.use_quadratic_distance_cost_;
+
+      use_quadratic_height_cost_ = other.use_quadratic_height_cost_;
+
+      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
+
+      vis_graph_with_a_star_heuristics_weight_ = other.vis_graph_with_a_star_heuristics_weight_;
+
+      depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
+
+      body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
+
+      number_of_bounding_box_checks_ = other.number_of_bounding_box_checks_;
+
+      maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
+
+      bounding_box_cost_ = other.bounding_box_cost_;
+
+      body_path_violation_weight_ = other.body_path_violation_weight_;
+
+      distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
+
+      delta_yaw_from_reference_tolerance_ = other.delta_yaw_from_reference_tolerance_;
+
    }
 
    /**
@@ -408,6 +556,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getCheckForBodyBoxCollisions()
    {
       return check_for_body_box_collisions_;
+   }
+
+   /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public void setCheckForPathCollisions(boolean check_for_path_collisions)
+   {
+      check_for_path_collisions_ = check_for_path_collisions;
+   }
+   /**
+            * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+            * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+            */
+   public boolean getCheckForPathCollisions()
+   {
+      return check_for_path_collisions_;
    }
 
    /**
@@ -989,27 +1154,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public void setBodyGroundClearance(double body_ground_clearance)
-   {
-      body_ground_clearance_ = body_ground_clearance;
-   }
-   /**
-            * Some node checkers will check if the body of the robot will move through a higher planar region
-            * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-            * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-            * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-            */
-   public double getBodyGroundClearance()
-   {
-      return body_ground_clearance_;
-   }
-
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -1161,13 +1305,391 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return min_y_clearance_from_stance_;
    }
 
+   /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public void setFinalTurnProximity(double final_turn_proximity)
+   {
+      final_turn_proximity_ = final_turn_proximity;
+   }
+   /**
+            * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+            */
+   public double getFinalTurnProximity()
+   {
+      return final_turn_proximity_;
+   }
 
    /**
-            * When using a cost based planning approach this value defines the weighting parameters to be used
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
             */
-   public controller_msgs.msg.dds.FootstepPlannerCostParametersPacket getCostParameters()
+   public void setFinalTurnBodyPathProximity(double final_turn_body_path_proximity)
    {
-      return cost_parameters_;
+      final_turn_body_path_proximity_ = final_turn_body_path_proximity;
+   }
+   /**
+            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+            */
+   public double getFinalTurnBodyPathProximity()
+   {
+      return final_turn_body_path_proximity_;
+   }
+
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public void setFinalTurnProximityBlendFactor(double final_turn_proximity_blend_factor)
+   {
+      final_turn_proximity_blend_factor_ = final_turn_proximity_blend_factor;
+   }
+   /**
+            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+            * the desired orientation is the final orientation.
+            */
+   public double getFinalTurnProximityBlendFactor()
+   {
+      return final_turn_proximity_blend_factor_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defined how the yaw of a footstep will be
+            * weighted in comparison to its position.
+            */
+   public void setYawWeight(double yaw_weight)
+   {
+      yaw_weight_ = yaw_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defined how the yaw of a footstep will be
+            * weighted in comparison to its position.
+            */
+   public double getYawWeight()
+   {
+      return yaw_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the pitch will be weighted.
+            */
+   public void setPitchWeight(double pitch_weight)
+   {
+      pitch_weight_ = pitch_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the pitch will be weighted.
+            */
+   public double getPitchWeight()
+   {
+      return pitch_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the roll will be weighted.
+            */
+   public void setRollWeight(double roll_weight)
+   {
+      roll_weight_ = roll_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the roll will be weighted.
+            */
+   public double getRollWeight()
+   {
+      return roll_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getLateralWeight()}
+            */
+   public void setForwardWeight(double forward_weight)
+   {
+      forward_weight_ = forward_weight;
+   }
+   /**
+            * When using a cost based planning approach, this value defines how the forward (or backward) displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getLateralWeight()}
+            */
+   public double getForwardWeight()
+   {
+      return forward_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach, this value defines how the lateral displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getForwardWeight()}
+            */
+   public void setLateralWeight(double lateral_weight)
+   {
+      lateral_weight_ = lateral_weight;
+   }
+   /**
+            * When using a cost based planning approach, this value defines how the lateral displacement
+            * of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+            * weight is averaged with the value returned by {@link #getForwardWeight()}
+            */
+   public double getLateralWeight()
+   {
+      return lateral_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping up will be
+            * weighted.
+            */
+   public void setStepUpWeight(double step_up_weight)
+   {
+      step_up_weight_ = step_up_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping up will be
+            * weighted.
+            */
+   public double getStepUpWeight()
+   {
+      return step_up_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping down will be
+            * weighted.
+            */
+   public void setStepDownWeight(double step_down_weight)
+   {
+      step_down_weight_ = step_down_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the height change when stepping down will be
+            * weighted.
+            */
+   public double getStepDownWeight()
+   {
+      return step_down_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public void setLongStepWeight(double long_step_weight)
+   {
+      long_step_weight_ = long_step_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double getLongStepWeight()
+   {
+      return long_step_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public void setFootholdAreaWeight(double foothold_area_weight)
+   {
+      foothold_area_weight_ = foothold_area_weight;
+   }
+   /**
+            * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+            */
+   public double getFootholdAreaWeight()
+   {
+      return foothold_area_weight_;
+   }
+
+   /**
+            * When using a cost based planning approach this value defines the cost that is added for each step
+            * taken. Setting this value to a high number will favor plans with less steps.
+            */
+   public void setCostPerStep(double cost_per_step)
+   {
+      cost_per_step_ = cost_per_step;
+   }
+   /**
+            * When using a cost based planning approach this value defines the cost that is added for each step
+            * taken. Setting this value to a high number will favor plans with less steps.
+            */
+   public double getCostPerStep()
+   {
+      return cost_per_step_;
+   }
+
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+            */
+   public void setUseQuadraticDistanceCost(boolean use_quadratic_distance_cost)
+   {
+      use_quadratic_distance_cost_ = use_quadratic_distance_cost;
+   }
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+            */
+   public boolean getUseQuadraticDistanceCost()
+   {
+      return use_quadratic_distance_cost_;
+   }
+
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+            */
+   public void setUseQuadraticHeightCost(boolean use_quadratic_height_cost)
+   {
+      use_quadratic_height_cost_ = use_quadratic_height_cost;
+   }
+   /**
+            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+            */
+   public boolean getUseQuadraticHeightCost()
+   {
+      return use_quadratic_height_cost_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
+   {
+      a_star_heuristics_weight_ = a_star_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the A Star planner.
+            */
+   public double getAStarHeuristicsWeight()
+   {
+      return a_star_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public void setVisGraphWithAStarHeuristicsWeight(double vis_graph_with_a_star_heuristics_weight)
+   {
+      vis_graph_with_a_star_heuristics_weight_ = vis_graph_with_a_star_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Visibility graph with A star planner.
+            */
+   public double getVisGraphWithAStarHeuristicsWeight()
+   {
+      return vis_graph_with_a_star_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public void setDepthFirstHeuristicsWeight(double depth_first_heuristics_weight)
+   {
+      depth_first_heuristics_weight_ = depth_first_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Depth First planner.
+            */
+   public double getDepthFirstHeuristicsWeight()
+   {
+      return depth_first_heuristics_weight_;
+   }
+
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public void setBodyPathBasedHeuristicsWeight(double body_path_based_heuristics_weight)
+   {
+      body_path_based_heuristics_weight_ = body_path_based_heuristics_weight;
+   }
+   /**
+            * Gets the weight for the heuristics in the Body path based planner.
+            */
+   public double getBodyPathBasedHeuristicsWeight()
+   {
+      return body_path_based_heuristics_weight_;
+   }
+
+   /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public void setNumberOfBoundingBoxChecks(long number_of_bounding_box_checks)
+   {
+      number_of_bounding_box_checks_ = number_of_bounding_box_checks;
+   }
+   /**
+            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+            * Additional checks are done by interpolating between the start and end steps
+            */
+   public long getNumberOfBoundingBoxChecks()
+   {
+      return number_of_bounding_box_checks_;
+   }
+
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum_2d_distance_from_bounding_box_to_penalize)
+   {
+      maximum_2d_distance_from_bounding_box_to_penalize_ = maximum_2d_distance_from_bounding_box_to_penalize;
+   }
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return maximum_2d_distance_from_bounding_box_to_penalize_;
+   }
+
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public void setBoundingBoxCost(double bounding_box_cost)
+   {
+      bounding_box_cost_ = bounding_box_cost;
+   }
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public double getBoundingBoxCost()
+   {
+      return bounding_box_cost_;
+   }
+
+   public void setBodyPathViolationWeight(double body_path_violation_weight)
+   {
+      body_path_violation_weight_ = body_path_violation_weight;
+   }
+   public double getBodyPathViolationWeight()
+   {
+      return body_path_violation_weight_;
+   }
+
+   public void setDistanceFromPathTolerance(double distance_from_path_tolerance)
+   {
+      distance_from_path_tolerance_ = distance_from_path_tolerance;
+   }
+   public double getDistanceFromPathTolerance()
+   {
+      return distance_from_path_tolerance_;
+   }
+
+   public void setDeltaYawFromReferenceTolerance(double delta_yaw_from_reference_tolerance)
+   {
+      delta_yaw_from_reference_tolerance_ = delta_yaw_from_reference_tolerance;
+   }
+   public double getDeltaYawFromReferenceTolerance()
+   {
+      return delta_yaw_from_reference_tolerance_;
    }
 
 
@@ -1191,6 +1713,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_path_collisions_, other.check_for_path_collisions_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_heuristic_search_policies_, other.perform_heuristic_search_policies_, epsilon)) return false;
 
@@ -1244,8 +1768,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_ground_clearance_, other.body_ground_clearance_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_depth_, other.body_box_depth_, epsilon)) return false;
@@ -1262,7 +1784,56 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
-      if (!this.cost_parameters_.epsilonEquals(other.cost_parameters_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_, other.final_turn_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_body_path_proximity_, other.final_turn_body_path_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_blend_factor_, other.final_turn_proximity_blend_factor_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pitch_weight_, other.pitch_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.roll_weight_, other.roll_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_weight_, other.forward_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_weight_, other.lateral_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_up_weight_, other.step_up_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_down_weight_, other.step_down_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.long_step_weight_, other.long_step_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foothold_area_weight_, other.foothold_area_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_distance_cost_, other.use_quadratic_distance_cost_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_height_cost_, other.use_quadratic_height_cost_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.vis_graph_with_a_star_heuristics_weight_, other.vis_graph_with_a_star_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_first_heuristics_weight_, other.depth_first_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_bounding_box_checks_, other.number_of_bounding_box_checks_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_violation_weight_, other.body_path_violation_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.delta_yaw_from_reference_tolerance_, other.delta_yaw_from_reference_tolerance_, epsilon)) return false;
+
 
       return true;
    }
@@ -1279,6 +1850,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
+
+      if(this.check_for_path_collisions_ != otherMyClass.check_for_path_collisions_) return false;
 
       if(this.perform_heuristic_search_policies_ != otherMyClass.perform_heuristic_search_policies_) return false;
 
@@ -1332,8 +1905,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
 
-      if(this.body_ground_clearance_ != otherMyClass.body_ground_clearance_) return false;
-
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
 
       if(this.body_box_depth_ != otherMyClass.body_box_depth_) return false;
@@ -1350,7 +1921,56 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
-      if (!this.cost_parameters_.equals(otherMyClass.cost_parameters_)) return false;
+      if(this.final_turn_proximity_ != otherMyClass.final_turn_proximity_) return false;
+
+      if(this.final_turn_body_path_proximity_ != otherMyClass.final_turn_body_path_proximity_) return false;
+
+      if(this.final_turn_proximity_blend_factor_ != otherMyClass.final_turn_proximity_blend_factor_) return false;
+
+      if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
+
+      if(this.pitch_weight_ != otherMyClass.pitch_weight_) return false;
+
+      if(this.roll_weight_ != otherMyClass.roll_weight_) return false;
+
+      if(this.forward_weight_ != otherMyClass.forward_weight_) return false;
+
+      if(this.lateral_weight_ != otherMyClass.lateral_weight_) return false;
+
+      if(this.step_up_weight_ != otherMyClass.step_up_weight_) return false;
+
+      if(this.step_down_weight_ != otherMyClass.step_down_weight_) return false;
+
+      if(this.long_step_weight_ != otherMyClass.long_step_weight_) return false;
+
+      if(this.foothold_area_weight_ != otherMyClass.foothold_area_weight_) return false;
+
+      if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
+
+      if(this.use_quadratic_distance_cost_ != otherMyClass.use_quadratic_distance_cost_) return false;
+
+      if(this.use_quadratic_height_cost_ != otherMyClass.use_quadratic_height_cost_) return false;
+
+      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
+
+      if(this.vis_graph_with_a_star_heuristics_weight_ != otherMyClass.vis_graph_with_a_star_heuristics_weight_) return false;
+
+      if(this.depth_first_heuristics_weight_ != otherMyClass.depth_first_heuristics_weight_) return false;
+
+      if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
+
+      if(this.number_of_bounding_box_checks_ != otherMyClass.number_of_bounding_box_checks_) return false;
+
+      if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
+
+      if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
+
+      if(this.body_path_violation_weight_ != otherMyClass.body_path_violation_weight_) return false;
+
+      if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
+
+      if(this.delta_yaw_from_reference_tolerance_ != otherMyClass.delta_yaw_from_reference_tolerance_) return false;
+
 
       return true;
    }
@@ -1365,6 +1985,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
+      builder.append("check_for_path_collisions=");
+      builder.append(this.check_for_path_collisions_);      builder.append(", ");
       builder.append("perform_heuristic_search_policies=");
       builder.append(this.perform_heuristic_search_policies_);      builder.append(", ");
       builder.append("ideal_footstep_width=");
@@ -1417,8 +2039,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.return_best_effort_plan_);      builder.append(", ");
       builder.append("minimum_steps_for_best_effort_plan=");
       builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
-      builder.append("body_ground_clearance=");
-      builder.append(this.body_ground_clearance_);      builder.append(", ");
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
       builder.append("body_box_depth=");
@@ -1435,8 +2055,56 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");
       builder.append("min_y_clearance_from_stance=");
       builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
-      builder.append("cost_parameters=");
-      builder.append(this.cost_parameters_);
+      builder.append("final_turn_proximity=");
+      builder.append(this.final_turn_proximity_);      builder.append(", ");
+      builder.append("final_turn_body_path_proximity=");
+      builder.append(this.final_turn_body_path_proximity_);      builder.append(", ");
+      builder.append("final_turn_proximity_blend_factor=");
+      builder.append(this.final_turn_proximity_blend_factor_);      builder.append(", ");
+      builder.append("yaw_weight=");
+      builder.append(this.yaw_weight_);      builder.append(", ");
+      builder.append("pitch_weight=");
+      builder.append(this.pitch_weight_);      builder.append(", ");
+      builder.append("roll_weight=");
+      builder.append(this.roll_weight_);      builder.append(", ");
+      builder.append("forward_weight=");
+      builder.append(this.forward_weight_);      builder.append(", ");
+      builder.append("lateral_weight=");
+      builder.append(this.lateral_weight_);      builder.append(", ");
+      builder.append("step_up_weight=");
+      builder.append(this.step_up_weight_);      builder.append(", ");
+      builder.append("step_down_weight=");
+      builder.append(this.step_down_weight_);      builder.append(", ");
+      builder.append("long_step_weight=");
+      builder.append(this.long_step_weight_);      builder.append(", ");
+      builder.append("foothold_area_weight=");
+      builder.append(this.foothold_area_weight_);      builder.append(", ");
+      builder.append("cost_per_step=");
+      builder.append(this.cost_per_step_);      builder.append(", ");
+      builder.append("use_quadratic_distance_cost=");
+      builder.append(this.use_quadratic_distance_cost_);      builder.append(", ");
+      builder.append("use_quadratic_height_cost=");
+      builder.append(this.use_quadratic_height_cost_);      builder.append(", ");
+      builder.append("a_star_heuristics_weight=");
+      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
+      builder.append("vis_graph_with_a_star_heuristics_weight=");
+      builder.append(this.vis_graph_with_a_star_heuristics_weight_);      builder.append(", ");
+      builder.append("depth_first_heuristics_weight=");
+      builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
+      builder.append("body_path_based_heuristics_weight=");
+      builder.append(this.body_path_based_heuristics_weight_);      builder.append(", ");
+      builder.append("number_of_bounding_box_checks=");
+      builder.append(this.number_of_bounding_box_checks_);      builder.append(", ");
+      builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
+      builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
+      builder.append("bounding_box_cost=");
+      builder.append(this.bounding_box_cost_);      builder.append(", ");
+      builder.append("body_path_violation_weight=");
+      builder.append(this.body_path_violation_weight_);      builder.append(", ");
+      builder.append("distance_from_path_tolerance=");
+      builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
+      builder.append("delta_yaw_from_reference_tolerance=");
+      builder.append(this.delta_yaw_from_reference_tolerance_);
       builder.append("}");
       return builder.toString();
    }

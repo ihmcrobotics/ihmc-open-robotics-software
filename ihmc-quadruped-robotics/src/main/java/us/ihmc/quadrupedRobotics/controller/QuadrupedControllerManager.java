@@ -59,7 +59,6 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -70,6 +69,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class QuadrupedControllerManager implements RobotController, CloseableAndDisposable
 {
+   public static final HighLevelControllerName fallbackStateOnException = HighLevelControllerName.FREEZE_STATE;
    public static final HighLevelControllerName sitDownStateName = HighLevelControllerName.CUSTOM1;
 
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
@@ -173,6 +173,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    @Override
    public void initialize()
    {
+      stateMachine.resetToInitialState();
    }
 
    @Override
@@ -197,6 +198,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          e.printStackTrace();
          statusMessageOutputManager.reportStatusMessage(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN,
                                                                                                              e.getMessage()));
+         if (stateMachine.getCurrentStateKey() != fallbackStateOnException)
+         {
+            stateMachine.performTransition(fallbackStateOnException);
+            stateMachine.doAction();
+         }
       }
 
       // update contact state used for state estimation

@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -28,6 +29,15 @@ public class ValkyrieEndToEndFootstepDataListMessageTest extends EndToEndFootste
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api")
+   @Test
+   @Override
+   public void testQueuing() throws SimulationExceededMaximumTimeException
+   {
+      super.testQueuing();
+   }
+
+   @Tag("controller-api-slow")
    @Test
    public void testProblematicNasaMessage() throws SimulationExceededMaximumTimeException
    {

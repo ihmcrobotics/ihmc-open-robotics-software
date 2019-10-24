@@ -183,8 +183,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    {
       RigidBodyTransform supportTransform = supportFrame.getTransformToWorldFrame();
       startTime.set(timestamp.getDoubleValue() + firstStepDelay.getValue() + xGaitSettings.getStepDuration());
-      startYaw.set(supportTransform.getRotationMatrix().getYaw());
-      centerStartPoint.set(supportTransform.getTranslationVector());
+      startYaw.set(supportTransform.getRotation().getYaw());
+      centerStartPoint.set(supportTransform.getTranslation());
    }
 
    private void setStartConditionsFromFootstepStatus()
@@ -208,7 +208,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
             QuadrupedFootstepStatusMessage statusMessage = getLatestCompleteStatusMessage(depth);
             if (statusMessage != null)
             {
-               RobotQuadrant robotQuadrant = RobotQuadrant.fromByte((byte) statusMessage.getFootstepQuadrant());
+               RobotQuadrant robotQuadrant = RobotQuadrant.fromByte(statusMessage.getRobotQuadrant());
                Point3DReadOnly soleDesiredPosition = statusMessage.getDesiredTouchdownPositionInWorld();
                double halfStanceLength = robotQuadrant.getEnd().negateIfFrontEnd(0.5 * xGaitSettings.getStanceLength());
                double halfStanceWidth = robotQuadrant.getSide().negateIfLeftSide(0.5 * xGaitSettings.getStanceWidth());
@@ -252,7 +252,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private void computeStepAdjustmentFromFootstepStatus()
    {
       QuadrupedFootstepStatusMessage latestCompleteStatusMessage = getLatestCompleteStatusMessage(1);
-      RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestCompleteStatusMessage.getFootstepQuadrant());
+      RobotQuadrant quadrant = RobotQuadrant.fromByte((byte) latestCompleteStatusMessage.getRobotQuadrant());
       QuadrupedFootstepStatusMessage startStatusMessage = footstepStartStatuses.get(quadrant).get();
 
       if (startStatusMessage == null || latestCompleteStatusMessage == null)

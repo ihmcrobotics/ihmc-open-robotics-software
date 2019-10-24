@@ -28,6 +28,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -103,10 +104,12 @@ public class PelvisICPBasedTranslationManager
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
    private final PelvisTrajectoryCommand commandBeingProcessed = new PelvisTrajectoryCommand();
-   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class, PelvisTrajectoryCommand::set);
+   private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class,
+                                                                                                       PelvisTrajectoryCommand::set);
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisXY");
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin,
+                                           BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       dt = controllerToolbox.getControlDT();
 
@@ -120,7 +123,10 @@ public class PelvisICPBasedTranslationManager
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", RigidBodyTaskspaceControlState.maxPointsInGenerator, worldFrame, registry);
+      positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset",
+                                                                                     RigidBodyTaskspaceControlState.maxPointsInGenerator,
+                                                                                     worldFrame,
+                                                                                     registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -269,6 +275,46 @@ public class PelvisICPBasedTranslationManager
          }
          return;
       }
+      else if (se3Trajectory.getExecutionMode() == ExecutionMode.STREAM)
+      {
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(se3Trajectory.getCommandId());
+         initialPelvisPositionTime.set(yoTime.getDoubleValue());
+
+         if (se3Trajectory.getNumberOfTrajectoryPoints() != 1)
+         {
+            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + se3Trajectory.getNumberOfTrajectoryPoints());
+            holdCurrentPosition();
+            return;
+         }
+
+         FrameSE3TrajectoryPoint trajectoryPoint = se3Trajectory.getTrajectoryPoint(0);
+
+         if (trajectoryPoint.getTime() != 0.0)
+         {
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            holdCurrentPosition();
+            return;
+         }
+
+         positionTrajectoryGenerator.clear();
+         positionTrajectoryGenerator.changeFrame(worldFrame);
+         positionTrajectoryGenerator.appendWaypoint(trajectoryPoint);
+         tempPosition.setIncludingFrame(trajectoryPoint.getLinearVelocity());
+         tempPosition.scaleAdd(se3Trajectory.getStreamIntegrationDuration(), trajectoryPoint.getPosition());
+         positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getStreamIntegrationDuration(), tempPosition, trajectoryPoint.getLinearVelocity());
+
+         if (supportFrame != null)
+            positionTrajectoryGenerator.changeFrame(supportFrame);
+         else
+            positionTrajectoryGenerator.changeFrame(worldFrame);
+
+         positionTrajectoryGenerator.initialize();
+         isTrajectoryStopped.set(false);
+         isRunning.set(true);
+         statusHelper.registerNewTrajectory(se3Trajectory);
+         return;
+      }
       else
       {
          LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + se3Trajectory.getExecutionMode() + ". Command ignored.");
@@ -288,8 +334,8 @@ public class PelvisICPBasedTranslationManager
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         LogTools.warn("Previous command ID mismatch: previous ID from command = " + previousCommandId
-               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         LogTools.warn("Previous command ID mismatch: previous ID from command = " + previousCommandId + ", last message ID received by the controller = "
+               + lastCommandId.getLongValue() + ". Aborting motion.");
          return false;
       }
 

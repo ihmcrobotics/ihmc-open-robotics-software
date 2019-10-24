@@ -12,6 +12,10 @@ public interface QuadrupedXGaitSettingsBasics extends QuadrupedXGaitSettingsRead
 
    void setStanceWidth(double stanceWidth);
 
+   void setMaxHorizontalSpeedFraction(double fraction);
+
+   void setMaxYawSpeedFraction(double fraction);
+
    void setStepGroundClearance(double stepGroundClearance);
 
    default void set(QuadrupedXGaitSettingsReadOnly other)
@@ -21,6 +25,8 @@ public interface QuadrupedXGaitSettingsBasics extends QuadrupedXGaitSettingsRead
       setStanceLength(other.getStanceLength());
       setStanceWidth(other.getStanceWidth());
       setStepGroundClearance(other.getStepGroundClearance());
+      setMaxHorizontalSpeedFraction(other.getMaxHorizontalSpeedFraction());
+      setMaxYawSpeedFraction(other.getMaxYawSpeedFraction());
 
       setPaceSlowSettings(other.getPaceSlowTimings());
       setPaceMediumSettings(other.getPaceMediumTimings());
@@ -40,6 +46,8 @@ public interface QuadrupedXGaitSettingsBasics extends QuadrupedXGaitSettingsRead
       setStanceLength(packet.getStanceLength());
       setStanceWidth(packet.getStanceWidth());
       setStepGroundClearance(packet.getStepGroundClearance());
+      setMaxHorizontalSpeedFraction(packet.getMaxHorizontalSpeedFraction());
+      setMaxYawSpeedFraction(packet.getMaxYawSpeedFraction());
 
       getPaceSlowTimings().set(packet.getPaceSlowSettingsPacket());
       getPaceMediumTimings().set(packet.getPaceMediumSettingsPacket());

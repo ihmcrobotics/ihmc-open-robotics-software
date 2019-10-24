@@ -175,7 +175,7 @@
     <default__swing__duration__>0.0</default__swing__duration__>
     <default__transfer__duration__>0.0</default__transfer__duration__>
     <final__transfer__duration__>0.0</final__transfer__duration__>
-    <trust__height__of__footsteps__>false</trust__height__of__footsteps__>
+    <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
     <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
     <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
     <queueing__properties__>
@@ -529,7 +529,7 @@
     <default__swing__duration__>0.0</default__swing__duration__>
     <default__transfer__duration__>0.0</default__transfer__duration__>
     <final__transfer__duration__>0.0</final__transfer__duration__>
-    <trust__height__of__footsteps__>false</trust__height__of__footsteps__>
+    <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
     <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
     <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
     <queueing__properties__>
@@ -831,7 +831,7 @@
     <default__swing__duration__>0.0</default__swing__duration__>
     <default__transfer__duration__>0.0</default__transfer__duration__>
     <final__transfer__duration__>0.0</final__transfer__duration__>
-    <trust__height__of__footsteps__>false</trust__height__of__footsteps__>
+    <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
     <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
     <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
     <queueing__properties__>
@@ -1133,7 +1133,7 @@
     <default__swing__duration__>0.0</default__swing__duration__>
     <default__transfer__duration__>0.0</default__transfer__duration__>
     <final__transfer__duration__>0.0</final__transfer__duration__>
-    <trust__height__of__footsteps__>false</trust__height__of__footsteps__>
+    <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
     <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
     <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
     <queueing__properties__>

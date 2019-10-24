@@ -3,21 +3,20 @@ package us.ihmc.footstepPlanning.graphSearch.aStar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
@@ -27,8 +26,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import static us.ihmc.robotics.Assert.*;
 
 import org.junit.jupiter.api.AfterEach;
 
@@ -43,7 +40,7 @@ public class AStarBestEffortTest
    @BeforeEach
    public void setup()
    {
-      FootstepPlannerParameters parameters = new BestEffortPlannerParameters(3);
+      FootstepPlannerParametersReadOnly parameters = new BestEffortPlannerParameters(3);
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       this.planner = AStarFootstepPlanner.createPlanner(parameters, null, footPolygons, expansion, registry);
@@ -90,11 +87,11 @@ public class AStarBestEffortTest
          FramePose3D pose = new FramePose3D();
          footstep.getSoleFramePose(pose);
          pose.changeFrame(ReferenceFrame.getWorldFrame());
-         assertTrue(pose.getPosition().epsilonEquals(new Point3D(1.0, 0.0, 0.0), 0.15));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(1.0, 0.0, 0.0), pose.getPosition(), 0.15);
       }
    }
 
-   private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
+   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
    {
       private final int minimumStepsForBestEffortPlan;
 

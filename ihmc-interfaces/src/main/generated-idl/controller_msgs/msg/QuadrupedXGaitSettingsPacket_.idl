@@ -37,6 +37,10 @@ module controller_msgs
         double stance_width;
         @defaultValue(value=-1.0)
         double step_ground_clearance;
+        @defaultValue(value=-1.0)
+        double max_horizontal_speed_fraction;
+        @defaultValue(value=-1.0)
+        double max_yaw_speed_fraction;
         octet quadruped_speed;
         controller_msgs::msg::dds::QuadrupedGaitTimingsPacket pace_slow_settings_packet;
         controller_msgs::msg::dds::QuadrupedGaitTimingsPacket pace_medium_settings_packet;

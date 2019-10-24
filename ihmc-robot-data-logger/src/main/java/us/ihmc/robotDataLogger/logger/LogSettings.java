@@ -53,7 +53,7 @@ public class LogSettings extends DataServerSettings
    @Deprecated
    public static final LogSettings FOOTSTEP_PLANNER = new LogSettings(false);
    @Deprecated
-   public static final LogSettings LLAMA = new LogSettings(true);
+   public static final LogSettings LLAMA = new LogSettings(true, "LlamaRemoteUIStream");
    @Deprecated
    public static final LogSettings THOR = new LogSettings(false);
 

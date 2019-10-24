@@ -60,11 +60,37 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -109,6 +135,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -116,6 +145,42 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -130,11 +195,13 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getNormalZThresholdForAccessibleRegions());
 
-      cdr.write_type_6(data.getPreferredExtrusionDistance());
+      cdr.write_type_6(data.getNavigableExtrusionDistance());
 
-      cdr.write_type_6(data.getExtrusionDistance());
+      cdr.write_type_6(data.getObstacleExtrusionDistance());
 
-      cdr.write_type_6(data.getExtrusionDistanceIfNotTooHighToStep());
+      cdr.write_type_6(data.getPreferredObstacleExtrusionDistance());
+
+      cdr.write_type_6(data.getObstacleExtrusionDistanceIfNotTooHighToStep());
 
       cdr.write_type_6(data.getTooHighToStepDistance());
 
@@ -150,6 +217,30 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getSearchHostRegionEpsilon());
 
+      cdr.write_type_6(data.getCanDuckUnderHeight());
+
+      cdr.write_type_6(data.getCanEasilyStepOverHeight());
+
+      cdr.write_type_6(data.getLengthForLongInterRegionEdge());
+
+      cdr.write_type_7(data.getPerformPostProcessingNodeShifting());
+
+      cdr.write_type_7(data.getIntroduceMidpointsInPostProcessing());
+
+      cdr.write_type_7(data.getComputeOrientationsToAvoidObstacles());
+
+      cdr.write_type_6(data.getHeuristicWeight());
+
+      cdr.write_type_6(data.getDistanceWeight());
+
+      cdr.write_type_6(data.getElevationWeight());
+
+      cdr.write_type_6(data.getOccludedGoalEdgeWeight());
+
+      cdr.write_type_6(data.getWeightForInterRegionEdge());
+
+      cdr.write_type_7(data.getReturnBestEffortSolution());
+
    }
 
    public static void read(controller_msgs.msg.dds.VisibilityGraphsParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -160,11 +251,13 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setNormalZThresholdForAccessibleRegions(cdr.read_type_6());
       	
-      data.setPreferredExtrusionDistance(cdr.read_type_6());
+      data.setNavigableExtrusionDistance(cdr.read_type_6());
       	
-      data.setExtrusionDistance(cdr.read_type_6());
+      data.setObstacleExtrusionDistance(cdr.read_type_6());
       	
-      data.setExtrusionDistanceIfNotTooHighToStep(cdr.read_type_6());
+      data.setPreferredObstacleExtrusionDistance(cdr.read_type_6());
+      	
+      data.setObstacleExtrusionDistanceIfNotTooHighToStep(cdr.read_type_6());
       	
       data.setTooHighToStepDistance(cdr.read_type_6());
       	
@@ -180,6 +273,30 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setSearchHostRegionEpsilon(cdr.read_type_6());
       	
+      data.setCanDuckUnderHeight(cdr.read_type_6());
+      	
+      data.setCanEasilyStepOverHeight(cdr.read_type_6());
+      	
+      data.setLengthForLongInterRegionEdge(cdr.read_type_6());
+      	
+      data.setPerformPostProcessingNodeShifting(cdr.read_type_7());
+      	
+      data.setIntroduceMidpointsInPostProcessing(cdr.read_type_7());
+      	
+      data.setComputeOrientationsToAvoidObstacles(cdr.read_type_7());
+      	
+      data.setHeuristicWeight(cdr.read_type_6());
+      	
+      data.setDistanceWeight(cdr.read_type_6());
+      	
+      data.setElevationWeight(cdr.read_type_6());
+      	
+      data.setOccludedGoalEdgeWeight(cdr.read_type_6());
+      	
+      data.setWeightForInterRegionEdge(cdr.read_type_6());
+      	
+      data.setReturnBestEffortSolution(cdr.read_type_7());
+      	
 
    }
 
@@ -189,9 +306,10 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("max_inter_region_connection_length", data.getMaxInterRegionConnectionLength());
       ser.write_type_6("normal_z_threshold_for_accessible_regions", data.getNormalZThresholdForAccessibleRegions());
-      ser.write_type_6("preferred_extrusion_distance", data.getPreferredExtrusionDistance());
-      ser.write_type_6("extrusion_distance", data.getExtrusionDistance());
-      ser.write_type_6("extrusion_distance_if_not_too_high_to_step", data.getExtrusionDistanceIfNotTooHighToStep());
+      ser.write_type_6("navigable_extrusion_distance", data.getNavigableExtrusionDistance());
+      ser.write_type_6("obstacle_extrusion_distance", data.getObstacleExtrusionDistance());
+      ser.write_type_6("preferred_obstacle_extrusion_distance", data.getPreferredObstacleExtrusionDistance());
+      ser.write_type_6("obstacle_extrusion_distance_if_not_too_high_to_step", data.getObstacleExtrusionDistanceIfNotTooHighToStep());
       ser.write_type_6("too_high_to_step_distance", data.getTooHighToStepDistance());
       ser.write_type_6("cluster_resolution", data.getClusterResolution());
       ser.write_type_6("exploration_distance_from_start_goal", data.getExplorationDistanceFromStartGoal());
@@ -199,6 +317,18 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_4("planar_region_min_size", data.getPlanarRegionMinSize());
       ser.write_type_6("region_orthogonal_angle", data.getRegionOrthogonalAngle());
       ser.write_type_6("search_host_region_epsilon", data.getSearchHostRegionEpsilon());
+      ser.write_type_6("can_duck_under_height", data.getCanDuckUnderHeight());
+      ser.write_type_6("can_easily_step_over_height", data.getCanEasilyStepOverHeight());
+      ser.write_type_6("length_for_long_inter_region_edge", data.getLengthForLongInterRegionEdge());
+      ser.write_type_7("perform_post_processing_node_shifting", data.getPerformPostProcessingNodeShifting());
+      ser.write_type_7("introduce_midpoints_in_post_processing", data.getIntroduceMidpointsInPostProcessing());
+      ser.write_type_7("compute_orientations_to_avoid_obstacles", data.getComputeOrientationsToAvoidObstacles());
+      ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
+      ser.write_type_6("distance_weight", data.getDistanceWeight());
+      ser.write_type_6("elevation_weight", data.getElevationWeight());
+      ser.write_type_6("occluded_goal_edge_weight", data.getOccludedGoalEdgeWeight());
+      ser.write_type_6("weight_for_inter_region_edge", data.getWeightForInterRegionEdge());
+      ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
    @Override
@@ -207,9 +337,10 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setMaxInterRegionConnectionLength(ser.read_type_6("max_inter_region_connection_length"));
       data.setNormalZThresholdForAccessibleRegions(ser.read_type_6("normal_z_threshold_for_accessible_regions"));
-      data.setPreferredExtrusionDistance(ser.read_type_6("preferred_extrusion_distance"));
-      data.setExtrusionDistance(ser.read_type_6("extrusion_distance"));
-      data.setExtrusionDistanceIfNotTooHighToStep(ser.read_type_6("extrusion_distance_if_not_too_high_to_step"));
+      data.setNavigableExtrusionDistance(ser.read_type_6("navigable_extrusion_distance"));
+      data.setObstacleExtrusionDistance(ser.read_type_6("obstacle_extrusion_distance"));
+      data.setPreferredObstacleExtrusionDistance(ser.read_type_6("preferred_obstacle_extrusion_distance"));
+      data.setObstacleExtrusionDistanceIfNotTooHighToStep(ser.read_type_6("obstacle_extrusion_distance_if_not_too_high_to_step"));
       data.setTooHighToStepDistance(ser.read_type_6("too_high_to_step_distance"));
       data.setClusterResolution(ser.read_type_6("cluster_resolution"));
       data.setExplorationDistanceFromStartGoal(ser.read_type_6("exploration_distance_from_start_goal"));
@@ -217,6 +348,18 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setPlanarRegionMinSize(ser.read_type_4("planar_region_min_size"));
       data.setRegionOrthogonalAngle(ser.read_type_6("region_orthogonal_angle"));
       data.setSearchHostRegionEpsilon(ser.read_type_6("search_host_region_epsilon"));
+      data.setCanDuckUnderHeight(ser.read_type_6("can_duck_under_height"));
+      data.setCanEasilyStepOverHeight(ser.read_type_6("can_easily_step_over_height"));
+      data.setLengthForLongInterRegionEdge(ser.read_type_6("length_for_long_inter_region_edge"));
+      data.setPerformPostProcessingNodeShifting(ser.read_type_7("perform_post_processing_node_shifting"));
+      data.setIntroduceMidpointsInPostProcessing(ser.read_type_7("introduce_midpoints_in_post_processing"));
+      data.setComputeOrientationsToAvoidObstacles(ser.read_type_7("compute_orientations_to_avoid_obstacles"));
+      data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
+      data.setDistanceWeight(ser.read_type_6("distance_weight"));
+      data.setElevationWeight(ser.read_type_6("elevation_weight"));
+      data.setOccludedGoalEdgeWeight(ser.read_type_6("occluded_goal_edge_weight"));
+      data.setWeightForInterRegionEdge(ser.read_type_6("weight_for_inter_region_edge"));
+      data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.VisibilityGraphsParametersPacket src, controller_msgs.msg.dds.VisibilityGraphsParametersPacket dest)

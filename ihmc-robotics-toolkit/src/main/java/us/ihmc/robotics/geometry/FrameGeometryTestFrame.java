@@ -21,7 +21,7 @@ public class FrameGeometryTestFrame extends JFrame
 
    public FrameGeometryTestFrame(double xMin, double xMax, double yMin, double yMax)
    {
-      this("Test", xMin, xMax, yMin, yMax);
+      this("FrameGeometryTestFrame", xMin, xMax, yMin, yMax);
    }
 
    public FrameGeometryTestFrame(String name, double xMin, double xMax, double yMin, double yMax)

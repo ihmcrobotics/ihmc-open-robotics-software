@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -97,7 +96,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    @Override
    public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
    {
-      throw new NotImplementedException();
+      throw new UnsupportedOperationException();
    }
 
 }

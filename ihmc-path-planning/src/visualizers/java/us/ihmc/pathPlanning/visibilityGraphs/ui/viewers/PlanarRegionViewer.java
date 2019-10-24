@@ -19,6 +19,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -40,8 +41,6 @@ public class PlanarRegionViewer
 
    private final AnimationTimer renderMeshAnimation;
    private final AtomicReference<Boolean> show;
-
-   private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
@@ -119,49 +118,15 @@ public class PlanarRegionViewer
          }
 
          MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-         regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
+         regionMeshView.setMaterial(new PhongMaterial(IdMappedColorFunction.INSTANCE.apply(regionId)));
          regionMeshViews.add(regionMeshView);
       }
 
       graphicsToRender.set(regionMeshViews);
    }
 
-
-   public static Color getRegionColor(int regionId)
-   {
-      return getRegionColor(regionId, 1.0);
-   }
-
-   public static Color getRegionColor(int regionId, double opacity)
-   {
-      java.awt.Color awtColor = colorPicker.getColor(regionId);
-      return Color.rgb(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue(), opacity);
-   }
-
    public Node getRoot()
    {
       return root;
-   }
-
-   /**
-    * Keeps a list N of good colors to render planar regions. Region i is given color i mod N
-    */
-   private static class PlanarRegionColorPicker
-   {
-      private final ArrayList<java.awt.Color> colors = new ArrayList<>();
-
-      PlanarRegionColorPicker()
-      {
-         colors.add(new java.awt.Color(104, 130, 219));
-         colors.add(new java.awt.Color(113, 168, 133));
-         colors.add(new java.awt.Color(196, 182, 90));
-         colors.add(new java.awt.Color(190, 89, 110));
-         colors.add(new java.awt.Color(155, 80, 190));
-      }
-
-      java.awt.Color getColor(int regionId)
-      {
-         return colors.get(Math.abs(regionId % colors.size()));
-      }
    }
 }

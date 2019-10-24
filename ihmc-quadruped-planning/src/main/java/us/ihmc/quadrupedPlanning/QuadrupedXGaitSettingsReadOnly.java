@@ -24,6 +24,22 @@ public interface QuadrupedXGaitSettingsReadOnly
    double getStanceWidth();
 
    /**
+    * Fractional multiplier of the max speed returned by {@link #getMaxSpeed()} to determine the maximum horizontal speed.
+    */
+   default double getMaxHorizontalSpeedFraction()
+   {
+      return 0.5;
+   }
+
+   /**
+    * Fractional multiplier of the max speed returned by {@link #getMaxSpeed()} to determine the maximum yaw speed.
+    */
+   default double getMaxYawSpeedFraction()
+   {
+      return 0.75;
+   }
+
+   /**
     * Ground clearance for each step (in meters).
     */
    double getStepGroundClearance();
@@ -134,6 +150,8 @@ public interface QuadrupedXGaitSettingsReadOnly
       packet.setStanceLength(getStanceLength());
       packet.setStanceWidth(getStanceWidth());
       packet.setStepGroundClearance(getStepGroundClearance());
+      packet.setMaxHorizontalSpeedFraction(getMaxHorizontalSpeedFraction());
+      packet.setMaxYawSpeedFraction(getMaxYawSpeedFraction());
       packet.getPaceSlowSettingsPacket().set(getPaceSlowTimings().getAsPacket());
       packet.getPaceMediumSettingsPacket().set(getPaceMediumTimings().getAsPacket());
       packet.getPaceFastSettingsPacket().set(getPaceFastTimings().getAsPacket());

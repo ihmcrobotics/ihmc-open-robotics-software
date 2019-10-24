@@ -5,7 +5,7 @@ import java.util.HashSet;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,9 +13,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
-   public SimpleSideBasedExpansion(FootstepPlannerParameters parameters)
+   public SimpleSideBasedExpansion(FootstepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }

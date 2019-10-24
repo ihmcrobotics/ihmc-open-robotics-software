@@ -9,10 +9,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,6 +27,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private static final int numberOfFootstepsToConsider = 3;
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(numberOfFootstepsToConsider);
 
    private final DoubleProvider minimumTransferTime;
 
@@ -30,7 +36,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
+   private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
 
+   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
@@ -47,6 +55,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
+      minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
+                                                                        walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
    }
 
    @Override
@@ -72,8 +82,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
+      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
+      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)
@@ -84,8 +98,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
+         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
+         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
          if (i == 0)
          {
@@ -93,7 +109,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
-         balanceManager.addFootstepToPlan(footstep, timing);
+         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);
@@ -136,9 +152,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep upcomingFootstep = footsteps[0];
          FrameSE3TrajectoryPoint firstWaypoint = upcomingFootstep.getSwingTrajectory().get(0);
+         MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide());
          tempOrientation.setIncludingFrame(firstWaypoint.getOrientation());
-         tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide()));
-         feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), toeOffDuration);
+         tempOrientation.changeFrame(soleZUpFrame);
+         tempAngularVelocity.setIncludingFrame(firstWaypoint.getAngularVelocity());
+         tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
+         feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
    }
 
@@ -149,9 +168,25 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
+   public void onEntry()
+   {
+      super.onEntry();
+
+      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+   }
+
+   @Override
    public boolean isDone(double timeInState)
    {
       return super.isDone(timeInState) || feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+   }
+
+   @Override
+   public void onExit()
+   {
+      super.onExit();
+
+      balanceManager.minimizeAngularMomentumRateZ(false);
    }
 
    /**

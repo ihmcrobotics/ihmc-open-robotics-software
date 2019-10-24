@@ -1,5 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
@@ -10,6 +15,38 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 
 public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWalkingOverRampsTest
 {
+   @Tag("quadruped-xgait-slow-3")
+   @Test
+   @Override
+   public void testWalkingOverShallowRamps() throws IOException
+   {
+      super.testWalkingOverShallowRamps();
+   }
+
+   @Tag("quadruped-xgait-3")
+   @Test
+   @Override
+   public void testWalkingOverAggressiveRamps() throws IOException
+   {
+      super.testWalkingOverAggressiveRamps();
+   }
+
+   @Tag("quadruped-xgait-3")
+   @Test
+   @Override
+   public void testWalkingUpSlope() throws IOException
+   {
+      super.testWalkingUpSlope();
+   }
+
+   @Tag("quadruped-xgait-3")
+   @Test
+   @Override
+   public void testWalkingDownSlope() throws IOException
+   {
+      super.testWalkingDownSlope();
+   }
+
    @Override
    public double getDesiredWalkingVelocity()
    {
@@ -39,7 +76,6 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    {
       return new GenericQuadrupedTestFactory();
    }
-
 
    private class InitialWalkDownSlopePosition extends GenericQuadrupedDefaultInitialPosition
    {

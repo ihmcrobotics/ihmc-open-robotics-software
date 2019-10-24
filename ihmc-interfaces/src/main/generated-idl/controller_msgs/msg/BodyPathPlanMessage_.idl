@@ -2,8 +2,8 @@
 #define __controller_msgs__msg__BodyPathPlanMessage__idl__
 
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
-#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose2D_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
   module msg
@@ -47,7 +47,7 @@ module controller_msgs
         @defaultValue(value=-1)
         long plan_id;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
-        sequence<geometry_msgs::msg::dds::Point> body_path;
+        sequence<geometry_msgs::msg::dds::Pose> body_path;
         geometry_msgs::msg::dds::Pose2D path_planner_start_pose;
         geometry_msgs::msg::dds::Pose2D path_planner_goal_pose;
       };

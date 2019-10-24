@@ -50,12 +50,12 @@ public class PushRobotController implements RobotController
       this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
    }
 
-   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3D forcePointOffset)
+   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset)
    {
       this(pushableRobot, jointNameToApplyForce, forcePointOffset, 0.005);
    }
 
-   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3D forcePointOffset, double visualScale)
+   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset, double visualScale)
    {
       yoTime = pushableRobot.getYoTime();
       registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());

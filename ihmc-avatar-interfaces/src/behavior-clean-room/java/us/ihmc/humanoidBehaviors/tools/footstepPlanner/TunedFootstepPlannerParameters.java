@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
 public class TunedFootstepPlannerParameters
 {
@@ -31,7 +31,7 @@ public class TunedFootstepPlannerParameters
    private double swingTimeFlatUp   ;
    private double swingTimeDown     ;
 
-   public void setFromFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
+   public void setFromFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       cliffClearance      = footstepPlannerParameters.getMinimumDistanceFromCliffBottoms();
       cliffHeight         = footstepPlannerParameters.getCliffHeightToAvoid()             ;
@@ -55,7 +55,7 @@ public class TunedFootstepPlannerParameters
       maxStepDownX        = footstepPlannerParameters.getMaximumStepXWhenForwardAndDown() ;
    }
 
-   public void packFootstepPlannerParameters(SettableFootstepPlannerParameters footstepPlannerParameters)
+   public void packFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(       cliffClearance      );
       footstepPlannerParameters.setCliffHeightToAvoid(                    cliffHeight         );

@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 
 public class DRCNetworkModuleParameters
@@ -27,9 +28,15 @@ public class DRCNetworkModuleParameters
    private boolean useWholeBodyTrajectoryToolbox;
    private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
-   private boolean useKinematicsPlanningToolbox;
-   private boolean useFootstepPlanningToolbox;
    private boolean useKinematicsToolboxVisualizer;
+   private boolean useKinematicsPlanningToolbox;
+   private boolean useKinematicsStreamingToolbox;
+   /**
+    * When provided, the toolbox is started on a separate process to improve real-time performance by
+    * isolating the toolbox. The class provided has to come with a main method.
+    */
+   private Class<? extends KinematicsStreamingToolboxModule> kinematicsStreamingToolboxLauncherClass;
+   private boolean useFootstepPlanningToolbox;
    private boolean useFootstepPlanningToolboxVisualizer;
    private boolean useTextToSpeechModule;
    private boolean useRobotEnvironmentAwarenessModule;
@@ -77,10 +84,20 @@ public class DRCNetworkModuleParameters
    {
       return useKinematicsToolbox;
    }
-   
+
    public boolean isKinematicsPlanningToolboxEnabled()
    {
       return useKinematicsPlanningToolbox;
+   }
+
+   public boolean isKinematicsStreamingToolboxEnabled()
+   {
+      return useKinematicsStreamingToolbox;
+   }
+
+   public Class<? extends KinematicsStreamingToolboxModule> getKinematicsStreamingToolboxLauncherClass()
+   {
+      return kinematicsStreamingToolboxLauncherClass;
    }
 
    public boolean isFootstepPlanningToolboxEnabled()
@@ -196,7 +213,19 @@ public class DRCNetworkModuleParameters
    {
       this.useKinematicsPlanningToolbox = useKinematicsPlanningToolbox;
    }
-   
+
+   public void enableKinematicsStreamingToolbox(boolean useKinematicsStreamingToolbox)
+   {
+      enableKinematicsStreamingToolbox(useKinematicsStreamingToolbox, null);
+   }
+
+   public void enableKinematicsStreamingToolbox(boolean useKinematicsStreamingToolbox,
+                                                Class<? extends KinematicsStreamingToolboxModule> kinematicsStreamingToolboxLauncherClass)
+   {
+      this.useKinematicsStreamingToolbox = useKinematicsStreamingToolbox;
+      this.kinematicsStreamingToolboxLauncherClass = kinematicsStreamingToolboxLauncherClass;
+   }
+
    public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
       this.useWholeBodyTrajectoryToolbox = useConstrainedWholeBodyPlanningToolbox;

@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.layout.AnchorPane?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <top>
-        <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />
+        <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml"/>
     </top>
     <bottom>
-        <TabPane prefHeight="300.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <TabPane prefHeight="300" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
-
                 <Tab text="Main">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="mainTab" source="MainTab.fxml" />
-                        </children>
+                        <fx:include fx:id="mainTab" source="MainTab.fxml"/>
                     </content>
                 </Tab>
 
@@ -33,64 +28,43 @@
 
                 <Tab text="Visibility Graph Parameters">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                        <children>
-                            <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml"/>
-                        </children>
+                        <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Body Collisions">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml" />
-                        </children>
+                        <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Footstep Costs">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml" />
-                        </children>
+                        <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Node checking">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />
-                        </children>
+                        <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Visualization Control">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
-                        </children>
+                        <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Unit Test Exporter">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
-                        </children>
+                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Robot Operation">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="uiRobot" source="UIRobot.fxml" />
-                        </children>
+                        <fx:include fx:id="uiRobot" source="UIRobot.fxml"/>
                     </content>
                 </Tab>
 

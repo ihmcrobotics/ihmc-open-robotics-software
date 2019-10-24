@@ -30,6 +30,7 @@ public class AtlasStepInPlaceBehaviorTest
    private AvatarSimulation avatarSimulation;
    private AtlasRobotModel robotModel;
 
+   @Disabled
    @Test
    public void testStepInPlaceBehavior()
    {
