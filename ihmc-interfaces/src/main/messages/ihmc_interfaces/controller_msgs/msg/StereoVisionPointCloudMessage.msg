@@ -6,5 +6,6 @@ uint32 sequence_id
 int64 timestamp
 geometry_msgs/Point sensor_position
 geometry_msgs/Quaternion sensor_orientation
+float64 confidence
 float32[<=600000] point_cloud
 int32[<=200000] colors
