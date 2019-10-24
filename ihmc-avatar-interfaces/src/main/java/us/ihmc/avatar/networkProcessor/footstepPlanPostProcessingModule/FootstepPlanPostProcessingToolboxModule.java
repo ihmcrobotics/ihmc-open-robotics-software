@@ -26,7 +26,7 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
 
    private final FootstepPlanPostProcessingToolboxController toolboxController;
 
-   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer) throws IOException
+   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
       this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
@@ -36,8 +36,7 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      toolboxController = new FootstepPlanPostProcessingToolboxController(statusOutputManager, registry, yoGraphicsListRegistry,
-                                                                          Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      toolboxController = new FootstepPlanPostProcessingToolboxController(statusOutputManager, registry, yoGraphicsListRegistry);
       startYoVariableServer();
    }
 
