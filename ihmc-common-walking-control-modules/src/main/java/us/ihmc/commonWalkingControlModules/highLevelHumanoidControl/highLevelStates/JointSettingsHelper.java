@@ -40,7 +40,7 @@ public class JointSettingsHelper
    private final JointLoadStatusProvider jointLoadStatusProvider;
 
 
-   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, HighLevelControllerState jointLoadStatusProvider,
+   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider,
                               HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
@@ -159,16 +159,16 @@ public class JointSettingsHelper
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersLoaded);
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersLoaded.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersLoaded.getPositionBreakFrequency());
-            jointDesiredOutput.setMaxPositionError(integrationParametersLoaded.getMaxPositionError());
-            jointDesiredOutput.setMaxVelocityError(integrationParametersLoaded.getMaxVelocity());
+            jointDesiredOutput.setPositionIntegrationMaxError(integrationParametersLoaded.getMaxPositionError());
+            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersLoaded.getMaxVelocity());
          }
          else if (integrationParametersNoLoad != null)
          { // The joint is not loaded or we do not have parameters for the loaded joint but we have default no load parameters.
             jointAccelerationIntegrationCommand.setJointParameters(jointIdx, integrationParametersNoLoad);
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersNoLoad.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersNoLoad.getPositionBreakFrequency());
-            jointDesiredOutput.setMaxPositionError(integrationParametersNoLoad.getMaxPositionError());
-            jointDesiredOutput.setMaxVelocityError(integrationParametersNoLoad.getMaxVelocity());
+            jointDesiredOutput.setPositionIntegrationMaxError(integrationParametersNoLoad.getMaxPositionError());
+            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersNoLoad.getMaxVelocity());
          }
 
          JointDesiredBehaviorReadOnly desiredBehaviorNoLoad = jointDesiredBehaviorNoLoad[jointIdx];
@@ -181,6 +181,8 @@ public class JointSettingsHelper
             jointDesiredOutput.setDamping(desiredBehaviorLoaded.getDamping());
             jointDesiredOutput.setMasterGain(desiredBehaviorLoaded.getMasterGain());
             jointDesiredOutput.setVelocityScaling(desiredBehaviorLoaded.getVelocityScaling());
+            jointDesiredOutput.setPositionFeedbackMaxError(desiredBehaviorLoaded.getMaxPositionError());
+            jointDesiredOutput.setVelocityFeedbackMaxError(desiredBehaviorLoaded.getMaxVelocityError());
          }
          else
          { // The joint is not loaded or we do not have parameters for the loaded joint.
@@ -189,6 +191,8 @@ public class JointSettingsHelper
             jointDesiredOutput.setDamping(desiredBehaviorNoLoad.getDamping());
             jointDesiredOutput.setMasterGain(desiredBehaviorNoLoad.getMasterGain());
             jointDesiredOutput.setVelocityScaling(desiredBehaviorNoLoad.getVelocityScaling());
+            jointDesiredOutput.setPositionFeedbackMaxError(desiredBehaviorNoLoad.getMaxPositionError());
+            jointDesiredOutput.setVelocityFeedbackMaxError(desiredBehaviorNoLoad.getMaxVelocityError());
          }
       }
    }

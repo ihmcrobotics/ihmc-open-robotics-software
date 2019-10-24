@@ -86,7 +86,7 @@ public class FootstepPlanningMessageReporter
          result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       result.setPlanId(planId);
       result.setFootstepPlanningResult(status.toByte());
-      result.setTimeTaken(timeTaken);
+      result.getFootstepPlanningStatistics().setTimeTaken(timeTaken);
       return result;
    }
 }

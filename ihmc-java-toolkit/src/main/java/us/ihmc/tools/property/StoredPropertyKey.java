@@ -9,8 +9,14 @@ public class StoredPropertyKey<T>
    private final String saveName;
    private final Class<T> type;
    private final int index;
+   private final Object defaultValue;
 
    public StoredPropertyKey(Class<T> type, int index, String titleCasedName)
+   {
+      this(type, index, titleCasedName, null);
+   }
+
+   public StoredPropertyKey(Class<T> type, int index, String titleCasedName, Object defaultValue)
    {
       if (!ClassUtils.isPrimitiveOrWrapper(type))
       {
@@ -20,6 +26,7 @@ public class StoredPropertyKey<T>
       this.type = type;
       this.index = index;
       this.titleCasedName = titleCasedName;
+      this.defaultValue = defaultValue;
 
       saveName = buildCamelCasedName();
    }
@@ -37,6 +44,16 @@ public class StoredPropertyKey<T>
    public Class<T> getType()
    {
       return type;
+   }
+
+   public Object getDefaultValue()
+   {
+      return defaultValue;
+   }
+
+   public boolean hasDefaultValue()
+   {
+      return defaultValue != null;
    }
 
    public String getCamelCasedName()

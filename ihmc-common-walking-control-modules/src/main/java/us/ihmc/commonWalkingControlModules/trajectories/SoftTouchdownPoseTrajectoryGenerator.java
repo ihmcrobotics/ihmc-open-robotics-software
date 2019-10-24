@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -52,6 +51,13 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    {
       constantOrientation.setIncludingFrame(orientation);
       constantAngularVelocity.setToZero(worldFrame);
+      constantAngularAcceleration.setToZero(worldFrame);
+   }
+
+   public void setOrientation(FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   {
+      constantOrientation.setIncludingFrame(orientation);
+      constantAngularVelocity.setIncludingFrame(angularVelocity);
       constantAngularAcceleration.setToZero(worldFrame);
    }
 

@@ -23,6 +23,8 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    public double stance_length_ = -1.0;
    public double stance_width_ = -1.0;
    public double step_ground_clearance_ = -1.0;
+   public double max_horizontal_speed_fraction_ = -1.0;
+   public double max_yaw_speed_fraction_ = -1.0;
    public byte quadruped_speed_;
    public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket pace_slow_settings_packet_;
    public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket pace_medium_settings_packet_;
@@ -64,6 +66,10 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       stance_width_ = other.stance_width_;
 
       step_ground_clearance_ = other.step_ground_clearance_;
+
+      max_horizontal_speed_fraction_ = other.max_horizontal_speed_fraction_;
+
+      max_yaw_speed_fraction_ = other.max_yaw_speed_fraction_;
 
       quadruped_speed_ = other.quadruped_speed_;
 
@@ -127,6 +133,24 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    public double getStepGroundClearance()
    {
       return step_ground_clearance_;
+   }
+
+   public void setMaxHorizontalSpeedFraction(double max_horizontal_speed_fraction)
+   {
+      max_horizontal_speed_fraction_ = max_horizontal_speed_fraction;
+   }
+   public double getMaxHorizontalSpeedFraction()
+   {
+      return max_horizontal_speed_fraction_;
+   }
+
+   public void setMaxYawSpeedFraction(double max_yaw_speed_fraction)
+   {
+      max_yaw_speed_fraction_ = max_yaw_speed_fraction;
+   }
+   public double getMaxYawSpeedFraction()
+   {
+      return max_yaw_speed_fraction_;
    }
 
    public void setQuadrupedSpeed(byte quadruped_speed)
@@ -220,6 +244,10 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_ground_clearance_, other.step_ground_clearance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_horizontal_speed_fraction_, other.max_horizontal_speed_fraction_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_yaw_speed_fraction_, other.max_yaw_speed_fraction_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_speed_, other.quadruped_speed_, epsilon)) return false;
 
       if (!this.pace_slow_settings_packet_.epsilonEquals(other.pace_slow_settings_packet_, epsilon)) return false;
@@ -254,6 +282,10 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
 
       if(this.step_ground_clearance_ != otherMyClass.step_ground_clearance_) return false;
 
+      if(this.max_horizontal_speed_fraction_ != otherMyClass.max_horizontal_speed_fraction_) return false;
+
+      if(this.max_yaw_speed_fraction_ != otherMyClass.max_yaw_speed_fraction_) return false;
+
       if(this.quadruped_speed_ != otherMyClass.quadruped_speed_) return false;
 
       if (!this.pace_slow_settings_packet_.equals(otherMyClass.pace_slow_settings_packet_)) return false;
@@ -285,6 +317,10 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       builder.append(this.stance_width_);      builder.append(", ");
       builder.append("step_ground_clearance=");
       builder.append(this.step_ground_clearance_);      builder.append(", ");
+      builder.append("max_horizontal_speed_fraction=");
+      builder.append(this.max_horizontal_speed_fraction_);      builder.append(", ");
+      builder.append("max_yaw_speed_fraction=");
+      builder.append(this.max_yaw_speed_fraction_);      builder.append(", ");
       builder.append("quadruped_speed=");
       builder.append(this.quadruped_speed_);      builder.append(", ");
       builder.append("pace_slow_settings_packet=");

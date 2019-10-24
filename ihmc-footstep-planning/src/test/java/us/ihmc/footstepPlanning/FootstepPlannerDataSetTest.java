@@ -180,7 +180,7 @@ public abstract class FootstepPlannerDataSetTest
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
+   protected void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());

@@ -12,7 +12,7 @@ public class TextToSpeechNetworkClientManualTest
 {
    public static void main(String[] args)
    {
-      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("10.7.4.100", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT,  new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("172.16.66.100", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT,  new IHMCCommunicationKryoNetClassList());
 //      PacketCommunicator ttsModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("127.0.0.1", NetworkPorts.TEXT_TO_SPEECH,  new IHMCCommunicationKryoNetClassList());
       try
       {

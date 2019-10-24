@@ -28,7 +28,9 @@ public enum HighLevelControllerName
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
    CALIBRATION,
-   CUSTOM1;
+   CUSTOM1,
+   @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
+   FALLING_STATE;
 
    public static final HighLevelControllerName[] values = values();
 
@@ -46,6 +48,7 @@ public enum HighLevelControllerName
       name.put(DIAGNOSTICS, "DIAGNOSTICS");
       name.put(CALIBRATION, "CALIBRATION");
       name.put(CUSTOM1, "UNDEFINED");
+      name.put(FALLING_STATE, "FALLING_STATE");
    }
 
    public static void setName(HighLevelControllerName state, String newName)

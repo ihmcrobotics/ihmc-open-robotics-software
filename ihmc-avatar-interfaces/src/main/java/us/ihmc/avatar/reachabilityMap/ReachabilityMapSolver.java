@@ -61,8 +61,14 @@ public class ReachabilityMapSolver
    {
       this.robotArmJoints = robotArmJoints;
       endEffector = robotArmJoints[robotArmJoints.length - 1].getSuccessor();
-      kinematicsToolboxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, null, robotArmJoints,
-                                                                    Collections.singleton(endEffector), yoGraphicsListRegistry, registry);
+      kinematicsToolboxController = new KinematicsToolboxController(commandInputManager,
+                                                                    statusOutputManager,
+                                                                    null,
+                                                                    robotArmJoints,
+                                                                    Collections.singleton(endEffector),
+                                                                    1.0e-3,
+                                                                    yoGraphicsListRegistry,
+                                                                    registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(MultiBodySystemTools.getRootBody(endEffector)));
 
       defaultArmConfiguration = RobotConfigurationDataFactory.create(robotArmJoints, new ForceSensorDefinition[0], new IMUDefinition[0]);

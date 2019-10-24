@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -141,9 +142,9 @@ public class WholeBodyInverseKinematicsSolver
 
    public void submitInverseKinematicsCommandList(InverseKinematicsCommandList inverseKinematicsCommandList)
    {
-      while (inverseKinematicsCommandList.getNumberOfCommands() > 0)
+      for (int commandIndex = 0; commandIndex < inverseKinematicsCommandList.getNumberOfCommands(); commandIndex++)
       {
-         InverseKinematicsCommand<?> command = inverseKinematicsCommandList.pollCommand();
+         InverseKinematicsCommand<?> command = inverseKinematicsCommandList.getCommand(commandIndex);
 
          switch (command.getCommandType())
          {
@@ -156,6 +157,9 @@ public class WholeBodyInverseKinematicsSolver
          case MOMENTUM:
             optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
             recordMomentumRate((MomentumCommand) command);
+            break;
+         case MOMENTUM_CONVEX_CONSTRAINT:
+            optimizationControlModule.submitLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) command);
             break;
          case PRIVILEGED_CONFIGURATION:
             optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
@@ -179,6 +183,7 @@ public class WholeBodyInverseKinematicsSolver
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+      inverseKinematicsCommandList.clear();
    }
 
    private void recordMomentumRate(MomentumCommand command)

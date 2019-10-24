@@ -234,7 +234,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 350;
 
@@ -295,7 +295,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 350;
 
@@ -337,7 +337,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 350;
 
@@ -390,7 +390,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 350;
 
@@ -452,7 +452,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 350;
 

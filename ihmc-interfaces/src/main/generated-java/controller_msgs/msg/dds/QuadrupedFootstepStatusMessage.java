@@ -29,7 +29,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    /**
             * footstep_index starts at 0 and monotonically increases during a controller session
             */
-   public int footstep_quadrant_;
+   public int footstep_index_;
    /**
             * The robot quadrant that this footstep status correlates to.
             */
@@ -71,7 +71,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
       footstep_status_ = other.footstep_status_;
 
-      footstep_quadrant_ = other.footstep_quadrant_;
+      footstep_index_ = other.footstep_index_;
 
       robot_quadrant_ = other.robot_quadrant_;
 
@@ -114,16 +114,16 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    /**
             * footstep_index starts at 0 and monotonically increases during a controller session
             */
-   public void setFootstepQuadrant(int footstep_quadrant)
+   public void setFootstepIndex(int footstep_index)
    {
-      footstep_quadrant_ = footstep_quadrant;
+      footstep_index_ = footstep_index;
    }
    /**
             * footstep_index starts at 0 and monotonically increases during a controller session
             */
-   public int getFootstepQuadrant()
+   public int getFootstepIndex()
    {
-      return footstep_quadrant_;
+      return footstep_index_;
    }
 
    /**
@@ -199,7 +199,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_status_, other.footstep_status_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_quadrant_, other.footstep_quadrant_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_index_, other.footstep_index_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_quadrant_, other.robot_quadrant_, epsilon)) return false;
 
@@ -224,7 +224,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
       if(this.footstep_status_ != otherMyClass.footstep_status_) return false;
 
-      if(this.footstep_quadrant_ != otherMyClass.footstep_quadrant_) return false;
+      if(this.footstep_index_ != otherMyClass.footstep_index_) return false;
 
       if(this.robot_quadrant_ != otherMyClass.robot_quadrant_) return false;
 
@@ -246,8 +246,8 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("footstep_status=");
       builder.append(this.footstep_status_);      builder.append(", ");
-      builder.append("footstep_quadrant=");
-      builder.append(this.footstep_quadrant_);      builder.append(", ");
+      builder.append("footstep_index=");
+      builder.append(this.footstep_index_);      builder.append(", ");
       builder.append("robot_quadrant=");
       builder.append(this.robot_quadrant_);      builder.append(", ");
       builder.append("desired_touchdown_position_in_world=");

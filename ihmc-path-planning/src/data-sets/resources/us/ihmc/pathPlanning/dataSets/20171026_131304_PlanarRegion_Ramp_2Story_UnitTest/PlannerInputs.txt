@@ -1,6 +1,6 @@
 start_position 1.038 0.356 0.000
 goal_position 9.169 -0.764 0.625
-vis_graph_status test
+vis_graph_status dev
 step_planner_status test
 planar_region_bipedal_timeout 10.0
 a_star_timeout 5.0

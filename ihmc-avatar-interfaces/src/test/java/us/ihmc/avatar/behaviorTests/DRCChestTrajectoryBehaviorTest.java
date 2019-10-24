@@ -1,22 +1,21 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -29,7 +28,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@Tag("humanoid-behaviors")
 public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -76,8 +74,11 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment,
+                                                        getSimpleRobotName(),
+                                                        DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters,
+                                                        getRobotModel());
    }
 
    @Test
@@ -88,7 +89,9 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       ReferenceFrame pelvisZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisZUpFrame();
 
       Quaternion desiredChestQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(),
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0,
+                                                                                                        desiredChestQuat,
+                                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                                         pelvisZUpFrame);
 
       ChestTrajectoryBehavior chestOrientationBehavior = testChestOrientationBehavior(chestTrajectoryMessage);
@@ -155,7 +158,9 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       {
          assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
       }
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD,
+                   0.0,
+                   orientationDistance,
                    ORIENTATION_THRESHOLD);
    }
 }

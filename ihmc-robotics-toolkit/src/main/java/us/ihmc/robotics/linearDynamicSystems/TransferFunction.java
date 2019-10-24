@@ -44,6 +44,11 @@ public class TransferFunction
       return new TransferFunction(new double[] {0.0}, new double[] {1.0});
    }
 
+   public int getOrder()
+   {
+      return denominator.getOrder();
+   }
+
    public ComplexNumber evaluate(ComplexNumber complexNumber)
    {
       ComplexNumber evaluateNumerator = numerator.evaluate(complexNumber);

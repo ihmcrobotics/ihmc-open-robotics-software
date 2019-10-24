@@ -10,6 +10,8 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    private double damping;
    private double masterGain;
    private double velocityScaling;
+   private double maxPositionError;
+   private double maxVelocityError;
 
    public JointDesiredBehavior(JointDesiredControlMode controlMode)
    {
@@ -29,6 +31,8 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
       this.damping = damping;
       this.masterGain = masterGain;
       this.velocityScaling = velocityScaling;
+      this.maxPositionError = Double.POSITIVE_INFINITY;
+      this.maxVelocityError = Double.POSITIVE_INFINITY;
    }
 
    public void set(JointDesiredBehaviorReadOnly other)
@@ -38,6 +42,8 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
       setDamping(other.getDamping());
       setMasterGain(other.getMasterGain());
       setVelocityScaling(other.getVelocityScaling());
+      setMaxPositionError(other.getMaxPositionError());
+      setMaxVelocityError(other.getMaxVelocityError());
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -63,6 +69,16 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
    public void setVelocityScaling(double velocityScaling)
    {
       this.velocityScaling = velocityScaling;
+   }
+
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError = maxPositionError;
+   }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.maxVelocityError = maxVelocityError;
    }
 
    @Override
@@ -95,4 +111,15 @@ public class JointDesiredBehavior implements JointDesiredBehaviorReadOnly
       return velocityScaling;
    }
 
+   @Override
+   public double getMaxPositionError()
+   {
+      return maxPositionError;
+   }
+
+   @Override
+   public double getMaxVelocityError()
+   {
+      return maxVelocityError;
+   }
 }

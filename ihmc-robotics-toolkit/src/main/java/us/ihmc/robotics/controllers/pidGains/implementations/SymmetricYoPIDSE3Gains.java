@@ -16,6 +16,11 @@ public class SymmetricYoPIDSE3Gains extends DefaultYoPID3DGains implements YoPID
       super(suffix, GainCoupling.XYZ, true, registry);
    }
 
+   public SymmetricYoPIDSE3Gains(String suffix, boolean useIntegrator, YoVariableRegistry registry)
+   {
+      super(suffix, GainCoupling.XYZ, useIntegrator, registry);
+   }
+
    @Override
    public YoPID3DGains getPositionGains()
    {

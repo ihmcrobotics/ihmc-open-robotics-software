@@ -223,7 +223,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TopicDataType.class);
       registerPacketField(RecyclingArrayList.class);
       registerPacketField(us.ihmc.idl.CDR.class);
-      
 
       registerPacketField(WrenchTrajectoryMessage.class);
       registerPacketField(WrenchTrajectoryMessagePubSubType.class);
@@ -301,6 +300,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkingControllerFailureStatusMessagePubSubType.class);
       registerPacketField(ParameterValuePubSubType.class);
       registerPacketField(FootstepDataMessagePubSubType.class);
+      registerPacketField(FootstepPlanningStatistics.class);
       registerPacketField(FootstepPlanningToolboxOutputStatusPubSubType.class);
       registerPacketField(ColorRGBAPubSubType.class);
       registerPacketField(PelvisPoseErrorPacketPubSubType.class);
@@ -507,6 +507,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(MeshPubSubType.class);
       registerPacketField(TransitionDescriptionPubSubType.class);
       registerPacketField(VehiclePosePacketPubSubType.class);
+      registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(HeadTrajectoryMessagePubSubType.class);
       registerPacketField(WalkOverTerrainGoalPacketPubSubType.class);
       registerPacketField(PlanarRegionsListMessagePubSubType.class);
@@ -582,6 +583,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Trajectory messages
       registerPacketClass(HandTrajectoryMessage.class);
       registerPacketClass(ArmTrajectoryMessage.class);
+      registerPacketClass(NeckTrajectoryMessage.class);
       registerPacketClass(HeadTrajectoryMessage.class);
       registerPacketClass(NeckTrajectoryMessage.class);
       registerPacketClass(ChestTrajectoryMessage.class);
@@ -608,6 +610,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PelvisTrajectoryMessage.class);
       registerPacketField(SpineTrajectoryMessage.class);
       registerPacketField(FootTrajectoryMessage.class);
+      registerPacketField(NeckTrajectoryMessage.class);
       registerPacketField(HeadTrajectoryMessage.class);
       registerPacketField(SE3TrajectoryMessage.class);
       registerPacketField(SO3TrajectoryMessage.class);

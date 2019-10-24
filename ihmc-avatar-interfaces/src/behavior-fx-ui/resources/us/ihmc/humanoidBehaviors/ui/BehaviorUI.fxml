@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="771.0" prefWidth="1163.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1350.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1">
    <bottom>
       <BorderPane prefHeight="240.0" prefWidth="1163.0" BorderPane.alignment="CENTER">
          <right>
@@ -43,6 +43,26 @@
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                   <children>
                                       <fx:include fx:id="stepInPlaceBehaviorUI" source="StepInPlaceBehaviorUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+                      
+                      <Tab text="FancyPoses">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <children>
+                                      <fx:include fx:id="fancyPosesBehaviorUI" source="FancyPosesBehaviorUI.fxml" />
+                                  </children>
+                              </AnchorPane>
+                          </content>
+                      </Tab>
+                      
+                      <Tab text="ExploreArea">
+                          <content>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <children>
+                                      <fx:include fx:id="exploreAreaBehaviorUI" source="ExploreAreaBehaviorUI.fxml" />
                                   </children>
                               </AnchorPane>
                           </content>

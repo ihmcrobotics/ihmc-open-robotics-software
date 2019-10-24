@@ -1,14 +1,12 @@
 package us.ihmc.robotics.referenceFrames;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.MemoryTools;
 
@@ -29,8 +27,6 @@ public class ReferenceFrameMemoryTest
          testFrames.add(testFrame);
       }
 
-      ReferenceFrame.getWorldFrame().clearChildren();
-
       try
       {
          Thread.sleep(100);
@@ -44,9 +40,18 @@ public class ReferenceFrameMemoryTest
       assertTrue(duringMemoryInMB - beforeMemoryInMB > 20);
 
       int afterMemoryInMB = MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("ReferenceFrameTest: after");
-      assertTrue("afterMemoryInMB - beforeMemoryInMB = " + (afterMemoryInMB - beforeMemoryInMB), afterMemoryInMB - beforeMemoryInMB < 140);
+      assertTrue(afterMemoryInMB - beforeMemoryInMB < 140, "afterMemoryInMB - beforeMemoryInMB = " + (afterMemoryInMB - beforeMemoryInMB));
 
       testFrames = null;
+      System.gc();
+      try
+      {
+         Thread.sleep(100);
+      }
+      catch (InterruptedException e)
+      {
+      }
+      
       afterMemoryInMB = MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("ReferenceFrameTest: after testFrames = null");
       assertTrue(afterMemoryInMB - beforeMemoryInMB < 10);
 

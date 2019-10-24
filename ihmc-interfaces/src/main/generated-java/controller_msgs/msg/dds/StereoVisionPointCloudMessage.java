@@ -15,7 +15,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public long robot_timestamp_;
+   public long timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D sensor_position_;
    public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
    public us.ihmc.idl.IDLSequence.Float  point_cloud_;
@@ -41,7 +41,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    {
       sequence_id_ = other.sequence_id_;
 
-      robot_timestamp_ = other.robot_timestamp_;
+      timestamp_ = other.timestamp_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.sensor_position_, sensor_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.sensor_orientation_, sensor_orientation_);
@@ -64,13 +64,13 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       return sequence_id_;
    }
 
-   public void setRobotTimestamp(long robot_timestamp)
+   public void setTimestamp(long timestamp)
    {
-      robot_timestamp_ = robot_timestamp;
+      timestamp_ = timestamp;
    }
-   public long getRobotTimestamp()
+   public long getTimestamp()
    {
-      return robot_timestamp_;
+      return timestamp_;
    }
 
 
@@ -117,7 +117,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_timestamp_, other.robot_timestamp_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
       if (!this.sensor_position_.epsilonEquals(other.sensor_position_, epsilon)) return false;
       if (!this.sensor_orientation_.epsilonEquals(other.sensor_orientation_, epsilon)) return false;
@@ -140,7 +140,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.robot_timestamp_ != otherMyClass.robot_timestamp_) return false;
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
       if (!this.sensor_position_.equals(otherMyClass.sensor_position_)) return false;
       if (!this.sensor_orientation_.equals(otherMyClass.sensor_orientation_)) return false;
@@ -158,8 +158,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       builder.append("StereoVisionPointCloudMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("robot_timestamp=");
-      builder.append(this.robot_timestamp_);      builder.append(", ");
+      builder.append("timestamp=");
+      builder.append(this.timestamp_);      builder.append(", ");
       builder.append("sensor_position=");
       builder.append(this.sensor_position_);      builder.append(", ");
       builder.append("sensor_orientation=");

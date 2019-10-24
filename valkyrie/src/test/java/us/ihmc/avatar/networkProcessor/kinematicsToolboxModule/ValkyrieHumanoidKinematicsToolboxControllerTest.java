@@ -40,6 +40,13 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKin
    }
 
    @Override
+   @Test
+   public void testCenterOfMassConstraint() throws Exception
+   {
+      super.testCenterOfMassConstraint();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

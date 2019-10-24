@@ -11,12 +11,14 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 public class TurnWalkTurnPlanner implements FootstepPlanner
 {
@@ -32,14 +34,14 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
    private double groundHeight = 0.0;
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    public TurnWalkTurnPlanner()
    {
       this(new DefaultTurnWalkTurnPlannerParameters());
    }
 
-   public TurnWalkTurnPlanner(FootstepPlannerParameters parameters)
+   public TurnWalkTurnPlanner(FootstepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }
@@ -285,54 +287,18 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
    }
 
-   private static class DefaultTurnWalkTurnPlannerParameters implements FootstepPlannerParameters
+   private static class DefaultTurnWalkTurnPlannerParameters extends DefaultFootstepPlannerParameters
    {
-      @Override
-      public double getIdealFootstepWidth()
+      public DefaultTurnWalkTurnPlannerParameters()
       {
-         return 0.3;
-      }
-
-      @Override
-      public double getIdealFootstepLength()
-      {
-         return 0.45;
-      }
-
-      @Override
-      public double getMaximumStepYaw()
-      {
-         return Math.toRadians(20.0);
-      }
-
-      @Override
-      public double getMinimumStepYaw()
-      {
-         return Math.toRadians(0.0);
-      }
-
-      @Override
-      public double getMaximumStepReach()
-      {
-         return getIdealFootstepLength();
-      }
-
-      @Override
-      public double getMinimumStepWidth()
-      {
-         return 0.0;
-      }
-
-      @Override
-      public double getMaximumStepZ()
-      {
-         return 0.0;
-      }
-
-      @Override
-      public double getMaximumStepWidth()
-      {
-         return getIdealFootstepWidth();
+         setIdealFootstepWidth(0.3);
+         setIdealFootstepLength(0.45);
+         setMaximumStepYaw(Math.toRadians(20.0));
+         setMinimumStepYaw(Math.toRadians(0.0));
+         setMaximumStepReach(0.45);
+         setMinimumStepWidth(0.0);
+         setMaximumStepZ(0.0);
+         setMaximumStepWidth(0.3);
       }
    }
 

@@ -31,8 +31,13 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
 
    public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion)
    {
+      this(pointInWorld, pointInLocal, visibilityGraphNavigableRegion, visibilityGraphNavigableRegion.getMapId());
+   }
+
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, int mapId)
+   {
       this.visibilityGraphNavigableRegion = visibilityGraphNavigableRegion;
-      this.pointInWorld = new ConnectionPoint3D(pointInWorld, visibilityGraphNavigableRegion.getMapId());
+      this.pointInWorld = new ConnectionPoint3D(pointInWorld, mapId);
       this.point2DInLocal = new Point2D(pointInLocal);
    }
 

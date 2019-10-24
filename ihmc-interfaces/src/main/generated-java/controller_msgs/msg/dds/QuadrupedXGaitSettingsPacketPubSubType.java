@@ -50,6 +50,10 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -84,6 +88,12 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -135,6 +145,10 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_6(data.getStepGroundClearance());
 
+      cdr.write_type_6(data.getMaxHorizontalSpeedFraction());
+
+      cdr.write_type_6(data.getMaxYawSpeedFraction());
+
       cdr.write_type_9(data.getQuadrupedSpeed());
 
       controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.write(data.getPaceSlowSettingsPacket(), cdr);
@@ -160,6 +174,10 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
       	
       data.setStepGroundClearance(cdr.read_type_6());
       	
+      data.setMaxHorizontalSpeedFraction(cdr.read_type_6());
+      	
+      data.setMaxYawSpeedFraction(cdr.read_type_6());
+      	
       data.setQuadrupedSpeed(cdr.read_type_9());
       	
       controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.read(data.getPaceSlowSettingsPacket(), cdr);	
@@ -182,6 +200,8 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
       ser.write_type_6("stance_length", data.getStanceLength());
       ser.write_type_6("stance_width", data.getStanceWidth());
       ser.write_type_6("step_ground_clearance", data.getStepGroundClearance());
+      ser.write_type_6("max_horizontal_speed_fraction", data.getMaxHorizontalSpeedFraction());
+      ser.write_type_6("max_yaw_speed_fraction", data.getMaxYawSpeedFraction());
       ser.write_type_9("quadruped_speed", data.getQuadrupedSpeed());
       ser.write_type_a("pace_slow_settings_packet", new controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType(), data.getPaceSlowSettingsPacket());
 
@@ -211,6 +231,8 @@ public class QuadrupedXGaitSettingsPacketPubSubType implements us.ihmc.pubsub.To
       data.setStanceLength(ser.read_type_6("stance_length"));
       data.setStanceWidth(ser.read_type_6("stance_width"));
       data.setStepGroundClearance(ser.read_type_6("step_ground_clearance"));
+      data.setMaxHorizontalSpeedFraction(ser.read_type_6("max_horizontal_speed_fraction"));
+      data.setMaxYawSpeedFraction(ser.read_type_6("max_yaw_speed_fraction"));
       data.setQuadrupedSpeed(ser.read_type_9("quadruped_speed"));
       ser.read_type_a("pace_slow_settings_packet", new controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType(), data.getPaceSlowSettingsPacket());
 

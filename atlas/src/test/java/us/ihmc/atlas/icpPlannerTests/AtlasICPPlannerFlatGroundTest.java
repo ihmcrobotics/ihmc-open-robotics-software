@@ -1,6 +1,7 @@
 package us.ihmc.atlas.icpPlannerTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
@@ -15,10 +16,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground")
 public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-
 
    @Override
    @Disabled
@@ -98,4 +99,3 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    }
 
 }
-

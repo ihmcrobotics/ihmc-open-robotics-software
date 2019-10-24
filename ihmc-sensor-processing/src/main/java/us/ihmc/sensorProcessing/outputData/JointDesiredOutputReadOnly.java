@@ -180,44 +180,76 @@ public interface JointDesiredOutputReadOnly
    double getPositionIntegrationBreakFrequency();
 
    /**
-    * Returns true if a maximum position error was set for this joint.
+    * Returns true if a maximum position error for acceleration integration was set for this joint.
     *
-    * @see #getMaxPositionError()
+    * @see #getPositionIntegrationMaxError()
     */
-   default boolean hasMaxPositionError()
+   default boolean hasPositionIntegrationMaxError()
    {
-      return !Double.isNaN(getMaxPositionError());
+      return !Double.isNaN(getPositionIntegrationMaxError());
    }
 
    /**
-    * Gets the maximum position error to consider in the low level control of this joint. How this
-    * value is used is specific to the joint low level control. In some cases it is used to limit the
-    * acceleration integration in other cases it might be used to determine a maximum position feedback
-    * for a joint PD controller.
+    * Gets the maximum position error to consider in the acceleration integration of this joint. How this
+    * value is used is specific to the joint low level control.
     *
-    * @return the maximum position error for the joint.
+    * @return the maximum position error for acceleration integration for the joint.
     */
-   double getMaxPositionError();
+   double getPositionIntegrationMaxError();
 
    /**
-    * Returns true if a maximum velocity error was set for this joint.
+    * Returns true if a maximum velocity error for acceleration integration was set for this joint.
     *
-    * @see #getMaxVelocityError()
+    * @see #getVelocityIntegrationMaxError()
     */
-   default boolean hasMaxVelocityError()
+   default boolean hasVelocityIntegrationMaxError()
    {
-      return !Double.isNaN(getMaxVelocityError());
+      return !Double.isNaN(getVelocityIntegrationMaxError());
    }
 
    /**
-    * Gets the maximum velocity error to consider in the low level control of this joint. How this
-    * value is used is specific to the joint low level control. In some cases it is used to limit the
-    * acceleration integration in other cases it might be used to determine a maximum velocity feedback
-    * for a joint PD controller.
+    * Gets the maximum velocity error to consider in the acceleration integration of this joint. How this
+    * value is used is specific to the joint low level control.
     *
     * @return the maximum velocity error for the joint.
     */
-   double getMaxVelocityError();
+   double getVelocityIntegrationMaxError();
+
+   /**
+    * Returns true if a maximum position error for feedback was set for this joint.
+    *
+    * @see #getPositionFeedbackMaxError()
+    */
+   default boolean hasPositionFeedbackMaxError()
+   {
+      return !Double.isNaN(getPositionFeedbackMaxError());
+   }
+
+   /**
+    * Gets the maximum position error to consider in the low level feedback control of this joint. How this
+    * value is used is specific to the joint low level control.
+    *
+    * @return the maximum position error for the joint feedback control.
+    */
+   double getPositionFeedbackMaxError();
+
+   /**
+    * Returns true if a maximum velocity error for feedback was set for this joint.
+    *
+    * @see #getVelocityFeedbackMaxError()
+    */
+   default boolean hasVelocityFeedbackMaxError()
+   {
+      return !Double.isNaN(getVelocityFeedbackMaxError());
+   }
+
+   /**
+    * Gets the maximum velocity error to consider in the low level feedback control of this joint. How this
+    * value is used is specific to the joint low level control.
+    *
+    * @return the maximum velocity error for the joint feedback control.
+    */
+   double getVelocityFeedbackMaxError();
 
    default String getRepresentativeString()
    {
@@ -279,9 +311,13 @@ public interface JointDesiredOutputReadOnly
             return false;
          if (Double.compare(getPositionIntegrationBreakFrequency(), other.getPositionIntegrationBreakFrequency()) != 0)
             return false;
-         if (Double.compare(getMaxVelocityError(), other.getMaxVelocityError()) != 0)
+         if (Double.compare(getVelocityIntegrationMaxError(), other.getVelocityIntegrationMaxError()) != 0)
             return false;
-         if (Double.compare(getMaxPositionError(), other.getMaxPositionError()) != 0)
+         if (Double.compare(getPositionIntegrationMaxError(), other.getPositionIntegrationMaxError()) != 0)
+            return false;
+         if (Double.compare(getVelocityFeedbackMaxError(), other.getVelocityFeedbackMaxError()) != 0)
+            return false;
+         if (Double.compare(getPositionFeedbackMaxError(), other.getPositionFeedbackMaxError()) != 0)
             return false;
          return true;
       }

@@ -28,5 +28,7 @@ FootTrajectoryMessage left_foot_trajectory_message
 # Trajectory for the right foot
 FootTrajectoryMessage right_foot_trajectory_message
 
+# Trajectory for the neck joints
+NeckTrajectoryMessage neck_trajectory_message
 # Trajectory for the head
 HeadTrajectoryMessage head_trajectory_message

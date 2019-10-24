@@ -99,7 +99,7 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_9(data.getFootstepStatus());
 
-      cdr.write_type_2(data.getFootstepQuadrant());
+      cdr.write_type_2(data.getFootstepIndex());
 
       cdr.write_type_9(data.getRobotQuadrant());
 
@@ -115,7 +115,7 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setFootstepStatus(cdr.read_type_9());
       	
-      data.setFootstepQuadrant(cdr.read_type_2());
+      data.setFootstepIndex(cdr.read_type_2());
       	
       data.setRobotQuadrant(cdr.read_type_9());
       	
@@ -131,7 +131,7 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("footstep_status", data.getFootstepStatus());
-      ser.write_type_2("footstep_quadrant", data.getFootstepQuadrant());
+      ser.write_type_2("footstep_index", data.getFootstepIndex());
       ser.write_type_9("robot_quadrant", data.getRobotQuadrant());
       ser.write_type_a("desired_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTouchdownPositionInWorld());
 
@@ -148,7 +148,7 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setFootstepStatus(ser.read_type_9("footstep_status"));
-      data.setFootstepQuadrant(ser.read_type_2("footstep_quadrant"));
+      data.setFootstepIndex(ser.read_type_2("footstep_index"));
       data.setRobotQuadrant(ser.read_type_9("robot_quadrant"));
       ser.read_type_a("desired_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTouchdownPositionInWorld());
 

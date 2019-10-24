@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -17,6 +18,7 @@ public class GenericQuadrupedTurning720Test extends QuadrupedXGaitTurning720Test
       return new GenericQuadrupedTestFactory();
    }
 
+   @Tag("quadruped-xgait")
    @Override
    @Test
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
@@ -24,6 +26,7 @@ public class GenericQuadrupedTurning720Test extends QuadrupedXGaitTurning720Test
       super.rotate720InPlaceRight();
    }
 
+   @Tag("quadruped-xgait-slow")
    @Override
    @Test
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException

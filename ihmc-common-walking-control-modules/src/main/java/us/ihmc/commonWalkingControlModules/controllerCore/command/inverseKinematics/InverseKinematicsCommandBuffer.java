@@ -23,6 +23,7 @@ public class InverseKinematicsCommandBuffer extends InverseKinematicsCommandList
    private final RecyclingArrayList<JointLimitEnforcementMethodCommand> jointLimitEnforcementMethodCommandBuffer = new RecyclingArrayList<>(JointLimitEnforcementMethodCommand.class);
    private final RecyclingArrayList<JointspaceVelocityCommand> jointspaceVelocityCommandBuffer = new RecyclingArrayList<>(JointspaceVelocityCommand.class);
    private final RecyclingArrayList<MomentumCommand> momentumCommandBuffer = new RecyclingArrayList<>(MomentumCommand.class);
+   private final RecyclingArrayList<LinearMomentumConvexConstraint2DCommand> linearMomentumConvexConstraint2DCommandBuffer = new RecyclingArrayList<>(LinearMomentumConvexConstraint2DCommand.class);
    private final RecyclingArrayList<PrivilegedConfigurationCommand> privilegedConfigurationCommandBuffer = new RecyclingArrayList<>(PrivilegedConfigurationCommand.class);
    private final RecyclingArrayList<PrivilegedJointSpaceCommand> privilegedJointSpaceCommandBuffer = new RecyclingArrayList<>(PrivilegedJointSpaceCommand.class);
    private final RecyclingArrayList<SpatialVelocityCommand> spatialVelocityCommandBuffer = new RecyclingArrayList<>(SpatialVelocityCommand.class);
@@ -44,6 +45,7 @@ public class InverseKinematicsCommandBuffer extends InverseKinematicsCommandList
       jointLimitEnforcementMethodCommandBuffer.clear();
       jointspaceVelocityCommandBuffer.clear();
       momentumCommandBuffer.clear();
+      linearMomentumConvexConstraint2DCommandBuffer.clear();
       privilegedConfigurationCommandBuffer.clear();
       privilegedJointSpaceCommandBuffer.clear();
       spatialVelocityCommandBuffer.clear();
@@ -142,6 +144,18 @@ public class InverseKinematicsCommandBuffer extends InverseKinematicsCommandList
    public MomentumCommand addMomentumCommand()
    {
       MomentumCommand command = momentumCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+   
+   /**
+    * Gets an available {@link LinearMomentumConvexConstraint2DCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
+   public LinearMomentumConvexConstraint2DCommand addLinearMomentumConvexConstraint2DCommand()
+   {
+      LinearMomentumConvexConstraint2DCommand command = linearMomentumConvexConstraint2DCommandBuffer.add();
       super.addCommand(command);
       return command;
    }

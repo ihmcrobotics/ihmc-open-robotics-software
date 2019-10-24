@@ -7,6 +7,10 @@ uint32 sequence_id
 # to run slower.
 bool check_for_body_box_collisions false
 
+# Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+# between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
+bool check_for_path_collisions false
+
 # Sets whether or not to perform the defined heuristic search policies.
 bool perform_heuristic_search_policies false
 
@@ -190,12 +194,6 @@ bool return_best_effort_plan false
 # contains at least this many footsteps.
 uint32 minimum_steps_for_best_effort_plan
 
-# Some node checkers will check if the body of the robot will move through a higher planar region
-# (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
-# ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
-# This should be set to be slightly above cinder block height (20.3cm) for Atlas.
-float64 body_ground_clearance -1.0
-
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
 # collisions, this defines the box height.
@@ -236,5 +234,90 @@ float64 min_x_clearance_from_stance -1.0
 # this parameter.
 float64 min_y_clearance_from_stance -1.0
 
-# When using a cost based planning approach this value defines the weighting parameters to be used
-FootstepPlannerCostParametersPacket cost_parameters
+# Radius around the goal inside which the planner should start to turn to match the goal's orientation
+float64 final_turn_proximity -1.0
+
+# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
+float64 final_turn_body_path_proximity -1.0
+
+# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
+# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
+# the desired orientation is the final orientation.
+float64 final_turn_proximity_blend_factor -1.0
+
+# When using a cost based planning approach this value defined how the yaw of a footstep will be
+# weighted in comparison to its position.
+float64 yaw_weight -1.0
+
+# When using a cost based planning approach this value defines how the pitch will be weighted.
+float64 pitch_weight -1.0
+
+# When using a cost based planning approach this value defines how the roll will be weighted.
+float64 roll_weight -1.0
+
+# When using a cost based planning approach, this value defines how the forward (or backward) displacement
+# of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+# weight is averaged with the value returned by {@link #getLateralWeight()}
+float64 forward_weight -1.0
+
+# When using a cost based planning approach, this value defines how the lateral displacement
+# of a footstep will be weighted in comparison to its position. Note that when using a Euclidean distance, this
+# weight is averaged with the value returned by {@link #getForwardWeight()}
+float64 lateral_weight -1.0
+
+# When using a cost based planning approach this value defines how the height change when stepping up will be
+# weighted.
+float64 step_up_weight -1.0
+
+# When using a cost based planning approach this value defines how the height change when stepping down will be
+# weighted.
+float64 step_down_weight -1.0
+
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+float64 long_step_weight -1.0
+
+# When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
+float64 foothold_area_weight -1.0
+
+# When using a cost based planning approach this value defines the cost that is added for each step
+# taken. Setting this value to a high number will favor plans with less steps.
+float64 cost_per_step -1.0
+
+# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
+bool use_quadratic_distance_cost false
+
+# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
+bool use_quadratic_height_cost false
+
+# Gets the weight for the heuristics in the A Star planner.
+float64 a_star_heuristics_weight -1.0
+
+# Gets the weight for the heuristics in the Visibility graph with A star planner.
+float64 vis_graph_with_a_star_heuristics_weight -1.0
+
+# Gets the weight for the heuristics in the Depth First planner.
+float64 depth_first_heuristics_weight -1.0
+
+# Gets the weight for the heuristics in the Body path based planner.
+float64 body_path_based_heuristics_weight -1.0
+
+# This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
+# Additional checks are done by interpolating between the start and end steps
+uint32 number_of_bounding_box_checks 1
+
+# If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+# @see FootstepPlannerCostParameters#getBoundingBoxCost
+float64 maximum_2d_distance_from_bounding_box_to_penalize -1.0
+
+# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+# {@code c * (1 - d / d_max)}, where d_max is this value.
+float64 bounding_box_cost -1.0
+
+float64 body_path_violation_weight -1.0
+
+float64 distance_from_path_tolerance -1.0
+
+float64 delta_yaw_from_reference_tolerance -1.0
+

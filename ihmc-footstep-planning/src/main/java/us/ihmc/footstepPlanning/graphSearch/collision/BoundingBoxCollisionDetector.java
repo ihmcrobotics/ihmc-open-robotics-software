@@ -1,17 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -23,7 +17,6 @@ public class BoundingBoxCollisionDetector
    private final double xyProximityCheck;
    
    private PlanarRegionsList planarRegionsList;
-   private final List<ConvexPolytope3D> planarRegionPolytopes = new ArrayList<>();
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
 
    private double bodyPoseX = Double.NaN;
@@ -31,13 +24,13 @@ public class BoundingBoxCollisionDetector
    private double bodyPoseZ = Double.NaN;
    private double bodyPoseYaw = Double.NaN;
 
+   // box that is checked for collision
    private final Box3D bodyBox = new Box3D();
+   // this is the bounding box of "bodyBox", used as an optimization before doing a full collision check
    private final BoundingBox3D boundingBox = new BoundingBox3D();
-   private final ConvexPolytope3D bodyBoxPolytope = new ConvexPolytope3D();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempPoint1 = new Point3D();
-   private final Point3D tempPoint2 = new Point3D();
 
    public BoundingBoxCollisionDetector(double boxDepth, double boxWidth, double boxHeight, double xyProximityCheck)
    {
@@ -49,27 +42,7 @@ public class BoundingBoxCollisionDetector
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
-      planarRegionPolytopes.clear();
       this.planarRegionsList = planarRegions;
-
-      List<PlanarRegion> planarRegionsList = planarRegions.getPlanarRegionsAsList();
-      for (int i = 0; i < planarRegionsList.size(); i++)
-      {
-         PlanarRegion planarRegion = planarRegionsList.get(i);
-         ConvexPolytope3D planarRegionPolytope = new ConvexPolytope3D();
-
-         List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
-         planarRegion.getTransformToWorld(tempTransform);
-
-         for (Point2DReadOnly point : pointsInPlanarRegion)
-         {
-            tempPoint1.set(point.getX(), point.getY(), 0.0);
-            tempPoint1.applyTransform(tempTransform);
-            planarRegionPolytope.addVertex(tempPoint1);
-         }
-
-         planarRegionPolytopes.add(planarRegionPolytope);
-      }
    }
 
    public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
@@ -92,15 +65,15 @@ public class BoundingBoxCollisionDetector
          setDimensionsToUpperBound();
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
 
-         if(planarRegion.getBoundingBox3dInWorld().intersectsExclusive(boundingBox))
+         if(planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
          {
-            ConvexPolytope3D planarRegionPolytope = planarRegionPolytopes.get(i);
-            EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(planarRegionPolytope, bodyBoxPolytope);
+            PlanarRegion region = planarRegionsList.getPlanarRegion(i);
+            EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
 
             if(collisionResult.areShapesColliding())
             {
                setDimensionsToLowerBound();
-               collisionResult = collisionDetector.evaluateCollision(planarRegionPolytope, bodyBoxPolytope);
+               collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
 
                if(collisionResult.areShapesColliding())
                {
@@ -162,7 +135,6 @@ public class BoundingBoxCollisionDetector
    {
       bodyBox.setSize(boxDepth, boxWidth, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
-      updateBodyBoxPolytope();
    }
 
    private void setDimensionsToUpperBound()
@@ -170,18 +142,6 @@ public class BoundingBoxCollisionDetector
       double planarDimensionIncrease = 2.0 * xyProximityCheck;
       bodyBox.setSize(boxDepth + planarDimensionIncrease, boxWidth + planarDimensionIncrease, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
-      updateBodyBoxPolytope();
-   }
-
-   private void updateBodyBoxPolytope()
-   {
-      bodyBoxPolytope.clear();
-
-      Point3DBasics[] vertices = bodyBox.getVertices();
-      for (int i = 0; i < vertices.length; i++)
-      {
-         bodyBoxPolytope.addVertex(vertices[i]);
-      }
    }
 
    private void checkInputs()

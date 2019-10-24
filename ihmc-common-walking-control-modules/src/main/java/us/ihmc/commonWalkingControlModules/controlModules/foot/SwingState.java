@@ -717,11 +717,12 @@ public class SwingState extends AbstractFootControlState
          lastPoint.getPositionIncludingFrame(finalPosition);
          lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
          lastPoint.getOrientationIncludingFrame(finalOrientation);
+         lastPoint.getAngularVelocity(finalAngularVelocity);
       }
 
       // Setup touchdown trajectory.
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, touchdownAcceleration);
-      touchdownTrajectory.setOrientation(finalOrientation);
+      touchdownTrajectory.setOrientation(finalOrientation, finalAngularVelocity);
 
       blendedSwingTrajectory.initializeTrajectory();
       fillAndInitializeBlendedTrajectories();

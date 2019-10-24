@@ -1,15 +1,20 @@
 package us.ihmc.humanoidBehaviors.upDownExploration;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
+
+import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
@@ -17,15 +22,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.TypedNotification;
-
-import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
 
 /**
  * Keep track of state and manage the specific flow of exploration for the May 2019 demo.
@@ -45,7 +44,8 @@ public class UpDownExplorer
    private double accumulatedTurnAmount = 0.0;
    private RobotSide turnDirection = RobotSide.LEFT;
 
-   private ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final BehaviorHelper behaviorHelper;
+   
    private Random random = new Random(System.nanoTime());
    private FramePose3DReadOnly midFeetZUpPose;
    private FramePoint2D midFeetZUpXYProjectionTemp = new FramePoint2D();
@@ -60,11 +60,9 @@ public class UpDownExplorer
    private UpDownState state = UpDownState.TRAVERSING;
    private Notification plannerFailedOnLastRun = new Notification();
 
-   public UpDownExplorer(Messager messager,
-                         ROS2Input<PlanarRegionsListMessage> planarRegionsList)
+   public UpDownExplorer(Messager messager, BehaviorHelper behaviorHelper)
    {
-      this.planarRegionsList = planarRegionsList;
-
+      this.behaviorHelper = behaviorHelper;
       upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
@@ -84,8 +82,10 @@ public class UpDownExplorer
       {
          boolean isCloseToCenter = isCloseToCenter(midFeetZUpPose);
          boolean requireHeightChange = isCloseToCenter;
+         PlanarRegionsList latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionList();
+         
          upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(humanoidReferenceFrames.getMidFeetZUpFrame(),
-                                                                           PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()),
+                                                                           latestPlanarRegionList,
                                                                            requireHeightChange);
       }
    }

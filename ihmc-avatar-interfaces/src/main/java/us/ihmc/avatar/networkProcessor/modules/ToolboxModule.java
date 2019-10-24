@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +28,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -65,44 +65,42 @@ public abstract class ToolboxModule
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
    protected Runnable toolboxRunnable = null;
-   protected final int updatePeriodMilliseconds = 1;
+   protected final int updatePeriodMilliseconds;
+   protected final YoBoolean isLogging = new YoBoolean("isLogging", registry);
 
    protected final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
    protected final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
-   private YoVariableServer yoVariableServer;
+   protected YoVariableServer yoVariableServer;
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
                         int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
-         throws IOException
    {
       this.robotName = robotName;
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
+      this.updatePeriodMilliseconds = updatePeriodMilliseconds;
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
@@ -126,7 +124,16 @@ public abstract class ToolboxModule
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
+      {
+         private final ToolboxStateMessage message = new ToolboxStateMessage();
+         @Override
+         public void onNewDataMessage(Subscriber<ToolboxStateMessage> s)
+         {
+            s.takeNextData(message, null);
+            receivedPacket(message);
+         }
+      });
       registerExtraPuSubs(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
@@ -141,13 +148,17 @@ public abstract class ToolboxModule
       if (!startYoVariableServer)
          return;
 
-      PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
-      yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
+      yoVariableServer = new YoVariableServer(getClass(), modelProvider, getYoVariableServerSettings(), YO_VARIABLE_SERVER_DT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
       yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,
                                                                       TimeUnit.MILLISECONDS);
+   }
+
+   public DataServerSettings getYoVariableServerSettings()
+   {
+      return new DataServerSettings(false);
    }
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
@@ -250,6 +261,20 @@ public abstract class ToolboxModule
          sleep();
          break;
       }
+
+      if (toolboxTaskScheduled != null)
+      {
+         if(message.getRequestLogging() && !isLogging.getValue())
+         {
+            startLogging();
+            isLogging.set(true);
+         }
+         else if(!message.getRequestLogging() && isLogging.getValue())
+         {
+            stopLogging();
+            isLogging.set(false);
+         }
+      }
    }
 
    public void wakeUp()
@@ -282,6 +307,8 @@ public abstract class ToolboxModule
       if (DEBUG)
          LogTools.debug("Going to sleep");
 
+      getToolboxController().notifyToolboxStateChange(ToolboxState.SLEEP);
+
       destroyToolboxRunnable();
 
       if (toolboxTaskScheduled == null)
@@ -294,6 +321,11 @@ public abstract class ToolboxModule
       getToolboxController().setFutureToListenTo(null);
       toolboxTaskScheduled.cancel(true);
       toolboxTaskScheduled = null;
+
+      if(isLogging.getValue())
+      {
+         stopLogging();
+      }
    }
 
    public void destroy()
@@ -360,6 +392,14 @@ public abstract class ToolboxModule
    private void destroyToolboxRunnable()
    {
       toolboxRunnable = null;
+   }
+
+   protected void startLogging()
+   {
+   }
+
+   protected void stopLogging()
+   {
    }
 
    abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);

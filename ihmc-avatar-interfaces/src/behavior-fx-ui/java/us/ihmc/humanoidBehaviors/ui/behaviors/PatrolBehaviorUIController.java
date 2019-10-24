@@ -41,6 +41,8 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
 public class PatrolBehaviorUIController extends Group
 {
+   @FXML private CheckBox enableCheckBox;
+
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
    @FXML private Button cancelPlanning2;
@@ -443,6 +445,11 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void loopThroughWaypoints()
    {
       behaviorMessager.submitMessage(Loop, loopThroughWaypoints.isSelected());
+   }
+
+   @FXML public void enable()
+   {
+      behaviorMessager.submitMessage(Enable, enableCheckBox.isSelected());
    }
 
    @FXML public void swingOverPlanarRegions()

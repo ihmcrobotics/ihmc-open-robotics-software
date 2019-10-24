@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +11,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,11 +24,11 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * This end to end test is to make sure the pelvis doesn't flip out when it has low gains. In March, 2015 we started investigating this bug.
- * It seems to have something to do with either some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator or State Estimator.
- *
+ * This end to end test is to make sure the pelvis doesn't flip out when it has low gains. In March,
+ * 2015 we started investigating this bug. It seems to have something to do with either some sort of
+ * problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator or State
+ * Estimator.
  */
-@Tag("humanoid-flat-ground-4")
 public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

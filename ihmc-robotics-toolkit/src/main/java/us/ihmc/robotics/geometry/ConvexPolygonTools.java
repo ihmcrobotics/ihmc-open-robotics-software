@@ -791,8 +791,109 @@ public class ConvexPolygonTools
       return true;
    }
 
-   public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut,
-                                        FrameConvexPolygonWithLineIntersector2d lineIntersector2d, RobotSide sideOfLineToCut)
+   private final Point2D intersectionPoint1 = new Point2D();
+   private final Point2D intersectionPoint2 = new Point2D();
+
+   public static ConvexPolygonCutResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCut,
+                                                               Line2DReadOnly cuttingLine,
+                                                               ConvexPolygon2DBasics croppedPolygonToPack)
+   {
+      return cutPolygonToLeftOfLine(polygonToCut, cuttingLine, croppedPolygonToPack, new Point2D(), new Point2D());
+   }
+
+   public static ConvexPolygonCutResult cutPolygonToLeftOfLine(ConvexPolygon2DReadOnly polygonToCut,
+                                                               Line2DReadOnly cuttingLine,
+                                                               ConvexPolygon2DBasics croppedPolygonToPack,
+                                                               Point2DBasics firstIntersectionToPack,
+                                                               Point2DBasics secondIntersectionToPack)
+   {
+      if (polygonToCut.isEmpty())
+      {
+         croppedPolygonToPack.clearAndUpdate();
+         return ConvexPolygonCutResult.REMOVE_ALL;
+      }
+
+      Vector2D upDirection = new Vector2D(cuttingLine.getDirection());
+      upDirection.normalize();
+      upDirection.set(-upDirection.getY(), upDirection.getX());
+
+      int intersectionCount = EuclidGeometryPolygonTools.intersectionBetweenLine2DAndConvexPolygon2D(cuttingLine.getPoint(),
+                                                                                                     cuttingLine.getDirection(),
+                                                                                                     polygonToCut.getVertexBufferView(),
+                                                                                                     polygonToCut.getNumberOfVertices(),
+                                                                                                     polygonToCut.isClockwiseOrdered(),
+                                                                                                     firstIntersectionToPack,
+                                                                                                     secondIntersectionToPack);
+      LogTools.trace("Intersection count: {}", intersectionCount);
+      boolean vertex0IsAbove = EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCut.getVertex(0), cuttingLine.getPoint(), upDirection);
+      if (intersectionCount == 0)
+      {
+         if (vertex0IsAbove)
+         {
+            croppedPolygonToPack.set(polygonToCut);
+            return ConvexPolygonCutResult.KEEP_ALL;
+         }
+         else
+         {
+            croppedPolygonToPack.clearAndUpdate();
+            return ConvexPolygonCutResult.REMOVE_ALL;
+         }
+      }
+      else if (intersectionCount == 1)
+      {
+         // firstIntersectionToPack is packed with only intersection
+         if (polygonToCut.getNumberOfVertices() > 1)
+         {
+            // isPoint2DInFrontOfRay2D returns true for on as well. Check any two vertices. One is on the line.
+            boolean isOnOrAboveTwo = EuclidGeometryTools.isPoint2DInFrontOfRay2D(polygonToCut.getVertex(1), cuttingLine.getPoint(), upDirection);
+
+            if (vertex0IsAbove && isOnOrAboveTwo)
+            {
+               croppedPolygonToPack.set(polygonToCut);
+               return ConvexPolygonCutResult.KEEP_ALL;
+            }
+            else
+            {
+               croppedPolygonToPack.clearAndUpdate();
+               return ConvexPolygonCutResult.REMOVE_ALL;
+            }
+         }
+         else
+         {
+            croppedPolygonToPack.clearAndUpdate();
+            return ConvexPolygonCutResult.REMOVE_ALL;
+         }
+      }
+      else
+      {
+         croppedPolygonToPack.clear();
+         for (int i =0; i < polygonToCut.getNumberOfVertices(); i++)
+         {
+            croppedPolygonToPack.addVertex(polygonToCut.getVertex(i));
+         }
+         croppedPolygonToPack.update();
+         cutPolygonWithLinePrivate(cuttingLine, croppedPolygonToPack, RobotSide.LEFT.getOppositeSide(), firstIntersectionToPack, secondIntersectionToPack);
+         return ConvexPolygonCutResult.CUT;
+      }
+   }
+
+   // TODO: This one requires creating a new ConvexPolygonTools object, fix
+   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      return cutPolygonWithLine(cuttingLine, polygonToCut, sideOfLineToCut, intersectionPoint1, intersectionPoint2);
+   }
+
+   // TODO: This one requires creating a new ConvexPolygonTools object, fix
+   public int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   {
+      cuttingLine.checkReferenceFrameMatch(polygonToCut);
+      return cutPolygonWithLine(cuttingLine, (ConvexPolygon2DBasics) polygonToCut, sideOfLineToCut);
+   }
+
+   public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine,
+                                        FixedFrameConvexPolygon2DBasics polygonToCut,
+                                        FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
+                                        RobotSide sideOfLineToCut)
    {
       lineIntersector2d.intersectWithLine(polygonToCut, cuttingLine);
 
@@ -803,40 +904,20 @@ public class ConvexPolygonTools
       }
       else
       {
-         int numberOfVerticesRemoved = 0;
-         int index = 0;
-         while (index < polygonToCut.getNumberOfVertices())
-         {
-            Point2DReadOnly vertex = polygonToCut.getVertex(index);
-            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
-            {
-               polygonToCut.removeVertex(index);
-               polygonToCut.update();
-               numberOfVerticesRemoved++;
-            }
-            else
-            {
-               index++;
-            }
-         }
-         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointOne());
-         polygonToCut.addVertex(lineIntersector2d.getIntersectionPointTwo());
-         polygonToCut.update();
-         return numberOfVerticesRemoved;
+         return cutPolygonWithLinePrivate(cuttingLine,
+                                          polygonToCut,
+                                          sideOfLineToCut,
+                                          lineIntersector2d.getIntersectionPointOne(),
+                                          lineIntersector2d.getIntersectionPointTwo());
       }
    }
 
-   public int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
-   {
-      cuttingLine.checkReferenceFrameMatch(polygonToCut);
-      return cutPolygonWithLine(cuttingLine, (ConvexPolygon2DBasics) polygonToCut, sideOfLineToCut);
-   }
-
-   private final Point2D intersectionPoint1 = new Point2D();
-   private final Point2D intersectionPoint2 = new Point2D();
-
    // TODO Needs to be extracted to Euclid.
-   public int cutPolygonWithLine(Line2DReadOnly cuttingLine, ConvexPolygon2DBasics polygonToCut, RobotSide sideOfLineToCut)
+   public static int cutPolygonWithLine(Line2DReadOnly cuttingLine,
+                                        ConvexPolygon2DBasics polygonToCut,
+                                        RobotSide sideOfLineToCut,
+                                        Point2D intersectionPoint1,
+                                        Point2D intersectionPoint2)
    {
       int intersectionPoints = polygonToCut.intersectionWith(cuttingLine, intersectionPoint1, intersectionPoint2);
 
@@ -846,27 +927,36 @@ public class ConvexPolygonTools
       }
       else
       {
-         int numberOfVerticesRemoved = 0;
-         int index = 0;
-         while (index < polygonToCut.getNumberOfVertices())
-         {
-            Point2DReadOnly vertex = polygonToCut.getVertex(index);
-            if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
-            {
-               polygonToCut.removeVertex(index);
-               polygonToCut.update();
-               numberOfVerticesRemoved++;
-            }
-            else
-            {
-               index++;
-            }
-         }
-         polygonToCut.addVertex(intersectionPoint1);
-         polygonToCut.addVertex(intersectionPoint2);
-         polygonToCut.update();
-         return numberOfVerticesRemoved;
+         return cutPolygonWithLinePrivate(cuttingLine, polygonToCut, sideOfLineToCut, intersectionPoint1, intersectionPoint2);
       }
+   }
+
+   private static int cutPolygonWithLinePrivate(Line2DReadOnly cuttingLine,
+                                                ConvexPolygon2DBasics polygonToCut,
+                                                RobotSide sideOfLineToCut,
+                                                Point2DBasics intersectionPoint1,
+                                                Point2DBasics intersectionPoint2)
+   {
+      int numberOfVerticesRemoved = 0;
+      int index = 0;
+      while (index < polygonToCut.getNumberOfVertices())
+      {
+         Point2DReadOnly vertex = polygonToCut.getVertex(index);
+         if (cuttingLine.isPointOnSideOfLine(vertex, sideOfLineToCut == RobotSide.LEFT))
+         {
+            polygonToCut.removeVertex(index);
+            polygonToCut.update();
+            numberOfVerticesRemoved++;
+         }
+         else
+         {
+            index++;
+         }
+      }
+      polygonToCut.addVertex(intersectionPoint1);
+      polygonToCut.addVertex(intersectionPoint2);
+      polygonToCut.update();
+      return numberOfVerticesRemoved;
    }
 
    /**

@@ -30,14 +30,15 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
-   @Tag("allocation")
    @Test
    public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
    {
       super.testACoupleMoreQueuedControllerCommands();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
@@ -45,6 +46,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testACoupleQueuedControllerCommands();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
@@ -52,6 +54,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
 
+   @Tag("humanoid-flat-ground")
    @Override
    // Invoked manually to test memory & thread leaks
    @Disabled
@@ -61,6 +64,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testForMemoryLeaks();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
@@ -68,6 +72,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testLongStepsMaxHeightPauseAndResume();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
@@ -75,22 +80,23 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testRotatedStepInTheAir();
    }
 
+   @Tag("humanoid-flat-ground")
    @Override
-   @Tag("allocation")
    @Test
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSimpleScripts();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
-   @Tag("allocation")
    @Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       super.testStandingForACoupleSeconds();
    }
 
+   @Tag("humanoid-flat-ground")
    @Override
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
    @Disabled
@@ -100,6 +106,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingOnUnevenTerrainForACoupleSeconds();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
@@ -107,6 +114,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
@@ -114,6 +122,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testTurningInPlaceAndPassingPI();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
@@ -121,6 +130,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
@@ -128,6 +138,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
       super.testWalkingUpToRampWithShortSteps();
    }
 
+   @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
    public void testRepeatedWalking() throws SimulationExceededMaximumTimeException

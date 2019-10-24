@@ -7,9 +7,9 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -19,8 +19,8 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -32,7 +32,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -110,9 +110,9 @@ public class ControllerBasedBodyPathTest
       private final List<YoFramePoint3D> points = new ArrayList<>();
 
       private final List<Point3D> waypoints = new ArrayList<>();
-      private final WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
+      private final WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
-      private final FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       private final AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
 
       private static final int stepsPerSide = 10;
@@ -196,9 +196,8 @@ public class ControllerBasedBodyPathTest
             }
 
             bodyPath.setWaypoints(waypoints);
-            bodyPath.compute();
 
-            Pose2D pose = new Pose2D();
+            Pose3D pose = new Pose3D();
             for (int i = 0; i < numberOfPoints; i++)
             {
                double percent = (double) i / (double) (numberOfPoints - 1);
@@ -206,9 +205,9 @@ public class ControllerBasedBodyPathTest
                points.get(i).set(pose.getX(), pose.getY(), 0.0);
             }
 
-            Pose2D startPose = new Pose2D();
+            Pose3D startPose = new Pose3D();
             bodyPath.getPointAlongPath(0.0, startPose);
-            Pose2D finalPose = new Pose2D();
+            Pose3D finalPose = new Pose3D();
             bodyPath.getPointAlongPath(1.0, finalPose);
 
             FramePose3D initialMidFootPose = new FramePose3D();
@@ -230,7 +229,6 @@ public class ControllerBasedBodyPathTest
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
             goal.setGoalPoseBetweenFeet(goalPose);
-            goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
             planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
             planner.setGoal(goal);
@@ -271,16 +269,17 @@ public class ControllerBasedBodyPathTest
          }
       }
 
-      private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
-                                                              WaypointDefinedBodyPathPlanner bodyPath)
+      private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParametersReadOnly parameters,
+                                                              WaypointDefinedBodyPathPlanHolder bodyPath)
       {
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, bodyPath);
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
 //         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
          FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(parameters);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 1.0, parameters, snapper, bodyPath);
+
          AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
          return planner;
       }

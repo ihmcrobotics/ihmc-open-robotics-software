@@ -3,9 +3,12 @@ package us.ihmc.robotics.stateMachine.extra;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoublePredicate;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -38,6 +41,11 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
          getFactory().addState(value, mutableState);
          getStateMap().put(value, mutableState);
       }
+   }
+
+   public void addTransition(K from, K to, StateTransitionCondition condition)
+   {
+      getFactory().addTransition(from,  to, condition);
    }
 
    /**
@@ -76,5 +84,30 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
    public HashMap<K, MutableState> getStateMap()
    {
       return stateMap;
+   }
+
+   public MutableState getState(K stateEnum)
+   {
+      return stateMap.get(stateEnum);
+   }
+
+   public void setOnEntry(K key, Runnable onEntry)
+   {
+      getState(key).setOnEntry(onEntry);
+   }
+
+   public void setDoAction(K key, DoubleConsumer doAction)
+   {
+      getState(key).setDoAction(doAction);
+   }
+
+   public void setOnExit(K key, Runnable onExit)
+   {
+      getState(key).setOnExit(onExit);
+   }
+
+   public void setIsDone(K key, DoublePredicate isDone)
+   {
+      getState(key).setIsDone(isDone);
    }
 }

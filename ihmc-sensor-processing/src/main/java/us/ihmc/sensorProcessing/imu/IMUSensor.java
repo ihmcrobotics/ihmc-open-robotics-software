@@ -4,10 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -80,7 +79,7 @@ public class IMUSensor implements IMUSensorReadOnly
       return measurementLink;
    }
 
-   public void setOrientationMeasurement(RotationMatrixReadOnly newOrientation)
+   public void setOrientationMeasurement(Orientation3DReadOnly newOrientation)
    {
       orientationMeasurement.set(newOrientation);
    }

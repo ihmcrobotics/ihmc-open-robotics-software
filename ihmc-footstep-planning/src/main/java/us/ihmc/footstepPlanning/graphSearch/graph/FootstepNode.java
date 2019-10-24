@@ -75,9 +75,14 @@ public class FootstepNode
 
    public double euclideanDistance(FootstepNode other)
    {
+      return Math.sqrt(euclideanDistanceSquared(other));
+   }
+
+   public double euclideanDistanceSquared(FootstepNode other)
+   {
       double dx = getX() - other.getX();
       double dy = getY() - other.getY();
-      return Math.sqrt(dx * dx + dy * dy);
+      return dx * dx + dy * dy;
    }
 
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
@@ -95,7 +100,7 @@ public class FootstepNode
       return midFootPoint;
    }
 
-   public static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
+   private static Point2D computeMidFootPoint(FootstepNode node, double idealStepWidth)
    {
       double w = idealStepWidth / 2.0;
       double vx = node.getRobotSide().negateIfRightSide(Math.sin(node.getYaw()) * w);

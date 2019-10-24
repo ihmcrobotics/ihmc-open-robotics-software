@@ -27,7 +27,7 @@ public class DoorTimingBehaviorAutomated extends AbstractBehavior
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
-      walkThroughDoorBehavior = new WalkThroughDoorBehavior(robotName, "automated", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry);
+      walkThroughDoorBehavior = new WalkThroughDoorBehavior(robotName, "automatedDoorBehavior", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry);
       doorTimingBehavior = new DoorTimingBehavior(robotName, yoTime, ros2Node, false);
    }
 

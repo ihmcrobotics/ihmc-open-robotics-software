@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndEndFootBearingMessageTest;
@@ -24,6 +25,7 @@ public class ValkyrieEndToEndFootLoadBearingMessageTest extends EndToEndEndFootB
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api")
    @Override
    @Test
    public void testSwitchFootToLoadBearing() throws Exception

@@ -49,6 +49,7 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    @Override
    public void addPlannerListener(BipedalFootstepPlannerListener listener)
    {
+      this.listeners.add(listener);
       for (FootstepNodeChecker nodeChecker : nodeCheckers)
          nodeChecker.addPlannerListener(listener);
    }

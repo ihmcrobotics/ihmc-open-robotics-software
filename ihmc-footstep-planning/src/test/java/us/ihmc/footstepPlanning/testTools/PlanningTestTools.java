@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.testTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -14,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -36,7 +37,7 @@ public class PlanningTestTools
 
 
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath)
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, null, null);
    }
@@ -51,13 +52,13 @@ public class PlanningTestTools
       visualizeAndSleep(planarRegionsList, footseps, null, null, null, null);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
                                         YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, PlannerTools.createDefaultFootPolygon(), registry, graphicsListRegistry);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanner bodyPath,
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
                                         ConvexPolygon2D defaultFoothold, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
@@ -89,7 +90,7 @@ public class PlanningTestTools
          for (int i = 0; i < markers; i++)
          {
             double alpha = (double) i / (double) (markers - 1);
-            Pose2D pose = new Pose2D();
+            Pose3D pose = new Pose3D();
             bodyPath.getPointAlongPath(alpha, pose);
             YoFramePoint3D yoPoint = new YoFramePoint3D("BodyPathPoint" + i, worldFrame, vizRegistry);
             yoPoint.set(pose.getPosition());
