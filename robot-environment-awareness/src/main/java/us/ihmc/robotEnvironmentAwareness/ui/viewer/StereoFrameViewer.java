@@ -14,7 +14,7 @@ public class StereoFrameViewer extends AbstractSensorFrameViewer<StereoVisionPoi
    @Override
    protected SensorFrame extractSensorFrameFromMessage(StereoVisionPointCloudMessage message)
    {
-      SensorFrame sensorFrame = new SensorFrame(message.getSensorPosition(), message.getSensorOrientation(), 1.0);
+      SensorFrame sensorFrame = new SensorFrame(message.getSensorPosition(), message.getSensorOrientation(), message.getConfidence());
       return sensorFrame;
    }
 }

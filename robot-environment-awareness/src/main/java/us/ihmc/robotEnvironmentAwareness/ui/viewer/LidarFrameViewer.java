@@ -14,7 +14,7 @@ public class LidarFrameViewer extends AbstractSensorFrameViewer<LidarScanMessage
    @Override
    protected SensorFrame extractSensorFrameFromMessage(LidarScanMessage message)
    {
-      SensorFrame sensorFrame = new SensorFrame(message.getLidarPosition(), message.getLidarOrientation(), 1.0);
+      SensorFrame sensorFrame = new SensorFrame(message.getLidarPosition(), message.getLidarOrientation(), message.getConfidence());
       return sensorFrame;
    }
 }
