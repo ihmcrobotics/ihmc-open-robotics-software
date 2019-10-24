@@ -242,6 +242,12 @@ public class PlanarRegionSegmentationCalculator
       return newRegion;
    }
 
+   /**
+    * TODO: 2019.10.24.
+    * We need to think proper place to check that each octree node is visible from camera position or not.
+    * At PR for fix/surface-normal-filter, we decided to keep the place here.
+    * But we can modify the Octree library to handle this part more cleverly. 
+    */
    public void growPlanarRegion(NormalOcTreeNode root, PlanarRegionSegmentationNodeData ocTreeNodePlanarRegion, OcTreeBoundingBoxInterface boundingBox,
                                 PlanarRegionSegmentationParameters parameters)
    {
