@@ -16,6 +16,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +29,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.BlockEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -79,16 +81,18 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(true);
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper( simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      double height = 0.3;
+      OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
+      startingLocation.addAdditionalOffset(new Vector3D(0.0, 0.0, height));
+
+      BlockEnvironment blockEnvironment = new BlockEnvironment(1.0, 1.0, height);
+      drcSimulationTestHelper = new DRCSimulationTestHelper( simulationTestingParameters, getRobotModel(), blockEnvironment);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
-      setupCameraForWalkingOffOfMediumPlatform();
-
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher = drcSimulationTestHelper.createPublisher(FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
 
@@ -96,8 +100,6 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class,
                                                FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(getSimpleRobotName()), outputStatus::set);
 
-
-      OffsetAndYawRobotInitialSetup startingLocation = selectedLocation.getStartingLocationOffset();
 
       FramePose3D leftFoot = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
       leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
@@ -111,14 +113,18 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       startingFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), startingLocation.getAdditionalOffset()));
       startingFrame.setOrientationAndUpdate(new Quaternion(startingLocation.getYaw(), 0.0, 0.0));
 
-      FramePose3D goalpose = new FramePose3D(startingFrame);
-      goalpose.setPosition(1.0, 0.0, 0.0);
-      goalpose.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose3D goalPose = new FramePose3D(startingFrame);
+      goalPose.setPosition(1.0, 0.0, 0.0);
+      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      request.getGoalPositionInWorld().set(goalpose.getPosition());
-      request.getGoalOrientationInWorld().set(goalpose.getOrientation());
+      request.getGoalPositionInWorld().set(goalPose.getPosition());
+      request.getGoalOrientationInWorld().set(goalPose.getOrientation());
+
+      request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(blockEnvironment.getPlanarRegionsList()));
 
       planningRequestPublisher.publish(request);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
 
       double maxTimeToWait = 20.0;
@@ -150,13 +156,4 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
-
-   private void setupCameraForWalkingOffOfMediumPlatform()
-   {
-      Point3D cameraFix = new Point3D(-3.9, -5.6, 0.55);
-      Point3D cameraPosition = new Point3D(-7.6, -2.4, 0.58);
-
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-   }
 }
