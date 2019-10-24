@@ -23,7 +23,12 @@ module controller_msgs
         long long timestamp;
         geometry_msgs::msg::dds::Point sensor_position;
         geometry_msgs::msg::dds::Quaternion sensor_orientation;
-        double confidence;
+        /**
+         * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+         * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+         */
+        double sensor_pose_confidence;
+        double point_cloud_confidence;
         sequence<float, 600000> point_cloud;
         sequence<long, 200000> colors;
       };

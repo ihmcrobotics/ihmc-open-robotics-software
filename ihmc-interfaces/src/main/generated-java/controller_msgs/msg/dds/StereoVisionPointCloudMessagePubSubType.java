@@ -50,6 +50,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (600000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -80,6 +82,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getPointCloud().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -100,7 +105,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getSensorPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getSensorOrientation(), cdr);
-      cdr.write_type_6(data.getConfidence());
+      cdr.write_type_6(data.getSensorPoseConfidence());
+
+      cdr.write_type_6(data.getPointCloudConfidence());
 
       if(data.getPointCloud().size() <= 600000)
       cdr.write_type_e(data.getPointCloud());else
@@ -120,7 +127,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getSensorPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getSensorOrientation(), cdr);	
-      data.setConfidence(cdr.read_type_6());
+      data.setSensorPoseConfidence(cdr.read_type_6());
+      	
+      data.setPointCloudConfidence(cdr.read_type_6());
       	
       cdr.read_type_e(data.getPointCloud());	
       cdr.read_type_e(data.getColors());	
@@ -136,7 +145,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
 
-      ser.write_type_6("confidence", data.getConfidence());
+      ser.write_type_6("sensor_pose_confidence", data.getSensorPoseConfidence());
+      ser.write_type_6("point_cloud_confidence", data.getPointCloudConfidence());
       ser.write_type_e("point_cloud", data.getPointCloud());
       ser.write_type_e("colors", data.getColors());
    }
@@ -150,7 +160,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
 
-      data.setConfidence(ser.read_type_6("confidence"));
+      data.setSensorPoseConfidence(ser.read_type_6("sensor_pose_confidence"));
+      data.setPointCloudConfidence(ser.read_type_6("point_cloud_confidence"));
       ser.read_type_e("point_cloud", data.getPointCloud());
       ser.read_type_e("colors", data.getColors());
    }
