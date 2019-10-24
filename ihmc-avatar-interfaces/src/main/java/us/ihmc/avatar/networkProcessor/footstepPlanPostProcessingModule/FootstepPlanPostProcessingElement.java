@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 
 public interface FootstepPlanPostProcessingElement
@@ -16,7 +17,7 @@ public interface FootstepPlanPostProcessingElement
     * @param outputStatus raw output status
     * @return processed output status
     */
-   FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningToolboxOutputStatus outputStatus);
+   FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus);
 
    /**
     * Gets the name of the current post processing element
