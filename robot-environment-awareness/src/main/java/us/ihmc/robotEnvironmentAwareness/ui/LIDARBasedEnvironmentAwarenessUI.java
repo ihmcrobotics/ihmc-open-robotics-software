@@ -29,10 +29,8 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorP
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.AbstractSensorFrameViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.LidarFrameViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.StereoFrameViewer;
 
 public class LIDARBasedEnvironmentAwarenessUI
 {
@@ -42,8 +40,8 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    private final REAUIMessager uiMessager;
    private final REAMeshViewer reaMeshViewer;
-   private final AbstractSensorFrameViewer<LidarScanMessage> lidarFrameViewer;
-   private final AbstractSensorFrameViewer<StereoVisionPointCloudMessage> stereoFrameViewer;
+   private final SensorFrameViewer<LidarScanMessage> lidarFrameViewer;
+   private final SensorFrameViewer<StereoVisionPointCloudMessage> stereoFrameViewer;
 
    @FXML
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
@@ -79,8 +77,11 @@ public class LIDARBasedEnvironmentAwarenessUI
       uiMessager.startMessager();
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
-      lidarFrameViewer = new LidarFrameViewer(uiMessager, REAModuleAPI.LidarScanState);
-      stereoFrameViewer = new StereoFrameViewer(uiMessager, REAModuleAPI.StereoVisionPointCloudState, REAModuleAPI.UISensorPoseHistoryFrames);
+      lidarFrameViewer = new SensorFrameViewer<LidarScanMessage>(uiMessager, REAModuleAPI.LidarScanState, null,
+                                                                         SensorFrameViewer.createLidarScanSensorFrameExtractor());
+      stereoFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager, REAModuleAPI.StereoVisionPointCloudState,
+                                                                                       REAModuleAPI.UISensorPoseHistoryFrames,
+                                                                                       SensorFrameViewer.createStereoVisionSensorFrameExtractor());
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new StereoVisionPointCloudDataExporter(uiMessager);

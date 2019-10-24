@@ -2,7 +2,10 @@ package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,7 +25,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
-public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends AnimationTimer
+public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 {
    private final AtomicReference<T> latestMessage;
 
@@ -40,9 +43,12 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
    private final Group affineRoot = new Group();
    private final Group historyRoot = new Group();
 
-   public AbstractSensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic)
+   private Function<T, SensorFrame> function;
+
+   public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function)
    {
-      if(numberOfFramesTopic == null)
+      this.function = function;
+      if (numberOfFramesTopic == null)
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
          numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
@@ -73,7 +79,7 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
       if (latestMessage.get() == null)
          return;
 
-      SensorFrame latestSensorFrame = extractSensorFrameFromMessage(latestMessage.getAndSet(null));
+      SensorFrame latestSensorFrame = function.apply(latestMessage.getAndSet(null));
 
       Affine affine = latestSensorFrame.getAffine();
       if (affine != null)
@@ -118,14 +124,22 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
       return root;
    }
 
-   protected abstract SensorFrame extractSensorFrameFromMessage(T message);
+   public static Function<LidarScanMessage, SensorFrame> createLidarScanSensorFrameExtractor()
+   {
+      return message -> new SensorFrame(message.getLidarPosition(), message.getLidarOrientation(), message.getSensorPoseConfidence());
+   }
 
-   class SensorFrame
+   public static Function<StereoVisionPointCloudMessage, SensorFrame> createStereoVisionSensorFrameExtractor()
+   {
+      return message -> new SensorFrame(message.getSensorPosition(), message.getSensorOrientation(), message.getSensorPoseConfidence());
+   }
+
+   public static class SensorFrame
    {
       private final Affine affine;
       private final double confidence;
 
-      SensorFrame(Point3DBasics position, QuaternionBasics orientation, double confidence)
+      public SensorFrame(Point3DBasics position, QuaternionBasics orientation, double confidence)
       {
          this.affine = JavaFXTools.createAffineFromOrientation3DAndTuple(orientation, position);
          this.confidence = confidence;
@@ -141,4 +155,5 @@ public abstract class AbstractSensorFrameViewer<T extends Packet<T>> extends Ani
          pointToPack.set(affine.getTx(), affine.getTy(), affine.getTz());
       }
    }
+
 }
