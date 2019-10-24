@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FootstepPlanPostProcessingToolboxController extends ToolboxController
 {
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> latestFootstepPlan = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningRequestPacket> latestRequestPacket = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -62,6 +63,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    public void updateInternal()
    {
       FootstepPlanningToolboxOutputStatus latestOutput = latestFootstepPlan.getAndSet(null);
+      FootstepPlanningRequestPacket latestRequest = latestRequestPacket.getAndSet(null);
 
       PlanarRegionsListMessage planarRegionsListMessage = latestOutput.getPlanarRegionsList();
       if (planarRegionsListMessage == null)
@@ -85,7 +87,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
          yoGraphicPlanarRegionsList.clear();
       }
 
-      FootstepPlanningToolboxOutputStatus processedOutputStatus = postProcessing.postProcessFootstepPlan(latestOutput);
+      FootstepPlanningToolboxOutputStatus processedOutputStatus = postProcessing.postProcessFootstepPlan(latestRequest, latestOutput);
 
       reportMessage(processedOutputStatus);
 
@@ -117,5 +119,10 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    public void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus outputStatus)
    {
       latestFootstepPlan.set(outputStatus);
+   }
+
+   public void processFootstepPlanningRequest(FootstepPlanningRequestPacket requestPacket)
+   {
+      latestRequestPacket.set(requestPacket);
    }
 }

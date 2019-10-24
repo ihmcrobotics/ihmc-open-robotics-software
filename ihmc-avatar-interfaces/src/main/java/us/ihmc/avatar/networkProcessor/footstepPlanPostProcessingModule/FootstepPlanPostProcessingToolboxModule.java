@@ -45,6 +45,10 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, getSubscriberTopicNameGenerator(),
                                            s -> toolboxController.processFootstepPlanningOutputStatus(s.takeNextData()));
+
+      MessageTopicNameGenerator footstepPlannerSubscriber = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubscriber,
+                                           s -> toolboxController.processFootstepPlanningRequest(s.takeNextData()));
    }
    
    @Override
