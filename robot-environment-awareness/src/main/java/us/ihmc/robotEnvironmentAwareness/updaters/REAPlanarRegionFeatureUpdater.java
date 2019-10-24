@@ -153,7 +153,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update(NormalOcTree octree, Pose3DReadOnly estimatedSensorPose)
+   public void update(NormalOcTree octree, Pose3DReadOnly sensorPose)
    {
       if (!isOcTreeEnabled.get())
          return;
@@ -173,7 +173,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
-      segmentationCalculator.setSensorPosition(estimatedSensorPose.getPosition());
+      segmentationCalculator.setSensorPosition(sensorPose.getPosition());
 
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 

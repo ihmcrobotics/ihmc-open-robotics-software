@@ -52,7 +52,7 @@ public class REAModuleAPI
    private static final CategoryTheme Message = apiFactory.createCategoryTheme("Message");
    private static final CategoryTheme Preserve = apiFactory.createCategoryTheme("Preserve");
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
-   private static final CategoryTheme SensorPose = apiFactory.createCategoryTheme("SensorPose");
+   private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -94,7 +94,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
 
-   public static final Topic<Pose3D> EstimatedSensorPose = ModuleCategory.child(SensorPose).topic(Data);
+   public static final Topic<Pose3D> SensorPose = ModuleCategory.child(SensorFrame).topic(Data);
 
    public static final Topic<Boolean> NormalEstimationEnable = ModuleCategory.child(NormalEstimation).topic(Enable);
    public static final Topic<Boolean> NormalEstimationClear = ModuleCategory.child(NormalEstimation).topic(Clear);
@@ -133,8 +133,8 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
 
-   public static final Topic<Boolean> UISensorPoseHistoryClear = Root.child(UI).child(SensorPose).topic(Clear);
-   public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorPose).topic(Size);
+   public static final Topic<Boolean> UISensorPoseHistoryClear = Root.child(UI).child(SensorFrame).topic(Clear);
+   public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);

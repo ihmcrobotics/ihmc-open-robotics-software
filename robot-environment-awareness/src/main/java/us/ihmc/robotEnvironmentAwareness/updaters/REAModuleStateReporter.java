@@ -42,9 +42,9 @@ public class REAModuleStateReporter
          reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(ocTree.getBoundingBox()));
    }
 
-   public void reportSensorPose(Pose3DReadOnly estimatedSensorPose)
+   public void reportSensorPose(Pose3DReadOnly sensorPose)
    {
-      reaMessager.submitMessage(REAModuleAPI.EstimatedSensorPose, new Pose3D(estimatedSensorPose));
+      reaMessager.submitMessage(REAModuleAPI.SensorPose, new Pose3D(sensorPose));
    }
 
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
