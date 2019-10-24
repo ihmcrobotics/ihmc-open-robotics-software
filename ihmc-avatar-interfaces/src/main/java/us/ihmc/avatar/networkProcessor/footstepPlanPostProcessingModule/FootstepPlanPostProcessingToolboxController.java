@@ -52,6 +52,8 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
       super(statusOutputManager, parentRegistry);
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
+      postProcessing.addPostProcessingElement(new StepSplitFractionPostProcessingElement(registry));
+
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
       isDone.set(true);
    }
