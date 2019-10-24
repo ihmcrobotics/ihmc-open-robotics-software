@@ -64,7 +64,7 @@ public class KSTTools
    private final double toolboxControllerPeriod;
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
-   private long currentMessageId = 0L;
+   private long currentMessageId = 1L;
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod,
@@ -197,6 +197,7 @@ public class KSTTools
       outputConverter.computeChestTrajectoryMessage();
       outputConverter.computePelvisTrajectoryMessage();
 
+      HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
 
       return wholeBodyTrajectoryMessage;
