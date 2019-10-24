@@ -149,10 +149,8 @@ public class VisibilityGraphsFrameworkTest
             return false;
          else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
             return false;
-         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
-            return false;
 
-         return false;
+         return dataSet.getPlannerInput().getVisGraphIsTestable();
       };
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
       runAssertionsOnAllDatasets(dataSets, dataset -> runAssertionsWithoutOcclusion(dataset));
