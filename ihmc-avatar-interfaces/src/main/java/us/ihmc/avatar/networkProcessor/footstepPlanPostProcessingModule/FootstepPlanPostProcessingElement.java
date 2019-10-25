@@ -10,8 +10,6 @@ public interface FootstepPlanPostProcessingElement
     */
    boolean isActive();
 
-   void setIsActive(boolean isActive);
-
    /**
     * Takes the output status of an element, and post processes it using the planar region list.
     * @param outputStatus raw output status

@@ -1,6 +1,9 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.YoVariablesForFootstepPostProcessingParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -45,16 +48,21 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
+   private final FootstepPostProcessingParametersReadOnly parameters;
    private final CompositeFootstepPlanPostProcessing postProcessing = new CompositeFootstepPlanPostProcessing();
 
-   public FootstepPlanPostProcessingToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry,
-                                                      YoGraphicsListRegistry graphicsListRegistry)
+   public FootstepPlanPostProcessingToolboxController(FootstepPostProcessingParametersBasics parameters, StatusMessageOutputManager statusOutputManager,
+                                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      this.parameters = parameters;
+
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
-      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(registry);
-      splitFractionPostProcessingElement.setIsActive(true);
+      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters, registry);
+
+      new YoVariablesForFootstepPostProcessingParameters(registry, parameters);
 
       postProcessing.addPostProcessingElement(splitFractionPostProcessingElement);
 

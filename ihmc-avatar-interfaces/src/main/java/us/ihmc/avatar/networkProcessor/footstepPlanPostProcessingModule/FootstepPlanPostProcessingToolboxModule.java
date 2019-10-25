@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
@@ -36,7 +37,7 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      toolboxController = new FootstepPlanPostProcessingToolboxController(statusOutputManager, registry, yoGraphicsListRegistry);
+      toolboxController = new FootstepPlanPostProcessingToolboxController(new DefaultFootstepPostProcessingParameters(), statusOutputManager, registry, yoGraphicsListRegistry);
       startYoVariableServer();
    }
 
