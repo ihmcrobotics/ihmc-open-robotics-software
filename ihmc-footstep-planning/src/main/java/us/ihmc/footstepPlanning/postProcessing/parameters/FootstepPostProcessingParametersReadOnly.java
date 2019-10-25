@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.postProcessing.parameters;
 
+import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface FootstepPostProcessingParametersReadOnly extends StoredPropertySetReadOnly
@@ -100,5 +101,26 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
    default double getIncrementalWaypointAdjustmentDistance()
    {
       return get(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+   }
+
+   default FootstepPostProcessingParametersPacket getAsPacket()
+   {
+      FootstepPostProcessingParametersPacket packet = new FootstepPostProcessingParametersPacket();
+
+      packet.setSplitFractionProcessingEnabled(splitFractionProcessingEnabled());
+      packet.setSwingOverRegionsEnabled(swingOverRegionsEnabled());
+
+      packet.setStepHeightForLargeStepDown(getStepHeightForLargeStepDown());
+      packet.setLargestStepDownHeight(getLargestStepDownHeight());
+      packet.setTransferSplitFractionAtFullDepth(getTransferSplitFractionAtFullDepth());
+      packet.setTransferWeightDistributionAtFullDepth(getTransferWeightDistributionAtFullDepth());
+
+      packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
+      packet.setNumberOfChecksPerSwing(getNumberOfChecksPerSwing());
+      packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
+      packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
+      packet.setIncrementalWaypointAdjustmentDistance(getIncrementalWaypointAdjustmentDistance());
+
+      return packet;
    }
 }
