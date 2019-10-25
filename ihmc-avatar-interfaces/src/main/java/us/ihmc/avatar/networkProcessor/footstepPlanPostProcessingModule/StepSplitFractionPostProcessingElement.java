@@ -66,10 +66,12 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
             if (stepNumber == footstepDataMessageList.size() - 1)
             { // this is the last step
                processedOutput.getFootstepDataList().setFinalTransferSplitFraction(0.01);
+               processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(0.7);
             }
             else
             {
                footstepDataMessageList.get(stepNumber + 1).setTransferSplitFraction(0.01);
+               footstepDataMessageList.get(stepNumber + 1).setTransferWeightDistribution(0.7);
             }
          }
 
