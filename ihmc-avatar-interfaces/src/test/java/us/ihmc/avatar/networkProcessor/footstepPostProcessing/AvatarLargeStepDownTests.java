@@ -1,19 +1,18 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -30,18 +29,21 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.BlockEnvironment;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -53,12 +55,15 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    private IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private IHMCROS2Publisher<FootstepPlannerParametersPacket> planningParametersPublisher;
    private IHMCROS2Publisher<ToolboxStateMessage> planningToolboxPublisher;
    private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
 
+   private FootstepPlanningToolboxModule footstepToolboxModule;
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
 
    @BeforeEach
-   public void showMemoryUsageBeforeTest()
+   public void showMemoryUsageBeforeTest() throws IOException
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
@@ -68,9 +73,14 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
 
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(true);
+      networkModuleParameters.enableNetworkProcessor(true);
+      networkModuleParameters.enableLocalControllerCommunicator(true);
+
+      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
 
@@ -83,7 +93,8 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
 
       planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubGenerator);
-      planningToolboxPublisher = drcSimulationTestHelper.createPublisher(ToolboxStateMessage.class, footstepPlannerSubGenerator);
+      planningParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, footstepPlannerSubGenerator);
+      planningToolboxPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
       drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator, plannerOutputStatus::set);
 
@@ -93,6 +104,8 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
@@ -107,6 +120,9 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
 
       planningRequestPublisher = null;
       plannerOutputStatus = null;
+
+      footstepToolboxModule.destroy();
+      footstepToolboxModule = null;
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -125,8 +141,14 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
+      footstepPlannerParameters.setMaximumStepZ(height + 0.05);
+
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlannerParameters);
+      planningParametersPublisher.publish(parametersPacket);
 
       FramePose3D leftFoot = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
       leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
@@ -149,12 +171,14 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(blockEnvironment.getPlanarRegionsList()));
 
+      request.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+
       planningRequestPublisher.publish(request);
       ThreadTools.sleep(100);
 
       planningToolboxPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+//      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
 
       double maxTimeToWait = 20.0;
@@ -171,19 +195,19 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper.publishToController(plannerOutputStatus.get().getFootstepDataList());
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
-      Point3D center = new Point3D(-4.4003012528878935, -6.046150532235836, 0.7887649325247877);
+      Point3D center = new Point3D(goalPose.getPosition());
+      center.addZ(0.7);
+
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 }
