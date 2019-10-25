@@ -36,7 +36,7 @@ public class MovingZUpFrame extends MovingReferenceFrame
       double cosYaw = transformToParent.getM00() / cosPitch;
       double sinYaw = transformToParent.getM10() / cosPitch;
 
-      transformToParent.setRotation(cosYaw, -sinYaw, 0.0, sinYaw, cosYaw, 0.0, 0.0, 0.0, 1.0);
+      transformToParent.getRotation().setUnsafe(cosYaw, -sinYaw, 0.0, sinYaw, cosYaw, 0.0, 0.0, 0.0, 1.0);
    }
 
    /**
