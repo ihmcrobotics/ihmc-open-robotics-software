@@ -13,4 +13,24 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
    {
       set(FootstepPostProcessingKeys.splitFractionProcessingEnabled, enabled);
    }
+
+   default void setStepHeightForLargeStepDown(double height)
+   {
+      set(FootstepPostProcessingKeys.stepHeightForLargeStepDown, height);
+   }
+
+   default void setLargestStepDownHeight(double height)
+   {
+      set(FootstepPostProcessingKeys.largestStepDownHeight, height);
+   }
+
+   default void setTransferSplitFractionAtFullDepth(double splitFraction)
+   {
+      set(FootstepPostProcessingKeys.transferSplitFractionAtFullDepth, splitFraction);
+   }
+
+   default void setTransferWeightDistributionAtFullDepth(double weightDistribution)
+   {
+      set(FootstepPostProcessingKeys.transferWeightDistributionAtFullDepth, weightDistribution);
+   }
 }
