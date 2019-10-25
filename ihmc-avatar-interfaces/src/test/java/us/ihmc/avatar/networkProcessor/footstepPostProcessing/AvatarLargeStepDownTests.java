@@ -3,11 +3,13 @@ package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -16,7 +18,11 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +34,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.BlockEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -45,10 +52,42 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
    protected SimulationTestingParameters simulationTestingParameters;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
+   private IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private IHMCROS2Publisher<ToolboxStateMessage> planningToolboxPublisher;
+   private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
+
+
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+
+
+      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
+
+      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
+
+      plannerOutputStatus = new AtomicReference<>();
+
+      Ros2Node ros2Node = drcSimulationTestHelper.getRos2Node();
+
+      String robotName = robotModel.getSimpleRobotName();
+      MessageTopicNameGenerator footstepPlannerSubGenerator = FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
+
+      planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubGenerator);
+      planningToolboxPublisher = drcSimulationTestHelper.createPublisher(ToolboxStateMessage.class, footstepPlannerSubGenerator);
+
+      drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator, plannerOutputStatus::set);
+
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -66,6 +105,9 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
          drcSimulationTestHelper = null;
       }
 
+      planningRequestPublisher = null;
+      plannerOutputStatus = null;
+
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -74,32 +116,17 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
    @Test
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
-
       double height = 0.3;
       OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
       startingLocation.addAdditionalOffset(new Vector3D(0.0, 0.0, height));
 
       BlockEnvironment blockEnvironment = new BlockEnvironment(1.0, 1.0, height);
-      drcSimulationTestHelper = new DRCSimulationTestHelper( simulationTestingParameters, getRobotModel(), blockEnvironment);
+      drcSimulationTestHelper.setTestEnvironment(blockEnvironment);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
-      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher = drcSimulationTestHelper.createPublisher(FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
-
-      AtomicReference<FootstepPlanningToolboxOutputStatus> outputStatus = new AtomicReference<>();
-      drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class,
-                                               FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(getSimpleRobotName()), outputStatus::set);
-
 
       FramePose3D leftFoot = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
       leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
@@ -123,23 +150,26 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(blockEnvironment.getPlanarRegionsList()));
 
       planningRequestPublisher.publish(request);
+      ThreadTools.sleep(100);
+
+      planningToolboxPublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
 
       double maxTimeToWait = 20.0;
       long startTime = System.nanoTime();
-      while (outputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
+      while (plannerOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
       {
          ThreadTools.sleep(100);
       }
 
-      if (outputStatus.get() == null)
+      if (plannerOutputStatus.get() == null)
       {
          fail("Never received an output, even after 20 seconds.");
       }
 
-      drcSimulationTestHelper.publishToController(outputStatus.get().getFootstepDataList());
+      drcSimulationTestHelper.publishToController(plannerOutputStatus.get().getFootstepDataList());
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
