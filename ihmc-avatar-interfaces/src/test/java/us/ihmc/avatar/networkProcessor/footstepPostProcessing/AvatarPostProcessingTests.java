@@ -1,9 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -15,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -288,10 +286,19 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
       }
 
+      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
 
-      drcSimulationTestHelper.publishToController(postProcessingOutputStatus.get().getFootstepDataList());
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
-      boolean success =  drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      double stepTime = footstepDataListMessage.getDefaultSwingDuration() + footstepDataListMessage.getDefaultTransferDuration();
+      if (stepTime < 0.5)
+      {
+         WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+         stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+      }
+      double simulationTime = 2.0 + stepTime * footstepDataListMessage.getFootstepDataList().size();
+
+      boolean success =  drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
