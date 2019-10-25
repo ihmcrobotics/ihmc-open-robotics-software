@@ -38,4 +38,29 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
    {
       set(FootstepPostProcessingKeys.transferWeightDistributionAtFullDepth, weightDistribution);
    }
+
+   default void setMinimumSwingFootClearance(double minimumSwingFootClearance)
+   {
+      set(FootstepPostProcessingKeys.minimumSwingFootClearance, minimumSwingFootClearance);
+   }
+
+   default void setNumberOfChecksPerSwing(int numberOfChecksPerSwing)
+   {
+      set(FootstepPostProcessingKeys.numberOfChecksPerSwing, numberOfChecksPerSwing);
+   }
+
+   default void setMaximumNumberOfAdjustmentAttempts(int numberOfAttempts)
+   {
+      set(FootstepPostProcessingKeys.maximumNumberOfAdjustmentAttempts, numberOfAttempts);
+   }
+
+   default void setMaximumWaypointAdjustmentDistance(double distance)
+   {
+      set(FootstepPostProcessingKeys.maximumWaypointAdjustmentDistance, distance);
+   }
+
+   default void setIncrementalWaypointAdjustmentDistance(double distance)
+   {
+      set(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance, distance);
+   }
 }

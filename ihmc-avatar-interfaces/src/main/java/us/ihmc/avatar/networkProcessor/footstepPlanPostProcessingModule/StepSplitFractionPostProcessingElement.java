@@ -4,6 +4,9 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,10 +18,13 @@ import java.util.List;
 public class StepSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
+   private final ICPPlannerParameters walkingControllerParameters;
 
-   public StepSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters)
+   public StepSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters,
+                                                 ICPPlannerParameters walkingControllerParameters)
    {
       this.parameters = parameters;
+      this.walkingControllerParameters = walkingControllerParameters;
    }
 
    /** {@inheritDoc} **/
@@ -40,6 +46,9 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
 
       FramePose3D nextFootPose = new FramePose3D();
 
+      double defaultTransferSplitFraction = walkingControllerParameters.getTransferSplitFraction();
+      double defaultWeightDistribution = 0.5;
+
       List<FootstepDataMessage> footstepDataMessageList = processedOutput.getFootstepDataList().getFootstepDataList();
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
@@ -58,8 +67,10 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
          if (nextFootPose.getZ() - stanceFootPose.getZ() < -parameters.getStepHeightForLargeStepDown())
          {
             double alpha = Math.min(1.0, Math.abs(stepDownHeight) / parameters.getLargestStepDownHeight());
-            double transferSplitFraction = InterpolationTools.linearInterpolate(0.5, parameters.getTransferSplitFractionAtFullDepth(), alpha);
-            double transferWeightDistribution = InterpolationTools.linearInterpolate(0.5, parameters.getTransferWeightDistributionAtFullDepth(), alpha);
+            double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
+                                                                                parameters.getTransferSplitFractionAtFullDepth(), alpha);
+            double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                     parameters.getTransferWeightDistributionAtFullDepth(), alpha);
 
             if (stepNumber == footstepDataMessageList.size() - 1)
             { // this is the last step

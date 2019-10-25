@@ -5,6 +5,8 @@ import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.paramete
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.YoVariablesForFootstepPostProcessingParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -53,7 +55,8 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    private final CompositeFootstepPlanPostProcessing postProcessing = new CompositeFootstepPlanPostProcessing();
 
    public FootstepPlanPostProcessingToolboxController(FootstepPostProcessingParametersBasics parameters,
-                                                      WalkingControllerParameters walkingControllerParameters, StatusMessageOutputManager statusOutputManager,
+                                                      WalkingControllerParameters walkingControllerParameters,
+                                                      ICPPlannerParameters cmpPlannerParameters, StatusMessageOutputManager statusOutputManager,
                                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -62,7 +65,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
-      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters);
+      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
       SwingOverRegionsPostProcessingElement swingOverRegionsPostProcessingElement = new SwingOverRegionsPostProcessingElement(parameters,
                                                                                                                               walkingControllerParameters,
                                                                                                                               registry, graphicsListRegistry);
