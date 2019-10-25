@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -13,29 +14,28 @@ import java.util.List;
 public class StepSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoBoolean isActive = new YoBoolean("isActive", registry);
 
    private final YoDouble stepHeightForLargeStepDown = new YoDouble("stepHeightForLargeStepDown", registry);
 
-   public StepSplitFractionPostProcessingElement(YoVariableRegistry parentRegistry)
+   private final FootstepPostProcessingParametersReadOnly parameters;
+
+   public StepSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, YoVariableRegistry parentRegistry)
    {
+      this.parameters = parameters;
+
       stepHeightForLargeStepDown.set(0.15);
 
       parentRegistry.addChild(registry);
    }
 
+   /** {@inheritDoc} **/
    @Override
    public boolean isActive()
    {
-      return isActive.getBooleanValue();
+      return parameters.splitFractionProcessingEnabled();
    }
 
-   @Override
-   public void setIsActive(boolean isActive)
-   {
-      this.isActive.set(isActive);
-   }
-
+   /** {@inheritDoc} **/
    @Override
    public FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus)
    {
@@ -80,6 +80,7 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
       return processedOutput;
    }
 
+   /** {@inheritDoc} **/
    @Override
    public PostProcessingEnum getElementName()
    {

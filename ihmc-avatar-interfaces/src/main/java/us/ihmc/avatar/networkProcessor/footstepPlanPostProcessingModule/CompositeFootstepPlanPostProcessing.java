@@ -17,16 +17,6 @@ public class CompositeFootstepPlanPostProcessing implements FootstepPlanPostProc
       postProcessingElements.put(postProcessingElement.getElementName(), postProcessingElement);
    }
 
-   public void setIsActive(PostProcessingEnum postProcessingEnum, boolean isActive)
-   {
-      postProcessingElements.get(postProcessingEnum).setIsActive(isActive);
-   }
-
-   public void setIsActive(boolean isActive)
-   {
-      throw new RuntimeException("Not a valid argument for the composite");
-   }
-
    /** {@inheritDoc} **/
    @Override
    public boolean isActive()
