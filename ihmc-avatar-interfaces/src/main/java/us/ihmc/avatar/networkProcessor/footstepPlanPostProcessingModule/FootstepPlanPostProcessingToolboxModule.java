@@ -22,7 +22,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
 {
-   private static final String moduleName = "/toolbox/continuous_planning";
+   public static final String moduleName = "/toolbox/continuous_planning";
 
    private final FootstepPlanPostProcessingToolboxController toolboxController;
 
@@ -44,13 +44,16 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, getSubscriberTopicNameGenerator(),
-                                           s -> toolboxController.processFootstepPlanningOutputStatus(s.takeNextData()));
+                                           s -> {
+                                              toolboxController.processFootstepPlanningOutputStatus(s.takeNextData());
+                                              wakeUp();
+                                           });
 
       MessageTopicNameGenerator footstepPlannerSubscriber = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubscriber,
                                            s -> toolboxController.processFootstepPlanningRequest(s.takeNextData()));
    }
-   
+
    @Override
    public void sleep()
    {
