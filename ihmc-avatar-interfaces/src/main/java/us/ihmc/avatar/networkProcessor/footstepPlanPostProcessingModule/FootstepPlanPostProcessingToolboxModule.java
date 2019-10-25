@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -51,8 +52,10 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
                                               toolboxController.processFootstepPlanningOutputStatus(s.takeNextData());
                                               wakeUp();
                                            });
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPostProcessingParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> toolboxController.processFootstepPostProcessingParameters(s.takeNextData()));
 
-      MessageTopicNameGenerator footstepPlannerSubscriber = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator footstepPlannerSubscriber = FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubscriber,
                                            s -> toolboxController.processFootstepPlanningRequest(s.takeNextData()));
    }

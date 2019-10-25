@@ -32,7 +32,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   private final FootstepPostProcessingParametersReadOnly parameters;
+   private final FootstepPostProcessingParametersBasics parameters;
    private final CompositeFootstepPlanPostProcessing postProcessing = new CompositeFootstepPlanPostProcessing();
 
    public FootstepPlanPostProcessingToolboxController(FootstepPostProcessingParametersBasics parameters,
@@ -120,6 +120,11 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
    public void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus outputStatus)
    {
       latestFootstepPlan.set(outputStatus);
+   }
+
+   public void processFootstepPostProcessingParameters(FootstepPostProcessingParametersPacket packet)
+   {
+      parameters.set(packet);
    }
 
    public void processFootstepPlanningRequest(FootstepPlanningRequestPacket requestPacket)
