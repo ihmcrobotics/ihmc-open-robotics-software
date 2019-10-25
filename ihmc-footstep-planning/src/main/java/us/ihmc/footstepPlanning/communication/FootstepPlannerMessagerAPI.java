@@ -8,6 +8,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -42,12 +43,14 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
    public static final Topic<Boolean> RequestPlannerStatistics = topic("RequestPlannerStatistics");
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
+
+   public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
 
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
 
-   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
    public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");
    public static final Topic<Double> PlannerTimeTaken = topic("PlannerTimeTaken");

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
+package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
