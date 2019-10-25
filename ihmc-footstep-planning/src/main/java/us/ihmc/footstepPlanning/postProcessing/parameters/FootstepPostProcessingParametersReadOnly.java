@@ -1,32 +1,23 @@
 package us.ihmc.footstepPlanning.postProcessing.parameters;
 
-import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface FootstepPostProcessingParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
-    * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
+    * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
     */
-   default boolean positionSplitFractionProcessingEnabled()
+   default boolean splitFractionProcessingEnabled()
    {
-      return get(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled);
-   }
-
-   /**
-    * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
-    */
-   default boolean areaSplitFractionProcessingEnabled()
-   {
-      return get(FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
+      return get(FootstepPostProcessingKeys.splitFractionProcessingEnabled);
    }
 
    /**
     * Determines whether the post processing module for swinging over planar regions is enabled.
     */
-   default boolean swingOverRegionsProcessingEnabled()
+   default boolean swingOverRegionsEnabled()
    {
-      return get(FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
+      return get(FootstepPostProcessingKeys.swingOverRegionsEnabled);
    }
 
    /**
@@ -109,71 +100,5 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
    default double getIncrementalWaypointAdjustmentDistance()
    {
       return get(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
-   }
-
-   /**
-    * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
-    * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
-    */
-   default double getFractionLoadIfFootHasFullSupport()
-   {
-      return get(FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport);
-   }
-
-   /**
-    * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
-    * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
-    * from the foot to the midpoint, or from the midpoint to that foot.
-    */
-   default double getFractionTimeOnFootIfFootHasFullSupport()
-   {
-      return get(FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport);
-   }
-
-   /**
-    * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
-    * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
-    * this movies the midpoint CoP position to that foot.
-    */
-   default double getFractionLoadIfOtherFootHasNoWidth()
-   {
-      return get(FootstepPostProcessingKeys.fractionLoadIfOtherFootHasNoWidth);
-   }
-
-   /**
-    * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
-    * CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
-    * this spends the entire time shifting either from the foot to the midpoint, or from the midpoint to that foot.
-    */
-   default double getFractionTimeOnFootIfOtherFootHasNoWidth()
-   {
-      return get(FootstepPostProcessingKeys.fractionTimeOnFootIfOtherFootHasNoWidth);
-   }
-
-   default FootstepPostProcessingParametersPacket getAsPacket()
-   {
-      FootstepPostProcessingParametersPacket packet = new FootstepPostProcessingParametersPacket();
-
-      packet.setPositionSplitFractionProcessingEnabled(positionSplitFractionProcessingEnabled());
-      packet.setAreaSplitFractionProcessingEnabled(areaSplitFractionProcessingEnabled());
-      packet.setSwingOverRegionsProcessingEnabled(swingOverRegionsProcessingEnabled());
-
-      packet.setStepHeightForLargeStepDown(getStepHeightForLargeStepDown());
-      packet.setLargestStepDownHeight(getLargestStepDownHeight());
-      packet.setTransferSplitFractionAtFullDepth(getTransferSplitFractionAtFullDepth());
-      packet.setTransferWeightDistributionAtFullDepth(getTransferWeightDistributionAtFullDepth());
-
-      packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
-      packet.setNumberOfChecksPerSwing(getNumberOfChecksPerSwing());
-      packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
-      packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
-      packet.setIncrementalWaypointAdjustmentDistance(getIncrementalWaypointAdjustmentDistance());
-
-      packet.setFractionLoadIfFootHasFullSupport(getFractionLoadIfFootHasFullSupport());
-      packet.setFractionTimeOnFootIfFootHasFullSupport(getFractionTimeOnFootIfFootHasFullSupport());
-      packet.setFractionLoadIfOtherFootHasNoWidth(getFractionLoadIfOtherFootHasNoWidth());
-      packet.setFractionTimeOnFootIfOtherFootHasNoWidth(getFractionTimeOnFootIfOtherFootHasNoWidth());
-
-      return packet;
    }
 }
