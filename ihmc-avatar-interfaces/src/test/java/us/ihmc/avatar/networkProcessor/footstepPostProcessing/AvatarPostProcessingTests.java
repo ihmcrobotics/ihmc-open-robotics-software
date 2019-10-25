@@ -190,7 +190,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       runTest(request);
    }
 
-   @Disabled
    @Test
    public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
    {

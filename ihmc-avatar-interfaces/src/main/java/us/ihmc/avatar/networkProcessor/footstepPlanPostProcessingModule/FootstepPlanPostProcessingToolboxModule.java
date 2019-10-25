@@ -37,7 +37,9 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      toolboxController = new FootstepPlanPostProcessingToolboxController(new DefaultFootstepPostProcessingParameters(), statusOutputManager, registry, yoGraphicsListRegistry);
+      toolboxController = new FootstepPlanPostProcessingToolboxController(new DefaultFootstepPostProcessingParameters(),
+                                                                          drcRobotModel.getWalkingControllerParameters(), statusOutputManager, registry,
+                                                                          yoGraphicsListRegistry);
       startYoVariableServer();
    }
 
