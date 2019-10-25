@@ -50,6 +50,12 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    @Override
    public FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus)
    {
+      swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(parameters.getMinimumSwingFootClearance());
+      swingOverPlanarRegionsTrajectoryExpander.setIncrementalAdjustmentDistance(parameters.getIncrementalWaypointAdjustmentDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(parameters.getMaximumWaypointAdjustmentDistance());
+
       FootstepPlanningToolboxOutputStatus processedOutput = new FootstepPlanningToolboxOutputStatus(outputStatus);
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(outputStatus.getPlanarRegionsList());
