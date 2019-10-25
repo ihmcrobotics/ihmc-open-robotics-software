@@ -115,10 +115,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
       maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
-      status = new YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
-                                                                                   SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
-      mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
-                                                                                                  SwingOverPlanarRegionsTrajectoryCollisionType.class);
+      status = new YoEnum<>(namePrefix + "Status", parentRegistry, SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
+      mostSevereCollisionType = new YoEnum<>(namePrefix + "CollisionType", parentRegistry, SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
       trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
@@ -130,7 +128,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
-      closestPolygonPointMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D>();
+      closestPolygonPointMap = new HashMap<>();
       for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
       {
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
@@ -163,6 +161,31 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance.set(0.04);
       incrementalAdjustmentDistance.set(0.03);
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
+   }
+
+   public void setNumberOfCheckpoints(int numberOfCheckpoints)
+   {
+      this.numberOfCheckpoints.set(numberOfCheckpoints);
+   }
+
+   public void setMaximumNumberOfTries(int maximumNumberOfTries)
+   {
+      this.numberOfTriesCounter.setMaxCount(maximumNumberOfTries);
+   }
+
+   public void setMinimumSwingFootClearance(double minimumSwingFootClearance)
+   {
+      minimumClearance.set(minimumSwingFootClearance);
+   }
+
+   public void setIncrementalAdjustmentDistance(double incrementalAdjustmentDistance)
+   {
+      this.incrementalAdjustmentDistance.set(incrementalAdjustmentDistance);
+   }
+
+   public void setMaximumAdjustmentDistance(double maximumAdjustmentDistance)
+   {
+      this.maximumAdjustmentDistance.set(maximumAdjustmentDistance);
    }
 
    public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose,
