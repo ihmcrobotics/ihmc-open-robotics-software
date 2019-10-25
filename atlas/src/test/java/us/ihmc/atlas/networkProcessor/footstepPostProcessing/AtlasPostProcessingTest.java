@@ -4,10 +4,10 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPostProcessing.AvatarLargeStepDownTests;
+import us.ihmc.avatar.networkProcessor.footstepPostProcessing.AvatarPostProcessingTests;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-public class AtlasPostProcessingTest extends AvatarLargeStepDownTests
+public class AtlasPostProcessingTest extends AvatarPostProcessingTests
 {
 
    @Override

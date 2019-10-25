@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -34,15 +35,23 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.BlockEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +60,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
-public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterface
+public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
    protected SimulationTestingParameters simulationTestingParameters;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
@@ -168,14 +177,6 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlannerParameters);
       planningParametersPublisher.publish(parametersPacket);
 
-      FramePose3D leftFoot = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
-      leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-      request.setInitialStanceRobotSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
-      request.getStanceFootPositionInWorld().set(leftFoot.getPosition());
-      request.getStanceFootOrientationInWorld().set(leftFoot.getOrientation());
-
       PoseReferenceFrame startingFrame = new PoseReferenceFrame("startingFrame", ReferenceFrame.getWorldFrame());
       startingFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), startingLocation.getAdditionalOffset()));
       startingFrame.setOrientationAndUpdate(new Quaternion(startingLocation.getYaw(), 0.0, 0.0));
@@ -184,12 +185,79 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
       goalPose.setPosition(1.0, 0.0, 0.0);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose);
+
+      runTest(request);
+   }
+
+   @Disabled
+   @Test
+   public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
+   {
+      String className = getClass().getSimpleName();
+
+      LittleWallsWithIncreasingHeightPlanarRegionEnvironment environment = new LittleWallsWithIncreasingHeightPlanarRegionEnvironment();
+
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.createSimulation(className);
+
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
+
+      footstepPlannerParameters.setMaximumStepReach(0.6);
+      footstepPlannerParameters.setMinimumStepWidth(0.05);
+      footstepPlannerParameters.setMaximumStepWidth(0.35);
+      footstepPlannerParameters.setBodyBoxBaseZ(0.4);
+      footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
+      footstepPlannerParameters.setCheckForPathCollisions(false);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
+      FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlannerParameters);
+      planningParametersPublisher.publish(parametersPacket);
+
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setPosition(2.0, 0.0, 0.0);
+      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose);
+      runTest(requestPacket);
+   }
+
+
+   private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
+   {
+      FramePose3D leftFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
+      request.setInitialStanceRobotSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
+      request.getStanceFootPositionInWorld().set(leftFoot.getPosition());
+      request.getStanceFootOrientationInWorld().set(leftFoot.getOrientation());
+
       request.getGoalPositionInWorld().set(goalPose.getPosition());
       request.getGoalOrientationInWorld().set(goalPose.getOrientation());
 
-      request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(blockEnvironment.getPlanarRegionsList()));
+      request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
       request.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+
+      return request;
+   }
+
+
+   private void runTest(FootstepPlanningRequestPacket request) throws SimulationExceededMaximumTimeException
+   {
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoFramePoint3D goalPosition = new YoFramePoint3D("goalPosition", ReferenceFrame.getWorldFrame(), registry);
+      YoGraphicPosition goalGraphic = new YoGraphicPosition("goalGraphic", goalPosition, 0.05, YoAppearance.Green());
+      goalPosition.set(request.getGoalPositionInWorld());
+      yoGraphicsListRegistry.registerYoGraphic("Test", goalGraphic);
+      drcSimulationTestHelper.addChildRegistry(registry);
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       planningRequestPublisher.publish(request);
       ThreadTools.sleep(100);
@@ -224,19 +292,18 @@ public abstract class AvatarLargeStepDownTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper.publishToController(postProcessingOutputStatus.get().getFootstepDataList());
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+      boolean success =  drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
-      Point3D center = new Point3D(goalPose.getPosition());
+      Point3D center = new Point3D(request.getGoalPositionInWorld());
       center.addZ(0.7);
 
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
-
 }
