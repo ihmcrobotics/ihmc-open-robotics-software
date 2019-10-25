@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.parameters;
+package us.ihmc.footstepPlanning.postProcessing.parameters;
 
 import us.ihmc.tools.property.StoredPropertySetBasics;
 

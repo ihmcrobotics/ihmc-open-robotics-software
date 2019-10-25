@@ -2,6 +2,8 @@ package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.footstepPlanning.postProcessing.FootstepPlanPostProcessingElement;
+import us.ihmc.footstepPlanning.postProcessing.PostProcessingEnum;
 
 import java.util.EnumMap;
 

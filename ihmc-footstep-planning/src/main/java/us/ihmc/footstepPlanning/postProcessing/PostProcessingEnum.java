@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
+package us.ihmc.footstepPlanning.postProcessing;
 
 public enum PostProcessingEnum
 {
