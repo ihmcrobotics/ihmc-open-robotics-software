@@ -14,6 +14,11 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.splitFractionProcessingEnabled, enabled);
    }
 
+   default void setSwingOverRegionsEnabled(boolean enabled)
+   {
+      set(FootstepPostProcessingKeys.swingOverRegionsEnabled, enabled);
+   }
+
    default void setStepHeightForLargeStepDown(double height)
    {
       set(FootstepPostProcessingKeys.stepHeightForLargeStepDown, height);

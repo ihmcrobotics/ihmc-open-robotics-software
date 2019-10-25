@@ -9,6 +9,11 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
       return get(FootstepPostProcessingKeys.splitFractionProcessingEnabled);
    }
 
+   default boolean swingOverRegionsEnabled()
+   {
+      return get(FootstepPostProcessingKeys.swingOverRegionsEnabled);
+   }
+
    default double getStepHeightForLargeStepDown()
    {
       return get(FootstepPostProcessingKeys.stepHeightForLargeStepDown);
