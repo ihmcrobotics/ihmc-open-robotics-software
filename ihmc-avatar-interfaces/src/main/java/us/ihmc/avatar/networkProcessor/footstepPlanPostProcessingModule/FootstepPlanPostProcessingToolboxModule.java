@@ -21,7 +21,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
 {
-   public static final String moduleName = "/toolbox/continuous_planning";
+   public static final String moduleName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX;
 
    private final FootstepPlanPostProcessingToolboxController toolboxController;
 
