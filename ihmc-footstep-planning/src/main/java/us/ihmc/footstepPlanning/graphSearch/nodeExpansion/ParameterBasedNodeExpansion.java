@@ -59,7 +59,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       {
          for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
-            double reachSquared = EuclidCoreTools.normSquared(x, y);
+            double relativeYToIdeal = y - parameters.getIdealFootstepWidth();
+            double reachSquared = EuclidCoreTools.normSquared(x, relativeYToIdeal);
             if (reachSquared > maxReachSquared)
                continue;
 
