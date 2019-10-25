@@ -333,7 +333,7 @@ public class RemoteUIMessageConverter
 
       if (plannerRequestId > currentPlanRequestId.get())
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
-     
+
       ThreadTools.sleep(100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
