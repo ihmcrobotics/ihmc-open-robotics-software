@@ -60,7 +60,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
-      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters, registry);
+      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters);
 
       new YoVariablesForFootstepPostProcessingParameters(registry, parameters);
 
