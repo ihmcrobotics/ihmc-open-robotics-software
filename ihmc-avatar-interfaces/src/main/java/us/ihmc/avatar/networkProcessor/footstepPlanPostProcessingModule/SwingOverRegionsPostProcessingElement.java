@@ -63,7 +63,7 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
       stanceReferenceFrame.setPoseAndUpdate(initialStanceFootPose);
 
       FramePose3D otherFootPose = new FramePose3D(stanceReferenceFrame);
-      otherFootPose.setY(stanceSide.negateIfRightSide(0.25));
+      otherFootPose.setY(stanceSide.negateIfLeftSide(0.25));
       otherFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
 
@@ -108,6 +108,6 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    @Override
    public PostProcessingEnum getElementName()
    {
-      return PostProcessingEnum.STEP_SPLIT_FRACTIONS;
+      return PostProcessingEnum.SWING_OVER_REGIONS;
    }
 }
