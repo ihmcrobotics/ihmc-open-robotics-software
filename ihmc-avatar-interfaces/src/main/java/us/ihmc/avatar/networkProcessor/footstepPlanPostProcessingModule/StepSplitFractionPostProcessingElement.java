@@ -61,7 +61,7 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
 
          // TODO scale the split fraction with the distance down.
          // This step is a big step down.
-         if (nextFootPose.getZ() - stanceFootPose.getZ() < stepHeightForLargeStepDown.getDoubleValue())
+         if (nextFootPose.getZ() - stanceFootPose.getZ() < -stepHeightForLargeStepDown.getDoubleValue())
          {
             if (stepNumber == footstepDataMessageList.size() - 1)
             { // this is the last step
