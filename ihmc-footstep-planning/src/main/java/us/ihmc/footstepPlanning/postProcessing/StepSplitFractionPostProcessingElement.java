@@ -26,7 +26,7 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
    @Override
    public boolean isActive()
    {
-      return parameters.splitFractionProcessingEnabled();
+      return parameters.positionSplitFractionProcessingEnabled();
    }
 
    /** {@inheritDoc} **/
