@@ -16,11 +16,9 @@ public class FootstepPostProcessingParametersUIController
    private JavaFXMessager messager;
    private FootstepPostProcessingParametersBasics postProcessingParameters;
 
-   @FXML
-   private CheckBox splitFractionProcessingEnabled;
-   @FXML
-   private CheckBox swingOverRegionsEnabled;
 
+   @FXML
+   private CheckBox positionSplitFractionProcessingEnabled;
    @FXML
    private Spinner<Double> stepHeightForLargeStepDown;
    @FXML
@@ -30,7 +28,15 @@ public class FootstepPostProcessingParametersUIController
    @FXML
    private Spinner<Double> transferWeightDistributionAtFullDepth;
 
+   @FXML
+   private CheckBox areaSplitFractionProcessingEnabled;
+   @FXML
+   private Spinner<Double> fractionLoadIfFootHasFullSupport;
+   @FXML
+   private Spinner<Double> fractionTimeOnFootIfFootHasFullSupport;
 
+   @FXML
+   private CheckBox swingOverRegionsProcessingEnabled;
    @FXML
    private Spinner<Double> minimumSwingFootClearance;
    @FXML
@@ -68,6 +74,9 @@ public class FootstepPostProcessingParametersUIController
       maximumNumberOfAdjustmentAttempts.setValueFactory(new IntegerSpinnerValueFactory(5, 100, 50, 5));
       maximumAdjustmentDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.2, 0.05));
       incrementalAdjustmentDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.03, 0.01));
+
+      fractionLoadIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
+      fractionTimeOnFootIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
    }
 
    public void bindControls()
@@ -75,17 +84,22 @@ public class FootstepPostProcessingParametersUIController
       setupControls();
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(postProcessingParameters);
-      javaFXStoredPropertyMap.put(splitFractionProcessingEnabled, FootstepPostProcessingKeys.splitFractionProcessingEnabled);
-      javaFXStoredPropertyMap.put(swingOverRegionsEnabled, FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
+      javaFXStoredPropertyMap.put(positionSplitFractionProcessingEnabled, FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled);
       javaFXStoredPropertyMap.put(stepHeightForLargeStepDown, FootstepPostProcessingKeys.stepHeightForLargeStepDown);
       javaFXStoredPropertyMap.put(largestStepDownHeight, FootstepPostProcessingKeys.largestStepDownHeight);
       javaFXStoredPropertyMap.put(transferSplitFractionAtFullDepth, FootstepPostProcessingKeys.transferSplitFractionAtFullDepth);
       javaFXStoredPropertyMap.put(transferWeightDistributionAtFullDepth, FootstepPostProcessingKeys.transferWeightDistributionAtFullDepth);
+
+      javaFXStoredPropertyMap.put(swingOverRegionsProcessingEnabled, FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
       javaFXStoredPropertyMap.put(minimumSwingFootClearance, FootstepPostProcessingKeys.minimumSwingFootClearance);
       javaFXStoredPropertyMap.put(numberOfChecksPerSwing, FootstepPostProcessingKeys.numberOfChecksPerSwing);
       javaFXStoredPropertyMap.put(maximumNumberOfAdjustmentAttempts, FootstepPostProcessingKeys.maximumNumberOfAdjustmentAttempts);
       javaFXStoredPropertyMap.put(maximumAdjustmentDistance, FootstepPostProcessingKeys.maximumWaypointAdjustmentDistance);
       javaFXStoredPropertyMap.put(incrementalAdjustmentDistance, FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+
+      javaFXStoredPropertyMap.put(areaSplitFractionProcessingEnabled, FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
+      javaFXStoredPropertyMap.put(fractionLoadIfFootHasFullSupport, FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport);
+      javaFXStoredPropertyMap.put(fractionTimeOnFootIfFootHasFullSupport, FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport);
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PostProcessingParametersTopic, parameters ->
