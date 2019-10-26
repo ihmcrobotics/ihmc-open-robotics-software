@@ -3,10 +3,10 @@ package us.ihmc.footstepPlanning.postProcessing;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 
 import java.util.List;
 
@@ -69,15 +69,46 @@ public class StepSplitFractionPostProcessingElement implements FootstepPlanPostP
 
             if (stepNumber == footstepDataMessageList.size() - 1)
             { // this is the last step
-               processedOutput.getFootstepDataList().setFinalTransferSplitFraction(transferSplitFraction);
-               processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(transferWeightDistribution);
+               double currentSplitFraction = processedOutput.getFootstepDataList().getFinalTransferSplitFraction();
+               double currentWeightDistribution = processedOutput.getFootstepDataList().getFinalTransferWeightDistribution();
+
+               double splitFractionToSet, weightDistributionToSet;
+
+               if (currentSplitFraction == -1.0)
+                  splitFractionToSet = transferSplitFraction;
+               else
+                  splitFractionToSet = transferSplitFraction * currentSplitFraction / defaultTransferSplitFraction;
+
+               if (currentWeightDistribution == -1.0)
+                  weightDistributionToSet = transferWeightDistribution;
+               else
+                  weightDistributionToSet = transferWeightDistribution * currentWeightDistribution / defaultWeightDistribution;
+
+               processedOutput.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
+               processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
             }
             else
             {
-               footstepDataMessageList.get(stepNumber + 1).setTransferSplitFraction(transferSplitFraction);
-               footstepDataMessageList.get(stepNumber + 1).setTransferWeightDistribution(transferWeightDistribution);
+               double currentSplitFraction = footstepDataMessageList.get(stepNumber + 1).getTransferSplitFraction();
+               double currentWeightDistribution = footstepDataMessageList.get(stepNumber + 1).getTransferWeightDistribution();
+
+               double splitFractionToSet, weightDistributionToSet;
+
+               if (currentSplitFraction == -1.0)
+                  splitFractionToSet = transferSplitFraction;
+               else
+                  splitFractionToSet = transferSplitFraction * currentSplitFraction / defaultTransferSplitFraction;
+
+               if (currentWeightDistribution == -1.0)
+                  weightDistributionToSet = transferWeightDistribution;
+               else
+                  weightDistributionToSet = transferWeightDistribution * currentWeightDistribution / defaultWeightDistribution;
+
+               footstepDataMessageList.get(stepNumber + 1).setTransferSplitFraction(splitFractionToSet);
+               footstepDataMessageList.get(stepNumber + 1).setTransferWeightDistribution(weightDistributionToSet);
             }
          }
+
 
       }
 
