@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPostProcessingParametersUIController">
+    <children>
+        <GridPane>
+            <children>
+                <CheckBox fx:id="splitFractionProcessingEnabled" mnemonicParsing="false" prefWidth="250.0" text="Split Fraction Processing Enabled" GridPane.rowIndex="1" />
+
+                <CheckBox fx:id="swingOverRegionsEnabled" mnemonicParsing="false" prefHeight="18.0" prefWidth="306.0" text="Swing over regions processing enabled" GridPane.rowIndex="2" />
+
+                <Label text="Step height for large step down" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label text="Largest step down height" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                <Label text="Transfer split fraction at full depth" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <Label text="Transfer weight distribution at full depth" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+
+                <Label text="Minimum swing foot clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label text="Number of checks per swing" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                <Label text="Maximum number of adjustment iterations" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <Label text="Maximum adjustment distance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                <Label text="Incremental adjustment distance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+
+                <Spinner fx:id="stepHeightForLargeStepDown" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <Spinner fx:id="largestStepDownHeight" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <Spinner fx:id="transferSplitFractionAtFullDepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                <Spinner fx:id="transferWeightDistributionAtFullDepth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+
+                <Spinner fx:id="minimumSwingFootClearance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                <Spinner fx:id="numberOfChecksPerSwing" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                <Spinner fx:id="maximumNumberOfAdjustmentAttempts" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                <Spinner fx:id="maximumAdjustmentDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+                <Spinner fx:id="incrementalAdjustmentDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+
+                <Label layoutX="734.0" layoutY="77.0" text="Split Fraction Processing" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+                <Label layoutX="714.0" layoutY="113.0" text="Swing Over Regions" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
+            </children>
+         <columnConstraints>
+            <ColumnConstraints maxWidth="308.0" minWidth="256.0" prefWidth="308.0" />
+            <ColumnConstraints maxWidth="324.0" minWidth="265.0" prefWidth="265.0" />
+            <ColumnConstraints maxWidth="164.0" minWidth="111.0" prefWidth="112.0" />
+            <ColumnConstraints maxWidth="346.0" minWidth="286.0" prefWidth="346.0" />
+            <ColumnConstraints maxWidth="165.0" minWidth="105.0" prefWidth="105.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </children>
+</AnchorPane>
