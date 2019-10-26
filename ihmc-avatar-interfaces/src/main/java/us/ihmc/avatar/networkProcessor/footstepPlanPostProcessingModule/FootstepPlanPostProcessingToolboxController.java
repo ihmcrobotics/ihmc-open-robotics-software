@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.footstepPlanning.postProcessing.StepSplitFractionPostProcessingElement;
+import us.ihmc.footstepPlanning.postProcessing.AreaSplitFractionPostProcessingElement;
+import us.ihmc.footstepPlanning.postProcessing.PositionSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.SwingOverRegionsPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.YoVariablesForFootstepPostProcessingParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
@@ -46,14 +46,16 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
-      StepSplitFractionPostProcessingElement splitFractionPostProcessingElement = new StepSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
+      PositionSplitFractionPostProcessingElement positionSplitFractionPostProcessingElement = new PositionSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
+      AreaSplitFractionPostProcessingElement areaSplitFractionPostProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
       SwingOverRegionsPostProcessingElement swingOverRegionsPostProcessingElement = new SwingOverRegionsPostProcessingElement(parameters,
                                                                                                                               walkingControllerParameters,
                                                                                                                               registry, graphicsListRegistry);
 
       new YoVariablesForFootstepPostProcessingParameters(registry, parameters);
 
-      postProcessing.addPostProcessingElement(splitFractionPostProcessingElement);
+      postProcessing.addPostProcessingElement(positionSplitFractionPostProcessingElement);
+      postProcessing.addPostProcessingElement(areaSplitFractionPostProcessingElement);
       postProcessing.addPostProcessingElement(swingOverRegionsPostProcessingElement);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
