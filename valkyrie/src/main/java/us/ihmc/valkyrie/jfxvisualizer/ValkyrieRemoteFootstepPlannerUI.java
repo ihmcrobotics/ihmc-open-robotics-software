@@ -13,6 +13,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -37,8 +38,9 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(), model,
-                                              previewModel, model.getContactPointParameters(), model.getWalkingControllerParameters());
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(),
+                                              new ValkyrieFootstepPostProcessorParameters(), model, previewModel, model.getContactPointParameters(),
+                                              model.getWalkingControllerParameters());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
