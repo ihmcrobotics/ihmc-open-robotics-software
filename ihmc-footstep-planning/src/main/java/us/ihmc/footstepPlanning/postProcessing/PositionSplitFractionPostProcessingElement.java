@@ -10,13 +10,13 @@ import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessing
 
 import java.util.List;
 
-public class StepSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
+public class PositionSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
    private final ICPPlannerParameters walkingControllerParameters;
 
-   public StepSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters,
-                                                 ICPPlannerParameters walkingControllerParameters)
+   public PositionSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters,
+                                                     ICPPlannerParameters walkingControllerParameters)
    {
       this.parameters = parameters;
       this.walkingControllerParameters = walkingControllerParameters;
