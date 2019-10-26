@@ -1,13 +1,17 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+# Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
 # Field default value True
-bool split_fraction_processing_enabled
+bool position_split_fraction_processing_enabled
+
+# Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+# Field default value True
+bool area_split_fraction_processing_enabled
 
 # Determines whether the post processing module for swinging over planar regions is enabled.
 # Field default value True
-bool swing_over_regions_enabled
+bool swing_over_regions_processing_enabled
 
 # Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
 # If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
@@ -54,5 +58,16 @@ float64 maximum_waypoint_adjustment_distance
 # If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
 # Field default value -1.0
 float64 incremental_waypoint_adjustment_distance
+
+# If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
+# support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
+# Field default value -1.0
+float64 fraction_load_if_foot_has_full_support
+
+# If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+# CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
+# from the foot to the midpoint, or from the midpoint to that foot.
+# Field default value -1.0
+float64 fraction_time_on_foot_if_foot_has_full_support
 
 

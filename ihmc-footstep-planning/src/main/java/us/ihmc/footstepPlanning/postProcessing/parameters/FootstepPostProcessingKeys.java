@@ -9,8 +9,9 @@ public class FootstepPostProcessingKeys
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final BooleanStoredPropertyKey splitFractionProcessingEnabled          = keys.addBooleanKey("Split fraction processing enabled", true);
-   public static final BooleanStoredPropertyKey swingOverRegionsEnabled                 = keys.addBooleanKey("Swing over regions enabled", true);
+   public static final BooleanStoredPropertyKey positionSplitFractionProcessingEnabled  = keys.addBooleanKey("Position split fraction processing enabled", true);
+   public static final BooleanStoredPropertyKey areaSplitFractionProcessingEnabled      = keys.addBooleanKey("Area split fraction processing enabled", true);
+   public static final BooleanStoredPropertyKey swingOverRegionsProcessingEnabled       = keys.addBooleanKey("Swing over regions processing enabled", true);
 
    public static final DoubleStoredPropertyKey  stepHeightForLargeStepDown              = keys.addDoubleKey("Step height for large step down", 0.15);
    public static final DoubleStoredPropertyKey  largestStepDownHeight                   = keys.addDoubleKey("Largest step down height", 0.35);
@@ -22,4 +23,7 @@ public class FootstepPostProcessingKeys
    public static final IntegerStoredPropertyKey maximumNumberOfAdjustmentAttempts       = keys.addIntegerKey("Maximum number of adjustment attempts", 50);
    public static final DoubleStoredPropertyKey  maximumWaypointAdjustmentDistance       = keys.addDoubleKey("Maximum waypoint adjustment distance", 0.2);
    public static final DoubleStoredPropertyKey  incrementalWaypointAdjustmentDistance   = keys.addDoubleKey("Incremental waypoint adjustment distance", 0.03);
+
+   public static final DoubleStoredPropertyKey  fractionLoadIfFootHasFullSupport        = keys.addDoubleKey("Fraction load if foot has full support", 0.5);
+   public static final DoubleStoredPropertyKey  fractionTimeOnFootIfFootHasFullSupport  = keys.addDoubleKey("Fraction time on foot if foot has full support", 0.5);
 }

@@ -21,9 +21,6 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
    private final FootstepPostProcessingParametersReadOnly parameters;
    private final ICPPlannerParameters walkingControllerParameters;
 
-   private static final double fractionLoadIfFullSupport = 0.5;
-   private static final double fractionTimeOnFootWithNoLoad = 0.5;
-
    public AreaSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters walkingControllerParameters)
    {
       this.parameters = parameters;
@@ -34,7 +31,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
    @Override
    public boolean isActive()
    {
-      return parameters.splitFractionProcessingEnabled();
+      return parameters.areaSplitFractionProcessingEnabled();
    }
 
    /** {@inheritDoc} **/
@@ -84,11 +81,11 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          double previousArea = previousPolygon.getArea();
 
          double percentAreaOnCurrentFoot = currentArea / (previousArea + currentArea);
-         double transferWeightDistribution = percentAreaOnCurrentFoot * fractionLoadIfFullSupport;
+         double transferWeightDistribution = percentAreaOnCurrentFoot * parameters.getFractionLoadIfFootHasFullSupport();
 
          // lower means it spends more time shifting to the center, higher means it spends less time shifting to the center
          // e.g., if we set the fraction to 0 and the trailing foot has no area, the split fraction should be 1 because we spend no time on the first segment
-         double transferSplitFraction =  percentAreaOnCurrentFoot * (1.0 - fractionTimeOnFootWithNoLoad);
+         double transferSplitFraction =  percentAreaOnCurrentFoot * (1.0 - parameters.getFractionTimeOnFootIfFootHasFullSupport());
 
          transferWeightDistribution = MathTools.clamp(transferWeightDistribution, 0.01, 0.99);
          transferSplitFraction = MathTools.clamp(transferSplitFraction, 0.01, 0.99);

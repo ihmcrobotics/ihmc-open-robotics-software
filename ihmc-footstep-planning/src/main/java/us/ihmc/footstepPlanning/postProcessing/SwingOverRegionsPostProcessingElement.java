@@ -41,7 +41,7 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    @Override
    public boolean isActive()
    {
-      return parameters.swingOverRegionsEnabled();
+      return parameters.swingOverRegionsProcessingEnabled();
    }
 
    /** {@inheritDoc} **/

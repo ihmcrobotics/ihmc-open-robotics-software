@@ -76,7 +76,7 @@ public class FootstepPostProcessingParametersUIController
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(postProcessingParameters);
       javaFXStoredPropertyMap.put(splitFractionProcessingEnabled, FootstepPostProcessingKeys.splitFractionProcessingEnabled);
-      javaFXStoredPropertyMap.put(swingOverRegionsEnabled, FootstepPostProcessingKeys.swingOverRegionsEnabled);
+      javaFXStoredPropertyMap.put(swingOverRegionsEnabled, FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
       javaFXStoredPropertyMap.put(stepHeightForLargeStepDown, FootstepPostProcessingKeys.stepHeightForLargeStepDown);
       javaFXStoredPropertyMap.put(largestStepDownHeight, FootstepPostProcessingKeys.largestStepDownHeight);
       javaFXStoredPropertyMap.put(transferSplitFractionAtFullDepth, FootstepPostProcessingKeys.transferSplitFractionAtFullDepth);

@@ -10,14 +10,19 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       setAll(footstepPostProcessingParameters.getAll());
    }
 
-   default void setSplitFractionProcessingEnabled(boolean enabled)
+   default void setPositionSplitFractionProcessingEnabled(boolean enabled)
    {
-      set(FootstepPostProcessingKeys.splitFractionProcessingEnabled, enabled);
+      set(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled, enabled);
    }
 
-   default void setSwingOverRegionsEnabled(boolean enabled)
+   default void setAreaSplitFractionProcessingEnabled(boolean enabled)
    {
-      set(FootstepPostProcessingKeys.swingOverRegionsEnabled, enabled);
+      set(FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled, enabled);
+   }
+
+   default void setSwingOverRegionsProcessingEnabled(boolean enabled)
+   {
+      set(FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled, enabled);
    }
 
    default void setStepHeightForLargeStepDown(double height)
@@ -65,10 +70,21 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance, distance);
    }
 
+   default void setFractionLoadIfFootHasFullSupport(double fraction)
+   {
+      set(FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport, fraction);
+   }
+
+   default void setFractionTimeOnFootIfFootHasFullSupport(double fraction)
+   {
+      set(FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport, fraction);
+   }
+
    default void set(FootstepPostProcessingParametersPacket packet)
    {
-      setSplitFractionProcessingEnabled(packet.getSplitFractionProcessingEnabled());
-      setSwingOverRegionsEnabled(packet.getSwingOverRegionsEnabled());
+      setPositionSplitFractionProcessingEnabled(packet.getPositionSplitFractionProcessingEnabled());
+      setAreaSplitFractionProcessingEnabled(packet.getAreaSplitFractionProcessingEnabled());
+      setSwingOverRegionsProcessingEnabled(packet.getSwingOverRegionsProcessingEnabled());
 
       if (packet.getStepHeightForLargeStepDown() != -1.0)
          setStepHeightForLargeStepDown(packet.getStepHeightForLargeStepDown());
@@ -87,5 +103,10 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
          setIncrementalWaypointAdjustmentDistance(packet.getIncrementalWaypointAdjustmentDistance());
       setNumberOfChecksPerSwing((int) packet.getNumberOfChecksPerSwing());
       setMaximumNumberOfAdjustmentAttempts((int) packet.getMaximumNumberOfAdjustmentAttempts());
+
+      if (packet.getFractionLoadIfFootHasFullSupport() != -1.0)
+         setFractionLoadIfFootHasFullSupport(packet.getFractionLoadIfFootHasFullSupport());
+      if (packet.getFractionTimeOnFootIfFootHasFullSupport() != -1.0)
+         setFractionTimeOnFootIfFootHasFullSupport(packet.getFractionTimeOnFootIfFootHasFullSupport());
    }
 }

@@ -16,13 +16,17 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
             */
    public long sequence_id_;
    /**
-            * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+            * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
             */
-   public boolean split_fraction_processing_enabled_ = true;
+   public boolean position_split_fraction_processing_enabled_ = true;
+   /**
+            * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+            */
+   public boolean area_split_fraction_processing_enabled_ = true;
    /**
             * Determines whether the post processing module for swinging over planar regions is enabled.
             */
-   public boolean swing_over_regions_enabled_ = true;
+   public boolean swing_over_regions_processing_enabled_ = true;
    /**
             * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
             * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
@@ -69,6 +73,17 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
             * If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
             */
    public double incremental_waypoint_adjustment_distance_ = -1.0;
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
+            * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
+            */
+   public double fraction_load_if_foot_has_full_support_ = -1.0;
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
+            * from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public double fraction_time_on_foot_if_foot_has_full_support_ = -1.0;
 
    public FootstepPostProcessingParametersPacket()
    {
@@ -84,9 +99,11 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
    {
       sequence_id_ = other.sequence_id_;
 
-      split_fraction_processing_enabled_ = other.split_fraction_processing_enabled_;
+      position_split_fraction_processing_enabled_ = other.position_split_fraction_processing_enabled_;
 
-      swing_over_regions_enabled_ = other.swing_over_regions_enabled_;
+      area_split_fraction_processing_enabled_ = other.area_split_fraction_processing_enabled_;
+
+      swing_over_regions_processing_enabled_ = other.swing_over_regions_processing_enabled_;
 
       step_height_for_large_step_down_ = other.step_height_for_large_step_down_;
 
@@ -106,6 +123,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       incremental_waypoint_adjustment_distance_ = other.incremental_waypoint_adjustment_distance_;
 
+      fraction_load_if_foot_has_full_support_ = other.fraction_load_if_foot_has_full_support_;
+
+      fraction_time_on_foot_if_foot_has_full_support_ = other.fraction_time_on_foot_if_foot_has_full_support_;
+
    }
 
    /**
@@ -124,33 +145,48 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
    }
 
    /**
-            * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+            * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
             */
-   public void setSplitFractionProcessingEnabled(boolean split_fraction_processing_enabled)
+   public void setPositionSplitFractionProcessingEnabled(boolean position_split_fraction_processing_enabled)
    {
-      split_fraction_processing_enabled_ = split_fraction_processing_enabled;
+      position_split_fraction_processing_enabled_ = position_split_fraction_processing_enabled;
    }
    /**
-            * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+            * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
             */
-   public boolean getSplitFractionProcessingEnabled()
+   public boolean getPositionSplitFractionProcessingEnabled()
    {
-      return split_fraction_processing_enabled_;
+      return position_split_fraction_processing_enabled_;
+   }
+
+   /**
+            * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+            */
+   public void setAreaSplitFractionProcessingEnabled(boolean area_split_fraction_processing_enabled)
+   {
+      area_split_fraction_processing_enabled_ = area_split_fraction_processing_enabled;
+   }
+   /**
+            * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+            */
+   public boolean getAreaSplitFractionProcessingEnabled()
+   {
+      return area_split_fraction_processing_enabled_;
    }
 
    /**
             * Determines whether the post processing module for swinging over planar regions is enabled.
             */
-   public void setSwingOverRegionsEnabled(boolean swing_over_regions_enabled)
+   public void setSwingOverRegionsProcessingEnabled(boolean swing_over_regions_processing_enabled)
    {
-      swing_over_regions_enabled_ = swing_over_regions_enabled;
+      swing_over_regions_processing_enabled_ = swing_over_regions_processing_enabled;
    }
    /**
             * Determines whether the post processing module for swinging over planar regions is enabled.
             */
-   public boolean getSwingOverRegionsEnabled()
+   public boolean getSwingOverRegionsProcessingEnabled()
    {
-      return swing_over_regions_enabled_;
+      return swing_over_regions_processing_enabled_;
    }
 
    /**
@@ -308,6 +344,42 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       return incremental_waypoint_adjustment_distance_;
    }
 
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
+            * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
+            */
+   public void setFractionLoadIfFootHasFullSupport(double fraction_load_if_foot_has_full_support)
+   {
+      fraction_load_if_foot_has_full_support_ = fraction_load_if_foot_has_full_support;
+   }
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
+            * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
+            */
+   public double getFractionLoadIfFootHasFullSupport()
+   {
+      return fraction_load_if_foot_has_full_support_;
+   }
+
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
+            * from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public void setFractionTimeOnFootIfFootHasFullSupport(double fraction_time_on_foot_if_foot_has_full_support)
+   {
+      fraction_time_on_foot_if_foot_has_full_support_ = fraction_time_on_foot_if_foot_has_full_support;
+   }
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
+            * from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public double getFractionTimeOnFootIfFootHasFullSupport()
+   {
+      return fraction_time_on_foot_if_foot_has_full_support_;
+   }
+
 
    public static Supplier<FootstepPostProcessingParametersPacketPubSubType> getPubSubType()
    {
@@ -328,9 +400,11 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.split_fraction_processing_enabled_, other.split_fraction_processing_enabled_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.position_split_fraction_processing_enabled_, other.position_split_fraction_processing_enabled_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.swing_over_regions_enabled_, other.swing_over_regions_enabled_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.area_split_fraction_processing_enabled_, other.area_split_fraction_processing_enabled_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.swing_over_regions_processing_enabled_, other.swing_over_regions_processing_enabled_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_height_for_large_step_down_, other.step_height_for_large_step_down_, epsilon)) return false;
 
@@ -350,6 +424,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.incremental_waypoint_adjustment_distance_, other.incremental_waypoint_adjustment_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_load_if_foot_has_full_support_, other.fraction_load_if_foot_has_full_support_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_time_on_foot_if_foot_has_full_support_, other.fraction_time_on_foot_if_foot_has_full_support_, epsilon)) return false;
+
 
       return true;
    }
@@ -365,9 +443,11 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.split_fraction_processing_enabled_ != otherMyClass.split_fraction_processing_enabled_) return false;
+      if(this.position_split_fraction_processing_enabled_ != otherMyClass.position_split_fraction_processing_enabled_) return false;
 
-      if(this.swing_over_regions_enabled_ != otherMyClass.swing_over_regions_enabled_) return false;
+      if(this.area_split_fraction_processing_enabled_ != otherMyClass.area_split_fraction_processing_enabled_) return false;
+
+      if(this.swing_over_regions_processing_enabled_ != otherMyClass.swing_over_regions_processing_enabled_) return false;
 
       if(this.step_height_for_large_step_down_ != otherMyClass.step_height_for_large_step_down_) return false;
 
@@ -387,6 +467,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if(this.incremental_waypoint_adjustment_distance_ != otherMyClass.incremental_waypoint_adjustment_distance_) return false;
 
+      if(this.fraction_load_if_foot_has_full_support_ != otherMyClass.fraction_load_if_foot_has_full_support_) return false;
+
+      if(this.fraction_time_on_foot_if_foot_has_full_support_ != otherMyClass.fraction_time_on_foot_if_foot_has_full_support_) return false;
+
 
       return true;
    }
@@ -399,10 +483,12 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       builder.append("FootstepPostProcessingParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("split_fraction_processing_enabled=");
-      builder.append(this.split_fraction_processing_enabled_);      builder.append(", ");
-      builder.append("swing_over_regions_enabled=");
-      builder.append(this.swing_over_regions_enabled_);      builder.append(", ");
+      builder.append("position_split_fraction_processing_enabled=");
+      builder.append(this.position_split_fraction_processing_enabled_);      builder.append(", ");
+      builder.append("area_split_fraction_processing_enabled=");
+      builder.append(this.area_split_fraction_processing_enabled_);      builder.append(", ");
+      builder.append("swing_over_regions_processing_enabled=");
+      builder.append(this.swing_over_regions_processing_enabled_);      builder.append(", ");
       builder.append("step_height_for_large_step_down=");
       builder.append(this.step_height_for_large_step_down_);      builder.append(", ");
       builder.append("largest_step_down_height=");
@@ -420,7 +506,11 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       builder.append("maximum_waypoint_adjustment_distance=");
       builder.append(this.maximum_waypoint_adjustment_distance_);      builder.append(", ");
       builder.append("incremental_waypoint_adjustment_distance=");
-      builder.append(this.incremental_waypoint_adjustment_distance_);
+      builder.append(this.incremental_waypoint_adjustment_distance_);      builder.append(", ");
+      builder.append("fraction_load_if_foot_has_full_support=");
+      builder.append(this.fraction_load_if_foot_has_full_support_);      builder.append(", ");
+      builder.append("fraction_time_on_foot_if_foot_has_full_support=");
+      builder.append(this.fraction_time_on_foot_if_foot_has_full_support_);
       builder.append("}");
       return builder.toString();
    }

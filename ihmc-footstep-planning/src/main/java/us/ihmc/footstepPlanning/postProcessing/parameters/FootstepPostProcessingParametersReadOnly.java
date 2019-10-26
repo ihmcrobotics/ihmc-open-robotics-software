@@ -6,19 +6,27 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 public interface FootstepPostProcessingParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
-    * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+    * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
     */
-   default boolean splitFractionProcessingEnabled()
+   default boolean positionSplitFractionProcessingEnabled()
    {
-      return get(FootstepPostProcessingKeys.splitFractionProcessingEnabled);
+      return get(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled);
+   }
+
+   /**
+    * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+    */
+   default boolean areaSplitFractionProcessingEnabled()
+   {
+      return get(FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
    }
 
    /**
     * Determines whether the post processing module for swinging over planar regions is enabled.
     */
-   default boolean swingOverRegionsEnabled()
+   default boolean swingOverRegionsProcessingEnabled()
    {
-      return get(FootstepPostProcessingKeys.swingOverRegionsEnabled);
+      return get(FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
    }
 
    /**
@@ -103,12 +111,32 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
       return get(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
    }
 
+   /**
+    * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
+    * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
+    */
+   default double getFractionLoadIfFootHasFullSupport()
+   {
+      return get(FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport);
+   }
+
+   /**
+    * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+    * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
+    * from the foot to the midpoint, or from the midpoint to that foot.
+    */
+   default double getFractionTimeOnFootIfFootHasFullSupport()
+   {
+      return get(FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport);
+   }
+
    default FootstepPostProcessingParametersPacket getAsPacket()
    {
       FootstepPostProcessingParametersPacket packet = new FootstepPostProcessingParametersPacket();
 
-      packet.setSplitFractionProcessingEnabled(splitFractionProcessingEnabled());
-      packet.setSwingOverRegionsEnabled(swingOverRegionsEnabled());
+      packet.setPositionSplitFractionProcessingEnabled(positionSplitFractionProcessingEnabled());
+      packet.setAreaSplitFractionProcessingEnabled(areaSplitFractionProcessingEnabled());
+      packet.setSwingOverRegionsProcessingEnabled(swingOverRegionsProcessingEnabled());
 
       packet.setStepHeightForLargeStepDown(getStepHeightForLargeStepDown());
       packet.setLargestStepDownHeight(getLargestStepDownHeight());
@@ -120,6 +148,9 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
       packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
       packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
       packet.setIncrementalWaypointAdjustmentDistance(getIncrementalWaypointAdjustmentDistance());
+
+      packet.setFractionLoadIfFootHasFullSupport(getFractionLoadIfFootHasFullSupport());
+      packet.setFractionTimeOnFootIfFootHasFullSupport(getFractionTimeOnFootIfFootHasFullSupport());
 
       return packet;
    }
