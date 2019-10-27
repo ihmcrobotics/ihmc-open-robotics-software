@@ -15,8 +15,8 @@ public class ValkyrieFootstepPostProcessorParameters extends StoredPropertySet i
    {
       super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPostProcessorParameters.class, projectName, pathToResources);
 
-      setSplitFractionProcessingEnabled(false);
-      setSwingOverRegionsEnabled(false);
+      setPositionSplitFractionProcessingEnabled(false);
+      setSwingOverRegionsProcessingEnabled(false);
 
       load();
    }
