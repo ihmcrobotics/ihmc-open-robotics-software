@@ -95,7 +95,6 @@ public class KSTStreamingState implements State
       HumanoidKinematicsToolboxController ikController = tools.getIKController();
       ikSolverGains = ikController.getDefaultGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
-      ikController.getMomentumWeight().set(0.001);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 

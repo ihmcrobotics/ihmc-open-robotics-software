@@ -192,7 +192,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       robotMass = TotalMassCalculator.computeSubTreeMass(desiredFullRobotModel.getElevator());
 
       footWeight.set(200.0);
-      momentumWeight.set(1.0e-6);
+      momentumWeight.set(0.001);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.
 
       for (RobotSide robotSide : RobotSide.values)
