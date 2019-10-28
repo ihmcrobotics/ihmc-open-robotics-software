@@ -336,6 +336,7 @@ public class MovingBaseRobotArm extends Robot
          {
             double tau = data.getDesiredTorque();
             pair.getValue().setTau(tau);
+            pair.getKey().setTau(tau);
          }
       }
    }
@@ -448,5 +449,10 @@ public class MovingBaseRobotArm extends Robot
    public RevoluteJoint getWristYaw()
    {
       return wristYaw;
+   }
+
+   public OneDegreeOfFreedomJoint getSCSJointFromIDJoint(OneDoFJointBasics oneDoFJoint)
+   {
+      return idToSCSJointMap.get(oneDoFJoint);
    }
 }

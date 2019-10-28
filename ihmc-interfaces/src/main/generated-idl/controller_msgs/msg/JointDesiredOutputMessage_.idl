@@ -1,0 +1,69 @@
+#ifndef __controller_msgs__msg__JointDesiredOutputMessage__idl__
+#define __controller_msgs__msg__JointDesiredOutputMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet CONTROL_MODE_POSITION =
+      0;
+
+      const octet CONTROL_VELOCITY =
+      1;
+
+      const octet CONTROL_EFFORT =
+      2;
+
+      const octet CONTROL_DISABLED =
+      3;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message contains joint-level desired values that are output from the whole-body controller
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::JointDesiredOutputMessage_")
+      struct JointDesiredOutputMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet control_mode;
+        boolean has_desired_torque;
+        boolean has_desired_position;
+        boolean has_desired_velocity;
+        boolean has_desired_acceleration;
+        boolean has_stiffness;
+        boolean has_damping;
+        boolean has_master_gain;
+        boolean has_velocity_scaling;
+        boolean has_position_integration_break_frequency;
+        boolean has_velocity_integration_break_frequency;
+        boolean has_position_integration_max_error;
+        boolean has_velocity_integration_max_error;
+        boolean has_position_feedback_max_error;
+        boolean has_velocity_feedback_max_error;
+        double desired_torque;
+        double desired_position;
+        double desired_velocity;
+        double desired_acceleration;
+        double stiffness;
+        double damping;
+        double master_gain;
+        double velocity_scaling;
+        double position_integration_break_frequency;
+        double velocity_integration_break_frequency;
+        double position_integration_max_error;
+        double velocity_integration_max_error;
+        double position_feedback_max_error;
+        double velocity_feedback_max_error;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,5 +1,8 @@
 package us.ihmc.sensorProcessing.outputData;
 
+import controller_msgs.msg.dds.JointDesiredOutputMessage;
+import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public interface JointDesiredOutputListReadOnly
@@ -227,6 +230,18 @@ public interface JointDesiredOutputListReadOnly
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(index);
       return lowLevelJointData.peekResetIntegratorsRequest();
+   }
+
+   default void copyToMessage(RobotDesiredConfigurationData jointDesiredOutputListMessage)
+   {
+      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = jointDesiredOutputListMessage.getJointDesiredOutputList();
+      jointDesiredOutputList.clear();
+
+      for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         JointDesiredOutputMessage jointDesiredOutputMessage = jointDesiredOutputList.add();
+         getJointDesiredOutput(i).copyToMessage(jointDesiredOutputMessage);
+      }
    }
 
    static void throwJointNotRegisteredException(OneDoFJointBasics joint)
