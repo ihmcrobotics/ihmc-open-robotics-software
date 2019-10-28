@@ -54,8 +54,8 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
       new YoVariablesForFootstepPostProcessingParameters(registry, parameters);
 
-      postProcessing.addPostProcessingElement(positionSplitFractionPostProcessingElement);
-      postProcessing.addPostProcessingElement(areaSplitFractionPostProcessingElement);
+      postProcessing.addPostProcessingElement(positionSplitFractionPostProcessingElement); // make sure this one comes before area
+      postProcessing.addPostProcessingElement(areaSplitFractionPostProcessingElement); // make sure this one comes after position
       postProcessing.addPostProcessingElement(swingOverRegionsPostProcessingElement);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
