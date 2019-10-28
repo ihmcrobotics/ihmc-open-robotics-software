@@ -25,4 +25,6 @@ public class FootstepPostProcessingKeys
    public static final BooleanStoredPropertyKey areaSplitFractionProcessingEnabled      = keys.addBooleanKey("Area split fraction processing enabled", true);
    public static final DoubleStoredPropertyKey  fractionLoadIfFootHasFullSupport        = keys.addDoubleKey("Fraction load if foot has full support", 0.5);
    public static final DoubleStoredPropertyKey  fractionTimeOnFootIfFootHasFullSupport  = keys.addDoubleKey("Fraction time on foot if foot has full support", 0.5);
+   public static final DoubleStoredPropertyKey  fractionLoadIfOtherFootHasNoWidth       = keys.addDoubleKey("Fraction load if other foot has no width", 0.5);
+   public static final DoubleStoredPropertyKey  fractionTimeOnFootIfOtherFootHasNoWidth = keys.addDoubleKey("Fraction time on foot if other foot has no width", 0.5);
 }

@@ -80,6 +80,16 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport, fraction);
    }
 
+   default void setFractionLoadIfOtherFootHasNoWidth(double fraction)
+   {
+      set(FootstepPostProcessingKeys.fractionLoadIfOtherFootHasNoWidth, fraction);
+   }
+
+   default void setFractionTimeOnFootIfOtherFootHasNoWidth(double fraction)
+   {
+      set(FootstepPostProcessingKeys.fractionTimeOnFootIfOtherFootHasNoWidth, fraction);
+   }
+
    default void set(FootstepPostProcessingParametersPacket packet)
    {
       setPositionSplitFractionProcessingEnabled(packet.getPositionSplitFractionProcessingEnabled());
@@ -108,5 +118,9 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
          setFractionLoadIfFootHasFullSupport(packet.getFractionLoadIfFootHasFullSupport());
       if (packet.getFractionTimeOnFootIfFootHasFullSupport() != -1.0)
          setFractionTimeOnFootIfFootHasFullSupport(packet.getFractionTimeOnFootIfFootHasFullSupport());
+      if (packet.getFractionLoadIfOtherFootHasNoWidth() != -1.0)
+         setFractionLoadIfOtherFootHasNoWidth(packet.getFractionLoadIfOtherFootHasNoWidth());
+      if (packet.getFractionTimeOnFootIfOtherFootHasNoWidth() != -1.0)
+         setFractionTimeOnFootIfOtherFootHasNoWidth(packet.getFractionTimeOnFootIfOtherFootHasNoWidth());
    }
 }

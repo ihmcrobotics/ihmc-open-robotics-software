@@ -70,6 +70,10 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -128,6 +132,12 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -164,6 +174,10 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
 
       cdr.write_type_6(data.getFractionTimeOnFootIfFootHasFullSupport());
 
+      cdr.write_type_6(data.getFractionLoadIfOtherFootHasNoWidth());
+
+      cdr.write_type_6(data.getFractionTimeOnFootIfOtherFootHasNoWidth());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPostProcessingParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -198,6 +212,10 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       	
       data.setFractionTimeOnFootIfFootHasFullSupport(cdr.read_type_6());
       	
+      data.setFractionLoadIfOtherFootHasNoWidth(cdr.read_type_6());
+      	
+      data.setFractionTimeOnFootIfOtherFootHasNoWidth(cdr.read_type_6());
+      	
 
    }
 
@@ -219,6 +237,8 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       ser.write_type_6("incremental_waypoint_adjustment_distance", data.getIncrementalWaypointAdjustmentDistance());
       ser.write_type_6("fraction_load_if_foot_has_full_support", data.getFractionLoadIfFootHasFullSupport());
       ser.write_type_6("fraction_time_on_foot_if_foot_has_full_support", data.getFractionTimeOnFootIfFootHasFullSupport());
+      ser.write_type_6("fraction_load_if_other_foot_has_no_width", data.getFractionLoadIfOtherFootHasNoWidth());
+      ser.write_type_6("fraction_time_on_foot_if_other_foot_has_no_width", data.getFractionTimeOnFootIfOtherFootHasNoWidth());
    }
 
    @Override
@@ -239,6 +259,8 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       data.setIncrementalWaypointAdjustmentDistance(ser.read_type_6("incremental_waypoint_adjustment_distance"));
       data.setFractionLoadIfFootHasFullSupport(ser.read_type_6("fraction_load_if_foot_has_full_support"));
       data.setFractionTimeOnFootIfFootHasFullSupport(ser.read_type_6("fraction_time_on_foot_if_foot_has_full_support"));
+      data.setFractionLoadIfOtherFootHasNoWidth(ser.read_type_6("fraction_load_if_other_foot_has_no_width"));
+      data.setFractionTimeOnFootIfOtherFootHasNoWidth(ser.read_type_6("fraction_time_on_foot_if_other_foot_has_no_width"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPostProcessingParametersPacket src, controller_msgs.msg.dds.FootstepPostProcessingParametersPacket dest)

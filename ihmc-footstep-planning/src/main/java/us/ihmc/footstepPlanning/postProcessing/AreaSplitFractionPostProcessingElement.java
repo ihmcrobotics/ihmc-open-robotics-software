@@ -80,12 +80,24 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          double currentArea = currentPolygon.getArea();
          double previousArea = previousPolygon.getArea();
 
+         double currentWidth = currentPolygon.getBoundingBoxRangeY();
+         double previousWidth = previousPolygon.getBoundingBoxRangeY();
+
          double percentAreaOnCurrentFoot = currentArea / (previousArea + currentArea);
-         double transferWeightDistribution = percentAreaOnCurrentFoot * parameters.getFractionLoadIfFootHasFullSupport();
+         double percentWidthOnCurrentFoot = currentWidth / (currentWidth + previousWidth);
+
+         double transferWeightDistributionFromArea = percentAreaOnCurrentFoot * parameters.getFractionLoadIfFootHasFullSupport();
+         double transferWeightDistributionFromWidth = percentWidthOnCurrentFoot * parameters.getFractionLoadIfOtherFootHasNoWidth();
 
          // lower means it spends more time shifting to the center, higher means it spends less time shifting to the center
          // e.g., if we set the fraction to 0 and the trailing foot has no area, the split fraction should be 1 because we spend no time on the first segment
-         double transferSplitFraction =  percentAreaOnCurrentFoot * (1.0 - parameters.getFractionTimeOnFootIfFootHasFullSupport());
+         double transferSplitFractionFromArea =  percentAreaOnCurrentFoot * (1.0 - parameters.getFractionTimeOnFootIfFootHasFullSupport());
+         double transferSplitFractionFromWidth =  percentWidthOnCurrentFoot * (1.0 - parameters.getFractionTimeOnFootIfOtherFootHasNoWidth());
+
+         double transferWeightDistribution = SplitFractionTools.appendWeightDistribution(transferWeightDistributionFromWidth,
+                                                                                         transferWeightDistributionFromArea, defaultWeightDistribution);
+         double transferSplitFraction = SplitFractionTools.appendSplitFraction(transferSplitFractionFromWidth, transferSplitFractionFromArea,
+                                                                               defaultTransferSplitFraction);
 
          transferWeightDistribution = MathTools.clamp(transferWeightDistribution, 0.01, 0.99);
          transferSplitFraction = MathTools.clamp(transferSplitFraction, 0.01, 0.99);

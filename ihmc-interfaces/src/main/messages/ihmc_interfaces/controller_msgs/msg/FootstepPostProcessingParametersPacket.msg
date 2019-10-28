@@ -57,3 +57,13 @@ float64 fraction_load_if_foot_has_full_support -1.0
 # CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
 # from the foot to the midpoint, or from the midpoint to that foot.
 float64 fraction_time_on_foot_if_foot_has_full_support -1.0
+
+# If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
+# a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
+# this movies the midpoint CoP position to that foot.
+float64 fraction_load_if_other_foot_has_no_width -1.0
+
+# If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+# CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
+# this spends the entire time shifting either from the foot to the midpoint, or from the midpoint to that foot.
+float64 fraction_time_on_foot_if_other_foot_has_no_width -1.0
