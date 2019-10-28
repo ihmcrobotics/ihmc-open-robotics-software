@@ -64,6 +64,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
    }
 
+   default void setStepYawReductionFactorAtMaxReach(double factor)
+   {
+      set(FootstepPlannerParameterKeys.stepYawReductionFactorAtMaxReach, factor);
+   }
+
    default void setMaximumXYWiggleDistance(double wiggleDistance)
    {
       set(FootstepPlannerParameterKeys.maximumXYWiggleDistance, wiggleDistance);
@@ -352,6 +357,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZ() != -1.0)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getStepYawReductionFactorAtMaxReach() != -1.0)
+         setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
       if (parametersPacket.getMinimumFootholdPercent() != -1.0)
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != -1.0)
