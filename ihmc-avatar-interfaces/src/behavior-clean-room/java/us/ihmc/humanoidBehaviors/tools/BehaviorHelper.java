@@ -2,12 +2,12 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -16,8 +16,6 @@ import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -51,21 +49,18 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class BehaviorHelper
 {
-   private final ManagedMessager messager;
    private final DRCRobotModel robotModel;
-   private final Ros2Node ros2Node;
+   private final ManagedMessager messager;
+   private final ManagedROS2Node ros2Node;
 
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
    private final RemoteREAInterface remoteREAInterface;
 
-   // TODO: Create ManagedROS2Node
-   private final List<ROS2Callback> ros2Callbacks = new ArrayList<>();
-
-   public BehaviorHelper(DRCRobotModel robotModel, ManagedMessager messager, Ros2Node ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
-      this.messager = messager;
       this.robotModel = robotModel;
-      this.ros2Node = ros2Node;
+      this.messager = new ManagedMessager(messager);
+      this.ros2Node = new ManagedROS2Node(ros2Node);
 
       // TODO: Remove all this construction until needed
 
@@ -134,7 +129,7 @@ public class BehaviorHelper
 
    public <T> void publishToUI(Topic<T> topic, T message)
    {
-      messager.publish(topic, message);
+      messager.submitMessage(topic, message);
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
@@ -144,7 +139,7 @@ public class BehaviorHelper
 
    public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
    {
-      messager.registerCallback(topic, listener);
+      messager.registerTopicListener(topic, listener);
    }
 
    public <T> AtomicReference<T> createUIInput(Topic<T> topic, T initialValue)
@@ -175,14 +170,11 @@ public class BehaviorHelper
    // TODO: Extract to behavior manager in general?
    public void setCommunicationCallbacksEnabled(boolean enabled)
    {
-      for (ROS2Callback ros2Callback : ros2Callbacks)
-      {
-         ros2Callback.setEnabled(enabled);
-      }
+      ros2Node.setEnabled(enabled);
       messager.setEnabled(enabled);
    }
 
-   public ManagedMessager getMessager()
+   public Messager getMessager()
    {
       return messager;
    }
