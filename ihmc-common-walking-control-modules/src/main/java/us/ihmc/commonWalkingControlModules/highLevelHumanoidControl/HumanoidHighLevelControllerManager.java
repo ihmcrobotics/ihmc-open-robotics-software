@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -37,10 +37,14 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
 
 public class HumanoidHighLevelControllerManager implements RobotController
 {
@@ -56,6 +60,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
@@ -65,6 +70,9 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
+
+   private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
+   private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
@@ -159,6 +167,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
+      reportRobotDesiredConfigurationData();
    }
 
    @Override
@@ -248,6 +257,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private void copyJointDesiredsToJoints()
    {
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
+
       for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
       {
          OneDoFJointBasics controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
@@ -259,6 +269,28 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+
+      RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getOutputForRootJoint();
+      if(rootJointDesiredConfiguration != null)
+      {
+         this.rootJointDesiredConfiguration.set(rootJointDesiredConfiguration);
+      }
+   }
+
+   private int jointDesiredOutputBroadcastCounter = 0;
+
+   private void reportRobotDesiredConfigurationData()
+   {
+      if (++jointDesiredOutputBroadcastCounter < jointDesiredOutputBroadcastFrequency.getValue())
+         return;
+      jointDesiredOutputBroadcastCounter = 0;
+
+      lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
+      stateMachine.getCurrentState().getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+
+      robotDesiredConfigurationData.setWallTime(System.nanoTime());
+      // TODO use or remove joint name hash
+      statusMessageOutputManager.reportStatusMessage(robotDesiredConfigurationData);
    }
 
    public HighLevelControllerName getCurrentHighLevelControlState()

@@ -439,12 +439,23 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
-      if (!ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
-         return null;
-      else
+      boolean hasFingers = true;
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         String handLinkName = jointMap.getHandName(robotSide);
+         hasFingers = hasFingers && !simulatedRobot.getLink(handLinkName).getParentJoint().getChildrenJoints().isEmpty();
+      }
+
+      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS && hasFingers)
+      {
          return new SimulatedValkyrieFingerController(simulatedRobot, realtimeRos2Node, this,
                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+      }
+      else
+      {
+         return null;
+      }
    }
 
    @Override

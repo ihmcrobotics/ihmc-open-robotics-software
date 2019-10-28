@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
+import controller_msgs.msg.dds.JointDesiredOutputMessage;
+
 /**
  * An interface for a data holder that is used to communicate desired joint behavior (setpoints and
  * controller properties) from a whole body controller to joint level controllers.
@@ -250,6 +252,40 @@ public interface JointDesiredOutputReadOnly
     * @return the maximum velocity error for the joint feedback control.
     */
    double getVelocityFeedbackMaxError();
+
+   /**
+    * Copies the contents of this object to {@link JointDesiredOutputMessage}
+    */
+   default void copyToMessage(JointDesiredOutputMessage jointDesiredOutputMessage)
+   {
+      jointDesiredOutputMessage.setControlMode(hasControlMode() ? getControlMode().toByte() : (byte) 255);
+
+      jointDesiredOutputMessage.setHasDesiredTorque(hasDesiredTorque());
+      jointDesiredOutputMessage.setHasDesiredPosition(hasDesiredPosition());
+      jointDesiredOutputMessage.setHasDesiredVelocity(hasDesiredVelocity());
+      jointDesiredOutputMessage.setHasDesiredAcceleration(hasDesiredAcceleration());
+      jointDesiredOutputMessage.setHasStiffness(hasStiffness());
+      jointDesiredOutputMessage.setHasDamping(hasDamping());
+      jointDesiredOutputMessage.setHasMasterGain(hasMasterGain());
+      jointDesiredOutputMessage.setHasVelocityScaling(hasVelocityScaling());
+      jointDesiredOutputMessage.setHasPositionIntegrationBreakFrequency(hasPositionIntegrationBreakFrequency());
+      jointDesiredOutputMessage.setHasVelocityIntegrationBreakFrequency(hasVelocityIntegrationBreakFrequency());
+      jointDesiredOutputMessage.setHasPositionIntegrationMaxError(hasPositionIntegrationMaxError());
+      jointDesiredOutputMessage.setHasVelocityFeedbackMaxError(hasVelocityFeedbackMaxError());
+
+      jointDesiredOutputMessage.setDesiredTorque(hasDesiredTorque() ? getDesiredTorque() : 0.0);
+      jointDesiredOutputMessage.setDesiredPosition(hasDesiredPosition() ? getDesiredPosition() : 0.0);
+      jointDesiredOutputMessage.setDesiredVelocity(hasDesiredVelocity() ? getDesiredVelocity() : 0.0);
+      jointDesiredOutputMessage.setDesiredAcceleration(hasDesiredAcceleration() ? getDesiredAcceleration() : 0.0);
+      jointDesiredOutputMessage.setStiffness(hasStiffness() ? getStiffness() : 0.0);
+      jointDesiredOutputMessage.setDamping(hasDamping() ? getDamping() : 0.0);
+      jointDesiredOutputMessage.setMasterGain(hasMasterGain() ? getMasterGain() : 0.0);
+      jointDesiredOutputMessage.setVelocityScaling(hasVelocityScaling() ? getVelocityScaling() : 0.0);
+      jointDesiredOutputMessage.setPositionIntegrationBreakFrequency(hasPositionIntegrationBreakFrequency() ? getPositionIntegrationBreakFrequency() : 0.0);
+      jointDesiredOutputMessage.setVelocityIntegrationBreakFrequency(hasVelocityIntegrationBreakFrequency() ? getVelocityIntegrationBreakFrequency() : 0.0);
+      jointDesiredOutputMessage.setPositionIntegrationMaxError(hasPositionIntegrationMaxError() ? getPositionIntegrationMaxError() : 0.0);
+      jointDesiredOutputMessage.setVelocityFeedbackMaxError(hasVelocityFeedbackMaxError() ? getVelocityFeedbackMaxError() : 0.0);
+   }
 
    default String getRepresentativeString()
    {
