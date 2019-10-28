@@ -47,17 +47,13 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPostProcessingPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> {
-                                              toolboxController.processFootstepPlanningOutputStatus(s.takeNextData());
+                                              toolboxController.processPostProcessingPacket(s.takeNextData());
                                               wakeUp();
                                            });
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPostProcessingParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> toolboxController.processFootstepPostProcessingParameters(s.takeNextData()));
-
-      MessageTopicNameGenerator footstepPlannerSubscriber = FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubscriber,
-                                           s -> toolboxController.processFootstepPlanningRequest(s.takeNextData()));
    }
 
    @Override

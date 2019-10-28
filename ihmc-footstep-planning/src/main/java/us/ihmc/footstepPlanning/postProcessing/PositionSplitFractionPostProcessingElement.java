@@ -3,10 +3,12 @@ package us.ihmc.footstepPlanning.postProcessing;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
 
@@ -31,20 +33,29 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
 
    /** {@inheritDoc} **/
    @Override
-   public FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus)
+   public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputPlan)
    {
-      FootstepPlanningToolboxOutputStatus processedOutput = new FootstepPlanningToolboxOutputStatus(outputStatus);
+      FootstepPostProcessingPacket processedPlan = new FootstepPostProcessingPacket(outputPlan);
 
       FramePose3D stanceFootPose = new FramePose3D();
-      stanceFootPose.setPosition(request.getStanceFootPositionInWorld());
-      stanceFootPose.setOrientation(request.getStanceFootOrientationInWorld());
+      RobotSide initialStanceSide = RobotSide.fromByte(outputPlan.getFootstepDataList().getFootstepDataList().get(0).getRobotSide()).getOppositeSide();
+      if (initialStanceSide == RobotSide.LEFT)
+      {
+         stanceFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
+         stanceFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+      }
+      else
+      {
+         stanceFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
+         stanceFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+      }
 
       FramePose3D nextFootPose = new FramePose3D();
 
       double defaultTransferSplitFraction = walkingControllerParameters.getTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
-      List<FootstepDataMessage> footstepDataMessageList = processedOutput.getFootstepDataList().getFootstepDataList();
+      List<FootstepDataMessage> footstepDataMessageList = processedPlan.getFootstepDataList().getFootstepDataList();
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
          if (stepNumber > 0)
@@ -69,14 +80,14 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
 
             if (stepNumber == footstepDataMessageList.size() - 1)
             { // this is the last step
-               double currentSplitFraction = processedOutput.getFootstepDataList().getFinalTransferSplitFraction();
-               double currentWeightDistribution = processedOutput.getFootstepDataList().getFinalTransferWeightDistribution();
+               double currentSplitFraction = processedPlan.getFootstepDataList().getFinalTransferSplitFraction();
+               double currentWeightDistribution = processedPlan.getFootstepDataList().getFinalTransferWeightDistribution();
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
-               processedOutput.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
-               processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
+               processedPlan.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
+               processedPlan.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
             }
             else
             {
@@ -94,7 +105,7 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
 
       }
 
-      return processedOutput;
+      return processedPlan;
    }
 
    /** {@inheritDoc} **/

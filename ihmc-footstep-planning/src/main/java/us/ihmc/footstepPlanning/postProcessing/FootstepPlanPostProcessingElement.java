@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 
 public interface FootstepPlanPostProcessingElement
 {
@@ -12,10 +13,10 @@ public interface FootstepPlanPostProcessingElement
 
    /**
     * Takes the output status of an element, and post processes it using the planar region list.
-    * @param outputStatus raw output status
-    * @return processed output status
+    * @param planToProcess raw plan
+    * @return processed plan
     */
-   FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus);
+   FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket planToProcess);
 
    /**
     * Gets the name of the current post processing element

@@ -99,7 +99,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private IHMCROS2Publisher<FootstepPostProcessingParametersPacket> postProcessingParametersPublisher;
    private IHMCROS2Publisher<ToolboxStateMessage> planningToolboxPublisher;
    private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
-   private AtomicReference<FootstepPlanningToolboxOutputStatus> postProcessingOutputStatus;
+   private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
 
    private FootstepPlanningToolboxModule footstepToolboxModule;
    private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;

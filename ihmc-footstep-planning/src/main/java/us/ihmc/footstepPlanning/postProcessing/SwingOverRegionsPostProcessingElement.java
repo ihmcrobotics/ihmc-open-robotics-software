@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.postProcessing;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
@@ -46,7 +47,7 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
 
    /** {@inheritDoc} **/
    @Override
-   public FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus)
+   public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputPlan)
    {
       swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
@@ -54,30 +55,27 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
       swingOverPlanarRegionsTrajectoryExpander.setIncrementalAdjustmentDistance(parameters.getIncrementalWaypointAdjustmentDistance());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(parameters.getMaximumWaypointAdjustmentDistance());
 
-      FootstepPlanningToolboxOutputStatus processedOutput = new FootstepPlanningToolboxOutputStatus(outputStatus);
+      FootstepPostProcessingPacket processedPlan = new FootstepPostProcessingPacket(outputPlan);
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(outputStatus.getPlanarRegionsList());
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(outputPlan.getPlanarRegionsList());
 
-      RobotSide stanceSide = RobotSide.fromByte(request.getInitialStanceRobotSide());
-      FramePose3D initialStanceFootPose = new FramePose3D();
-      initialStanceFootPose.setPosition(request.getStanceFootPositionInWorld());
-      initialStanceFootPose.setOrientation(request.getStanceFootOrientationInWorld());
+      RobotSide stanceSide = RobotSide.fromByte(outputPlan.getFootstepDataList().getFootstepDataList().get(0).getRobotSide()).getOppositeSide();
 
-      PoseReferenceFrame stanceReferenceFrame = new PoseReferenceFrame("stanceReferenceFrame", ReferenceFrame.getWorldFrame());
-      stanceReferenceFrame.setPoseAndUpdate(initialStanceFootPose);
+      FramePose3D leftFootPose = new FramePose3D();
+      leftFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
+      leftFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
 
-      FramePose3D otherFootPose = new FramePose3D(stanceReferenceFrame);
-      otherFootPose.setY(stanceSide.negateIfLeftSide(0.25));
-      otherFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
+      FramePose3D rightFootPose = new FramePose3D();
+      rightFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
+      rightFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
 
       SideDependentList<FramePose3D> footPoses = new SideDependentList<>();
-      footPoses.put(stanceSide, initialStanceFootPose);
-      footPoses.put(stanceSide.getOppositeSide(), otherFootPose);
+      footPoses.put(RobotSide.LEFT, leftFootPose);
+      footPoses.put(RobotSide.RIGHT, rightFootPose);
 
-      FramePose3D stanceFootPose = new FramePose3D(initialStanceFootPose);
+      FramePose3D stanceFootPose = new FramePose3D(footPoses.get(stanceSide));
 
-      List<FootstepDataMessage> footstepDataMessageList = processedOutput.getFootstepDataList().getFootstepDataList();
+      List<FootstepDataMessage> footstepDataMessageList = processedPlan.getFootstepDataList().getFootstepDataList();
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
          FramePose3D nextFootPose = new FramePose3D();
@@ -105,7 +103,7 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
          footPoses.put(side, nextFootPose);
       }
 
-      return processedOutput;
+      return processedPlan;
    }
 
    /** {@inheritDoc} **/
