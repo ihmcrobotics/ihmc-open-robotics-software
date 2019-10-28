@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
@@ -11,6 +12,7 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground")
 @Disabled
 public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityTest
 {

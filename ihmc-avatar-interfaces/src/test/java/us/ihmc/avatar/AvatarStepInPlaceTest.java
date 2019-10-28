@@ -5,7 +5,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -131,7 +130,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Tag("humanoid-flat-ground-slow")
    @Test
    public void testStepInPlace() throws SimulationExceededMaximumTimeException
    {
@@ -163,7 +161,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   @Tag("humanoid-flat-ground-3")
    @Test
    public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
    {

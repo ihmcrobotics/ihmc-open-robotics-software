@@ -28,12 +28,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
-import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -73,7 +73,7 @@ public abstract class ToolboxModule
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
-   private YoVariableServer yoVariableServer;
+   protected YoVariableServer yoVariableServer;
 
    public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
@@ -124,7 +124,16 @@ public abstract class ToolboxModule
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
+      {
+         private final ToolboxStateMessage message = new ToolboxStateMessage();
+         @Override
+         public void onNewDataMessage(Subscriber<ToolboxStateMessage> s)
+         {
+            s.takeNextData(message, null);
+            receivedPacket(message);
+         }
+      });
       registerExtraPuSubs(realtimeRos2Node);
       realtimeRos2Node.spin();
    }
@@ -139,13 +148,17 @@ public abstract class ToolboxModule
       if (!startYoVariableServer)
          return;
 
-      PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
-      yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
+      yoVariableServer = new YoVariableServer(getClass(), modelProvider, getYoVariableServerSettings(), YO_VARIABLE_SERVER_DT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
       yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,
                                                                       TimeUnit.MILLISECONDS);
+   }
+
+   public DataServerSettings getYoVariableServerSettings()
+   {
+      return new DataServerSettings(false);
    }
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)

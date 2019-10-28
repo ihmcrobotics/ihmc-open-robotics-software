@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -69,7 +70,12 @@ public class RobotJointVelocityAccelerationIntegrator
       int jointStartIndex = 0;
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(joints);
-      int sixDofJoints = MultiBodySystemTools.filterJoints(joints, SixDoFJoint.class).length;
+      int sixDofJoints = 0;
+      for (JointBasics joint : joints)
+      {
+         if (joint instanceof FloatingJointReadOnly)
+            sixDofJoints++;
+      }
       jointConfigurations.reshape(numberOfDoFs + sixDofJoints, 1);
       jointVelocities.reshape(numberOfDoFs, 1);
 

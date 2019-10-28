@@ -78,6 +78,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -187,6 +189,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -403,6 +408,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMaximumStepZ());
 
+      cdr.write_type_6(data.getStepYawReductionFactorAtMaxReach());
+
       cdr.write_type_6(data.getMinimumFootholdPercent());
 
       cdr.write_type_6(data.getMinimumSurfaceInclineRadians());
@@ -531,6 +538,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMaximumStepZ(cdr.read_type_6());
       	
+      data.setStepYawReductionFactorAtMaxReach(cdr.read_type_6());
+      	
       data.setMinimumFootholdPercent(cdr.read_type_6());
       	
       data.setMinimumSurfaceInclineRadians(cdr.read_type_6());
@@ -644,6 +653,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_step_x_when_forward_and_down", data.getMaximumStepXWhenForwardAndDown());
       ser.write_type_6("maximum_step_z_when_forward_and_down", data.getMaximumStepZWhenForwardAndDown());
       ser.write_type_6("maximum_step_z", data.getMaximumStepZ());
+      ser.write_type_6("step_yaw_reduction_factor_at_max_reach", data.getStepYawReductionFactorAtMaxReach());
       ser.write_type_6("minimum_foothold_percent", data.getMinimumFootholdPercent());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_7("wiggle_into_convex_hull_of_planar_regions", data.getWiggleIntoConvexHullOfPlanarRegions());
@@ -711,6 +721,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumStepXWhenForwardAndDown(ser.read_type_6("maximum_step_x_when_forward_and_down"));
       data.setMaximumStepZWhenForwardAndDown(ser.read_type_6("maximum_step_z_when_forward_and_down"));
       data.setMaximumStepZ(ser.read_type_6("maximum_step_z"));
+      data.setStepYawReductionFactorAtMaxReach(ser.read_type_6("step_yaw_reduction_factor_at_max_reach"));
       data.setMinimumFootholdPercent(ser.read_type_6("minimum_foothold_percent"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setWiggleIntoConvexHullOfPlanarRegions(ser.read_type_7("wiggle_into_convex_hull_of_planar_regions"));

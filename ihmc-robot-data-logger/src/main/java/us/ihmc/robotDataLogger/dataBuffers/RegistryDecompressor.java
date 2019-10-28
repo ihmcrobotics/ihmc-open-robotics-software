@@ -6,6 +6,8 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.jpountz.lz4.LZ4Exception;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.tools.compression.CompressionImplementation;
@@ -56,7 +58,16 @@ public class RegistryDecompressor
    public void decompressSegment(RegistryReceiveBuffer buffer, int registryOffset)
    {
       decompressBuffer.clear();
-      compressionImplementation.decompress(buffer.getData(), decompressBuffer, buffer.getNumberOfVariables() * 8);      
+      try
+      {
+    	  compressionImplementation.decompress(buffer.getData(), decompressBuffer, buffer.getNumberOfVariables() * 8);
+      }
+      catch(Throwable e)
+	  {
+    	  // Malformed packet. Just skip.
+    	  LogTools.error("Cannot decompress incoming packet. Skipping packet. " + e.getMessage());
+    	  return;
+	  }
       decompressBuffer.flip();
       LongBuffer longData = decompressBuffer.asLongBuffer();
       

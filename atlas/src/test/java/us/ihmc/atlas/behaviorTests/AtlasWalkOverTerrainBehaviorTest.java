@@ -3,6 +3,7 @@ package us.ihmc.atlas.behaviorTests;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -29,6 +30,7 @@ public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehav
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Disabled
    @Test

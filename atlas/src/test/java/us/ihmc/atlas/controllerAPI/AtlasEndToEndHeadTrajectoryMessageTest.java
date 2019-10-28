@@ -15,7 +15,7 @@ public class AtlasEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajecto
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
-   @Tag("controller-api-3")
+   @Tag("controller-api")
    @Override
    @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException

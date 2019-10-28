@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
@@ -18,11 +19,11 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
@@ -30,13 +31,22 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.processManagement.JavaProcessSpawner;
 
 public class DRCNetworkProcessor
 {
    private final boolean DEBUG = false;
+   private final String[] programArgs;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
+      this(null, robotModel, params);
+   }
+
+   public DRCNetworkProcessor(String[] programArgs, DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      this.programArgs = programArgs;
+
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
       tryToStartModule(() -> setupBehaviorModule(robotModel, params));
@@ -93,7 +103,11 @@ public class DRCNetworkProcessor
    {
       if (!params.isKinematicsStreamingToolboxEnabled())
          return;
-      new KinematicsStreamingToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
+      if (params.getKinematicsStreamingToolboxLauncherClass() == null)
+         new KinematicsStreamingToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
+      else
+         new JavaProcessSpawner(true, true).spawn(params.getKinematicsStreamingToolboxLauncherClass(), programArgs);
+      new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName());
    }
 
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -239,7 +253,7 @@ public class DRCNetworkProcessor
    {
       if (DEBUG)
       {
-         PrintTools.debug(this, methodName + ": " + destination);
+         LogTools.debug(methodName + ": " + destination);
       }
    }
 
@@ -251,7 +265,7 @@ public class DRCNetworkProcessor
       }
       catch (RuntimeException | IOException e)
       {
-         PrintTools.error(this, "Failed to start a module in the network processor, stack trace:");
+         LogTools.error("Failed to start a module in the network processor, stack trace:");
          e.printStackTrace();
       }
    }
