@@ -234,7 +234,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Maximum step width when stepping forward and down.
+    * Maximum step length when stepping forward and down.
     *
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
@@ -259,7 +259,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Maximum step length when stepping forward and down.
+    * Maximum step width when stepping forward and down.
     *
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
