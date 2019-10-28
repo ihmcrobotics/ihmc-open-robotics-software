@@ -72,17 +72,8 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
                double currentSplitFraction = processedOutput.getFootstepDataList().getFinalTransferSplitFraction();
                double currentWeightDistribution = processedOutput.getFootstepDataList().getFinalTransferWeightDistribution();
 
-               double splitFractionToSet, weightDistributionToSet;
-
-               if (currentSplitFraction == -1.0)
-                  splitFractionToSet = transferSplitFraction;
-               else
-                  splitFractionToSet = transferSplitFraction * currentSplitFraction / defaultTransferSplitFraction;
-
-               if (currentWeightDistribution == -1.0)
-                  weightDistributionToSet = transferWeightDistribution;
-               else
-                  weightDistributionToSet = transferWeightDistribution * currentWeightDistribution / defaultWeightDistribution;
+               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
                processedOutput.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
                processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
@@ -92,17 +83,8 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
                double currentSplitFraction = footstepDataMessageList.get(stepNumber + 1).getTransferSplitFraction();
                double currentWeightDistribution = footstepDataMessageList.get(stepNumber + 1).getTransferWeightDistribution();
 
-               double splitFractionToSet, weightDistributionToSet;
-
-               if (currentSplitFraction == -1.0)
-                  splitFractionToSet = transferSplitFraction;
-               else
-                  splitFractionToSet = transferSplitFraction * currentSplitFraction / defaultTransferSplitFraction;
-
-               if (currentWeightDistribution == -1.0)
-                  weightDistributionToSet = transferWeightDistribution;
-               else
-                  weightDistributionToSet = transferWeightDistribution * currentWeightDistribution / defaultWeightDistribution;
+               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
                footstepDataMessageList.get(stepNumber + 1).setTransferSplitFraction(splitFractionToSet);
                footstepDataMessageList.get(stepNumber + 1).setTransferWeightDistribution(weightDistributionToSet);
