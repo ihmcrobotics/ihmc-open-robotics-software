@@ -68,6 +68,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
             previousPolygon.addVertex(vertexInSoleFrame);
          }
+         previousPolygon.update();
 
          for (Point3DReadOnly vertex : currentStep.getPredictedContactPoints2d())
          {
@@ -76,6 +77,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
             currentPolygon.addVertex(vertexInSoleFrame);
          }
+         currentPolygon.update();
 
          double currentArea = currentPolygon.getArea();
          double previousArea = previousPolygon.getArea();
