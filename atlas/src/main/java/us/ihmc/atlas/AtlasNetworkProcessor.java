@@ -20,21 +20,14 @@ public class AtlasNetworkProcessor
    {
       JSAP jsap = new JSAP();
 
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model")
-                                                                .setShortFlag('m')
-                                                                .setRequired(true)
-                                                                .setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
 
-      FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand")
-                                                                    .setShortFlag('l')
-                                                                    .setRequired(false)
+      FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand").setShortFlag('l').setRequired(false)
                                                                     .setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand")
-                                                                      .setShortFlag('r')
-                                                                      .setRequired(false)
+      FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand").setShortFlag('r').setRequired(false)
                                                                       .setStringParser(JSAP.STRING_PARSER);
 
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
@@ -62,6 +55,7 @@ public class AtlasNetworkProcessor
          networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
          networkModuleParams.enableKinematicsToolbox(true);
          networkModuleParams.enableKinematicsToolboxVisualizer(false);
+         networkModuleParams.enableKinematicsStreamingToolbox(true, AtlasKinematicsStreamingToolboxModule.class);
          networkModuleParams.setFilterControllerInputMessages(true);
          networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
          networkModuleParams.enableAutoREAStateUpdater(true);
@@ -111,7 +105,7 @@ public class AtlasNetworkProcessor
 
          networkModuleParams.enableLocalControllerCommunicator(false);
 
-         new DRCNetworkProcessor(model, networkModuleParams);
+         new DRCNetworkProcessor(args, model, networkModuleParams);
       }
       else
       {

@@ -77,31 +77,31 @@ public class PlannerParametersUIController
       swingTimeDown     .setValueFactory(new DoubleSpinnerValueFactory(0.0, 500.0, RemoteFootstepPlannerInterface.DEFAULT_SWING_TIME_DOWN      , 0.1));
 
       // add edit listeners to all fields and publish automatically
-      cliffClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      cliffHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepZ.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxXYWiggle.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxYawWiggle.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minFootholdPercent.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minStepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minStepYaw.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minSurfaceIncline.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      wiggleInsideDelta.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      stepUpHeight  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      stepDownHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepUpX    .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      maxStepDownX  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      timeout  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      transferTimeFlatUp.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      transferTimeDown  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      swingTimeFlatUp   .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
-      swingTimeDown     .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      cliffClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      cliffHeight.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepLength.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepWidth.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepYaw.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepZ.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxXYWiggle.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxYawWiggle.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minFootholdPercent.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minStepLength.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minStepWidth.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minStepYaw.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minSurfaceIncline.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minXClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      minYClearance.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      wiggleInsideDelta.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      stepUpHeight  .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      stepDownHeight.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepUpX    .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      maxStepDownX  .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      timeout  .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      transferTimeFlatUp.getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      transferTimeDown  .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      swingTimeFlatUp   .getValueFactory().valueProperty().addListener(observable -> publishParameters());
+      swingTimeDown     .getValueFactory().valueProperty().addListener(observable -> publishParameters());
       });
    }
 

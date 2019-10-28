@@ -2,6 +2,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 
 import java.io.InputStream;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -15,6 +16,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-rough-terrain")
 public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDataMessageSwingTrajectoryTest
 {
    @Override

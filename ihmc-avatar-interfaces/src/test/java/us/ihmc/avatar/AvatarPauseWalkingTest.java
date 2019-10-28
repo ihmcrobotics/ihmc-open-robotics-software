@@ -84,7 +84,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
@@ -103,7 +102,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testTwoIndependentSteps() throws SimulationExceededMaximumTimeException
    {
@@ -131,7 +129,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testStartSecondStepWhileTransitioningToStand() throws SimulationExceededMaximumTimeException
    {
@@ -159,7 +156,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   @Tag("humanoid-flat-ground-2")
    @Test
    public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
    {
@@ -178,7 +174,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @Tag("humanoid-flat-ground-2")
    @Test
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -201,7 +196,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   @Tag("humanoid-flat-ground-2")
    @Test
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
@@ -234,7 +228,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + getTransferTime() + getFinalTransferDuration()));
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {
