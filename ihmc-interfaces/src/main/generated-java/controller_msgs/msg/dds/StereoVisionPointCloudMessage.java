@@ -22,8 +22,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
             * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
             * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
             */
-   public double sensor_pose_confidence_;
-   public double point_cloud_confidence_;
+   public double sensor_pose_confidence_ = 1.0;
+   public double point_cloud_confidence_ = 1.0;
    public us.ihmc.idl.IDLSequence.Float  point_cloud_;
    public us.ihmc.idl.IDLSequence.Integer  colors_;
 
