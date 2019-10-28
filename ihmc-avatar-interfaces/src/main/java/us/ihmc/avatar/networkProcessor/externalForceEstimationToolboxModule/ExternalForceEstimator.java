@@ -27,10 +27,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.Arrays;
 import java.util.function.BiConsumer;
@@ -57,24 +54,18 @@ public class ExternalForceEstimator implements RobotController
    private final boolean hasFloatingBase;
 
    private static final double integrationTime = 2.5;
+   private static final double defaultEstimatorGain = 0.7;
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
 
-   private final JointReadOnly[] joints;
-   private final RigidBodyBasics endEffector;
+   private final JointBasics[] joints;
    private final int dofs;
    private final DenseMatrix64F tau;
    private final DenseMatrix64F qd;
 
-   // Frame at which external force is expected to be applied. Aligned with world frame
-   private final ReferenceFrame externalForcePointFrame;
-   private final FramePoint3D externalForcePoint;
-   private final Tuple3DReadOnly externalForcePointOffset;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-
    private final DenseMatrix64F currentIntegrandValue;
    private final DenseMatrix64F currentIntegratedValue;
    private final DenseMatrix64F observedExternalJointTorque;
-   private final DenseMatrix64F estimatedExternalWrenchMatrix;
+   private final DenseMatrix64F estimatedExternalForceMatrix;
    private final DenseMatrix64F hqd;
    private final DenseMatrix64F massMatrix;
    private final DenseMatrix64F massMatrixPrev;
@@ -84,67 +75,47 @@ public class ExternalForceEstimator implements RobotController
    private final DenseMatrix64F integrandHistory;
    private final DenseMatrix64F hqdHistory;
 
-   private final DenseMatrix64F observedExternalTorqueAlongEndEffectorPath;
-   private final int[] torqueIndicesAlongEndEffectorPath;
-
    private final BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
    private final Consumer<DenseMatrix64F> tauSetter;
-
    private final LinearSolver<DenseMatrix64F> forceEstimateSolver;
 
-   private final GeometricJacobian geometricJacobian;
-   private final PointJacobian pointJacobian;
-   private final DenseMatrix64F jacobianMatrix;
-   private final DenseMatrix64F jacobianMatrixInverse;
-   private final DenseMatrix64F pointJacobianTranspose;
+   private final FramePoint3D externalForcePoint = new FramePoint3D();
+   private final Vector3D externalForcePointOffset = new Vector3D();
+
+   private GeometricJacobian geometricJacobian;
+   private RigidBodyBasics endEffector;
+   private DenseMatrix64F observedExternalTorqueAlongEndEffectorPath;
+   private int[] torqueIndicesAlongEndEffectorPath;
+
+   private PointJacobian pointJacobian = new PointJacobian();
+   private DenseMatrix64F pointJacobianTranspose;
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
 
-   private final SpatialForce estimatedExternalWrench = new SpatialForce();
-   private final YoFixedFrameSpatialForce yoEstimatedExternalWrench;
-   private final YoFramePoint3D yoExternalForcePosition = new YoFramePoint3D("externalForcePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D externalForcePosition = new YoFramePoint3D("externalForcePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D estimatedExternalForce = new YoFrameVector3D("estimatedExternalForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D yoLinkFramePose = new YoFramePose3D("linkFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicVector estimatedForceVectorGraphic;
    private boolean firstTick = true;
 
    /**
-    * Estimates external force applied at the given end-effector. The force is assumed to be applied at the given offset in the "frame after" the end effector's parent joint
+    * Estimates external force on the given system. To set the end-effector and external force point position, call {@link #setEndEffector}
     *
     * @param dynamicMatrixSetter sets the mass matrix and coriolis-gravity matrices respectively
     */
    public ExternalForceEstimator(JointBasics[] joints,
-                                 RigidBodyBasics endEffector,
-                                 Tuple3DReadOnly externalForcePointOffset,
                                  double dt,
                                  BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter,
                                  Consumer<DenseMatrix64F> tauSetter,
                                  YoVariableRegistry parentRegistry)
    {
       this.joints = joints;
-      this.endEffector = endEffector;
       this.tauSetter = tauSetter;
       this.dt = dt;
-      this.wrenchEstimationGain.set(0.7);
+      this.wrenchEstimationGain.set(defaultEstimatorGain);
       this.dynamicMatrixSetter = dynamicMatrixSetter;
       this.hasFloatingBase = joints[0] instanceof FloatingJointBasics;
-
-      RigidBodyBasics baseLink = joints[0].getPredecessor();
-      this.externalForcePointOffset = externalForcePointOffset;
-      this.externalForcePoint = new FramePoint3D(endEffector.getParentJoint().getFrameAfterJoint(), externalForcePointOffset);
-      this.externalForcePointFrame = new ReferenceFrame("externalForcePointFrame", ReferenceFrame.getWorldFrame(), false, true)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            externalForcePoint.changeFrame(worldFrame);
-            transformToParent.setTranslationAndIdentityRotation(externalForcePoint);
-         }
-      };
-
-      this.geometricJacobian = new GeometricJacobian(baseLink, endEffector, externalForcePointFrame);
-      this.pointJacobian = new PointJacobian();
-      this.pointJacobianTranspose = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 3);
 
       this.integrationWindow = (int) (integrationTime / dt);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
@@ -155,7 +126,7 @@ public class ExternalForceEstimator implements RobotController
       this.currentIntegrandValue = new DenseMatrix64F(dofs, 1);
       this.currentIntegratedValue = new DenseMatrix64F(dofs, 1);
       this.observedExternalJointTorque = new DenseMatrix64F(dofs, 1);
-      this.estimatedExternalWrenchMatrix = new DenseMatrix64F(6, 1);
+      this.estimatedExternalForceMatrix = new DenseMatrix64F(3, 1);
       this.hqd = new DenseMatrix64F(dofs, 1);
       this.massMatrix = new DenseMatrix64F(dofs, dofs);
       this.massMatrixPrev = new DenseMatrix64F(dofs, dofs);
@@ -163,16 +134,13 @@ public class ExternalForceEstimator implements RobotController
       this.coriolisGravityTerm = new DenseMatrix64F(dofs, 1);
       this.tau = new DenseMatrix64F(dofs, 1);
       this.qd = new DenseMatrix64F(dofs, 1);
-      this.jacobianMatrix = new DenseMatrix64F(6, dofs);
-      this.jacobianMatrixInverse = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 6);
-      this.forceEstimateSolver = new DampedLeastSquaresSolver(geometricJacobian.getNumberOfColumns(), 0.05); // new SolvePseudoInverseSvd(dofs, dofs); //
-      this.yoEstimatedExternalWrench = new YoFixedFrameSpatialForce("estimatedWrench", geometricJacobian.getBaseFrame(), registry);
+      this.forceEstimateSolver = new DampedLeastSquaresSolver(dofs, 0.05); // new SolvePseudoInverseSvd(dofs, dofs); //
 
       this.yoObservedExternalJointTorque = new YoDouble[dofs];
       this.yoSimulatedTorqueSensingError = new YoDouble[dofs];
       this.estimatedForceVectorGraphic = new YoGraphicVector("estimatedForceGraphic",
-                                                             yoExternalForcePosition,
-                                                             yoEstimatedExternalWrench.getLinearPart(),
+                                                             externalForcePosition,
+                                                             estimatedExternalForce,
                                                              0.05,
                                                              YoAppearance.Green());
 
@@ -192,6 +160,20 @@ public class ExternalForceEstimator implements RobotController
          yoSimulatedTorqueSensingError[i] = new YoDouble("simulatedTauSensorError_" + nameSuffix, registry);
       }
 
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
+   }
+
+   /**
+    * Specifies the rigid body and position at which the external force is assumed to be applied. The position is in the rigid body's body-fixed frame
+    */
+   public void setEndEffector(RigidBodyBasics endEffector, Tuple3DReadOnly externalForcePointOffset)
+   {
+      RigidBodyBasics baseLink = joints[0].getPredecessor();
+      this.endEffector = endEffector;
+
+      this.geometricJacobian = new GeometricJacobian(baseLink, endEffector, baseLink.getBodyFixedFrame());
+      this.pointJacobianTranspose = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 3);
       this.observedExternalTorqueAlongEndEffectorPath = new DenseMatrix64F(geometricJacobian.getNumberOfColumns(), 1);
       this.torqueIndicesAlongEndEffectorPath = new int[geometricJacobian.getNumberOfColumns()];
 
@@ -218,8 +200,13 @@ public class ExternalForceEstimator implements RobotController
          }
       }
 
-      if (parentRegistry != null)
-         parentRegistry.addChild(registry);
+      this.externalForcePoint.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), externalForcePointOffset);
+      this.externalForcePointOffset.set(externalForcePointOffset);
+   }
+
+   public void setEstimatorGain(double estimatorGain)
+   {
+      this.wrenchEstimationGain.set(estimatorGain);
    }
 
    @Override
@@ -299,44 +286,23 @@ public class ExternalForceEstimator implements RobotController
       MatrixTools.setMatrixBlock(observedExternalJointTorqueHistory, 0, index, observedExternalJointTorque, 0, 0, dofs, 1, 1.0);
 
       externalForcePoint.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), externalForcePointOffset);
-      externalForcePointFrame.update();
-
+      
       for (int i = 0; i < torqueIndicesAlongEndEffectorPath.length; i++)
       {
          int jointIndex = torqueIndicesAlongEndEffectorPath[i];
          observedExternalTorqueAlongEndEffectorPath.set(i, 0, observedExternalJointTorque.get(jointIndex, 0));
       }
 
-//      solveUsingFullJacobian();
       solveUsingPointJacobian();
 
-      yoEstimatedExternalWrench.set(estimatedExternalWrench);
-
       externalForcePoint.changeFrame(worldFrame);
-      yoExternalForcePosition.set(externalForcePoint);
-      externalForcePointFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      yoLinkFramePose.set(tempTransform);
+      externalForcePosition.set(externalForcePoint);
 
       for (int i = 0; i < dofs; i++)
       {
          yoObservedExternalJointTorque[i].set(observedExternalJointTorque.get(i, 0));
       }
    }
-
-   private void solveUsingFullJacobian()
-   {
-      geometricJacobian.changeFrame(geometricJacobian.getBaseFrame());
-      geometricJacobian.compute();
-
-      jacobianMatrix.set(geometricJacobian.getJacobianMatrix());
-      forceEstimateSolver.setA(jacobianMatrix);
-      forceEstimateSolver.invert(jacobianMatrixInverse);
-      CommonOps.multTransA(jacobianMatrixInverse, observedExternalTorqueAlongEndEffectorPath, estimatedExternalWrenchMatrix);
-
-      estimatedExternalWrench.setIncludingFrame(geometricJacobian.getBaseFrame(), estimatedExternalWrenchMatrix);
-   }
-
-   private final DenseMatrix64F estimatedExternalForceMatrix = new DenseMatrix64F(3, 1);
 
    private void solveUsingPointJacobian()
    {
@@ -346,28 +312,16 @@ public class ExternalForceEstimator implements RobotController
       pointJacobian.set(geometricJacobian, externalForcePoint);
       pointJacobian.compute();
       CommonOps.transpose(pointJacobian.getJacobianMatrix(), pointJacobianTranspose);
-      
+
       forceEstimateSolver.setA(pointJacobianTranspose);
       forceEstimateSolver.solve(observedExternalTorqueAlongEndEffectorPath, estimatedExternalForceMatrix);
-      CommonOps.fill(estimatedExternalWrenchMatrix, 0.0);
-      MatrixTools.setMatrixBlock(estimatedExternalWrenchMatrix, 3, 0, estimatedExternalForceMatrix, 0, 0, 3, 1, 1.0);
 
-      estimatedExternalWrench.setIncludingFrame(geometricJacobian.getBaseFrame(), estimatedExternalWrenchMatrix);
+      estimatedExternalForce.set(estimatedExternalForceMatrix);
    }
 
-   public void setEstimatorGain(double estimatorGain)
+   public YoFrameVector3D getEstimatedExternalForce()
    {
-      this.wrenchEstimationGain.set(estimatorGain);
-   }
-
-   public void setExternalForcePointOffset(Tuple3DReadOnly externalForcePointOffset)
-   {
-      // TODO refactor so that offset is an internal field
-   }
-
-   public SpatialForceReadOnly getEstimatedExternalWrench()
-   {
-      return estimatedExternalWrench;
+      return estimatedExternalForce;
    }
 
    @Override
