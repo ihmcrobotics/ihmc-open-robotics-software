@@ -59,9 +59,9 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
          // This step is a big step down.
          double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
 
-         if (nextFootPose.getZ() - stanceFootPose.getZ() < -parameters.getStepHeightForLargeStepDown())
+         if (stepDownHeight < -parameters.getStepHeightForLargeStepDown())
          {
-            double alpha = Math.min(1.0, Math.abs(stepDownHeight) / parameters.getLargestStepDownHeight());
+            double alpha = Math.min(1.0, (Math.abs(stepDownHeight) - parameters.getStepHeightForLargeStepDown()) / (parameters.getLargestStepDownHeight() - parameters.getStepHeightForLargeStepDown()));
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
                                                                                 parameters.getTransferSplitFractionAtFullDepth(), alpha);
             double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
