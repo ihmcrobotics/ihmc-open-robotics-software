@@ -84,6 +84,18 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
             * from the foot to the midpoint, or from the midpoint to that foot.
             */
    public double fraction_time_on_foot_if_foot_has_full_support_ = -1.0;
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
+            * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
+            * this movies the midpoint CoP position to that foot.
+            */
+   public double fraction_load_if_other_foot_has_no_width_ = -1.0;
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
+            * this spends the entire time shifting either from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public double fraction_time_on_foot_if_other_foot_has_no_width_ = -1.0;
 
    public FootstepPostProcessingParametersPacket()
    {
@@ -126,6 +138,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       fraction_load_if_foot_has_full_support_ = other.fraction_load_if_foot_has_full_support_;
 
       fraction_time_on_foot_if_foot_has_full_support_ = other.fraction_time_on_foot_if_foot_has_full_support_;
+
+      fraction_load_if_other_foot_has_no_width_ = other.fraction_load_if_other_foot_has_no_width_;
+
+      fraction_time_on_foot_if_other_foot_has_no_width_ = other.fraction_time_on_foot_if_other_foot_has_no_width_;
 
    }
 
@@ -380,6 +396,44 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       return fraction_time_on_foot_if_foot_has_full_support_;
    }
 
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
+            * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
+            * this movies the midpoint CoP position to that foot.
+            */
+   public void setFractionLoadIfOtherFootHasNoWidth(double fraction_load_if_other_foot_has_no_width)
+   {
+      fraction_load_if_other_foot_has_no_width_ = fraction_load_if_other_foot_has_no_width;
+   }
+   /**
+            * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
+            * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
+            * this movies the midpoint CoP position to that foot.
+            */
+   public double getFractionLoadIfOtherFootHasNoWidth()
+   {
+      return fraction_load_if_other_foot_has_no_width_;
+   }
+
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
+            * this spends the entire time shifting either from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public void setFractionTimeOnFootIfOtherFootHasNoWidth(double fraction_time_on_foot_if_other_foot_has_no_width)
+   {
+      fraction_time_on_foot_if_other_foot_has_no_width_ = fraction_time_on_foot_if_other_foot_has_no_width;
+   }
+   /**
+            * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
+            * CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
+            * this spends the entire time shifting either from the foot to the midpoint, or from the midpoint to that foot.
+            */
+   public double getFractionTimeOnFootIfOtherFootHasNoWidth()
+   {
+      return fraction_time_on_foot_if_other_foot_has_no_width_;
+   }
+
 
    public static Supplier<FootstepPostProcessingParametersPacketPubSubType> getPubSubType()
    {
@@ -428,6 +482,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_time_on_foot_if_foot_has_full_support_, other.fraction_time_on_foot_if_foot_has_full_support_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_load_if_other_foot_has_no_width_, other.fraction_load_if_other_foot_has_no_width_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_time_on_foot_if_other_foot_has_no_width_, other.fraction_time_on_foot_if_other_foot_has_no_width_, epsilon)) return false;
+
 
       return true;
    }
@@ -471,6 +529,10 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if(this.fraction_time_on_foot_if_foot_has_full_support_ != otherMyClass.fraction_time_on_foot_if_foot_has_full_support_) return false;
 
+      if(this.fraction_load_if_other_foot_has_no_width_ != otherMyClass.fraction_load_if_other_foot_has_no_width_) return false;
+
+      if(this.fraction_time_on_foot_if_other_foot_has_no_width_ != otherMyClass.fraction_time_on_foot_if_other_foot_has_no_width_) return false;
+
 
       return true;
    }
@@ -510,7 +572,11 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       builder.append("fraction_load_if_foot_has_full_support=");
       builder.append(this.fraction_load_if_foot_has_full_support_);      builder.append(", ");
       builder.append("fraction_time_on_foot_if_foot_has_full_support=");
-      builder.append(this.fraction_time_on_foot_if_foot_has_full_support_);
+      builder.append(this.fraction_time_on_foot_if_foot_has_full_support_);      builder.append(", ");
+      builder.append("fraction_load_if_other_foot_has_no_width=");
+      builder.append(this.fraction_load_if_other_foot_has_no_width_);      builder.append(", ");
+      builder.append("fraction_time_on_foot_if_other_foot_has_no_width=");
+      builder.append(this.fraction_time_on_foot_if_other_foot_has_no_width_);
       builder.append("}");
       return builder.toString();
    }

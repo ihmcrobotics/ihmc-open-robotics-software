@@ -4,17 +4,30 @@ public class SplitFractionTools
 {
    static double appendSplitFraction(double desiredSplitFraction, double currentSplitFraction, double nominalSplitFraction)
    {
-      if (currentSplitFraction == -1.0)
-         return desiredSplitFraction;
-
-      return desiredSplitFraction * currentSplitFraction / nominalSplitFraction;
+      return combineTwoShifts(desiredSplitFraction, currentSplitFraction, nominalSplitFraction);
    }
 
    static double appendWeightDistribution(double desiredWeightDistribution, double currentWeightDistribution, double nominalWeightDistribution)
    {
-      if (currentWeightDistribution == -1.0)
-         return desiredWeightDistribution;
+      return combineTwoShifts(desiredWeightDistribution, currentWeightDistribution, nominalWeightDistribution);
+   }
 
-      return desiredWeightDistribution * currentWeightDistribution / nominalWeightDistribution;
+   private static double combineTwoShifts(double desiredShift, double currentShift, double nominalShift)
+   {
+      if (currentShift == -1.0)
+         return desiredShift;
+
+      if (desiredShift > nominalShift)
+      {
+         double desiredPercentShiftForward = (desiredShift - nominalShift) / (1.0 - nominalShift);
+         double desiredShiftForward = desiredPercentShiftForward * (1.0 - currentShift);
+         return currentShift + desiredShiftForward;
+      }
+      else
+      {
+         double desiredPercentShiftBackward = (nominalShift - desiredShift) / nominalShift;
+         double desiredShiftBackward = desiredPercentShiftBackward * currentShift;
+         return currentShift - desiredShiftBackward;
+      }
    }
 }
