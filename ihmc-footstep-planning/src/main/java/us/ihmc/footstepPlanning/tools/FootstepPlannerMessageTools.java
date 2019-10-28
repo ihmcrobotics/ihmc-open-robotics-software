@@ -71,6 +71,7 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleIntoConvexHullOfPlanarRegions(parameters.getWiggleIntoConvexHullOfPlanarRegions());

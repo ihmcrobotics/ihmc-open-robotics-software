@@ -260,6 +260,22 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * This is the reduction factor for the max yaw when the step is at max reach.
+    * This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
+    * If this returns 0.0, the max yaw is not modified, even at full reach.
+    * If this returns 1.0, the max yaw is 0 at full reach.
+    *
+    * That is,
+    * modifiedMaxYaw = (1.0 - reach / maxReach) * maxYaw + reach / maxReach * (1.0 - alpha) * maxYaw
+    *
+    * @return alpha in the above equation
+    */
+   default double getStepYawReductionFactorAtMaxReach()
+   {
+      return get(stepYawReductionFactorAtMaxReach);
+   }
+
+   /**
     * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
     * <p>
     * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
