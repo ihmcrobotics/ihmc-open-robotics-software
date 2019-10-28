@@ -53,7 +53,8 @@ import java.util.function.Consumer;
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalForceEstimator externalForceEstimator = new ExternalForceEstimator(joints, endEffector, externalForcePointOffset, controlDT, dynamicMatrixSetter, tauSetter, null);
+      ExternalForceEstimator externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, null);
+      externalForceEstimator.setEndEffector(endEffector, externalForcePointOffset);
       robot.setController(externalForceEstimator);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();

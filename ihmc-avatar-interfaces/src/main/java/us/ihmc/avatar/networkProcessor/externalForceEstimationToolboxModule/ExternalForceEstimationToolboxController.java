@@ -4,6 +4,7 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -17,11 +18,12 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,9 +41,15 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
+   private final double updateDT;
 
+   private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
+
+   private JointBasics[] jointsToIgnore;
+   private JointBasics[] joints;
+   private final TIntObjectHashMap<RigidBodyBasics> endEffectorHashMap = new TIntObjectHashMap<>();
 
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
 
@@ -52,7 +60,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DenseMatrix64F coriolisMatrix;
 
    private final CommandInputManager commandInputManager;
-   private final ExternalForceEstimator externalForceEstimator;
+   private ExternalForceEstimator externalForceEstimator;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
 
    public ExternalForceEstimationToolboxController(DRCRobotModel robotModel,
@@ -66,13 +74,16 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       super(statusOutputManager, parentRegistry);
 
       this.commandInputManager = commandInputManager;
+      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
+      this.updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
 
-      JointBasics[] jointsToIgnore = new JointBasics[0]; // new JointBasics[]{controllerFullRobotModel.getOneDoFJointByName("hokuyo_joint")}; //
-      JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      jointsToIgnore = new JointBasics[0]; // new JointBasics[]{controllerFullRobotModel.getOneDoFJointByName("hokuyo_joint")}; //
+      joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
       this.rootJoint = fullRobotModel.getRootJoint();
+      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator()).subtreeIterable().forEach(rigidBody -> endEffectorHashMap.put(rigidBody.hashCode(), rigidBody));
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
                                                                                        9.81,
@@ -109,23 +120,27 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       Consumer<DenseMatrix64F> tauSetter = tau -> tau.set(controllerDesiredTau);
 
-      // TODO set up end effector configuration through a message
-      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.3, 0.0);
-      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName("rightForearmYaw").getSuccessor();
+      externalForceEstimator = new ExternalForceEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, registry);
 
-      this.externalForceEstimator = new ExternalForceEstimator(joints, endEffector, externalForcePointOffset, updateDT, dynamicMatrixSetter, tauSetter, parentRegistry);
       graphicsListRegistry.registerYoGraphic("EstimatedExternalForce", externalForceEstimator.getEstimatedForceVectorGraphic());
    }
 
    @Override
    public boolean initialize()
    {
-      if(commandInputManager.isNewCommandAvailable(ExternalForceEstimationToolboxConfigurationCommand.class))
+      if (commandInputManager.isNewCommandAvailable(ExternalForceEstimationToolboxConfigurationCommand.class))
       {
          ExternalForceEstimationToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(
                ExternalForceEstimationToolboxConfigurationCommand.class);
+
+         RigidBodyBasics endEffector = endEffectorHashMap.get(configurationCommand.getEndEffectorHashCode());
+         externalForceEstimator.setEndEffector(endEffector, configurationCommand.getExternalForcePosition());
          externalForceEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
+      }
+      else if(externalForceEstimator == null)
+      {
+         return false;
       }
 
       externalForceEstimator.initialize();
@@ -158,8 +173,13 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       externalForceEstimator.doControl();
 
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
-      outputStatus.getEstimatedExternalForce().set(externalForceEstimator.getEstimatedExternalWrench().getLinearPart());
+      outputStatus.getEstimatedExternalForce().set(externalForceEstimator.getEstimatedExternalForce());
       statusOutputManager.reportStatusMessage(outputStatus);
+   }
+
+   public FrameVector3DReadOnly getEstimatedExternalForce()
+   {
+      return externalForceEstimator.getEstimatedExternalForce();
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -176,6 +196,16 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    public boolean isDone()
    {
       return false;
+   }
+
+   public FloatingJointBasics getRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJointBasics[] getOneDoFJoints()
+   {
+      return oneDoFJoints;
    }
 
    private static void updateRobotState(RobotConfigurationData robotConfigurationData, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
