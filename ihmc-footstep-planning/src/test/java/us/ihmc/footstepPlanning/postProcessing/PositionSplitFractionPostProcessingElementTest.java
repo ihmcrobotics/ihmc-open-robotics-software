@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.postProcessing;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -41,11 +42,10 @@ public class PositionSplitFractionPostProcessingElementTest
 
       PositionSplitFractionPostProcessingElement postProcessingElement = new PositionSplitFractionPostProcessingElement(parameters, icpPlannerParameters);
 
-      FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-      request.setInitialStanceRobotSide(stanceSide.toByte());
-      request.getStanceFootPositionInWorld().set(0.0, stanceSide.negateIfRightSide(width / 2.0), 0.0);
+      FootstepPostProcessingPacket output = new FootstepPostProcessingPacket();
+      output.getLeftFootPositionInWorld().set(0.0, width / 2.0, 0.0);
+      output.getRightFootPositionInWorld().set(0.0, -width / 2.0, 0.0);
 
-      FootstepPlanningToolboxOutputStatus output = new FootstepPlanningToolboxOutputStatus();
       RecyclingArrayList<FootstepDataMessage> footstepList = output.getFootstepDataList().getFootstepDataList();
       FootstepDataMessage firstStep = footstepList.add();
       firstStep.setRobotSide(stanceSide.getOppositeSide().toByte());
@@ -55,7 +55,7 @@ public class PositionSplitFractionPostProcessingElementTest
       secondStep.setRobotSide(stanceSide.toByte());
       secondStep.getLocation().set(stepLength, stanceSide.negateIfRightSide(width / 2.0), minHeightToStartShifting);
 
-      FootstepPlanningToolboxOutputStatus processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+      FootstepPostProcessingPacket processedOutput = postProcessingElement.postProcessFootstepPlan(output);
       assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
       assertEquals(2, processedOutput.getFootstepDataList().getFootstepDataList().size());
       for (int i = 0; i < 2; i++)
@@ -85,7 +85,7 @@ public class PositionSplitFractionPostProcessingElementTest
       firstStep.getLocation().setZ(heightForFullShift - 0.05);
       secondStep.getLocation().setZ(heightForFullShift - 0.05);
 
-      processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+      processedOutput = postProcessingElement.postProcessFootstepPlan(output);
       assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
       assertEquals(2, processedOutput.getFootstepDataList().getFootstepDataList().size());
       for (int i = 0; i < 2; i++)
@@ -118,7 +118,7 @@ public class PositionSplitFractionPostProcessingElementTest
          firstStep.getLocation().setZ(height);
          secondStep.getLocation().setZ(height);
 
-         processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+         processedOutput = postProcessingElement.postProcessFootstepPlan(output);
          assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
          assertEquals(2, processedOutput.getFootstepDataList().getFootstepDataList().size());
          for (int i = 0; i < 2; i++)
@@ -169,17 +169,16 @@ public class PositionSplitFractionPostProcessingElementTest
 
       PositionSplitFractionPostProcessingElement postProcessingElement = new PositionSplitFractionPostProcessingElement(parameters, icpPlannerParameters);
 
-      FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-      request.setInitialStanceRobotSide(stanceSide.toByte());
-      request.getStanceFootPositionInWorld().set(0.0, stanceSide.negateIfRightSide(width / 2.0), 0.0);
+      FootstepPostProcessingPacket output = new FootstepPostProcessingPacket();
+      output.getLeftFootPositionInWorld().set(0.0, width / 2.0, 0.0);
+      output.getRightFootPositionInWorld().set(0.0, -width / 2.0, 0.0);
 
-      FootstepPlanningToolboxOutputStatus output = new FootstepPlanningToolboxOutputStatus();
       RecyclingArrayList<FootstepDataMessage> footstepList = output.getFootstepDataList().getFootstepDataList();
       FootstepDataMessage firstStep = footstepList.add();
       firstStep.setRobotSide(stanceSide.getOppositeSide().toByte());
       firstStep.getLocation().set(stepLength, stanceSide.negateIfLeftSide(width / 2.0), minHeightToStartShifting);
 
-      FootstepPlanningToolboxOutputStatus processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+      FootstepPostProcessingPacket processedOutput = postProcessingElement.postProcessFootstepPlan(output);
       assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
       assertEquals(1, processedOutput.getFootstepDataList().getFootstepDataList().size());
       FootstepDataMessage message = output.getFootstepDataList().getFootstepDataList().get(0);
@@ -199,7 +198,7 @@ public class PositionSplitFractionPostProcessingElementTest
       // check for full shift
       firstStep.getLocation().setZ(heightForFullShift - 0.05);
 
-      processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+      processedOutput = postProcessingElement.postProcessFootstepPlan(output);
       assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
       assertEquals(1, processedOutput.getFootstepDataList().getFootstepDataList().size());
       message = output.getFootstepDataList().getFootstepDataList().get(0);
@@ -222,7 +221,7 @@ public class PositionSplitFractionPostProcessingElementTest
       {
          firstStep.getLocation().setZ(height);
 
-         processedOutput = postProcessingElement.postProcessFootstepPlan(request, output);
+         processedOutput = postProcessingElement.postProcessFootstepPlan(output);
          assertEquals(output.getFootstepDataList().getFootstepDataList().size(), processedOutput.getFootstepDataList().getFootstepDataList().size());
          assertEquals(1, processedOutput.getFootstepDataList().getFootstepDataList().size());
 

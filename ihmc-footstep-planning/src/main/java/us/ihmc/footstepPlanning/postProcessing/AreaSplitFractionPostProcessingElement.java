@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.postProcessing;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -36,9 +37,9 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
    /** {@inheritDoc} **/
    @Override
-   public FootstepPlanningToolboxOutputStatus postProcessFootstepPlan(FootstepPlanningRequestPacket request, FootstepPlanningToolboxOutputStatus outputStatus)
+   public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket inputPlan)
    {
-      FootstepPlanningToolboxOutputStatus processedOutput = new FootstepPlanningToolboxOutputStatus(outputStatus);
+      FootstepPostProcessingPacket processedPlan = new FootstepPostProcessingPacket(inputPlan);
 
       ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
       ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
@@ -49,7 +50,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
       double defaultTransferSplitFraction = walkingControllerParameters.getTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
-      List<FootstepDataMessage> footstepDataMessageList = processedOutput.getFootstepDataList().getFootstepDataList();
+      List<FootstepDataMessage> footstepDataMessageList = processedPlan.getFootstepDataList().getFootstepDataList();
       for (int stepNumber = 1; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
          FootstepDataMessage previousStep = footstepDataMessageList.get(stepNumber - 1);
@@ -106,14 +107,14 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
          if (stepNumber == footstepDataMessageList.size() - 1)
          { // this is the last step
-            double currentSplitFraction = processedOutput.getFootstepDataList().getFinalTransferSplitFraction();
-            double currentWeightDistribution = processedOutput.getFootstepDataList().getFinalTransferWeightDistribution();
+            double currentSplitFraction = processedPlan.getFootstepDataList().getFinalTransferSplitFraction();
+            double currentWeightDistribution = processedPlan.getFootstepDataList().getFinalTransferWeightDistribution();
 
             double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
             double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
-            processedOutput.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
-            processedOutput.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
+            processedPlan.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
+            processedPlan.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
          }
          else
          {
@@ -128,7 +129,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          }
       }
 
-      return processedOutput;
+      return processedPlan;
    }
 
    /** {@inheritDoc} **/
