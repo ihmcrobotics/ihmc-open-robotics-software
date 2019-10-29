@@ -7,6 +7,7 @@ import java.util.Optional;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -52,6 +53,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
+   private final RecyclingArrayList<FrameVector3D> adjustmentVectors;
    private final double minimumSwingHeight;
    private final double maximumSwingHeight;
    private double collisionSphereRadius;
@@ -72,6 +74,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final Point3D tempPointOnPlane = new Point3D();
    private final Vector3D tempPlaneNormal = new Vector3D();
+   private final Point3D toeAtStartOfStep = new Point3D();
+   private final Point3D heelAtEndOfStep = new Point3D();
+   private final Vector3D stepDirectionVector = new Vector3D();
 
    // Boilerplate variables
    private final FrameVector3D initialVelocity;
@@ -126,6 +131,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
       adjustedWaypoints.add();
       adjustedWaypoints.add();
+      adjustmentVectors = new RecyclingArrayList<>(2, FrameVector3D.class);
+      adjustmentVectors.add();
+      adjustmentVectors.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
       closestPolygonPointMap = new HashMap<>();
@@ -205,18 +213,16 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
 
-      originalWaypoints.get(0).setToZero();
       originalWaypoints.get(0).interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[0]);
-      midGroundPoint.set(originalWaypoints.get(0));
       originalWaypoints.get(0).add(0.0, 0.0, minimumSwingHeight);
-      adjustedWaypoints.get(0).set(originalWaypoints.get(0));
-      originalWaypoints.get(1).setToZero();
       originalWaypoints.get(1).interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[1]);
-      midGroundPoint.add(originalWaypoints.get(1));
       originalWaypoints.get(1).add(0.0, 0.0, minimumSwingHeight);
+
+      adjustedWaypoints.get(0).set(originalWaypoints.get(0));
       adjustedWaypoints.get(1).set(originalWaypoints.get(1));
 
-      midGroundPoint.scale(0.5);
+      midGroundPoint.interpolate(originalWaypoints.get(0), originalWaypoints.get(1), 0.5);
+      midGroundPoint.subZ(minimumSwingHeight);
 
       adjustSwingEndIfCoincidentWithSwingStart();
 
@@ -229,15 +235,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       tempPlaneNormal.normalize();
       swingFloorPlane.set(swingStartPosition, tempPlaneNormal);
 
-      tempPlaneNormal.sub(swingEndPosition, swingStartPosition);
-      tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition);
-      swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
+      stepDirectionVector.sub(swingEndPosition, swingStartPosition);
+      stepDirectionVector.normalize();
+      toeAtStartOfStep.scaleAdd(collisionSphereRadius, stepDirectionVector, swingStartPosition);
+      swingStartToeFacingSwingEndPlane.set(toeAtStartOfStep, stepDirectionVector);
 
-      tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
-      tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition);
-      swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
+      heelAtEndOfStep.scaleAdd(-collisionSphereRadius, stepDirectionVector, swingEndPosition);
+      swingEndHeelFacingSwingStartPlane.set(heelAtEndOfStep, stepDirectionVector);
 
       wereWaypointsAdjusted.set(false);
 
@@ -274,6 +278,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.initialize();
 
       double stepAmount = 1.0 / numberOfCheckpoints.getIntegerValue();
+      double maxAdjustmentDistanceSquared = MathTools.square(maximumAdjustmentDistance.getDoubleValue());
+
       for (double time = 0.0; time < 1.0; time += stepAmount)
       {
          twoWaypointSwingGenerator.compute(time);
@@ -327,19 +333,15 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                         waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
                         waypointAdjustmentVector.normalize();
                         rigidBodyTransform.transform(waypointAdjustmentVector);
-                        waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());
-                        waypointAdjustmentVector.scale(1.0 - time);
-                        adjustedWaypoints.get(0).add(waypointAdjustmentVector);
 
-                        waypointAdjustmentVector.sub(swingStartPosition, swingEndPosition);
-                        waypointAdjustmentVector.normalize();
-                        rigidBodyTransform.transform(waypointAdjustmentVector);
-                        waypointAdjustmentVector.scale(incrementalAdjustmentDistance.getDoubleValue());
-                        waypointAdjustmentVector.scale(time);
-                        adjustedWaypoints.get(1).add(waypointAdjustmentVector);
+                        adjustmentVectors.get(0).setAndScale((1.0 - time) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentVector);
+                        adjustmentVectors.get(1).setAndScale(time * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentVector);
+                        
+                        adjustedWaypoints.get(0).add(adjustmentVectors.get(0));
+                        adjustedWaypoints.get(1).add(adjustmentVectors.get(1));
 
-                        if (adjustedWaypoints.get(0).distance(originalWaypoints.get(0)) > maximumAdjustmentDistance.getDoubleValue()
-                              || adjustedWaypoints.get(1).distance(originalWaypoints.get(1)) > maximumAdjustmentDistance.getDoubleValue())
+                        if (adjustedWaypoints.get(0).distanceSquared(originalWaypoints.get(0)) > maxAdjustmentDistanceSquared
+                              || adjustedWaypoints.get(1).distanceSquared(originalWaypoints.get(1)) > maxAdjustmentDistanceSquared)
                         {
                            return SwingOverPlanarRegionsTrajectoryExpansionStatus.FAILURE_HIT_MAX_ADJUSTMENT_DISTANCE;
                         }
