@@ -28,7 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ClusterToolsTest
@@ -773,9 +773,9 @@ public class ClusterToolsTest
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
 
-      filteredObstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(filteredObstacleRegions, homeRegion,
-                                                                                                     DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION,
-                                                                                                     planarRegionFilter);
+      filteredObstacleRegions = REAPlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(filteredObstacleRegions, homeRegion,
+                                                                                                        DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION,
+                                                                                                        planarRegionFilter);
 
       List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, filteredObstacleRegions, orthogonalAngle, extrusionDistanceCalculator);
       return obstacleClusters;

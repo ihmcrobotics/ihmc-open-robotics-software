@@ -15,7 +15,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -70,8 +70,8 @@ public class NavigableRegionsFactory
       List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
                                                        .collect(Collectors.toList());
 
-      obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
-                                                                                             DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
+      obstacleRegions = REAPlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
+                                                                                                DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
 
       navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, navigableCalculator));
       navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, obstacleCalculator));
