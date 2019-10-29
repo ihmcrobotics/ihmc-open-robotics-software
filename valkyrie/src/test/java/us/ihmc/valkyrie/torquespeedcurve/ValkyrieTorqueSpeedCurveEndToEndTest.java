@@ -3,6 +3,10 @@ package us.ihmc.valkyrie.torquespeedcurve;
 import static us.ihmc.avatar.testTools.EndToEndTestTools.computeWalkingDuration;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,12 +20,15 @@ import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -95,7 +102,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
       double xGoal = 2.0;
 
-      double x = 0.0;
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       double stepLength = steppingParameters.getDefaultStepLength();
       double stepWidth = steppingParameters.getInPlaceWidth();
@@ -104,7 +110,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
 
       FootstepDataListMessage footsteps;
-      footsteps = stepTo(x, stepStart - 0.5 * footLength - 0.05, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, false, true);
+      footsteps = stepTo(0.0, stepStart - 0.5 * footLength - 0.05, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, false, true);
       setTimings(footsteps, walkingControllerParameters);
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25));
@@ -158,8 +164,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double xGoal = 2.0;
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      double x = 0.0;
-
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       double stepLength = steppingParameters.getDefaultStepLength();
       double stepWidth = steppingParameters.getInPlaceWidth();
@@ -167,7 +171,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double footLength = steppingParameters.getFootLength();
       HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
 
-      stepTo(x, stepStart - 0.5 * footLength - 0.15, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
+      stepTo(0.0, stepStart - 0.5 * footLength - 0.15, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
       RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
       stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
       setTimings(footsteps, walkingControllerParameters);
@@ -184,6 +188,104 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testWalkSlopeReal() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.PI / 6.0, new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.REAL_ROBOT));
+   }
+
+   @Test
+   public void testWalkSlopeSim() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.PI / 6.0, new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.SCS));
+   }
+
+   public void testWalkSlope(double slopeAngle, WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
+
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
+      drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.setCameraFix(1.0, 0.0, 0.8);
+      scs.setCameraPosition(1.0, -8.0, 1.0);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      scs.setInPoint();
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double stepLength = steppingParameters.getDefaultStepLength();
+      double stepWidth = steppingParameters.getInPlaceWidth();
+
+      HeightMapWithNormals heightMap = slope.getTerrainObject3D().getHeightMapIfAvailable();
+
+      stepTo(0.0, 5.0, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, true, true);
+      setTimings(footsteps, walkingControllerParameters);
+      footsteps.getFootstepDataList().forEach(footstep -> footstep.getOrientation().setToPitchOrientation(slopeAngle));
+      footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
+      computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75}, 0.075);
+      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+
+      drcSimulationTestHelper.publishToController(footsteps);
+
+      double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+      assertTrue(success);
+
+      //      Point3D center = new Point3D(1.9552, 0.0, 1.3);
+      //      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
+      //      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private static void computeDefaultWaypointPrositions(FootstepDataListMessage footsteps, double[] percentages, double swingHeight)
+   {
+      Map<RobotSide, List<FootstepDataMessage>> stepsBySide = footsteps.getFootstepDataList().stream()
+                                                                       .collect(Collectors.groupingBy(step -> RobotSide.fromByte(step.getRobotSide())));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<FootstepDataMessage> steps = stepsBySide.get(robotSide);
+
+         for (int i = 1; i < steps.size(); i++)
+         {
+            for (double percentage : percentages)
+            {
+               Point3D waypoint = computeOneSwingWaypoint(steps.get(i - 1).getLocation(), steps.get(i).getLocation(), percentage, swingHeight);
+               steps.get(i).getCustomPositionWaypoints().add().set(waypoint);
+            }
+         }
+      }
+   }
+
+   private static Point3D computeOneSwingWaypoint(Point3DReadOnly start, Point3DReadOnly end, double percentage, double swingHeight)
+   {
+      Point3D waypoint = new Point3D();
+      waypoint.interpolate(start, end, percentage);
+
+      Vector3D stepDirection = new Vector3D();
+      Vector3D perpendicularDirection = new Vector3D();
+      stepDirection.sub(end, start);
+      perpendicularDirection.cross(Axis.Z, stepDirection);
+      perpendicularDirection.normalize();
+      Vector3D swingHeightSupportVector = new Vector3D();
+      swingHeightSupportVector.cross(stepDirection, perpendicularDirection);
+      swingHeightSupportVector.normalize();
+
+      waypoint.scaleAdd(swingHeight, swingHeightSupportVector, waypoint);
+
+      return waypoint;
    }
 
    private static void setTimings(FootstepDataListMessage footsteps, WalkingControllerParameters parametersWithTimings)
