@@ -72,7 +72,6 @@ public class REAModuleAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Color = apiFactory.createTopicTheme("Color");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
-   private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("REA"));
 
