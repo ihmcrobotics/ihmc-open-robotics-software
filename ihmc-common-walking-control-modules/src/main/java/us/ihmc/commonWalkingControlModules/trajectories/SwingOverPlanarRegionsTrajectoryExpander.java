@@ -196,8 +196,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       this.maximumAdjustmentDistance.set(maximumAdjustmentDistance);
    }
 
-   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose,
-                                                 FramePose3D swingEndPose, PlanarRegionsList planarRegionsList)
+   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose, FramePose3D swingEndPose,
+                                                   PlanarRegionsList planarRegionsList)
    {
       wereWaypointsAdjusted.set(false);
       stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
@@ -249,10 +249,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       numberOfTriesCounter.resetCount();
       while (status.getEnumValue().equals(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION) && !numberOfTriesCounter.maxCountReached())
       {
-         for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
+         for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType
+               .values())
          {
-            closestPolygonPointMap.get(swingOverPlanarRegionsTrajectoryCollisionType).setIncludingFrame(WORLD, Double.MAX_VALUE, Double.MAX_VALUE,
-                                                                                                        Double.MAX_VALUE);
+            closestPolygonPointMap.get(swingOverPlanarRegionsTrajectoryCollisionType)
+                                  .setIncludingFrame(WORLD, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
          }
          mostSevereCollisionType.set(SwingOverPlanarRegionsTrajectoryCollisionType.NO_INTERSECTION);
 
@@ -268,7 +269,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    // TODO figure out a better solution for coincident points and replace this
    private void adjustSwingEndIfCoincidentWithSwingStart()
    {
-      if(swingStartPosition.distance(swingEndPosition) < 1e-8)
+      if (swingStartPosition.distance(swingEndPosition) < 1e-8)
          swingEndPosition.add(1e-4, 1e-4, 1e-4);
    }
 
@@ -323,7 +324,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
                      if ((swingStartToeFacingSwingEndPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
                            && swingEndHeelFacingSwingStartPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()))
-                           || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint.distance(solePoseReferenceFrame.getPosition()))
+                           || midGroundPoint.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < midGroundPoint
+                           .distance(solePoseReferenceFrame.getPosition()))
                      {
                         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.CRITICAL_INTERSECTION);
 
@@ -336,7 +338,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
                         adjustmentVectors.get(0).setAndScale((1.0 - time) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentVector);
                         adjustmentVectors.get(1).setAndScale(time * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentVector);
-                        
+
                         adjustedWaypoints.get(0).add(adjustmentVectors.get(0));
                         adjustedWaypoints.get(1).add(adjustmentVectors.get(1));
 
@@ -370,7 +372,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       {
          this.mostSevereCollisionType.set(collisionType);
       }
-      if (footCollisionSphere.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < footCollisionSphere.distance(closestPolygonPointMap.get(collisionType)))
+      if (footCollisionSphere.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < footCollisionSphere
+            .distance(closestPolygonPointMap.get(collisionType)))
       {
          closestPolygonPointMap.get(collisionType).set(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon());
       }
