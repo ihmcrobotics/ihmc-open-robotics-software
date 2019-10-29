@@ -418,8 +418,8 @@ public class MainTabController
             messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartOrientation, startRotationProperty.get());
          }
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootSupportPolygonTopic, PlannerTools.createDefaultFootPolygon());
-         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootSupportPolygonTopic, PlannerTools.createDefaultFootPolygon());
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartSupportPolygon, PlannerTools.createDefaultFootPolygon());
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartSupportPolygon, PlannerTools.createDefaultFootPolygon());
       }
       else
       {

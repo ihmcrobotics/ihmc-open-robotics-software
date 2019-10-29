@@ -40,6 +40,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
    public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
+   public static final Topic<Boolean> ShowPostProcessingInfo = topic("ShowPostProcessingInfo");
 
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
