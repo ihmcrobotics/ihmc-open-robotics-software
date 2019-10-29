@@ -44,6 +44,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
+   private final YoBoolean doInitialFastApproximation;
    private final YoInteger numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
    private final YoDouble minimumClearance;
@@ -60,7 +61,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
-   private final RecyclingArrayList<FrameVector3D> adjustmentVectors;
    private final double minimumSwingHeight;
    private final double maximumSwingHeight;
    private final double collisionSphereRadius;
@@ -122,6 +122,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       collisionSphereRadius = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
 
+      doInitialFastApproximation = new YoBoolean(namePrefix + "DoInitialFastApproximation", parentRegistry);
       numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
@@ -142,9 +143,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
       adjustedWaypoints.add();
       adjustedWaypoints.add();
-      adjustmentVectors = new RecyclingArrayList<>(2, FrameVector3D.class);
-      adjustmentVectors.add();
-      adjustmentVectors.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
       closestPolygonPointMap = new HashMap<>();
@@ -175,6 +173,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       visualizer = Optional.empty();
 
       // Set default values
+      doInitialFastApproximation.set(true);
       minimumFractionOfSwingForCollisionCheck.set(0.0);
       maximumFractionOfSwingForCollisionCheck.set(1.0);
       minimumHeightAboveFloorForCollision.set(0.02);
@@ -183,6 +182,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance.set(0.04);
       incrementalAdjustmentDistance.set(0.03);
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
+   }
+
+   public void setDoInitialFastApproximation(boolean doInitialFastApproximation)
+   {
+      this.doInitialFastApproximation.set(doInitialFastApproximation);
    }
 
    public void setNumberOfCheckpoints(int numberOfCheckpoints)
@@ -323,12 +327,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          swingEndPosition.add(1e-4, 1e-4, 1e-4);
    }
 
-   // fixme improve the adjustment
    private SwingOverPlanarRegionsTrajectoryExpansionStatus fastCheckAndAdjustForCollisions(List<PlanarRegion> planarRegionsList)
    {
-      twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, adjustedWaypoints);
-      twoWaypointSwingGenerator.initialize();
-
       double maxAdjustmentDistanceSquared = MathTools.square(maximumAdjustmentDistance.getDoubleValue());
 
       double timeOfCollision = getFastFractionThroughTrajectoryForCollision(planarRegionsList);
@@ -336,11 +336,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       {
          computeWaypointAdjustmentDirection(timeOfCollision);
 
-         adjustmentVectors.get(0).setAndScale((1.0 - timeOfCollision) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection);
-         adjustmentVectors.get(1).setAndScale(timeOfCollision * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection);
-
-         adjustedWaypoints.get(0).add(adjustmentVectors.get(0));
-         adjustedWaypoints.get(1).add(adjustmentVectors.get(1));
+         adjustedWaypoints.get(0).scaleAdd((1.0 - timeOfCollision) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection, adjustedWaypoints.get(0));
+         adjustedWaypoints.get(1).scaleAdd(timeOfCollision * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection, adjustedWaypoints.get(1));
 
          if (adjustedWaypoints.get(0).distanceSquared(originalWaypoints.get(0)) > maxAdjustmentDistanceSquared
                || adjustedWaypoints.get(1).distanceSquared(originalWaypoints.get(1)) > maxAdjustmentDistanceSquared)
@@ -356,32 +353,35 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private double getFastFractionThroughTrajectoryForCollision(List<PlanarRegion> planarRegions)
    {
-      twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, adjustedWaypoints);
-      twoWaypointSwingGenerator.initialize();
+      double firstSegmentLength = swingStartPosition.distance(adjustedWaypoints.get(0));
+      double secondSegmentLength = adjustedWaypoints.get(0).distance(adjustedWaypoints.get(1));
+      double thirdSegmentLength = adjustedWaypoints.get(1).distance(swingEndPosition);
+      double totalLength = firstSegmentLength + secondSegmentLength + thirdSegmentLength;
 
       double fractionThroughSegmentForCollision = checkLineSegmentForCollision(swingStartPosition, adjustedWaypoints.get(0), planarRegions);
       if (fractionThroughSegmentForCollision >= 0.0)
       {
-         return fractionThroughSegmentForCollision * twoWaypointSwingGenerator.getWaypointTime(0);
+         return fractionThroughSegmentForCollision * firstSegmentLength / totalLength;
       }
 
       fractionThroughSegmentForCollision = checkLineSegmentForCollision(adjustedWaypoints.get(0), adjustedWaypoints.get(1), planarRegions);
       if (fractionThroughSegmentForCollision >= 0.0)
       {
-         double segmentLength = twoWaypointSwingGenerator.getWaypointTime(1) - twoWaypointSwingGenerator.getWaypointTime(0);
-         return fractionThroughSegmentForCollision * segmentLength + twoWaypointSwingGenerator.getWaypointTime(0);
+         return (fractionThroughSegmentForCollision * secondSegmentLength + firstSegmentLength) / totalLength;
       }
 
       fractionThroughSegmentForCollision = checkLineSegmentForCollision(adjustedWaypoints.get(1), swingEndPosition, planarRegions);
       if (fractionThroughSegmentForCollision >= 0.0)
       {
-         double segmentLength = 1.0 - twoWaypointSwingGenerator.getWaypointTime(1);
-         return fractionThroughSegmentForCollision * segmentLength + twoWaypointSwingGenerator.getWaypointTime(1);
+         return (fractionThroughSegmentForCollision * thirdSegmentLength + secondSegmentLength + firstSegmentLength) / totalLength;
       }
 
       return -1.0;
    }
 
+   /**
+    * Returns the fraction through the segment that the collision occurs at.
+    */
    private double checkLineSegmentForCollision(Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint, List<PlanarRegion> planarRegions)
    {
       double avoidanceDistance = collisionSphereRadius + minimumClearance.getDoubleValue();
@@ -402,9 +402,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          if (distance < avoidanceDistance)
          {
-            Point3D closestPointOnSegmentInWorld = new Point3D(closestPointOnSegment);
             Point3D closestPointOnRegionInWorld = new Point3D(closestPointInRegion);
-            planarRegion.transformFromLocalToWorld(closestPointOnSegmentInWorld);
             planarRegion.transformFromLocalToWorld(closestPointOnRegionInWorld);
 
             wereWaypointsAdjusted.set(true);
@@ -435,11 +433,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       {
          computeWaypointAdjustmentDirection(timeOfCollision);
 
-         adjustmentVectors.get(0).setAndScale((1.0 - timeOfCollision) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection);
-         adjustmentVectors.get(1).setAndScale(timeOfCollision * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection);
-
-         adjustedWaypoints.get(0).add(adjustmentVectors.get(0));
-         adjustedWaypoints.get(1).add(adjustmentVectors.get(1));
+         adjustedWaypoints.get(0).scaleAdd((1.0 - timeOfCollision) * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection, adjustedWaypoints.get(0));
+         adjustedWaypoints.get(1).scaleAdd(timeOfCollision * incrementalAdjustmentDistance.getDoubleValue(), waypointAdjustmentDirection, adjustedWaypoints.get(1));
 
          if (adjustedWaypoints.get(0).distanceSquared(originalWaypoints.get(0)) > maxAdjustmentDistanceSquared
                || adjustedWaypoints.get(1).distanceSquared(originalWaypoints.get(1)) > maxAdjustmentDistanceSquared)

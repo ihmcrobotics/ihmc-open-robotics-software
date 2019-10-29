@@ -32,6 +32,8 @@ float64 transfer_split_fraction_at_full_depth -1.0
 # desired weight distribution is linearly interpolated between the default value and the value returned by this function.
 float64 transfer_weight_distribution_at_full_depth -1.0
 
+bool do_initial_fast_approximation true
+
 # If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
 # along the swing foot trajectory and the planar regions in the environment.
 float64 minimum_swing_foot_clearance -1.0
@@ -48,6 +50,8 @@ float64 maximum_waypoint_adjustment_distance -1.0
 
 # If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
 float64 incremental_waypoint_adjustment_distance -1.0
+
+float64 minimum_height_above_floor_for_collision -1.0
 
 # If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
 # support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
