@@ -86,6 +86,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
       {
          if (stepNumber > 0)
          {
+            previousPolygon.clear();
             FootstepDataMessage previousStep = footstepDataMessageList.get(stepNumber - 1);
 
             previousFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, previousStep.getLocation()));
@@ -106,6 +107,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          currentFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, currentStep.getLocation()));
          currentFrame.setOrientationAndUpdate(currentStep.getOrientation());
 
+         currentPolygon.clear();
          for (Point3DReadOnly vertex : currentStep.getPredictedContactPoints2d())
          {
             FramePoint3D vertexInSoleFrame = new FramePoint3D(worldFrame, vertex);
@@ -118,24 +120,27 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          double currentArea = currentPolygon.getArea();
          double previousArea = previousPolygon.getArea();
 
+         double totalArea = currentArea + previousArea;
+
          double currentWidth = currentPolygon.getBoundingBoxRangeY();
          double previousWidth = previousPolygon.getBoundingBoxRangeY();
 
-         double percentAreaOnCurrentFoot = currentArea / (previousArea + currentArea);
-         double percentWidthOnCurrentFoot = currentWidth / (currentWidth + previousWidth);
+         double totalWidth = currentWidth + previousWidth;
 
-         // FIXME this math is wrong wrong wrong.
+         double percentAreaOnCurrentFoot = totalArea > 0.0 ? currentArea / totalArea : 0.5;
+         double percentWidthOnCurrentFoot = totalWidth > 0.0 ? currentWidth / totalWidth : 0.5;
+
          double transferWeightDistributionFromArea = InterpolationTools.linearInterpolate(defaultWeightDistribution, parameters.getFractionLoadIfFootHasFullSupport(),
-                                                                                          percentAreaOnCurrentFoot - 0.5);
+                                                                                          2.0 * percentAreaOnCurrentFoot - 1.0);
          double transferWeightDistributionFromWidth = InterpolationTools.linearInterpolate(defaultWeightDistribution, parameters.getFractionLoadIfOtherFootHasNoWidth(),
-                                                                                           percentWidthOnCurrentFoot - 0.5);
+                                                                                           2.0 * percentWidthOnCurrentFoot - 1.0);
 
          // lower means it spends more time shifting to the center, higher means it spends less time shifting to the center
          // e.g., if we set the fraction to 0 and the trailing foot has no area, the split fraction should be 1 because we spend no time on the first segment
          double transferSplitFractionFromArea = InterpolationTools.linearInterpolate(defaultTransferSplitFraction, 1.0 - parameters.getFractionTimeOnFootIfFootHasFullSupport(),
-                                                                                     percentAreaOnCurrentFoot - 0.5);
+                                                                                     2.0 * percentAreaOnCurrentFoot - 1.0);
          double transferSplitFractionFromWidth = InterpolationTools.linearInterpolate(defaultTransferSplitFraction, 1.0 - parameters.getFractionTimeOnFootIfOtherFootHasNoWidth(),
-                                                                                      percentWidthOnCurrentFoot - 0.5);
+                                                                                      2.0 * percentWidthOnCurrentFoot - 1.0);
 
          double transferWeightDistribution = 0.5 * (transferWeightDistributionFromArea + transferWeightDistributionFromWidth);
          double transferSplitFraction = 0.5 * (transferSplitFractionFromArea + transferSplitFractionFromWidth);
