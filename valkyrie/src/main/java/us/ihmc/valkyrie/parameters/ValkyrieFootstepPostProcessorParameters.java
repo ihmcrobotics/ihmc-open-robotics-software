@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.tools.property.StoredPropertySet;
 
@@ -13,7 +13,7 @@ public class ValkyrieFootstepPostProcessorParameters extends StoredPropertySet i
 
    public ValkyrieFootstepPostProcessorParameters(String projectName, String pathToResources)
    {
-      super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPostProcessorParameters.class, projectName, pathToResources);
+      super(FootstepPostProcessingKeys.keys, ValkyrieFootstepPostProcessorParameters.class, projectName, pathToResources);
 
       setPositionSplitFractionProcessingEnabled(false);
       setSwingOverRegionsProcessingEnabled(false);

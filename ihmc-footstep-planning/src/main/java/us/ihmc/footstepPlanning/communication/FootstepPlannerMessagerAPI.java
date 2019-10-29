@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -41,6 +43,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
+   public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
    public static final Topic<Boolean> RequestPlannerStatistics = topic("RequestPlannerStatistics");
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
 
@@ -79,6 +82,13 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
+
+   public static final Topic<Point3D> LeftFootStartPosition = topic("LeftFootStartPosition");
+   public static final Topic<Point3D> RightFootStartPosition = topic("RightFootStartPosition");
+   public static final Topic<Quaternion> LeftFootStartOrientation = topic("LeftFootStartOrientation");
+   public static final Topic<Quaternion> RightFootStartOrientation = topic("RightFootStartOrientation");
+   public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
+   public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
 
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 

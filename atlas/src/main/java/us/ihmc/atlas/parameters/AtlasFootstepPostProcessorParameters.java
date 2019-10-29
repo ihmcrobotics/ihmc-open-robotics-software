@@ -1,7 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.tools.property.StoredPropertySet;
 
@@ -14,7 +13,7 @@ public class AtlasFootstepPostProcessorParameters extends StoredPropertySet impl
 
    public AtlasFootstepPostProcessorParameters(String projectName, String pathToResources)
    {
-      super(FootstepPlannerParameterKeys.keys, AtlasFootstepPostProcessorParameters.class, projectName, pathToResources);
+      super(FootstepPostProcessingKeys.keys, AtlasFootstepPostProcessorParameters.class, projectName, pathToResources);
 
       load();
    }
