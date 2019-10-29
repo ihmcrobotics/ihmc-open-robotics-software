@@ -57,12 +57,11 @@ public class BehaviorHelper
       managedMessager = new ManagedMessager(messager);
       managedROS2Node = new ManagedROS2Node(ros2Node);
 
-      setCommunicationCallbacksEnabled(false); // TODO: should initialize to false?
-
-      // TODO: Extract UI comms class
+      setCommunicationCallbacksEnabled(false); // should do this?
    }
 
    // Construction-only methods:
+   // These not safe yet. "Create" needs to happen at construction or not at all. Maybe doesn't matter right now.
 
    public RemoteHumanoidRobotInterface getOrCreateRobotInterface()
    {
@@ -86,6 +85,7 @@ public class BehaviorHelper
    }
 
    // UI Communication Methods:
+   // Extract into class?
 
    public <T> void publishToUI(Topic<T> topic, T message)
    {
@@ -127,7 +127,8 @@ public class BehaviorHelper
 
    // Behavior Helper Stuff:
 
-   // TODO: Extract to behavior manager in general?
+   // Let behaviors manage or manage for them?
+   // Split into finer granularity -- publishers and subscribers?
    public void setCommunicationCallbacksEnabled(boolean enabled)
    {
       managedROS2Node.setEnabled(enabled);
