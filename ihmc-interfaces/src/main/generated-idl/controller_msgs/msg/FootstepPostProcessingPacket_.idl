@@ -26,6 +26,8 @@ module controller_msgs
         geometry_msgs::msg::dds::Point right_foot_position_in_world;
         geometry_msgs::msg::dds::Quaternion left_foot_orientation_in_world;
         geometry_msgs::msg::dds::Quaternion right_foot_orientation_in_world;
+        sequence<geometry_msgs::msg::dds::Point, 10> left_foot_contact_points_2d;
+        sequence<geometry_msgs::msg::dds::Point, 10> right_foot_contact_points_2d;
         controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
       };

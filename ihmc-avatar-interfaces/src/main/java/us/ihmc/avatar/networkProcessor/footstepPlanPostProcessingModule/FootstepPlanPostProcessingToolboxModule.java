@@ -79,7 +79,7 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-      statusMessages.add(FootstepPlanningToolboxOutputStatus.class);
+      statusMessages.add(FootstepPostProcessingPacket.class);
 
       return statusMessages;
    }
