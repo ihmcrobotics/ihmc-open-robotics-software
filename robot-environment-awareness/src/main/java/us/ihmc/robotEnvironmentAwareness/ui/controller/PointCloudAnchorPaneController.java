@@ -18,6 +18,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private ToggleButton enableStereoButton;
    @FXML
    private Spinner<Integer> sizeOfPointCloudSpinner;
+   @FXML
+   private Slider navigationFramesSlider;
 
    private static final int maximumSizeOfPointCloud = 200000;
    private static final int minimumSizeOfPointCloud = 1000;
@@ -50,6 +52,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
    }
 
    @FXML
@@ -70,6 +73,12 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       saveUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
+   }
+   
+   @FXML
+   public void clearNavigation()
+   {
+      uiMessager.submitMessageInternal(REAModuleAPI.UISensorPoseHistoryClear, true);
    }
 
    public void load()

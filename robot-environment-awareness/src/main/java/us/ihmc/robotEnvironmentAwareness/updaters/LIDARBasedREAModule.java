@@ -23,6 +23,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -204,6 +205,7 @@ public class LIDARBasedREAModule
       try
       {
          NormalOcTree mainOctree = mainUpdater.getMainOctree();
+         Pose3DReadOnly sensorPose = mainUpdater.getSensorPose();
          if (clearOcTree.getAndSet(false))
          {
             lidarBufferUpdater.clearBuffer();
@@ -224,11 +226,12 @@ public class LIDARBasedREAModule
 
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
+            moduleStateReporter.reportSensorPose(sensorPose);
 
             if (isThreadInterrupted())
                return;
 
-            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree), planarRegionsTimeReport);
+            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
