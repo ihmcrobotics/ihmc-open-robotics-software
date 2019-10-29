@@ -39,11 +39,12 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final boolean LOCAL_MODE = false;
+   private static final boolean LOCAL_MODE = true;
 
    @Test
    public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       String className = getClass().getSimpleName();
 
       double swingTime = 0.6;

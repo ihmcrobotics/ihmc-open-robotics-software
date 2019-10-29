@@ -5,6 +5,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -27,9 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceFromPoint3DToLineSegment3D;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.isPoint2DOnSideOfLine2D;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
 
 public class PlanarRegionTools
 {
@@ -307,6 +306,179 @@ public class PlanarRegionTools
          }
       }
       return false;
+   }
+
+   public static double getDistanceFromLineSegment3DToPlanarRegion(LineSegment3DReadOnly lineSegmentInLocal,
+                                                                   PlanarRegion planarRegion, Point3DBasics closestPointOnSegmentToPack,
+                                                                   Point3DBasics closestPointOnRegionToPack)
+   {
+      return getDistanceFromLineSegment3DToPlanarRegion(lineSegmentInLocal.getFirstEndpoint(), lineSegmentInLocal.getSecondEndpoint(), planarRegion,
+                                                        closestPointOnSegmentToPack, closestPointOnRegionToPack);
+   }
+
+   public static double getDistanceFromLineSegment3DToPlanarRegion(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
+                                                                   PlanarRegion planarRegion, Point3DBasics closestPointOnSegmentToPack,
+                                                                   Point3DBasics closestPointOnRegionToPack)
+   {
+      List<Point3D> vertices = Arrays.stream(planarRegion.getConcaveHull()).map(Point3D::new).collect(Collectors.toList());
+      int numberOfVertices = vertices.size();
+      double minDistanceToEdge = Double.POSITIVE_INFINITY;
+
+      if (numberOfVertices == 0)
+      {
+         minDistanceToEdge = Double.NaN;
+      }
+      else if (numberOfVertices == 1)
+      {
+         if (closestPointOnRegionToPack != null)
+            closestPointOnRegionToPack.set(vertices.get(0));
+         if (closestPointOnSegmentToPack != null)
+         {
+            closestPointOnSegmentToPack.set(orthogonalProjectionOnLineSegment3D(vertices.get(0), firstEndPointInLocal, secondEndPointInLocal));
+            minDistanceToEdge = vertices.get(0).distance(closestPointOnSegmentToPack);
+         }
+         else
+         {
+            minDistanceToEdge = distanceFromPoint3DToLineSegment3D(vertices.get(0), firstEndPointInLocal, secondEndPointInLocal);
+         }
+      }
+      else if (numberOfVertices == 2)
+      {
+         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, vertices.get(0), vertices.get(1),
+                                                                     closestPointOnSegmentToPack, closestPointOnRegionToPack);
+      }
+      else
+      {
+         Point3D point1ToThrowAway = new Point3D();
+         Point3D point2ToThrowAway = new Point3D();
+
+         for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
+         {
+            List<Point3D> polygonVertices = convexPolygon.getVertexBufferView().stream().map(Point3D::new).collect(Collectors.toList());
+            double distanceToPolygon = getDistanceFromLineSegment3DToConvexPolygon(firstEndPointInLocal, secondEndPointInLocal, polygonVertices,
+                                                                                   point1ToThrowAway, point2ToThrowAway);
+            if (distanceToPolygon < minDistanceToEdge)
+            {
+               minDistanceToEdge = distanceToPolygon;
+               if (closestPointOnSegmentToPack != null)
+                  closestPointOnSegmentToPack.set(point1ToThrowAway);
+               if (closestPointOnRegionToPack != null)
+                  closestPointOnRegionToPack.set(point2ToThrowAway);
+            }
+         }
+      }
+
+      return minDistanceToEdge;
+   }
+
+   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
+                                                                    List<Point3D> convexPolygon3D, Point3DBasics closestPointOnSegmentToPack,
+                                                                    Point3DBasics closestPointOnRegionToPack)
+   {
+      int numberOfVertices = convexPolygon3D.size();
+      double minDistanceToEdge = Double.POSITIVE_INFINITY;
+
+      if (numberOfVertices == 0)
+         minDistanceToEdge = Double.NaN;
+
+      else if (numberOfVertices == 1)
+      {
+         if (closestPointOnRegionToPack != null)
+            closestPointOnRegionToPack.set(convexPolygon3D.get(0));
+         if (closestPointOnSegmentToPack != null)
+         {
+            closestPointOnSegmentToPack.set(orthogonalProjectionOnLineSegment3D(convexPolygon3D.get(0), firstEndPointInLocal, secondEndPointInLocal));
+            minDistanceToEdge = convexPolygon3D.get(0).distance(closestPointOnSegmentToPack);
+         }
+         else
+         {
+            minDistanceToEdge = distanceFromPoint3DToLineSegment3D(convexPolygon3D.get(0), firstEndPointInLocal, secondEndPointInLocal);
+         }
+      }
+
+      else if (numberOfVertices == 2)
+      {
+         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, convexPolygon3D.get(0), convexPolygon3D.get(1),
+                                                                     closestPointOnSegmentToPack, closestPointOnRegionToPack);
+      }
+      else
+      {
+         Point3D point1ToThrowAway = new Point3D();
+         Point3D point2ToThrowAway = new Point3D();
+         boolean isQueryStartOutsidePolygon = false;
+         boolean isQueryEndOutsidePolygon = false;
+
+         for (int index = 0; index < numberOfVertices; index++)
+         {
+            Point3DReadOnly edgeStart = convexPolygon3D.get(index);
+            Point3DReadOnly edgeEnd = convexPolygon3D.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
+            Point2DReadOnly edgeStart2D = new Point2D(edgeStart);
+            Point2DReadOnly edgeEnd2D = new Point2D(edgeEnd);
+
+            double distanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, edgeStart, edgeEnd, point1ToThrowAway,
+                                                                            point2ToThrowAway);
+            if (distanceToEdge < minDistanceToEdge)
+            {
+               minDistanceToEdge = distanceToEdge;
+               if (closestPointOnSegmentToPack != null)
+                  closestPointOnSegmentToPack.set(point1ToThrowAway);
+               if (closestPointOnRegionToPack != null)
+                  closestPointOnRegionToPack.set(point2ToThrowAway);
+            }
+
+            isQueryStartOutsidePolygon |= isPoint2DOnSideOfLine2D(firstEndPointInLocal.getX(), firstEndPointInLocal.getY(), edgeStart2D, edgeEnd2D, true);
+            isQueryEndOutsidePolygon |= isPoint2DOnSideOfLine2D(secondEndPointInLocal.getX(), secondEndPointInLocal.getY(), edgeStart2D, edgeEnd2D, true);
+         }
+
+         boolean pointsAllAbove = firstEndPointInLocal.getZ() > 0 && secondEndPointInLocal.getZ() > 0;
+         boolean pointsAllBelow = firstEndPointInLocal.getZ() < 0 && secondEndPointInLocal.getZ() < 0;
+
+         if (!isQueryStartOutsidePolygon && !isQueryEndOutsidePolygon)
+         { // points are within the edges, so the shortest distance is to the plane surface
+            double distanceToFirstEnd = Math.abs(firstEndPointInLocal.getZ());
+            double distanceToSecondEnd = Math.abs(secondEndPointInLocal.getZ());
+            if (distanceToFirstEnd < distanceToSecondEnd)
+            {
+               minDistanceToEdge = distanceToFirstEnd;
+               if (closestPointOnSegmentToPack != null)
+               closestPointOnSegmentToPack.set(firstEndPointInLocal);
+               if (closestPointOnRegionToPack != null)
+                  closestPointOnRegionToPack.set(firstEndPointInLocal.getX(), firstEndPointInLocal.getY(), 0.0);
+            }
+            else
+            {
+               minDistanceToEdge = distanceToSecondEnd;
+               if (closestPointOnSegmentToPack != null)
+                  closestPointOnSegmentToPack.set(secondEndPointInLocal);
+               if (closestPointOnRegionToPack != null)
+                  closestPointOnRegionToPack.set(secondEndPointInLocal.getX(), secondEndPointInLocal.getY(), 0.0);
+            }
+         }
+         else if (!pointsAllAbove || !pointsAllBelow)
+         { // points are on opposite sides of the plane
+            Point3DReadOnly intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0),
+                                                                                                                   new Vector3D(0.0, 0.0, 1.0),
+                                                                                                                   firstEndPointInLocal, secondEndPointInLocal);
+
+            // checking convex hull here - might be better to check all polygons to avoid false positive
+            if (intersectionWithPlane != null)
+            {
+               List<Point2DReadOnly> polygonIn2D = new ArrayList<>();
+               Point2DReadOnly intersectionIn2D = new Point2D(intersectionWithPlane);
+               convexPolygon3D.forEach(vertex -> polygonIn2D.add(new Point2D(vertex)));
+               if (isPointInsidePolygon(polygonIn2D, intersectionIn2D))
+               {
+                  minDistanceToEdge = -minDistanceToEdge;
+                  if (closestPointOnRegionToPack != null)
+                     closestPointOnRegionToPack.set(intersectionWithPlane);
+                  if (closestPointOnSegmentToPack != null)
+                     closestPointOnSegmentToPack.set(intersectionWithPlane);
+               }
+            }
+         }
+      }
+
+      return minDistanceToEdge;
    }
 
    public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
