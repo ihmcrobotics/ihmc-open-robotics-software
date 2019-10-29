@@ -20,7 +20,6 @@ import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -63,7 +62,7 @@ public class UpDownExplorer
    public UpDownExplorer(BehaviorHelper behaviorHelper)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getManagedMessager());
 
       behaviorHelper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
       upDownCenter = behaviorHelper.createUIInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));

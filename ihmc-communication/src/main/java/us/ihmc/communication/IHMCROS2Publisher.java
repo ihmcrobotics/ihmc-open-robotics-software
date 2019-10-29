@@ -5,17 +5,17 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.ros2.Ros2Publisher;
+import us.ihmc.ros2.Ros2PublisherBasics;
 
 public class IHMCROS2Publisher<T>
 {
    private static final int NUMBER_OF_EXCEPTIONS_TO_PRINT = 5;
 
-   private Ros2Publisher<T> publisher;
+   private Ros2PublisherBasics<T> publisher;
 
    private int numberOfExceptions = 0;
 
-   IHMCROS2Publisher(Ros2Publisher<T> ros2Publisher)
+   IHMCROS2Publisher(Ros2PublisherBasics<T> ros2Publisher)
    {
       this.publisher = ros2Publisher;
    }
