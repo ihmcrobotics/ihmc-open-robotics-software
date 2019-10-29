@@ -48,6 +48,10 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -73,6 +77,12 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getLidarOrientation(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getScan().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -89,6 +99,10 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLidarPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLidarOrientation(), cdr);
+      cdr.write_type_6(data.getSensorPoseConfidence());
+
+      cdr.write_type_6(data.getPointCloudConfidence());
+
       if(data.getScan().size() <= 200000)
       cdr.write_type_e(data.getScan());else
           throw new RuntimeException("scan field exceeds the maximum length");
@@ -103,6 +117,10 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getLidarPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLidarOrientation(), cdr);	
+      data.setSensorPoseConfidence(cdr.read_type_6());
+      	
+      data.setPointCloudConfidence(cdr.read_type_6());
+      	
       cdr.read_type_e(data.getScan());	
 
    }
@@ -116,6 +134,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       ser.write_type_a("lidar_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLidarOrientation());
 
+      ser.write_type_6("sensor_pose_confidence", data.getSensorPoseConfidence());
+      ser.write_type_6("point_cloud_confidence", data.getPointCloudConfidence());
       ser.write_type_e("scan", data.getScan());
    }
 
@@ -128,6 +148,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       ser.read_type_a("lidar_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLidarOrientation());
 
+      data.setSensorPoseConfidence(ser.read_type_6("sensor_pose_confidence"));
+      data.setPointCloudConfidence(ser.read_type_6("point_cloud_confidence"));
       ser.read_type_e("scan", data.getScan());
    }
 
