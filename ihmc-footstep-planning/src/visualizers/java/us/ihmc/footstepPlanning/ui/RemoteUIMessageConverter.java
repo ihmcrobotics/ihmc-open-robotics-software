@@ -450,7 +450,9 @@ public class RemoteUIMessageConverter
       if (!checkPostProcessingRequireds())
          return;
 
-      postProcessingParametersPublisher.publish(postProcessingParametersReference.get().getAsPacket());
+      FootstepPostProcessingParametersReadOnly postProcessingParameters = postProcessingParametersReference.get();
+      if (postProcessingParameters != null)
+         postProcessingParametersPublisher.publish(postProcessingParameters.getAsPacket());
 
       submitFootstepPostProcessingRequestPacket();
    }

@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -68,35 +67,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
    public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
    public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
-   private static final CategoryTheme PlanarRegion = apiFactory.createCategoryTheme("PlanarRegion");
-   private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
-   private static final CategoryTheme Intermediate = apiFactory.createCategoryTheme("Intermediate");
-   private static final CategoryTheme Goal = apiFactory.createCategoryTheme("Goal");
-   private static final CategoryTheme Any = apiFactory.createCategoryTheme("Any");
-   private static final CategoryTheme SelectedRegion = apiFactory.createCategoryTheme("SelectedRegion");
-   private static final CategoryTheme PositionTheme = apiFactory.createCategoryTheme("PositionTheme");
-   private static final CategoryTheme OrientationTheme = apiFactory.createCategoryTheme("OrientationTheme");
-   private static final CategoryTheme EditMode = apiFactory.createCategoryTheme("EditMode");
-   private static final CategoryTheme FootstepPlan = apiFactory.createCategoryTheme("FootstepPlan");
-   private static final CategoryTheme GoHome = apiFactory.createCategoryTheme("GoHome");
-   private static final CategoryTheme BodyPath = apiFactory.createCategoryTheme("BodyPath");
-   private static final CategoryTheme VisibilityGraphs = apiFactory.createCategoryTheme("VisibilityGraphs");
-   private static final CategoryTheme NodeChecking = apiFactory.createCategoryTheme("NodeChecking");
-   private static final CategoryTheme UnitTest = apiFactory.createCategoryTheme("UnitTest");
-   private static final CategoryTheme Cluster = apiFactory.createCategoryTheme("Cluster");
-   private static final CategoryTheme Map = apiFactory.createCategoryTheme("Map");
-   private static final CategoryTheme InterRegion = apiFactory.createCategoryTheme("InterRegion");
-   private static final CategoryTheme Statistics = apiFactory.createCategoryTheme("Statistics");
-   private static final CategoryTheme Raw = apiFactory.createCategoryTheme("Raw");
-   private static final CategoryTheme Navigable = apiFactory.createCategoryTheme("Navigable");
-   private static final CategoryTheme NonNavigable = apiFactory.createCategoryTheme("NonNavigable");
-   private static final CategoryTheme OccupancyMap = apiFactory.createCategoryTheme("OccupancyMap");
-   private static final CategoryTheme PlannerData = apiFactory.createCategoryTheme("PlannerData");
-   private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
-   private static final CategoryTheme Preview = apiFactory.createCategoryTheme("Preview");
-   private static final CategoryTheme Proximity = apiFactory.createCategoryTheme("Proximity");
-
-   private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
 
    public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
