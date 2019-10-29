@@ -1,21 +1,15 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,9 +47,9 @@ public class BehaviorHelper
    private final DRCRobotModel robotModel;
    private final ManagedMessager managedMessager;
    private final ManagedROS2Node managedROS2Node;
-
-   private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
-   private final RemoteREAInterface remoteREAInterface;
+   private RemoteHumanoidRobotInterface robot;
+   private RemoteFootstepPlannerInterface footstepPlannerToolbox;
+   private RemoteREAInterface rea;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -65,67 +59,30 @@ public class BehaviorHelper
 
       setCommunicationCallbacksEnabled(false); // TODO: should initialize to false?
 
-      // TODO: Remove all this construction until needed
-
-      // TODO: Create enable/disable support for these
-
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(managedROS2Node, robotModel, messager); // planner toolbox
-      remoteREAInterface = new RemoteREAInterface(managedROS2Node); // REA toolbox
-
       // TODO: Extract UI comms class
-
-      // TODO: Make accessors to classes; interface?
    }
 
    // Construction-only methods:
 
-   // TODO
-
-   public RemoteHumanoidRobotInterface createRobotInterface()
+   public RemoteHumanoidRobotInterface getOrCreateRobotInterface()
    {
-      return new RemoteHumanoidRobotInterface(managedROS2Node, robotModel);
+      if (robot == null)
+         robot = new RemoteHumanoidRobotInterface(managedROS2Node, robotModel);
+      return robot;
    }
 
-   // Robot Command Methods:
-
-
-   // Robot Action Callback and Polling Methods:
-
-   // RobotEnvironmentAwareness Methods:
-
-   public PlanarRegionsList getLatestPlanarRegionList()
+   public RemoteFootstepPlannerInterface getOrCreateFootstepPlannerToolboxInterface()
    {
-      return remoteREAInterface.getLatestPlanarRegionList();
+      if (footstepPlannerToolbox == null)
+         footstepPlannerToolbox = new RemoteFootstepPlannerInterface(managedROS2Node, robotModel, managedMessager);
+      return footstepPlannerToolbox; // planner toolbox
    }
 
-   public PlanarRegionsListMessage getLatestPlanarRegionListMessage()
+   public RemoteREAInterface getOrCreateREAInterface()
    {
-      return remoteREAInterface.getLatestPlanarRegionListMessage();
-   }
-
-   public void clearREA()
-   {
-      remoteREAInterface.clearREA();
-   }
-
-   // Planning Methods:
-
-   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
-                                                                     PlanarRegionsList planarRegionsList)
-   {
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      return requestPlan(start, goal, planarRegionsListMessage);
-   }
-
-   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal,
-                                                                     PlanarRegionsListMessage planarRegionsListMessage)
-   {
-      return remoteFootstepPlannerInterface.requestPlan(start, goal, planarRegionsListMessage);
-   }
-
-   public void abortPlanning()
-   {
-      remoteFootstepPlannerInterface.abortPlanning();
+      if (rea == null)
+         rea = new RemoteREAInterface(managedROS2Node);
+      return rea; // REA toolbox
    }
 
    // UI Communication Methods:

@@ -59,7 +59,7 @@ public class FancyPosesBehavior implements BehaviorInterface
       LogTools.debug("Initializing FancyPosesBehavior");
 
       this.helper = helper;
-      robot = helper.createRobotInterface();
+      robot = helper.getOrCreateRobotInterface();
 
       robot.createFootstepStatusCallback(this::acceptFootstepStatus);
       stepping = helper.createBooleanActivationReference(API.Stepping);

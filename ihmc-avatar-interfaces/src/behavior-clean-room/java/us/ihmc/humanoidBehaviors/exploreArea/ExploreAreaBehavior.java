@@ -23,10 +23,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -72,7 +74,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private final List<Double> headPitchForLookingAround = Arrays.asList(-20.0, 0.0, 20.0);
 
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
 
    private int chestYawForLookingAroundIndex = 0;
 
@@ -88,6 +90,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    }
 
    private final BehaviorHelper helper;
+   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteREAInterface rea;
 
    private final StateMachine<ExploreAreaBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
@@ -106,7 +110,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      robot = helper.createRobotInterface();
+      robot = helper.getOrCreateRobotInterface();
+      rea = helper.getOrCreateREAInterface();
+      footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
 
       explore = helper.createUIInput(ExploreAreaBehaviorAPI.ExploreArea, false);
       helper.createUICallback(ExploreAreaBehaviorAPI.Parameters, parameters::setAllFromStrings);
@@ -263,7 +269,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void onPerceiveStateEntry()
    {
       LogTools.info("Entering perceive state. Clearing LIDAR");
-      helper.clearREA();
+      rea.clearREA();
    }
 
    private void rememberObservationPoint()
@@ -375,7 +381,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doSlam(boolean doSlam)
    {
-      PlanarRegionsList latestPlanarRegionsList = helper.getLatestPlanarRegionList();
+      PlanarRegionsList latestPlanarRegionsList = rea.getLatestPlanarRegionList();
 
       this.latestPlanarRegionsList = latestPlanarRegionsList;
       if (concatenatedMap == null)
@@ -755,7 +761,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
          helper.publishToUI(ExploreAreaBehaviorAPI.PlanningToPosition, goalToSend);
 
-         footstepPlanResultNotification = helper.requestPlan(midFeetZUpPose, goal, concatenatedMap);
+         footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose, goal, concatenatedMap);
       }
       else
       {
@@ -803,7 +809,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       footstepPlan = null;
       footstepDataListMessageFromPlan = null;
       planarRegionsListFromPlan = null;
-      helper.abortPlanning();
+      footstepPlannerToolbox.abortPlanning();
    }
 
    private boolean readyToTransitionFromPlanToPlan(double timeInState)

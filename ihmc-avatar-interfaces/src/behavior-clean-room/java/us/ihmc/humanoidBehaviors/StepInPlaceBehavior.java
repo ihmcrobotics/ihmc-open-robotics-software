@@ -42,7 +42,7 @@ public class StepInPlaceBehavior implements BehaviorInterface
       LogTools.debug("Initializing step in place behavior");
 
       this.helper = helper;
-      robot = helper.createRobotInterface();
+      robot = helper.getOrCreateRobotInterface();
 
       robot.createFootstepStatusCallback(this::consumeFootstepStatus);
       stepping = helper.createBooleanActivationReference(API.Stepping);

@@ -6,6 +6,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,6 +18,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2NodeInterface;
@@ -129,6 +131,19 @@ public class RemoteFootstepPlannerInterface
 
          resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(result);
       }
+   }
+
+   /**
+    * Assume flat ground.
+    */
+   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal)
+   {
+      return requestPlan(start, goal, (PlanarRegionsListMessage) null);
+   }
+
+   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal, PlanarRegionsList planarRegionsList)
+   {
+      return requestPlan(start, goal, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
