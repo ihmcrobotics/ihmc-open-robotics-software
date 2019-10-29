@@ -31,7 +31,7 @@ public class CompositeFootstepPlanPostProcessing implements FootstepPlanPostProc
    @Override
    public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputStatus)
    {
-      FootstepPostProcessingPacket currentOutputStatus = outputStatus;
+      FootstepPostProcessingPacket currentOutputStatus = new FootstepPostProcessingPacket(outputStatus);
       for (FootstepPlanPostProcessingElement element : postProcessingElements.values())
       {
          if (!element.isActive())
