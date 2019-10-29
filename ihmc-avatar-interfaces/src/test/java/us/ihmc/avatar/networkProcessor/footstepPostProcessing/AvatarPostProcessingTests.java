@@ -94,7 +94,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    private IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
-   private IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> postProcessingRequestPublisher;
+   private IHMCROS2Publisher<FootstepPostProcessingPacket> postProcessingRequestPublisher;
    private IHMCROS2Publisher<FootstepPlannerParametersPacket> planningParametersPublisher;
    private IHMCROS2Publisher<FootstepPostProcessingParametersPacket> postProcessingParametersPublisher;
    private IHMCROS2Publisher<ToolboxStateMessage> planningToolboxPublisher;
@@ -141,13 +141,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       MessageTopicNameGenerator postProcessingSubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingToolboxModule.moduleName, ROS2Tools.ROS2TopicQualifier.INPUT);
 
       planningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class, footstepPlannerSubGenerator);
-      postProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class, postProcessingSubGenerator);
+      postProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class, postProcessingSubGenerator);
       postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingParametersPacket.class, postProcessingSubGenerator);
       planningParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class, footstepPlannerSubGenerator);
       planningToolboxPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
 
       drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator, plannerOutputStatus::set);
-      drcSimulationTestHelper.createSubscriber(FootstepPlanningToolboxOutputStatus.class, postProcessingPubGenerator, postProcessingOutputStatus::set);
+      drcSimulationTestHelper.createSubscriber(FootstepPostProcessingPacket.class, postProcessingPubGenerator, postProcessingOutputStatus::set);
 
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -365,8 +365,40 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       message.getFootstepDataList().add().set(footstepData);
 
+      FramePose3D leftFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.RIGHT));
+      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      List<FootstepDataMessage> footsteps = new ArrayList<>(message.getFootstepDataList());
+      FootstepPostProcessingPacket postProcessingRequest = new FootstepPostProcessingPacket();
+      postProcessingRequest.getFootstepDataList().set(message);
+      postProcessingRequest.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
+      postProcessingRequest.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
+      postProcessingRequest.getRightFootPositionInWorld().set(rightFootPose.getPosition());
+      postProcessingRequest.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
+      for (Point2DReadOnly vertex : defaultSolePolygon.getVertexBufferView())
+      {
+         postProcessingRequest.getLeftFootContactPoints2d().add().set(vertex);
+         postProcessingRequest.getRightFootContactPoints2d().add().set(vertex);
+      }
+
+      postProcessingRequestPublisher.publish(postProcessingRequest);
+
+      double maxTimeToWait = 20.0;
+      long startTime = System.nanoTime();
+      while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
+      {
+         ThreadTools.sleep(100);
+      }
+
+      if (postProcessingOutputStatus.get() == null)
+      {
+         fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
+      }
+
+      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
+
+      List<FootstepDataMessage> footsteps = new ArrayList<>(footstepDataListMessage.getFootstepDataList());
 
       int stepCounter = 0;
       for (RobotSide robotSide1 : RobotSide.values)
@@ -389,7 +421,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          });
       }
 
-      drcSimulationTestHelper.publishToController(message);
+      drcSimulationTestHelper.publishToController(footstepDataListMessage);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((swingDuration + transferDuration) * numberOfSteps + 5.0);
       assertTrue(success);
    }
@@ -477,7 +509,20 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          fail("Never received an output from the footstep planner, even after 20 seconds.");
       }
 
-      postProcessingRequestPublisher.publish(plannerOutputStatus.get());
+      FramePose3D leftFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.RIGHT));
+      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepPostProcessingPacket postProcessingRequest = new FootstepPostProcessingPacket();
+      postProcessingRequest.getFootstepDataList().set(plannerOutputStatus.get().getFootstepDataList());
+      postProcessingRequest.getPlanarRegionsList().set(plannerOutputStatus.get().getPlanarRegionsList());
+      postProcessingRequest.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
+      postProcessingRequest.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
+      postProcessingRequest.getRightFootPositionInWorld().set(rightFootPose.getPosition());
+      postProcessingRequest.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
+
+      postProcessingRequestPublisher.publish(postProcessingRequest);
 
       startTime = System.nanoTime();
       while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)

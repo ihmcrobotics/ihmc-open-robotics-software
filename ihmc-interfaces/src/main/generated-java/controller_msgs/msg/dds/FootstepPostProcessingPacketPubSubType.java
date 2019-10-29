@@ -50,6 +50,12 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -78,6 +84,16 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRightFootOrientationInWorld(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getLeftFootContactPoints2d().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftFootContactPoints2d().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRightFootContactPoints2d().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootContactPoints2d().get(i0), current_alignment);}
+
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
@@ -94,6 +110,14 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRightFootPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLeftFootOrientationInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRightFootOrientationInWorld(), cdr);
+      if(data.getLeftFootContactPoints2d().size() <= 10)
+      cdr.write_type_e(data.getLeftFootContactPoints2d());else
+          throw new RuntimeException("left_foot_contact_points_2d field exceeds the maximum length");
+
+      if(data.getRightFootContactPoints2d().size() <= 10)
+      cdr.write_type_e(data.getRightFootContactPoints2d());else
+          throw new RuntimeException("right_foot_contact_points_2d field exceeds the maximum length");
+
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getFootstepDataList(), cdr);
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
    }
@@ -106,6 +130,8 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRightFootPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLeftFootOrientationInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRightFootOrientationInWorld(), cdr);	
+      cdr.read_type_e(data.getLeftFootContactPoints2d());	
+      cdr.read_type_e(data.getRightFootContactPoints2d());	
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getFootstepDataList(), cdr);	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
 
@@ -123,6 +149,8 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
 
       ser.write_type_a("right_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRightFootOrientationInWorld());
 
+      ser.write_type_e("left_foot_contact_points_2d", data.getLeftFootContactPoints2d());
+      ser.write_type_e("right_foot_contact_points_2d", data.getRightFootContactPoints2d());
       ser.write_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
@@ -141,6 +169,8 @@ public class FootstepPostProcessingPacketPubSubType implements us.ihmc.pubsub.To
 
       ser.read_type_a("right_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRightFootOrientationInWorld());
 
+      ser.read_type_e("left_foot_contact_points_2d", data.getLeftFootContactPoints2d());
+      ser.read_type_e("right_foot_contact_points_2d", data.getRightFootContactPoints2d());
       ser.read_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
