@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
+   private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
@@ -89,7 +90,6 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      boolean fullyExpandVisibilityGraph = false;
       return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
    }
 
@@ -117,7 +117,10 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions();
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(), parameters);
+      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
+                                            parameters.getPreferredToPreferredInterRegionConnectionFilter(),
+                                            parameters.getPreferredToNonPreferredInterRegionConnectionFilter(),
+                                            parameters);
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
@@ -173,7 +176,7 @@ public class NavigableRegionsManager
          {
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
-            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight());
+            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight(), neighboringEdge.getStaticEdgeCost());
             double newCostFromStart = nodeToExpand.getCostFromStart() + connectionCost;
 
             double currentCostFromStart = neighbor.getCostFromStart();
@@ -185,6 +188,7 @@ public class NavigableRegionsManager
                double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
+               // FIXME is this check necessary?
                stack.remove(neighbor);
                stack.add(neighbor);
             }
@@ -223,7 +227,7 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
+   List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
    {
       if (nodeToExpand.getHasBeenExpanded())
       {
@@ -240,7 +244,7 @@ public class NavigableRegionsManager
       return nodeToExpand.getEdges();
    }
 
-   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight)
+   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight, double staticEdgeCost)
    {
       Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
       Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
@@ -256,7 +260,7 @@ public class NavigableRegionsManager
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
       double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
 
-      return edgeWeight * (distanceCost + elevationCost);
+      return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)

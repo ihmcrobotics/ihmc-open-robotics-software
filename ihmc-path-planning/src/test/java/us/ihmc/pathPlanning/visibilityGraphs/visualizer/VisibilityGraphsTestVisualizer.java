@@ -13,6 +13,8 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.PreviousDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ReloadDatasetRequest;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowBodyPath;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
@@ -91,6 +93,8 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private ToggleButton showClusterRawPointsToggleButton, showClusterNavigableExtrusionsToggleButton, showClusterNonNavigableExtrusionsToggleButton;
    @FXML
+   private ToggleButton showClusterPreferredNavigableExtrusionsToggleButton, showClusterPreferredNonNavigableExtrusionsToggleButton;
+   @FXML
    private ToggleButton showInnerRegionMapsToggleButton, showInterRegionMapToggleButton;
    @FXML
    private ToggleButton showStartMapToggleButton, showGoalMapToggleButton;
@@ -121,7 +125,8 @@ public class VisibilityGraphsTestVisualizer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+                                  ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
       navigableRegionMeshViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionVisibilityMap);
@@ -196,6 +201,8 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
 
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), false);

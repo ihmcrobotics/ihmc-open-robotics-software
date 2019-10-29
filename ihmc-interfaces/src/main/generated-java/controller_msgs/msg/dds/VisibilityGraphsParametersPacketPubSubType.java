@@ -62,6 +62,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -79,6 +81,12 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -138,6 +146,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -163,6 +174,15 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -199,6 +219,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getObstacleExtrusionDistance());
 
+      cdr.write_type_6(data.getPreferredNavigableExtrusionDistance());
+
       cdr.write_type_6(data.getPreferredObstacleExtrusionDistance());
 
       cdr.write_type_6(data.getObstacleExtrusionDistanceIfNotTooHighToStep());
@@ -229,6 +251,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_7(data.getComputeOrientationsToAvoidObstacles());
 
+      cdr.write_type_7(data.getIncludePreferredExtrusions());
+
       cdr.write_type_6(data.getHeuristicWeight());
 
       cdr.write_type_6(data.getDistanceWeight());
@@ -238,6 +262,10 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       cdr.write_type_6(data.getOccludedGoalEdgeWeight());
 
       cdr.write_type_6(data.getWeightForInterRegionEdge());
+
+      cdr.write_type_6(data.getWeightForNonPreferredEdge());
+
+      cdr.write_type_6(data.getCostForNonPreferredNode());
 
       cdr.write_type_7(data.getReturnBestEffortSolution());
 
@@ -254,6 +282,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setNavigableExtrusionDistance(cdr.read_type_6());
       	
       data.setObstacleExtrusionDistance(cdr.read_type_6());
+      	
+      data.setPreferredNavigableExtrusionDistance(cdr.read_type_6());
       	
       data.setPreferredObstacleExtrusionDistance(cdr.read_type_6());
       	
@@ -285,6 +315,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setComputeOrientationsToAvoidObstacles(cdr.read_type_7());
       	
+      data.setIncludePreferredExtrusions(cdr.read_type_7());
+      	
       data.setHeuristicWeight(cdr.read_type_6());
       	
       data.setDistanceWeight(cdr.read_type_6());
@@ -294,6 +326,10 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setOccludedGoalEdgeWeight(cdr.read_type_6());
       	
       data.setWeightForInterRegionEdge(cdr.read_type_6());
+      	
+      data.setWeightForNonPreferredEdge(cdr.read_type_6());
+      	
+      data.setCostForNonPreferredNode(cdr.read_type_6());
       	
       data.setReturnBestEffortSolution(cdr.read_type_7());
       	
@@ -308,6 +344,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("normal_z_threshold_for_accessible_regions", data.getNormalZThresholdForAccessibleRegions());
       ser.write_type_6("navigable_extrusion_distance", data.getNavigableExtrusionDistance());
       ser.write_type_6("obstacle_extrusion_distance", data.getObstacleExtrusionDistance());
+      ser.write_type_6("preferred_navigable_extrusion_distance", data.getPreferredNavigableExtrusionDistance());
       ser.write_type_6("preferred_obstacle_extrusion_distance", data.getPreferredObstacleExtrusionDistance());
       ser.write_type_6("obstacle_extrusion_distance_if_not_too_high_to_step", data.getObstacleExtrusionDistanceIfNotTooHighToStep());
       ser.write_type_6("too_high_to_step_distance", data.getTooHighToStepDistance());
@@ -323,11 +360,14 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_7("perform_post_processing_node_shifting", data.getPerformPostProcessingNodeShifting());
       ser.write_type_7("introduce_midpoints_in_post_processing", data.getIntroduceMidpointsInPostProcessing());
       ser.write_type_7("compute_orientations_to_avoid_obstacles", data.getComputeOrientationsToAvoidObstacles());
+      ser.write_type_7("include_preferred_extrusions", data.getIncludePreferredExtrusions());
       ser.write_type_6("heuristic_weight", data.getHeuristicWeight());
       ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("elevation_weight", data.getElevationWeight());
       ser.write_type_6("occluded_goal_edge_weight", data.getOccludedGoalEdgeWeight());
       ser.write_type_6("weight_for_inter_region_edge", data.getWeightForInterRegionEdge());
+      ser.write_type_6("weight_for_non_preferred_edge", data.getWeightForNonPreferredEdge());
+      ser.write_type_6("cost_for_non_preferred_node", data.getCostForNonPreferredNode());
       ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
@@ -339,6 +379,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setNormalZThresholdForAccessibleRegions(ser.read_type_6("normal_z_threshold_for_accessible_regions"));
       data.setNavigableExtrusionDistance(ser.read_type_6("navigable_extrusion_distance"));
       data.setObstacleExtrusionDistance(ser.read_type_6("obstacle_extrusion_distance"));
+      data.setPreferredNavigableExtrusionDistance(ser.read_type_6("preferred_navigable_extrusion_distance"));
       data.setPreferredObstacleExtrusionDistance(ser.read_type_6("preferred_obstacle_extrusion_distance"));
       data.setObstacleExtrusionDistanceIfNotTooHighToStep(ser.read_type_6("obstacle_extrusion_distance_if_not_too_high_to_step"));
       data.setTooHighToStepDistance(ser.read_type_6("too_high_to_step_distance"));
@@ -354,11 +395,14 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setPerformPostProcessingNodeShifting(ser.read_type_7("perform_post_processing_node_shifting"));
       data.setIntroduceMidpointsInPostProcessing(ser.read_type_7("introduce_midpoints_in_post_processing"));
       data.setComputeOrientationsToAvoidObstacles(ser.read_type_7("compute_orientations_to_avoid_obstacles"));
+      data.setIncludePreferredExtrusions(ser.read_type_7("include_preferred_extrusions"));
       data.setHeuristicWeight(ser.read_type_6("heuristic_weight"));
       data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setElevationWeight(ser.read_type_6("elevation_weight"));
       data.setOccludedGoalEdgeWeight(ser.read_type_6("occluded_goal_edge_weight"));
       data.setWeightForInterRegionEdge(ser.read_type_6("weight_for_inter_region_edge"));
+      data.setWeightForNonPreferredEdge(ser.read_type_6("weight_for_non_preferred_edge"));
+      data.setCostForNonPreferredNode(ser.read_type_6("cost_for_non_preferred_node"));
       data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 

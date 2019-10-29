@@ -22,23 +22,28 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    private boolean hasBeenExpanded = false;
    private VisibilityGraphNode bestParentNode = null;
 
+   private final boolean isPreferredNode;
+
    private final ArrayList<VisibilityGraphEdge> edges = new ArrayList<>();
 
-   public int getRegionId()
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
+                              boolean isPreferredNode)
    {
-      return pointInWorld.getRegionId();
+      this(pointInWorld, pointInLocal, visibilityGraphNavigableRegion, visibilityGraphNavigableRegion.getMapId(), isPreferredNode);
    }
 
-   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion)
-   {
-      this(pointInWorld, pointInLocal, visibilityGraphNavigableRegion, visibilityGraphNavigableRegion.getMapId());
-   }
-
-   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, int mapId)
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
+                              int mapId, boolean isPreferredNode)
    {
       this.visibilityGraphNavigableRegion = visibilityGraphNavigableRegion;
       this.pointInWorld = new ConnectionPoint3D(pointInWorld, mapId);
       this.point2DInLocal = new Point2D(pointInLocal);
+      this.isPreferredNode = isPreferredNode;
+   }
+
+   public int getRegionId()
+   {
+      return pointInWorld.getRegionId();
    }
 
    public VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegion()
@@ -100,6 +105,11 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    public void setEstimatedCostToGoal(double estimatedCostToGoal)
    {
       this.estimatedCostToGoal = estimatedCostToGoal;
+   }
+
+   public boolean isPreferredNode()
+   {
+      return isPreferredNode;
    }
 
    public boolean getHasBeenExpanded()

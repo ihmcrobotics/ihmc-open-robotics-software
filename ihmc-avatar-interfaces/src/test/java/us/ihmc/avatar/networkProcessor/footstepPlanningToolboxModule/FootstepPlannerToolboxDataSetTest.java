@@ -868,7 +868,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
       @Override
       public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
       {
-         return new DefaultVisibilityGraphParameters();
+         DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
+         return visibilityGraphParameters;
       }
    }
 
