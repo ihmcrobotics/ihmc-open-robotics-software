@@ -21,7 +21,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
@@ -1246,7 +1245,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       FootstepDataListMessage twoStepsInPlace = twoStepsInPlace(fullRobotModel.getSoleFrames());
       drcSimulationTestHelper.publishToController(twoStepsInPlace);
 
-      double walkingDuration = computeWalkingDuration(twoStepsInPlace, getRobotModel().getWalkingControllerParameters());
+      double walkingDuration = EndToEndTestTools.computeWalkingDuration(twoStepsInPlace, getRobotModel().getWalkingControllerParameters());
 
       int numberOfAssertions = 50;
 
@@ -1486,46 +1485,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
 
       return HumanoidMessageTools.createFootstepDataListMessage(footstepDataList, -1.0);
-   }
-
-   public static double computeWalkingDuration(FootstepDataListMessage message, WalkingControllerParameters parameters)
-   {
-      double walkingDuration = 0.0;
-
-      Object<FootstepDataMessage> footsteps = message.getFootstepDataList();
-
-      if (footsteps.isEmpty())
-         return walkingDuration;
-
-      double defaultSwingTime = selectDefaultIfCustomInvalid(message.getDefaultSwingDuration(), parameters.getDefaultSwingTime());
-      double defaultTransferTime = selectDefaultIfCustomInvalid(message.getDefaultTransferDuration(), parameters.getDefaultTransferTime());
-      FootstepDataMessage initialFootstep = footsteps.get(0);
-
-      walkingDuration += computeStepDuration(initialFootstep, parameters.getDefaultInitialTransferTime(), defaultSwingTime);
-
-      for (int i = 1; i < footsteps.size(); i++)
-      {
-         walkingDuration += computeStepDuration(footsteps.get(i), defaultTransferTime, defaultSwingTime);
-      }
-
-      walkingDuration += selectDefaultIfCustomInvalid(message.getFinalTransferDuration(), parameters.getDefaultFinalTransferTime());
-
-      return walkingDuration;
-   }
-
-   public static double computeStepDuration(FootstepDataMessage message, double defaultTransferDuration, double defaultSwingDuration)
-   {
-      double stepDuration = selectDefaultIfCustomInvalid(message.getTransferDuration(), defaultTransferDuration);
-      stepDuration += selectDefaultIfCustomInvalid(message.getSwingDuration(), defaultSwingDuration);
-      return stepDuration;
-   }
-
-   private static double selectDefaultIfCustomInvalid(double customValue, double defaultValue)
-   {
-      if (customValue <= 0.0 || Double.isNaN(customValue))
-         return defaultValue;
-      else
-         return customValue;
    }
 
    @BeforeEach

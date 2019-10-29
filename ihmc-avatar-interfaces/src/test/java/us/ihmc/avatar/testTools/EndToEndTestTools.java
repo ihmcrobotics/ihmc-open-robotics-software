@@ -2,9 +2,12 @@ package us.ihmc.avatar.testTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
@@ -28,6 +31,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -50,6 +54,46 @@ public class EndToEndTestTools
 {
    public static final String FORMAT = EuclidCoreIOTools.getStringFormat(6, 4);
 
+   public static double computeWalkingDuration(FootstepDataListMessage message, WalkingControllerParameters parameters)
+   {
+      double walkingDuration = 0.0;
+
+      Object<FootstepDataMessage> footsteps = message.getFootstepDataList();
+
+      if (footsteps.isEmpty())
+         return walkingDuration;
+
+      double defaultSwingTime = selectDefaultIfCustomInvalid(message.getDefaultSwingDuration(), parameters.getDefaultSwingTime());
+      double defaultTransferTime = selectDefaultIfCustomInvalid(message.getDefaultTransferDuration(), parameters.getDefaultTransferTime());
+      FootstepDataMessage initialFootstep = footsteps.get(0);
+
+      walkingDuration += computeStepDuration(initialFootstep, parameters.getDefaultInitialTransferTime(), defaultSwingTime);
+
+      for (int i = 1; i < footsteps.size(); i++)
+      {
+         walkingDuration += computeStepDuration(footsteps.get(i), defaultTransferTime, defaultSwingTime);
+      }
+
+      walkingDuration += selectDefaultIfCustomInvalid(message.getFinalTransferDuration(), parameters.getDefaultFinalTransferTime());
+
+      return walkingDuration;
+   }
+
+   public static double computeStepDuration(FootstepDataMessage message, double defaultTransferDuration, double defaultSwingDuration)
+   {
+      double stepDuration = selectDefaultIfCustomInvalid(message.getTransferDuration(), defaultTransferDuration);
+      stepDuration += selectDefaultIfCustomInvalid(message.getSwingDuration(), defaultSwingDuration);
+      return stepDuration;
+   }
+
+   private static double selectDefaultIfCustomInvalid(double customValue, double defaultValue)
+   {
+      if (customValue <= 0.0 || Double.isNaN(customValue))
+         return defaultValue;
+      else
+         return customValue;
+   }
+
    /**
     * This method will assert the number of waypoints used by a {@link RigidBodyTaskspaceControlState}
     * that is controlling the {@link RigidBodyBasics} with given name. The number of waypoints checked
@@ -63,7 +107,8 @@ public class EndToEndTestTools
    public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, int expectedNumberOfPoints,
                                                                      YoVariableHolder yoVariableHolder)
    {
-      assertEquals(expectedNumberOfPoints, findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder),
+      assertEquals(expectedNumberOfPoints,
+                   findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder),
                    "Unexpected number of waypoints:");
    }
 
@@ -88,9 +133,15 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedWaypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon,
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
+                                                              expectedWaypoint.getOrientation(),
+                                                              actualWaypoint.getOrientationCopy(),
+                                                              epsilon,
                                                               FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocityCopy(), epsilon,
+      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
+                                              expectedWaypoint.getAngularVelocity(),
+                                              actualWaypoint.getAngularVelocityCopy(),
+                                              epsilon,
                                               FORMAT);
    }
 
@@ -99,7 +150,10 @@ public class EndToEndTestTools
    {
       for (int jointIndex = 0; jointIndex < jointNames.length; jointIndex++)
       {
-         assertOneDoFJointFeedbackControllerDesireds(jointNames[jointIndex], desiredJointPositions[jointIndex], desiredJointVelocities[jointIndex], epsilon,
+         assertOneDoFJointFeedbackControllerDesireds(jointNames[jointIndex],
+                                                     desiredJointPositions[jointIndex],
+                                                     desiredJointVelocities[jointIndex],
+                                                     epsilon,
                                                      yoVariableHolder);
       }
    }
@@ -185,8 +239,15 @@ public class EndToEndTestTools
                                                       Pose3DReadOnly expectedDesiredPose, String endEffectorName,
                                                       TaskspaceTrajectoryStatusMessage statusMessage, double epsilon, double controllerDT)
    {
-      assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, expectedDesiredPose.getPosition(),
-                                      expectedDesiredPose.getOrientation(), endEffectorName, statusMessage, epsilon, controllerDT);
+      assertTaskspaceTrajectoryStatus(expectedSequenceID,
+                                      expectedStatus,
+                                      expectedTimestamp,
+                                      expectedDesiredPose.getPosition(),
+                                      expectedDesiredPose.getOrientation(),
+                                      endEffectorName,
+                                      statusMessage,
+                                      epsilon,
+                                      controllerDT);
    }
 
    public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
@@ -255,7 +316,8 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation), statusMessage.getDesiredEndEffectorOrientation(),
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
+                                                                 statusMessage.getDesiredEndEffectorOrientation(),
                                                                  epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
@@ -385,7 +447,8 @@ public class EndToEndTestTools
 
    public static Point3DReadOnly findFeedbackControllerDesiredPosition(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.POSITION.getName(),
+      return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                bodyName + Type.DESIRED.getName() + Space.POSITION.getName(),
                                 yoVariableHolder);
    }
 
@@ -394,19 +457,22 @@ public class EndToEndTestTools
     */
    public static QuaternionReadOnly findFeedbackControllerDesiredOrientation(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(),
+      return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(),
+                                   bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(),
                                    yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredLinearVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(),
+      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                 bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredAngularVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ANGULAR_VELOCITY.getName(),
+      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
+                                 bodyName + Type.DESIRED.getName() + Space.ANGULAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
