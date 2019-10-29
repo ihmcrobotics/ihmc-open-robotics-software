@@ -1,11 +1,15 @@
 package us.ihmc.humanoidBehaviors;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelperBuilder;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.ros2.Ros2Node;
 
 public enum BehaviorRegistry
 {
@@ -28,9 +32,9 @@ public enum BehaviorRegistry
       this.behaviorAPI = behaviorAPI;
    }
 
-   public void build(BehaviorHelperBuilder helperBuilder)
+   public void build(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
-      constructedBehavior = behaviorSupplier.build(helperBuilder.build());
+      constructedBehavior = behaviorSupplier.build(new BehaviorHelper(robotModel, messager, ros2Node));
    }
 
    public MessagerAPI getBehaviorAPI()

@@ -45,11 +45,9 @@ public class BehaviorModule
       PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
-      BehaviorHelperBuilder helperBuilder = new BehaviorHelperBuilder(robotModel, messager, ros2Node);
-
       for (BehaviorRegistry behavior : BehaviorRegistry.values())
       {
-         behavior.build(helperBuilder);
+         behavior.build(robotModel, messager, ros2Node);
       }
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
