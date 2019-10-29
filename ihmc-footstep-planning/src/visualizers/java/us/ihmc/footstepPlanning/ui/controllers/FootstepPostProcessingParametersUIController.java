@@ -81,6 +81,8 @@ public class FootstepPostProcessingParametersUIController
 
       fractionLoadIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
       fractionTimeOnFootIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
+      fractionLoadIfOtherFootHasNoWidth.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
+      fractionTimeOnFootIfOtherFootHasNoWidth.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
    }
 
    public void bindControls()

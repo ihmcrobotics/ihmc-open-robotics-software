@@ -35,12 +35,7 @@ import us.ihmc.footstepPlanning.ui.components.NodeCheckerEditor;
 import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
 import us.ihmc.footstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.footstepPlanning.ui.controllers.*;
-import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.FootstepPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.NodeCheckerRenderer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
-import us.ihmc.footstepPlanning.ui.viewers.VisibilityGraphsRenderer;
+import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
@@ -78,6 +73,7 @@ public class FootstepPlannerUI
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
+   private final FootstepPostProcessingMeshViewer postProcessingViewer;
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final FootstepPlannerDataExporter dataExporter;
@@ -206,6 +202,7 @@ public class FootstepPlannerUI
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
+      this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
@@ -216,6 +213,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
+      view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
@@ -267,6 +265,7 @@ public class FootstepPlannerUI
       startGoalEditor.start();
       orientationEditor.start();
       pathViewer.start();
+      postProcessingViewer.start();
       nodeCheckerRenderer.start();
       nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
@@ -340,6 +339,7 @@ public class FootstepPlannerUI
       startGoalEditor.stop();
       orientationEditor.stop();
       pathViewer.stop();
+      postProcessingViewer.stop();
       nodeCheckerRenderer.stop();
       dataExporter.stop();
       bodyPathMeshViewer.stop();

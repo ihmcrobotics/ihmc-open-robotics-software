@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
@@ -15,13 +13,12 @@ import java.util.List;
 public class PositionSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
-   private final ICPPlannerParameters walkingControllerParameters;
+   private final ICPPlannerParameters icpPlannerParameters;
 
-   public PositionSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters,
-                                                     ICPPlannerParameters walkingControllerParameters)
+   public PositionSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters icpPlannerParameters)
    {
       this.parameters = parameters;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.icpPlannerParameters = icpPlannerParameters;
    }
 
    /** {@inheritDoc} **/
@@ -52,7 +49,7 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
 
       FramePose3D nextFootPose = new FramePose3D();
 
-      double defaultTransferSplitFraction = walkingControllerParameters.getTransferSplitFraction();
+      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
       List<FootstepDataMessage> footstepDataMessageList = processedPlan.getFootstepDataList().getFootstepDataList();

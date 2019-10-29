@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
@@ -22,12 +20,12 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FootstepPostProcessingParametersReadOnly parameters;
-   private final ICPPlannerParameters walkingControllerParameters;
+   private final ICPPlannerParameters icpPlannerParameters;
 
-   public AreaSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters walkingControllerParameters)
+   public AreaSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters icpPlannerParameters)
    {
       this.parameters = parameters;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.icpPlannerParameters = icpPlannerParameters;
    }
 
    /** {@inheritDoc} **/
@@ -79,7 +77,7 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          previousPolygon.update();
       }
 
-      double defaultTransferSplitFraction = walkingControllerParameters.getTransferSplitFraction();
+      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
@@ -129,6 +127,9 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
          double percentAreaOnCurrentFoot = totalArea > 0.0 ? currentArea / totalArea : 0.5;
          double percentWidthOnCurrentFoot = totalWidth > 0.0 ? currentWidth / totalWidth : 0.5;
+
+         if (MathTools.epsilonEquals(percentAreaOnCurrentFoot, 0.5, 1.0e-2) && MathTools.epsilonEquals(percentWidthOnCurrentFoot, 0.5, 2.0e-2))
+            continue;
 
          double transferWeightDistributionFromArea = InterpolationTools.linearInterpolate(defaultWeightDistribution, parameters.getFractionLoadIfFootHasFullSupport(),
                                                                                           2.0 * percentAreaOnCurrentFoot - 1.0);

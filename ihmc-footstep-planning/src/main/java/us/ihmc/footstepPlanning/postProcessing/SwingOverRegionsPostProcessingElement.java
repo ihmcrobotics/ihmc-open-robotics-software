@@ -92,13 +92,15 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, footPoses.get(side),
                                                                                                                    nextFootPose, planarRegionsList);
+         if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
+         {
+            FootstepDataMessage footstepData = footstepDataMessageList.get(stepNumber);
 
-         FootstepDataMessage footstepData = footstepDataMessageList.get(stepNumber);
-
-         footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
-         Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
-         Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         MessageTools.copyData(new Point3D[] {waypointOne, waypointTwo}, footstepData.getCustomPositionWaypoints());
+            footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
+            Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+            Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
+            MessageTools.copyData(new Point3D[] {waypointOne, waypointTwo}, footstepData.getCustomPositionWaypoints());
+         }
 
          footPoses.put(side, nextFootPose);
       }

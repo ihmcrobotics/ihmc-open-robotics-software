@@ -51,7 +51,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    private final RealtimeRos2Node ros2Node;
 
@@ -183,7 +183,7 @@ public class RemoteUIMessageConverter
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // we want to list to the footstep plan post processing result from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class,
-                                           getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2TopicQualifier.INPUT),
+                                           getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2TopicQualifier.OUTPUT),
                                            s -> processFootstepPostProcessingResult(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
