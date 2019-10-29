@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.externalForceEstimation;
+package us.ihmc.valkyrie.externalForceEstimation;
 
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
@@ -8,9 +8,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -19,13 +16,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
-import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -39,7 +32,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ValkyrieExternalWrenchEstimationSimulation
