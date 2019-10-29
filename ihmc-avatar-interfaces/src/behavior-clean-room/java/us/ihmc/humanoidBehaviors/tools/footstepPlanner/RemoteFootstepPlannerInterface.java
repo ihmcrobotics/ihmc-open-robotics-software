@@ -19,6 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class RemoteFootstepPlannerInterface
 
    private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
-   public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
+   public RemoteFootstepPlannerInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
