@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
@@ -295,6 +296,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
             PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
             planarRegion.getTransformToWorld(planarRegionTransform);
             planarRegionReferenceFrame.setTransformAndUpdate(planarRegionTransform);
+
             for (int j = 0; j < planarRegion.getNumberOfConvexPolygons(); j++)
             {
                framePlanarRegion.setIncludingFrame(planarRegionReferenceFrame, planarRegion.getConvexPolygon(j));
