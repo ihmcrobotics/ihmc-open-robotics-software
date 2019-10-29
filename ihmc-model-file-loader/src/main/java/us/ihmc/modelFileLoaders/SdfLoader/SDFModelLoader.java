@@ -1,4 +1,4 @@
-package us.ihmc.robotDataVisualizer.modelLoader;
+package us.ihmc.modelFileLoaders.SdfLoader;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -14,15 +14,11 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.modelLoaders.LogModelLoader;
 import us.ihmc.tools.ClassLoaderTools;
 
-public class SDFModelLoader implements LogModelLoader<RobotDescription>
+public class SDFModelLoader implements LogModelLoader
 {
    private final static String resourceDirectoryLocation = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "resources";
 
