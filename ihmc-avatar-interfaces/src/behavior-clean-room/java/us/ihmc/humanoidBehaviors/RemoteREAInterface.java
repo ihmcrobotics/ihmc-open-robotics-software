@@ -7,14 +7,14 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 
 public class RemoteREAInterface
 {
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
-   public RemoteREAInterface(Ros2Node ros2Node)
+   public RemoteREAInterface(Ros2NodeInterface ros2Node)
    {
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);

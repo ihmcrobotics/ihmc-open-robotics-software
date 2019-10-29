@@ -129,7 +129,7 @@ public class PatrolBehavior implements BehaviorInterface
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 
-      waypointManager = WaypointManager.createForModule(helper.getMessager(),
+      waypointManager = WaypointManager.createForModule(helper.getManagedMessager(),
                                                         WaypointsToModule,
                                                         WaypointsToUI,
                                                         GoToWaypoint,
