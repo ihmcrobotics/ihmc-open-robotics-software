@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
@@ -45,9 +46,6 @@ import us.ihmc.tools.thread.TypedNotification;
  */
 public class PatrolBehavior implements BehaviorInterface
 {
-
-   private final RemoteHumanoidRobotInterface robot;
-
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
@@ -70,6 +68,9 @@ public class PatrolBehavior implements BehaviorInterface
    }
 
    private final BehaviorHelper helper;
+   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
+   private final RemoteREAInterface rea;
 
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
@@ -96,7 +97,9 @@ public class PatrolBehavior implements BehaviorInterface
    public PatrolBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      robot = helper.createRobotInterface();
+      robot = helper.getOrCreateRobotInterface();
+      footstepPlannerToolbox = helper.getOrCreateFootstepPlannerToolboxInterface();
+      rea = helper.getOrCreateREAInterface();
 
       LogTools.debug("Initializing patrol behavior");
 
@@ -152,7 +155,7 @@ public class PatrolBehavior implements BehaviorInterface
       perceiveDuration = helper.createUIInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
       helper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(helper);
+      upDownExplorer = new UpDownExplorer(helper, rea);
       helper.createUICallback(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -237,7 +240,7 @@ public class PatrolBehavior implements BehaviorInterface
       // update waypoints if UI modified them
       waypointManager.updateToMostRecentData();
 
-      helper.abortPlanning();
+      footstepPlannerToolbox.abortPlanning();
 
       FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
@@ -246,9 +249,11 @@ public class PatrolBehavior implements BehaviorInterface
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
-      PlanarRegionsListMessage latestPlanarRegionList = helper.getLatestPlanarRegionListMessage();
+      PlanarRegionsListMessage latestPlanarRegionList = rea.getLatestPlanarRegionListMessage();
 
-      footstepPlanResultNotification = helper.requestPlan(midFeetZUpPose, new FramePose3D(waypointManager.peekNextPose()), latestPlanarRegionList);
+      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose,
+                                                                          new FramePose3D(waypointManager.peekNextPose()),
+                                                                          latestPlanarRegionList);
    }
 
    private void doPlanStateAction(double timeInState)
@@ -384,7 +389,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onPerceiveStateEntry()
    {
-      helper.clearREA();
+      rea.clearREA();
    }
 
    private void doPerceiveStateAction(double timeInState)
