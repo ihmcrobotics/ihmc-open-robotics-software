@@ -57,11 +57,13 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    {
       long startTime = System.nanoTime();
 
+      swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(parameters.getDoInitialFastApproximation());
       swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(parameters.getMinimumSwingFootClearance());
       swingOverPlanarRegionsTrajectoryExpander.setIncrementalAdjustmentDistance(parameters.getIncrementalWaypointAdjustmentDistance());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(parameters.getMaximumWaypointAdjustmentDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(parameters.getMinimumHeightAboveFloorForCollision());
 
       FootstepPostProcessingPacket processedPlan = new FootstepPostProcessingPacket(outputPlan);
 

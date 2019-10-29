@@ -51,6 +51,7 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
             * desired weight distribution is linearly interpolated between the default value and the value returned by this function.
             */
    public double transfer_weight_distribution_at_full_depth_ = -1.0;
+   public boolean do_initial_fast_approximation_ = true;
    /**
             * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
             * along the swing foot trajectory and the planar regions in the environment.
@@ -73,6 +74,7 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
             * If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
             */
    public double incremental_waypoint_adjustment_distance_ = -1.0;
+   public double minimum_height_above_floor_for_collision_ = -1.0;
    /**
             * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
             * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
@@ -125,6 +127,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       transfer_weight_distribution_at_full_depth_ = other.transfer_weight_distribution_at_full_depth_;
 
+      do_initial_fast_approximation_ = other.do_initial_fast_approximation_;
+
       minimum_swing_foot_clearance_ = other.minimum_swing_foot_clearance_;
 
       number_of_checks_per_swing_ = other.number_of_checks_per_swing_;
@@ -134,6 +138,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       maximum_waypoint_adjustment_distance_ = other.maximum_waypoint_adjustment_distance_;
 
       incremental_waypoint_adjustment_distance_ = other.incremental_waypoint_adjustment_distance_;
+
+      minimum_height_above_floor_for_collision_ = other.minimum_height_above_floor_for_collision_;
 
       fraction_load_if_foot_has_full_support_ = other.fraction_load_if_foot_has_full_support_;
 
@@ -281,6 +287,15 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       return transfer_weight_distribution_at_full_depth_;
    }
 
+   public void setDoInitialFastApproximation(boolean do_initial_fast_approximation)
+   {
+      do_initial_fast_approximation_ = do_initial_fast_approximation;
+   }
+   public boolean getDoInitialFastApproximation()
+   {
+      return do_initial_fast_approximation_;
+   }
+
    /**
             * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
             * along the swing foot trajectory and the planar regions in the environment.
@@ -358,6 +373,15 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
    public double getIncrementalWaypointAdjustmentDistance()
    {
       return incremental_waypoint_adjustment_distance_;
+   }
+
+   public void setMinimumHeightAboveFloorForCollision(double minimum_height_above_floor_for_collision)
+   {
+      minimum_height_above_floor_for_collision_ = minimum_height_above_floor_for_collision;
+   }
+   public double getMinimumHeightAboveFloorForCollision()
+   {
+      return minimum_height_above_floor_for_collision_;
    }
 
    /**
@@ -468,6 +492,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_weight_distribution_at_full_depth_, other.transfer_weight_distribution_at_full_depth_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.do_initial_fast_approximation_, other.do_initial_fast_approximation_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_swing_foot_clearance_, other.minimum_swing_foot_clearance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_checks_per_swing_, other.number_of_checks_per_swing_, epsilon)) return false;
@@ -477,6 +503,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_waypoint_adjustment_distance_, other.maximum_waypoint_adjustment_distance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.incremental_waypoint_adjustment_distance_, other.incremental_waypoint_adjustment_distance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_height_above_floor_for_collision_, other.minimum_height_above_floor_for_collision_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_load_if_foot_has_full_support_, other.fraction_load_if_foot_has_full_support_, epsilon)) return false;
 
@@ -515,6 +543,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
 
       if(this.transfer_weight_distribution_at_full_depth_ != otherMyClass.transfer_weight_distribution_at_full_depth_) return false;
 
+      if(this.do_initial_fast_approximation_ != otherMyClass.do_initial_fast_approximation_) return false;
+
       if(this.minimum_swing_foot_clearance_ != otherMyClass.minimum_swing_foot_clearance_) return false;
 
       if(this.number_of_checks_per_swing_ != otherMyClass.number_of_checks_per_swing_) return false;
@@ -524,6 +554,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       if(this.maximum_waypoint_adjustment_distance_ != otherMyClass.maximum_waypoint_adjustment_distance_) return false;
 
       if(this.incremental_waypoint_adjustment_distance_ != otherMyClass.incremental_waypoint_adjustment_distance_) return false;
+
+      if(this.minimum_height_above_floor_for_collision_ != otherMyClass.minimum_height_above_floor_for_collision_) return false;
 
       if(this.fraction_load_if_foot_has_full_support_ != otherMyClass.fraction_load_if_foot_has_full_support_) return false;
 
@@ -559,6 +591,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       builder.append(this.transfer_split_fraction_at_full_depth_);      builder.append(", ");
       builder.append("transfer_weight_distribution_at_full_depth=");
       builder.append(this.transfer_weight_distribution_at_full_depth_);      builder.append(", ");
+      builder.append("do_initial_fast_approximation=");
+      builder.append(this.do_initial_fast_approximation_);      builder.append(", ");
       builder.append("minimum_swing_foot_clearance=");
       builder.append(this.minimum_swing_foot_clearance_);      builder.append(", ");
       builder.append("number_of_checks_per_swing=");
@@ -569,6 +603,8 @@ public class FootstepPostProcessingParametersPacket extends Packet<FootstepPostP
       builder.append(this.maximum_waypoint_adjustment_distance_);      builder.append(", ");
       builder.append("incremental_waypoint_adjustment_distance=");
       builder.append(this.incremental_waypoint_adjustment_distance_);      builder.append(", ");
+      builder.append("minimum_height_above_floor_for_collision=");
+      builder.append(this.minimum_height_above_floor_for_collision_);      builder.append(", ");
       builder.append("fraction_load_if_foot_has_full_support=");
       builder.append(this.fraction_load_if_foot_has_full_support_);      builder.append(", ");
       builder.append("fraction_time_on_foot_if_foot_has_full_support=");
