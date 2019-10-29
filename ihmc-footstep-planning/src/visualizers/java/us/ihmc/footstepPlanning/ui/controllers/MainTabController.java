@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
@@ -416,6 +417,9 @@ public class MainTabController
             messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartPosition, new Point3D(leftFoot));
             messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartOrientation, startRotationProperty.get());
          }
+
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootSupportPolygonTopic, PlannerTools.createDefaultFootPolygon());
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootSupportPolygonTopic, PlannerTools.createDefaultFootPolygon());
       }
       else
       {

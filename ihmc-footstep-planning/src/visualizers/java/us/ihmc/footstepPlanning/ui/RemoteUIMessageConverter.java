@@ -195,9 +195,13 @@ public class RemoteUIMessageConverter
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, s.takeNextData()));
 
+      // things from the controller
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           s -> processCapturabilityStatus(s.takeNextData()));
 
       MessageTopicNameGenerator controllerPreviewOutputTopicNameGenerator = getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
@@ -370,6 +374,19 @@ public class RemoteUIMessageConverter
          if (verbose)
             LogTools.info("Received updated planner regions.");
       }
+   }
+
+   private void processCapturabilityStatus(CapturabilityBasedStatus packet)
+   {
+      ConvexPolygon2D leftFootPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D rightFootPolygon = new ConvexPolygon2D();
+      packet.getLeftFootSupportPolygon2d().forEach(leftFootPolygon::addVertex);
+      packet.getRightFootSupportPolygon2d().forEach(rightFootPolygon::addVertex);
+      leftFootPolygon.update();
+      rightFootPolygon.update();
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartSupportPolygon, leftFootPolygon);
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartSupportPolygon, rightFootPolygon);
    }
 
    private void requestNewPlan()
