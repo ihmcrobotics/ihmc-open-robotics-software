@@ -11,7 +11,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPostProcessingParametersUIController">
     <children>
-        <GridPane layoutY="15.0" prefHeight="184.0" prefWidth="1200.0">
+        <GridPane layoutX="7.0" layoutY="34.0" prefHeight="294.0" prefWidth="1200.0">
             <children>
 
 
@@ -27,6 +27,8 @@
                 <CheckBox fx:id="areaSplitFractionProcessingEnabled" mnemonicParsing="false" prefHeight="18.0" prefWidth="306.0" text="Area split fraction processing enabled" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                 <Label text="Fraction load if full foot" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                 <Label text="Fraction time on foot if full" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <Label text="Fraction load if no width on other foot" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                <Label text="Fraction time on foot if no width on other foot" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
 
 
                 <CheckBox fx:id="swingOverRegionsProcessingEnabled" mnemonicParsing="false" prefHeight="18.0" prefWidth="306.0" text="Swing over regions processing enabled" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
@@ -44,6 +46,8 @@
 
                 <Spinner fx:id="fractionLoadIfFootHasFullSupport" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
                 <Spinner fx:id="fractionTimeOnFootIfFootHasFullSupport" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                <Spinner fx:id="fractionLoadIfOtherFootHasNoWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+                <Spinner fx:id="fractionTimeOnFootIfOtherFootHasNoWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="5" />
 
                 <Spinner fx:id="minimumSwingFootClearance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
                 <Spinner fx:id="numberOfChecksPerSwing" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
@@ -62,8 +66,8 @@
             <ColumnConstraints maxWidth="308.0" minWidth="46.0" prefWidth="46.0" />
             <ColumnConstraints maxWidth="570.0" minWidth="256.0" prefWidth="300.0" />
             <ColumnConstraints maxWidth="535.0" minWidth="97.0" prefWidth="106.0" />
-            <ColumnConstraints maxWidth="385.0" minWidth="111.0" prefWidth="216.0" />
-            <ColumnConstraints maxWidth="604.0" minWidth="96.0" prefWidth="123.0" />
+            <ColumnConstraints maxWidth="385.0" minWidth="111.0" prefWidth="247.0" />
+            <ColumnConstraints maxWidth="604.0" minWidth="60.0" prefWidth="90.0" />
             <ColumnConstraints maxWidth="432.0" minWidth="105.0" prefWidth="326.0" />
             <ColumnConstraints maxWidth="138.0" minWidth="90.0" prefWidth="90.0" />
          </columnConstraints>
