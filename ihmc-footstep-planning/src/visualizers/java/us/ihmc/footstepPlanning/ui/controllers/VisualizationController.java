@@ -40,6 +40,8 @@ public class VisualizationController
    @FXML
    private CheckBox showIntermediateSolution;
    @FXML
+   private CheckBox showPostProcessingInfo;
+   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -73,5 +75,6 @@ public class VisualizationController
       messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowNodeData, showIntermediateSolution.selectedProperty(), true);
+      messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
    }
 }

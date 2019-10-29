@@ -50,6 +50,8 @@
                               GridPane.rowIndex="2"/>
                 <CheckBox fx:id="showIntermediateSolution" mnemonicParsing="false" selected="true" text="Show intermediate plans" GridPane.columnIndex="4"
                               GridPane.rowIndex="3"/>
+                <CheckBox fx:id="showPostProcessingInfo" mnemonicParsing="false" selected="true" text="Show post processing info" GridPane.columnIndex="4"
+                          GridPane.rowIndex="4"/>
             </children>
         </GridPane>
     </children>
