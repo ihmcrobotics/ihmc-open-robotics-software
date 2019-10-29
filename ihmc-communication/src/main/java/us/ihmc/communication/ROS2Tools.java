@@ -14,6 +14,7 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.RealtimeRos2Subscription;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2QosProfile;
 import us.ihmc.ros2.Ros2Subscription;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
@@ -172,20 +173,20 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
                                                                     NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName,
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName,
                                                                     NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
    {
       try
@@ -200,20 +201,20 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType,
                                                                         MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType,
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType,
                                                                         String topicName)
    {
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2Node ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -308,23 +309,23 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createPublisher(ros2Node, messageType, topicName);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
       return new IHMCROS2Publisher<>(ros2Node, messageType, robotName, identifier);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       return createPublisher(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2Node ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
       try
       {

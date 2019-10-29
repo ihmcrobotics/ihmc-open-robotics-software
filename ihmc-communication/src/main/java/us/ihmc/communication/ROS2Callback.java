@@ -5,7 +5,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2Subscription;
 
 import java.util.function.Consumer;
@@ -21,7 +21,7 @@ public class ROS2Callback<T>
    private Ros2Subscription<T> subscription;
    private volatile boolean enabled = true;
 
-   public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
+   public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
    {
       this(ros2Node,
            messageType,
@@ -34,12 +34,12 @@ public class ROS2Callback<T>
    /**
     *  For topics that use the default /ihmc/topic_name.
     */
-   public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, Consumer<T> messageCallback)
+   public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, Consumer<T> messageCallback)
    {
       this(ros2Node, messageType, null, null, null, messageCallback);
    }
 
-   public ROS2Callback(Ros2Node ros2Node,
+   public ROS2Callback(Ros2NodeInterface ros2Node,
                        Class<T> messageType,
                        String robotName,
                        String moduleTopicQualifier,

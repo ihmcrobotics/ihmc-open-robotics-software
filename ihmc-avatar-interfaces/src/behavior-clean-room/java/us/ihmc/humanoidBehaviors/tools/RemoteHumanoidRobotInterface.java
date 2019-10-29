@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,7 +42,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
 {
-   private final Ros2Node ros2Node;
+   private final Ros2NodeInterface ros2Node;
    private final String robotName;
    private final DRCRobotJointMap jointMap;
 
@@ -63,7 +64,7 @@ public class RemoteHumanoidRobotInterface
 
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
-   public RemoteHumanoidRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
+   public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       this.ros2Node = ros2Node;
       robotName = robotModel.getSimpleRobotName();
