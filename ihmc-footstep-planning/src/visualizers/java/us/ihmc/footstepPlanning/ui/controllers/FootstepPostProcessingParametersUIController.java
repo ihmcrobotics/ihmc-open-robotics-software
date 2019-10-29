@@ -34,6 +34,10 @@ public class FootstepPostProcessingParametersUIController
    private Spinner<Double> fractionLoadIfFootHasFullSupport;
    @FXML
    private Spinner<Double> fractionTimeOnFootIfFootHasFullSupport;
+   @FXML
+   private Spinner<Double> fractionLoadIfOtherFootHasNoWidth;
+   @FXML
+   private Spinner<Double> fractionTimeOnFootIfOtherFootHasNoWidth;
 
    @FXML
    private CheckBox swingOverRegionsProcessingEnabled;
@@ -100,6 +104,8 @@ public class FootstepPostProcessingParametersUIController
       javaFXStoredPropertyMap.put(areaSplitFractionProcessingEnabled, FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
       javaFXStoredPropertyMap.put(fractionLoadIfFootHasFullSupport, FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport);
       javaFXStoredPropertyMap.put(fractionTimeOnFootIfFootHasFullSupport, FootstepPostProcessingKeys.fractionTimeOnFootIfFootHasFullSupport);
+      javaFXStoredPropertyMap.put(fractionLoadIfOtherFootHasNoWidth, FootstepPostProcessingKeys.fractionLoadIfOtherFootHasNoWidth);
+      javaFXStoredPropertyMap.put(fractionTimeOnFootIfOtherFootHasNoWidth, FootstepPostProcessingKeys.fractionTimeOnFootIfOtherFootHasNoWidth);
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PostProcessingParametersTopic, parameters ->
