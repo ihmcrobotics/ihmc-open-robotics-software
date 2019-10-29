@@ -27,6 +27,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey wiggleInsideDelta                          = keys.addDoubleKey ("Wiggle inside delta", 0.01);
    public static final DoubleStoredPropertyKey  maximumStepReachWhenSteppingUp             = keys.addDoubleKey ("Max step reach when stepping up", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepZWhenSteppingUp                 = keys.addDoubleKey ("Max step Z when stepping up", Double.POSITIVE_INFINITY);
+   public static final DoubleStoredPropertyKey stepYawReductionFactorAtMaxReach            = keys.addDoubleKey("Step yaw reduction factor at max reach", 0.0);
    public static final DoubleStoredPropertyKey  minFootholdPercent                         = keys.addDoubleKey ("Min foothold percent", 0.9);
    public static final DoubleStoredPropertyKey  minSurfaceIncline                          = keys.addDoubleKey ("Min surface incline", Math.toDegrees(45.0));
    public static final BooleanStoredPropertyKey wiggleIntoConvexHullOfPlanarRegions        = keys.addBooleanKey("Wiggle into convex hull of planar regions", false);

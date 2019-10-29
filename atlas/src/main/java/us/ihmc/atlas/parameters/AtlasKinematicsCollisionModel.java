@@ -53,7 +53,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotKinematicsCol
          // Head ---------------------------------------------------------------------
          MovingReferenceFrame headFrame = head.getBodyFixedFrame();
          // Covers the whole multisense.
-         Capsule3D headShapeMultisense = new Capsule3D(0.05, 0.105);
+         Capsule3D headShapeMultisense = new Capsule3D(0.08, 0.115);
          headShapeMultisense.getPosition().set(0.03, 0.0, 0.03);
          headShapeMultisense.setAxis(Axis.Z);
          collidables.add(new KinematicsCollidable(head, collisionMask, collisionGroup, headShapeMultisense, headFrame, minimumSafeDistance));
@@ -63,7 +63,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotKinematicsCol
 
          MovingReferenceFrame beforeNeckFrame = head.getParentJoint().getFrameBeforeJoint();
          // Cover the head guards that are part of the torso actually.
-         Capsule3D headguardShapeFront = new Capsule3D(0.25, 0.1);
+         Capsule3D headguardShapeFront = new Capsule3D(0.25, 0.11);
          headguardShapeFront.getPosition().set(0.0, 0.0, 0.0);
          headguardShapeFront.setAxis(Axis.Y);
          collidables.add(new KinematicsCollidable(torso, collisionMask, collisionGroup, headguardShapeFront, beforeNeckFrame, minimumSafeDistance));
@@ -94,7 +94,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotKinematicsCol
 
          // Pelvis ---------------------------------------------------------------------
          MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-         Capsule3D pelvisShape = new Capsule3D(0.05, 0.2);
+         Capsule3D pelvisShape = new Capsule3D(0.05, 0.22);
          pelvisShape.setAxis(Axis.Z);
          pelvisShape.getPosition().set(0.0, 0.0, 0.01);
          collidables.add(new KinematicsCollidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame, minimumSafeDistance));
@@ -139,15 +139,15 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotKinematicsCol
 
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          ReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
-         Capsule3D handShapeKnob = new Capsule3D(0.03, 0.06);
-         handShapeKnob.getPosition().set(0.0, robotSide.negateIfRightSide(0.082), 0.0);
+         Capsule3D handShapeKnob = new Capsule3D(0.07, 0.06);
+         handShapeKnob.getPosition().set(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          handShapeKnob.setAxis(Axis.Y);
          collidables.add(new KinematicsCollidable(hand, collisionMask, collisionGroup, handShapeKnob, handFrame, minimumSafeDistance));
 
          OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL);
          RigidBodyBasics forearm = elbowJoint.getSuccessor();
          ReferenceFrame elbowFrame = elbowJoint.getFrameAfterJoint();
-         Capsule3D forearmShape = new Capsule3D(0.31, 0.09);
+         Capsule3D forearmShape = new Capsule3D(0.31, 0.1);
          forearmShape.getPosition().set(-0.01, robotSide.negateIfRightSide(0.12), -0.01);
          forearmShape.setAxis(Axis.Y);
          collidables.add(new KinematicsCollidable(forearm, collisionMask, collisionGroup, forearmShape, elbowFrame, minimumSafeDistance));

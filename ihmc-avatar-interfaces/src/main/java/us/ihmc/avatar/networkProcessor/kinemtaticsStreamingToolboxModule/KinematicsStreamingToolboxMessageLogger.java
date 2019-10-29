@@ -1,7 +1,30 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.*;
+
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
@@ -11,16 +34,6 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class KinematicsStreamingToolboxMessageLogger
 {
@@ -38,6 +51,8 @@ public class KinematicsStreamingToolboxMessageLogger
    static final String kinematicsToolboxConfigurationMessageName = KinematicsToolboxConfigurationMessage.class.getSimpleName();
    static final String kinematicsStreamingToolboxInputMessageName = KinematicsStreamingToolboxInputMessage.class.getSimpleName();
    static final String kinematicsToolboxOutputStatusName = KinematicsToolboxOutputStatus.class.getSimpleName();
+
+   private final RealtimeRos2Node ros2Node;
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
@@ -61,27 +76,57 @@ public class KinematicsStreamingToolboxMessageLogger
    private Runnable loggerRunnable = null;
    private ScheduledFuture<?> loggerTaskScheduled = null;
 
-   public KinematicsStreamingToolboxMessageLogger(String robotName, RealtimeRos2Node ros2Node)
+   public KinematicsStreamingToolboxMessageLogger(String robotName)
    {
       this.robotName = robotName;
+      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
+                                                  "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> capturabilityBasedStatus.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           CapturabilityBasedStatus.class,
+                                           controllerPubGenerator,
+                                           s -> capturabilityBasedStatus.set(s.takeNextData()));
 
       MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxSubTopicNameGenerator, s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubTopicNameGenerator, s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ToolboxStateMessage.class,
+                                           toolboxSubTopicNameGenerator,
+                                           s -> processToolboxStateMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           KinematicsToolboxConfigurationMessage.class,
+                                           toolboxSubTopicNameGenerator,
+                                           s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           KinematicsStreamingToolboxInputMessage.class,
+                                           toolboxSubTopicNameGenerator,
+                                           s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
       MessageTopicNameGenerator toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxOutputStatus.class, toolboxPubTopicNameGenerator, s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           KinematicsToolboxOutputStatus.class,
+                                           toolboxPubTopicNameGenerator,
+                                           s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
+
+      ros2Node.spin();
+   }
+
+   private void processToolboxStateMessage(ToolboxStateMessage message)
+   {
+      boolean requestLogging = message.getRequestLogging();
+
+      if (requestLogging)
+         startLogging();
+      else if (requestLogging)
+         stopLogging();
    }
 
    public void startLogging()
    {
       LogTools.info("Starting logger...");
 
-      if(loggerRunnable != null)
+      if (loggerRunnable != null)
          return;
 
       String fileName = logDirectory + dateFormat.format(new Date()) + "_" + robotName + "KinematicsStreamingToolbox.json";
@@ -100,7 +145,7 @@ public class KinematicsStreamingToolboxMessageLogger
 
          loggerTaskScheduled = executorService.scheduleAtFixedRate(loggerRunnable, 0, recordPeriodMillis, TimeUnit.MILLISECONDS);
       }
-      catch(IOException e)
+      catch (IOException e)
       {
          loggerRunnable = null;
          executorService.shutdownNow();
@@ -111,7 +156,7 @@ public class KinematicsStreamingToolboxMessageLogger
 
    public void stopLogging()
    {
-      if(loggerRunnable == null)
+      if (loggerRunnable == null)
          return;
 
       stopRequested.set(true);
@@ -119,13 +164,13 @@ public class KinematicsStreamingToolboxMessageLogger
 
    private void logMessageFrame()
    {
-      if(!containsNewMessage())
+      if (!containsNewMessage())
          return;
 
-      if(stopRequested.get() || System.currentTimeMillis() - startTimeMillis > Conversions.secondsToMilliseconds(maximumRecordTimeSeconds))
+      if (stopRequested.get() || System.currentTimeMillis() - startTimeMillis > Conversions.secondsToMilliseconds(maximumRecordTimeSeconds))
          closeLog();
 
-      if(!firstMessage.get())
+      if (!firstMessage.get())
          printStream.println("},");
 
       printStream.println("{");
@@ -135,18 +180,24 @@ public class KinematicsStreamingToolboxMessageLogger
       {
          writeIfPresent(robotConfigurationData, robotConfigurationDataName, robotConfigurationDataSerializer, printStream);
          writeIfPresent(capturabilityBasedStatus, capturabilityBasedStatusName, capturabilityBasedStatusSerializer, printStream);
-         writeIfPresent(kinematicsToolboxConfigurationMessage, kinematicsToolboxConfigurationMessageName, kinematicsToolboxConfigurationMessageSerializer, printStream);
-         writeIfPresent(kinematicsStreamingToolboxInputMessage, kinematicsStreamingToolboxInputMessageName, kinematicsStreamingToolboxInputMessageSerializer, printStream);
+         writeIfPresent(kinematicsToolboxConfigurationMessage,
+                        kinematicsToolboxConfigurationMessageName,
+                        kinematicsToolboxConfigurationMessageSerializer,
+                        printStream);
+         writeIfPresent(kinematicsStreamingToolboxInputMessage,
+                        kinematicsStreamingToolboxInputMessageName,
+                        kinematicsStreamingToolboxInputMessageSerializer,
+                        printStream);
          writeIfPresent(kinematicsToolboxOutputStatus, kinematicsToolboxOutputStatusName, kinematicsToolboxOutputStatusSerializer, printStream);
       }
-      catch(IOException e)
+      catch (IOException e)
       {
          LogTools.error("Error logging messages. Shutting down logging process");
          shutdown();
          return;
       }
 
-      if(firstMessage.get())
+      if (firstMessage.get())
          firstMessage.set(false);
    }
 
@@ -179,10 +230,12 @@ public class KinematicsStreamingToolboxMessageLogger
       outputStream = null;
    }
 
-   private static <T extends Packet> void writeIfPresent(AtomicReference<T> messageReference, String messageName, JSONSerializer<T> serializer, PrintStream printStream) throws IOException
+   private static <T extends Packet> void writeIfPresent(AtomicReference<T> messageReference, String messageName, JSONSerializer<T> serializer,
+                                                         PrintStream printStream)
+         throws IOException
    {
       T message = messageReference.getAndSet(null);
-      if(message == null)
+      if (message == null)
          return;
 
       printStream.println(",");
@@ -193,24 +246,7 @@ public class KinematicsStreamingToolboxMessageLogger
    public static void main(String[] args)
    {
       String robotName = "Valkyrie"; // "Atlas"; //
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      KinematicsStreamingToolboxMessageLogger logger = new KinematicsStreamingToolboxMessageLogger(robotName, ros2Node);
-
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, ToolboxStateMessage.class, toolboxSubTopicNameGenerator, s ->
-      {
-         ToolboxStateMessage toolboxStateMessage = s.takeNextData();
-         if(toolboxStateMessage.getRequestedToolboxState() == ToolboxStateMessage.WAKE_UP)
-         {
-            logger.startLogging();
-         }
-         else if(toolboxStateMessage.getRequestedToolboxState() == ToolboxStateMessage.SLEEP)
-         {
-            logger.stopLogging();
-         }
-      });
-
-      ros2Node.spin();
+      new KinematicsStreamingToolboxMessageLogger(robotName);
    }
 }

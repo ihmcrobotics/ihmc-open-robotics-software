@@ -122,10 +122,23 @@ public class KinematicsCollidable
     */
    public KinematicsCollisionResult evaluateCollision(KinematicsCollidable other)
    {
-      KinematicsCollisionResult result = KinematicsCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame);
-      result.setCollidableA(this);
-      result.setCollidableB(other);
+      KinematicsCollisionResult result = new KinematicsCollisionResult();
+      evaluateCollision(other, result);
       return result;
+   }
+
+   /**
+    * Performs a collision evaluation between this collidable and {@code other} in order to calculate
+    * their closest point, separating/penetration distance, etc.
+    * 
+    * @param other        the query. Not modified.
+    * @param resultToPack where the result of the evaluation is stored. Modified.
+    */
+   public void evaluateCollision(KinematicsCollidable other, KinematicsCollisionResult resultToPack)
+   {
+      KinematicsCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame, resultToPack);
+      resultToPack.setCollidableA(this);
+      resultToPack.setCollidableB(other);
    }
 
    /**

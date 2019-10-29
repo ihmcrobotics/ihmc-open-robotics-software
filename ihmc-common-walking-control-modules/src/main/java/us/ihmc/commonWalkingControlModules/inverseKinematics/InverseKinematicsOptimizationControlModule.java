@@ -55,11 +55,14 @@ public class InverseKinematicsOptimizationControlModule
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
+   private final InverseKinematicsSolution inverseKinematicsSolution;
+
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       qpInput = new QPInput(numberOfDoFs);
@@ -131,7 +134,7 @@ public class InverseKinematicsOptimizationControlModule
 
       DenseMatrix64F jointVelocities = qpSolver.getJointVelocities();
       MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
-      InverseKinematicsSolution inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor, jointVelocities);
+      inverseKinematicsSolution.setJointVelocities(jointVelocities);
       inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
 
       if (noConvergenceException != null)

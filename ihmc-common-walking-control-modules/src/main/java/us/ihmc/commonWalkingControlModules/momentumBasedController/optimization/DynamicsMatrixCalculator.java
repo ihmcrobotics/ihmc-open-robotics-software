@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -51,7 +52,7 @@ public class DynamicsMatrixCalculator
       this(new ArrayList<>(), toolbox, wrenchMatrixCalculator);
    }
 
-   public DynamicsMatrixCalculator(ArrayList<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
+   public DynamicsMatrixCalculator(List<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
       FloatingJointBasics rootJoint = toolbox.getRootJoint();
       RigidBodyBasics rootBody = toolbox.getRootBody();
