@@ -25,6 +25,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
             */
    public double sensor_pose_confidence_ = 1.0;
    /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
             * The confidence of the point cloud represents the quality of the collected point cloud data.
             */
    public double point_cloud_confidence_ = 1.0;
@@ -119,6 +121,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    }
 
    /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
             * The confidence of the point cloud represents the quality of the collected point cloud data.
             */
    public void setPointCloudConfidence(double point_cloud_confidence)
@@ -126,6 +130,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       point_cloud_confidence_ = point_cloud_confidence;
    }
    /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
             * The confidence of the point cloud represents the quality of the collected point cloud data.
             */
    public double getPointCloudConfidence()
