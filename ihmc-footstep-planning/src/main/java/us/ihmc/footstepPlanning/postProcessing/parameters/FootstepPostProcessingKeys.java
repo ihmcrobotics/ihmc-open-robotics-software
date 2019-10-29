@@ -16,8 +16,8 @@ public class FootstepPostProcessingKeys
    public static final DoubleStoredPropertyKey  transferWeightDistributionAtFullDepth   = keys.addDoubleKey("Transfer weight distribution at full depth", 0.7);
 
    public static final BooleanStoredPropertyKey swingOverRegionsProcessingEnabled       = keys.addBooleanKey("Swing over regions processing enabled", true);
-   public static final BooleanStoredPropertyKey doInitialFastApproximation              = keys.addBooleanKey("Do initial fast approximation", true);
-   public static final DoubleStoredPropertyKey  minimumSwingFootClearance               = keys.addDoubleKey("Minimum swing foot clearance", 0.04);
+   public static final BooleanStoredPropertyKey doInitialFastApproximation              = keys.addBooleanKey("Do initial fast approximation", false);
+   public static final DoubleStoredPropertyKey  minimumSwingFootClearance               = keys.addDoubleKey("Minimum swing foot clearance", 0.0);
    public static final IntegerStoredPropertyKey numberOfChecksPerSwing                  = keys.addIntegerKey("Number of checks per swing", 100);
    public static final IntegerStoredPropertyKey maximumNumberOfAdjustmentAttempts       = keys.addIntegerKey("Maximum number of adjustment attempts", 50);
    public static final DoubleStoredPropertyKey  maximumWaypointAdjustmentDistance       = keys.addDoubleKey("Maximum waypoint adjustment distance", 0.2);
