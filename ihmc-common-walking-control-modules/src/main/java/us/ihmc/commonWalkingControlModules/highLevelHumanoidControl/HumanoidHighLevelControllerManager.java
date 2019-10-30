@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -42,9 +45,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
 
 public class HumanoidHighLevelControllerManager implements RobotController
 {
@@ -286,7 +286,9 @@ public class HumanoidHighLevelControllerManager implements RobotController
       jointDesiredOutputBroadcastCounter = 0;
 
       lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
-      stateMachine.getCurrentState().getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+      HighLevelControllerState currentState = stateMachine.getCurrentState();
+      if (currentState != null && currentState.getOutputForRootJoint() != null)
+         currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
 
       robotDesiredConfigurationData.setWallTime(System.nanoTime());
       // TODO use or remove joint name hash
