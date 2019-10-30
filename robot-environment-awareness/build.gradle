@@ -23,7 +23,7 @@ mainDependencies {
    api("us.ihmc:joctomap:1.6.13")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-yovariables:0.3.11")
-   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.10")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("org.bytedeco:javacv-platform:1.5")
