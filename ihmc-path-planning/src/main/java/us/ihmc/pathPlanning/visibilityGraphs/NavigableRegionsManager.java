@@ -8,8 +8,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
@@ -25,7 +24,7 @@ public class NavigableRegionsManager
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
-   private final PostProcessor postProcessor;
+   private final BodyPathPostProcessor postProcessor;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
@@ -57,7 +56,7 @@ public class NavigableRegionsManager
       this(parameters, regions, null);
    }
 
-   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, PostProcessor postProcessor)
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor)
    {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
