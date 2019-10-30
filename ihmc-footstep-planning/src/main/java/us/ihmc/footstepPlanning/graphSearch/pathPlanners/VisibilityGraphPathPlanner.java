@@ -18,6 +18,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -37,20 +38,23 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
    }
 
-   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                     ObstacleAndCliffAvoidanceProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
+   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                     VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     BodyPathPostProcessor pathPostProcessor, YoVariableRegistry parentRegistry)
    {
       this("", footstepPlannerParameters, visibilityGraphsParameters, pathPostProcessor, parentRegistry);
    }
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                     VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      YoVariableRegistry parentRegistry)
    {
       this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
    }
 
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                     ObstacleAndCliffAvoidanceProcessor postProcessor, YoVariableRegistry parentRegistry)
+   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                     VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
+                                     BodyPathPostProcessor postProcessor, YoVariableRegistry parentRegistry)
    {
       super(prefix, footstepPlannerParameters, parentRegistry);
 

@@ -2,16 +2,12 @@ package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,9 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.TestEnvironmentTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -86,7 +80,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAndCliffAvoidanceProcessor.removeDuplicated3DPointsFromList(listOfPoints, distanceToFilter);
+         PostProcessingTools.removeDuplicated3DPointsFromList(listOfPoints, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
@@ -144,7 +138,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAndCliffAvoidanceProcessor.removeDuplicated2DPointsFromList(listOfPoints, distanceToFilter);
+         PostProcessingTools.removeDuplicated2DPointsFromList(listOfPoints, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
@@ -207,7 +201,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
             listOfPoints.add(newPoint);
          }
 
-         ObstacleAndCliffAvoidanceProcessor.removeDuplicateStartOrEndPointsFromList(listOfPoints, startPoint, endPoint, distanceToFilter);
+         PostProcessingTools.removeDuplicateStartOrEndPointsFromList(listOfPoints, startPoint, endPoint, distanceToFilter);
 
          for (int i = 0; i < listOfPoints.size(); i++)
          {
