@@ -21,8 +21,8 @@ mainDependencies {
    api("org.ejml:dense64:0.28")
    api("org.boofcv:geo:0.24.1")
 
-   api("us.ihmc:ihmc-graphics-description:0.12.12")
-   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-graphics-description:0.12.13")
+   api("us.ihmc:simulation-construction-set:0.12.16")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-communication:source")

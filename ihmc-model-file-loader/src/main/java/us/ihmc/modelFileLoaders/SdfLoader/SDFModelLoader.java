@@ -1,4 +1,4 @@
-package us.ihmc.multicastLogDataProtocol.modelLoaders;
+package us.ihmc.modelFileLoaders.SdfLoader;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -14,11 +14,8 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.modelLoaders.LogModelLoader;
 import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFModelLoader implements LogModelLoader
@@ -32,6 +29,11 @@ public class SDFModelLoader implements LogModelLoader
    private SDFDescriptionMutator descriptionMutator;
 
    @Override
+   public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip)
+   {
+      load(modelName, model, resourceDirectories, resourceZip, null);
+   }
+
    public void load(String modelName, byte[] model, String[] resourceDirectories, byte[] resourceZip, SDFDescriptionMutator descriptionMutator)
    {
       this.modelName = modelName;
