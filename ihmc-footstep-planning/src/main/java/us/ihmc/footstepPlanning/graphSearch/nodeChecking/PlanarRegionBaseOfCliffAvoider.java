@@ -81,12 +81,12 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 
       double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, new Point3D());
 
-      boolean tooCloseToCliff = maximumCliffZInSoleFrame < cliffHeightToAvoid;
-      if(tooCloseToCliff)
+      boolean cliffDetected = maximumCliffZInSoleFrame >= cliffHeightToAvoid;
+      if(cliffDetected)
          rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-      return tooCloseToCliff;
+      return !cliffDetected;
    }
-   
+
    public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
                                                       Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
      {
