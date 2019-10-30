@@ -135,6 +135,17 @@ public class KryoMessager implements Messager
       return boundVariable;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public <T> boolean removeInput(Topic<T> topic, AtomicReference<T> input)
+   {
+      List<?> boundVariablesForTopic = inputVariablesMap.get(topic);
+      if (boundVariablesForTopic == null)
+         return false;
+      else
+         return boundVariablesForTopic.remove(input);
+   }
+
    @Override
    @SuppressWarnings("unchecked")
    public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
@@ -146,6 +157,17 @@ public class KryoMessager implements Messager
          topicListenersMap.put(topic, topicListeners);
       }
       topicListeners.add((TopicListener<Object>) listener);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public <T> boolean removeTopicListener(Topic<T> topic, TopicListener<T> listener)
+   {
+      List<?> topicListeners = topicListenersMap.get(topic);
+      if (topicListeners == null)
+         return false;
+      else
+         return topicListeners.remove(listener);
    }
 
    @Override
@@ -186,6 +208,12 @@ public class KryoMessager implements Messager
          }
       });
       messagerStateListeners.add(listener);
+   }
+
+   @Override
+   public boolean removeMessagerStateListener(MessagerStateListener listener)
+   {
+      throw new UnsupportedOperationException("Unsupported operation due to API restriction of NetworkedObjectCommunicator.");
    }
 
    @Override
