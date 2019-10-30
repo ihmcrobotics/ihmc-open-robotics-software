@@ -338,18 +338,22 @@ public class RemoteUIMessageConverter
       if (verbose)
          LogTools.info("Told the toolbox to wake up.");
       
-      FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
+      if(footstepPlannerParameters != null)
+      {
+         FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
+         FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+         plannerParametersPublisher.publish(plannerParametersPacket);
+      }
 
-      FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
-      plannerParametersPublisher.publish(plannerParametersPacket);
-
-      VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
       VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
+      if(visibilityGraphsParameters != null)
+      {
+         VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
+         FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
+         visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
+      }
 
-      FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
-      visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
-      
       if (verbose)
          LogTools.info("Sent out some parameters");
 
