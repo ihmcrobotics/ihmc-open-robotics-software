@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPosition;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
@@ -59,16 +59,16 @@ public class StartGoalOrientationViewer extends AnimationTimer
       root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
-      startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabledTopic, false);
-      goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabledTopic, false);
+      startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabled, false);
+      goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabled, false);
 
-      startPositionReference = messager.createInput(StartPositionTopic, new Point3D());
-      lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPositionTopic, new Point3D());
-      goalPositionReference = messager.createInput(GoalPositionTopic, new Point3D());
+      startPositionReference = messager.createInput(StartPosition, new Point3D());
+      lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
+      goalPositionReference = messager.createInput(GoalPosition, new Point3D());
 
-      startQuaternionReference = messager.createInput(StartOrientationTopic, new Quaternion());
-      lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientationTopic, new Quaternion());
-      goalQuaternionReference = messager.createInput(GoalOrientationTopic, new Quaternion());
+      startQuaternionReference = messager.createInput(StartOrientation, new Quaternion());
+      lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
+      goalQuaternionReference = messager.createInput(GoalOrientation, new Quaternion());
    }
 
    @Override

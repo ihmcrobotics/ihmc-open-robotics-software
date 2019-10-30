@@ -36,12 +36,12 @@ public class VisibilityGraphsRenderer
 
    public VisibilityGraphsRenderer(Messager messager)
    {
-      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalResetTopic, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
                                   ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, VisibilityMapWithNavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
@@ -53,7 +53,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalResetTopic, ShowNavigableRegionVisibilityMaps, VisibilityMapWithNavigableRegionData);
+      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, VisibilityMapWithNavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);

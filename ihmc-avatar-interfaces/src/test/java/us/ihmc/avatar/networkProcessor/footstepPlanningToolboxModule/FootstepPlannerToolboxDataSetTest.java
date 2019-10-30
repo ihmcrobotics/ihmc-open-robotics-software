@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +78,6 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -156,11 +155,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
 
-      messager.registerTopicListener(FootstepPlanResponseTopic, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
+      messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
-      uiPlanningResultReference = messager.createInput(PlanningResultTopic);
+      uiFootstepPlanReference = messager.createInput(FootstepPlanResponse);
+      uiPlanningResultReference = messager.createInput(PlanningResult);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
@@ -373,24 +372,24 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private void packPlanningRequest(DataSet dataset, Messager messager)
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getStartPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getGoalPosition());
-      messager.submitMessage(PlannerTypeTopic, getPlannerType());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, dataset.getPlannerInput().getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, dataset.getPlannerInput().getGoalPosition());
+      messager.submitMessage(PlannerType, getPlannerType());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeMultiplier * timeout);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, getRobotModel().getFootstepPlannerParameters());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, getRobotModel().getFootstepPlannerParameters());
 
       if(dataset.getPlannerInput().hasStartOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
       if(dataset.getPlannerInput().hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
       if (DEBUG)
          LogTools.info("Sending out planning request packet.");
