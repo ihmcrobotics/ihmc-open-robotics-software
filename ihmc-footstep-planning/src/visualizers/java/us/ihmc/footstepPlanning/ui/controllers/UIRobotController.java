@@ -82,7 +82,7 @@ public class UIRobotController
       BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParametersTopic, supportPlanarRegionParametersMessage);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportPlanarRegionParametersMessage);
    }
 
    public void attachMessager(JavaFXMessager messager)

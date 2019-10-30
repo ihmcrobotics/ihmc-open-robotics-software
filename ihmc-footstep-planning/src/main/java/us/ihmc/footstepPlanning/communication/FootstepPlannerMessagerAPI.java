@@ -28,67 +28,67 @@ public class FootstepPlannerMessagerAPI
    private static final Category Root = apiFactory.createRootCategory("FootstepPlannerRoot");
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
-   public static final Topic<RobotConfigurationData> RobotConfigurationDataTopic = topic("RobotConfigurationDataTopic");
-   public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = topic("PlanarRegionDataTopic");
-   public static final Topic<Boolean> ShowPlanarRegionsTopic = topic("ShowPlanarRegionsTopic");
+   public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
+   public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
+   public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
-   public static final Topic<PlanarRegion> SelectedRegionTopic = topic("SelectedRegionTopic");
+   public static final Topic<PlanarRegion> SelectedRegion = topic("SelectedRegion");
 
-   public static final Topic<FootstepDataListMessage> FootstepPlanResponseTopic = topic("FootstepPlanResponseTopic");
-   public static final Topic<FootstepDataListMessage> FootstepPlanToRobotTopic = topic("FootstepPlanToRobotTopic");
-   public static final Topic<Boolean> ShowFootstepPlanTopic = topic("ShowFootstepPlanTopic");
+   public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
+   public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
+   public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
 
-   public static final Topic<Boolean> ComputePathTopic = topic("ComputePathTopic");
-   public static final Topic<Boolean> AbortPlanningTopic = topic("AbortPlanningTopic");
+   public static final Topic<Boolean> ComputePath = topic("ComputePath");
+   public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
    public static final Topic<Boolean> RequestPlannerStatistics = topic("RequestPlannerStatistics");
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
-   public static final Topic<FootstepPlannerParametersReadOnly> PlannerParametersTopic = topic("PlannerParametersTopic");
+   public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
 
-   public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHomeTopic");
-   public static final Topic<Boolean> IgnorePartialFootholdsTopic = topic("IgnorePartialFootholdsTopic");
+   public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
+   public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
 
-   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParametersTopic = topic("VisibilityGraphsParametersTopic");
-   public static final Topic<Double> PlannerTimeoutTopic = topic("PlannerTimeoutTopic");
-   public static final Topic<Double> PlannerTimeTakenTopic = topic("PlannerTimeTakenTopic");
-   public static final Topic<Double> PlannerHorizonLengthTopic = topic("PlannerHorizonLengthTopic");
-   public static final Topic<FootstepPlannerType> PlannerTypeTopic = topic("PlannerTypeTopic");
-   public static final Topic<FootstepPlanningResult> PlanningResultTopic = topic("PlanningResultTopic");
-   public static final Topic<FootstepPlannerStatus> PlannerStatusTopic = topic("PlannerStatusTopic");
-   public static final Topic<Integer> PlannerRequestIdTopic = topic("PlannerRequestIdTopic");
-   public static final Topic<Integer> ReceivedPlanIdTopic = topic("ReceivedPlanIdTopic");
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
+   public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
+   public static final Topic<Double> PlannerTimeTaken = topic("PlannerTimeTaken");
+   public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
+   public static final Topic<FootstepPlannerType> PlannerType = topic("PlannerType");
+   public static final Topic<FootstepPlanningResult> PlanningResult = topic("PlanningResult");
+   public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
+   public static final Topic<Integer> PlannerRequestId = topic("PlannerRequestId");
+   public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
 
-   public static final Topic<Boolean> EditModeEnabledTopic = topic("EditModeEnabledTopic");
-   public static final Topic<Boolean> StartPositionEditModeEnabledTopic = topic("StartPositionEditModeEnabledTopic");
-   public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = topic("GoalPositionEditModeEnabledTopic");
+   public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
+   public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
+   public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
 
-   public static final Topic<Boolean> StartOrientationEditModeEnabledTopic = topic("StartOrientationEditModeEnabledTopic");
-   public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = topic("GoalOrientationEditModeEnabledTopic");
+   public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
+   public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
-   public static final Topic<RobotSide> InitialSupportSideTopic = topic("InitialSupportSideTopic");
-   public static final Topic<Point3D> StartPositionTopic = topic("StartPositionTopic");
-   public static final Topic<Point3D> GoalPositionTopic = topic("GoalPositionTopic");
-   public static final Topic<Point3D> LowLevelGoalPositionTopic = topic("LowLevelGoalPositionTopic");
+   public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
+   public static final Topic<Point3D> StartPosition = topic("StartPosition");
+   public static final Topic<Point3D> GoalPosition = topic("GoalPosition");
+   public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
 
-   public static final Topic<Quaternion> StartOrientationTopic = topic("StartOrientationTopic");
-   public static final Topic<Quaternion> GoalOrientationTopic = topic("GoalOrientationTopic");
-   public static final Topic<Quaternion> LowLevelGoalOrientationTopic = topic("LowLevelGoalOrientationTopic");
+   public static final Topic<Quaternion> StartOrientation = topic("StartOrientation");
+   public static final Topic<Quaternion> GoalOrientation = topic("GoalOrientation");
+   public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
 
-   public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParametersTopic = topic("BipedalSupportRegionsParametersTopic");
+   public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 
-   public static final Topic<Boolean> GlobalResetTopic = topic("GlobalResetTopic");
+   public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
 
    public static final Topic<Boolean> EnableNodeChecking = topic("EnableNodeChecking");
    public static final Topic<Point3D> NodeCheckingPosition = topic("NodeCheckingPosition");
    public static final Topic<Quaternion> NodeCheckingOrientation = topic("NodeCheckingOrientation");
    public static final Topic<Boolean> EnableNodeCheckingPositionEditing = topic("EnableNodeCheckingPositionEditing");
 
-   public static final Topic<Boolean> exportUnitTestDataFile = topic("exportUnitTestDataFile");
-   public static final Topic<String> exportUnitTestPath = topic("exportUnitTestPath");
+   public static final Topic<Boolean> ExportUnitTestDataFile = topic("ExportUnitTestDataFile");
+   public static final Topic<String> ExportUnitTestPath = topic("ExportUnitTestPath");
 
-   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathDataTopic = topic("BodyPathDataTopic");
+   public static final Topic<List<? extends Pose3DReadOnly>> BodyPathData = topic("BodyPathData");
 
    public static final Topic<Boolean> ShowBodyPath = topic("ShowBodyPath");
 
@@ -110,13 +110,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = topic("ShowInterRegionVisibilityMap");
 
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
-   public static final Topic<FootstepNodeDataListMessage> NodeDataTopic = topic("NodeDataTopic");
-   public static final Topic<Boolean> ShowNodeDataTopic = topic("ShowNodeDataTopic");
-   public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMapTopic = topic("OccupancyMapTopic");
+   public static final Topic<FootstepNodeDataListMessage> NodeData = topic("NodeData");
+   public static final Topic<Boolean> ShowNodeData = topic("ShowNodeData");
+   public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMap = topic("OccupancyMap");
    public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
-   public static final Topic<FootstepPlanningStatistics> PlannerStatisticsTopic = topic("PlannerStatisticsTopic");
+   public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
-   public static final Topic<Boolean> RenderShiftedWaypointsTopic = topic("RenderShiftedWaypointsTopic");
+   public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");
    public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = topic("WalkingPreviewOutput");

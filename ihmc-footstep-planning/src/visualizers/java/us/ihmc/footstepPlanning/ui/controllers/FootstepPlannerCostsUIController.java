@@ -85,7 +85,7 @@ public class FootstepPlannerCostsUIController
       javaFXStoredPropertyMap.put(stepUpWeight, FootstepPlannerParameterKeys.stepUpWeight);
       javaFXStoredPropertyMap.put(stepDownWeight, FootstepPlannerParameterKeys.stepDownWeight);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, v ->
       {
          planningParameters.set(v);
 
@@ -99,7 +99,7 @@ public class FootstepPlannerCostsUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createLowWeightValueFactory()
