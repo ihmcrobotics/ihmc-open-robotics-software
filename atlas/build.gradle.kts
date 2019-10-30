@@ -39,7 +39,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:ihmc-yovariables:0.3.11")
    api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.9")
    api("us.ihmc:simulation-construction-set:0.12.15")
    api("us.ihmc:ihmc-graphics-description:0.12.13")
    api("us.ihmc:ihmc-robot-description:0.12.8")
