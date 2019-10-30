@@ -44,7 +44,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       }
    }
 
-   private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   protected void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -77,7 +77,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       robot.update();
    }
 
-   private void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
+   protected void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(rotation, positionInWorld);

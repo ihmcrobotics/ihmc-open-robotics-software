@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -27,20 +28,31 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieTorqueSpeedCurveEndToEndTest
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private ValkyrieJointMap jointMap = new ValkyrieJointMap();
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -72,13 +84,13 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    @Test
    public void testStepUpWithSquareUpReal() throws SimulationExceededMaximumTimeException
    {
-      testStepUpWithSquareUp(new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.REAL_ROBOT));
+      testStepUpWithSquareUp(getRealRobotWalkingParameters());
    }
 
    @Test
    public void testStepUpWithSquareUpSim() throws SimulationExceededMaximumTimeException
    {
-      testStepUpWithSquareUp(new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.SCS));
+      testStepUpWithSquareUp(getSCSWalkingParameters());
    }
 
    public void testStepUpWithSquareUp(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
@@ -132,13 +144,13 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    @Test
    public void testStepUpWithoutSquareUpReal() throws SimulationExceededMaximumTimeException
    {
-      testStepUpWithoutSquareUp(new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.REAL_ROBOT));
+      testStepUpWithoutSquareUp(getRealRobotWalkingParameters());
    }
 
    @Test
    public void testStepUpWithoutSquareUpSim() throws SimulationExceededMaximumTimeException
    {
-      testStepUpWithoutSquareUp(new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.SCS));
+      testStepUpWithoutSquareUp(getSCSWalkingParameters());
    }
 
    public void testStepUpWithoutSquareUp(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
@@ -191,18 +203,57 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testWalkSlopeReal() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope45DegReal() throws SimulationExceededMaximumTimeException
    {
-      testWalkSlope(Math.PI / 6.0, new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.REAL_ROBOT));
+      testWalkSlope(Math.toRadians(45.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
    }
 
    @Test
-   public void testWalkSlopeSim() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope45DegSim() throws SimulationExceededMaximumTimeException
    {
-      testWalkSlope(Math.PI / 6.0, new ValkyrieWalkingControllerParameters(getRobotModel().getJointMap(), RobotTarget.SCS));
+      testWalkSlope(Math.toRadians(45.0), 0.33 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
    }
 
-   public void testWalkSlope(double slopeAngle, WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   @Test
+   public void testWalkDownSlope30DegReal() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(30.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+   }
+
+   @Test
+   public void testWalkDownSlope30DegSim() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+   }
+
+   @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
+   @Test
+   public void testWalkUpSlope45DegReal() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(-45.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+   }
+
+   @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
+   @Test
+   public void testWalkUpSlope45DegSim() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(-45.0), 0.33 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+   }
+
+   @Test
+   public void testWalkUpSlope30DegReal() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(-30.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+   }
+
+   @Test
+   public void testWalkUpSlope30DegSim() throws SimulationExceededMaximumTimeException
+   {
+      testWalkSlope(Math.toRadians(-30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+   }
+
+   public void testWalkSlope(double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters)
+         throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -211,10 +262,13 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
+      drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable()));
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.setCameraFix(1.0, 0.0, 0.8);
-      scs.setCameraPosition(1.0, -8.0, 1.0);
+      double cameraX = 2.0;
+      double cameraZ = 0.8 + slope.getTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 0.0);
+      scs.setCameraFix(cameraX, 0.0, cameraZ);
+      scs.setCameraPosition(cameraX, -8.0, cameraZ);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -223,12 +277,11 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      double stepLength = steppingParameters.getDefaultStepLength();
       double stepWidth = steppingParameters.getInPlaceWidth();
 
       HeightMapWithNormals heightMap = slope.getTerrainObject3D().getHeightMapIfAvailable();
 
-      stepTo(0.0, 5.0, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, true, true);
+      stepTo(0.2, 5.0, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, true, true);
       setTimings(footsteps, walkingControllerParameters);
       footsteps.getFootstepDataList().forEach(footstep -> footstep.getOrientation().setToPitchOrientation(slopeAngle));
       footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
@@ -247,6 +300,48 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private static ValkyrieInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap)
+   {
+      return new ValkyrieInitialSetup(0.0, 0.0)
+      {
+         @Override
+         protected void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+         {
+            super.setActuatorPositions(robot, jointMap);
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               String hipPitch = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
+               String anklePitch = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH);
+
+               OneDegreeOfFreedomJoint anklePitchJoint = robot.getOneDegreeOfFreedomJoint(anklePitch);
+               OneDegreeOfFreedomJoint hipPitchJoint = robot.getOneDegreeOfFreedomJoint(hipPitch);
+               hipPitchJoint.setQ(hipPitchJoint.getQ() - 0.05);
+               anklePitchJoint.setQ(anklePitchJoint.getQ() + slopeAngle - 0.05);
+            }
+            robot.update();
+         }
+
+         @Override
+         protected void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
+         {
+            super.positionRobotInWorld(robot);
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               List<GroundContactPoint> footGCs = robot.getFootGroundContactPoints(robotSide);
+
+               for (GroundContactPoint gc : footGCs)
+               {
+                  double heightAt = heightMap.heightAt(gc.getX(), gc.getY(), 0.0);
+                  robot.getRootJoint().getQz().add(heightAt - gc.getZ());
+                  robot.update();
+               }
+            }
+         }
+      };
    }
 
    private static void computeDefaultWaypointPrositions(FootstepDataListMessage footsteps, double[] percentages, double swingHeight)
@@ -337,7 +432,36 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
    private ValkyrieRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      {
+         @Override
+         public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
+         {
+            if (jointHolder.getName().contains("AnklePitch"))
+            {
+               jointHolder.setLimits(-Math.PI, Math.PI);
+            }
+         }
+      };
    }
 
+   private ValkyrieWalkingControllerParameters getRealRobotWalkingParameters()
+   {
+      return new ValkyrieWalkingControllerParameters(jointMap, RobotTarget.REAL_ROBOT);
+   }
+
+   private ValkyrieWalkingControllerParameters getSCSWalkingParameters()
+   {
+      return new ValkyrieWalkingControllerParameters(jointMap, RobotTarget.SCS);
+   }
+
+   private SteppingParameters getRealRobotSteppingParameters()
+   {
+      return getRealRobotWalkingParameters().getSteppingParameters();
+   }
+
+   private SteppingParameters getSCSSteppingParameters()
+   {
+      return getSCSWalkingParameters().getSteppingParameters();
+   }
 }
