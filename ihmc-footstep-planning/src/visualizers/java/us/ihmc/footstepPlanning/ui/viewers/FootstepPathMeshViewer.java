@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,21 +17,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Double;
@@ -69,30 +63,30 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    public FootstepPathMeshViewer(Messager messager)
    {
-      ignorePartialFootholds = messager.createInput(IgnorePartialFootholdsTopic, false);
-      footstepDataListMessage = messager.createInput(FootstepPlanResponseTopic, null);
+      ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
+      footstepDataListMessage = messager.createInput(FootstepPlanResponse, null);
 
-      messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
 
-      messager.registerTopicListener(NodeDataTopic, nodeData -> executorService.submit(() -> {
+      messager.registerTopicListener(NodeData, nodeData -> executorService.submit(() -> {
          solutionWasReceived.set(false);
          processLowestCostNodeList(nodeData);
       }));
 
-      messager.registerTopicListener(RenderShiftedWaypointsTopic, value ->
+      messager.registerTopicListener(RenderShiftedWaypoints, value ->
       {
          renderShiftedFootsteps.set(value);
          processFootstepPath(footstepDataListMessage.get());
       });
 
-      messager.registerTopicListener(IgnorePartialFootholdsTopic, b -> processFootstepPath(footstepDataListMessage.get()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
-      showSolution = messager.createInput(ShowFootstepPlanTopic, true);
-      showIntermediatePlan = messager.createInput(ShowNodeDataTopic, true);
+      showSolution = messager.createInput(ShowFootstepPlan, true);
+      showIntermediatePlan = messager.createInput(ShowNodeData, true);
    }
 
    private void processLowestCostNodeList(FootstepNodeDataListMessage message)

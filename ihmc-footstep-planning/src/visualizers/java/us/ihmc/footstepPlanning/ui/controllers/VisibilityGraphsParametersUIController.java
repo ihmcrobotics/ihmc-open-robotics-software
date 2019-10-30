@@ -5,12 +5,9 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
 
 public class VisibilityGraphsParametersUIController
@@ -80,7 +77,7 @@ public class VisibilityGraphsParametersUIController
       javaFXStoredPropertyMap.put(searchHostRegionEpsilon, VisibilityGraphParametersKeys.searchHostRegionEpsilon);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, parameters ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, parameters ->
       {
          planningParameters.set(parameters);
 
@@ -94,7 +91,7 @@ public class VisibilityGraphsParametersUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, planningParameters);
    }
 
 
