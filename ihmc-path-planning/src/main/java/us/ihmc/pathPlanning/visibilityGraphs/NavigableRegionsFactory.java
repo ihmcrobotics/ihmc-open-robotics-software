@@ -15,7 +15,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -52,17 +52,23 @@ public class NavigableRegionsFactory
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
+      NavigableExtrusionDistanceCalculator preferredNavigableCalculator = parameters.getPreferredNavigableExtrusionDistanceCalculator();
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
+      ObstacleExtrusionDistanceCalculator preferredObstacleCalculator = parameters.getPreferredObstacleExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
-                                    obstacleCalculator);
+      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
+                                    preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator,
+                                    parameters.includePreferredExtrusions());
    }
 
    public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                         ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                        NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
                                                         NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator)
+                                                        ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
+                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator,
+                                                        boolean includePreferredExtrusions)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
@@ -70,16 +76,20 @@ public class NavigableRegionsFactory
       List<PlanarRegion> obstacleRegions = otherRegions.stream().filter(candidate -> obstacleRegionFilter.isRegionValidObstacle(candidate, homeRegion))
                                                        .collect(Collectors.toList());
 
-      obstacleRegions = PlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
-                                                                                             DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
+      obstacleRegions = REAPlanarRegionTools.filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion,
+                                                                                                DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, filter);
 
-      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, navigableCalculator));
-      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, obstacleCalculator));
+      navigableRegion.setHomeRegionCluster(ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator,
+                                                                                includePreferredExtrusions));
+      navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
+                                                                              obstacleCalculator, includePreferredExtrusions));
 
       for (Cluster cluster : navigableRegion.getAllClusters())
       {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
+         List<Point2DReadOnly> expandListOfPreferred2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getPreferredNavigableExtrusionsInLocal(), clusterResolution);
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
+         cluster.setPreferredNavigableExtrusionsInLocal(expandListOfPreferred2DPoints);
       }
       return navigableRegion;
    }

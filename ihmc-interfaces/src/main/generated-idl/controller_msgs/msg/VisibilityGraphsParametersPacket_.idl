@@ -27,6 +27,8 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double obstacle_extrusion_distance;
         @defaultValue(value=-1.0)
+        double preferred_navigable_extrusion_distance;
+        @defaultValue(value=-1.0)
         double preferred_obstacle_extrusion_distance;
         @defaultValue(value=-1.0)
         double obstacle_extrusion_distance_if_not_too_high_to_step;
@@ -63,6 +65,8 @@ module controller_msgs
         @defaultValue(value=True)
         boolean introduce_midpoints_in_post_processing;
         boolean compute_orientations_to_avoid_obstacles;
+        @defaultValue(value=True)
+        boolean include_preferred_extrusions;
         @defaultValue(value=-1.0)
         double heuristic_weight;
         @defaultValue(value=-1.0)
@@ -73,6 +77,10 @@ module controller_msgs
         double occluded_goal_edge_weight;
         @defaultValue(value=-1.0)
         double weight_for_inter_region_edge;
+        @defaultValue(value=-1.0)
+        double weight_for_non_preferred_edge;
+        @defaultValue(value=-1.0)
+        double cost_for_non_preferred_node;
         boolean return_best_effort_solution;
       };
     };

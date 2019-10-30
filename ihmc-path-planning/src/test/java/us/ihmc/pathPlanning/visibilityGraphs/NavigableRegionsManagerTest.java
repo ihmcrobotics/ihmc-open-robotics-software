@@ -37,12 +37,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class NavigableRegionsManagerTest
 {
    private static boolean visualize = true;
    private static final double epsilon = 1e-4;
-   private static final double proximityEpsilon = 2e-2;
+   private static final double proximityEpsilon = 6e-2;
 
    // For enabling helpful prints.
    private static boolean DEBUG = false;
@@ -784,8 +784,8 @@ public class NavigableRegionsManagerTest
 //      if (numberOfPoints < originalPath.size())
 //         errorMessages += fail("number of points is not what was expected.");
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(start, path.get(0).getPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goal, path.get(numberOfPoints - 1).getPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Did not start at the desired location.", start, path.get(0).getPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Did not end at the desired location.", goal, path.get(numberOfPoints - 1).getPosition(), epsilon);
 
 //      for (Pose3DReadOnly point : path)
 //      {
@@ -1457,7 +1457,9 @@ public class NavigableRegionsManagerTest
          };
       parameters.setObstacleExtrusionDistance(obstacleExtrusionDistance);
       parameters.setPreferredObstacleExtrusionDistance(preferredObstacleExtrusionDistance);
+      parameters.setPreferredNavigableExtrusionDistance(1.0);
 //      parameters.setClusterResolution(0.501);
+      parameters.setIntroduceMidpointsInPostProcessing(true);
       parameters.setPerformPostProcessingNodeShifting(true);
       parameters.setComputeOrientationsToAvoidObstacles(true);
 
