@@ -1,16 +1,16 @@
 package us.ihmc.footstepPlanning.ui;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionDataTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationDataTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegionTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegionsTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegion;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPosition;
 
 import java.util.ArrayList;
 
@@ -58,7 +58,6 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -194,13 +193,13 @@ public class FootstepPlannerUI
       }
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
-      this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
-                                                                 StartPositionTopic, LowLevelGoalPositionTopic, GoalPositionTopic);
+      this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
+                                                                 StartPosition, LowLevelGoalPosition, GoalPosition);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
-                                                         StartPositionTopic, GoalPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
-                                                         StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic);
+      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
+                                                         StartPosition, GoalPosition, PlanarRegionData, SelectedRegion,
+                                                         StartOrientationEditModeEnabled, GoalOrientationEditModeEnabled);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
@@ -226,7 +225,7 @@ public class FootstepPlannerUI
       else
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
-         messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
+         messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();

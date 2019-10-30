@@ -49,13 +49,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
       this.messager = messager;
       this.subScene = subScene;
 
-      startEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
-      goalEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
+      startEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled, false);
+      goalEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled, false);
 
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
 
-      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(FootstepPlannerMessagerAPI.SelectedRegionTopic);
+      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(FootstepPlannerMessagerAPI.SelectedRegion);
 
       rayCastInterceptor = (event) ->
       {
@@ -129,13 +129,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
             double startYaw = Math.atan2(difference.getY(), difference.getX());
             Quaternion orientation = new Quaternion(startYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, orientation);
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, orientation);
          }
 
          if(orientationValidated.getAndSet(false))
          {
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
-            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, false);
          }
       }
 
@@ -151,13 +151,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
             double goalYaw = Math.atan2(difference.getY(), difference.getX());
             Quaternion orientation = new Quaternion(goalYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, orientation);
+            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, orientation);
          }
 
          if(orientationValidated.getAndSet(false))
          {
-            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
-            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled, false);
+            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, false);
          }
       }
    }
