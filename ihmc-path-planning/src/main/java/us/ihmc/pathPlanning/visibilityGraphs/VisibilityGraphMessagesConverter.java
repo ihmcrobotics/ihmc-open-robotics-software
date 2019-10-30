@@ -218,7 +218,7 @@ public class VisibilityGraphMessagesConverter
       cluster.setTransformToWorld(transform);
       cluster.addRawPointsInLocal3D(rawPointsInLocal);
       for (int i = 0; i < navigableExtrusionsInLocal.size(); i++)
-         cluster.addNavigableExtrusionInLocal(navigableExtrusionsInLocal.get(i));
+         cluster.addNavigableExtrusionInLocal(new Point2D(navigableExtrusionsInLocal.get(i)));
       for (int i = 0; i < nonNavigableExtrusionsInLocal.size(); i++)
          cluster.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocal.get(i));
 

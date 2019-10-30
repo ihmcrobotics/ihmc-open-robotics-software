@@ -31,6 +31,10 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
+   private CheckBox showClusterPreferredNavigableExtrusionsToggleButton;
+   @FXML
+   private CheckBox showClusterPreferredNonNavigableExtrusionsToggleButton;
+   @FXML
    private CheckBox showOccupancyMap;
    @FXML
    private CheckBox showSolution;
@@ -60,6 +64,8 @@ public class VisualizationController
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), true);
 
       messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);

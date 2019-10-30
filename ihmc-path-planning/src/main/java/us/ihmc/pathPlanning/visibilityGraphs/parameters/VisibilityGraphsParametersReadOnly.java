@@ -7,9 +7,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import java.util.List;
@@ -38,6 +38,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    default double getObstacleExtrusionDistance()
    {
       return get(obstacleExtrusionDistance);
+   }
+
+   default double getPreferredNavigableExtrusionDistance()
+   {
+      return get(preferredNavigableExtrusionDistance);
    }
 
    default double getPreferredObstacleExtrusionDistance()
@@ -175,12 +180,33 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    }
 
    /**
+    * This is the additional weight applied to any edge that ends on a non-preferred node.
+    * */
+   default double getWeightForNonPreferredEdge()
+   {
+      return get(weightForNonPreferredEdge);
+   }
+
+   /**
+    * This a static cost added to any edge that ends on a non-preferred node.
+    * */
+   default double getCostForNonPreferredNode()
+   {
+      return get(costForNonPreferredNode);
+   }
+
+   /**
     * This flag says whether or not to return a solution even when the goal is not reached.
     * The solution that is returned is the lowest cost path, including estimated cost to goal.
     */
    default boolean returnBestEffortSolution()
    {
       return get(returnBestEffortSolution);
+   }
+
+   default boolean includePreferredExtrusions()
+   {
+      return get(includePreferredExtrusions);
    }
 
    /**
@@ -196,6 +222,18 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
          {
             return getNavigableExtrusionDistance();
+         }
+      };
+   }
+
+   default NavigableExtrusionDistanceCalculator getPreferredNavigableExtrusionDistanceCalculator()
+   {
+      return new NavigableExtrusionDistanceCalculator()
+      {
+         @Override
+         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
+         {
+            return getPreferredNavigableExtrusionDistance();
          }
       };
    }
@@ -219,6 +257,29 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          else
          {
             return getObstacleExtrusionDistance();
+         }
+      };
+   }
+
+   /**
+    * This calculator is used when extruding the projection of an obstacle onto a navigable region.
+    *
+    * @return the calculator use for obstacle extrusion.
+    */
+   default ObstacleExtrusionDistanceCalculator getPreferredObstacleExtrusionDistanceCalculator()
+   {
+      return (pointToExtrude, obstacleHeight) -> {
+         if (obstacleHeight < 0.0)
+         {
+            return 0.0;
+         }
+         else if (obstacleHeight < getTooHighToStepDistance())
+         {
+            return getObstacleExtrusionDistanceIfNotTooHighToStep();
+         }
+         else
+         {
+            return getPreferredObstacleExtrusionDistance();
          }
       };
    }
@@ -255,7 +316,61 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
+         {
+            return maxLength;
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getPreferredToPreferredInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * (getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance());
+         private final double maxLengthSquared = MathTools.square(maxLength);
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnectionDistance()
+         {
+            return maxLength;
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getPreferredToNonPreferredInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         private final double maxLength = getMaxInterRegionConnectionLength() + getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance();
+         private final double maxLengthSquared = MathTools.square(maxLength);
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnectionDistance()
          {
             return maxLength;
          }

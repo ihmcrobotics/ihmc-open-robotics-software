@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -13,58 +17,82 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="pointCloudAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="615.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController">
+<AnchorPane fx:id="pointCloudAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController">
    <children>
-      <VBox layoutX="6.0" layoutY="5.0" prefHeight="180.0" prefWidth="615.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <HBox prefHeight="180.0" prefWidth="800.0" spacing="10.0">
          <children>
-            <HBox prefHeight="70.0" prefWidth="615.0" spacing="15.0">
+            <VBox alignment="CENTER" prefHeight="180.0" prefWidth="615.0">
                <children>
-                  <VBox alignment="CENTER" prefHeight="62.0" prefWidth="112.0" spacing="10.0">
+                  <HBox prefHeight="70.0" prefWidth="615.0" spacing="15.0">
                      <children>
-                        <ToggleButton fx:id="enableLidarButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Scan" />
-                        <Button fx:id="clearLidarButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearLidar" text="Clear" />
+                        <VBox alignment="CENTER" prefHeight="62.0" prefWidth="112.0" spacing="10.0">
+                           <children>
+                              <ToggleButton fx:id="enableLidarButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Scan" />
+                              <Button fx:id="clearLidarButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearLidar" text="Clear" />
+                           </children>
+                        </VBox>
+                        <VBox>
+                           <children>
+                              <Label text="Number of scans:" />
+                              <Slider fx:id="scanHistorySizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="150.0" minorTickCount="4" prefHeight="38.0" prefWidth="492.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" />
+                           </children>
+                        </VBox>
                      </children>
-                  </VBox>
-                  <VBox>
+                  </HBox>
+                  <VBox prefHeight="70.0" prefWidth="615.0" spacing="10.0">
                      <children>
-                        <Label text="Number of scans:" />
-                        <Slider fx:id="scanHistorySizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="150.0" minorTickCount="4" prefHeight="38.0" prefWidth="492.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" />
+                        <HBox prefHeight="74.0" prefWidth="615.0">
+                           <children>
+                              <VBox alignment="CENTER" prefHeight="0.0" prefWidth="110.0" spacing="10.0">
+                                 <children>
+                                    <ToggleButton fx:id="enableStereoButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo" />
+                                    <Button fx:id="clearStereoButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearStereo" text="Clear" />
+                                 </children>
+                              </VBox>
+                              <GridPane prefHeight="70.0" prefWidth="283.0">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+	      						<children>
+	                             <Label alignment="CENTER" prefHeight="16.0" prefWidth="187.0" text="Number of points" />
+	                          	   <Spinner fx:id="sizeOfPointCloudSpinner" editable="true" GridPane.columnIndex="1">
+	                          	      <opaqueInsets>
+	                          	        <Insets />
+	                                	</opaqueInsets>
+	                            	 </Spinner>
+	                          	</children>
+                              </GridPane>
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
                </children>
-            </HBox>
-            <VBox prefHeight="70.0" prefWidth="615.0" spacing="10.0">
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="180.0" prefWidth="150.0">
                <children>
-                  <HBox prefHeight="74.0" prefWidth="615.0">
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Sensor Pose History" textAlignment="CENTER">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
                      <children>
-                        <VBox alignment="CENTER" prefHeight="0.0" prefWidth="110.0" spacing="10.0">
-                           <children>
-                              <ToggleButton fx:id="enableStereoButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo" />
-                              <Button fx:id="clearStereoButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearStereo" text="Clear" />
-                           </children>
-                        </VBox>
-                        <GridPane prefHeight="70.0" prefWidth="283.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label alignment="CENTER" prefHeight="16.0" prefWidth="187.0" text="Number of points" />
-                              <Spinner fx:id="sizeOfPointCloudSpinner" editable="true" GridPane.columnIndex="1">
-                                 <opaqueInsets>
-                                    <Insets />
-                                 </opaqueInsets>
-                              </Spinner>
-                           </children>
-                        </GridPane>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="79.0" text="Frames" textAlignment="CENTER" />
+                        <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" min="1" max="200.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="20.0">
+                           <tooltip>
+                              <Tooltip text="Set number of frames to visualize" />
+                           </tooltip>
+                        </Slider>
                      </children>
                   </HBox>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear" />
                </children>
             </VBox>
          </children>
-      </VBox>
+      </HBox>
    </children>
 </AnchorPane>

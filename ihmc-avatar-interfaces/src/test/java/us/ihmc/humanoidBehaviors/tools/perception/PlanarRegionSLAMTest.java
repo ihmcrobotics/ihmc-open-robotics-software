@@ -34,12 +34,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerLis
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.lists.PairList;
 

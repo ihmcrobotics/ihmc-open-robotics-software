@@ -7,6 +7,18 @@ geometry_msgs/Point sensor_position
 
 geometry_msgs/Quaternion sensor_orientation
 
+# There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+# The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+# The confidence of the sensor pose represents the quality of the pose estimation.
+# Field default value 1.0
+float64 sensor_pose_confidence
+
+# There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+# The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+# The confidence of the point cloud represents the quality of the collected point cloud data.
+# Field default value 1.0
+float64 point_cloud_confidence
+
 float32[] point_cloud
 
 int32[] colors

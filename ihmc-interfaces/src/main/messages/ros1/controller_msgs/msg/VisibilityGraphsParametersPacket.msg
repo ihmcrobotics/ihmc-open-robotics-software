@@ -14,6 +14,9 @@ float64 navigable_extrusion_distance
 float64 obstacle_extrusion_distance
 
 # Field default value -1.0
+float64 preferred_navigable_extrusion_distance
+
+# Field default value -1.0
 float64 preferred_obstacle_extrusion_distance
 
 # Field default value -1.0
@@ -61,6 +64,9 @@ bool introduce_midpoints_in_post_processing
 
 bool compute_orientations_to_avoid_obstacles
 
+# Field default value True
+bool include_preferred_extrusions
+
 # Field default value -1.0
 float64 heuristic_weight
 
@@ -75,6 +81,12 @@ float64 occluded_goal_edge_weight
 
 # Field default value -1.0
 float64 weight_for_inter_region_edge
+
+# Field default value -1.0
+float64 weight_for_non_preferred_edge
+
+# Field default value -1.0
+float64 cost_for_non_preferred_node
 
 bool return_best_effort_solution
 

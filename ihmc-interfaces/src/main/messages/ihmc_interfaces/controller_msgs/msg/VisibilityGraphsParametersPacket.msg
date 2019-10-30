@@ -11,6 +11,8 @@ float64 navigable_extrusion_distance -1.0
 
 float64 obstacle_extrusion_distance -1.0
 
+float64 preferred_navigable_extrusion_distance -1.0
+
 float64 preferred_obstacle_extrusion_distance -1.0
 
 float64 obstacle_extrusion_distance_if_not_too_high_to_step -1.0
@@ -48,6 +50,8 @@ bool introduce_midpoints_in_post_processing true
 
 bool compute_orientations_to_avoid_obstacles false
 
+bool include_preferred_extrusions true
+
 float64 heuristic_weight -1.0
 
 float64 distance_weight -1.0
@@ -57,5 +61,9 @@ float64 elevation_weight -1.0
 float64 occluded_goal_edge_weight -1.0
 
 float64 weight_for_inter_region_edge -1.0
+
+float64 weight_for_non_preferred_edge -1.0
+
+float64 cost_for_non_preferred_node -1.0
 
 bool return_best_effort_solution false
