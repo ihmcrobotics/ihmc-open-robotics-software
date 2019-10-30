@@ -4,8 +4,8 @@ buildscript {
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }
       mavenCentral()
-      maven { url = uri("http://dl.bintray.com/ihmcrobotics/maven-release") }
-      maven { url = uri("http://dl.bintray.com/ihmcrobotics/maven-vendor") }
+      maven { url = uri("https://dl.bintray.com/ihmcrobotics/maven-release") }
+      maven { url = uri("https://dl.bintray.com/ihmcrobotics/maven-vendor") }
       mavenLocal()
       jcenter()
    }

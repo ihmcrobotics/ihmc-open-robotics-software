@@ -1,8 +1,8 @@
 buildscript {
    repositories {
       maven { url "https://plugins.gradle.org/m2/" }
-      maven { url "http://dl.bintray.com/ihmcrobotics/maven-release" }
-      maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
+      maven { url "https://dl.bintray.com/ihmcrobotics/maven-release" }
+      maven { url "https://dl.bintray.com/ihmcrobotics/maven-vendor" }
    }
    dependencies {
       classpath group: "us.ihmc", name: "ihmc-pub-sub-generator", version: "0.10.2"
