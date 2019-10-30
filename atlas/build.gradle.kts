@@ -43,7 +43,7 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set:0.12.15")
    api("us.ihmc:ihmc-graphics-description:0.12.13")
    api("us.ihmc:ihmc-robot-description:0.12.8")
-   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.10")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
