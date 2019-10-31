@@ -119,19 +119,34 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp, maxStepZ);
    }
 
-   default void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
-   {
-      set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
-   }
-
    default void setMaximumStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
    {
       set(FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp);
    }
 
+   default void setMaximumStepWidthWhenSteppingUp(double maximumStepWidthWhenSteppingUp)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepWidthWhenSteppingUp, maximumStepWidthWhenSteppingUp);
+   }
+
+   default void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
+   }
+
    default void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
    {
       set(FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
+   }
+
+   default void setMaximumStepYWhenForwardAndDown(double maximumStepYWhenForwardAndDown)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown, maximumStepYWhenForwardAndDown);
+   }
+
+   default void setTranslationScaleFromGrandparentNode(double translationScaleFromGrandparentNode)
+   {
+      set(FootstepPlannerParameterKeys.translationScaleFromGrandparentNode, translationScaleFromGrandparentNode);
    }
 
    default void setIdealFootstepWidth(double idealFootstepWidth)
@@ -349,12 +364,18 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumStepYaw(parametersPacket.getMinimumStepYaw());
       if (parametersPacket.getMaximumStepReachWhenSteppingUp() != -1.0)
          setMaximumStepReachWhenSteppingUp(parametersPacket.getMaximumStepReachWhenSteppingUp());
+      if (parametersPacket.getMaximumStepWidthWhenSteppingUp() != -1.0)
+         setMaximumStepWidthWhenSteppingUp(parametersPacket.getMaximumStepWidthWhenSteppingUp());
       if (parametersPacket.getMaximumStepZWhenSteppingUp() != -1.0)
          setMaximumStepZWhenSteppingUp(parametersPacket.getMaximumStepZWhenSteppingUp());
       if (parametersPacket.getMaximumStepXWhenForwardAndDown() != -1.0)
          setMaximumStepXWhenForwardAndDown(parametersPacket.getMaximumStepXWhenForwardAndDown());
+      if (parametersPacket.getMaximumStepYWhenForwardAndDown() != -1.0)
+         setMaximumStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZWhenForwardAndDown() != -1.0)
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
+      if (parametersPacket.getTranslationScaleFromGrandparentNode() != -1.0)
+         setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
       if (parametersPacket.getMaximumStepZ() != -1.0)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
       if (parametersPacket.getStepYawReductionFactorAtMaxReach() != -1.0)

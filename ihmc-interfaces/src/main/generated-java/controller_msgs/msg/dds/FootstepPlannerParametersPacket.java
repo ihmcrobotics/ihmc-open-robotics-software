@@ -10,13 +10,27 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC footstep planning module.
        * Maximum step reach when stepping up.
        * 
-       * Long steps forward are rejected by the planner if two criteria are met:
-       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * Long steps forward are rejected by the planner if one of two criteria are met:
+       * The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - OR -
+       * The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - AND -
+       * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * Maximum step width when stepping up.
+       * 
+       * Long steps forward are rejected by the planner if one of two criteria are met:
+       * The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - OR -
+       * The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - AND -
        * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
        * Step height for considering stepping up.
        * 
-       * Long steps forward are rejected by the planner if two criteria are met:
-       * The x-position of the value of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * Long steps forward are rejected by the planner if one of two criteria are met:
+       * The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - OR -
+       * The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+       * - AND -
        * The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
        */
 public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParametersPacket> implements Settable<FootstepPlannerParametersPacket>, EpsilonComparable<FootstepPlannerParametersPacket>
@@ -112,12 +126,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
             * it's very close to saturating its torque limits.
             */
+   public double maximum_step_width_when_stepping_up_ = -1.0;
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
    public double maximum_step_z_when_stepping_up_ = -1.0;
    /**
             * Maximum step length when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
             * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
@@ -126,17 +149,44 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_x_when_forward_and_down_ = -1.0;
    /**
+            * Maximum step width when stepping forward and down.
+            * 
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
+            * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * 
+            * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+            * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+            * it's very close to hitting it's ankle pitch joint limit.
+            */
+   public double maximum_step_y_when_forward_and_down_ = -1.0;
+   /**
             * Maximum step height when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-            * The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
             * it's very close to hitting it's ankle pitch joint limit.
             */
    public double maximum_step_z_when_forward_and_down_ = -1.0;
+   /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public double translation_scale_from_grandparent_node_ = -1.0;
    /**
             * Maximum vertical distance between consecutive footsteps
             * 
@@ -436,11 +486,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       maximum_step_reach_when_stepping_up_ = other.maximum_step_reach_when_stepping_up_;
 
+      maximum_step_width_when_stepping_up_ = other.maximum_step_width_when_stepping_up_;
+
       maximum_step_z_when_stepping_up_ = other.maximum_step_z_when_stepping_up_;
 
       maximum_step_x_when_forward_and_down_ = other.maximum_step_x_when_forward_and_down_;
 
+      maximum_step_y_when_forward_and_down_ = other.maximum_step_y_when_forward_and_down_;
+
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
+
+      translation_scale_from_grandparent_node_ = other.translation_scale_from_grandparent_node_;
 
       maximum_step_z_ = other.maximum_step_z_;
 
@@ -806,6 +862,25 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
             * it's very close to saturating its torque limits.
             */
+   public void setMaximumStepWidthWhenSteppingUp(double maximum_step_width_when_stepping_up)
+   {
+      maximum_step_width_when_stepping_up_ = maximum_step_width_when_stepping_up;
+   }
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
+   public double getMaximumStepWidthWhenSteppingUp()
+   {
+      return maximum_step_width_when_stepping_up_;
+   }
+
+   /**
+            * Large steps forward and up can cause the robot to surpass its torque limits.
+            * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+            * it's very close to saturating its torque limits.
+            */
    public void setMaximumStepZWhenSteppingUp(double maximum_step_z_when_stepping_up)
    {
       maximum_step_z_when_stepping_up_ = maximum_step_z_when_stepping_up;
@@ -823,8 +898,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Maximum step length when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
             * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
@@ -838,8 +916,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Maximum step length when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
             * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
@@ -852,11 +933,51 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
+            * Maximum step width when stepping forward and down.
+            * 
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
+            * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * 
+            * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+            * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+            * it's very close to hitting it's ankle pitch joint limit.
+            */
+   public void setMaximumStepYWhenForwardAndDown(double maximum_step_y_when_forward_and_down)
+   {
+      maximum_step_y_when_forward_and_down_ = maximum_step_y_when_forward_and_down;
+   }
+   /**
+            * Maximum step width when stepping forward and down.
+            * 
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
+            * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * 
+            * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+            * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+            * it's very close to hitting it's ankle pitch joint limit.
+            */
+   public double getMaximumStepYWhenForwardAndDown()
+   {
+      return maximum_step_y_when_forward_and_down_;
+   }
+
+   /**
             * Maximum step height when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-            * The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
@@ -869,9 +990,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Maximum step height when stepping forward and down.
             * 
-            * Large steps forward and down are rejected by the planner if two criteria are met:
+            * Large steps forward and down are rejected by the planner if one of two criteria are met:
             * The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-            * The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - OR -
+            * The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+            * - AND -
+            * The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
             * 
             * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
             * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
@@ -880,6 +1004,31 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZWhenForwardAndDown()
    {
       return maximum_step_z_when_forward_and_down_;
+   }
+
+   /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public void setTranslationScaleFromGrandparentNode(double translation_scale_from_grandparent_node)
+   {
+      translation_scale_from_grandparent_node_ = translation_scale_from_grandparent_node;
+   }
+   /**
+            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
+            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+            * {@link #getMaximumStepZWhenForwardAndDown()}.
+            * 
+            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+            */
+   public double getTranslationScaleFromGrandparentNode()
+   {
+      return translation_scale_from_grandparent_node_;
    }
 
    /**
@@ -1775,11 +1924,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_when_stepping_up_, other.maximum_step_reach_when_stepping_up_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_when_stepping_up_, other.maximum_step_width_when_stepping_up_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_stepping_up_, other.maximum_step_z_when_stepping_up_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_x_when_forward_and_down_, other.maximum_step_x_when_forward_and_down_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_y_when_forward_and_down_, other.maximum_step_y_when_forward_and_down_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_forward_and_down_, other.maximum_step_z_when_forward_and_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_scale_from_grandparent_node_, other.translation_scale_from_grandparent_node_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
 
@@ -1914,11 +2069,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_reach_when_stepping_up_ != otherMyClass.maximum_step_reach_when_stepping_up_) return false;
 
+      if(this.maximum_step_width_when_stepping_up_ != otherMyClass.maximum_step_width_when_stepping_up_) return false;
+
       if(this.maximum_step_z_when_stepping_up_ != otherMyClass.maximum_step_z_when_stepping_up_) return false;
 
       if(this.maximum_step_x_when_forward_and_down_ != otherMyClass.maximum_step_x_when_forward_and_down_) return false;
 
+      if(this.maximum_step_y_when_forward_and_down_ != otherMyClass.maximum_step_y_when_forward_and_down_) return false;
+
       if(this.maximum_step_z_when_forward_and_down_ != otherMyClass.maximum_step_z_when_forward_and_down_) return false;
+
+      if(this.translation_scale_from_grandparent_node_ != otherMyClass.translation_scale_from_grandparent_node_) return false;
 
       if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
 
@@ -2050,12 +2211,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.minimum_step_yaw_);      builder.append(", ");
       builder.append("maximum_step_reach_when_stepping_up=");
       builder.append(this.maximum_step_reach_when_stepping_up_);      builder.append(", ");
+      builder.append("maximum_step_width_when_stepping_up=");
+      builder.append(this.maximum_step_width_when_stepping_up_);      builder.append(", ");
       builder.append("maximum_step_z_when_stepping_up=");
       builder.append(this.maximum_step_z_when_stepping_up_);      builder.append(", ");
       builder.append("maximum_step_x_when_forward_and_down=");
       builder.append(this.maximum_step_x_when_forward_and_down_);      builder.append(", ");
+      builder.append("maximum_step_y_when_forward_and_down=");
+      builder.append(this.maximum_step_y_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z_when_forward_and_down=");
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
+      builder.append("translation_scale_from_grandparent_node=");
+      builder.append(this.translation_scale_from_grandparent_node_);      builder.append(", ");
       builder.append("maximum_step_z=");
       builder.append(this.maximum_step_z_);      builder.append(", ");
       builder.append("step_yaw_reduction_factor_at_max_reach=");

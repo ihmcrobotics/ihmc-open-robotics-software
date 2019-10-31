@@ -83,12 +83,21 @@ float64 maximum_step_reach_when_stepping_up
 # These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
 # it's very close to saturating its torque limits.
 # Field default value -1.0
+float64 maximum_step_width_when_stepping_up
+
+# Large steps forward and up can cause the robot to surpass its torque limits.
+# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+# it's very close to saturating its torque limits.
+# Field default value -1.0
 float64 maximum_step_z_when_stepping_up
 
 # Maximum step length when stepping forward and down.
 # 
-# Large steps forward and down are rejected by the planner if two criteria are met:
+# Large steps forward and down are rejected by the planner if one of two criteria are met:
 # The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - OR -
+# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - AND -
 # The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
 # 
 # Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
@@ -97,17 +106,44 @@ float64 maximum_step_z_when_stepping_up
 # Field default value -1.0
 float64 maximum_step_x_when_forward_and_down
 
+# Maximum step width when stepping forward and down.
+# 
+# Large steps forward and down are rejected by the planner if one of two criteria are met:
+# The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - OR -
+# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - AND -
+# The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# 
+# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
+# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
+# it's very close to hitting it's ankle pitch joint limit.
+# Field default value -1.0
+float64 maximum_step_y_when_forward_and_down
+
 # Maximum step height when stepping forward and down.
 # 
-# Large steps forward and down are rejected by the planner if two criteria are met:
+# Large steps forward and down are rejected by the planner if one of two criteria are met:
 # The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - OR -
+# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
+# - AND -
+# The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
 # 
 # Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
 # These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
 # it's very close to hitting it's ankle pitch joint limit.
 # Field default value -1.0
 float64 maximum_step_z_when_forward_and_down
+
+# Scale factor for checking 2D step limitations when changing height from the grandparent node.
+# This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
+# {@link #getMaximumStepZWhenForwardAndDown()}.
+# 
+# If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
+# up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+# Field default value -1.0
+float64 translation_scale_from_grandparent_node
 
 # Maximum vertical distance between consecutive footsteps
 # 
