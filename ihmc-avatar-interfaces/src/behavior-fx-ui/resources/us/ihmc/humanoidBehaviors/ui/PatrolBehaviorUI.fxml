@@ -57,23 +57,6 @@
                         <Button fx:id="placeUpDownCenter" mnemonicParsing="false" onAction="#placeUpDownCenter" text="Place Center" BorderPane.alignment="CENTER" />
                      </right>
                   </BorderPane>
-                  <HBox GridPane.columnIndex="1" GridPane.rowIndex="6">
-                     <children>
-                        <Label text="Enable:">
-                           <padding>
-                              <Insets right="5.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets top="3.0" />
-                           </HBox.margin>
-                        </Label>
-                        <CheckBox fx:id="enableCheckBox" onAction="#enable">
-                           <HBox.margin>
-                              <Insets top="3.0" />
-                           </HBox.margin>
-                        </CheckBox>
-                     </children>
-                  </HBox>
                   </children>
                <columnConstraints>
                   <ColumnConstraints />

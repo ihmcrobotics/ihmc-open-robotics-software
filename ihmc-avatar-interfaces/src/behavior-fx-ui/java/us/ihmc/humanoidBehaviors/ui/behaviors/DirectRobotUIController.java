@@ -27,14 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectRobotUIController
 {
-   @FXML private Button homeAll;
-   @FXML private Button freeze;
-   @FXML private Button standPrep;
-   @FXML private Button shutdown;
    @FXML private ComboBox<Integer> pumpPSI;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
-   @FXML private Button clearREA;
    @FXML private Slider stanceHeightSlider;
    @FXML private Slider leanForwardSlider;
    @FXML private Slider neckSlider;
