@@ -1,17 +1,35 @@
 package us.ihmc.avatar.networkProcessor.continuousPlanningToolboxModule;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import com.jme3.math.Transform;
-import controller_msgs.msg.dds.*;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
-import javafx.util.Pair;
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com.google.common.util.concurrent.AtomicDouble;
+import com.jme3.math.Transform;
+
+import controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -53,7 +71,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -79,15 +96,20 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -102,17 +124,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class BipedContinuousPlanningToolboxDataSetTest
 {
@@ -256,7 +267,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          createUI(messager);
       }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, footstepPlannerParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
 
       ThreadTools.sleep(1000);
@@ -491,8 +502,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
       planarRegionsPublisher.publish(planarRegionsListMessage);
       plannerParametersPublisher.publish(parametersPacket);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, footstepPlannerParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
       ThreadTools.sleep(100);
 
@@ -523,9 +534,9 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       requestPublisher.publish(requestPacket);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getGoalPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, dataset.getPlannerInput().getGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, dataset.getPlannerInput().getStartPosition());
 
 
       if (DEBUG)
@@ -539,10 +550,10 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       outputFromPlannerReference.set(packet);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, packet.getLowLevelPlannerGoal().getPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, packet.getLowLevelPlannerGoal().getOrientation());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathDataTopic, packet.getBodyPath());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, packet.getLowLevelPlannerGoal().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, packet.getLowLevelPlannerGoal().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, packet.getBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList()));
    }
 
    private void processFootstepDataListMessage(FootstepDataListMessage packet)
@@ -550,7 +561,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       if (DEBUG)
          PrintTools.info("Processed an output from a remote planner.");
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, packet);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, packet);
       fullStepListFromContinuousToolbox.set(packet);
       receivedFullStepList.set(true);
    }
@@ -697,8 +708,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
 
          FramePose3D startPose = feetPoses.get(RobotSide.fromByte(fullStepListFromContinuousToolbox.get().getFootstepDataList().get(0).getRobotSide()).getOppositeSide());
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, new Point3D(startPose.getPosition()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startPose.getOrientation()));
 
          firstTick = false;
          tickStartTime = currentTime;
