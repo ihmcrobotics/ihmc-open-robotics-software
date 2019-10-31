@@ -38,6 +38,7 @@ public class ROS2Tools
 
    public static final String FOOTSTEP_PLANNER_TOOLBOX = FOOTSTEP_PLANNER.getModuleTopicQualifier();
    public static final String CONTINUOUS_PLANNING_TOOLBOX = "/toolbox/continuous_planning";
+   public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX = "/toolbox/footstep_postprocessing";
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
    public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
