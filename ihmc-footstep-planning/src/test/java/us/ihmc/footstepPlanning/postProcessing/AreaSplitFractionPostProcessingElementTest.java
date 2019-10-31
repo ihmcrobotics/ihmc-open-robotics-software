@@ -99,8 +99,8 @@ public class AreaSplitFractionPostProcessingElementTest
       assertEquals(-1.0, secondProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, secondProcessedStep.getSwingSplitFraction());
 
-      assertEquals(0.5, thirdProcessedStep.getTransferWeightDistribution());
-      assertEquals(0.5, thirdProcessedStep.getTransferSplitFraction());
+      assertEquals(-1.0, thirdProcessedStep.getTransferWeightDistribution());
+      assertEquals(-1.0, thirdProcessedStep.getTransferSplitFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingSplitFraction());
 
@@ -185,8 +185,8 @@ public class AreaSplitFractionPostProcessingElementTest
       assertEquals(-1.0, secondProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, secondProcessedStep.getSwingSplitFraction());
 
-      assertEquals(0.5, thirdProcessedStep.getTransferWeightDistribution());
-      assertEquals(0.5, thirdProcessedStep.getTransferSplitFraction());
+      assertEquals(-1.0, thirdProcessedStep.getTransferWeightDistribution());
+      assertEquals(-1.0, thirdProcessedStep.getTransferSplitFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingSplitFraction());
 
@@ -271,8 +271,8 @@ public class AreaSplitFractionPostProcessingElementTest
       assertEquals(-1.0, secondProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, secondProcessedStep.getSwingSplitFraction());
 
-      assertEquals(0.5, thirdProcessedStep.getTransferWeightDistribution());
-      assertEquals(0.5, thirdProcessedStep.getTransferSplitFraction());
+      assertEquals(-1.0, thirdProcessedStep.getTransferWeightDistribution());
+      assertEquals(-1.0, thirdProcessedStep.getTransferSplitFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingDurationShiftFraction());
       assertEquals(-1.0, thirdProcessedStep.getSwingSplitFraction());
 
