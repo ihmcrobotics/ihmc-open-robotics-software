@@ -64,6 +64,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final IntegerProvider planId;
 
    private final AtomicDouble timeout = new AtomicDouble();
+   private final AtomicDouble bestEffortTimeout = new AtomicDouble();
    private final AtomicDouble horizonLength = new AtomicDouble();
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
@@ -238,6 +239,12 @@ public class FootstepPlanningStage implements FootstepPlanner
    }
 
    @Override
+   public void setBestEffortTimeout(double bestEffortTimeout)
+   {
+      this.bestEffortTimeout.set(bestEffortTimeout);
+   }
+
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList.set(planarRegionsList == null ? null : planarRegionsList.copy());
@@ -337,6 +344,7 @@ public class FootstepPlanningStage implements FootstepPlanner
       getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
       getPlanner().setGoal(goal.get());
       getPlanner().setTimeout(timeout.get());
+      getPlanner().setBestEffortTimeout(bestEffortTimeout.get());
       getPlanner().setPlanarRegions(planarRegionsList.get());
       getPlanner().setPlanningHorizonLength(horizonLength.get());
 
