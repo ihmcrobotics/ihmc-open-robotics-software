@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 
 public interface FootstepPlanPostProcessingElement

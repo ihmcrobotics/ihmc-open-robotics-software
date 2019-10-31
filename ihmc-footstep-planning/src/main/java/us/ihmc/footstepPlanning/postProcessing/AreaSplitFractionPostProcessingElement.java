@@ -15,6 +15,23 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
 
+/**
+ * The purpose of this class is to modify elements of the dynamic trajectory planner based on the comparative quality between footholds.
+ * Currently, the transfer phase is split into two segments. One where the CoP goes from the trailing foot to some midpoint, then the second where it goes
+ * from the midpoint to the leading foot. The midpoint is determined by interpolating between the trailing foot and the leading foot by some fraction set by
+ * the desired weight distribution {@link FootstepDataMessage#transfer_weight_distribution_}. The time spent shifting from the trailing foot to the midpoint
+ * is some fraction of the transfer duration determined by the transfer split fraction {@link FootstepDataMessage#transfer_split_fraction_}.
+ *
+ * <p>
+ *    This module defines several parameters that allow the weight distribution and split fraction to be modified based on the comparative area and width of the
+ *    leading and trailing footholds. That is, we can say that if the upcoming foothold has more area, we should shift our weight to be more on it, and do so
+ *    quickly. The same is said for the width - if it has more width, we should shift out weight more and quickly.
+ * </p>
+ * <p>
+ *    This is done by defining the desired weight distribution and split fraction if the upcoming foothold has ALL the area and width. That is, if the trailing
+ *    foot has no support area, where the midpoint CoP should be located, and if the trailing foot is purely a line, where the midpoint CoP should be.
+ * </p>
+ */
 public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

@@ -22,6 +22,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
 
+/**
+ * This class is a post-processing elements that bolts on top of the {@link SwingOverPlanarRegionsTrajectoryExpander} to allow it to take in planar regions,
+ * and then modify the two midpoints so that the swing trajectory is collision free.
+ */
 public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
