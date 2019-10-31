@@ -121,7 +121,11 @@ tasks.create("deploy") {
    dependsOn("installDist")
 
    doLast {
-      remote.session("link02", "val") // control
+      val valkyrie_link_ip: String by project
+      val valkyrie_realtime_username: String by project
+      val valkyrie_realtime_password: String by project
+
+      remote.session(valkyrie_link_ip, valkyrie_realtime_username, valkyrie_realtime_password) // control
       {
          exec("mkdir -p $directory")
 
@@ -149,7 +153,11 @@ tasks.create("deployNetworkProcessor") {
 
 fun deployNetworkProcessor()
 {
-   remote.session("zelda02", "val") // perception
+   val valkyrie_zelda_ip: String by project
+   val valkyrie_realtime_username: String by project
+   val valkyrie_realtime_password: String by project
+
+   remote.session(valkyrie_zelda_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
    {
       exec("mkdir -p $directory")
 
