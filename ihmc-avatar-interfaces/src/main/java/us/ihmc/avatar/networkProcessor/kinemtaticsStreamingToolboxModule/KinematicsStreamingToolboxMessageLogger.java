@@ -114,11 +114,11 @@ public class KinematicsStreamingToolboxMessageLogger
 
    private void processToolboxStateMessage(ToolboxStateMessage message)
    {
-      boolean requestLogging = message.getRequestLogging();
-
-      if (requestLogging)
+      boolean loggingRequested = message.getRequestLogging();
+      boolean sleepRequested = message.getRequestedToolboxState() == ToolboxStateMessage.SLEEP;
+      if (!sleepRequested && loggingRequested)
          startLogging();
-      else if (requestLogging)
+      else
          stopLogging();
    }
 
