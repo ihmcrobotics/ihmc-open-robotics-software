@@ -112,8 +112,8 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          }
       }
 
-
-      double stepReach = EuclidCoreTools.norm(solePositionInParentZUpFrame.getX(), solePositionInParentZUpFrame.getY());
+      double widthRelativeToIdeal = solePositionInParentZUpFrame.getY() - robotSide.negateIfRightSide(parameters.getIdealFootstepWidth());
+      double stepReach = EuclidCoreTools.norm(solePositionInParentZUpFrame.getX(), widthRelativeToIdeal);
       if (stepReach > parameters.getMaximumStepReach())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
