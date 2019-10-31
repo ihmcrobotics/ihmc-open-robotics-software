@@ -1,3 +1,6 @@
+# This message is part of the IHMC external force estimation module.
+# It specifies where an expected external force will be applied.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
