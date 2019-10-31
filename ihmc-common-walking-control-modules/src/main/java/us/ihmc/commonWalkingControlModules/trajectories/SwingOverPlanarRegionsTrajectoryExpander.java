@@ -28,10 +28,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 public class SwingOverPlanarRegionsTrajectoryExpander
 {
@@ -49,6 +46,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType> mostSevereCollisionType;
    private final YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus> status;
 
+   private final YoBoolean wereWaypointsAdjusted;
    private final YoFramePoint3D trajectoryPosition;
    private final PoseReferenceFrame solePoseReferenceFrame;
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
@@ -115,10 +113,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
       incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
       maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
-      status = new YoEnum<SwingOverPlanarRegionsTrajectoryExpansionStatus>(namePrefix + "Status", parentRegistry,
-                                                                                   SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
-      mostSevereCollisionType = new YoEnum<SwingOverPlanarRegionsTrajectoryCollisionType>(namePrefix + "CollisionType", parentRegistry,
-                                                                                                  SwingOverPlanarRegionsTrajectoryCollisionType.class);
+      wereWaypointsAdjusted = new YoBoolean(namePrefix + "WereWaypointsAdjusted", parentRegistry);
+      status = new YoEnum<>(namePrefix + "Status", parentRegistry, SwingOverPlanarRegionsTrajectoryExpansionStatus.class);
+      mostSevereCollisionType = new YoEnum<>(namePrefix + "CollisionType", parentRegistry, SwingOverPlanarRegionsTrajectoryCollisionType.class);
 
       trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", WORLD, parentRegistry);
       solePoseReferenceFrame = new PoseReferenceFrame(namePrefix + "SolePoseReferenceFrame", WORLD);
@@ -130,7 +127,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints.add();
 
       sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
-      closestPolygonPointMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D>();
+      closestPolygonPointMap = new HashMap<>();
       for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
       {
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
@@ -165,9 +162,35 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
+   public void setNumberOfCheckpoints(int numberOfCheckpoints)
+   {
+      this.numberOfCheckpoints.set(numberOfCheckpoints);
+   }
+
+   public void setMaximumNumberOfTries(int maximumNumberOfTries)
+   {
+      this.numberOfTriesCounter.setMaxCount(maximumNumberOfTries);
+   }
+
+   public void setMinimumSwingFootClearance(double minimumSwingFootClearance)
+   {
+      minimumClearance.set(minimumSwingFootClearance);
+   }
+
+   public void setIncrementalAdjustmentDistance(double incrementalAdjustmentDistance)
+   {
+      this.incrementalAdjustmentDistance.set(incrementalAdjustmentDistance);
+   }
+
+   public void setMaximumAdjustmentDistance(double maximumAdjustmentDistance)
+   {
+      this.maximumAdjustmentDistance.set(maximumAdjustmentDistance);
+   }
+
    public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose,
                                                  FramePose3D swingEndPose, PlanarRegionsList planarRegionsList)
    {
+      wereWaypointsAdjusted.set(false);
       stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
       stanceFootPosition.changeFrame(WORLD);
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
@@ -214,6 +237,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       tempPlaneNormal.normalize();
       tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition);
       swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
+
+      wereWaypointsAdjusted.set(false);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
       numberOfTriesCounter.resetCount();
@@ -279,6 +304,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
                if (intersectionExists)
                {
+                  wereWaypointsAdjusted.set(true);
+
                   updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE);
 
                   if (swingFloorPlane.isOnOrAbove(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon())
@@ -348,6 +375,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    public RecyclingArrayList<FramePoint3D> getExpandedWaypoints()
    {
       return adjustedWaypoints;
+   }
+
+   public boolean wereWaypointsAdjusted()
+   {
+      return wereWaypointsAdjusted.getBooleanValue();
    }
 
    public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()

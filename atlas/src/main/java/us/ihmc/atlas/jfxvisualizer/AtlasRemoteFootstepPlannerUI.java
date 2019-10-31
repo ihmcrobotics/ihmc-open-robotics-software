@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasFootstepPostProcessorParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
@@ -46,8 +47,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewModel,
-                                              drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
+                                              drcRobotModel.getVisibilityGraphsParameters(), new AtlasFootstepPostProcessorParameters(), drcRobotModel,
+                                              previewModel, drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
 
