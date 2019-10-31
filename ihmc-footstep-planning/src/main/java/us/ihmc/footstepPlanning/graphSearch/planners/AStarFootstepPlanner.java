@@ -92,6 +92,8 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
    private final YoDouble timeout = new YoDouble("footstepPlannerTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("footstepPlannerBestEffortTimeout", registry);
+
    private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
    private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodes", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
@@ -137,6 +139,12 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    public void setTimeout(double timeoutInSeconds)
    {
       timeout.set(timeoutInSeconds);
+   }
+
+   @Override
+   public void setBestEffortTimeout(double timeoutInSeconds)
+   {
+      bestEffortTimeout.set(timeoutInSeconds);
    }
 
    @Override
@@ -430,7 +438,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             listener.tickAndUpdate();
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue() || abortPlanning.getBooleanValue())
+         double planningTime = Conversions.nanosecondsToSeconds(timeInNano - planningStartTime);
+         boolean hardTimeout = planningTime > timeout.getDoubleValue();
+         boolean bestEffortTimedOut = parameters.getReturnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue() && endNode != null;
+         if (hardTimeout || bestEffortTimedOut || abortPlanning.getBooleanValue())
          {
             if (abortPlanning.getBooleanValue())
                LogTools.info("Abort planning requested.");
@@ -495,7 +506,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          return false;
       return true;
    }
-   
+
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
    {
       if (!parameters.getReturnBestEffortPlan())
@@ -518,6 +529,9 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          return FootstepPlanningResult.NO_PATH_EXISTS;
       if (!graph.doesNodeExist(endNode))
          return FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+
+      if (!goalNodes.get(endNode.getRobotSide()).equals(endNode))
+         return FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
 
       if (heuristics.getWeight() <= 1.0)
          return FootstepPlanningResult.OPTIMAL_SOLUTION;

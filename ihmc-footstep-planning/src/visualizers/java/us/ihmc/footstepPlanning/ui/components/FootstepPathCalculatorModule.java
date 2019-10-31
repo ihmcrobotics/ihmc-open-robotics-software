@@ -100,6 +100,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<Double> plannerTimeoutReference;
+   private final AtomicReference<Double> plannerBestEffortTimeoutReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
 
    private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
@@ -124,6 +125,7 @@ public class FootstepPathCalculatorModule
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
+      plannerBestEffortTimeoutReference = messager.createInput(PlannerBestEffortTimeout, 0.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
@@ -139,6 +141,7 @@ public class FootstepPathCalculatorModule
       goalPositionReference.set(null);
       goalOrientationReference.set(null);
       plannerTimeoutReference.set(null);
+      plannerBestEffortTimeoutReference.set(null);
       plannerHorizonLengthReference.set(null);
    }
 
@@ -187,6 +190,7 @@ public class FootstepPathCalculatorModule
 
          planner.setPlanarRegions(planarRegionsList);
          planner.setTimeout(plannerTimeoutReference.get());
+         planner.setBestEffortTimeout(plannerBestEffortTimeoutReference.get());
          planner.setPlanningHorizonLength(plannerHorizonLengthReference.get());
 
          planner

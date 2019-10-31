@@ -49,6 +49,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
+   public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");
    public static final Topic<Double> PlannerTimeTaken = topic("PlannerTimeTaken");
    public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
    public static final Topic<FootstepPlannerType> PlannerType = topic("PlannerType");
