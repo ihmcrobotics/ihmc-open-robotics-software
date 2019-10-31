@@ -63,7 +63,6 @@ public class KSTStreamingState implements State
 
    private final YoBoolean isStreaming = new YoBoolean("isStreaming", registry);
    private final YoBoolean wasStreaming = new YoBoolean("wasStreaming", registry);
-   private final YoBoolean isRateLimiting = new YoBoolean("isRateLimiting", registry);
    private final YoDouble linearRateLimit = new YoDouble("linearRateLimit", registry);
    private final YoDouble angularRateLimit = new YoDouble("angularRateLimit", registry);
    private final YoDouble defaultLinearRateLimit = new YoDouble("defaultLinearRateLimit", registry);
@@ -95,7 +94,6 @@ public class KSTStreamingState implements State
       HumanoidKinematicsToolboxController ikController = tools.getIKController();
       ikSolverGains = ikController.getDefaultGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
-      ikController.getMomentumWeight().set(0.001);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -123,9 +121,6 @@ public class KSTStreamingState implements State
 
       defaultLinearRateLimit.set(1.5);
       defaultAngularRateLimit.set(10.0);
-
-      isRateLimiting.set(true);
-
       outputJointVelocityScale.set(0.75);
 
       streamingBlendingDuration.set(defautlInitialBlendDuration);
@@ -166,6 +161,8 @@ public class KSTStreamingState implements State
    @Override
    public void onEntry()
    {
+      isStreaming.set(false);
+      wasStreaming.set(false);
       timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       ikSolverGains.setPositionProportionalGains(50.0);
       ikSolverGains.setOrientationProportionalGains(50.0);
@@ -175,6 +172,7 @@ public class KSTStreamingState implements State
       configurationMessage.setEnableJointVelocityLimits(true);
       ikCommandInputManager.submitMessage(configurationMessage);
 
+      // TODO change to using mid-feet z-up frame for initializing pelvis and chest
       FramePose3D pelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       pelvisPose.changeFrame(worldFrame);
       defaultPelvisMessage.getDesiredPositionInWorld().set(pelvisPose.getPosition());
@@ -183,6 +181,14 @@ public class KSTStreamingState implements State
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
       resetFilter = true;
+      streamingStartTime.set(Double.NaN);
+
+      ikRobotState.setToNaN();
+      initialRobotState.setToNaN();
+      blendedRobotState.setToNaN();
+      filteredRobotState.setToNaN();
+      outputRobotState.setToNaN();
+
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
@@ -331,7 +337,7 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-            outputPublisher.publish(tools.setupFinalizeStreamingMessage(blendedRobotState.getStatus()));
+            outputPublisher.publish(tools.setupFinalizeStreamingMessage(outputRobotState.getStatus()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
