@@ -4,6 +4,7 @@ import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
@@ -19,6 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -128,7 +130,21 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       }
       catch (Throwable e)
       {
-         e.printStackTrace();
+         try
+         {
+            ControllerCrashNotificationPacket errorMessage = new ControllerCrashNotificationPacket();
+            StringBuilder stacktrace = errorMessage.getStacktrace();
+            stacktrace.append(StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()));
+            stacktrace.append(' ');
+            stacktrace.append(e.getMessage());
+            if (stacktrace.length() > 255) // TODO We need to make that upper limit configurable.
+               stacktrace.delete(255, stacktrace.length());
+            reportMessage(errorMessage);
+         }
+         catch (Exception e1)
+         {
+            e1.printStackTrace();
+         }
          isDone.set(true);
       }
    }
