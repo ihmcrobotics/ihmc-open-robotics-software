@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -23,10 +24,13 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
@@ -35,6 +39,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.StaircaseEnvironment;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -102,7 +107,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double stepHeight = 2.54 / 100.0 * 9.5;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
-      DRCRobotModel robotModel = getRobotModel();
+      DRCRobotModel robotModel = getRobotModel(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
       drcSimulationTestHelper.createSimulation("StepUpWithSquareUpFast");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -162,7 +167,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double stepHeight = 2.54 / 100.0 * 9.5;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
-      DRCRobotModel robotModel = getRobotModel();
+      DRCRobotModel robotModel = getRobotModel(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -260,7 +265,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
       SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
 
-      DRCRobotModel robotModel = getRobotModel();
+      DRCRobotModel robotModel = getRobotModel(slopeAngle < 0.0);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
       drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable()));
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
@@ -298,6 +303,82 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       //      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
       //      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testUpstairsReal() throws SimulationExceededMaximumTimeException
+   {
+      testUpstairs(getRealRobotWalkingParameters());
+   }
+
+   @Test
+   public void testUpstairsSim() throws SimulationExceededMaximumTimeException
+   {
+      /*
+       * TODO Needs: SwingTrajectoryParameters.useSingularityAvoidanceInSupport() to be false and disable
+       * smoothing in the CenterOfMassHeightControlState.computeDesiredCoMHeightAcceleration(...)
+       */
+      testUpstairs(getSCSWalkingParameters());
+   }
+
+   public void testUpstairs(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      double stairStepHeight = 2.54 / 100.0 * 9.5;
+      double stairStepLength = 1.5 * walkingControllerParameters.getSteppingParameters().getActualFootLength();
+      int numberOfStairSteps = 10;
+      StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight, stairStepLength);
+
+      DRCRobotModel robotModel = getRobotModel(false);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
+      drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      double xGoal = 0.6 + numberOfStairSteps * stairStepLength;
+      double cameraX = xGoal / 2.0;
+      double cameraZ = 0.8 + staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 10.0);
+      scs.setCameraFix(cameraX, 0.0, cameraZ);
+      scs.setCameraPosition(cameraX, -8.0, cameraZ);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      FramePoint3D pelvisPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double desiredHeight = pelvisPosition.getZ() + 0.08;
+      PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
+      drcSimulationTestHelper.publishToController(pelvisHeightMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      scs.setInPoint();
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      double stepLength = steppingParameters.getDefaultStepLength();
+      double stepWidth = steppingParameters.getInPlaceWidth();
+
+      HeightMapWithNormals heightMap = staircase.getTerrainObject3D().getHeightMapIfAvailable();
+
+      double firstStep = 0.6;
+      stepTo(0.0, firstStep - 0.5 * stairStepLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
+      RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
+      stepTo(firstStep + 0.5 * stairStepLength, xGoal, stairStepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+      setTimings(footsteps, walkingControllerParameters);
+
+      drcSimulationTestHelper.publishToController(footsteps);
+
+      double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
+      assertTrue(success);
+
+      Point3D center = new Point3D(xGoal, 0.0, 1.1 + staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(xGoal, 0.0, 10.0));
+      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -430,14 +511,14 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       stepToPack.getLocation().set(x, y, heightMap.heightAt(x, y, 10.0));
    }
 
-   private ValkyrieRobotModel getRobotModel()
+   private ValkyrieRobotModel getRobotModel(boolean disableAnkleLimits)
    {
       return new ValkyrieRobotModel(RobotTarget.SCS, false)
       {
          @Override
          public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
          {
-            if (jointHolder.getName().contains("AnklePitch"))
+            if (disableAnkleLimits && jointHolder.getName().contains("AnklePitch"))
             {
                jointHolder.setLimits(-Math.PI, Math.PI);
             }
