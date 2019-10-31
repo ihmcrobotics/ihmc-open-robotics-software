@@ -337,7 +337,7 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-            outputPublisher.publish(tools.setupFinalizeStreamingMessage(blendedRobotState.getStatus()));
+            outputPublisher.publish(tools.setupFinalizeStreamingMessage(outputRobotState.getStatus()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
