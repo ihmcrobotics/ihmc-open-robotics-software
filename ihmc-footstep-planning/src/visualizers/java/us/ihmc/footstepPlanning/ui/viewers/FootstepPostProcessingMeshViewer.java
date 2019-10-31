@@ -53,19 +53,19 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
 
    public FootstepPostProcessingMeshViewer(Messager messager)
    {
-      leftFootPosition = messager.createInput(LeftFootPositionTopic, null);
-      rightFootPosition = messager.createInput(RightFootPositionTopic, null);
+      leftFootPosition = messager.createInput(LeftFootStartPosition, null);
+      rightFootPosition = messager.createInput(RightFootStartPosition, null);
 
-      messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
 
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
-      showSolution = messager.createInput(ShowFootstepPlanTopic, true);
-      showPostProcessingInfo = messager.createInput(ShowPostProcessingInfoTopic, true);
+      showSolution = messager.createInput(ShowFootstepPlan, true);
+      showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
    }
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
