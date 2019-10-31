@@ -1,13 +1,14 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.footstepPlanning.postProcessing.FootstepPlanPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.PostProcessingEnum;
 
 import java.util.EnumMap;
 
+/**
+ * This class is meant to combine multiple instances of {@link FootstepPlanPostProcessingElement}, and then iteratively execute them.
+ */
 public class CompositeFootstepPlanPostProcessing implements FootstepPlanPostProcessingElement
 {
    private final EnumMap<PostProcessingEnum, FootstepPlanPostProcessingElement> postProcessingElements = new EnumMap<>(PostProcessingEnum.class);

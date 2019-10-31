@@ -10,6 +10,24 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
 
+/**
+ * The purpose of this class is to modify elements of the dynamic trajectory planner based on the step position.
+ * Currently, the transfer phase is split into two segments. One where the CoP goes from the trailing foot to some midpoint, then the second where it goes
+ * from the midpoint to the leading foot. The midpoint is determined by interpolating between the trailing foot and the leading foot by some fraction set by
+ * the desired weight distribution {@link FootstepDataMessage#transfer_weight_distribution_}. The time spent shifting from the trailing foot to the midpoint
+ * is some fraction of the transfer duration determined by the transfer split fraction {@link FootstepDataMessage#transfer_split_fraction_}.
+ *
+ * <p>
+ *    This module defines several parameters that allow the weight distribution and split fraction to be modified based on the step position, specifically
+ *    changes in step height. This is done so that the robot "commits" to large step downs. That is to say, when the robot is stepping down, there is a minimum
+ *    step down height that causes it to start to shift its upcoming CoP midpoint and time to cause it to rapidly shift the weight on the next step.
+ * </p>
+ * <p>
+ *    This is done by defining the desired weight distribution and split fraction if the upcoming foothold is below a certain threshold, defined by some maximum
+ *    step down distance. Then, once the step is below another threshold, it starts linearly interpolating to these values, until it has reached its largest
+ *    step down distance.
+ * </p>
+ */
 public class PositionSplitFractionPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
