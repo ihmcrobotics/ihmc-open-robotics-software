@@ -41,7 +41,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.13.4")
+   api("us.ihmc:ihmc-ros2-library:0.14.2")
 }
 
 generatorDependencies {

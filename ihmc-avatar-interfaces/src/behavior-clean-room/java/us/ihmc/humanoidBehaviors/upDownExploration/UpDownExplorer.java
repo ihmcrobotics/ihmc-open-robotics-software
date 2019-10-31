@@ -14,13 +14,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,7 +45,8 @@ public class UpDownExplorer
    private RobotSide turnDirection = RobotSide.LEFT;
 
    private final BehaviorHelper behaviorHelper;
-   
+   private final RemoteREAInterface rea;
+
    private Random random = new Random(System.nanoTime());
    private FramePose3DReadOnly midFeetZUpPose;
    private FramePoint2D midFeetZUpXYProjectionTemp = new FramePoint2D();
@@ -60,13 +61,14 @@ public class UpDownExplorer
    private UpDownState state = UpDownState.TRAVERSING;
    private Notification plannerFailedOnLastRun = new Notification();
 
-   public UpDownExplorer(Messager messager, BehaviorHelper behaviorHelper)
+   public UpDownExplorer(BehaviorHelper behaviorHelper, RemoteREAInterface rea)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getManagedMessager());
+      this.rea = rea;
 
-      messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
-      upDownCenter = messager.createInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
+      behaviorHelper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
+      upDownCenter = behaviorHelper.createUIInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry(HumanoidReferenceFrames humanoidReferenceFrames)
@@ -82,7 +84,7 @@ public class UpDownExplorer
       {
          boolean isCloseToCenter = isCloseToCenter(midFeetZUpPose);
          boolean requireHeightChange = isCloseToCenter;
-         PlanarRegionsList latestPlanarRegionList = behaviorHelper.getLatestPlanarRegionList();
+         PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
          
          upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(humanoidReferenceFrames.getMidFeetZUpFrame(),
                                                                            latestPlanarRegionList,

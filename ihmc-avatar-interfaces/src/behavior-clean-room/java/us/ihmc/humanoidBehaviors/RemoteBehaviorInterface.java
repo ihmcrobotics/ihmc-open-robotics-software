@@ -11,7 +11,7 @@ public class RemoteBehaviorInterface
 {
    public static Messager createForUI(String backpackAddress)
    {
-      KryoMessager moduleMessager = KryoMessager.createClient(BehaviorModule.getBehaviorAPI(),
+      KryoMessager moduleMessager = KryoMessager.createClient(BehaviorModule.MessagerAPI,
                                                               backpackAddress,
                                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                                               new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));

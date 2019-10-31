@@ -6,7 +6,7 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 import static us.ihmc.communication.ROS2Tools.HUMANOID_CONTROLLER;
@@ -19,7 +19,7 @@ public class RemoteSyncedRobotModel
    private final int jointNameHash;
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
 
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2Node ros2Node)
+   public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2NodeInterface ros2Node)
    {
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData();
