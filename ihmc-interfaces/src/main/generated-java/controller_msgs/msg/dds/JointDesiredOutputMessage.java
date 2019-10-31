@@ -20,6 +20,7 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   public java.lang.StringBuilder joint_name_;
    public byte control_mode_ = (byte) 255;
    public boolean has_desired_torque_;
    public boolean has_desired_position_;
@@ -52,6 +53,7 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
 
    public JointDesiredOutputMessage()
    {
+      joint_name_ = new java.lang.StringBuilder(255);
    }
 
    public JointDesiredOutputMessage(JointDesiredOutputMessage other)
@@ -63,6 +65,9 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
    public void set(JointDesiredOutputMessage other)
    {
       sequence_id_ = other.sequence_id_;
+
+      joint_name_.setLength(0);
+      joint_name_.append(other.joint_name_);
 
       control_mode_ = other.control_mode_;
 
@@ -137,6 +142,21 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setJointName(java.lang.String joint_name)
+   {
+      joint_name_.setLength(0);
+      joint_name_.append(joint_name);
+   }
+
+   public java.lang.String getJointNameAsString()
+   {
+      return getJointName().toString();
+   }
+   public java.lang.StringBuilder getJointName()
+   {
+      return joint_name_;
    }
 
    public void setControlMode(byte control_mode)
@@ -420,6 +440,8 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.joint_name_, other.joint_name_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.control_mode_, other.control_mode_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_desired_torque_, other.has_desired_torque_, epsilon)) return false;
@@ -493,6 +515,8 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.joint_name_, otherMyClass.joint_name_)) return false;
+
       if(this.control_mode_ != otherMyClass.control_mode_) return false;
 
       if(this.has_desired_torque_ != otherMyClass.has_desired_torque_) return false;
@@ -563,6 +587,8 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
       builder.append("JointDesiredOutputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("joint_name=");
+      builder.append(this.joint_name_);      builder.append(", ");
       builder.append("control_mode=");
       builder.append(this.control_mode_);      builder.append(", ");
       builder.append("has_desired_torque=");

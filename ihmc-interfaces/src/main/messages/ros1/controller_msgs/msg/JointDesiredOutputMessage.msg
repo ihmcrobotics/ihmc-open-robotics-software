@@ -12,6 +12,8 @@ int8 CONTROL_DISABLED=3
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+string joint_name
+
 # Field default value 255
 int8 control_mode
 
