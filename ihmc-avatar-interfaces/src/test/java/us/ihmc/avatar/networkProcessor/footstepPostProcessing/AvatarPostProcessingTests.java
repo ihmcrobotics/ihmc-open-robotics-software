@@ -200,6 +200,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters.setMaximumStepZ(height + 0.05);
 
+
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
@@ -239,6 +240,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
+
+      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
+      parameters.setSwingOverRegionsProcessingEnabled(true);
+
+      postProcessingParametersPublisher.publish(parameters.getAsPacket());
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
