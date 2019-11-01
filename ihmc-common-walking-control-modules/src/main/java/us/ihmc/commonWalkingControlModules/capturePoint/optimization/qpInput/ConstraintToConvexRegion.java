@@ -166,7 +166,6 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
    public void formulateConstraint()
    {
       scaler.scaleConvexPolygon(convexPolygon, deltaInside, scaledConvexPolygon);
-
       PolygonWiggler.convertToInequalityConstraints(scaledConvexPolygon, Aineq, bineq, 0.0);
       CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }

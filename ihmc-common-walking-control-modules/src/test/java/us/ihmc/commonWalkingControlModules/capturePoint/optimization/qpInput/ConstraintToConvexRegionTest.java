@@ -19,6 +19,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class ConstraintToConvexRegionTest
 {
    @AfterEach
@@ -84,6 +86,42 @@ public class ConstraintToConvexRegionTest
 
          Assert.assertTrue(MatrixFeatures.isEquals(Aineq, constraintToConvexRegion.Aineq, 1e-7));
          Assert.assertTrue(MatrixFeatures.isEquals(bineq, constraintToConvexRegion.bineq, 1e-7));
+      }
+   }
+
+   @Test
+   public void testSquareButWithTooBigADistanceInside()
+   {
+      ConstraintToConvexRegion constraint = new ConstraintToConvexRegion(50);
+      constraint.addVertex(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.05, 0.05));
+      constraint.addVertex(new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.05, 0.05));
+      constraint.addVertex(new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.05, -0.05));
+      constraint.addVertex(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.05, -0.05));
+
+      constraint.setPolygon();
+      constraint.formulateConstraint();
+
+      DenseMatrix64F point = new DenseMatrix64F(2, 1);
+      DenseMatrix64F bineqCalc = new DenseMatrix64F(constraint.bineq.numRows, 1);
+
+      CommonOps.mult(constraint.Aineq, point, bineqCalc);
+      for (int i = 0; i < constraint.bineq.numRows; i++)
+      {
+         assertTrue(bineqCalc.get(i, 0) < constraint.bineq.get(i, 0));
+      }
+
+      constraint.setDeltaInside(0.06);
+
+      constraint.setPolygon();
+      constraint.formulateConstraint();
+
+      point = new DenseMatrix64F(2, 1);
+      bineqCalc = new DenseMatrix64F(constraint.bineq.numRows, 1);
+
+      CommonOps.mult(constraint.Aineq, point, bineqCalc);
+      for (int i = 0; i < constraint.bineq.numRows; i++)
+      {
+         assertTrue(bineqCalc.get(i, 0) <= constraint.bineq.get(i, 0));
       }
    }
 }
