@@ -622,6 +622,11 @@ public class BipedContinuousPlanningToolboxDataSetTest
             timeAtStartOfState = currentTime;
 
          FootstepDataListMessage stepList = fullStepListFromContinuousToolbox.get();
+         if (stepList.getFootstepDataList().size() < 1)
+         {
+            message += "Failed. Step list contains zero steps.";
+            return message;
+         }
          FootstepDataMessage currentStep = stepList.getFootstepDataList().get(0);
 
          double timeInState = currentTime - timeAtStartOfState;
