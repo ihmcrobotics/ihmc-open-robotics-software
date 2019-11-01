@@ -264,6 +264,7 @@ public class KinematicsToolboxController extends ToolboxController
     * burden.
     */
    private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   private final YoDouble maxCollisionResolutionVelocity = new YoDouble("maxCollisionResolutionVelocity", registry);
    /** Sets the maximum number of collisions to create YoVariables for. */
    private final int numberOfCollisionsToVisualize = 20;
    /** Debug variable. */
@@ -335,6 +336,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       enableCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
+      maxCollisionResolutionVelocity.set(0.10);
       setupCollisionVisualization();
    }
 
@@ -868,6 +870,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
+         sigmaDot = Math.min(sigmaDot, maxCollisionResolutionVelocity.getValue());
 
          KinematicsCollisionFrame collisionFrame = collisionFrames.add();
          collisionFrame.update(collision, true);
