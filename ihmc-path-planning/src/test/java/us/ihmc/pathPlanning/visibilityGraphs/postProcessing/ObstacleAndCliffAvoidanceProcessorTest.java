@@ -402,43 +402,6 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
    }
 
-   @Test
-   public void testTrickyCase2()
-   {
-      List<PlanarRegion> planarRegions = TestEnvironmentTools.createBigToSmallRegions();
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
-
-      DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
-
-      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegions, parameters);
-
-
-      double extrusionDistance = parameters.getNavigableExtrusionDistance();
-      double maxInterRegionConnectionLength = parameters.getMaxInterRegionConnectionLength();
-      double desiredDistanceFromCliff = parameters.getPreferredObstacleExtrusionDistance();
-      double cliffHeightToAvoid = 0.10;
-
-
-      Point2D pointOnOutsideSharedEdge = new Point2D(5.0, 0.0);
-      pointOnOutsideSharedEdge.subX(extrusionDistance);
-      NavigableRegion homeRegion = getRegionContainingPoint(pointOnOutsideSharedEdge, navigableRegions);
-
-      List<LineSegment2DReadOnly> cliffEdgesToPack = new ArrayList<>();
-
-      cliffEdgesToPack.clear();
-      boolean isNearCliff = ObstacleAndCliffAvoidanceProcessor.isNearCliff(pointOnOutsideSharedEdge, maxInterRegionConnectionLength, cliffHeightToAvoid, desiredDistanceFromCliff, homeRegion, navigableRegions, cliffEdgesToPack);
-
-      boolean expected = false;
-
-      if (visualize && expected != isNearCliff)
-      {
-         visualize(planarRegionsList, pointOnOutsideSharedEdge, cliffEdgesToPack, parameters, navigableRegions);
-      }
-
-      assertEquals(expected, isNearCliff);
-
-   }
-
    private static NavigableRegion getRegionContainingPoint(Point2DReadOnly point, List<NavigableRegion> navigableRegions)
    {
       NavigableRegion homeRegion = null;
