@@ -707,9 +707,16 @@ public class BipedContinuousPlanningToolboxDataSetTest
          }
 
 
-         FramePose3D startPose = feetPoses.get(RobotSide.fromByte(fullStepListFromContinuousToolbox.get().getFootstepDataList().get(0).getRobotSide()).getOppositeSide());
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, new Point3D(startPose.getPosition()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startPose.getOrientation()));
+         if (fullStepListFromContinuousToolbox.get().getFootstepDataList().size() > 0)
+         {
+            FramePose3D startPose = feetPoses.get(RobotSide.fromByte(fullStepListFromContinuousToolbox.get().getFootstepDataList().get(0).getRobotSide()).getOppositeSide());
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, new Point3D(startPose.getPosition()));
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startPose.getOrientation()));
+         }
+//         else
+//         {
+//            message += "\nFailed. Resulting plan had no steps " + fullStepListFromContinuousToolbox.get().get
+//         }
 
          firstTick = false;
          tickStartTime = currentTime;
