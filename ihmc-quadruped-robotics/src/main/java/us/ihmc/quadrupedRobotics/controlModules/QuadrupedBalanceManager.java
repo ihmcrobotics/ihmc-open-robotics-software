@@ -307,8 +307,10 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.initialize();
    }
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint3D tempComPosition = new FramePoint3D();
+   private final FramePoint3D tempEcmpPosition = new FramePoint3D();
+   private final FrameVector3D tempComVelocity = new FrameVector3D();
+
    public void initializeForStanding()
    {
       centerOfMassHeightManager.initialize();
@@ -320,13 +322,15 @@ public class QuadrupedBalanceManager
 
       if (useCustomCoMPlanner)
       {
-         tempPoint.setToZero(supportFrame);
-         tempPoint.setZ(centerOfMassHeightManager.getDesiredHeight(supportFrame));
-         tempPoint.changeFrame(worldFrame);
+         tempComPosition.setToZero(supportFrame);
+         tempComPosition.setZ(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+         tempComPosition.changeFrame(worldFrame);
+         tempEcmpPosition.setToZero(supportFrame);
+         tempEcmpPosition.changeFrame(worldFrame);
 
-         tempVector.setToZero();
+         tempComVelocity.setToZero();
 
-         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), tempPoint, tempVector, tempPoint);
+         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), tempComPosition, tempComVelocity, tempEcmpPosition);
          comPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
       }
 
