@@ -42,6 +42,8 @@ public class FootstepPostProcessingParametersUIController
    @FXML
    private CheckBox swingOverRegionsProcessingEnabled;
    @FXML
+   private CheckBox doInitialFastApproximation;
+   @FXML
    private Spinner<Double> minimumSwingFootClearance;
    @FXML
    private Spinner<Integer> numberOfChecksPerSwing;
@@ -51,6 +53,8 @@ public class FootstepPostProcessingParametersUIController
    private Spinner<Double> maximumAdjustmentDistance;
    @FXML
    private Spinner<Double> incrementalAdjustmentDistance;
+   @FXML
+   private Spinner<Double> minimumHeightAboveFloorForCollision;
 
    public FootstepPostProcessingParametersUIController()
    {
@@ -78,6 +82,7 @@ public class FootstepPostProcessingParametersUIController
       maximumNumberOfAdjustmentAttempts.setValueFactory(new IntegerSpinnerValueFactory(5, 100, 50, 5));
       maximumAdjustmentDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.2, 0.05));
       incrementalAdjustmentDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.03, 0.01));
+      minimumHeightAboveFloorForCollision.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.15, 0.03, 0.01));
 
       fractionLoadIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
       fractionTimeOnFootIfFootHasFullSupport.setValueFactory(new DoubleSpinnerValueFactory(0.01, 0.99, 0.5, 0.05));
@@ -97,11 +102,13 @@ public class FootstepPostProcessingParametersUIController
       javaFXStoredPropertyMap.put(transferWeightDistributionAtFullDepth, FootstepPostProcessingKeys.transferWeightDistributionAtFullDepth);
 
       javaFXStoredPropertyMap.put(swingOverRegionsProcessingEnabled, FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
+      javaFXStoredPropertyMap.put(doInitialFastApproximation, FootstepPostProcessingKeys.doInitialFastApproximation);
       javaFXStoredPropertyMap.put(minimumSwingFootClearance, FootstepPostProcessingKeys.minimumSwingFootClearance);
       javaFXStoredPropertyMap.put(numberOfChecksPerSwing, FootstepPostProcessingKeys.numberOfChecksPerSwing);
       javaFXStoredPropertyMap.put(maximumNumberOfAdjustmentAttempts, FootstepPostProcessingKeys.maximumNumberOfAdjustmentAttempts);
       javaFXStoredPropertyMap.put(maximumAdjustmentDistance, FootstepPostProcessingKeys.maximumWaypointAdjustmentDistance);
       javaFXStoredPropertyMap.put(incrementalAdjustmentDistance, FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+      javaFXStoredPropertyMap.put(minimumHeightAboveFloorForCollision, FootstepPostProcessingKeys.minimumHeightAboveFloorForCollision);
 
       javaFXStoredPropertyMap.put(areaSplitFractionProcessingEnabled, FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
       javaFXStoredPropertyMap.put(fractionLoadIfFootHasFullSupport, FootstepPostProcessingKeys.fractionLoadIfFootHasFullSupport);

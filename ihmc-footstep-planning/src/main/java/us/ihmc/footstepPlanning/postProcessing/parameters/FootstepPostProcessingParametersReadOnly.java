@@ -78,6 +78,11 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
       return get(FootstepPostProcessingKeys.minimumSwingFootClearance);
    }
 
+   default boolean getDoInitialFastApproximation()
+   {
+      return get(FootstepPostProcessingKeys.doInitialFastApproximation);
+   }
+
    /**
     * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
     */
@@ -109,6 +114,11 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
    default double getIncrementalWaypointAdjustmentDistance()
    {
       return get(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+   }
+
+   default double getMinimumHeightAboveFloorForCollision()
+   {
+      return get(FootstepPostProcessingKeys.minimumHeightAboveFloorForCollision);
    }
 
    /**
@@ -164,10 +174,12 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
       packet.setTransferWeightDistributionAtFullDepth(getTransferWeightDistributionAtFullDepth());
 
       packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
+      packet.setDoInitialFastApproximation(getDoInitialFastApproximation());
       packet.setNumberOfChecksPerSwing(getNumberOfChecksPerSwing());
       packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
       packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
       packet.setIncrementalWaypointAdjustmentDistance(getIncrementalWaypointAdjustmentDistance());
+      packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
 
       packet.setFractionLoadIfFootHasFullSupport(getFractionLoadIfFootHasFullSupport());
       packet.setFractionTimeOnFootIfFootHasFullSupport(getFractionTimeOnFootIfFootHasFullSupport());

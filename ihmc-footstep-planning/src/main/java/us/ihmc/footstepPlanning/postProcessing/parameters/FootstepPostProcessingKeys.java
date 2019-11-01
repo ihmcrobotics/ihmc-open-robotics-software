@@ -16,11 +16,13 @@ public class FootstepPostProcessingKeys
    public static final DoubleStoredPropertyKey  transferWeightDistributionAtFullDepth   = keys.addDoubleKey("Transfer weight distribution at full depth", 0.7);
 
    public static final BooleanStoredPropertyKey swingOverRegionsProcessingEnabled       = keys.addBooleanKey("Swing over regions processing enabled", true);
-   public static final DoubleStoredPropertyKey  minimumSwingFootClearance               = keys.addDoubleKey("Minimum swing foot clearance", 0.04);
+   public static final BooleanStoredPropertyKey doInitialFastApproximation              = keys.addBooleanKey("Do initial fast approximation", false);
+   public static final DoubleStoredPropertyKey  minimumSwingFootClearance               = keys.addDoubleKey("Minimum swing foot clearance", 0.0);
    public static final IntegerStoredPropertyKey numberOfChecksPerSwing                  = keys.addIntegerKey("Number of checks per swing", 100);
    public static final IntegerStoredPropertyKey maximumNumberOfAdjustmentAttempts       = keys.addIntegerKey("Maximum number of adjustment attempts", 50);
    public static final DoubleStoredPropertyKey  maximumWaypointAdjustmentDistance       = keys.addDoubleKey("Maximum waypoint adjustment distance", 0.2);
    public static final DoubleStoredPropertyKey  incrementalWaypointAdjustmentDistance   = keys.addDoubleKey("Incremental waypoint adjustment distance", 0.03);
+   public static final DoubleStoredPropertyKey  minimumHeightAboveFloorForCollision     = keys.addDoubleKey("Minimum height above floor for collision", 0.03);
 
    public static final BooleanStoredPropertyKey areaSplitFractionProcessingEnabled      = keys.addBooleanKey("Area split fraction processing enabled", true);
    public static final DoubleStoredPropertyKey  fractionLoadIfFootHasFullSupport        = keys.addDoubleKey("Fraction load if foot has full support", 0.5);

@@ -10,14 +10,14 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       setAll(footstepPostProcessingParameters.getAll());
    }
 
-   default void setPositionSplitFractionProcessingEnabled(boolean enabled)
-   {
-      set(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled, enabled);
-   }
-
    default void setAreaSplitFractionProcessingEnabled(boolean enabled)
    {
       set(FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled, enabled);
+   }
+
+   default void setPositionSplitFractionProcessingEnabled(boolean enabled)
+   {
+      set(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled, enabled);
    }
 
    default void setSwingOverRegionsProcessingEnabled(boolean enabled)
@@ -45,6 +45,11 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.transferWeightDistributionAtFullDepth, weightDistribution);
    }
 
+   default void setDoInitialFastApproximation(boolean doApproximation)
+   {
+      set(FootstepPostProcessingKeys.doInitialFastApproximation, doApproximation);
+   }
+
    default void setMinimumSwingFootClearance(double minimumSwingFootClearance)
    {
       set(FootstepPostProcessingKeys.minimumSwingFootClearance, minimumSwingFootClearance);
@@ -68,6 +73,11 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
    default void setIncrementalWaypointAdjustmentDistance(double distance)
    {
       set(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance, distance);
+   }
+
+   default void setMinimumHeightAboveFloorForCollision(double height)
+   {
+      set(FootstepPostProcessingKeys.minimumHeightAboveFloorForCollision, height);
    }
 
    default void setFractionLoadIfFootHasFullSupport(double fraction)
@@ -105,12 +115,15 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       if (packet.getTransferWeightDistributionAtFullDepth() != -1.0)
          setTransferWeightDistributionAtFullDepth(packet.getTransferWeightDistributionAtFullDepth());
 
+      setDoInitialFastApproximation(packet.getDoInitialFastApproximation());
       if (packet.getMinimumSwingFootClearance() != -1.0)
          setMinimumSwingFootClearance(packet.getMinimumSwingFootClearance());
       if (packet.getMaximumWaypointAdjustmentDistance() != -1.0)
          setMaximumWaypointAdjustmentDistance(packet.getMaximumWaypointAdjustmentDistance());
       if (packet.getIncrementalWaypointAdjustmentDistance() != -1.0)
          setIncrementalWaypointAdjustmentDistance(packet.getIncrementalWaypointAdjustmentDistance());
+      if (packet.getMinimumHeightAboveFloorForCollision() != -1.0)
+         setMinimumHeightAboveFloorForCollision(packet.getMinimumHeightAboveFloorForCollision());
       setNumberOfChecksPerSwing((int) packet.getNumberOfChecksPerSwing());
       setMaximumNumberOfAdjustmentAttempts((int) packet.getMaximumNumberOfAdjustmentAttempts());
 
