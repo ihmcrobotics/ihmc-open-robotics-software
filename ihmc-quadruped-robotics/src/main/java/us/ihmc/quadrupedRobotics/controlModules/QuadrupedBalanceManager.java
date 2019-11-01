@@ -307,6 +307,8 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.initialize();
    }
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
    public void initializeForStanding()
    {
       centerOfMassHeightManager.initialize();
@@ -315,6 +317,18 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.update();
       if (updateLipmHeightFromDesireds.getValue())
          linearInvertedPendulumModel.setLipmHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+
+      if (useCustomCoMPlanner)
+      {
+         tempPoint.setToZero(supportFrame);
+         tempPoint.setZ(centerOfMassHeightManager.getDesiredHeight(supportFrame));
+         tempPoint.changeFrame(worldFrame);
+
+         tempVector.setToZero();
+
+         comPlanner.setInitialState(robotTimestamp.getDoubleValue(), tempPoint, tempVector, tempPoint);
+         comPlanner.computeSetpoints(robotTimestamp.getDoubleValue(), stepSequence, controllerToolbox.getFeetInContact());
+      }
 
       momentumRateOfChangeModule.initialize();
    }
