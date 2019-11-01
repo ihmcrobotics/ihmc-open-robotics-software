@@ -29,6 +29,7 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -98,8 +99,8 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
-      parameters.setPerformPostProcessingNodeShifting(false);
-//      parameters.setIntroduceMidpointsInPostProcessing(true);
+      parameters.setPerformPostProcessingNodeShifting(true);
+      parameters.setIntroduceMidpointsInPostProcessing(true);
       parameters.setObstacleExtrusionDistance(0.3);
       parameters.setPreferredObstacleExtrusionDistance(0.6);
       parameters.setNavigableExtrusionDistance(0.02);
@@ -630,7 +631,7 @@ public class VisibilityGraphsFrameworkTest
                                                     List<Pose3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
    {
       VisibilityGraphsParametersReadOnly parameters = createTestParameters();
-      NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAndCliffAvoidanceProcessor(parameters));
+      NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAvoidanceProcessor(parameters));
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -905,8 +906,9 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-      String dataSetName = "20171216_111326_CrossoverPlatforms";
+      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171216_111326_CrossoverPlatforms";
+//      String dataSetName = "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
 //      String dataSetName = "20171215_220523_SteppingStones";
 //      String dataSetName = "20171218_204917_FlatGround";
@@ -924,8 +926,8 @@ public class VisibilityGraphsFrameworkTest
 //         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }

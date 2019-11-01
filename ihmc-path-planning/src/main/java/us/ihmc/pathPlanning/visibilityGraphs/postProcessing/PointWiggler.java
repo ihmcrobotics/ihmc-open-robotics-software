@@ -52,9 +52,10 @@ public class PointWiggler
       while (pointToCheckIndex < pointsInfoToAvoid.size())
       {
          int otherPointIndex = 0;
-         Vector2D currentVector = new Vector2D();
+         Vector2D currentDirection = new Vector2D();
          PointInfo pointToAvoidInfo = pointsInfoToAvoid.get(pointToCheckIndex);
-         currentVector.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
+         currentDirection.sub(pointToShift, pointToAvoidInfo.pointToAvoid);
+         currentDirection.normalize();
 
          double currentDistance = pointToAvoidInfo.distanceToPoint;
          double currentDesiredDistance = pointToAvoidInfo.desiredDistanceToPoint;
@@ -66,7 +67,8 @@ public class PointWiggler
             if (otherPointIndex != pointToCheckIndex)
             {
                PointInfo otherPointToAvoidInfo = pointsInfoToAvoid.get(otherPointIndex);
-               affectedByOtherShift = currentDistance + otherPointToAvoidInfo.desiredVector.dot(currentVector) < currentDesiredDistance;
+               double projectionOntoCurrent = otherPointToAvoidInfo.desiredVector.dot(currentDirection);
+               affectedByOtherShift = currentDistance + projectionOntoCurrent < currentDesiredDistance;
             }
             otherPointIndex++;
          }
@@ -94,13 +96,15 @@ public class PointWiggler
 
          double minimumDistance = pointToShiftFromInfo.minimumDistanceToPoint;
 
-         Vector2DReadOnly desiredVectorToPoint = pointToShiftFromInfo.desiredVector;
+         Vector2D desiredVectorToPoint = new Vector2D(pointToShiftFromInfo.desiredVector);
 
          double desiredX = pointToShiftFrom.getX() + desiredVectorToPoint.getX();
          double desiredY = pointToShiftFrom.getY() + desiredVectorToPoint.getY();
          b.add(0, 0, -2.0 * desiredX);
          b.add(1, 0, -2.0 * desiredY);
 
+         // FIXME this is wrong, didn't normalize
+         desiredVectorToPoint.normalize();
          CI.set(numberOfPointsAdded, 0, -desiredVectorToPoint.getX());
          CI.set(numberOfPointsAdded, 1, -desiredVectorToPoint.getY());
          ci.set(numberOfPointsAdded,
@@ -108,6 +112,9 @@ public class PointWiggler
 
          numberOfPointsAdded++;
       }
+
+      if (numberOfPointsAdded == 0)
+         return new Vector2D();
 
       // remove unused constraints
       while (CI.getNumRows() > numberOfPointsAdded)
