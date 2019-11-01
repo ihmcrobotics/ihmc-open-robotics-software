@@ -55,8 +55,6 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    @Override
    public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputPlan)
    {
-      long startTime = System.nanoTime();
-
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(parameters.getDoInitialFastApproximation());
       swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
@@ -114,8 +112,6 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
 
          footPoses.put(side, nextFootPose);
       }
-
-      LogTools.info("Total time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       return processedPlan;
    }
