@@ -50,6 +50,7 @@ public class FeetInContactForPlanner
       for (int i = 0; i < actualFeetInContact.size(); i++)
          feetInContact.add(actualFeetInContact.get(i));
 
+      /*
       int stepIndex = 0;
       while (stepIndex < stepsWithLinkedCompletions.size())
       {
@@ -85,6 +86,7 @@ public class FeetInContactForPlanner
          if (!controllerToolbox.getFeetInContact().contains(feetInContact.get(i)))
             LogTools.info("What?");
       }
+      */
    }
 
    public List<RobotQuadrant> getFeetInContactForPlanner()
