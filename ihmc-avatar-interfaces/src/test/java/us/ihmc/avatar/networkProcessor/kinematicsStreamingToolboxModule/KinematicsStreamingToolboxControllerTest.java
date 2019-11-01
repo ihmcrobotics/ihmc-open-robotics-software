@@ -377,7 +377,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
                if (collidable1.isCollidableWith(collidable2))
                {
                   KinematicsCollisionResult collision = collidable1.evaluateCollision(collidable2);
-                  assertTrue(collision.getSignedDistance() > -1.0e-3);
+                  assertTrue(collision.getSignedDistance() > -1.5e-3, collidable1.getRigidBody().getName() + ", " + collidable2.getRigidBody().getName() + ": " + collision.getSignedDistance());
                }
             }
          }
