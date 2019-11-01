@@ -37,6 +37,9 @@ float64 transfer_split_fraction_at_full_depth
 # Field default value -1.0
 float64 transfer_weight_distribution_at_full_depth
 
+# Field default value True
+bool do_initial_fast_approximation
+
 # If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
 # along the swing foot trajectory and the planar regions in the environment.
 # Field default value -1.0
@@ -58,6 +61,9 @@ float64 maximum_waypoint_adjustment_distance
 # If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
 # Field default value -1.0
 float64 incremental_waypoint_adjustment_distance
+
+# Field default value -1.0
+float64 minimum_height_above_floor_for_collision
 
 # If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
 # support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.

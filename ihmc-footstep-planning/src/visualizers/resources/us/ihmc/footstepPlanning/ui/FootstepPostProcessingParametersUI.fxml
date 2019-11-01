@@ -11,7 +11,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPostProcessingParametersUIController">
     <children>
-        <GridPane layoutX="7.0" layoutY="34.0" prefHeight="294.0" prefWidth="1200.0">
+        <GridPane layoutX="14.0" layoutY="7.0" prefHeight="282.0" prefWidth="1200.0">
             <children>
 
 
@@ -32,11 +32,13 @@
 
 
                 <CheckBox fx:id="swingOverRegionsProcessingEnabled" mnemonicParsing="false" prefHeight="18.0" prefWidth="306.0" text="Swing over regions processing enabled" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                <Label text="Minimum swing foot clearance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <Label text="Number of checks per swing" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <Label text="Maximum number of adjustment iterations" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                <Label text="Maximum adjustment distance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                <Label text="Incremental adjustment distance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                <CheckBox fx:id="doInitialFastApproximation" mnemonicParsing="false" prefHeight="18.0" prefWidth="306.0" text="Do initial fast approximation" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                <Label text="Minimum swing foot clearance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <Label text="Number of checks per swing" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                <Label text="Maximum number of adjustment iterations" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                <Label text="Maximum adjustment distance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                <Label text="Incremental adjustment distance" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                <Label text="Minimum height above floor for collision" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="8" />
 
 
                 <Spinner fx:id="stepHeightForLargeStepDown" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -49,13 +51,14 @@
                 <Spinner fx:id="fractionLoadIfOtherFootHasNoWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="4" />
                 <Spinner fx:id="fractionTimeOnFootIfOtherFootHasNoWidth" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="5" />
 
-                <Spinner fx:id="minimumSwingFootClearance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                <Spinner fx:id="numberOfChecksPerSwing" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                <Spinner fx:id="maximumNumberOfAdjustmentAttempts" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="4" />
-                <Spinner fx:id="maximumAdjustmentDistance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="5" />
-                <Spinner fx:id="incrementalAdjustmentDistance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="6" />
+                <Spinner fx:id="minimumSwingFootClearance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
+                <Spinner fx:id="numberOfChecksPerSwing" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="4" />
+                <Spinner fx:id="maximumNumberOfAdjustmentAttempts" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="5" />
+                <Spinner fx:id="maximumAdjustmentDistance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="6" />
+                <Spinner fx:id="incrementalAdjustmentDistance" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="7" />
+                <Spinner fx:id="minimumHeightAboveFloorForCollision" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="8" />
 
-                <Button onAction="#saveToFile" prefWidth="130.0" text="Save" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+                <Button onAction="#saveToFile" prefWidth="130.0" text="Save" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
 
 
                 <Label layoutX="734.0" layoutY="77.0" text="Position Split Fraction Processing" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="CENTER" />
