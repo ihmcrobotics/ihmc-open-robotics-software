@@ -861,6 +861,9 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsCollidable collidableA = collision.getCollidableA();
          KinematicsCollidable collidableB = collision.getCollidableB();
 
+         if (collision.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+            continue;
+
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
          double sigma = -collision.getSignedDistance();
