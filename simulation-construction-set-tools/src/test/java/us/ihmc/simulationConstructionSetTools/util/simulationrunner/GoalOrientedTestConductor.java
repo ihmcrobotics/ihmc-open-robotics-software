@@ -216,7 +216,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          stop();
          LogTools.error(scsCrashedException);
-         fail();
+         fail("SCS crashed.");
       }
       
       //wait to see if scs threw any exceptions
