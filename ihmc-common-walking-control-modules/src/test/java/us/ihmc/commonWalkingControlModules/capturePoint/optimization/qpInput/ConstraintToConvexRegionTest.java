@@ -110,6 +110,8 @@ public class ConstraintToConvexRegionTest
          assertTrue(bineqCalc.get(i, 0) < constraint.bineq.get(i, 0));
       }
 
+      // by setting this distance to larger than possible, we are making it so that the solution is technically unsolvable. However, the best attempt to solving
+      // it is located at the origin, so we should still find a solution there.
       constraint.setDeltaInside(0.06);
 
       constraint.setPolygon();
