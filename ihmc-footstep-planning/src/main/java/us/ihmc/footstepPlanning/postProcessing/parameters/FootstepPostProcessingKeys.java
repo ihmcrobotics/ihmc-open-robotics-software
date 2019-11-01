@@ -15,7 +15,7 @@ public class FootstepPostProcessingKeys
    public static final DoubleStoredPropertyKey  transferSplitFractionAtFullDepth        = keys.addDoubleKey("Transfer split fraction at full depth", 0.2);
    public static final DoubleStoredPropertyKey  transferWeightDistributionAtFullDepth   = keys.addDoubleKey("Transfer weight distribution at full depth", 0.7);
 
-   public static final BooleanStoredPropertyKey swingOverRegionsProcessingEnabled       = keys.addBooleanKey("Swing over regions processing enabled", true);
+   public static final BooleanStoredPropertyKey swingOverRegionsProcessingEnabled       = keys.addBooleanKey("Swing over regions processing enabled", false);
    public static final BooleanStoredPropertyKey doInitialFastApproximation              = keys.addBooleanKey("Do initial fast approximation", false);
    public static final DoubleStoredPropertyKey  minimumSwingFootClearance               = keys.addDoubleKey("Minimum swing foot clearance", 0.0);
    public static final IntegerStoredPropertyKey numberOfChecksPerSwing                  = keys.addIntegerKey("Number of checks per swing", 100);
