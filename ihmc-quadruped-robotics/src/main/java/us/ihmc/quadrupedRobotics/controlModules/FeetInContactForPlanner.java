@@ -50,7 +50,6 @@ public class FeetInContactForPlanner
       for (int i = 0; i < actualFeetInContact.size(); i++)
          feetInContact.add(actualFeetInContact.get(i));
 
-      /*
       int stepIndex = 0;
       while (stepIndex < stepsWithLinkedCompletions.size())
       {
@@ -67,6 +66,7 @@ public class FeetInContactForPlanner
          }
       }
 
+      /*
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          TimeIntervalReadOnly stepInProgress = stepsInProgress.get(robotQuadrant);
@@ -75,18 +75,10 @@ public class FeetInContactForPlanner
          if (stepInProgress != null)
             feetInContact.remove(robotQuadrant);
       }
+      */
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footContactStateForPlanner.get(robotQuadrant).set(feetInContact.contains(robotQuadrant));
-
-      if (feetInContact.size() != controllerToolbox.getFeetInContact().size())
-         LogTools.info("Wrong size.");
-      for (int i = 0; i < feetInContact.size(); i++)
-      {
-         if (!controllerToolbox.getFeetInContact().contains(feetInContact.get(i)))
-            LogTools.info("What?");
-      }
-      */
    }
 
    public List<RobotQuadrant> getFeetInContactForPlanner()
