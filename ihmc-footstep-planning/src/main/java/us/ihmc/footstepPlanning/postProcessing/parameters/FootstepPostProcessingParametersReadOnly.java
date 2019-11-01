@@ -1,23 +1,32 @@
 package us.ihmc.footstepPlanning.postProcessing.parameters;
 
+import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface FootstepPostProcessingParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
-    * Determines whether the post processing module for adjusting the split fractions for the CoP trajectory is enabled.
+    * Determines whether the post processing module for adjusting the split fractions based on the footstep positions for the CoP trajectory is enabled.
     */
-   default boolean splitFractionProcessingEnabled()
+   default boolean positionSplitFractionProcessingEnabled()
    {
-      return get(FootstepPostProcessingKeys.splitFractionProcessingEnabled);
+      return get(FootstepPostProcessingKeys.positionSplitFractionProcessingEnabled);
+   }
+
+   /**
+    * Determines whether the post processing module for adjusting the split fractions based on the foothold areas for the CoP trajectory is enabled.
+    */
+   default boolean areaSplitFractionProcessingEnabled()
+   {
+      return get(FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
    }
 
    /**
     * Determines whether the post processing module for swinging over planar regions is enabled.
     */
-   default boolean swingOverRegionsEnabled()
+   default boolean swingOverRegionsProcessingEnabled()
    {
-      return get(FootstepPostProcessingKeys.swingOverRegionsEnabled);
+      return get(FootstepPostProcessingKeys.swingOverRegionsProcessingEnabled);
    }
 
    /**
