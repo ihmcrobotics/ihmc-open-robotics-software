@@ -15,6 +15,7 @@ import us.ihmc.tools.property.StoredPropertyKey;
 import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertNotEquals;
 
 public class FootstepPlannerMessageToolsTest
 {
@@ -38,6 +39,18 @@ public class FootstepPlannerMessageToolsTest
       }
    }
 
+   @Test
+   public void testNotSettingFromPacket()
+   {
+      FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
+      FootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
+      FootstepPlannerParametersBasics expectedParameters = new DefaultFootstepPlannerParameters();
+
+      parametersToSet.set(packet);
+
+      assertDoubleParametersDontContainNoValue(expectedParameters, parametersToSet);
+   }
+
    private static void assertParametersEqual(FootstepPlannerParametersReadOnly parametersA, FootstepPlannerParametersReadOnly parametersB)
    {
       for (StoredPropertyKey<?> key : FootstepPlannerParameterKeys.keys.keys())
@@ -47,6 +60,7 @@ public class FootstepPlannerMessageToolsTest
          {
             DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
             assertEquals(failureMessage, parametersA.get(doubleKey), parametersB.get(doubleKey), 1e-5);
+            assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), 1e-5);
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
@@ -60,6 +74,21 @@ public class FootstepPlannerMessageToolsTest
          }
       }
    }
+
+   private static void assertDoubleParametersDontContainNoValue(FootstepPlannerParametersReadOnly parametersA, FootstepPlannerParametersReadOnly parametersB)
+   {
+      for (StoredPropertyKey<?> key : FootstepPlannerParameterKeys.keys.keys())
+      {
+         String failureMessage = key.getTitleCasedName() + " contains a no value.";
+         if (key instanceof DoubleStoredPropertyKey)
+         {
+            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
+            assertNotEquals(failureMessage, FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), 1e-5);
+            assertNotEquals(failureMessage, FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersA.get(doubleKey), 1e-5);
+         }
+      }
+   }
+
 
    private static FootstepPlannerParametersReadOnly getRandomParameters(Random random)
    {
