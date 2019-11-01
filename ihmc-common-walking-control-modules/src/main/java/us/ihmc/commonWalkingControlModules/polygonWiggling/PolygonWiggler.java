@@ -406,7 +406,7 @@ public class PolygonWiggler
       }
    }
 
-   private static boolean isAllowed(int index, int... indicesToIgnore)
+   private static boolean isAllowed(int index, int[] indicesToIgnore)
    {
       for (int i = 0; i < indicesToIgnore.length; i++)
       {
