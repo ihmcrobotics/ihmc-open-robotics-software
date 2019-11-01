@@ -4,11 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -128,6 +124,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
                                          numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferPreservingEnable, preserveOcTreeHistoryButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.DepthCloudBufferEnable, enableStereoBufferButton.selectedProperty());      //TODO : add one more Button To set.
 
       surfaceNormalFilterParametersProperty.bindBidirectionalBounds(surfaceNormalUpperBoundSlider.valueProperty(),
                                                                     surfaceNormalLowerBoundSlider.valueProperty());

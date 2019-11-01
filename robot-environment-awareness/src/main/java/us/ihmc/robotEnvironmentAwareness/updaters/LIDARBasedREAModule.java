@@ -81,9 +81,9 @@ public class LIDARBasedREAModule
       stereoVisionBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
                                                       REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
                                                       REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
-      depthCloudBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
+      depthCloudBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.DepthCloudBufferEnable, false,
                                                     REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
-                                                    REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);  //TODO: add new API and UI.
+                                                    REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.DepthCloudBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater, depthCloudBufferUpdater};
       mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);

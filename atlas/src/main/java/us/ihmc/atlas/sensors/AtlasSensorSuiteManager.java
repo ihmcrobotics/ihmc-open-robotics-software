@@ -44,7 +44,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
    private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
 
-   private static final String prefixDepthCloudTopicName = "_D435";
+   private static final boolean ENABLE_STEREO_PUBLISHER = false;
+   private static final boolean ENABLE_DEPTH_PUBLISHER = true;
+
+   private static final String surfixDepthCloudTopicNameToPublish = "_D435";
    private static final String depthCloudTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
 
    private final RobotROSClockCalculator rosClockCalculator;
@@ -74,7 +77,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, prefixDepthCloudTopicName);
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, surfixDepthCloudTopicNameToPublish);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
       realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
    }
@@ -114,8 +117,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.receiveLidarFromROSAsPointCloud2WithSource(multisenseLidarParameters.getRosTopic(), rosMainNode);
       lidarScanPublisher.setScanFrameToWorldFrame();
 
-      multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
-      realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthCloudTopicNameToSubscribe, rosMainNode);
+      if (ENABLE_STEREO_PUBLISHER)
+         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+      if (ENABLE_DEPTH_PUBLISHER)
+         realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthCloudTopicNameToSubscribe, rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -133,8 +138,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
       lidarScanPublisher.start();
-      multisenseStereoVisionPointCloudPublisher.start();
-      realsenseDepthPointCloudPublisher.start();
+
+      if (ENABLE_STEREO_PUBLISHER)
+         multisenseStereoVisionPointCloudPublisher.start();
+      if (ENABLE_DEPTH_PUBLISHER)
+         realsenseDepthPointCloudPublisher.start();
 
       rosClockCalculator.setROSMainNode(rosMainNode);
 
