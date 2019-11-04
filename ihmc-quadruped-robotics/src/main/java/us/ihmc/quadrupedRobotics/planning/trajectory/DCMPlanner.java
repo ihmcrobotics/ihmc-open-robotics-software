@@ -145,6 +145,10 @@ public class DCMPlanner implements DCMPlannerInterface
    {
    }
 
+   public void setHoldCurrentDesiredPosition(boolean holdPosition)
+   {
+   }
+
    public void addStepToSequence(QuadrupedTimedStep step)
    {
       stepSequence.add(step);

@@ -1,20 +1,22 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -26,7 +28,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportState extends QuadrupedFootState
 {
@@ -52,7 +53,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
-
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
@@ -65,6 +65,11 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final YoBoolean isFootSlipping;
    private final YoDouble footPlanarVelocity;
+
+   private final YoDouble maxNormalForceSetpoint;
+
+   private final ContactStateRhoRamping<RobotQuadrant> rhoRamping;
+   private final QuadrupedFootControlModuleParameters footControlModuleParameters;
 
 
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
@@ -79,6 +84,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
 
+   private final int numberOfBasisVectors;
+   private final double rhoMin;
    private final double controlDT;
 
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
@@ -90,9 +97,18 @@ public class QuadrupedSupportState extends QuadrupedFootState
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
+      numberOfBasisVectors = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings().getNumberOfBasisVectorsPerContactPoint();
+      rhoMin = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings().getRhoMin();
+
+      footControlModuleParameters = controllerToolbox.getFootControlModuleParameters();
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings();
+      double rhoWeight = controllerCoreOptimizationSettings.getRhoWeight();
+      rhoRamping = new ContactStateRhoRamping<>(robotQuadrant, contactState, rhoWeight, registry);
+
       ReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotQuadrant);
 
       String prefix = robotQuadrant.getShortName();
+      maxNormalForceSetpoint = new YoDouble(prefix + "MaxNormalForceSetpoint", registry);
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
       rootBody = controllerToolbox.getFullRobotModel().getElevator();
@@ -132,6 +148,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
+      rhoRamping.initialize(footControlModuleParameters.getTouchdownDuration());
 
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
@@ -155,6 +172,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       updateHoldPositionSetpoints();
 
+      updateTouchdownSetpoints(timeInState);
 
       // assemble acceleration command
       ReferenceFrame bodyFixedFrame = contactState.getRigidBody().getBodyFixedFrame();
@@ -162,7 +180,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footAcceleration.setBodyFrame(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(soleFrame, footAcceleration);
       spatialAccelerationCommand.setLinearWeights(parameters.getSupportFootWeights());
-      
+
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(soleFrame);
@@ -202,6 +220,36 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
+   }
+
+   private void updateTouchdownSetpoints(double timeInState)
+   {
+      double rhoClampingDuration = footControlModuleParameters.getRhoClampingDuration();
+
+      if (timeInState > rhoClampingDuration)
+      {
+         rhoRamping.resetContactState();
+         for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = contactState.getContactPoints().get(i);
+            contactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
+         }
+      }
+      else
+      {
+         rhoRamping.update(timeInState);
+         double minValue = Math.max(footControlModuleParameters.getLoadingMinMagnitude(), computeMinZForceBasedOnRhoMin(rhoMin) + 1.0E-5);
+         maxNormalForceSetpoint.set(InterpolationTools.linearInterpolate(minValue,
+                                                                         footControlModuleParameters.getLoadingMaxMagnitude(), timeInState / rhoClampingDuration));
+
+         // Make sure the max force is always a little larger then the min force required by the rhoMin value. This is to avoid sending conflicting constraints.
+
+         for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = contactState.getContactPoints().get(i);
+            contactState.setMaxContactPointNormalForce(contactPoint, maxNormalForceSetpoint.getDoubleValue());
+         }
+      }
    }
 
    private void updateHoldPositionSetpoints()
@@ -275,6 +323,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footBarelyLoaded.set(false);
       isFootSlipping.set(false);
       footPlanarVelocity.setToNaN();
+      rhoRamping.resetContactState();
    }
 
    @Override
@@ -299,5 +348,19 @@ public class QuadrupedSupportState extends QuadrupedFootState
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
+   }
+
+   private final FrameVector3D normalVector = new FrameVector3D();
+
+   private double computeMinZForceBasedOnRhoMin(double rhoMin)
+   {
+      contactState.getContactNormalFrameVector(normalVector);
+      normalVector.changeFrame(ReferenceFrame.getWorldFrame());
+      normalVector.normalize();
+
+      double friction = contactState.getCoefficientOfFriction();
+      int points = contactState.getNumberOfContactPointsInContact();
+
+      return normalVector.getZ() * rhoMin * numberOfBasisVectors * points / Math.sqrt(1.0 + friction * friction);
    }
 }

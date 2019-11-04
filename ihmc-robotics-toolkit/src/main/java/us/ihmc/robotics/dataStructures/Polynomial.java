@@ -75,31 +75,31 @@ public class Polynomial
          this.coefficients[i - coefficientsToSkip] = coefficientsHighOrderFirst[i];
       }
 
-      if (coefficientsHighOrderFirst.length == 1)
+      if (this.coefficients.length == 1)
       {
          this.derivativeCoefficients = new double[] {0.0};
       }
       else
       {
-         this.derivativeCoefficients = new double[coefficientsHighOrderFirst.length - 1];
-         int length = coefficientsHighOrderFirst.length;
-         for (int i = 0; i < coefficientsHighOrderFirst.length - 1; i++)
+         this.derivativeCoefficients = new double[this.coefficients.length - 1];
+         int length = this.coefficients.length;
+         for (int i = 0; i < this.coefficients.length - 1; i++)
          {
-            this.derivativeCoefficients[i] = (length - i - 1) * coefficientsHighOrderFirst[i];
+            this.derivativeCoefficients[i] = (length - i - 1) * this.coefficients[i];
          }
       }
 
-      if (coefficientsHighOrderFirst.length < 3)
+      if (this.coefficients.length < 3)
       {
          this.doubleDerivativeCoefficients = new double[] {0.0};
       }
       else
       {
-         this.doubleDerivativeCoefficients = new double[coefficientsHighOrderFirst.length - 2];
-         int length = coefficientsHighOrderFirst.length;
-         for (int i = 0; i < coefficientsHighOrderFirst.length - 2; i++)
+         this.doubleDerivativeCoefficients = new double[this.coefficients.length - 2];
+         int length = this.coefficients.length;
+         for (int i = 0; i < this.coefficients.length - 2; i++)
          {
-            this.doubleDerivativeCoefficients[i] = (length - i - 1) * (length - i - 2) * coefficientsHighOrderFirst[i];
+            this.doubleDerivativeCoefficients[i] = (length - i - 1) * (length - i - 2) * this.coefficients[i];
          }
       }
 

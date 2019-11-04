@@ -7,6 +7,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.YoTimeInterval;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -18,6 +19,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    private final TimeIntervalBasics timeInterval;
    private final YoDouble groundClearance;
    private final YoFramePoint3D goalPosition;
+   private final YoEnum<TrajectoryType> trajectoryType;
 
    public YoQuadrupedTimedStep(String prefix, YoVariableRegistry registry)
    {
@@ -26,6 +28,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
       this.groundClearance = new YoDouble(prefix + "GroundClearance", registry);
       this.goalPosition = new YoFramePoint3D(prefix + "GoalPosition", ReferenceFrame.getWorldFrame(), registry);
       this.timeInterval = new YoTimeInterval(prefix + "TimeInterval", registry);
+      this.trajectoryType = YoEnum.create(prefix + "TrajectoryType", prefix + "TrajectoryType", TrajectoryType.class, registry, true);
    }
 
    @Override
@@ -62,6 +65,18 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    public double getGroundClearance()
    {
       return this.groundClearance.getDoubleValue();
+   }
+   
+   @Override
+   public TrajectoryType getTrajectoryType()
+   {
+      return this.trajectoryType.getEnumValue();
+   }
+   
+   @Override
+   public void setTrajectoryType(TrajectoryType trajectoryType)
+   {
+      this.trajectoryType.set(trajectoryType);
    }
 
    @Override

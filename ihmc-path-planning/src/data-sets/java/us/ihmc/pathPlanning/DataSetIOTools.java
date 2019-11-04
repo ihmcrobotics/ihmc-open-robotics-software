@@ -33,6 +33,7 @@ public class DataSetIOTools
    public static final String QUADRUPED_START_YAW_TAG = "quadruped_" + START_YAW_TAG;
    public static final String QUADRUPED_GOAL_YAW_TAG = "quadruped_" + GOAL_YAW_TAG;
 
+   public static final String REQUIRES_OCCLUSION = "requires_occlusion";
    public static final String TESTABLE_FLAG = "test";
    public static final String IN_DEVELOPMENT_FLAG = "dev";
 

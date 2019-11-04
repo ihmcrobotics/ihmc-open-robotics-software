@@ -73,6 +73,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
    {
       boolean done = doneMoving && !isDoneMoving.get(robotQuadrant).getBooleanValue();
       isDoneMoving.get(robotQuadrant).set(done);
+      balanceManager.setHoldCurrentDesiredPosition(false);
    }
 
    @Override
@@ -93,7 +94,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
             QuadrupedTimedStep spoofStep = spoofStepPool.get(robotQuadrant);
             spoofStep.setRobotQuadrant(robotQuadrant);
             spoofStep.setGoalPosition(footPosition);
-            spoofStep.getTimeInterval().setInterval(currentTime.getDoubleValue() + transferToSoleWaypointDuration.getValue(), Double.POSITIVE_INFINITY);
+            spoofStep.getTimeInterval().setInterval(currentTime.getDoubleValue() + transferToSoleWaypointDuration.getValue(), Double.MAX_VALUE);
 
             spoofSteps.add(spoofStep);
          }
@@ -114,7 +115,11 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
    public void doAction(double timeInState)
    {
       if (timeInState > transferToSoleWaypointDuration.getValue() && !doneWithInitialTransfer.getBooleanValue())
+      {
          doneWithInitialTransfer.set(true);
+         balanceManager.initializeForStepping();
+         balanceManager.setHoldCurrentDesiredPosition(true);
+      }
 
       if (doneWithInitialTransfer.getBooleanValue())
       {

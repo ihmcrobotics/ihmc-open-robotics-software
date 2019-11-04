@@ -91,7 +91,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
    private final List<Consumer<DetectionVisualizationPackets>> detectionResultListeners = Collections.synchronizedList(new ArrayList<>());
 
    private final ConcurrentLinkedQueue<ObjectDetectorResultPacket> results = new ConcurrentLinkedQueue<>();
-   private final PacketCommunicator valveDetectorClient = PacketCommunicator.createTCPPacketCommunicatorClient("10.7.4.103", NetworkPorts.VALVE_DETECTOR_SERVER_PORT, new IHMCCommunicationKryoNetClassList());
+   private final PacketCommunicator valveDetectorClient = PacketCommunicator.createTCPPacketCommunicatorClient("172.16.66.103", NetworkPorts.VALVE_DETECTOR_SERVER_PORT, new IHMCCommunicationKryoNetClassList());
 
    public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {

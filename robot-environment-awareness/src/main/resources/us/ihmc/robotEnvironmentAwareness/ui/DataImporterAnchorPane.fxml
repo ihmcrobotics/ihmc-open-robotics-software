@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToggleButton?>
+
+<AnchorPane prefHeight="250.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.DataImporterAnchorPaneController">
+   <children>
+      <VBox layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Stereo Data Importer" textAlignment="CENTER" />
+            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#loadFromFile" text="Load from File" />
+            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exportPlanarRegions" text="Export Planar Regions" />
+         </children>
+      </VBox>
+      <VBox layoutX="225.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Stereo Data Handler" textAlignment="CENTER" />
+            <HBox prefHeight="0.0" prefWidth="190.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="139.0" text="Roll (deg)" textAlignment="CENTER" />
+                  <TextField fx:id="tfRollDegree" alignment="CENTER" prefHeight="25.0" prefWidth="51.0" text="0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="0.0" prefWidth="190.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="139.0" text="Pitch (deg)" textAlignment="CENTER" />
+                  <TextField fx:id="tfPitchDegree" alignment="CENTER" prefHeight="25.0" prefWidth="51.0" text="45" />
+               </children>
+            </HBox>
+            <HBox prefHeight="0.0" prefWidth="190.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="139.0" text="Yaw (deg)" textAlignment="CENTER" />
+                  <TextField fx:id="tfYawDegree" alignment="CENTER" prefHeight="25.0" prefWidth="51.0" text="0" />
+               </children>
+            </HBox>
+            <HBox prefHeight="0.0" prefWidth="190.0">
+               <children>
+                  <TextField fx:id="tfDataIndex" alignment="CENTER" prefHeight="25.0" prefWidth="51.0" text="0" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#publishMessages" prefHeight="25.0" prefWidth="143.0" text="Publish Messages" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

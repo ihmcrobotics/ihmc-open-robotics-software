@@ -35,131 +35,157 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 public enum ControllerCoreCommandType
 {
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} given in taskspace. This could be a {@link SpatialVelocityCommand} for the
-    * {@link WholeBodyInverseKinematicsSolver}, a {@link SpatialAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, or a
+    * Represents a command for the {@link WholeBodyControllerCore} given in taskspace. This could be a
+    * {@link SpatialVelocityCommand} for the {@link WholeBodyInverseKinematicsSolver}, a
+    * {@link SpatialAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, or a
     * {@link SpatialFeedbackControlCommand} for the {@link WholeBodyFeedbackController}.
     */
    TASKSPACE,
 
    /**
-    * Represents a {@link PointFeedbackControlCommand} to try and achieve a certain linear position. This is submitted to the {@link WholeBodyFeedbackController}.
+    * Represents a {@link PointFeedbackControlCommand} to try and achieve a certain linear position.
+    * This is submitted to the {@link WholeBodyFeedbackController}.
     */
    POINT,
 
    /**
-    * Represents a {@link OrientationFeedbackControlCommand} to try and achieve a certain rotational orientation. This is submitted to the
-    * {@link WholeBodyFeedbackController}.
+    * Represents a {@link OrientationFeedbackControlCommand} to try and achieve a certain rotational
+    * orientation. This is submitted to the {@link WholeBodyFeedbackController}.
     */
    ORIENTATION,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} given in jointspace. This could be a {@link JointspaceVelocityCommand} for the
-    * {@link WholeBodyInverseKinematicsSolver}, a {@link JointspaceAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, a
-    * {@link JointTorqueCommand} for the {@link WholeBodyVirtualModelControlSolver}, or a {@link SpatialFeedbackControlCommand} for the
-    * {@link WholeBodyFeedbackController}.
+    * Represents a command for the {@link WholeBodyControllerCore} given in jointspace. This could be a
+    * {@link JointspaceVelocityCommand} for the {@link WholeBodyInverseKinematicsSolver}, a
+    * {@link JointspaceAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, a
+    * {@link JointTorqueCommand} for the {@link WholeBodyVirtualModelControlSolver}, or a
+    * {@link SpatialFeedbackControlCommand} for the {@link WholeBodyFeedbackController}.
     */
    JOINTSPACE,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} given for the center of mass. This could be a {@link MomentumCommand} for the
-    * {@link WholeBodyInverseKinematicsSolver}, a {@link MomentumRateCommand} for the {@link WholeBodyInverseDynamicsSolver} or the
-    * {@link WholeBodyVirtualModelControlSolver}, or a {@link CenterOfMassFeedbackControlCommand} for the {@link WholeBodyFeedbackController}.
+    * Represents a command for the {@link WholeBodyControllerCore} given for the center of mass. This
+    * could be a {@link MomentumCommand} for the {@link WholeBodyInverseKinematicsSolver}, a
+    * {@link MomentumRateCommand} for the {@link WholeBodyInverseDynamicsSolver} or the
+    * {@link WholeBodyVirtualModelControlSolver}, or a {@link CenterOfMassFeedbackControlCommand} for
+    * the {@link WholeBodyFeedbackController}.
     */
    MOMENTUM,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired privileged configuration. This is a configuration set for the robot to
-    * help the {@link WholeBodyInverseKinematicsSolver} and {@link WholeBodyInverseDynamicsSolver} avoid singularities in their solutions. It is then used in an
-    * internal feedback controller to determine a desired jointspace velocity or acceleration, respectively, in the null-space for the optimization modules.
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a convex set of bounds to
+    * apply on the motion of the center of mass. This could be a
+    * {@link MomentumConvexConstraintCommand} for the {@link WholeBodyInverseKinematicsSolver}.
+    */
+   MOMENTUM_CONVEX_CONSTRAINT,
+
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired privileged
+    * configuration. This is a configuration set for the robot to help the
+    * {@link WholeBodyInverseKinematicsSolver} and {@link WholeBodyInverseDynamicsSolver} avoid
+    * singularities in their solutions. It is then used in an internal feedback controller to determine
+    * a desired jointspace velocity or acceleration, respectively, in the null-space for the
+    * optimization modules.
     */
    PRIVILEGED_CONFIGURATION,
 
    /**
-    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired privileged joint space of a joint or joints. This is an
-    * acceleration in the {@link WholeBodyInverseDynamicsSolver}, a velocity in the {@link WholeBodyInverseKinematicsSolver}, and will be a torque in the
-    * {@link WholeBodyVirtualModelControlSolver}. This is then used in the task null-space to help the solution avoid singularities.
+    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired
+    * privileged joint space of a joint or joints. This is an acceleration in the
+    * {@link WholeBodyInverseDynamicsSolver}, a velocity in the
+    * {@link WholeBodyInverseKinematicsSolver}, and will be a torque in the
+    * {@link WholeBodyVirtualModelControlSolver}. This is then used in the task null-space to help the
+    * solution avoid singularities.
     */
    PRIVILEGED_JOINTSPACE_COMMAND,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired joint limit reduction using the {@link JointLimitReductionCommand}
-    * for the {@link WholeBodyInverseKinematicsSolver} and {@link WholeBodyInverseDynamicsSolver}.
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired joint limit
+    * reduction using the {@link JointLimitReductionCommand} for the
+    * {@link WholeBodyInverseKinematicsSolver} and {@link WholeBodyInverseDynamicsSolver}.
     */
    LIMIT_REDUCTION,
 
    /**
-    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired joint limit enforcement using the
-    * {@link JointLimitEnforcementMethodCommand} so that the {@link WholeBodyInverseDynamicsSolver} respects the joint limits of the joints specified in the
+    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired joint
+    * limit enforcement using the {@link JointLimitEnforcementMethodCommand} so that the
+    * {@link WholeBodyInverseDynamicsSolver} respects the joint limits of the joints specified in the
     * {@link JointLimitEnforcementMethodCommand} using the {@link JointLimitEnforcement} method.
     */
    JOINT_LIMIT_ENFORCEMENT,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired external wrench using the {@link ExternalWrenchCommand}
-    * for the {@link WholeBodyInverseDynamicsSolver} and {@link WholeBodyVirtualModelControlSolver}.
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired external wrench
+    * using the {@link ExternalWrenchCommand} for the {@link WholeBodyInverseDynamicsSolver} and
+    * {@link WholeBodyVirtualModelControlSolver}.
     */
    EXTERNAL_WRENCH,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a plane's contact state using the {@link PlaneContactStateCommand}
-    * for the {@link WholeBodyInverseDynamicsSolver} and {@link WholeBodyVirtualModelControlSolver}.
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a plane's contact state
+    * using the {@link PlaneContactStateCommand} for the {@link WholeBodyInverseDynamicsSolver} and
+    * {@link WholeBodyVirtualModelControlSolver}.
     */
    PLANE_CONTACT_STATE,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired Center of Pressure for the reaction force optimization using the
-    * {@link CenterOfPressureCommand} for the {@link WholeBodyInverseDynamicsSolver}.
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a desired Center of
+    * Pressure for the reaction force optimization using the {@link CenterOfPressureCommand} for the
+    * {@link WholeBodyInverseDynamicsSolver}.
     */
    CENTER_OF_PRESSURE,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} to specify a the desired joint acceleration integration approach for the solution using the
+    * Represents a command for the {@link WholeBodyControllerCore} to specify a the desired joint
+    * acceleration integration approach for the solution using the
     * {@link JointAccelerationIntegrationCommand} for the {@link WholeBodyInverseDynamicsSolver}.
     */
    JOINT_ACCELERATION_INTEGRATION,
 
    /**
-    * Represents a list of commands for the {@link WholeBodyControllerCore}. This can be a {@link InverseKinematicsCommandList} for the
-    * {@link WholeBodyInverseKinematicsSolver}, a {@link InverseDynamicsCommandList} for the {@link WholeBodyInverseDynamicsSolver}, a
-    * {@link VirtualModelControlCommandList} for the {@link WholeBodyVirtualModelControlSolver}, or a {@link FeedbackControlCommandList} for the
-    * {@link WholeBodyFeedbackController}..
+    * Represents a list of commands for the {@link WholeBodyControllerCore}. This can be a
+    * {@link InverseKinematicsCommandList} for the {@link WholeBodyInverseKinematicsSolver}, a
+    * {@link InverseDynamicsCommandList} for the {@link WholeBodyInverseDynamicsSolver}, a
+    * {@link VirtualModelControlCommandList} for the {@link WholeBodyVirtualModelControlSolver}, or a
+    * {@link FeedbackControlCommandList} for the {@link WholeBodyFeedbackController}..
     */
    COMMAND_LIST,
 
    /**
-    * Represents a {@link VirtualWrenchCommand} for the {@link WholeBodyVirtualModelControlSolver}.
-    * // TODO make this a TASKSPACE command.
+    * Represents a {@link VirtualWrenchCommand} for the {@link WholeBodyVirtualModelControlSolver}. //
+    * TODO make this a TASKSPACE command.
     */
    VIRTUAL_WRENCH,
 
    /**
-    * Represents a {@link VirtualForceCommand} for the {@link WholeBodyVirtualModelControlSolver}.
-    * // TODO make this a TASKSPACE command.
+    * Represents a {@link VirtualForceCommand} for the {@link WholeBodyVirtualModelControlSolver}. //
+    * TODO make this a TASKSPACE command.
     */
    VIRTUAL_FORCE,
 
    /**
-    * Represents a {@link VirtualTorqueCommand} for the {@link WholeBodyVirtualModelControlSolver}.
-    * // TODO make this a TASKSPACE command.
+    * Represents a {@link VirtualTorqueCommand} for the {@link WholeBodyVirtualModelControlSolver}. //
+    * TODO make this a TASKSPACE command.
     */
    VIRTUAL_TORQUE,
 
    /**
-    * An objective for the wrench exerted by a body in contact {@link WholeBodyInverseDynamicsSolver}. This is different from the
-    * {@link #EXTERNAL_WRENCH} command in that it will be added to the optimization. E.g. this can be used to request that the
-    * inverse dynamics optimization try to put a certain force on one foot or to constrain the foot wrench.
+    * An objective for the wrench exerted by a body in contact {@link WholeBodyInverseDynamicsSolver}.
+    * This is different from the {@link #EXTERNAL_WRENCH} command in that it will be added to the
+    * optimization. E.g. this can be used to request that the inverse dynamics optimization try to put
+    * a certain force on one foot or to constrain the foot wrench.
     */
    CONTACT_WRENCH,
 
    /**
-    * Represents a command that modifies the optimization settings in the controller core. By default these settings are defined
-    * in the {@link ControllerCoreOptimizationSettings}. This command allows changing some of the optimization settings such as
-    * bounds on rhos online using the command API.
+    * Represents a command that modifies the optimization settings in the controller core. By default
+    * these settings are defined in the {@link ControllerCoreOptimizationSettings}. This command allows
+    * changing some of the optimization settings such as bounds on rhos online using the command API.
     */
    OPTIMIZATION_SETTINGS;
 
-   private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
-         PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
+   private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, MOMENTUM_CONVEX_CONSTRAINT,
+         PRIVILEGED_CONFIGURATION, PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
 
    private static final ControllerCoreCommandType[] inverseDynamicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
          PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE,
@@ -203,7 +229,8 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyInverseKinematicsSolver}.
+    * Polls whether the command {@code commandType} is an available command for the
+    * {@link WholeBodyInverseKinematicsSolver}.
     */
    public static boolean isInverseKinematicsCommand(ControllerCoreCommandType commandType)
    {
@@ -217,7 +244,8 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyInverseDynamicsSolver}.
+    * Polls whether the command {@code commandType} is an available command for the
+    * {@link WholeBodyInverseDynamicsSolver}.
     */
    public static boolean isInverseDynamicsCommand(ControllerCoreCommandType commandType)
    {
@@ -231,7 +259,8 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyVirtualModelControlSolver}.
+    * Polls whether the command {@code commandType} is an available command for the
+    * {@link WholeBodyVirtualModelControlSolver}.
     */
    public static boolean isVirtualModelControlCommand(ControllerCoreCommandType commandType)
    {
@@ -245,7 +274,8 @@ public enum ControllerCoreCommandType
    }
 
    /**
-    * Polls whether the command {@code commandType} is an available command for the {@link WholeBodyFeedbackController}.
+    * Polls whether the command {@code commandType} is an available command for the
+    * {@link WholeBodyFeedbackController}.
     */
    public static boolean isFeedbackControlCommand(ControllerCoreCommandType commandType)
    {

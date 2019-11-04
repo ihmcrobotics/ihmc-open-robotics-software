@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
+import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;

@@ -52,5 +52,10 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    {
       return null;
    }
+   
+   public default String getParameterFileName()
+   {
+      return "not implemented";
+   }
 }
 

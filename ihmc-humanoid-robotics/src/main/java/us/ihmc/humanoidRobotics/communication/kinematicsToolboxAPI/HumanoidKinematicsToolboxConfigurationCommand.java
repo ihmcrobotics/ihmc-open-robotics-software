@@ -7,6 +7,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       implements Command<HumanoidKinematicsToolboxConfigurationCommand, HumanoidKinematicsToolboxConfigurationMessage>
 {
    private long sequenceId;
+   private boolean enableSupportPolygonConstraint = true;
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean holdSupportFootPositions = true;
 
@@ -14,6 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public void clear()
    {
       sequenceId = 0;
+      enableSupportPolygonConstraint = true;
       holdCurrentCenterOfMassXYPosition = true;
       holdSupportFootPositions = true;
    }
@@ -22,6 +24,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public void set(HumanoidKinematicsToolboxConfigurationCommand other)
    {
       sequenceId = other.sequenceId;
+      enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
       holdSupportFootPositions = other.holdSupportFootPositions;
    }
@@ -30,8 +33,14 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public void setFromMessage(HumanoidKinematicsToolboxConfigurationMessage message)
    {
       sequenceId = message.getSequenceId();
+      enableSupportPolygonConstraint = message.getEnableSupportPolygonConstraint();
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
       holdSupportFootPositions = message.getHoldSupportFootPositions();
+   }
+
+   public boolean enableSupportPolygonConstraint()
+   {
+      return enableSupportPolygonConstraint;
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()

@@ -31,6 +31,8 @@ public enum TrajectoryType
 
    public static TrajectoryType fromByte(byte enumAsByte)
    {
+      if (enumAsByte == -1)
+         return null;
       return values[enumAsByte];
    }
 }

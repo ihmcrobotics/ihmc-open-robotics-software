@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -26,8 +27,8 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -38,9 +39,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -101,7 +102,7 @@ public class SimpleOcclusionTests
       runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
    }
 
-   private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
+   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
    {
       @Override
       public boolean getReturnBestEffortPlan()
@@ -131,8 +132,8 @@ public class SimpleOcclusionTests
       runTest(testInfo, startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
    }
 
-   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters,
-                        VisibilityGraphsParameters visibilityGraphsParameters, double maxAllowedSolveTime)
+   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
+                        VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -443,7 +444,7 @@ public class SimpleOcclusionTests
       return goal;
    }
 
-   private RobotSide computeStanceFootPose(FramePose3D startPose, FootstepPlannerParameters parameters, FramePose3D stancePoseToPack)
+   private RobotSide computeStanceFootPose(FramePose3D startPose, FootstepPlannerParametersReadOnly parameters, FramePose3D stancePoseToPack)
    {
       RobotSide side = RobotSide.LEFT;
 
@@ -460,7 +461,7 @@ public class SimpleOcclusionTests
       return side;
    }
 
-   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, FootstepPlannerParameters parameters, double bodyHeight)
+   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, FootstepPlannerParametersReadOnly parameters, double bodyHeight)
    {
       double stanceWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame soleFrame = new PoseReferenceFrame("stanceFrame", solePose);
@@ -489,8 +490,8 @@ public class SimpleOcclusionTests
          Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, observer);
-         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
-         if (intersection == null)
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersectionPair == null)
          {
             if (rayPointsToPack != null)
             {
@@ -498,6 +499,8 @@ public class SimpleOcclusionTests
             }
             continue;
          }
+
+         Point3D intersection = intersectionPair.getLeft();
 
          if (rayPointsToPack != null)
          {
@@ -586,19 +589,19 @@ public class SimpleOcclusionTests
       return ret;
    }
 
-   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
+   private FootstepPlanner getPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                       YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
       return new VisibilityGraphWithAStarPlanner(parameters, visibilityGraphsParameters, footPloygons, graphicsListRegistry, registry);
    }
 
-   private FootstepPlannerParameters getParameters()
+   private FootstepPlannerParametersReadOnly getParameters()
    {
-      return new DefaultFootstepPlanningParameters();
+      return new DefaultFootstepPlannerParameters();
    }
 
-   private VisibilityGraphsParameters getVisibilityGraphsParameters()
+   private VisibilityGraphsParametersReadOnly getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
    }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
 
 public class ConvexPolygonToolsTest
@@ -1099,6 +1101,71 @@ public class ConvexPolygonToolsTest
       tools.computeMinimumDistancePoints(polygonOne, polygonTwo, pointOneToPack, pointTwoToPack);
    }
 
+   @Test
+   public void testCutSimpleConvexPolygonAbove()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      LogTools.info("{}", size2square0center.getVertex(0));
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(0.0, 0.0, 0.0, -1.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConvexPolygonCutResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
+
+      Assertions.assertEquals(result, ConvexPolygonCutResult.CUT, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
+      aboveYAxisRectangle.addVertex(1.0, 1.0);
+      aboveYAxisRectangle.addVertex(1.0, -1.0);
+      aboveYAxisRectangle.addVertex(0.0, -1.0);
+      aboveYAxisRectangle.addVertex(0.0, 1.0);
+      aboveYAxisRectangle.update();
+
+      // assert equal
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
+   }
+
+   @Test
+   public void testCutSimpleConvexPolygonBelow()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D size2square0center = new ConvexPolygon2D();
+      size2square0center.addVertex(1.0, 1.0);
+      size2square0center.addVertex(1.0, -1.0);
+      size2square0center.addVertex(-1.0, -1.0);
+      size2square0center.addVertex(-1.0, 1.0);
+      size2square0center.update();
+
+      // create line and up direction
+      Line2D yAxis = new Line2D(0.0, 0.0, 0.0, 1.0);
+
+      // cut it above a line
+      ConvexPolygon2D croppedResult = new ConvexPolygon2D();
+      ConvexPolygonCutResult result = ConvexPolygonTools.cutPolygonToLeftOfLine(size2square0center, yAxis, croppedResult);
+
+      Assertions.assertEquals(result, ConvexPolygonCutResult.CUT, "supposed to cut");
+
+      // create the ideal result
+      ConvexPolygon2D aboveYAxisRectangle = new ConvexPolygon2D();
+      aboveYAxisRectangle.addVertex(-1.0, 1.0);
+      aboveYAxisRectangle.addVertex(0.0, 1.0);
+      aboveYAxisRectangle.addVertex(0.0, -1.0);
+      aboveYAxisRectangle.addVertex(-1.0, -1.0);
+      aboveYAxisRectangle.update();
+
+      // assert equal
+      assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
+   }
 
    @Test
    public void testPolygonIntersections()

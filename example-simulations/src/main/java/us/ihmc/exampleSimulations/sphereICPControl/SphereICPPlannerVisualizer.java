@@ -44,6 +44,7 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -301,6 +302,8 @@ public class SphereICPPlannerVisualizer
    private final FrameConvexPolygon2D tempFootstepPolygonForShrinking = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
 
+   private final FootstepShiftFractions shiftFractions = new FootstepShiftFractions();
+
    private void simulate(List<Footstep> footsteps, List<FootstepTiming> timings)
    {
       boolean isInDoubleSupport = true;
@@ -331,9 +334,9 @@ public class SphereICPPlannerVisualizer
 
          updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 
-         icpPlanner.addFootstepToPlan(nextFootstep, nextFootstepTiming);
-         icpPlanner.addFootstepToPlan(nextNextFootstep, nextNextFootstepTiming);
-         icpPlanner.addFootstepToPlan(nextNextNextFootstep, nextNextNextFootstepTiming);
+         icpPlanner.addFootstepToPlan(nextFootstep, nextFootstepTiming, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextFootstep, nextNextFootstepTiming, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextNextFootstep, nextNextNextFootstepTiming, shiftFractions);
 
          if (isInDoubleSupport)
          {

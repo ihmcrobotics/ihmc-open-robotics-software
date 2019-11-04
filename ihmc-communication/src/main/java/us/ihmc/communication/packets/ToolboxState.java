@@ -13,6 +13,9 @@ public enum ToolboxState
 
    public static ToolboxState fromByte(byte enumAsByte)
    {
-      return values[enumAsByte];
+      if (enumAsByte == -1)
+         return null;
+      else
+         return values[enumAsByte];
    }
 }

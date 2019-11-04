@@ -1,10 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class FootstepNodeTools
@@ -45,6 +49,20 @@ public class FootstepNodeTools
       snapTransform.transform(transformToPack);
    }
 
+   public static Point3DReadOnly getNodePositionInWorld(FootstepNode node, RigidBodyTransform snapTransform)
+   {
+      Point3D nodeInWorld = new Point3D();
+      getNodePositionInWorld(node, nodeInWorld, snapTransform);
+
+      return nodeInWorld;
+   }
+
+   public static void getNodePositionInWorld(FootstepNode node, Point3DBasics nodeInWorld, RigidBodyTransform snapTransform)
+   {
+      nodeInWorld.set(node.getX(), node.getY(), 0.0);
+      snapTransform.transform(nodeInWorld);
+   }
+
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep node
     *
@@ -62,8 +80,11 @@ public class FootstepNodeTools
       footPolygonToPack.applyTransform(nodeTransform);
    }
 
-   public static LatticeNode computeAverage(LatticeNode nodeA, LatticeNode nodeB)
+   public static LatticeNode interpolate(LatticeNode nodeA, LatticeNode nodeB, double alpha)
    {
-      return new LatticeNode(0.5 * (nodeA.getX() + nodeB.getX()), 0.5 * (nodeA.getY() + nodeB.getY()),AngleTools.computeAngleAverage(nodeA.getYaw(), nodeB.getYaw()));
+      double x = EuclidCoreTools.interpolate(nodeA.getX(), nodeB.getX(), alpha);
+      double y = EuclidCoreTools.interpolate(nodeA.getY(), nodeB.getY(), alpha);
+      double yaw = AngleTools.interpolateAngle(nodeA.getYaw(), nodeB.getYaw(), alpha);
+      return new LatticeNode(x, y, yaw);
    }
 }

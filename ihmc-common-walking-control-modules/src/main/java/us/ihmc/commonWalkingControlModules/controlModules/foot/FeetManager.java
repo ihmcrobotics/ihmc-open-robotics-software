@@ -200,7 +200,7 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeight(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -213,7 +213,10 @@ public class FeetManager
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
+   }
 
+   public void correctCoMHeightForUnreachableFootstep(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   {
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -540,16 +543,16 @@ public class FeetManager
       return footControlModules.get(robotSide).pollStatusToReport();
    }
 
-   public void liftOff(RobotSide side, double pitch, double duration)
+   public void liftOff(RobotSide side, double pitch, double pitchVelocity, double duration)
    {
-      footControlModules.get(side).liftOff(pitch, duration);
+      footControlModules.get(side).liftOff(pitch, pitchVelocity, duration);
    }
 
-   public void touchDown(RobotSide side, double pitch, double duration)
+   public void touchDown(RobotSide side, double initialPitch, double initialPitchVelocity, double pitch, double duration)
    {
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
-      footControlModules.get(side).touchDown(pitch, duration);
+      footControlModules.get(side).touchDown(initialPitch, initialPitchVelocity, pitch, duration);
       reset();
    }
 }

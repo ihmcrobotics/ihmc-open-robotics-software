@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.interfaces.DataServerDiscoveryListener;
+import us.ihmc.robotDataLogger.util.DaemonThreadFactory;
 import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection.HTTPDataServerConnectionListener;
 
 /**
@@ -31,8 +33,10 @@ public class DataServerDiscoveryClient implements DataServerLocationBroadcastRec
    private final Object lock = new Object();
    private final DataServerDiscoveryListener listener;
 
-   private final ScheduledExecutorService connectionExecutor = Executors.newSingleThreadScheduledExecutor();
-   private final Executor listenerExecutor = Executors.newSingleThreadExecutor();
+   private final ThreadFactory daemonThreadFactory = DaemonThreadFactory.getNamedDaemonThreadFactory(getClass().getSimpleName());
+
+   private final ScheduledExecutorService connectionExecutor = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory);
+   private final Executor listenerExecutor = Executors.newSingleThreadExecutor(daemonThreadFactory);
 
    private final HashMap<HTTPDataServerDescription, HTTPDataServerDescription> hosts = new HashMap<HTTPDataServerDescription, HTTPDataServerDescription>();
 

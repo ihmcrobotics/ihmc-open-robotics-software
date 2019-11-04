@@ -89,6 +89,11 @@ public class QuadrupedStepMessageHandler
 
    public void handleQuadrupedTimedStepListCommand(QuadrupedTimedStepListCommand command)
    {
+      if (!isValidStepPlan(command))
+      {
+         return;
+      }
+
       // if paused, resume when new steps are received
       if (isPaused.getBooleanValue())
       {
@@ -126,6 +131,34 @@ public class QuadrupedStepMessageHandler
       }
 
       receivedStepSequence.sort(TimeIntervalTools.endTimeComparator);
+   }
+
+   private static boolean isValidStepPlan(QuadrupedTimedStepListCommand command)
+   {
+      double maximumStepTranslation = 1.0;
+      RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
+
+      for (int i = 0; i < command.getNumberOfSteps(); i++)
+      {
+         QuadrupedTimedStepCommand stepCommand = stepCommands.get(i);
+         for (int j = i + 1; j < command.getNumberOfSteps(); j++)
+         {
+            if(stepCommands.get(j).getRobotQuadrant() == stepCommands.get(i).getRobotQuadrant())
+            {
+               QuadrupedTimedStepCommand nextStepCommand = stepCommands.get(j);
+               if(nextStepCommand.getGoalPosition().distance(stepCommand.getGoalPosition()) > maximumStepTranslation)
+               {
+                  return false;
+               }
+               else
+               {
+                  break;
+               }
+            }
+         }
+      }
+
+      return true;
    }
 
    public void clearSteps()

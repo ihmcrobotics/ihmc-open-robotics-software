@@ -359,10 +359,22 @@ public class DRCSimulationTestHelper
    }
 
    private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+
    public void notifyControllerHasFailed()
    {
       hasControllerFailed.set(true);
       scs.stop();
+   }
+
+   public void resetControllerFailure()
+   {
+      if (blockingSimulationRunner != null)
+      { // FIXME Hack to reset controller failure inside the BlockingSimulationRunner.
+         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+         blockingSimulationRunner.createValidDesiredICPListener();
+         blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
+      }
+      hasControllerFailed.set(false);
    }
 
    public void destroySimulation()

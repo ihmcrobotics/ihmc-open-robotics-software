@@ -3,20 +3,23 @@ package us.ihmc.robotics.geometry;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.geometry.*;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -882,6 +885,93 @@ public class PlanarRegionTest
       assertFalse(valueMatchesComputed);
       assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.0), 1e-7));
       assertTrue(planarRegion.isPointInside(new Point3D(0.0, 0.0, 0.5), 1e-7));
+   }
+
+   @Test
+   public void testGetSupportingVertex()
+   {
+      Random random = new Random(3290);
+
+      // test simple unit square
+      ConvexPolygon2D convexPolygon2d = new ConvexPolygon2D();
+      convexPolygon2d.addVertex(1.0, 1.0);
+      convexPolygon2d.addVertex(-1.0, 1.0);
+      convexPolygon2d.addVertex(-1.0, -1.0);
+      convexPolygon2d.addVertex(1.0, -1.0);
+      convexPolygon2d.update();
+      ArrayList<ConvexPolygon2D> polygonList = new ArrayList<>();
+      polygonList.add(convexPolygon2d);
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorld, polygonList);
+
+      assertTrue(planarRegion.getSupportingVertex(new Vector3D(1.0, 1.0, 0.0)).epsilonEquals(new Point3D(1.0, 1.0, 0.0), 1e-10));
+      assertTrue(planarRegion.getSupportingVertex(new Vector3D(-1.0, 1.0, 0.0)).epsilonEquals(new Point3D(-1.0, 1.0, 0.0), 1e-10));
+      assertTrue(planarRegion.getSupportingVertex(new Vector3D(-1.0, -1.0, 0.0)).epsilonEquals(new Point3D(-1.0, -1.0, 0.0), 1e-10));
+      assertTrue(planarRegion.getSupportingVertex(new Vector3D(1.0, -1.0, 0.0)).epsilonEquals(new Point3D(1.0, -1.0, 0.0), 1e-10));
+
+      // test random regions
+      for (int i = 0; i < 10000; i++)
+      {
+         planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 5.0, 8);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         List<Point3D> convexHullVertices = planarRegion.getConvexHull().getPolygonVerticesView().stream().map(Point3D::new).peek(transformToWorld::transform).collect(Collectors.toList());
+         Point3DReadOnly expectedSupportVertex, actualSupportVertex;
+         Vector3D supportDirection = new Vector3D();
+
+         // Trivial case #1: supportingVector = +X
+         supportDirection.set(Axis.X);
+         expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getX)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Trivial case #2: supportingVector = -X
+         supportDirection.setAndNegate(Axis.X);
+         expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getX)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Trivial case #1: supportingVector = +Y
+         supportDirection.set(Axis.Y);
+         expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getY)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Trivial case #2: supportingVector = -Y
+         supportDirection.setAndNegate(Axis.Y);
+         expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getY)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Trivial case #1: supportingVector = +Z
+         supportDirection.set(Axis.Z);
+         expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getZ)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Trivial case #2: supportingVector = -Z
+         supportDirection.setAndNegate(Axis.Z);
+         expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getZ)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+
+         // Random support direction
+         supportDirection = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D orthogonalDirection = new Vector3D();
+         Vector3D supportDirectionInPlane = new Vector3D();
+         orthogonalDirection.cross(planarRegion.getNormal(), supportDirection);
+         supportDirectionInPlane.cross(orthogonalDirection, planarRegion.getNormal());
+         supportDirectionInPlane.normalize();
+         supportDirection.scale(EuclidCoreRandomTools.nextDouble(random, 0.1, 10.0));
+
+         Line3D line = new Line3D();
+         line.setDirection(orthogonalDirection);
+         line.translate(20.0 * supportDirectionInPlane.getX(), 20.0 * supportDirectionInPlane.getY(), 20.0 * supportDirectionInPlane.getZ());
+
+         expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(line::distance)).get();
+         actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
+         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+      }
    }
 
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)

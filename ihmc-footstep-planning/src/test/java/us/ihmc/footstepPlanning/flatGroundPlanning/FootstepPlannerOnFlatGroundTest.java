@@ -122,6 +122,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (assertPlannerReturnedResult) assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, footstepPlan));
    }
 
+   @Test
    public void testJustTurnInPlace()
    {
       boolean assertPlannerReturnedResult = assertPlannerReturnedResult();

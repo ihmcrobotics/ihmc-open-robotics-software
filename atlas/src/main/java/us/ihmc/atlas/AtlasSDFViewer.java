@@ -3,9 +3,16 @@ package us.ihmc.atlas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -14,20 +21,23 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class AtlasSDFViewer
 {
    private static final boolean SHOW_ELLIPSOIDS = false;
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_IMU_FRAMES = false;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
 
    public static void main(String[] args)
    {
@@ -48,6 +58,14 @@ public class AtlasSDFViewer
       {
          showIMUFrames(sdfRobot);
       }
+
+      if (SHOW_KINEMATICS_COLLISIONS)
+      {
+         FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+         fullRobotModel.updateFrames();
+         addKinematicsCollisionGraphics(fullRobotModel, sdfRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+      }
+
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
 
@@ -139,5 +157,56 @@ public class AtlasSDFViewer
             linkGraphics.combine(joint.getLink().getLinkGraphics());
          joint.getLink().setLinkGraphics(linkGraphics);
       }
+   }
+
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, HumanoidRobotKinematicsCollisionModel collisionModel)
+   {
+      List<KinematicsCollidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel);
+
+      for (KinematicsCollidable collidable : robotCollidables)
+      {
+         Link link = robot.getLink(collidable.getRigidBody().getName());
+         Graphics3DObject linkGraphics = link.getLinkGraphics();
+         if (linkGraphics == null)
+         {
+            linkGraphics = new Graphics3DObject();
+            link.setLinkGraphics(linkGraphics);
+         }
+         linkGraphics.combine(getGraphics(collidable));
+      }
+   }
+
+   private static Graphics3DObject getGraphics(KinematicsCollidable collidable)
+   {
+      Shape3DReadOnly shape = collidable.getShape();
+      RigidBodyTransform transformToParentJoint = collidable.getShapeFrame()
+                                                            .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
+      Graphics3DObject graphics = new Graphics3DObject();
+      graphics.transform(transformToParentJoint);
+      AppearanceDefinition appearance = YoAppearance.DarkGreen();
+      appearance.setTransparency(0.5);
+
+      if (shape instanceof Sphere3DReadOnly)
+      {
+         Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
+         graphics.translate(sphere.getPosition());
+         graphics.addSphere(sphere.getRadius(), appearance);
+      }
+      else if (shape instanceof Capsule3DReadOnly)
+      {
+         Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
+         RigidBodyTransform transform = new RigidBodyTransform();
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), transform.getRotation());
+         transform.setTranslation(capsule.getPosition());
+         graphics.transform(transform);
+         graphics.addCapsule(capsule.getRadius(),
+                             capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
+                             appearance);
+      }
+      else
+      {
+         throw new UnsupportedOperationException("Unsupported shape: " + shape.getClass().getSimpleName());
+      }
+      return graphics;
    }
 }

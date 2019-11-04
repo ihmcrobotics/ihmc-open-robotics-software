@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -34,6 +35,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -77,6 +79,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+@Tag("humanoid-toolbox")
 public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -230,7 +233,14 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       enableToolboxUpdater.set(false);
 
       assertNotNull(latestOutput.getValue());
-      assertEquals(dt, latestOutput.getValue().getFrameDt(), EPSILON);
+      double expectedFrameDT = dt;
+
+      if (expectedNumberOfFrames > MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES)
+      {
+         expectedFrameDT = dt * (double) expectedNumberOfFrames / (double) MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+         expectedNumberOfFrames = MessageTools.WALKING_PREVIEW_MAX_NUMBER_OF_FRAMES;
+      }
+      assertEquals(expectedFrameDT, latestOutput.getValue().getFrameDt(), EPSILON);
       int actualNumberOfFrames = latestOutput.getValue().getRobotConfigurations().size();
       assertEquals(expectedNumberOfFrames, actualNumberOfFrames);
    }
@@ -398,7 +408,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          FramePose3D cameraPose = new FramePose3D(pelvisFrame);
          cameraPose.changeFrame(worldFrame);
          Point3D cameraFix = new Point3D(cameraPose.getPosition());
-         cameraPose.getOrientation().setToYawQuaternion(cameraPose.getYaw());
+         cameraPose.getOrientation().setToYawOrientation(cameraPose.getYaw());
          cameraPose.appendTranslation(6.0, 0.0, 0.5);
          drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, new Point3D(cameraPose.getPosition()));
       }
@@ -502,8 +512,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.02, 0.06, 0.20);
-         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.06, 0.15); // I wonder if the tracking is off because the control is in joint-space.
+         assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.04, 0.06, 0.20);
+         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.08, 0.15); // I wonder if the tracking is off because the control is in joint-space.
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

@@ -20,6 +20,8 @@ import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -43,7 +45,7 @@ public class BodyPathMeshViewer extends AnimationTimer
    private final Group root = new Group();
    private final MeshView bodyPathMeshView = new MeshView();
 
-   private final AtomicReference<List<? extends Point3DReadOnly>> activeBodyPathReference = new AtomicReference<>(null);
+   private final AtomicReference<List<? extends Pose3DReadOnly>> activeBodyPathReference = new AtomicReference<>(null);
 
    private final AtomicReference<Pair<Mesh, Material>> bodyPathMeshToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
@@ -101,12 +103,12 @@ public class BodyPathMeshViewer extends AnimationTimer
       }
    }
 
-   private void processBodyPathOnThread(List<? extends Point3DReadOnly> bodyPath)
+   private void processBodyPathOnThread(List<? extends Pose3DReadOnly> bodyPath)
    {
       executorService.execute(() -> processBodyPath(bodyPath));
    }
 
-   private void processBodyPath(List<? extends Point3DReadOnly> bodyPath)
+   private void processBodyPath(List<? extends Pose3DReadOnly> bodyPath)
    {
       if (bodyPath == null || bodyPath.isEmpty())
       {
@@ -118,12 +120,12 @@ public class BodyPathMeshViewer extends AnimationTimer
       }
 
       // First let's make a deep copy for later usage.
-      bodyPath = bodyPath.stream().map(Point3D::new).collect(Collectors.toList());
+      bodyPath = bodyPath.stream().map(Pose3D::new).collect(Collectors.toList());
 
       if (VERBOSE)
          PrintTools.info(this, "Building mesh for body path.");
 
-      double totalPathLength = PathTools.computePathLength(bodyPath);
+      double totalPathLength = PathTools.computePosePathLength(bodyPath);
       double currentLength = 0.0;
 
       palette.clearPalette();
@@ -131,8 +133,8 @@ public class BodyPathMeshViewer extends AnimationTimer
 
       for (int segmentIndex = 0; segmentIndex < bodyPath.size() - 1; segmentIndex++)
       {
-         Point3DReadOnly lineStart = bodyPath.get(segmentIndex);
-         Point3DReadOnly lineEnd = bodyPath.get(segmentIndex + 1);
+         Point3DReadOnly lineStart = bodyPath.get(segmentIndex).getPosition();
+         Point3DReadOnly lineEnd = bodyPath.get(segmentIndex + 1).getPosition();
 
          double lineStartHue = EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
          currentLength += lineStart.distance(lineEnd);

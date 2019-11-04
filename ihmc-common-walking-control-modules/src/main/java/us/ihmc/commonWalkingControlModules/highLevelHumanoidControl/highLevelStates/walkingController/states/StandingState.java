@@ -12,13 +12,11 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class StandingState extends WalkingState
 {
@@ -33,11 +31,10 @@ public class StandingState extends WalkingState
    private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   private final YoBoolean doPrepareManipulationForLocomotion = new YoBoolean("doPrepareManipulationForLocomotion", registry);
-
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler,
+                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                        WalkingFailureDetectionControlModule failureDetectionControlModule, WalkingControllerParameters walkingControllerParameters,
+                        YoVariableRegistry parentRegistry)
    {
       super(WalkingStateEnum.STANDING, parentRegistry);
 
@@ -47,14 +44,14 @@ public class StandingState extends WalkingState
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      if(chest != null)
+      if (chest != null)
       {
          ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
 
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            if(hand != null)
+            if (hand != null)
             {
                ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
                RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
@@ -67,21 +64,17 @@ public class StandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
    }
 
    @Override
    public void doAction(double timeInState)
    {
       comHeightManager.setSupportLeg(RobotSide.LEFT);
-      consumePrepareForLocomotion();
    }
 
    @Override
    public void onEntry()
    {
-      consumePrepareForLocomotion();
       commandInputManager.clearAllCommands();
 
       // need to always update biped support polygons after a change to the contact states
@@ -110,13 +103,10 @@ public class StandingState extends WalkingState
    @Override
    public void onExit()
    {
-      if (doPrepareManipulationForLocomotion.getBooleanValue())
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (handManagers.get(robotSide) != null)
-               handManagers.get(robotSide).holdInJointspace();
-         }
+         if (handManagers.get(robotSide) != null)
+            handManagers.get(robotSide).prepareForLocomotion();
       }
 
       if (pelvisOrientationManager != null)
@@ -139,17 +129,6 @@ public class StandingState extends WalkingState
    public boolean isStateSafeToConsumeManipulationCommands()
    {
       return true;
-   }
-
-   private void consumePrepareForLocomotion()
-   {
-      if (commandInputManager.isNewCommandAvailable(PrepareForLocomotionCommand.class))
-      {
-         PrepareForLocomotionCommand command = commandInputManager.pollNewestCommand(PrepareForLocomotionCommand.class);
-         doPrepareManipulationForLocomotion.set(command.isPrepareManipulation());
-         pelvisOrientationManager.setPrepareForLocomotion(command.isPreparePelvis());
-         comHeightManager.setPrepareForLocomotion(command.isPreparePelvis());
-      }
    }
 
    @Override

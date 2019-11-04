@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import javax.swing.JFrame;
 
@@ -18,6 +19,7 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -28,14 +30,13 @@ import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class GUICaptureStreamer
 {
    public static final String topicType = "us::ihmc::robotDataLogger::gui::screenshot";
    public static final String partition = LogParticipantSettings.partition + LogParticipantSettings.namespaceSeperator + "GuiStreamer";
    public static final int MAXIMUM_IMAGE_DATA_SIZE= 1024*1024;
-   private final JFrame window;
+   private final Supplier<Rectangle> windowBoundsProvider;
    private final int fps;
 
    private final ScreenCapture screenCapture = ScreenCaptureFactory.getScreenCapture();
@@ -55,8 +56,12 @@ public class GUICaptureStreamer
 
    public GUICaptureStreamer(JFrame window, int fps, float quality, int domainID, String topicName)
    {
+	   this(() -> window.getBounds(), fps, quality, domainID, topicName);
+   }
 
-      this.window = window;
+   public GUICaptureStreamer(Supplier<Rectangle> windowBoundsProvider, int fps, float quality, int domainID, String topicName)
+   {
+      this.windowBoundsProvider = windowBoundsProvider;
       this.fps = fps;
       this.topicName = topicName;
       try
@@ -69,7 +74,6 @@ public class GUICaptureStreamer
       {
          throw new RuntimeException(e);
       }
-
    }
 
    public synchronized void start()
@@ -105,7 +109,7 @@ public class GUICaptureStreamer
       @Override
       public void run()
       {
-         Rectangle windowBounds = window.getBounds();
+         Rectangle windowBounds = windowBoundsProvider.get();
          Rectangle screen = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
          Rectangle captureRectangle = windowBounds.intersection(screen);
          Dimension windowSize = captureRectangle.getSize();

@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -22,6 +23,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       return 0.5;
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
@@ -29,6 +31,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testControllerFailureKicksIn();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -36,6 +39,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testLongBackwardPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -43,6 +47,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -50,6 +55,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -57,6 +63,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
@@ -64,6 +71,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
@@ -71,6 +79,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileInTransfer();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
@@ -78,6 +87,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileStanding();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
@@ -85,6 +95,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
@@ -92,6 +103,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testRecoveringWithSwingSpeedUpWhileInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
@@ -99,7 +111,9 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testRecoveryWhileInFlamingoStance();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
+   @Test
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimiWhileInSwing();

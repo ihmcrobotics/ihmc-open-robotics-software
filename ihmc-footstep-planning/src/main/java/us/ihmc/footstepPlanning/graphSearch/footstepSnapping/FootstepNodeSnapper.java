@@ -1,19 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
-import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly

@@ -11,6 +11,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegionsConverter;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class REAModuleStateReporter
 {
@@ -41,9 +42,9 @@ public class REAModuleStateReporter
 
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
    {
-      if (regionFeaturesProvider.getPlanarRegionsList() != null && arePlanarRegionsRequested.getAndSet(false))
-         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState,
-                                   PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList()));
+      PlanarRegionsList planarRegionsList = regionFeaturesProvider.getPlanarRegionsList();
+      if (planarRegionsList != null && planarRegionsList.getNumberOfPlanarRegions() > 0 && arePlanarRegionsRequested.getAndSet(false))
+         reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       if (isPlanarRegionSegmentationRequested.getAndSet(false))
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationState,
                                    REAPlanarRegionsConverter.createPlanarRegionSegmentationMessages(regionFeaturesProvider));

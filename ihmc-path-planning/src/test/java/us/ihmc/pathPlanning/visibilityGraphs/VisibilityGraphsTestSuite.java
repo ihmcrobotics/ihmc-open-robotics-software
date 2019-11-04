@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3DTest;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegionTest;
-import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlannerTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterToolsTest;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionToolsTest;

@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import javafx.stage.Window;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
@@ -59,5 +60,16 @@ public class PlanarRegionDataExporter
    {
       Path folderPath = Paths.get(dataDirectoryPath.get() + File.separator + PlanarRegionFileTools.createDefaultTimeStampedFolderName());
       PlanarRegionFileTools.exportPlanarRegionData(folderPath, PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionData));
+   }
+
+   // STATIC TOOL
+
+   public static void exportUsingFileChooser(Window ownerWindow, PlanarRegionsList planarRegionsList)
+   {
+      File dataFolder = PlanarRegionDataImporter.chooseFile(ownerWindow);
+      if (dataFolder != null)
+      {
+         PlanarRegionFileTools.exportPlanarRegionData(dataFolder.toPath(), planarRegionsList);
+      }
    }
 }

@@ -5,7 +5,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -67,7 +66,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Tag("humanoid-flat-ground-2")
    @Test
    public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
@@ -89,7 +87,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
    {
@@ -122,7 +119,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4 * stepDuration + 3.0));
    }
 
-   @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
    {
@@ -144,7 +140,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
-   @Tag("humanoid-flat-ground-2")
    @Test
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
    {

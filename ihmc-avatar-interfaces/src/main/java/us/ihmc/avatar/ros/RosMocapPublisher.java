@@ -28,7 +28,7 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
 
          try
          {
-            mainNode = new RosMainNode(new URI("http://10.7.4.102:11311"), getClass().getSimpleName());
+            mainNode = new RosMainNode(new URI("http://172.16.66.102:11311"), getClass().getSimpleName());
             tfPublisher = new RosTf2Publisher(false);
          }
          catch (URISyntaxException e)

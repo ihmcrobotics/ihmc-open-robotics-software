@@ -6,7 +6,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -40,7 +40,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Corridor);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlanningParameters()
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlannerParameters()
       {
          @Override public boolean checkForBodyBoxCollisions()
          {
@@ -56,7 +56,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Bollards);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlanningParameters()
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlannerParameters()
       {
          @Override public boolean checkForBodyBoxCollisions()
          {
@@ -89,7 +89,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_204953_FlatGroundWithWall);
 
       ThreadTools.sleepForever();
       test.tearDown();

@@ -201,6 +201,9 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.STEP, QuadrupedSteppingStateEnum.STAND);
 
+      // Clear step queue when stand is requested
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepMessageHandler::clearUpcomingSteps);
+
       // Sole Waypoint events
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
       factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
@@ -247,7 +250,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
       QuadrupedFootstepStatusMessage footstepStatusMessage = footstepStatusMessages.get(quadrant);
 
-      footstepStatusMessage.setFootstepQuadrant(quadrant.toByte());
+      footstepStatusMessage.setRobotQuadrant(quadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED);
       footstepStatusMessage.setSequenceId(stepIndex.getIntegerValue());
       footstepStatusMessage.getDesiredStepInterval().setStartTime(step.getTimeInterval().getStartTime());
@@ -257,7 +260,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getDesiredTouchdownPositionInWorld().set(step.getGoalPosition());
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
-      balanceManager.beganStep();
+      balanceManager.beganStep(quadrant, tempPoint);
 
       controllerToolbox.getFallDetector().setNextFootstep(quadrant, step);
    }
@@ -275,7 +278,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
       double currentTime = runtimeEnvironment.getRobotTimestamp().getDoubleValue();
 
-      footstepStatusMessage.setFootstepQuadrant(thisStepQuadrant.toByte());
+      footstepStatusMessage.setRobotQuadrant(thisStepQuadrant.toByte());
       footstepStatusMessage.setFootstepStatus(QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED);
       footstepStatusMessage.getActualStepInterval().setEndTime(currentTime);
       footstepStatusMessage.getActualTouchdownPositionInWorld().set(tempPoint);

@@ -26,6 +26,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneCont
 import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LidarFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
 
@@ -76,6 +77,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       reaMeshViewer = new REAMeshViewer(uiMessager);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
+      new StereoVisionPointCloudDataExporter(uiMessager);
 
       initializeControllers(uiMessager);
 

@@ -39,7 +39,6 @@ public class QuadrupedStepAdjustmentController
    private final QuadrantDependentList<RateLimitedYoFrameVector> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
 
    private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 5.0);
-   private final DoubleParameter maxStepAdjustmentAcceleration = new DoubleParameter("maxStepAdjustmentAcceleration", registry, 10.0);
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> recursionMultipliers = new QuadrantDependentList<>();
@@ -115,6 +114,11 @@ public class QuadrupedStepAdjustmentController
       planarRegionProjection = new QuadrupedStepPlanarRegionProjection(registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void beganStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly goalPosition)
+   {
+      planarRegionProjection.beganStep(robotQuadrant, goalPosition);
    }
 
    public void completedStep(RobotQuadrant robotQuadrant)
@@ -205,12 +209,6 @@ public class QuadrupedStepAdjustmentController
                instantaneousStepAdjustment.set(dcmError);
                instantaneousStepAdjustment.scale(-1.0 / dcmStepAdjustmentMultiplier.getDoubleValue());
                instantaneousStepAdjustment.setZ(0);
-
-               stepHasBeenAdjusted = true;
-            }
-            else
-            {
-               stepHasBeenAdjusted = false;
             }
          }
          else
@@ -228,6 +226,9 @@ public class QuadrupedStepAdjustmentController
          if (projectAdjustmentIntoPlanarRegions.getValue())
             planarRegionProjection.project(tempPoint, robotQuadrant);
 
+         if (!stepHasBeenAdjusted)
+            stepHasBeenAdjusted = tempPoint.distanceXY(activeStep.getGoalPosition()) > 1e-3;
+            
          adjustedStep.setGoalPosition(tempPoint);
       }
 
