@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +21,15 @@ public class MultiStagePlannerListener
    private final List<StagePlannerListener> listeners = new ArrayList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoDouble broadcastOccupancyMap = new YoDouble("broadcastOccupancyMap", registry);
 
-   public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt)
+   public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
+
+      parentRegistry.addChild(registry);
    }
 
    public long getBroadcastDt()

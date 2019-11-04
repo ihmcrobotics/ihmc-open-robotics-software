@@ -104,8 +104,8 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       for (int i = 0; i < plannerCells.length; i++)
       {
          FootstepPlannerCellMessage plannerCell = occupiedCells.add();
-         plannerCell.setXIndex(plannerCells[i].xIndex);
-         plannerCell.setYIndex(plannerCells[i].yIndex);
+         plannerCell.setXIndex(plannerCells[i].getXIndex());
+         plannerCell.setYIndex(plannerCells[i].getYIndex());
       }
 
       return message;
