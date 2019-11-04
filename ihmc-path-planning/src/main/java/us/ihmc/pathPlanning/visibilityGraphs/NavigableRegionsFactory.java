@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,8 +33,7 @@ public class NavigableRegionsFactory
          PlanarRegion candidate = allRegions.get(candidateIndex);
 
          List<PlanarRegion> otherRegions = new ArrayList<>(allRegions);
-         Collections.swap(otherRegions, candidateIndex, otherRegions.size() - 1);
-         otherRegions.remove(otherRegions.size() - 1);
+         otherRegions.remove(candidate);
 
          if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
             continue;
