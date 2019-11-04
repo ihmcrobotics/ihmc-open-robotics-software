@@ -13,7 +13,8 @@ import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnecti
 
 public class YoVariableLogger
 {
-   public static final int timeout = 2500;
+   // changed to a 10s timeout for camp lejeune demo
+   public static final int timeout = 10000; // 2500;
 
    private final YoVariableClient client;
 

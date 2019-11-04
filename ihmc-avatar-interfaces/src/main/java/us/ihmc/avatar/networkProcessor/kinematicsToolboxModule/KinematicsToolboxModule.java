@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +9,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
@@ -27,17 +27,23 @@ public class KinematicsToolboxModule extends ToolboxModule
 {
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
       this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
    }
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
-      kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
+      kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
+                                                                            statusOutputManager,
+                                                                            fullRobotModel,
+                                                                            robotModel,
+                                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
+                                                                            yoGraphicsListRegistry,
                                                                             registry);
+      kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
@@ -47,11 +53,13 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
          if (kinematicsToolBoxController != null)
             kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      {
          if (kinematicsToolBoxController != null)
             kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData());
       });

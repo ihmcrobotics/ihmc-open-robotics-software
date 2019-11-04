@@ -1,9 +1,26 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,6 +28,7 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -18,9 +36,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,13 +44,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -55,12 +68,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.robotics.Assert.*;
 
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
@@ -175,7 +182,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testShortCinderBlockFieldWithAStar()
@@ -189,7 +195,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, goalPose);
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testShortCinderBlockFieldWithVisibilityGraph()
@@ -203,7 +208,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
@@ -230,7 +234,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testSteppingStonesWithPlanarRegionBipedalPlanner()
@@ -244,7 +247,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, goalPose);
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testWalkingOnFlatGround()
@@ -257,7 +259,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, null, goalPose);
    }
 
-   @Tag("humanoid-rough-terrain")
    @Disabled
    @Test
    public void testWalkingBetweenBollardsAStarPlanner()
@@ -270,7 +271,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       drcSimulationTestHelper.getSimulationConstructionSet().addScript(collisionChecker);
 
-      FootstepPlannerParameters parameters = getRobotModel().getFootstepPlannerParameters();
+      FootstepPlannerParametersReadOnly parameters = getRobotModel().getFootstepPlannerParameters();
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);

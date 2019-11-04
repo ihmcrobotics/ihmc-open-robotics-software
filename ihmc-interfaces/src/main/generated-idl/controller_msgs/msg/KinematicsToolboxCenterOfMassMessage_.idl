@@ -12,7 +12,7 @@ module controller_msgs
     {
 
       /**
-       * This message is part of the IHMC hole-body inverse kinematics module.
+       * This message is part of the IHMC whole-body inverse kinematics module.
        * It holds all the information needed for detailing the type of constraint to apply to the center of mass.
        */
       @TypeCode(type="controller_msgs::msg::dds_::KinematicsToolboxCenterOfMassMessage_")

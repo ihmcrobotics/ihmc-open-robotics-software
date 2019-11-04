@@ -42,6 +42,13 @@ public class AtlasHumanoidKinematicsToolboxControllerTest extends HumanoidKinema
    }
 
    @Override
+   @Test
+   public void testCenterOfMassConstraint() throws Exception
+   {
+      super.testCenterOfMassConstraint();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return robotModel;

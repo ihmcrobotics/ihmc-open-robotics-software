@@ -45,6 +45,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -149,6 +150,7 @@ public class SmoothCMPBasedICPPlannerTest
    private SideDependentList<YoPlaneContactState> contactStates;
    private List<Footstep> footstepList;
    private List<FootstepTiming> timingList;
+   private List<FootstepShiftFractions> shiftFractions;
    private boolean newTestStartDiscontinuity, newTestStartConsistency;
    private List<CoPPointsInFoot> copWaypointsFromPreviousPlan;
    private RecyclingArrayList<FramePoint3D> icpCornerPointsFromPreviousPlan;
@@ -826,8 +828,8 @@ public class SmoothCMPBasedICPPlannerTest
 
       for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
       {
-         addFootsteps(currentStepCount, footstepList, timingList, planner1);
-         addFootsteps(currentStepCount, footstepList, timingList, planner2);
+         addFootsteps(currentStepCount, footstepList, timingList, shiftFractions, planner1);
+         addFootsteps(currentStepCount, footstepList, timingList, shiftFractions, planner2);
 
          updateContactState(currentStepCount, 0.0);
          for (RobotSide robotSide : RobotSide.values)
@@ -858,8 +860,8 @@ public class SmoothCMPBasedICPPlannerTest
          currentStepCount = updateStateMachine(currentStepCount);
       }
 
-      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner1);
-      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner2);
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, shiftFractions, planner1);
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, shiftFractions, planner2);
 
       updateContactState(-1, 0.0);
 
@@ -896,7 +898,7 @@ public class SmoothCMPBasedICPPlannerTest
 
       for (int currentStepCount = 0; currentStepCount < numberOfFootstepsForTest; )
       {
-         addFootsteps(currentStepCount, footstepList, timingList, planner);
+         addFootsteps(currentStepCount, footstepList, timingList, shiftFractions, planner);
          updateContactState(currentStepCount, 0.0);
          if (inDoubleSupport.getBooleanValue())
          {
@@ -919,7 +921,7 @@ public class SmoothCMPBasedICPPlannerTest
          currentStepCount = updateStateMachine(currentStepCount);
       }
 
-      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, planner);
+      addFootsteps(numberOfFootstepsForTest, footstepList, timingList, shiftFractions, planner);
       updateContactState(-1, 0.0);
       planner.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
       planner.initializeForTransfer(yoTime.getDoubleValue());
@@ -1170,17 +1172,23 @@ public class SmoothCMPBasedICPPlannerTest
       FootstepTestHelper footstepHelper = new FootstepTestHelper(feet);
       footstepList = footstepHelper.createFootsteps(stepWidth, stepLength, numberOfFootstepsForTest);
       timingList = new ArrayList<>(footstepList.size());
+      shiftFractions = new ArrayList<>(footstepList.size());
       timingList.add(new FootstepTiming(defaultInitialSwingTime, defaultInitialTransferTime));
+      shiftFractions.add(new FootstepShiftFractions());
       for (int i = 0; i < footstepList.size() - 1; i++)
+      {
          timingList.add(new FootstepTiming(defaultSwingTime, defaultTransferTime));
+         shiftFractions.add(new FootstepShiftFractions());
+      }
    }
 
-   private void addFootsteps(int currentFootstepIndex, List<Footstep> footstepList, List<FootstepTiming> timingList, SmoothCMPBasedICPPlanner planner)
+   private void addFootsteps(int currentFootstepIndex, List<Footstep> footstepList, List<FootstepTiming> timingList,
+                             List<FootstepShiftFractions> shiftFractions, SmoothCMPBasedICPPlanner planner)
    {
       planner.clearPlan();
       for (int i = currentFootstepIndex; i < Math.min(footstepList.size(), currentFootstepIndex + numberOfFootstepsToConsider); i++)
       {
-         planner.addFootstepToPlan(footstepList.get(i), timingList.get(i));
+         planner.addFootstepToPlan(footstepList.get(i), timingList.get(i), shiftFractions.get(i));
       }
    }
 

@@ -17,6 +17,7 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
@@ -140,7 +141,7 @@ public class NavigableRegionViewer extends AnimationTimer
 
    private Color getLineColor(int regionId)
    {
-      return PlanarRegionViewer.getRegionColor(regionId).brighter();
+      return IdMappedColorFunction.INSTANCE.apply(regionId).brighter();
    }
 
    @Override

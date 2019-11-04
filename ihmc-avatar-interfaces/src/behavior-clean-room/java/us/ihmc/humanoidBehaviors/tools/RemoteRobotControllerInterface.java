@@ -1,21 +1,28 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
-import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -27,12 +34,19 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-
 public class RemoteRobotControllerInterface
 {
+   //TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
+
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
+   private final IHMCROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<ChestTrajectoryMessage> chestOrientationTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<HeadTrajectoryMessage> headOrientationTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<PelvisOrientationTrajectoryMessage> pelvisOrientationTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<PelvisTrajectoryMessage> pelvisTrajectoryMessagePublisher;
+   private final IHMCROS2Publisher<GoHomeMessage> goHomeMessagePublisher;
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
@@ -40,28 +54,25 @@ public class RemoteRobotControllerInterface
 
    public RemoteRobotControllerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      pausePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                 ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
-                                                 ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      String robotName = robotModel.getSimpleRobotName();
+      ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
+      
+      footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, robotName, controllerId);
+      armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, robotName, controllerId);
+      chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, robotName, controllerId);
+      headOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, HeadTrajectoryMessage.class, robotName, controllerId);
+      pelvisOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisOrientationTrajectoryMessage.class, robotName, controllerId);
+      pelvisTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisTrajectoryMessage.class, robotName, controllerId);
+      goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, robotName, controllerId);
+      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, robotName, controllerId);
+      pausePublisher = new IHMCROS2Publisher<>(ros2Node, PauseWalkingMessage.class, robotName, controllerId);
 
-      new ROS2Callback<>(ros2Node,
-                         WalkingStatusMessage.class,
-                         robotModel.getSimpleRobotName(),
-                         HighLevelHumanoidControllerFactory.ROS2_ID,
-                         this::acceptWalkingStatus);
+      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotName, controllerId, this::acceptWalkingStatus);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerState = new ROS2Input<>(ros2Node,
-                                        HighLevelStateChangeStatusMessage.class,
-                                        robotModel.getSimpleRobotName(),
-                                        HighLevelHumanoidControllerFactory.ROS2_ID,
-                                        initialState,
-                                        this::acceptStatusChange);
+      controllerState = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, robotName, controllerId, initialState, this::acceptStatusChange);
 
       YoVariableRegistry registry = new YoVariableRegistry("swingOver");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -95,10 +106,8 @@ public class RemoteRobotControllerInterface
       return requestWalk(footstepPlan, humanoidReferenceFrames, false, null);
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
-                                                              HumanoidReferenceFrames humanoidReferenceFrames,
-                                                              boolean swingOverPlanarRegions,
-                                                              PlanarRegionsList planarRegionsList)
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames,
+                                                              boolean swingOverPlanarRegions, PlanarRegionsList planarRegionsList)
    {
 
       if (swingOverPlanarRegions && planarRegionsList != null && decidePlanDistance(footstepPlan, humanoidReferenceFrames) == PlanTravelDistance.FAR)
@@ -115,8 +124,42 @@ public class RemoteRobotControllerInterface
       return walkingCompletedNotification;
    }
 
-   private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan,
-                                      HumanoidReferenceFrames humanoidReferenceFrames)
+   public void requestFootTrajectory(FootTrajectoryMessage message)
+   {
+      footTrajectoryMessagePublisher.publish(message);
+   }
+
+   public void requestArmTrajectory(ArmTrajectoryMessage message)
+   {
+      armTrajectoryMessagePublisher.publish(message);
+   }
+
+   public void requestChestOrientationTrajectory(ChestTrajectoryMessage message)
+   {
+      chestOrientationTrajectoryMessagePublisher.publish(message);
+   }
+
+   public void requestHeadOrientationTrajectory(HeadTrajectoryMessage message)
+   {
+      headOrientationTrajectoryMessagePublisher.publish(message);
+   }
+
+   public void requestPelvisOrientationTrajectory(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
+   {
+      pelvisOrientationTrajectoryMessagePublisher.publish(pelvisOrientationTrajectoryMessage);
+   }
+
+   public void requestPelvisTrajectory(PelvisTrajectoryMessage pelvisTrajectoryMessage)
+   {
+      pelvisTrajectoryMessagePublisher.publish(pelvisTrajectoryMessage);
+   }
+
+   public void requestGoHome(GoHomeMessage goHomeMessage)
+   {
+      goHomeMessagePublisher.publish(goHomeMessage);
+   }
+
+   private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
    {
       FramePose3D midFeetZUpPose = new FramePose3D();
       midFeetZUpPose.setFromReferenceFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
@@ -128,8 +171,7 @@ public class RemoteRobotControllerInterface
       return distance < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
-   private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepDataListMessage footsteps,
-                                                                          HumanoidReferenceFrames humanoidReferenceFrames,
+   private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepDataListMessage footsteps, HumanoidReferenceFrames humanoidReferenceFrames,
                                                                           PlanarRegionsList planarRegionsList)
    {
       LogTools.debug("Calculating swing over planar regions...");
@@ -152,8 +194,8 @@ public class RemoteRobotControllerInterface
          stanceFootPose.set(swingEndPose);
          swingEndPose.set(footstepData.getLocation(), footstepData.getOrientation());
 
-         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander
-               .expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
+         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose,
+                                                                                                                   planarRegionsList);
 
          LogTools.debug("Step " + ++i + ": " + swingOverPlanarRegionsTrajectoryExpander.getStatus());
          LogTools.debug("Foot: " + footstepData.getRobotSide() + "  Position: " + footstepData.getLocation());
@@ -186,4 +228,5 @@ public class RemoteRobotControllerInterface
    {
       return HighLevelControllerName.fromByte(controllerState.getLatest().getEndHighLevelControllerName());
    }
+
 }

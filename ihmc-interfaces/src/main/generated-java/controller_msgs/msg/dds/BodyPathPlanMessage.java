@@ -25,14 +25,14 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  body_path_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose2D path_planner_start_pose_;
    public us.ihmc.euclid.geometry.Pose2D path_planner_goal_pose_;
 
    public BodyPathPlanMessage()
    {
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+      body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       path_planner_start_pose_ = new us.ihmc.euclid.geometry.Pose2D();
       path_planner_goal_pose_ = new us.ihmc.euclid.geometry.Pose2D();
 
@@ -98,7 +98,7 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getBodyPath()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPath()
    {
       return body_path_;
    }

@@ -62,7 +62,7 @@ public class PlanarRegionsMeshBuilder implements Runnable
 
       uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegions);
 
-      if (newMessage == null)
+      if (newMessage == null || newMessage.getRegionId().size() == 0)
          return;
 
       meshAndMaterialToRender.set(generateMeshAndMaterial(newMessage));

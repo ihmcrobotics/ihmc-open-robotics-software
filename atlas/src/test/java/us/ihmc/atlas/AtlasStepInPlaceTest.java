@@ -1,5 +1,8 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
@@ -7,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
 {
@@ -35,13 +39,24 @@ public class AtlasStepInPlaceTest extends AvatarStepInPlaceTest
       }
    };
 
-
    private final int numberOfSteps = 1;
    private final double stepWidth = 0.0;
    private final double stepLength = 0.5;
 
+   @Tag("humanoid-flat-ground-slow")
+   @Override
+   public void testStepInPlace() throws SimulationExceededMaximumTimeException
+   {
+      super.testStepInPlace();
+   }
 
-
+   @Tag("humanoid-flat-ground")
+   @Test
+   @Override
+   public void testStepInPlaceWithPush() throws SimulationExceededMaximumTimeException
+   {
+      super.testStepInPlaceWithPush();
+   }
 
    @Override
    public DRCRobotModel getRobotModel()

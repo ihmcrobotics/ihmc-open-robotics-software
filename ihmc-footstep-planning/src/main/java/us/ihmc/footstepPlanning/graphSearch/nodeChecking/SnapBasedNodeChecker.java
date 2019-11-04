@@ -6,7 +6,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -19,7 +19,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
    private final List<SnapBasedCheckerComponent> checkerComponents = new ArrayList<>();
 
-   public SnapBasedNodeChecker(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
+   public SnapBasedNodeChecker(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper)
    {
       this.snapper = snapper;
 

@@ -18,6 +18,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
@@ -25,26 +26,26 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 public class AtlasBehaviorSimulation
 {
-   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, int recordTicksPerControllerTick)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick);
    }
 
    public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1);
    }
 
    private static SimulationConstructionSet create(DRCRobotModel robotModel,
                                                    CommonAvatarEnvironmentInterface environment,
-                                                   PubSubImplementation pubSubImplementation)
+                                                   PubSubImplementation pubSubImplementation, int recordTicksPerControllerTick)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
-      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT() * recordTicksPerControllerTick);
       scsInitialSetup.setUsePerfectSensors(true);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -91,13 +92,15 @@ public class AtlasBehaviorSimulation
       avatarSimulationFactory.setCreateYoVariableServer(false);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
+      if (scs.getGUI() != null )
+         scs.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
 
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()
 
       // TODO set up some useful graphs
 
-      SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
       scs.setupGraph("root.atlas.t");
       scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
 
@@ -106,8 +109,9 @@ public class AtlasBehaviorSimulation
 
    public static void main(String[] args)
    {
+      int recordTicksPerControllerTick = 1;
       SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                          new FlatGroundEnvironment());
+                                                          new FlatGroundEnvironment(), recordTicksPerControllerTick);
       scs.simulate();
    }
 }

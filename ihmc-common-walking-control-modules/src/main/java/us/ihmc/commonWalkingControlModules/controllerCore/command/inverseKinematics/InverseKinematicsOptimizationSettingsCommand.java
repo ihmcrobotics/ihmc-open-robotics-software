@@ -4,8 +4,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 
 public class InverseKinematicsOptimizationSettingsCommand implements InverseKinematicsCommand<InverseKinematicsOptimizationSettingsCommand>
 {
+   public enum JointVelocityLimitMode
+   {
+      ENABLED, DISABLED
+   };
+
    private double jointVelocityWeight = Double.NaN;
    private double jointAccelerationWeight = Double.NaN;
+   public JointVelocityLimitMode jointVelocityLimitMode = null;
 
    /**
     * Sets the weight specifying how much high joint velocity values should be penalized in the
@@ -39,6 +45,16 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    }
 
    /**
+    * Sets whether the joint velocity limits should be considered or not.
+    * 
+    * @param jointVelocityLimitMode the new value for considering joint velocity limits.
+    */
+   public void setJointVelocityLimitMode(JointVelocityLimitMode jointVelocityLimitMode)
+   {
+      this.jointVelocityLimitMode = jointVelocityLimitMode;
+   }
+
+   /**
     * Whether this command holds onto a new value for {@code jointVelocityWeight} or not.
     * 
     * @return {@code true} if this command carries an actual value for this field.
@@ -56,6 +72,16 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    public boolean hasJointAccelerationWeight()
    {
       return !Double.isNaN(jointAccelerationWeight);
+   }
+
+   /**
+    * Whether this command holds onto a new value for {@code jointVelocityLimitMode} or not.
+    * 
+    * @return {@code true} if this command carries an actual value for this field.
+    */
+   public boolean hashJointVelocityLimitMode()
+   {
+      return jointVelocityLimitMode != null;
    }
 
    /**
@@ -88,11 +114,27 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return jointAccelerationWeight;
    }
 
+   /**
+    * Gets the value for {@code jointVelocityLimitMode}.
+    * <p>
+    * It is equal to {@code null} if this command does not hold onto a new value for this field.
+    * </p>
+    * 
+    * @return the new value for {@code jointVelocityLimitMode}.
+    * @see #hashJointVelocityLimitMode()
+    * @see #setJointVelocityLimitMode(JointVelocityLimitMode)
+    */
+   public JointVelocityLimitMode getJointVelocityLimitMode()
+   {
+      return jointVelocityLimitMode;
+   }
+
    @Override
    public void set(InverseKinematicsOptimizationSettingsCommand other)
    {
       jointVelocityWeight = other.jointVelocityWeight;
       jointAccelerationWeight = other.jointAccelerationWeight;
+      jointVelocityLimitMode = other.jointVelocityLimitMode;
    }
 
    @Override
@@ -116,6 +158,8 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
             return false;
          if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
             return false;
+         if (jointVelocityLimitMode != other.jointVelocityLimitMode)
+            return false;
 
          return true;
       }
@@ -128,6 +172,7 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": qd weight: " + jointVelocityWeight + ", qdd weight: " + jointAccelerationWeight;
+      return getClass().getSimpleName() + ": qd weight: " + jointVelocityWeight + ", qdd weight: " + jointAccelerationWeight + ", qd limits: "
+            + jointVelocityLimitMode;
    }
 }

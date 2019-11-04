@@ -2,25 +2,26 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
 
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public SurfaceInclineSnapChecker(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper)
+   public SurfaceInclineSnapChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -43,8 +44,7 @@ public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
    {
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
 
-      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(nodeToCheck, snapData.getSnapTransform(), snappedSoleTransform);
+      RigidBodyTransform snappedSoleTransform = snapData.getOrComputeSnappedNodeTransform(nodeToCheck);
       if (snappedSoleTransform.getM22() < Math.cos(parameters.getMinimumSurfaceInclineRadians()))
       {
          if (DEBUG)

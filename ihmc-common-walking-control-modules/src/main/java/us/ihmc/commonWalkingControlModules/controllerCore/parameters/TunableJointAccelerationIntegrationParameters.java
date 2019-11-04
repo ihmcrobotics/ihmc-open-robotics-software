@@ -14,6 +14,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class TunableJointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
 {
+   private static final String POSITION_BREAK_FREQUENCY_NAME = "PositionBreakFrequency";
+   private static final String VELOCITY_BREAK_FREQUENCY_NAME = "VelocityBreakFrequency";
+   private static final String POSITION_INTEGRATION_MAX_ERROR_NAME = "PositionIntegrationMaxError";
+   private static final String VELOCITY_INTEGRATION_MAX_MAGNITUDE_NAME = "VelocityIntegrationMaxMagnitude";
+
    private static final double SUGGESTED_MAXIMUM_POSITION_ERROR = 2.0 * Math.PI;
    private static final double SUGGESTED_MAXIMUM_VELOCITY = SUGGESTED_MAXIMUM_POSITION_ERROR / 0.1;
    private static final double SUGGESTED_MAXIMUM_FREQUENCY = 5.0;
@@ -34,10 +39,10 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     */
    public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry)
    {
-      positionBreakFrequency = new DoubleParameter(namePrefix + "PositionBreakFrequency", registry, JointAccelerationIntegrationCalculator.DEFAULT_POSITION_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
-      velocityBreakFrequency = new DoubleParameter(namePrefix + "VelocityBreakFrequency", registry, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
-      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_POSITION_ERROR, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
-      maxVelocity = new DoubleParameter(namePrefix + "MaxVelocity", registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
+      positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_POSITION_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
+      velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
+      maxPositionError = new DoubleParameter(namePrefix + POSITION_INTEGRATION_MAX_ERROR_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_POSITION_ERROR, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
+      maxVelocity = new DoubleParameter(namePrefix + VELOCITY_INTEGRATION_MAX_MAGNITUDE_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
    }
 
    /**
@@ -52,10 +57,10 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     */
    public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
    {
-      positionBreakFrequency = new DoubleParameter(namePrefix + "PositionBreakFrequency", registry, defaults.getPositionBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
-      velocityBreakFrequency = new DoubleParameter(namePrefix + "VelocityBreakFrequency", registry, defaults.getVelocityBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
-      maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, defaults.getMaxPositionError(), 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
-      maxVelocity = new DoubleParameter(namePrefix + "MaxVelocity", registry, defaults.getMaxVelocity(), 0.0, SUGGESTED_MAXIMUM_VELOCITY);
+      positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, defaults.getPositionBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
+      velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, defaults.getVelocityBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
+      maxPositionError = new DoubleParameter(namePrefix + POSITION_INTEGRATION_MAX_ERROR_NAME, registry, defaults.getMaxPositionError(), 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
+      maxVelocity = new DoubleParameter(namePrefix + VELOCITY_INTEGRATION_MAX_MAGNITUDE_NAME, registry, defaults.getMaxVelocity(), 0.0, SUGGESTED_MAXIMUM_VELOCITY);
    }
 
    /**
@@ -74,10 +79,10 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    public TunableJointAccelerationIntegrationParameters(String namePrefix, double positionBreakFrequency, double velocityBreakFrequency,
                                                         double maxPositionError, double maxVelocity, YoVariableRegistry registry)
    {
-      this.positionBreakFrequency = new DoubleParameter(namePrefix + "PositionBreakFrequency", registry, positionBreakFrequency, 0.0, 1.0);
-      this.velocityBreakFrequency = new DoubleParameter(namePrefix + "VelocityBreakFrequency", registry, velocityBreakFrequency, 0.0, 1.0);
-      this.maxPositionError = new DoubleParameter(namePrefix + "MaxPositionError", registry, maxPositionError, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
-      this.maxVelocity = new DoubleParameter(namePrefix + "MaxVelocity", registry, maxVelocity, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
+      this.positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, positionBreakFrequency, 0.0, 1.0);
+      this.velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, velocityBreakFrequency, 0.0, 1.0);
+      this.maxPositionError = new DoubleParameter(namePrefix + POSITION_INTEGRATION_MAX_ERROR_NAME, registry, maxPositionError, 0.0, SUGGESTED_MAXIMUM_POSITION_ERROR);
+      this.maxVelocity = new DoubleParameter(namePrefix + VELOCITY_INTEGRATION_MAX_MAGNITUDE_NAME, registry, maxVelocity, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
    }
 
    /** {@inheritDoc} */

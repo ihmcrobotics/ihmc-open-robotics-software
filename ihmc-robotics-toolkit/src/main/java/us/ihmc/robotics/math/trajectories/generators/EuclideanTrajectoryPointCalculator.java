@@ -18,8 +18,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanT
 
 public class EuclideanTrajectoryPointCalculator
 {
-   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-
    private static final int dimension = Axis.values.length;
    private static final int maxIterations = 2000;
    private final TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(dimension);
@@ -41,7 +39,7 @@ public class EuclideanTrajectoryPointCalculator
    public void appendTrajectoryPoint(Point3DBasics position)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
-      newTrajectoryPoint.setToZero(referenceFrame);
+      newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTimeToNaN();
       newTrajectoryPoint.setPosition(position);
       newTrajectoryPoint.setLinearVelocityToNaN();
@@ -51,7 +49,7 @@ public class EuclideanTrajectoryPointCalculator
    public void appendTrajectoryPoint(double time, Point3DBasics position)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
-      newTrajectoryPoint.setToZero(referenceFrame);
+      newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTime(time);
       newTrajectoryPoint.setPosition(position);
       newTrajectoryPoint.setLinearVelocityToNaN();
@@ -62,7 +60,7 @@ public class EuclideanTrajectoryPointCalculator
    public void appendTrajectoryPoint(double time, Point3DBasics position, Vector3DBasics linearVelocity)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
-      newTrajectoryPoint.setToZero(referenceFrame);
+      newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTime(time);
       newTrajectoryPoint.setPosition(position);
       newTrajectoryPoint.setLinearVelocity(linearVelocity);
@@ -72,9 +70,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         trajectoryPoints.getTrajectoryPoint(i).changeFrame(referenceFrame);
-      this.referenceFrame = referenceFrame;
+      trajectoryPoints.changeFrame(referenceFrame);
    }
 
    public void compute(double trajectoryTime)

@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -14,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * This class ramps the Rho weights of contact points not in contact at initialization
  * It uses a quadratic to ramp the weights
  */
-public class ContactStateRhoRamping
+public class ContactStateRhoRamping<T extends RobotSegment>
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
@@ -38,8 +39,8 @@ public class ContactStateRhoRamping
     * @param dt used to increment the time in duration on update
     * @param parentRegistry
     */
-   public ContactStateRhoRamping(RobotSide robotSide, YoPlaneContactState contactState, double finalRhoWeight, YoVariableRegistry parentRegistry)
-   {  
+   public ContactStateRhoRamping(T robotSide, YoPlaneContactState contactState, double finalRhoWeight, YoVariableRegistry parentRegistry)
+   {
       this.contactState = contactState;
       this.contactPoints = contactState.getContactPoints();
       this.contactPointRhoRampingActivated = new boolean[contactPoints.size()];
@@ -60,9 +61,9 @@ public class ContactStateRhoRamping
    }
 
    /**
-    * sets up rho ramping. 
+    * sets up rho ramping.
     * This enables rho ramping for all contact points currently NOT in contact
-    * Then sets all contact points in contact 
+    * Then sets all contact points in contact
     * @param duration the time until ramping is finished
     */
    public void initialize(double duration)
@@ -107,7 +108,7 @@ public class ContactStateRhoRamping
             contactState.setRhoWeight(yoContactPoint, rhoCurrent.getDoubleValue());
          }
       }
-      
+
       //TODO: once the new icp planner handles replans, enable notifying the planner for a replan and test it out
       //      contactState.notifyContactStateHasChanged();
    }

@@ -1,6 +1,7 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -16,6 +17,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.WobblySimulationContactPoints;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("humanoid-obstacle-slow")
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    private static final double footZWobbleForTests = 0.01;

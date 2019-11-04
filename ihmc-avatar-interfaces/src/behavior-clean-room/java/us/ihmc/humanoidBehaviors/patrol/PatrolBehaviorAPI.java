@@ -23,6 +23,8 @@ public class PatrolBehaviorAPI
    private static final Category Root = apiFactory.createRootCategory("PatrolBehavior");
    private static final CategoryTheme Patrol = apiFactory.createCategoryTheme("Patrol");
 
+   public static final Topic<Boolean> Enable = topic("Enable");
+
    /** Input: Waypoints modified by operator TODO These two require a new feature from messager: remote-receive only */
    public static final Topic<WaypointSequence> WaypointsToModule = topic("WaypointsToModule");
    /** Output: Waypoints modified by behavior */

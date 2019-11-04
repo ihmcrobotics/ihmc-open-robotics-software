@@ -17,6 +17,7 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
@@ -229,12 +230,12 @@ public class ClusterMeshViewer extends AnimationTimer
 
    private Color getNonNavigableLineColor(int regionId)
    {
-      return PlanarRegionViewer.getRegionColor(regionId).darker();
+      return IdMappedColorFunction.INSTANCE.apply(regionId).darker();
    }
 
    private Color getNavigableLineColor(int regionId)
    {
-      return PlanarRegionViewer.getRegionColor(regionId).brighter();
+      return IdMappedColorFunction.INSTANCE.apply(regionId).brighter();
    }
 
    @Override

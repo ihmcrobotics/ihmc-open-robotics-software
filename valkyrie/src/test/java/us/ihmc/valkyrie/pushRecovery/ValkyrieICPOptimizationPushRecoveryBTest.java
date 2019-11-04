@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -73,6 +74,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       return 0.8;
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
@@ -81,14 +83,16 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationDiagonalOutwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
-      percentWeight = 0.13;
+      percentWeight = 0.11; // Used to be 0.13 before PR #1326
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
@@ -97,6 +101,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationLongBackwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
@@ -105,6 +110,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationLongForwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationNoPush() throws Exception
@@ -112,6 +118,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationNoPush();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
@@ -120,6 +127,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
@@ -128,6 +136,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationOutwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationRandomPushInSwing() throws Exception

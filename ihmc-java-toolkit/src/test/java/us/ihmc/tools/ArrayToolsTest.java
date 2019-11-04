@@ -1,7 +1,11 @@
 package us.ihmc.tools;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -22,12 +26,10 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class ArrayToolsTest
 {
 
-	@Test
+   @Test
    public void testParseDoubleArrayFromMATLABString()
    {
       try
@@ -50,7 +52,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseDoubleArrayFromMATLABBufferedReader()
    {
       try
@@ -74,7 +76,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseDoubleArrayFromDataInputStream()
    {
       try
@@ -83,10 +85,9 @@ public class ArrayToolsTest
          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
          DataOutputStream dataOutputStream = new DataOutputStream(byteOutStream);
          dataOutputStream.writeInt(expectedArray.length);
-         for(double expected : expectedArray)
+         for (double expected : expectedArray)
             dataOutputStream.writeDouble(expected);
-         
-         
+
          DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(byteOutStream.toByteArray()));
          double[] parsedArray = ArrayTools.parseDoubleArray(dataInputStream);
 
@@ -100,7 +101,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseIntegerArrayFromString()
    {
       try
@@ -119,7 +120,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseIntegerArrayFromBufferedReader()
    {
       try
@@ -139,7 +140,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseIntegerArrayFromDataInputStream()
    {
       try
@@ -148,7 +149,7 @@ public class ArrayToolsTest
          ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
          DataOutputStream dataOutputStream = new DataOutputStream(byteOutStream);
          dataOutputStream.writeInt(expectedArray.length);
-         for(int expected : expectedArray)
+         for (int expected : expectedArray)
             dataOutputStream.writeInt(expected);
          dataOutputStream.flush();
 
@@ -165,40 +166,36 @@ public class ArrayToolsTest
       }
    }
 
-
-	@Test
+   @Test
    public void testDeltaEquals()
    {
       double[] array1 = generateDoubleArray();
       double[] array2 = generateDoubleArray(array1.length);
-      
+
       Double[] arrayOfDifferences = new Double[array1.length];
-      
-      for(int i = 0; i < array1.length; i++)
+
+      for (int i = 0; i < array1.length; i++)
          arrayOfDifferences[i] = Math.abs(array1[i] - array2[i]);
-      
+
       double largestDifference = (Double) (Collections.max(Arrays.asList(arrayOfDifferences)));
       System.out.println(largestDifference);
       assertTrue(ArrayTools.deltaEquals(array1, array2, largestDifference + 1));
       assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
    }
-	
-	@Test
-	public void testDeltaEqualsWithNull()
-	{
-	   double[] array1 = null;
-	   double[] array2 = null;
-	   double[] array3 = generateDoubleArray();
-	   double dummyDelta = 10e-2; // dummy value
-	   
-	   assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
-	   assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
-	}
 
+   @Test
+   public void testDeltaEqualsWithNull()
+   {
+      double[] array1 = null;
+      double[] array2 = null;
+      double[] array3 = generateDoubleArray();
+      double dummyDelta = 10e-2; // dummy value
 
+      assertFalse(ArrayTools.deltaEquals(array1, array2, dummyDelta)); // 2 null arrays should return false
+      assertFalse(ArrayTools.deltaEquals(array1, array3, dummyDelta));
+   }
 
-
-	@Test
+   @Test
    public void testParseDoubleArrayFromString() throws IOException
    {
       Random random = new Random();
@@ -223,7 +220,7 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseDoubleArrayFromBufferedReader()
    {
       Random random = new Random();
@@ -259,10 +256,11 @@ public class ArrayToolsTest
       }
    }
 
-	@Test
+   @Test
    public void testParseDoubleArrayFromBufferedReaderWithIOException() throws IOException
    {
-      assertThrows(IOException.class, () -> {
+      assertThrows(IOException.class, () ->
+      {
          BufferedReader mockBufferedReader = new BufferedReader(new Reader()
          {
             @Override
@@ -281,7 +279,7 @@ public class ArrayToolsTest
          ArrayTools.parseDoubleArray(mockBufferedReader);
       });
    }
-	
+
    private StringBuilder generateParseableArrayString(Random random, int arraySize, NumberFormat formatter, double[] originalArrayOfRandomNumbers)
    {
       for (int i = 0; i < arraySize; i++)
@@ -313,7 +311,7 @@ public class ArrayToolsTest
 
       return array;
    }
-      
+
    private double[] generateDoubleArray(int size)
    {
       Random random = new Random();
@@ -326,7 +324,7 @@ public class ArrayToolsTest
 
       return array;
    }
-   
+
    private int[] generateIntegerArray()
    {
       Random random = new Random();
@@ -338,76 +336,251 @@ public class ArrayToolsTest
 
       return array;
    }
-	
+
    @Test
    public void testGetRearrangedArrayList()
    {
       ArrayList<Integer> arrayList = new ArrayList<Integer>();
-      
+
       arrayList.add(1);
       arrayList.add(2);
       arrayList.add(3);
       arrayList.add(4);
-      
+
       ArrayList<Integer> rearrangedList = ArrayTools.getRearrangedArrayListCopy(arrayList, 1);
-      
+
       ArrayList<Integer> expectedList = new ArrayList<>();
       expectedList.add(2);
       expectedList.add(3);
       expectedList.add(4);
       expectedList.add(1);
-      
+
       assertEquals(expectedList, rearrangedList);
-      
+
       assertEquals(arrayList, ArrayTools.getRearrangedArrayListCopy(arrayList, 0));
    }
 
-	
-	@Test
+   @Test
    public void testGetMaximumAbsoluteChangeBetweenTicks()
    {
-      double[] array = new double[]{1.7};
+      double[] array = new double[] {1.7};
       double maxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(array);
       assertEquals(0.0, maxChange, 1e-7);
-    
-      array = new double[]{1.0, 2.0, 3.0};
+
+      array = new double[] {1.0, 2.0, 3.0};
       maxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(array);
       assertEquals(1.0, maxChange, 1e-7);
-      
-      array = new double[]{3.0, 2.0, 1.0};
+
+      array = new double[] {3.0, 2.0, 1.0};
       maxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(array);
       assertEquals(1.0, maxChange, 1e-7);
-      
-      array = new double[]{1.0, 1.01, 1.03, 1.04};
+
+      array = new double[] {1.0, 1.01, 1.03, 1.04};
       maxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(array);
       assertEquals(0.02, maxChange, 1e-7);
-      
-      array = new double[]{1.0, 1.01, 1.02, 1.0};
+
+      array = new double[] {1.0, 1.01, 1.02, 1.0};
       maxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(array);
       assertEquals(0.02, maxChange, 1e-7);
    }
 
-	@Test
+   @Test
    public void testIsContinuous()
    {
-      double[] array = new double[]{1.7};
+      double[] array = new double[] {1.7};
       assertTrue(ArrayTools.isContinuous(array, 1e-7));
-      
-      array = new double[]{1.0, 2.0, 3.0};
-      assertTrue(ArrayTools.isContinuous(array, 1.0 + 1e-7));
-      assertFalse(ArrayTools.isContinuous(array, 1.0 - 1e-7));
-      
-      array = new double[]{3.0, 2.0, 1.0};
+
+      array = new double[] {1.0, 2.0, 3.0};
       assertTrue(ArrayTools.isContinuous(array, 1.0 + 1e-7));
       assertFalse(ArrayTools.isContinuous(array, 1.0 - 1e-7));
 
-      
-      array = new double[]{1.0, 2.0, 3.0, 2.0, 1.0};
+      array = new double[] {3.0, 2.0, 1.0};
       assertTrue(ArrayTools.isContinuous(array, 1.0 + 1e-7));
       assertFalse(ArrayTools.isContinuous(array, 1.0 - 1e-7));
-      
-      array = new double[]{1.0, 1.01, 1.03, 1.04};
+
+      array = new double[] {1.0, 2.0, 3.0, 2.0, 1.0};
+      assertTrue(ArrayTools.isContinuous(array, 1.0 + 1e-7));
+      assertFalse(ArrayTools.isContinuous(array, 1.0 - 1e-7));
+
+      array = new double[] {1.0, 1.01, 1.03, 1.04};
       assertTrue(ArrayTools.isContinuous(array, 0.02 + 1e-7));
       assertFalse(ArrayTools.isContinuous(array, 0.02 - 1e-7));
+   }
+
+   @Test
+   public void testReverse()
+   {
+      Random random = new Random(345346);
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(Object[] array)
+         int arraySize = random.nextInt(100);
+         Integer[] arrayOriginal = new Integer[arraySize];
+         Integer[] arrayReversed = new Integer[arraySize];
+         Integer[] arrayReReversed = new Integer[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            arrayOriginal[j] = new Integer(j);
+         }
+         System.arraycopy(arrayOriginal, 0, arrayReversed, 0, arraySize);
+         ArrayTools.reverse(arrayReversed);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(arraySize - j - 1, arrayReversed[j].intValue());
+         }
+
+         System.arraycopy(arrayReversed, 0, arrayReReversed, 0, arraySize);
+         ArrayTools.reverse(arrayReReversed);
+         assertArrayEquals(arrayOriginal, arrayReReversed);
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(float[] array)
+         int arraySize = random.nextInt(100);
+         float[] actual = new float[arraySize];
+         Float[] expected = new Float[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            float nextFloat = random.nextFloat();
+            actual[j] = nextFloat;
+            expected[j] = new Float(nextFloat);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].floatValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(double[] array)
+         int arraySize = random.nextInt(100);
+         double[] actual = new double[arraySize];
+         Double[] expected = new Double[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            double nextDouble = random.nextDouble();
+            actual[j] = nextDouble;
+            expected[j] = new Double(nextDouble);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].doubleValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(byte[] array)
+         int arraySize = random.nextInt(100);
+         byte[] actual = new byte[arraySize];
+         Byte[] expected = new Byte[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            byte nextByte = (byte) random.nextInt();
+            actual[j] = nextByte;
+            expected[j] = new Byte(nextByte);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].byteValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(short[] array)
+         int arraySize = random.nextInt(100);
+         short[] actual = new short[arraySize];
+         Short[] expected = new Short[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            short nextShort = (short) random.nextInt();
+            actual[j] = nextShort;
+            expected[j] = new Short(nextShort);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].shortValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(integer[] array)
+         int arraySize = random.nextInt(100);
+         int[] actual = new int[arraySize];
+         Integer[] expected = new Integer[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            int nextInteger = random.nextInt();
+            actual[j] = nextInteger;
+            expected[j] = new Integer(nextInteger);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].intValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(long[] array)
+         int arraySize = random.nextInt(100);
+         long[] actual = new long[arraySize];
+         Long[] expected = new Long[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            long nextLong = random.nextLong();
+            actual[j] = nextLong;
+            expected[j] = new Long(nextLong);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].longValue(), actual[j]);
+         }
+      }
+
+      for (int i = 0; i < 100; i++)
+      { // Test reverse(boolean[] array)
+         int arraySize = random.nextInt(100);
+         boolean[] actual = new boolean[arraySize];
+         Boolean[] expected = new Boolean[arraySize];
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            boolean nextBoolean = random.nextBoolean();
+            actual[j] = nextBoolean;
+            expected[j] = new Boolean(nextBoolean);
+         }
+         ArrayTools.reverse(actual);
+         ArrayTools.reverse(expected);
+
+         for (int j = 0; j < arraySize; j++)
+         {
+            assertEquals(expected[j].booleanValue(), actual[j]);
+         }
+      }
    }
 }

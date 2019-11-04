@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import us.ihmc.robotics.geometry.AngleTools;
-
 public class LatticeNode
 {
    public static final double gridSizeXY = 0.05;
-   public static final double gridSizeYaw = Math.PI / 18.0;
+
+   public static final int yawDivisions = 36;
+   public static final double gridSizeYaw = 2.0 * Math.PI / yawDivisions;
 
    private final int xIndex;
    private final int yIndex;
@@ -17,7 +17,7 @@ public class LatticeNode
    {
       this.xIndex = (int) Math.round(x / gridSizeXY);
       this.yIndex = (int) Math.round(y / gridSizeXY);
-      this.yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
+      this.yawIndex = Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions);
       hashCode = computeHashCode(this);
    }
 

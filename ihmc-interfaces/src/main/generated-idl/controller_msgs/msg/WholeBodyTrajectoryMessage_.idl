@@ -6,6 +6,7 @@
 #include "controller_msgs/msg/./FootTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./HandTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./HeadTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./NeckTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./PelvisTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./SpineTrajectoryMessage_.idl"
 module controller_msgs
@@ -62,6 +63,10 @@ module controller_msgs
          * Trajectory for the right foot
          */
         controller_msgs::msg::dds::FootTrajectoryMessage right_foot_trajectory_message;
+        /**
+         * Trajectory for the neck joints
+         */
+        controller_msgs::msg::dds::NeckTrajectoryMessage neck_trajectory_message;
         /**
          * Trajectory for the head
          */

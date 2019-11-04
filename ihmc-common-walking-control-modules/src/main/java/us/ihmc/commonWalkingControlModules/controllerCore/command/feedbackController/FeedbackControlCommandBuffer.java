@@ -137,4 +137,29 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
       super.addCommand(command);
       return command;
    }
+
+   public RecyclingArrayList<OneDoFJointFeedbackControlCommand> getOneDoFJointFeedbackControlCommandBuffer()
+   {
+      return oneDoFJointFeedbackControlCommandBuffer;
+   }
+
+   public RecyclingArrayList<OrientationFeedbackControlCommand> getOrientationFeedbackControlCommandBuffer()
+   {
+      return orientationFeedbackControlCommandBuffer;
+   }
+
+   public RecyclingArrayList<PointFeedbackControlCommand> getPointFeedbackControlCommandBuffer()
+   {
+      return pointFeedbackControlCommandBuffer;
+   }
+
+   public RecyclingArrayList<SpatialFeedbackControlCommand> getSpatialFeedbackControlCommandBuffer()
+   {
+      return spatialFeedbackControlCommandBuffer;
+   }
+
+   public RecyclingArrayList<CenterOfMassFeedbackControlCommand> getCenterOfMassFeedbackControlCommandBuffer()
+   {
+      return centerOfMassFeedbackControlCommandBuffer;
+   }
 }

@@ -44,6 +44,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
@@ -130,6 +131,7 @@ public class WalkingCommandConsumer
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
             RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+            handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
             handManagers.put(robotSide, handManager);
          }
       }
@@ -507,7 +509,6 @@ public class WalkingCommandConsumer
       {
          walkingMessageHandler.handleComTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewestCommand(CenterOfMassTrajectoryCommand.class));
       }
-
    }
 
    public void consumeAbortWalkingCommands(YoBoolean abortWalkingRequested)
@@ -523,5 +524,18 @@ public class WalkingCommandConsumer
       {
          walkingMessageHandler.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
       }
+   }
+
+   public void consumePrepareForLocomotionCommands()
+   {
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PrepareForLocomotionCommand.class))
+         return;
+
+      PrepareForLocomotionCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PrepareForLocomotionCommand.class);
+
+      for (RobotSide robotSide : RobotSide.values)
+         handManagers.get(robotSide).setDoPrepareForLocomotion(command.isPrepareManipulation());
+      pelvisOrientationManager.setPrepareForLocomotion(command.isPreparePelvis());
+      comHeightManager.setPrepareForLocomotion(command.isPreparePelvis());
    }
 }

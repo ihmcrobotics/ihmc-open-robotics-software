@@ -1,73 +1,84 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Arrays;
-
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class KinematicsToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final int jointsHashCode;
+
+   private final OneDoFJointBasics[] neckJoints;
+   private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
 
    public KinematicsToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
-      this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
-      rootJoint = fullRobotModelToUseForConversion.getRootJoint();
-      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModelToUseForConversion);
-      jointsHashCode = Arrays.hashCode(oneDoFJoints);
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModelToUseForConversion);
+      this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      rootJoint = fullRobotModel.getRootJoint();
+      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      RigidBodyBasics head = fullRobotModel.getHead();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+
+      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
+      }
    }
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)
    {
-      if (jointsHashCode != solution.getJointNameHash())
-         throw new RuntimeException("Hashes are different.");
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         float q = solution.getDesiredJointAngles().get(i);
-         OneDoFJointBasics joint = oneDoFJoints[i];
-         joint.setQ(q);
-         if (solution.getDesiredJointAngles().size() == solution.getDesiredJointVelocities().size())
-         {
-            float qd = solution.getDesiredJointVelocities().get(i);
-            joint.setQd(qd);
-         }
-      }
-      Vector3D translation = solution.getDesiredRootTranslation();
-      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion orientation = solution.getDesiredRootOrientation();
-      rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-      fullRobotModelToUseForConversion.updateFrames();
+      MessageTools.unpackDesiredJointState(solution, rootJoint, oneDoFJoints);
+      referenceFrames.updateFrames();
    }
 
    private WholeBodyTrajectoryMessage output;
@@ -84,26 +95,42 @@ public class KinematicsToolboxOutputConverter
       this.trajectoryTime = trajectoryTime;
    }
 
+   private boolean enableVelocity = false;
+
+   public void setEnableVelocity(boolean enable)
+   {
+      enableVelocity = enable;
+   }
+
    public void computeArmTrajectoryMessages()
    {
+      checkIfDataHasBeenSet();
+
       for (RobotSide robotSide : RobotSide.values)
          computeArmTrajectoryMessage(robotSide);
    }
 
    public void computeArmTrajectoryMessage(RobotSide robotSide)
    {
-      RigidBodyBasics hand = fullRobotModelToUseForConversion.getHand(robotSide);
-      RigidBodyBasics chest = fullRobotModelToUseForConversion.getChest();
-      OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-      int numberOfArmJoints = armJoints.length;
-      double[] desiredJointPositions = new double[numberOfArmJoints];
+      checkIfDataHasBeenSet();
+
+      OneDoFJointBasics[] joints = armJoints.get(robotSide);
+      int numberOfArmJoints = joints.length;
+      ArmTrajectoryMessage armTrajectoryMessage = select(robotSide, output.getLeftArmTrajectoryMessage(), output.getRightArmTrajectoryMessage());
+      armTrajectoryMessage.setRobotSide(robotSide.toByte());
+      JointspaceTrajectoryMessage jointspaceTrajectory = armTrajectoryMessage.getJointspaceTrajectory();
+      jointspaceTrajectory.getJointTrajectoryMessages().clear();
+
       for (int i = 0; i < numberOfArmJoints; i++)
       {
-         OneDoFJointBasics armJoint = armJoints[i];
-         desiredJointPositions[i] = MathTools.clamp(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
+         OneDoFJointBasics joint = joints[i];
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = jointspaceTrajectory.getJointTrajectoryMessages().add();
+         jointTrajectoryMessage.getTrajectoryPoints().clear();
+         packTrajectoryPoint1DMessage(trajectoryTime,
+                                      getJointPosition(joint),
+                                      enableVelocity ? joint.getQd() : 0.0,
+                                      jointTrajectoryMessage.getTrajectoryPoints().add());
       }
-      ArmTrajectoryMessage armTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftArmTrajectoryMessage() : output.getRightArmTrajectoryMessage();
-      armTrajectoryMessage.set(HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions));
    }
 
    public void computeHandTrajectoryMessages()
@@ -112,51 +139,111 @@ public class KinematicsToolboxOutputConverter
          computeHandTrajectoryMessage(robotSide);
    }
 
+   private final FramePose3D desiredPose = new FramePose3D(worldFrame);
+   private final SpatialVector desiredSpatialVelocity = new SpatialVector();
+
    public void computeHandTrajectoryMessage(RobotSide robotSide)
    {
       checkIfDataHasBeenSet();
 
-      ReferenceFrame trajectoryFrame = worldFrame;
-      Point3D desiredPosition = new Point3D();
-      Quaternion desiredOrientation = new Quaternion();
-      ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
-      FramePose3D desiredHandPose = new FramePose3D(handControlFrame);
-      desiredHandPose.changeFrame(worldFrame);
-      desiredHandPose.get(desiredPosition, desiredOrientation);
-      HandTrajectoryMessage handTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftHandTrajectoryMessage()
-            : output.getRightHandTrajectoryMessage();
-      handTrajectoryMessage.set(HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation,
-                                                                                 trajectoryFrame));
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      // TODO Add the option to define the control frame in the API instead of hardcoding it here.
+      MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+      desiredPose.setToZero(handControlFrame);
+      desiredPose.changeFrame(worldFrame);
+      spatialVelocity(handControlFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
+      HandTrajectoryMessage handTrajectoryMessage = select(robotSide, output.getLeftHandTrajectoryMessage(), output.getRightHandTrajectoryMessage());
+      handTrajectoryMessage.setRobotSide(robotSide.toByte());
+      SE3TrajectoryMessage se3TrajectoryMessage = handTrajectoryMessage.getSe3Trajectory();
+      packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+
+      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+      packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
+   }
+
+   public void computeNeckTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      int numberOfJoints = neckJoints.length;
+
+      JointspaceTrajectoryMessage jointspaceTrajectory = output.getNeckTrajectoryMessage().getJointspaceTrajectory();
+      jointspaceTrajectory.getJointTrajectoryMessages().clear();
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         OneDoFJointBasics joint = neckJoints[i];
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = jointspaceTrajectory.getJointTrajectoryMessages().add();
+         jointTrajectoryMessage.getTrajectoryPoints().clear();
+         packTrajectoryPoint1DMessage(trajectoryTime,
+                                      getJointPosition(joint),
+                                      enableVelocity ? joint.getQd() : 0.0,
+                                      jointTrajectoryMessage.getTrajectoryPoints().add());
+      }
+   }
+
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+
+   public void computeHeadTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      MovingReferenceFrame headFrame = fullRobotModel.getHead().getBodyFixedFrame();
+      desiredOrientation.setToZero(headFrame);
+      desiredOrientation.changeFrame(worldFrame);
+      angularVelocity(headFrame, worldFrame, enableVelocity, desiredAngularVelocity);
+
+      HeadTrajectoryMessage headTrajectoryMessage = output.getHeadTrajectoryMessage();
+      SO3TrajectoryMessage so3Trajectory = headTrajectoryMessage.getSo3Trajectory();
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+
+      Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+      packSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, taskspaceTrajectoryPoints.add());
    }
 
    public void computeChestTrajectoryMessage()
    {
+      computeChestTrajectoryMessage(referenceFrames.getPelvisZUpFrame());
+   }
+
+   public void computeChestTrajectoryMessage(ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
-      ReferenceFrame chestFrame = fullRobotModelToUseForConversion.getChest().getBodyFixedFrame();
-      Quaternion desiredQuaternion = new Quaternion();
-      FrameQuaternion desiredOrientation = new FrameQuaternion(chestFrame);
+      MovingReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      desiredOrientation.setToZero(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
-      desiredQuaternion.set(desiredOrientation);
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame,
-                                                                                                        pelvisZUpFrame);
-      output.getChestTrajectoryMessage().set(chestTrajectoryMessage);
+      angularVelocity(chestFrame, worldFrame, enableVelocity, desiredAngularVelocity);
+
+      ChestTrajectoryMessage chestTrajectoryMessage = output.getChestTrajectoryMessage();
+      SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
+      so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
+
+      Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+      packSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, taskspaceTrajectoryPoints.add());
    }
 
    public void computePelvisTrajectoryMessage()
    {
       checkIfDataHasBeenSet();
 
-      Point3D desiredPosition = new Point3D();
-      Quaternion desiredOrientation = new Quaternion();
-      ReferenceFrame pelvisFrame = fullRobotModelToUseForConversion.getRootJoint().getFrameAfterJoint();
-      FramePose3D desiredPelvisPose = new FramePose3D(pelvisFrame);
-      desiredPelvisPose.changeFrame(worldFrame);
-      desiredPelvisPose.get(desiredPosition, desiredOrientation);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
-      output.getPelvisTrajectoryMessage().set(pelvisTrajectoryMessage);
+      MovingReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      desiredPose.setToZero(pelvisFrame);
+      desiredPose.changeFrame(worldFrame);
+      spatialVelocity(pelvisFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
+
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = output.getPelvisTrajectoryMessage();
+      SE3TrajectoryMessage se3Trajectory = pelvisTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+
+      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+      packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }
 
    public void computeFootTrajectoryMessages()
@@ -169,20 +256,94 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
-      Point3D desiredPosition = new Point3D();
-      Quaternion desiredOrientation = new Quaternion();
-      ReferenceFrame footFrame = fullRobotModelToUseForConversion.getEndEffectorFrame(robotSide, LimbName.LEG);
-      FramePose3D desiredFootPose = new FramePose3D(footFrame);
-      desiredFootPose.changeFrame(worldFrame);
-      desiredFootPose.get(desiredPosition, desiredOrientation);
-      FootTrajectoryMessage footTrajectoryMessage = robotSide == RobotSide.LEFT ? output.getLeftFootTrajectoryMessage()
-            : output.getRightFootTrajectoryMessage();
-      footTrajectoryMessage.set(HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation));
+      MovingReferenceFrame footFrame = fullRobotModel.getEndEffector(robotSide, LimbName.LEG).getBodyFixedFrame();
+      desiredPose.setToZero(footFrame);
+      desiredPose.changeFrame(worldFrame);
+      spatialVelocity(footFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
+
+      FootTrajectoryMessage footTrajectoryMessage = select(robotSide, output.getLeftFootTrajectoryMessage(), output.getRightFootTrajectoryMessage());
+      SE3TrajectoryMessage se3Trajectory = footTrajectoryMessage.getSe3Trajectory();
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+
+      Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
+      taskspaceTrajectoryPoints.clear();
+      packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
+   }
+
+   private static <T> T select(RobotSide robotSide, T left, T right)
+   {
+      return robotSide == RobotSide.LEFT ? left : right;
+   }
+
+   private static void angularVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+                                       FrameVector3DBasics angularVelocityToPack)
+   {
+      if (!enableVelocity)
+      {
+         angularVelocityToPack.setToZero(outputFrame);
+      }
+      else
+      {
+         angularVelocityToPack.setIncludingFrame(movingFrame.getTwistOfFrame().getAngularPart());
+         angularVelocityToPack.changeFrame(outputFrame);
+      }
+   }
+
+   private static void spatialVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+                                       SpatialVectorBasics spatialVelocityToPack)
+   {
+      if (!enableVelocity)
+      {
+         spatialVelocityToPack.setToZero(outputFrame);
+      }
+      else
+      {
+         spatialVelocityToPack.setIncludingFrame(movingFrame.getTwistOfFrame());
+         spatialVelocityToPack.changeFrame(outputFrame);
+      }
+   }
+
+   public static double getJointPosition(OneDoFJointReadOnly joint)
+   {
+      return MathTools.clamp(joint.getQ(), joint.getJointLimitLower(), joint.getJointLimitUpper());
+   }
+
+   public static void packTrajectoryPoint1DMessage(double time, double position, double velocity, TrajectoryPoint1DMessage messageToPack)
+   {
+      messageToPack.setTime(time);
+      messageToPack.setPosition(position);
+      messageToPack.setVelocity(velocity);
+   }
+
+   public static void packCustomControlFrame(ReferenceFrame endEffectorFrame, ReferenceFrame controlFrame, SE3TrajectoryMessage messageToPack)
+   {
+      messageToPack.setUseCustomControlFrame(true);
+      Pose3D controlFramePose = messageToPack.getControlFramePose();
+      controlFramePose.setToZero();
+      controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
+   }
+
+   public static void packSO3TrajectoryPointMessage(double time, Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity,
+                                                    SO3TrajectoryPointMessage messageToPack)
+   {
+      messageToPack.setTime(time);
+      messageToPack.getOrientation().set(orientation);
+      messageToPack.getAngularVelocity().set(angularVelocity);
+   }
+
+   public static void packSE3TrajectoryPointMessage(double time, Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity,
+                                                    SE3TrajectoryPointMessage messageToPack)
+   {
+      messageToPack.setTime(time);
+      messageToPack.getPosition().set(pose.getPosition());
+      messageToPack.getOrientation().set(pose.getOrientation());
+      messageToPack.getLinearVelocity().set(spatialVelocity.getLinearPart());
+      messageToPack.getAngularVelocity().set(spatialVelocity.getAngularPart());
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      return fullRobotModelToUseForConversion;
+      return fullRobotModel;
    }
 
    private void checkIfDataHasBeenSet()

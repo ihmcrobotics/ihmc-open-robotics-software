@@ -7,15 +7,23 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 
 public class RemoteAtlasVisualizer
 {
    /** The update rate of the visualizer in milliseconds. If you experience delay build-up increase this value. */
+   private static final int DEFAULT_BUFFER_SIZE = 16384;
    private static final int DEFAULT_UPDATE_RATE = 6;
 
-   private static void startVisualizer(int bufferSize, int updateRateInMs) throws IOException
+   public static void startVisualizer()
+   {
+      ExceptionTools.handle(() -> startVisualizer(DEFAULT_BUFFER_SIZE, DEFAULT_UPDATE_RATE), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   }
+
+   public static void startVisualizer(int bufferSize, int updateRateInMs) throws IOException
    {
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.setVariableUpdateRate(updateRateInMs);
@@ -29,7 +37,7 @@ public class RemoteAtlasVisualizer
 
    public static void main(String[] args) throws JSAPException, IOException
    {
-      int bufferSize = 16384;
+      int bufferSize = DEFAULT_BUFFER_SIZE;
       JSAP jsap = new JSAP();
 
       FlaggedOption updateRate = new FlaggedOption("updateRate").setLongFlag("rate").setShortFlag('r').setStringParser(JSAP.INTEGER_PARSER).setRequired(false);

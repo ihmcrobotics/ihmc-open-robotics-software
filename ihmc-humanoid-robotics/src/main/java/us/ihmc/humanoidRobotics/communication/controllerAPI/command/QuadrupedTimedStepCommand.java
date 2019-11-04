@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepCommand, QuadrupedTimedStepMessage>
 {
@@ -63,6 +64,11 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    public FramePoint3D getGoalPosition()
    {
       return stepCommand.getGoalPosition();
+   }
+   
+   public TrajectoryType getTrajectoryType()
+   {
+      return stepCommand.getTrajectoryType();
    }
 
    public double getStartTime()

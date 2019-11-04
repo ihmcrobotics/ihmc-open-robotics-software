@@ -20,7 +20,7 @@ public class GenericQuadrupedFallDetectionParameters implements QuadrupedFallDet
    @Override
    public double getMaxRoll()
    {
-      return 0.5;
+      return 1.0;
    }
 
    @Override

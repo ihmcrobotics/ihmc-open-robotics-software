@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
-import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
+import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 
 public class PositionGraphic implements PositionEditable
 {

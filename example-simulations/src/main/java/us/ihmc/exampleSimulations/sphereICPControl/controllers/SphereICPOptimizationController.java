@@ -19,10 +19,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -292,6 +289,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    }
 
    private final FootstepTiming timing = new FootstepTiming();
+   private final FootstepShiftFractions shiftFractions = new FootstepShiftFractions();
    private final SimpleAdjustableFootstep footstep = new SimpleAdjustableFootstep();
 
    private class SingleSupportState implements State
@@ -336,9 +334,9 @@ public class SphereICPOptimizationController implements GenericSphereController
          nextFootsteps.add(nextNextNextFootstep);
 
          timing.setTimings(controlToolbox.getDoubleSupportDuration(), controlToolbox.getSingleSupportDuration());
-         icpPlanner.addFootstepToPlan(nextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+         icpPlanner.addFootstepToPlan(nextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing, shiftFractions);
 
          footstep.set(nextFootstep);
          icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
@@ -432,9 +430,9 @@ public class SphereICPOptimizationController implements GenericSphereController
          controlToolbox.updateUpcomingFootstepsViz(nextFootstep, nextNextFootstep, nextNextNextFootstep);
 
          timing.setTimings(controlToolbox.getDoubleSupportDuration(), controlToolbox.getSingleSupportDuration());
-         icpPlanner.addFootstepToPlan(nextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
-         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
+         icpPlanner.addFootstepToPlan(nextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextFootstep, timing, shiftFractions);
+         icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing, shiftFractions);
 
          footstep.set(nextFootstep);
          icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());

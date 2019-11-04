@@ -42,6 +42,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
 
+   private double swingSplitFraction = Double.NaN;
+   private double swingDurationShiftFraction = Double.NaN;
+   private double transferSplitFraction = Double.NaN;
+
+   private double transferWeightDistribution = Double.NaN;
+
    private double liftoffDuration = Double.NaN;
    private double touchdownDuration = Double.NaN;
 
@@ -73,6 +79,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
+
+      swingSplitFraction = Double.NaN;
+      swingDurationShiftFraction = Double.NaN;
+      transferSplitFraction = Double.NaN;
+
+      transferWeightDistribution = Double.NaN;
 
       touchdownDuration = Double.NaN;
       liftoffDuration = Double.NaN;
@@ -132,6 +144,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingDuration = message.getSwingDuration();
       transferDuration = message.getTransferDuration();
 
+      swingSplitFraction = message.getSwingSplitFraction();
+      swingDurationShiftFraction = message.getSwingDurationShiftFraction();
+      transferSplitFraction = message.getTransferSplitFraction();
+
+      transferWeightDistribution = message.getTransferWeightDistribution();
+
       touchdownDuration = message.getTouchdownDuration();
       liftoffDuration = message.getLiftoffDuration();
 
@@ -171,6 +189,13 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
+
+      swingSplitFraction = other.getSwingSplitFraction();
+      swingDurationShiftFraction = other.getSwingDurationShiftFraction();
+      transferSplitFraction = other.getTransferSplitFraction();
+
+      transferWeightDistribution = other.getTransferWeightDistribution();
+
       touchdownDuration = other.touchdownDuration;
       liftoffDuration = other.liftoffDuration;
       this.executionDelayTime = other.executionDelayTime;
@@ -280,6 +305,26 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return transferDuration;
    }
 
+   public double getSwingSplitFraction()
+   {
+      return swingSplitFraction;
+   }
+
+   public double getSwingDurationShiftFraction()
+   {
+      return swingDurationShiftFraction;
+   }
+
+   public double getTransferSplitFraction()
+   {
+      return transferSplitFraction;
+   }
+
+   public double getTransferWeightDistribution()
+   {
+      return transferWeightDistribution;
+   }
+
    public double getTouchdownDuration()
    {
       return touchdownDuration;
@@ -304,7 +349,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
    /**
     * returns the amount of time this command is delayed on the controller side before executing
-    * 
+    *
     * @return the time to delay this command in seconds
     */
    @Override
@@ -315,7 +360,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
    /**
     * sets the amount of time this command is delayed on the controller side before executing
-    * 
+    *
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    @Override
@@ -347,7 +392,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
    /**
     * tells the controller if this command supports delayed execution (Spoiler alert: It does)
-    * 
+    *
     * @return
     */
    @Override

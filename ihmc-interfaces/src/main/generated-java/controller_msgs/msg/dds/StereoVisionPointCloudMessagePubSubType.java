@@ -91,7 +91,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getRobotTimestamp());
+      cdr.write_type_11(data.getTimestamp());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getSensorPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getSensorOrientation(), cdr);
@@ -109,7 +109,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setRobotTimestamp(cdr.read_type_11());
+      data.setTimestamp(cdr.read_type_11());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getSensorPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getSensorOrientation(), cdr);	
@@ -122,7 +122,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    public final void serialize(controller_msgs.msg.dds.StereoVisionPointCloudMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("robot_timestamp", data.getRobotTimestamp());
+      ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
 
       ser.write_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
@@ -135,7 +135,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StereoVisionPointCloudMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setRobotTimestamp(ser.read_type_11("robot_timestamp"));
+      data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
 
       ser.read_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());

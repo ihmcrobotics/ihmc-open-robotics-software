@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -26,6 +27,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -33,6 +35,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingDownRampWithMediumSteps();
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
@@ -40,6 +43,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithMediumSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
@@ -47,6 +51,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortSteps();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
@@ -54,6 +59,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
 
+   @Tag("humanoid-obstacle-slow")
    @Override
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException

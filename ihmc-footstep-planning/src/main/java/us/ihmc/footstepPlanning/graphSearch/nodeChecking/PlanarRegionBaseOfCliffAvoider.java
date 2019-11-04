@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -12,24 +12,23 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 {
-   private final FootstepPlannerParameters parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
 
    private FootstepNode startNode;
 
-   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
@@ -60,9 +59,8 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
          return true;
 
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(node, snapper.getSnapData(node).getSnapTransform(), soleTransform);
-      
+      RigidBodyTransformReadOnly soleTransform = snapper.getSnapData(node).getOrComputeSnappedNodeTransform(node);
+
       ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
       ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
@@ -83,13 +81,13 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 
       double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, new Point3D());
 
-      boolean tooCloseToCliff = maximumCliffZInSoleFrame < cliffHeightToAvoid;
-      if(tooCloseToCliff)
+      boolean cliffDetected = maximumCliffZInSoleFrame >= cliffHeightToAvoid;
+      if(cliffDetected)
          rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-      return tooCloseToCliff;
+      return !cliffDetected;
    }
-   
-   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
+
+   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
                                                       Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
      {
         double maxZInSoleFrame = Double.NEGATIVE_INFINITY;

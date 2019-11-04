@@ -47,7 +47,7 @@ module controller_msgs
         /**
          * footstep_index starts at 0 and monotonically increases during a controller session
          */
-        long footstep_quadrant;
+        long footstep_index;
         /**
          * The robot quadrant that this footstep status correlates to.
          */
