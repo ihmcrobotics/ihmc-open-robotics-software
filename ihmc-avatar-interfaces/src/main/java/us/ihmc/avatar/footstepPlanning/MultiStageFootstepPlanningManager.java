@@ -181,7 +181,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       maxNumberOfPathPlanners = Math.max(initialNumberOfPathStages, absoluteMaxNumberOfPathStages);
 
       long updateFrequency = 1000;
-      plannerListener = new MultiStagePlannerListener(updateFrequency);
+      plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency);
 
       for (int i = 0; i < Math.min(initialNumberOfStepStages, absoluteMaxNumberOfStepStages); i++)
       {

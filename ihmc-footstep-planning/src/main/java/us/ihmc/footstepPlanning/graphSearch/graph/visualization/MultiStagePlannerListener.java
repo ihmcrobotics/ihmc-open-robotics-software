@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.idl.IDLSequence.Object;
 
@@ -17,8 +18,11 @@ public class MultiStagePlannerListener
 
    private final List<StagePlannerListener> listeners = new ArrayList<>();
 
-   public MultiStagePlannerListener(long occupancyMapBroadcastDt)
+   private final StatusMessageOutputManager statusOutputManager;
+
+   public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt)
    {
+      this.statusOutputManager = statusOutputManager;
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
    }
 
@@ -141,12 +145,12 @@ public class MultiStagePlannerListener
 
    private void broadcastNodeData(FootstepNodeDataListMessage message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+//      statusOutputManager.reportStatusMessage(message);
    }
 
    private void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+      statusOutputManager.reportStatusMessage(message);
    }
 
 }
