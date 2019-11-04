@@ -172,6 +172,7 @@ public class NavigableRegionsManager
          List<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
          expandedNodesCount += neighboringEdges.size();
 
+         // A* using XY distance heuristic
          for (VisibilityGraphEdge neighboringEdge : neighboringEdges)
          {
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
@@ -258,7 +259,7 @@ public class NavigableRegionsManager
       double angle = Math.atan(verticalDistance / horizontalDistance);
 
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
-      double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
+      double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI; // what is this operation?
 
       return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
