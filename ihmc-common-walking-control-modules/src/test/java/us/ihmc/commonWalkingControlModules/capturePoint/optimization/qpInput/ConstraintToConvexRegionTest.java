@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -23,6 +25,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ConstraintToConvexRegionTest
 {
+   private static final double epsilon = 1e-7;
+
    @AfterEach
    public void tearDown()
    {
@@ -53,6 +57,9 @@ public class ConstraintToConvexRegionTest
 
          convexPolygon.update();
 
+         ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+         ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+
          // test no offsets
          constraintToConvexRegion.setPolygon();
          constraintToConvexRegion.formulateConstraint();
@@ -61,17 +68,19 @@ public class ConstraintToConvexRegionTest
          DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
          PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, 0.0);
 
-         Assert.assertTrue(MatrixFeatures.isEquals(Aineq, constraintToConvexRegion.Aineq, 1e-7));
-         Assert.assertTrue(MatrixFeatures.isEquals(bineq, constraintToConvexRegion.bineq, 1e-7));
+         EjmlUnitTests.assertEquals(Aineq, constraintToConvexRegion.Aineq, epsilon);
+         EjmlUnitTests.assertEquals(bineq, constraintToConvexRegion.bineq, epsilon);
 
          // test with required distance inside
          constraintToConvexRegion.setDeltaInside(0.02);
          constraintToConvexRegion.formulateConstraint();
-         PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, 0.02);
 
-         Assert.assertTrue(MatrixFeatures.isEquals(Aineq, constraintToConvexRegion.Aineq, 1e-7));
-         Assert.assertTrue(MatrixFeatures.isEquals(bineq, constraintToConvexRegion.bineq, 1e-7));
+         scaler.scaleConvexPolygon(convexPolygon, 0.02, scaledPolygon);
 
+         PolygonWiggler.convertToInequalityConstraints(scaledPolygon, Aineq, bineq, 0.0);
+
+         EjmlUnitTests.assertEquals(Aineq, constraintToConvexRegion.Aineq, epsilon);
+         EjmlUnitTests.assertEquals(bineq, constraintToConvexRegion.bineq, epsilon);
 
          // test with position offset to the position
          DenseMatrix64F positionOffset = new DenseMatrix64F(2, 1);
@@ -84,8 +93,8 @@ public class ConstraintToConvexRegionTest
          PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, 0.00);
          CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
 
-         Assert.assertTrue(MatrixFeatures.isEquals(Aineq, constraintToConvexRegion.Aineq, 1e-7));
-         Assert.assertTrue(MatrixFeatures.isEquals(bineq, constraintToConvexRegion.bineq, 1e-7));
+         EjmlUnitTests.assertEquals(Aineq, constraintToConvexRegion.Aineq, epsilon);
+         EjmlUnitTests.assertEquals(bineq, constraintToConvexRegion.bineq, epsilon);
       }
    }
 
