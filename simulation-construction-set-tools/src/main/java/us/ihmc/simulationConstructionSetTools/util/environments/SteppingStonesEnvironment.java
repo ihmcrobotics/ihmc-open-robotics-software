@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -32,10 +36,11 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
 
    private final List<FramePoint3D> blockPositions = new ArrayList<>();
+   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
 
    public SteppingStonesEnvironment()
    {
-      addGround();
+//      addGround();
       double yaw = Math.toRadians(45.0);
 
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -119,6 +124,24 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
       RigidBodyTransform blockPose = new RigidBodyTransform(orientation, facePosition);
       Box3D block = new Box3D(blockPose, dimensions.getX(), dimensions.getY(), dimensions.getZ());
       combinedTerrainObject3D.addTerrainObject(new RotatableBoxTerrainObject(block, color));
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendTranslation(facePosition.getX(), facePosition.getY(), facePosition.getZ() + blockFaceHeight / 2.0);
+      transform.appendYawRotation(yaw);
+      ConvexPolygon2D face = new ConvexPolygon2D();
+      face.addVertex(0.5 * dimensions.getX(), 0.5 * dimensions.getY());
+      face.addVertex(0.5 * dimensions.getX(), -0.5 * dimensions.getY());
+      face.addVertex(-0.5 * dimensions.getX(), 0.5 * dimensions.getY());
+      face.addVertex(-0.5 * dimensions.getX(), -0.5 * dimensions.getY());
+      face.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(transform, face);
+      planarRegionsList.addPlanarRegion(planarRegion);
+   }
+
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
    }
 
    @Override
