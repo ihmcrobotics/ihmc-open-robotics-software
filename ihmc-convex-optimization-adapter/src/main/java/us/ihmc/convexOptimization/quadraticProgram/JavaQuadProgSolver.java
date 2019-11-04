@@ -9,6 +9,7 @@ import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -43,7 +44,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
  */
 public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 {
-   private enum QuadProgStep {COMPUTE_CONSTRAINT_VIOLATIONS, FIND_MOST_VIOLATED_CONSTRAINT, COMPUTE_STEP_LENGTH}
+   private enum QuadProgStep {COMPUTE_CONSTRAINT_VIOLATIONS, FIND_MOST_VIOLATED_CONSTRAINT, COMPUTE_STEP_LENGTH, FAILED}
 
    private final static boolean bulkHandleEqualityConstraints = false;
 
@@ -612,6 +613,13 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             stepLength = Math.min(partialStepLength, fullStepLength);
 
             break;
+         case FAILED:
+            CommonOps.fill(solutionToPack, Double.NaN);
+            CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+            return numberOfIterations;
          default:
             throw new RuntimeException("This is an empty state.");
          }
@@ -779,9 +787,10 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + stepLength);
 
       inactiveSetIndices.set(constraintIndexForPartialStep, constraintIndexForPartialStep);
-      deleteConstraint(J);
-
-      return QuadProgStep.COMPUTE_STEP_LENGTH;
+      if (deleteConstraint(J))
+         return QuadProgStep.COMPUTE_STEP_LENGTH;
+      else
+         return QuadProgStep.FAILED;
    }
 
    private QuadProgStep takeStepInPrimalAndDualSpace(DenseMatrix64F solutionToPack, double stepLength, double fullStepLength, int mostViolatedConstraintIndex)
@@ -800,7 +809,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             if (!requireInequalityConstraintsSatisfied)
                excludeConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
 
-            deleteConstraint(J);
+            if (!deleteConstraint(J))
+               return QuadProgStep.FAILED;
 
             for (int i = 0; i < totalNumberOfInequalityConstraints; i++)
                inactiveSetIndices.set(i, i);
@@ -827,7 +837,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       { // a partial step has taken
          // drop constraint constraintIndexForMinimumStepLength
          inactiveSetIndices.set(constraintIndexForPartialStep, constraintIndexForPartialStep);
-         deleteConstraint(J);
+         if (!deleteConstraint(J))
+            return QuadProgStep.FAILED;
 
          // update s[ip] = CI * x + ci0
          double sum = 0.0;
@@ -907,7 +918,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    }
 
    /** the only time this should be called is when removing an inequality constraint **/
-   private void deleteConstraint(DenseMatrix64F J)
+   private boolean deleteConstraint(DenseMatrix64F J)
    {
       double cc, ss, h, xny, t1, t2;
       int qq = -1;
@@ -921,6 +932,9 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             break;
          }
       }
+
+      if (qq == -1)
+         return false;
 
       // remove the constraint from the active set and the duals
       for (int i = qq; i < numberOfActiveConstraints - 1; i++)
@@ -945,7 +959,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       numberOfActiveConstraints--;
 
       if (numberOfActiveConstraints == 0)
-         return;
+         return true;
 
       for (int j = qq + numberOfEqualityConstraints; j < numberOfActiveConstraints; j++)
       {
@@ -988,6 +1002,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             J.set(k, j + 1, xny * (J.get(k, j) + t1) - t2);
          }
       }
+
+      return true;
    }
 
 
