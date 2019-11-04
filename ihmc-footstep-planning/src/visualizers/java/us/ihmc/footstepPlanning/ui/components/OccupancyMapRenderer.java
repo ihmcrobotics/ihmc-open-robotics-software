@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,6 +23,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerCell;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -40,22 +43,23 @@ public class OccupancyMapRenderer extends AnimationTimer
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
+
    private final AtomicReference<Pair<Mesh, Material>> footstepGraphToRender = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
-   private final MeshView footstepGraphMeshView = new MeshView();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
+   private final MeshView footstepGraphMeshView = new MeshView();
    private final ConvexPolygon2D cellPolygon = new ConvexPolygon2D();
 
    public OccupancyMapRenderer(Messager messager)
    {
       messager
-            .registerTopicListener(FootstepPlannerMessagerAPI.OccupancyMap, message -> executorService.execute(() -> processOccupancyMapMessage(message)));
+            .registerTopicListener(FootstepPlannerMessagerAPI.OccupancyMap, occupancyMap -> executorService.execute(() -> processOccupancyMap(occupancyMap)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList::set);
       this.show = messager.createInput(FootstepPlannerMessagerAPI.ShowOccupancyMap, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.AssumeFlatGround, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
       cellPolygon.addVertex(cellWidth, 0.0);
@@ -69,25 +73,24 @@ public class OccupancyMapRenderer extends AnimationTimer
       root.getChildren().add(footstepGraphMeshView);
    }
 
-   private void processOccupancyMapMessage(FootstepPlannerOccupancyMapMessage message)
+   private void processOccupancyMap(PlannerOccupancyMap occupancyMap)
    {
       palette.clearPalette();
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      for (int i = 0; i < occupiedCells.size(); i++)
+      Collection<PlannerCell> occupiedCells = occupancyMap.getOccupiedCells();
+      for (PlannerCell cell : occupiedCells)
       {
-         FootstepPlannerCellMessage cell = occupiedCells.get(i);
          double x = cell.getXIndex() * LatticeNode.gridSizeXY;
          double y = cell.getYIndex() * LatticeNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setTranslation(x, y, z);
 
-         if (cell.getNodeIsValid())
-            meshBuilder.addPolygon(transform, cellPolygon, validCellColor);
-         else
-            meshBuilder.addPolygon(transform, cellPolygon, rejectedCellColor);
+//         if (cell.getNodeIsValid())
+         meshBuilder.addPolygon(transform, cellPolygon, validCellColor);
+//         else
+//            occupancyMapBuilder.addPolygon(transform, cellPolygon, rejectedCellColor);
       }
 
       footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
@@ -109,6 +112,8 @@ public class OccupancyMapRenderer extends AnimationTimer
          root.getChildren().add(footstepGraphMeshView);
       else if (!show.get() && !root.getChildren().isEmpty())
          root.getChildren().clear();
+
+      // FIXME make sure the occupancy map builder is getting cleared at the right time
 
       if (reset.getAndSet(false))
       {

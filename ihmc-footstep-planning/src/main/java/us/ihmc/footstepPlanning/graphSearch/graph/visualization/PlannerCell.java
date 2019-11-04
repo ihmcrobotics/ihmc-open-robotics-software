@@ -1,17 +1,34 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-class PlannerCell
+import controller_msgs.msg.dds.FootstepPlannerCellMessage;
+
+public class PlannerCell
 {
-   int xIndex;
-   int yIndex;
+   private int xIndex;
+   private int yIndex;
 
    int hashCode;
 
-   PlannerCell(int xIndex, int yIndex)
+   public PlannerCell(int xIndex, int yIndex)
    {
       this.xIndex = xIndex;
       this.yIndex = yIndex;
       hashCode = computeHashCode(xIndex, yIndex);
+   }
+
+   public PlannerCell(FootstepPlannerCellMessage message)
+   {
+      this(message.getXIndex(), message.getYIndex());
+   }
+
+   public int getXIndex()
+   {
+      return xIndex;
+   }
+
+   public int getYIndex()
+   {
+      return yIndex;
    }
 
    @Override
@@ -30,7 +47,6 @@ class PlannerCell
       return result;
    }
 
-
    @Override
    public boolean equals(Object other)
    {
@@ -39,5 +55,17 @@ class PlannerCell
 
       PlannerCell otherCell = (PlannerCell) other;
       return otherCell.xIndex == xIndex && otherCell.yIndex == yIndex;
+   }
+
+   public void set(FootstepPlannerCellMessage message)
+   {
+      this.xIndex = message.getXIndex();
+      this.yIndex = message.getYIndex();
+   }
+
+   public void getAsMessage(FootstepPlannerCellMessage messageToPack)
+   {
+      messageToPack.setXIndex(xIndex);
+      messageToPack.setYIndex(yIndex);
    }
 }

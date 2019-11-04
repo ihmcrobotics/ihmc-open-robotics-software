@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__FootstepPlannerCellMessage__idl__
-#define __controller_msgs__msg__FootstepPlannerCellMessage__idl__
+#ifndef __controller_msgs__msg__FootstepPlannerLatticeNodeMessage__idl__
+#define __controller_msgs__msg__FootstepPlannerLatticeNodeMessage__idl__
 
 module controller_msgs
 {
@@ -12,8 +12,8 @@ module controller_msgs
        * This message is part of the IHMC footstep planning module.
        * This message is sent from the planner in order to visualize and debug planner progress
        */
-      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlannerCellMessage_")
-      struct FootstepPlannerCellMessage
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlannerLatticeNodeMessage_")
+      struct FootstepPlannerLatticeNodeMessage
       {
         /**
          * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
@@ -23,6 +23,10 @@ module controller_msgs
          * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
          */
         long y_index;
+        /**
+         * Yaw index of the cell
+         */
+        long yaw_index;
       };
     };
   };

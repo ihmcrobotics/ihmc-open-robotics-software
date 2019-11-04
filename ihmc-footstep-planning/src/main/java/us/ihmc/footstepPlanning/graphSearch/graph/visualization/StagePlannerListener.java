@@ -21,17 +21,15 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepNodeSnapperReadOnly snapper;
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final HashSet<PlannerCell> exploredCells = new HashSet<>();
+   private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
    private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
 
    private final RecyclingArrayList<FootstepNodeDataMessage> nodeDataMessageList = new RecyclingArrayList<>(FootstepNodeDataMessage::new);
-   private final RecyclingArrayList<FootstepPlannerCellMessage> cellMessages = new RecyclingArrayList<>(FootstepPlannerCellMessage::new);
 
-   private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>();
    private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
+   private final ConcurrentCopier<FootstepPlannerOccupancyMapMessage> occupancyMapMessage = new ConcurrentCopier<>(FootstepPlannerOccupancyMapMessage::new);
 
    private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
    private final AtomicBoolean hasNodeData = new AtomicBoolean(true);
@@ -62,9 +60,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       else
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         PlannerCell plannerCell = new PlannerCell(node.getXIndex(), node.getYIndex());
-
-         exploredCells.add(plannerCell);
+         occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
          totalNodeCount++;
       }
    }
@@ -73,7 +69,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       rejectionReasons.clear();
       childMap.clear();
-      exploredCells.clear();
+      occupancyMapSinceLastReport.clear();
       lowestCostPlan.clear();
       totalNodeCount = 1;
       rejectionCount.values().forEach(count -> count.setValue(0));
@@ -119,18 +115,12 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
-      occupiedCells.clear();
-      cellMessages.clear();
-      PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
-      for (int i = 0; i < plannerCells.length; i++)
-      {
-         FootstepPlannerCellMessage plannerCell = cellMessages.add();
-         plannerCell.setXIndex(plannerCells[i].xIndex);
-         plannerCell.setYIndex(plannerCells[i].yIndex);
-      }
-      occupiedCells.addAll(cellMessages);
+      FootstepPlannerOccupancyMapMessage occupancyMapMessage = this.occupancyMapMessage.getCopyForReading();
+      occupancyMapSinceLastReport.getAsMessage(occupancyMapMessage);
+      this.occupancyMapMessage.commit();
+      occupancyMapSinceLastReport.clear();
 
-      hasOccupiedCells.set(true);
+      hasOccupiedCells.set(!occupancyMapMessage.getOccupiedCells().isEmpty());
    }
 
    private void updateNodeData()
@@ -161,19 +151,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
    {
-      if (occupiedCells.isEmpty())
-         return null;
-
-      Object<FootstepPlannerCellMessage> occupiedCellsForMessage = occupancyMapMessage.getOccupiedCells();
-      occupiedCellsForMessage.clear();
-
-      List<FootstepPlannerCellMessage> occupiedCells = this.occupiedCells.getCopyForReading();
-      for (int i = 0; i < occupiedCells.size(); i++)
-         occupiedCellsForMessage.add().set(occupiedCells.get(i));
-
       hasOccupiedCells.set(false);
 
-      return occupancyMapMessage;
+      return occupancyMapMessage.getCopyForReading();
    }
 
    FootstepNodeDataListMessage packLowestCostPlanMessage()
