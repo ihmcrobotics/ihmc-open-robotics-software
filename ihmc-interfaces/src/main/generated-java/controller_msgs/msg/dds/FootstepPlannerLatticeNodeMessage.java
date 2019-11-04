@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC footstep planning module.
        * This message is sent from the planner in order to visualize and debug planner progress
        */
-public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessage> implements Settable<FootstepPlannerCellMessage>, EpsilonComparable<FootstepPlannerCellMessage>
+public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLatticeNodeMessage> implements Settable<FootstepPlannerLatticeNodeMessage>, EpsilonComparable<FootstepPlannerLatticeNodeMessage>
 {
    /**
             * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
@@ -20,22 +20,28 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
             * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int y_index_;
+   /**
+            * Yaw index of the cell
+            */
+   public int yaw_index_;
 
-   public FootstepPlannerCellMessage()
+   public FootstepPlannerLatticeNodeMessage()
    {
    }
 
-   public FootstepPlannerCellMessage(FootstepPlannerCellMessage other)
+   public FootstepPlannerLatticeNodeMessage(FootstepPlannerLatticeNodeMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(FootstepPlannerCellMessage other)
+   public void set(FootstepPlannerLatticeNodeMessage other)
    {
       x_index_ = other.x_index_;
 
       y_index_ = other.y_index_;
+
+      yaw_index_ = other.yaw_index_;
 
    }
 
@@ -69,20 +75,35 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       return y_index_;
    }
 
-
-   public static Supplier<FootstepPlannerCellMessagePubSubType> getPubSubType()
+   /**
+            * Yaw index of the cell
+            */
+   public void setYawIndex(int yaw_index)
    {
-      return FootstepPlannerCellMessagePubSubType::new;
+      yaw_index_ = yaw_index;
+   }
+   /**
+            * Yaw index of the cell
+            */
+   public int getYawIndex()
+   {
+      return yaw_index_;
+   }
+
+
+   public static Supplier<FootstepPlannerLatticeNodeMessagePubSubType> getPubSubType()
+   {
+      return FootstepPlannerLatticeNodeMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return FootstepPlannerCellMessagePubSubType::new;
+      return FootstepPlannerLatticeNodeMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(FootstepPlannerCellMessage other, double epsilon)
+   public boolean epsilonEquals(FootstepPlannerLatticeNodeMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -90,6 +111,8 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_index_, other.x_index_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_index_, other.y_index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_index_, other.yaw_index_, epsilon)) return false;
 
 
       return true;
@@ -100,13 +123,15 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof FootstepPlannerCellMessage)) return false;
+      if(!(other instanceof FootstepPlannerLatticeNodeMessage)) return false;
 
-      FootstepPlannerCellMessage otherMyClass = (FootstepPlannerCellMessage) other;
+      FootstepPlannerLatticeNodeMessage otherMyClass = (FootstepPlannerLatticeNodeMessage) other;
 
       if(this.x_index_ != otherMyClass.x_index_) return false;
 
       if(this.y_index_ != otherMyClass.y_index_) return false;
+
+      if(this.yaw_index_ != otherMyClass.yaw_index_) return false;
 
 
       return true;
@@ -117,11 +142,13 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("FootstepPlannerCellMessage {");
+      builder.append("FootstepPlannerLatticeNodeMessage {");
       builder.append("x_index=");
       builder.append(this.x_index_);      builder.append(", ");
       builder.append("y_index=");
-      builder.append(this.y_index_);
+      builder.append(this.y_index_);      builder.append(", ");
+      builder.append("yaw_index=");
+      builder.append(this.yaw_index_);
       builder.append("}");
       return builder.toString();
    }

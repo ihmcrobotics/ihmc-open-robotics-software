@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -197,7 +198,7 @@ public class RemoteUIMessageConverter
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerOccupancyMapMessage.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, s.takeNextData()));
+                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
 
       // things from the controller
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
