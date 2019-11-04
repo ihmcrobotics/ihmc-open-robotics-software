@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
+/**
+ * Directed visibility graph edge data structure containing weight and cost information,
+ * and source and target nodes that this edge connects.
+ */
 public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdge>, LineSegment3DReadOnly
 {
    private static final double defaultEdgeWeight = 1.0;

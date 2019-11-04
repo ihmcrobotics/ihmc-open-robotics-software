@@ -39,7 +39,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       List<Point3D> newPathPositions = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
       if (!parameters.getPerformPostProcessingNodeShifting())
-         return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
+         return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList()); // just a Collections.copy? parallel for this?
 
       int pathNodeIndex = 0;
       int waypointIndex = 0;
@@ -121,6 +121,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       {
          for (Cluster potentialCluster : navigableRegion.getObstacleClusters())
          {
+            // might be unecessary check, points in here were already filtered for this
             if (potentialCluster.getRawPointsInLocal3D().stream().anyMatch(point -> point.getZ() > parameters.getTooHighToStepDistance()))
                obstacleClusters.add(potentialCluster);
          }
@@ -134,7 +135,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
          nodeShiftToAvoidObstacles = new Vector2D();
 
       if (nodeShiftToAvoidObstacles.length() < minDistanceToMove)
-         return;
+         return; // didn't shift, don't need to do following checks
 
       Point2D shiftedPoint = new Point2D(nodeLocationToPack);
       shiftedPoint.add(nodeShiftToAvoidObstacles);

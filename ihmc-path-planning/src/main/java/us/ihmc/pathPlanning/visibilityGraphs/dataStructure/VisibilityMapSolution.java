@@ -4,6 +4,13 @@ import java.util.ArrayList;
 
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 
+/**
+ * Large data structure containing the full world visibility graphs soltions
+ * along with all the planar regions used to start with. Contains visibility maps for:
+ * - all navigable regions
+ * - inter region connections
+ * - map from start and from goal
+ */
 public class VisibilityMapSolution
 {
    private NavigableRegions navigableRegions;

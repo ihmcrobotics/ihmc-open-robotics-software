@@ -85,6 +85,7 @@ public class VisibilityGraph
          visibilityGraphNavigableRegion.createGraphBetweenInnerClusterRings(parameters.getWeightForNonPreferredEdge(), parameters.getCostForNonPreferredNode());
       }
 
+      // create inter-region connections
       for (int sourceIndex = 0; sourceIndex < visibilityGraphNavigableRegions.size(); sourceIndex++)
       {
          VisibilityGraphNavigableRegion sourceNavigableRegion = visibilityGraphNavigableRegions.get(sourceIndex);
@@ -96,6 +97,7 @@ public class VisibilityGraph
          }
       }
 
+      // set edges have been determined
       for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
          List<VisibilityGraphNode> allNavigableNodes = visibilityGraphNavigableRegion.getAllNavigableNodes();

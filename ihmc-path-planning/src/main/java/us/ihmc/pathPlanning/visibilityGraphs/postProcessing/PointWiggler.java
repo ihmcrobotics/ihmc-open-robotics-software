@@ -116,7 +116,7 @@ public class PointWiggler
       if (numberOfPointsAdded == 0)
          return new Vector2D();
 
-      // remove unused constraints
+      // remove unused constraints; still need this?
       while (CI.getNumRows() > numberOfPointsAdded)
       {
          MatrixTools.removeRow(CI, numberOfPointsAdded);
