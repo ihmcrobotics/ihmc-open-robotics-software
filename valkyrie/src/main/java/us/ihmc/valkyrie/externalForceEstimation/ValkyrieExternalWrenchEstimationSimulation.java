@@ -60,20 +60,20 @@ public class ValkyrieExternalWrenchEstimationSimulation
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       // ----- Root Joint ----- //
-//      Joint scsEndEffector = scsRobot.getRootJoint();
-//      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
+      //      Joint scsEndEffector = scsRobot.getRootJoint();
+      //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
 
       // ----- 1DOF Joints ----- //
-//      String endEffectorName = "torsoRoll"; // Chest
-//      String endEffectorName = "rightShoulderRoll"; // Shoulder
-//      String endEffectorName = "rightElbowPitch"; // Elbow
-//      String endEffectorName = "rightForearmYaw"; // Forearm
-//      String endEffectorName = "rightWristRoll"; // Wrist roll
-      String endEffectorName = "rightWristPitch"; // Wrist pitch
+      //      String endEffectorName = "torsoRoll"; // Chest
+      //      String endEffectorName = "rightShoulderRoll"; // Shoulder
+      String endEffectorName = "rightElbowPitch"; // Elbow
+      //      String endEffectorName = "rightForearmYaw"; // Forearm
+      //      String endEffectorName = "rightWristRoll"; // Wrist roll
+      //      String endEffectorName = "rightWristPitch"; // Wrist pitch
       Joint scsEndEffector = scsRobot.getJoint(endEffectorName);
       RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
 
-      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.1, 0.0);
+      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
       scsEndEffector.addExternalForcePoint(externalForcePoint);
@@ -131,6 +131,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
 
                                         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
                                         toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
+                                        toolboxStateMessage.setRequestLogging(true);
                                         toolboxStatePublisher.publish(toolboxStateMessage);
                                      });
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addButton(wakeupButton);
@@ -141,7 +142,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
                                        ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
                                        toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
                                        toolboxStatePublisher.publish(toolboxStateMessage);
-                                     });
+                                    });
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addButton(sleepButton);
 
       new ExternalForceEstimationToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
