@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,15 +18,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -90,19 +94,26 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F cmpAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
       DenseMatrix64F cmpBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
 
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      ConvexPolygon2D scaledCoPConstraint = new ConvexPolygon2D();
+      ConvexPolygon2D scaledCMPConstraint = new ConvexPolygon2D();
+
+      scaler.scaleConvexPolygon(copConstraint, 0.01, scaledCoPConstraint);
+      scaler.scaleConvexPolygon(cmpConstraint, -0.05, scaledCMPConstraint);
+
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(scaledCoPConstraint, copAin, copBin, 0.0);
+      PolygonWiggler.convertToInequalityConstraints(scaledCMPConstraint, cmpAin, cmpBin, 0.0);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertTrue(MatrixFeatures.isEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
    }
 
    @Test
@@ -240,17 +251,21 @@ public class ICPOptimizationCoPConstraintHandlerTest
       copConstraint.update();
       cmpConstraint.update();
 
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      ConvexPolygon2D scaledCoPConstraint = new ConvexPolygon2D();
+
       DenseMatrix64F copAin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 2);
       DenseMatrix64F copBin = new DenseMatrix64F(copConstraint.getNumberOfVertices(), 1);
 
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      scaler.scaleConvexPolygon(copConstraint, 0.01, scaledCoPConstraint);
+      PolygonWiggler.convertToInequalityConstraints(scaledCoPConstraint, copAin, copBin, 0.0);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
       assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
       assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);

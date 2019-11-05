@@ -71,6 +71,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       List<QuadrupedTimedStepMessage> steps = getSteps(environment.getBaseBlockFrame());
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
       stepTeleopManager.publishTimedStepListToController(message);
+      stepTeleopManager.submitPlanarRegionsList(environment.getPlanarRegionsList());
 
       int number = message.getQuadrupedStepList().size();
       QuadrupedTimedStepMessage lastMessage0 = message.getQuadrupedStepList().get(number - 1);

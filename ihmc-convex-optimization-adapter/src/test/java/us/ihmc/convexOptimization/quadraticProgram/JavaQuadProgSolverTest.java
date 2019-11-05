@@ -1,20 +1,19 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import static us.ihmc.robotics.Assert.*;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
@@ -349,6 +348,56 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       assertEquals(lagrangeInequalityMultipliers[0], 2.0, epsilon);
       assertEquals(lagrangeInequalityMultipliers[1], 0.0, epsilon);
       assertEquals(lagrangeInequalityMultipliers[2], 0.0, epsilon);
+   }
+
+   /**
+    * GW: exported this from a failing Atlas unit test 05/23/2019
+    * Not sure if this should be solvable but in any case it should fail gracefully.
+    */
+   @Test
+   public void testCaseFromSimulation()
+   {
+      DenseMatrix64F costQuadraticMatrix = new DenseMatrix64F(6, 6);
+      costQuadraticMatrix.data = new double[] {993.9053988041245, 327.83942494534944, 993.556655887893, 327.83942494534944, 2308.09243287179, 354.1845700419416,
+            327.83942494534944, 1423.124867640583, 327.83942494534944, 1422.7761247243516, 354.1845700419416, 2771.803937517132, 993.556655887893,
+            327.83942494534944, 1009.1964870941272, 327.83942494534944, 2308.09243287179, 354.1845700419416, 327.83942494534944, 1422.7761247243516,
+            327.83942494534944, 1438.4159559305858, 354.1845700419416, 2771.803937517132, 2308.09243287179, 354.1845700419416, 2308.09243287179,
+            354.1845700419416, 5508.124706211761, 0.06581329118532331, 354.1845700419416, 2771.803937517132, 354.1845700419416, 2771.803937517132,
+            0.06581329118532508, 5507.8812912972435};
+
+      DenseMatrix64F costLinearVector = new DenseMatrix64F(6, 1);
+      costLinearVector.data = new double[] {20222.5613016018, 5592.963753999038, 20222.5613016018, 5592.963753999038, 47486.04338938162, 5042.8181779521055};
+
+      DenseMatrix64F quadraticCostScalar = new DenseMatrix64F(1, 1);
+      quadraticCostScalar.data = new double[] {206999.16716064143};
+
+      DenseMatrix64F linearInequalityConstraintCMatrix = new DenseMatrix64F(17, 6);
+      linearInequalityConstraintCMatrix.data = new double[] {-0.532490759103742, 0.8464358165089191, 0.0, 0.0, 0.0, 0.0, 0.8781297702936439, 0.4784225188304082,
+            0.0, 0.0, 0.0, 0.0, 0.4314826988044296, -0.9021212117184951, 0.0, 0.0, 0.0, 0.0, -0.8674617517025186, -0.4975038787117122, 0.0, 0.0, 0.0, 0.0,
+            -0.532490759103742, 0.8464358165089191, -0.532490759103742, 0.8464358165089191, 0.0, 0.0, 0.8781297702936439, 0.4784225188304082,
+            0.8781297702936439, 0.4784225188304082, 0.0, 0.0, 0.4314826988044296, -0.9021212117184951, 0.4314826988044296, -0.9021212117184951, 0.0, 0.0,
+            -0.8674617517025186, -0.4975038787117122, -0.8674617517025186, -0.4975038787117122, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.9838237285970943,
+            0.17913925044308668, 0.0, 0.0, 0.0, 0.0, -0.6119239483029338, 0.7909166084318549, 0.0, 0.0, 0.0, 0.0, -0.15126410326159784, 0.9884933844313095, 0.0,
+            0.0, 0.0, 0.0, 0.5483141711347475, 0.836272425548526, 0.0, 0.0, 0.0, 0.0, 0.39417400487132703, -0.9190358284004487, 0.0, 0.0, 0.0, 0.0, -0.0, 1.0,
+            0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0};
+
+      DenseMatrix64F linearInequalityConstraintDVector = new DenseMatrix64F(17, 1);
+      linearInequalityConstraintDVector.data = new double[] {0.03209312106775908, 0.12675512800740218, 0.05477548585328318, 0.07957996960652647,
+            0.07200972933235494, 0.15848182583418868, 0.09792941203582961, 0.1298875084279425, 8.725615888588424, 4.899796215838858, 0.8792506851639368,
+            -4.6465724005639855, -2.4847821341512306, -0.8057687026687546, -9.103397051640995, 1.0993716410559957, 9.292818302213409};
+
+      JavaQuadProgSolver solver = new JavaQuadProgSolver();
+      solver.setMaxNumberOfIterations(100);
+      solver.setUseWarmStart(true);
+      solver.clear();
+      solver.resetActiveConstraints();
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar.get(0, 0));
+      solver.setLinearInequalityConstraints(linearInequalityConstraintCMatrix, linearInequalityConstraintDVector);
+
+      DenseMatrix64F solution = new DenseMatrix64F(6, 1);
+      solver.solve(solution);
    }
 }
 
