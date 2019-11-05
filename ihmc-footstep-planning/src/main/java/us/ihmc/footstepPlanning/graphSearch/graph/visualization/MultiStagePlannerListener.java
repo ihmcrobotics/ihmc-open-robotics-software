@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -22,6 +23,7 @@ public class MultiStagePlannerListener
    private final YoBoolean broadcastOccupancyMap = new YoBoolean("broadcastOccupancyMap", registry);
    private final YoBoolean broadcastExpandedNodes = new YoBoolean("broadcastExpandedNodes", registry);
    private final YoBoolean broadcastLowestCostPlan = new YoBoolean("broadcastLowestCostPlan", registry);
+   private final YoBoolean broadcastFullGraph = new YoBoolean("broadcastFullGraph", registry);
 
    public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
@@ -56,13 +58,15 @@ public class MultiStagePlannerListener
          return;
 
       boolean stageHasMapUpdate = false;
-      for (StagePlannerListener listener : listeners)
-         stageHasMapUpdate |= listener.hasOccupiedCells() && listener.hasExpandedNodes();
-
       boolean stageHasLowestCostPlan = false;
-      for (StagePlannerListener listener : listeners)
-         stageHasLowestCostPlan |= listener.hasLowestCostPlan();
+      boolean stageHasFullGraph = false;
 
+      for (StagePlannerListener listener : listeners)
+      {
+         stageHasMapUpdate |= listener.hasOccupiedCells() && listener.hasExpandedNodes();
+         stageHasLowestCostPlan |= listener.hasLowestCostPlan();
+         stageHasFullGraph |= listener.hasFullGraph();
+      }
 
       if (stageHasMapUpdate)
       {
@@ -81,15 +85,20 @@ public class MultiStagePlannerListener
          lastBroadcastTime = currentTime;
       }
 
-      if (stageHasLowestCostPlan)
+      if (stageHasLowestCostPlan && broadcastLowestCostPlan.getBooleanValue())
       {
-         if (broadcastLowestCostPlan.getBooleanValue())
-         {
-            FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
-            if (!message.getNodeData().isEmpty())
-               statusOutputManager.reportStatusMessage(message);
-         }
+         FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
+         if (!message.getNodeData().isEmpty())
+            statusOutputManager.reportStatusMessage(message);
       }
+
+      if (stageHasFullGraph && broadcastFullGraph.getBooleanValue())
+      {
+         FootstepNodeDataListMessage message = getConcatenatedFullGraph();
+         if (!message.getNodeData().isEmpty())
+            statusOutputManager.reportStatusMessage(message);
+      }
+
    }
 
    public void plannerFinished(List<FootstepNode> plan)
@@ -191,6 +200,33 @@ public class MultiStagePlannerListener
 
          for (PlannerNodeData nodeData : lowestCostPlan.getNodeData())
             nodeData.getAsMessage(message.getNodeData().add());
+      }
+      return message;
+   }
+
+   private static int assumedMaxGraphSize = 1000000000;
+
+   private FootstepNodeDataListMessage getConcatenatedFullGraph()
+   {
+      FootstepNodeDataListMessage message = new FootstepNodeDataListMessage();
+      message.setIsFootstepGraph(true);
+      for (int listenerIdx = 0; listenerIdx < listeners.size(); listenerIdx++)
+      {
+         StagePlannerListener listener = listeners.get(listenerIdx);
+
+         if (!listener.hasFullGraph())
+            continue;
+
+         PlannerNodeDataList fullGraph = listener.getFullGraph();
+         if (fullGraph == null)
+            continue;
+
+         for (PlannerNodeData nodeData : fullGraph.getNodeData())
+         {
+            FootstepNodeDataMessage nodeDataMessage = message.getNodeData().add();
+            nodeData.getAsMessage(nodeDataMessage);
+            nodeDataMessage.setNodeId(nodeData.getNodeId() + listenerIdx * assumedMaxGraphSize);
+         }
       }
       return message;
    }

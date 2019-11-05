@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -38,29 +40,60 @@ public class PlannerNodeDataList
       nodeDataList.clear();
    }
 
+   public int size()
+   {
+      return nodeDataList.size();
+   }
+
    public List<PlannerNodeData> getNodeData()
    {
       return nodeDataList;
    }
 
-   public void addNode(RobotSide newNodeSide, Pose3DReadOnly newNodePose)
+   public PlannerNodeData getDataForNode(FootstepNode node)
    {
-      addNode(-1, newNodeSide, newNodePose, null);
+      if (node == null)
+         return null;
+
+      return nodeDataList.get(nodeDataList.indexOf(node.getLatticeNode()));
    }
 
-   public void addNode(PlannerNodeData parentNode, RobotSide newNodeSide, Pose3DReadOnly newNodePose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+
+   public PlannerNodeData addNode(int xIndex, int yIndex, int yawIndex, RobotSide newNodeSide, Pose3DReadOnly newNodePose)
    {
-      addNode(nodeDataList.indexOf(parentNode), newNodeSide, newNodePose, rejectionReason);
+      return addNode(-1, nodeDataList.size(), xIndex, yIndex, yawIndex, newNodeSide, newNodePose, null);
    }
 
-   public void addNode(int parentNodeIndex, RobotSide newNodeSide, Pose3DReadOnly newNodePose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   public PlannerNodeData addNode(PlannerNodeData parentNode, int nodeIndex, LatticeNode latticeNode, RobotSide newNodeSide,
+                                  Pose3DReadOnly newNodePose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      addNode(new PlannerNodeData(parentNodeIndex, newNodeSide, newNodePose, rejectionReason));
+      return addNode(parentNode, nodeIndex, latticeNode.getXIndex(), latticeNode.getYIndex(), latticeNode.getYawIndex(), newNodeSide, newNodePose,
+                     rejectionReason);
    }
 
-   public void addNode(PlannerNodeData nodeData)
+   public PlannerNodeData addNode(PlannerNodeData parentNode, int nodeIndex, int xIndex, int yIndex, int yawIndex, RobotSide newNodeSide,
+                                  Pose3DReadOnly newNodePose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      return addNode(nodeDataList.indexOf(parentNode), nodeIndex, xIndex, yIndex, yawIndex, newNodeSide, newNodePose, rejectionReason);
+   }
+
+   public PlannerNodeData addNode(int parentNodeIndex, int nodeIndex, int xIndex, int yIndex, int yawIndex, RobotSide newNodeSide, Pose3DReadOnly newNodePose,
+                                  BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      return addNode(new PlannerNodeData(parentNodeIndex, nodeIndex, xIndex, yIndex, yawIndex, newNodeSide, newNodePose, rejectionReason));
+   }
+
+   public PlannerNodeData addNode(int parentNodeIndex, int nodeIndex, LatticeNode latticeNode, RobotSide newNodeSide, Pose3DReadOnly newNodePose,
+                                  BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      return addNode(parentNodeIndex, nodeIndex, latticeNode.getXIndex(), latticeNode.getYIndex(), latticeNode.getYawIndex(), newNodeSide, newNodePose,
+                     rejectionReason);
+   }
+
+   public PlannerNodeData addNode(PlannerNodeData nodeData)
    {
       nodeDataList.add(nodeData);
+      return nodeData;
    }
 
    public FootstepNodeDataListMessage getAsMessage()
@@ -86,7 +119,7 @@ public class PlannerNodeDataList
          addNode(new PlannerNodeData(nodeDataMessage));
       }
 
-      getNodeData().sort(Comparator.comparingInt(PlannerNodeData::getParentNodeId));
+      getNodeData().sort(Comparator.comparingInt(PlannerNodeData::getNodeId));
    }
 
 }

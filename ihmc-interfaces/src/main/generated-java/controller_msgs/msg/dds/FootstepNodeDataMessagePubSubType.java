@@ -48,6 +48,14 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -73,6 +81,18 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -86,7 +106,15 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
+      cdr.write_type_2(data.getNodeId());
+
       cdr.write_type_2(data.getParentNodeId());
+
+      cdr.write_type_2(data.getXIndex());
+
+      cdr.write_type_2(data.getYIndex());
+
+      cdr.write_type_2(data.getYawIndex());
 
       cdr.write_type_9(data.getBipedalFootstepPlannerNodeRejectionReason());
 
@@ -98,7 +126,15 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
+      data.setNodeId(cdr.read_type_2());
+      	
       data.setParentNodeId(cdr.read_type_2());
+      	
+      data.setXIndex(cdr.read_type_2());
+      	
+      data.setYIndex(cdr.read_type_2());
+      	
+      data.setYawIndex(cdr.read_type_2());
       	
       data.setBipedalFootstepPlannerNodeRejectionReason(cdr.read_type_9());
       	
@@ -113,7 +149,11 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
+      ser.write_type_2("node_id", data.getNodeId());
       ser.write_type_2("parent_node_id", data.getParentNodeId());
+      ser.write_type_2("x_index", data.getXIndex());
+      ser.write_type_2("y_index", data.getYIndex());
+      ser.write_type_2("yaw_index", data.getYawIndex());
       ser.write_type_9("bipedal_footstep_planner_node_rejection_reason", data.getBipedalFootstepPlannerNodeRejectionReason());
    }
 
@@ -125,7 +165,11 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
+      data.setNodeId(ser.read_type_2("node_id"));
       data.setParentNodeId(ser.read_type_2("parent_node_id"));
+      data.setXIndex(ser.read_type_2("x_index"));
+      data.setYIndex(ser.read_type_2("y_index"));
+      data.setYawIndex(ser.read_type_2("yaw_index"));
       data.setBipedalFootstepPlannerNodeRejectionReason(ser.read_type_9("bipedal_footstep_planner_node_rejection_reason"));
    }
 

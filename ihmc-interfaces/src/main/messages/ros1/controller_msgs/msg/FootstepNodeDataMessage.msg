@@ -50,7 +50,20 @@ geometry_msgs/Quaternion orientation
 
 # ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
 # Field default value -1
+int32 node_id
+
+# ID of node. This should reference the index of this node in a FootstepNodeDataList
+# Field default value -1
 int32 parent_node_id
+
+# Field default value -1
+int32 x_index
+
+# Field default value -1
+int32 y_index
+
+# Field default value -1
+int32 yaw_index
 
 # Node rejection reason. 255 if node was accepted
 # Field default value 255

@@ -15,21 +15,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
    private final FootstepNodeSnapperReadOnly snapper;
-   private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
-   private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
 
    private final ConcurrentList<PlannerCell> occupancyMapCellsSinceLastReport = new ConcurrentList<>();
    private final ConcurrentList<LatticeNode> expandedNodesSinceLastReport = new ConcurrentList<>();
+   private final ConcurrentList<PlannerNodeData> fullGraphSinceLastReport = new ConcurrentList<>();
 
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
+
+   private final List<PlannerNodeData> incomingNodeDataThisTick = new ArrayList<>();
    private final List<PlannerCell> incomingOccupiedCellsThisTick = new ArrayList<>();
    private final List<LatticeNode> incomingExpandedNodes = new ArrayList<>();
+
+   private final PlannerNodeDataList allNodes = new PlannerNodeDataList();
 
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
    private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
    private final AtomicBoolean hasExpandedNodes = new AtomicBoolean(true);
+   private final AtomicBoolean hasFullGraph = new AtomicBoolean(true);
    private final AtomicBoolean hasLowestCostPlan = new AtomicBoolean(true);
 
    private final long occupancyMapUpdateDt;
@@ -41,6 +45,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
+      allNodes.setIsFootstepGraph(true);
 
       for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
       {
@@ -51,26 +56,32 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
+      int previousNodeDataIndex;
       if (previousNode == null)
       {
          reset();
+         previousNodeDataIndex = -1;
       }
       else
       {
-         childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
+         previousNodeDataIndex = allNodes.getNodeData().indexOf(previousNode.getLatticeNode());
 
-         incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
          incomingExpandedNodes.add(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
-
-         totalNodeCount++;
       }
+
+      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+      PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+
+      incomingNodeDataThisTick.add(nodeData);
+      incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+
+      totalNodeCount++;
    }
 
    public void reset()
    {
-      rejectionReasons.clear();
-      childMap.clear();
-
+      allNodes.clear();
+      incomingNodeDataThisTick.clear();
       incomingOccupiedCellsThisTick.clear();
       incomingExpandedNodes.clear();
 
@@ -78,7 +89,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       expandedNodesSinceLastReport.clear();
 
       lowestCostPlan.clear();
-      totalNodeCount = 1;
+      totalNodeCount = 0;
       rejectionCount.values().forEach(count -> count.setValue(0));
    }
 
@@ -92,7 +103,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      rejectionReasons.put(rejectedNode, reason);
+      PlannerNodeData nodeData = incomingNodeDataThisTick.get(incomingNodeDataThisTick.indexOf(rejectedNode.getLatticeNode()));
+      nodeData.setRejectionReason(reason);
+
       rejectionCount.get(reason).increment();
    }
 
@@ -111,6 +124,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       updateOccupiedCells();
       updateExpandedNodes();
       updateLowestCostPlan();
+      updateFullGraph();
 
       lastUpdateTime = currentTime;
    }
@@ -145,12 +159,20 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       {
          FootstepNode node = lowestCostPlan.get(i);
          Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
-         concurrentNodeDataList.addNode(-1, node.getRobotSide(), nodePose, null);
+         concurrentNodeDataList.addNode(-1, i, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
       }
       this.concurrentLowestCostNodeDataList.commit();
       lowestCostPlan.clear();
 
       hasLowestCostPlan.set(!concurrentNodeDataList.getNodeData().isEmpty());
+   }
+
+   private void updateFullGraph()
+   {
+      fullGraphSinceLastReport.addAll(incomingNodeDataThisTick);
+      hasFullGraph.set(hasFullGraph.get() || !incomingNodeDataThisTick.isEmpty());
+
+      incomingNodeDataThisTick.clear();
    }
 
    public boolean hasOccupiedCells()
@@ -166,6 +188,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public boolean hasLowestCostPlan()
    {
       return hasLowestCostPlan.get();
+   }
+
+   public boolean hasFullGraph()
+   {
+      return hasFullGraph.get();
    }
 
    PlannerOccupancyMap getOccupancyMap()
@@ -197,6 +224,20 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       hasLowestCostPlan.set(false);
 
       return concurrentLowestCostNodeDataList.getCopyForReading();
+   }
+
+   PlannerNodeDataList getFullGraph()
+   {
+      PlannerNodeDataList plannerNodeDataList = new PlannerNodeDataList();
+      plannerNodeDataList.setIsFootstepGraph(true);
+
+      for (PlannerNodeData nodeData : fullGraphSinceLastReport.getCopyForReading())
+         plannerNodeDataList.addNode(nodeData);
+
+      hasFullGraph.set(false);
+      fullGraphSinceLastReport.clear();
+
+      return plannerNodeDataList;
    }
 
    public int getTotalNodeCount()

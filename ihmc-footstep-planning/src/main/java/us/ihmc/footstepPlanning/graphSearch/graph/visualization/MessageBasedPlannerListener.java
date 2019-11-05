@@ -14,36 +14,50 @@ import java.util.List;
 public abstract class MessageBasedPlannerListener implements BipedalFootstepPlannerListener
 {
    private final FootstepNodeSnapperReadOnly snapper;
-   private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
-   private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
+
    private final PlannerNodeDataList lowestNodeDataList = new PlannerNodeDataList();
    private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
    private final PlannerLatticeMap expandedNodesSinceLastReport = new PlannerLatticeMap();
+   private final PlannerNodeDataList fullGraphSinceLastReport = new PlannerNodeDataList();
 
-   private final long occupancyMapBroadcastDt;
+   private final long broadcastDt;
    private long lastBroadcastTime = -1;
+   private final PlannerNodeDataList allNodes = new PlannerNodeDataList();
 
-   public MessageBasedPlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapBroadcastDt)
+
+   public MessageBasedPlannerListener(FootstepNodeSnapperReadOnly snapper, long broadcastDt)
    {
       this.snapper = snapper;
-      this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
+      this.broadcastDt = broadcastDt;
    }
 
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
+      int previousNodeDataIndex;
+
       if (previousNode == null)
       {
-         rejectionReasons.clear();
-         childMap.clear();
-         lowestNodeDataList.clear();
+         reset();
+         previousNodeDataIndex = -1;
       }
       else
       {
-         childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
+         previousNodeDataIndex = allNodes.getNodeData().indexOf(previousNode.getLatticeNode());
+
          expandedNodesSinceLastReport.addLatticeNode(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
+      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+      PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+
+      fullGraphSinceLastReport.addNode(nodeData);
+      occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
+   }
+
+   private void reset()
+   {
+      lowestNodeDataList.clear();
+      allNodes.clear();
    }
 
    @Override
@@ -54,14 +68,14 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          FootstepNode node = plan.get(i);
          Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
-         lowestNodeDataList.addNode(i - 1, node.getRobotSide(), nodePose, null);
+         lowestNodeDataList.addNode(i - 1, i, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
       }
    }
 
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      rejectionReasons.put(rejectedNode, reason);
+      fullGraphSinceLastReport.getDataForNode(rejectedNode).setRejectionReason(reason);
    }
 
    @Override
@@ -72,7 +86,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       if (lastBroadcastTime == -1)
          lastBroadcastTime = currentTime;
 
-      if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
+      if (currentTime - lastBroadcastTime > broadcastDt)
       {
          broadcastOccupancyMap(occupancyMapSinceLastReport);
          broadcastExpandedNodes(expandedNodesSinceLastReport);
@@ -80,7 +94,10 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
          occupancyMapSinceLastReport.clear();
          expandedNodesSinceLastReport.clear();
 
-         broadcastNodeData(lowestNodeDataList);
+         broadcastLowestCostNodeData(lowestNodeDataList);
+
+         broadcastFullGraph(fullGraphSinceLastReport);
+         fullGraphSinceLastReport.clear();
 
          lastBroadcastTime = currentTime;
       }
@@ -96,5 +113,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    abstract void broadcastExpandedNodes(PlannerLatticeMap latticeMap);
 
-   abstract void broadcastNodeData(PlannerNodeDataList nodeDataList);
+   abstract void broadcastLowestCostNodeData(PlannerNodeDataList nodeDataList);
+
+   abstract void broadcastFullGraph(PlannerNodeDataList nodeDataList);
 }

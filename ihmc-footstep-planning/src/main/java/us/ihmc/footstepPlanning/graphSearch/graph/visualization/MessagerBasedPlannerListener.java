@@ -15,7 +15,7 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastNodeData(PlannerNodeDataList message)
+   void broadcastLowestCostNodeData(PlannerNodeDataList message)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, message);
    }
@@ -30,5 +30,11 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    void broadcastExpandedNodes(PlannerLatticeMap message)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.ExpandedNodesMap, message);
+   }
+
+   @Override
+   void broadcastFullGraph(PlannerNodeDataList message)
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraph, message);
    }
 }

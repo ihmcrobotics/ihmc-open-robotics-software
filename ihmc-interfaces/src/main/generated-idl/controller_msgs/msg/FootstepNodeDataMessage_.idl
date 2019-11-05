@@ -91,7 +91,18 @@ module controller_msgs
          * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
          */
         @defaultValue(value=-1)
+        long node_id;
+        /**
+         * ID of node. This should reference the index of this node in a FootstepNodeDataList
+         */
+        @defaultValue(value=-1)
         long parent_node_id;
+        @defaultValue(value=-1)
+        long x_index;
+        @defaultValue(value=-1)
+        long y_index;
+        @defaultValue(value=-1)
+        long yaw_index;
         /**
          * Node rejection reason. 255 if node was accepted
          */

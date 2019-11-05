@@ -14,7 +14,7 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastNodeData(PlannerNodeDataList message)
+   void broadcastLowestCostNodeData(PlannerNodeDataList message)
    {
       statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
@@ -27,6 +27,12 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
 
    @Override
    void broadcastExpandedNodes(PlannerLatticeMap message)
+   {
+      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
+   }
+
+   @Override
+   void broadcastFullGraph(PlannerNodeDataList message)
    {
       statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
