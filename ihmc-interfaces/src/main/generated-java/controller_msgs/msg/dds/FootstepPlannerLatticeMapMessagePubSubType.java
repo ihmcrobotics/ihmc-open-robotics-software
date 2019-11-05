@@ -62,9 +62,9 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getOccupiedCells().size(); ++i0)
+      for(int i0 = 0; i0 < data.getLatticeNodes().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getCdrSerializedSize(data.getOccupiedCells().get(i0), current_alignment);}
+          current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getCdrSerializedSize(data.getLatticeNodes().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -74,9 +74,9 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getOccupiedCells().size() <= 100)
-      cdr.write_type_e(data.getOccupiedCells());else
-          throw new RuntimeException("occupied_cells field exceeds the maximum length");
+      if(data.getLatticeNodes().size() <= 100)
+      cdr.write_type_e(data.getLatticeNodes());else
+          throw new RuntimeException("lattice_nodes field exceeds the maximum length");
 
    }
 
@@ -84,7 +84,7 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      cdr.read_type_e(data.getOccupiedCells());	
+      cdr.read_type_e(data.getLatticeNodes());	
 
    }
 
@@ -92,14 +92,14 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_e("occupied_cells", data.getOccupiedCells());
+      ser.write_type_e("lattice_nodes", data.getLatticeNodes());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_e("occupied_cells", data.getOccupiedCells());
+      ser.read_type_e("lattice_nodes", data.getLatticeNodes());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage src, controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage dest)

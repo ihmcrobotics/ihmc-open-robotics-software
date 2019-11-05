@@ -2,6 +2,6 @@
 uint32 sequence_id
 
 # List of cells that the planner has explored
-controller_msgs/FootstepPlannerLatticeNodeMessage[] occupied_cells
+controller_msgs/FootstepPlannerLatticeNodeMessage[] lattice_nodes
 
 

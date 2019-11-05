@@ -27,4 +27,10 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, message);
    }
+
+   @Override
+   void broadcastLatticeMap(PlannerLatticeMap message)
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.LatticeMap, message);
+   }
 }
