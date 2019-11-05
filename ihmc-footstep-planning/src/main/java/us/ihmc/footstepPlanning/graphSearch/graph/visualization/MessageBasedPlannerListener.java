@@ -1,23 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
-import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public abstract class MessageBasedPlannerListener implements BipedalFootstepPlannerListener
@@ -27,7 +18,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
    private final PlannerNodeDataList lowestNodeDataList = new PlannerNodeDataList();
    private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
-   private final PlannerLatticeMap latticeMapSinceLastReport = new PlannerLatticeMap();
+   private final PlannerLatticeMap expandedNodesSinceLastReport = new PlannerLatticeMap();
 
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
@@ -51,7 +42,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
          occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
-         latticeMapSinceLastReport.addLatticeNode(new LatticeNode(node.getXIndex(), node.getYIndex(), node.getYawIndex()));
+         expandedNodesSinceLastReport.addLatticeNode(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
    }
 
@@ -84,10 +75,10 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
       {
          broadcastOccupancyMap(occupancyMapSinceLastReport);
-         broadcastLatticeMap(latticeMapSinceLastReport);
+         broadcastExpandedNodes(expandedNodesSinceLastReport);
 
          occupancyMapSinceLastReport.clear();
-         latticeMapSinceLastReport.clear();
+         expandedNodesSinceLastReport.clear();
 
          broadcastNodeData(lowestNodeDataList);
 
@@ -103,7 +94,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    abstract void broadcastOccupancyMap(PlannerOccupancyMap occupancyMap);
 
-   abstract void broadcastLatticeMap(PlannerLatticeMap latticeMap);
+   abstract void broadcastExpandedNodes(PlannerLatticeMap latticeMap);
 
    abstract void broadcastNodeData(PlannerNodeDataList nodeDataList);
 }

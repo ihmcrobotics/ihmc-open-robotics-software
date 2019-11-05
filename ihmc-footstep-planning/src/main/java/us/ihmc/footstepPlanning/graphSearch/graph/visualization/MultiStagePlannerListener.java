@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -21,13 +20,16 @@ public class MultiStagePlannerListener
    private final StatusMessageOutputManager statusOutputManager;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean broadcastOccupancyMap = new YoBoolean("broadcastOccupancyMap", registry);
-   private final YoBoolean broadcastLatticeMap = new YoBoolean("broadcastLatticeMap", registry);
+   private final YoBoolean broadcastExpandedNodes = new YoBoolean("broadcastExpandedNodes", registry);
    private final YoBoolean broadcastLowestCostPlan = new YoBoolean("broadcastLowestCostPlan", registry);
 
    public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
+
+      broadcastOccupancyMap.set(true);
+      broadcastExpandedNodes.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -53,35 +55,49 @@ public class MultiStagePlannerListener
       if (!isTimeForBroadcast)
          return;
 
-      boolean isUpToDate = true;
+      boolean stageHasMapUpdate = false;
       for (StagePlannerListener listener : listeners)
-         isUpToDate &= listener.hasNodeData() && listener.hasOccupiedCells() && listener.hasLatticeMap();
+         stageHasMapUpdate |= listener.hasOccupiedCells() && listener.hasExpandedNodes();
 
-      if (isUpToDate)
-         return;
+      boolean stageHasLowestCostPlan = false;
+      for (StagePlannerListener listener : listeners)
+         stageHasLowestCostPlan |= listener.hasLowestCostPlan();
 
-      if (broadcastOccupancyMap.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
 
-      if (broadcastLatticeMap.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedLatticeMap());
-
-      if (broadcastLowestCostPlan.getBooleanValue())
+      if (stageHasMapUpdate)
       {
-         FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
-         if (!message.getNodeData().isEmpty())
-            statusOutputManager.reportStatusMessage(message);
+         if (broadcastOccupancyMap.getBooleanValue())
+            statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+
+         if (broadcastExpandedNodes.getBooleanValue())
+            statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
+
+         if (broadcastLowestCostPlan.getBooleanValue())
+         {
+            FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
+            if (!message.getNodeData().isEmpty())
+               statusOutputManager.reportStatusMessage(message);
+         }
+         lastBroadcastTime = currentTime;
       }
 
-      lastBroadcastTime = currentTime;
+      if (stageHasLowestCostPlan)
+      {
+         if (broadcastLowestCostPlan.getBooleanValue())
+         {
+            FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
+            if (!message.getNodeData().isEmpty())
+               statusOutputManager.reportStatusMessage(message);
+         }
+      }
    }
 
    public void plannerFinished(List<FootstepNode> plan)
    {
       if (broadcastOccupancyMap.getBooleanValue())
          statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
-      if (broadcastLatticeMap.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedLatticeMap());
+      if (broadcastExpandedNodes.getBooleanValue())
+         statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
@@ -123,18 +139,33 @@ public class MultiStagePlannerListener
       FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
       for (StagePlannerListener listener : listeners)
       {
-         for (PlannerCell stageCell : listener.getOccupancyMap().getOccupiedCells())
+         if (!listener.hasOccupiedCells())
+            continue;
+
+         PlannerOccupancyMap occupancyMap = listener.getOccupancyMap();
+         if (occupancyMap == null)
+            continue;
+
+         for (PlannerCell stageCell : occupancyMap.getOccupiedCells())
             stageCell.getAsMessage(occupancyMapMessage.getOccupiedCells().add());
       }
+
       return occupancyMapMessage;
    }
 
-   private FootstepPlannerLatticeMapMessage getConcatenatedLatticeMap()
+   private FootstepPlannerLatticeMapMessage getConcatenatedExpandedNodes()
    {
       FootstepPlannerLatticeMapMessage latticeMapMessage = new FootstepPlannerLatticeMapMessage();
       for (StagePlannerListener listener : listeners)
       {
-         for (LatticeNode stageCell : listener.getLatticeMap().getLatticeNodes())
+         if (!listener.hasExpandedNodes())
+            continue;
+
+         PlannerLatticeMap latticeMap = listener.getExpandedNodes();
+         if (latticeMap == null)
+            continue;
+
+         for (LatticeNode stageCell : latticeMap.getLatticeNodes())
          {
             FootstepPlannerLatticeNodeMessage nodeMessage = latticeMapMessage.getLatticeNodes().add();
             nodeMessage.setXIndex(stageCell.getXIndex());
@@ -151,7 +182,14 @@ public class MultiStagePlannerListener
       message.setIsFootstepGraph(false);
       for (StagePlannerListener listener : listeners)
       {
-         for (PlannerNodeData nodeData : listener.getLowestCostPlan().getNodeData())
+         if (!listener.hasLowestCostPlan())
+            continue;
+
+         PlannerNodeDataList lowestCostPlan = listener.getLowestCostPlan();
+         if (lowestCostPlan == null)
+            continue;
+
+         for (PlannerNodeData nodeData : lowestCostPlan.getNodeData())
             nodeData.getAsMessage(message.getNodeData().add());
       }
       return message;
