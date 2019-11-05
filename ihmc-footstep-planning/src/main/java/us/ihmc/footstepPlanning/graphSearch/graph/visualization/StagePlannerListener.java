@@ -3,11 +3,13 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.concurrent.ConcurrentCopier;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.idl.IDLSequence.Object;
@@ -206,22 +208,21 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
    {
-      nodeDataMessage.setParentNodeId(parentNodeIndex);
-
       byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
+
+      nodeDataMessage.setParentNodeId(parentNodeIndex);
       nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
-
       nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
-      nodeDataMessage.setXIndex(node.getXIndex());
-      nodeDataMessage.setYIndex(node.getYIndex());
-      nodeDataMessage.setYawIndex(node.getYawIndex());
 
-      if(snapper != null)
+      if (snapper != null)
       {
-         FootstepNodeSnapData snapData = snapper.getSnapData(node);
-         Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-         Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-         snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+         Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+         nodeDataMessage.getPosition().set(nodePose.getPosition());
+         nodeDataMessage.getOrientation().set(nodePose.getOrientation());
+      }
+      else
+      {
+         nodeDataMessage.getPosition().set(node.getX(), node.getY(), 0.0);
       }
    }
 

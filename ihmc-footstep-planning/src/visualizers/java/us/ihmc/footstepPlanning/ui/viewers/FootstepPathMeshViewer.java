@@ -122,17 +122,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, FootstepNodeDataMessage nodeData)
    {
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * LatticeNode.gridSizeYaw);
-      footstepPose.setTranslationX(nodeData.getXIndex() * LatticeNode.gridSizeXY);
-      footstepPose.setTranslationY(nodeData.getYIndex() * LatticeNode.gridSizeXY);
-
       FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-      RigidBodyTransform snapTransform = new RigidBodyTransform();
-      snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());
-      snapTransform.transform(footstepPose);
-      footstepDataMessage.getLocation().set(footstepPose.getTranslationVector());
-      footstepDataMessage.getOrientation().set(footstepPose.getRotationMatrix());
+      footstepDataMessage.getLocation().set(nodeData.getPosition());
+      footstepDataMessage.getOrientation().set(nodeData.getOrientation());
       footstepDataMessage.setRobotSide(nodeData.getRobotSide());
    }
 

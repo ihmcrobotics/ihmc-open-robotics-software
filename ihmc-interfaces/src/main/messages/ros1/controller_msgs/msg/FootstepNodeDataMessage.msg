@@ -42,17 +42,11 @@ int8 AT_CLIFF_BOTTOM=15
 # Field default value 255
 int8 robot_side
 
-int32 x_index
-
-int32 y_index
-
-int32 yaw_index
-
 # Specifies snap transform translation. NaN if snap was unsuccessful
-geometry_msgs/Point snap_translation
+geometry_msgs/Point position
 
 # Specifies the snap rotation. NaN if snap unsuccessful.
-geometry_msgs/Quaternion snap_rotation
+geometry_msgs/Quaternion orientation
 
 # ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
 # Field default value -1
