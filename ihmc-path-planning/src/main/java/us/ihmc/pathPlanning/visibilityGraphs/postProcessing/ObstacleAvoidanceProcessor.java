@@ -39,7 +39,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       List<Point3D> newPathPositions = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
       if (!parameters.getPerformPostProcessingNodeShifting())
-         return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
+         return new ArrayList<>(newPathPositions);
 
       int pathNodeIndex = 0;
       int waypointIndex = 0;
