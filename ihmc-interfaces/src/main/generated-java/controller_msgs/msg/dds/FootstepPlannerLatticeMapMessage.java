@@ -19,11 +19,11 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
    /**
             * List of cells that the planner has explored
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage>  occupied_cells_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage>  lattice_nodes_;
 
    public FootstepPlannerLatticeMapMessage()
    {
-      occupied_cells_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage> (100, new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType());
+      lattice_nodes_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage> (100, new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType());
 
    }
 
@@ -37,7 +37,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
    {
       sequence_id_ = other.sequence_id_;
 
-      occupied_cells_.set(other.occupied_cells_);
+      lattice_nodes_.set(other.lattice_nodes_);
    }
 
    /**
@@ -59,9 +59,9 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
    /**
             * List of cells that the planner has explored
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage>  getOccupiedCells()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage>  getLatticeNodes()
    {
-      return occupied_cells_;
+      return lattice_nodes_;
    }
 
 
@@ -84,11 +84,11 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (this.occupied_cells_.size() != other.occupied_cells_.size()) { return false; }
+      if (this.lattice_nodes_.size() != other.lattice_nodes_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.occupied_cells_.size(); i++)
-         {  if (!this.occupied_cells_.get(i).epsilonEquals(other.occupied_cells_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.lattice_nodes_.size(); i++)
+         {  if (!this.lattice_nodes_.get(i).epsilonEquals(other.lattice_nodes_.get(i), epsilon)) return false; }
       }
 
 
@@ -106,7 +106,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.occupied_cells_.equals(otherMyClass.occupied_cells_)) return false;
+      if (!this.lattice_nodes_.equals(otherMyClass.lattice_nodes_)) return false;
 
       return true;
    }
@@ -119,8 +119,8 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
       builder.append("FootstepPlannerLatticeMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("occupied_cells=");
-      builder.append(this.occupied_cells_);
+      builder.append("lattice_nodes=");
+      builder.append(this.lattice_nodes_);
       builder.append("}");
       return builder.toString();
    }

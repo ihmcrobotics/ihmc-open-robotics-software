@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.idl.IDLSequence.Object;
 
@@ -24,6 +25,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
    private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
+   private final PlannerLatticeMap latticeMapSinceLastReport = new PlannerLatticeMap();
 
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
@@ -47,6 +49,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
          occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
+         latticeMapSinceLastReport.addLatticeNode(new LatticeNode(node.getXIndex(), node.getYIndex(), node.getYawIndex()));
       }
    }
 
@@ -74,6 +77,10 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
       {
          broadcastOccupancyMap(occupancyMapSinceLastReport);
+         broadcastLatticeMap(latticeMapSinceLastReport);
+
+         occupancyMapSinceLastReport.clear();
+         latticeMapSinceLastReport.clear();
 
          FootstepNodeDataListMessage nodeDataListMessage = packLowestCostPlanMessage();
          if (nodeDataListMessage != null)
@@ -91,8 +98,9 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    abstract void broadcastOccupancyMap(PlannerOccupancyMap occupancyMap);
 
-   abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
+   abstract void broadcastLatticeMap(PlannerLatticeMap latticeMap);
 
+   abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
 
    FootstepNodeDataListMessage packLowestCostPlanMessage()
    {

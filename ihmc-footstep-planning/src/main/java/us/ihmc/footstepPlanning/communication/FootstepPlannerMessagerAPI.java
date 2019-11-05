@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
@@ -128,6 +129,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepNodeDataListMessage> NodeData = topic("NodeData");
    public static final Topic<Boolean> ShowNodeData = topic("ShowNodeData");
    public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
+   public static final Topic<PlannerLatticeMap> LatticeMap = topic("LatticeMap");
    public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
