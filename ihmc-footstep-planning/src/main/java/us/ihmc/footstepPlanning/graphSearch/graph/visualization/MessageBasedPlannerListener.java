@@ -4,11 +4,13 @@ import controller_msgs.msg.dds.FootstepNodeDataListMessage;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import controller_msgs.msg.dds.FootstepPlannerCellMessage;
 import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.idl.IDLSequence.Object;
@@ -125,20 +127,16 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
    {
-      nodeDataMessage.setParentNodeId(parentNodeIndex);
-
       byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
-      nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
-
-      nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
-      nodeDataMessage.setXIndex(node.getXIndex());
-      nodeDataMessage.setYIndex(node.getYIndex());
-      nodeDataMessage.setYawIndex(node.getYawIndex());
 
       FootstepNodeSnapData snapData = snapper.getSnapData(node);
-      Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-      Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-      snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
+
+      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapData.getSnapTransform());
+      nodeDataMessage.setParentNodeId(parentNodeIndex);
+      nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
+      nodeDataMessage.getPosition().set(nodePose.getPosition());
+      nodeDataMessage.getOrientation().set(nodePose.getOrientation());
+      nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
    }
 
 }

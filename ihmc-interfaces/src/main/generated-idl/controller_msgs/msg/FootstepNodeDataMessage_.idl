@@ -79,17 +79,14 @@ module controller_msgs
          */
         @defaultValue(value=255)
         octet robot_side;
-        long x_index;
-        long y_index;
-        long yaw_index;
         /**
          * Specifies snap transform translation. NaN if snap was unsuccessful
          */
-        geometry_msgs::msg::dds::Point snap_translation;
+        geometry_msgs::msg::dds::Point position;
         /**
          * Specifies the snap rotation. NaN if snap unsuccessful.
          */
-        geometry_msgs::msg::dds::Quaternion snap_rotation;
+        geometry_msgs::msg::dds::Quaternion orientation;
         /**
          * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
          */

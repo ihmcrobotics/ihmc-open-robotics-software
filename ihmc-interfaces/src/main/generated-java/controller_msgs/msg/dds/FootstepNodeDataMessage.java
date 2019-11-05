@@ -37,17 +37,14 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
             * Footstep node side
             */
    public byte robot_side_ = (byte) 255;
-   public int x_index_;
-   public int y_index_;
-   public int yaw_index_;
    /**
             * Specifies snap transform translation. NaN if snap was unsuccessful
             */
-   public us.ihmc.euclid.tuple3D.Point3D snap_translation_;
+   public us.ihmc.euclid.tuple3D.Point3D position_;
    /**
             * Specifies the snap rotation. NaN if snap unsuccessful.
             */
-   public us.ihmc.euclid.tuple4D.Quaternion snap_rotation_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
             * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
             */
@@ -59,8 +56,8 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
    public FootstepNodeDataMessage()
    {
-      snap_translation_ = new us.ihmc.euclid.tuple3D.Point3D();
-      snap_rotation_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public FootstepNodeDataMessage(FootstepNodeDataMessage other)
@@ -73,14 +70,8 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    {
       robot_side_ = other.robot_side_;
 
-      x_index_ = other.x_index_;
-
-      y_index_ = other.y_index_;
-
-      yaw_index_ = other.yaw_index_;
-
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.snap_translation_, snap_translation_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.snap_rotation_, snap_rotation_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       parent_node_id_ = other.parent_node_id_;
 
       bipedal_footstep_planner_node_rejection_reason_ = other.bipedal_footstep_planner_node_rejection_reason_;
@@ -102,49 +93,22 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
       return robot_side_;
    }
 
-   public void setXIndex(int x_index)
-   {
-      x_index_ = x_index;
-   }
-   public int getXIndex()
-   {
-      return x_index_;
-   }
-
-   public void setYIndex(int y_index)
-   {
-      y_index_ = y_index;
-   }
-   public int getYIndex()
-   {
-      return y_index_;
-   }
-
-   public void setYawIndex(int yaw_index)
-   {
-      yaw_index_ = yaw_index;
-   }
-   public int getYawIndex()
-   {
-      return yaw_index_;
-   }
-
 
    /**
             * Specifies snap transform translation. NaN if snap was unsuccessful
             */
-   public us.ihmc.euclid.tuple3D.Point3D getSnapTranslation()
+   public us.ihmc.euclid.tuple3D.Point3D getPosition()
    {
-      return snap_translation_;
+      return position_;
    }
 
 
    /**
             * Specifies the snap rotation. NaN if snap unsuccessful.
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getSnapRotation()
+   public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
    {
-      return snap_rotation_;
+      return orientation_;
    }
 
    /**
@@ -197,14 +161,8 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_index_, other.x_index_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_index_, other.y_index_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_index_, other.yaw_index_, epsilon)) return false;
-
-      if (!this.snap_translation_.epsilonEquals(other.snap_translation_, epsilon)) return false;
-      if (!this.snap_rotation_.epsilonEquals(other.snap_rotation_, epsilon)) return false;
+      if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
+      if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.parent_node_id_, other.parent_node_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bipedal_footstep_planner_node_rejection_reason_, other.bipedal_footstep_planner_node_rejection_reason_, epsilon)) return false;
@@ -224,14 +182,8 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.x_index_ != otherMyClass.x_index_) return false;
-
-      if(this.y_index_ != otherMyClass.y_index_) return false;
-
-      if(this.yaw_index_ != otherMyClass.yaw_index_) return false;
-
-      if (!this.snap_translation_.equals(otherMyClass.snap_translation_)) return false;
-      if (!this.snap_rotation_.equals(otherMyClass.snap_rotation_)) return false;
+      if (!this.position_.equals(otherMyClass.position_)) return false;
+      if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if(this.parent_node_id_ != otherMyClass.parent_node_id_) return false;
 
       if(this.bipedal_footstep_planner_node_rejection_reason_ != otherMyClass.bipedal_footstep_planner_node_rejection_reason_) return false;
@@ -248,16 +200,10 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
       builder.append("FootstepNodeDataMessage {");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("x_index=");
-      builder.append(this.x_index_);      builder.append(", ");
-      builder.append("y_index=");
-      builder.append(this.y_index_);      builder.append(", ");
-      builder.append("yaw_index=");
-      builder.append(this.yaw_index_);      builder.append(", ");
-      builder.append("snap_translation=");
-      builder.append(this.snap_translation_);      builder.append(", ");
-      builder.append("snap_rotation=");
-      builder.append(this.snap_rotation_);      builder.append(", ");
+      builder.append("position=");
+      builder.append(this.position_);      builder.append(", ");
+      builder.append("orientation=");
+      builder.append(this.orientation_);      builder.append(", ");
       builder.append("parent_node_id=");
       builder.append(this.parent_node_id_);      builder.append(", ");
       builder.append("bipedal_footstep_planner_node_rejection_reason=");
