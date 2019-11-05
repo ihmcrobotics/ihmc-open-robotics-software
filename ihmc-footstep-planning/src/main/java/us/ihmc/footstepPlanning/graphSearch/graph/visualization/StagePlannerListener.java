@@ -1,23 +1,20 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.*;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import controller_msgs.msg.dds.FootstepNodeDataMessage;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
-import us.ihmc.idl.IDLSequence.Object;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
@@ -28,11 +25,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final PlannerLatticeMap latticeMapSinceLastReport = new PlannerLatticeMap();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-
-   private final RecyclingArrayList<FootstepNodeDataMessage> nodeDataMessageList = new RecyclingArrayList<>(FootstepNodeDataMessage::new);
-
-   private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
+   private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
    private final ConcurrentCopier<PlannerOccupancyMap> concurrentOccupancyMap = new ConcurrentCopier<>(PlannerOccupancyMap::new);
    private final ConcurrentCopier<PlannerLatticeMap> concurrentLatticeMap = new ConcurrentCopier<>(PlannerLatticeMap::new);
 
@@ -124,7 +117,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
-      PlannerOccupancyMap concurrentOccupancyMap = this.concurrentOccupancyMap.getCopyForReading();
+      PlannerOccupancyMap concurrentOccupancyMap = this.concurrentOccupancyMap.getCopyForWriting();
       concurrentOccupancyMap.set(occupancyMapSinceLastReport);
       this.concurrentOccupancyMap.commit();
       occupancyMapSinceLastReport.clear();
@@ -134,7 +127,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateLatticeMap()
    {
-      PlannerLatticeMap concurrentLatticeMap = this.concurrentLatticeMap.getCopyForReading();
+      PlannerLatticeMap concurrentLatticeMap = this.concurrentLatticeMap.getCopyForWriting();
       concurrentLatticeMap.set(latticeMapSinceLastReport);
       this.concurrentLatticeMap.commit();
       latticeMapSinceLastReport.clear();
@@ -144,18 +137,18 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateNodeData()
    {
-      nodeData.clear();
+      PlannerNodeDataList concurrentNodeDataList = this.concurrentLowestCostNodeDataList.getCopyForWriting();
+      concurrentNodeDataList.clear();
       for (int i = 0; i < lowestCostPlan.size(); i++)
       {
          FootstepNode node = lowestCostPlan.get(i);
-         FootstepNodeDataMessage nodeDataMessage = nodeDataMessageList.add();
-         setNodeDataMessage(nodeDataMessage, node, -1);
+         Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+         concurrentNodeDataList.addNode(-1, node.getRobotSide(), nodePose, null);
       }
-      nodeData.addAll(nodeDataMessageList);
-
+      this.concurrentLowestCostNodeDataList.commit();
       lowestCostPlan.clear();
 
-      hasNodeData.set(true);
+      hasNodeData.set(!concurrentNodeDataList.getNodeData().isEmpty());
    }
 
    public boolean hasOccupiedCells()
@@ -187,23 +180,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return concurrentLatticeMap.getCopyForReading();
    }
 
-   FootstepNodeDataListMessage packLowestCostPlanMessage()
+   PlannerNodeDataList getLowestCostPlan()
    {
-      if (nodeData.isEmpty())
-         return null;
-
-      Object<FootstepNodeDataMessage> nodeDataListForMessage = nodeDataListMessage.getNodeData();
-      nodeDataListForMessage.clear();
-
-      List<FootstepNodeDataMessage> nodeData = this.nodeData.getCopyForReading();
-      for (int i = 0; i < nodeData.size(); i++)
-         nodeDataListForMessage.add().set(nodeData.get(i));
-
-      nodeDataListMessage.setIsFootstepGraph(false);
-
       hasNodeData.set(false);
 
-      return nodeDataListMessage;
+      return concurrentLowestCostNodeDataList.getCopyForReading();
    }
 
    private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
@@ -234,55 +215,5 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public int getRejectionReasonCount(BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
       return rejectionCount.get(rejectionReason).getValue();
-   }
-
-   private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
-   {
-      public ConcurrentList()
-      {
-         super(ArrayList::new);
-      }
-
-      public void clear()
-      {
-         getCopyForWriting().clear();
-         commit();
-      }
-
-      public void addAll(Collection<? extends T> collection)
-      {
-         List<T> currentSet = getCopyForReading();
-         List<T> updatedSet = getCopyForWriting();
-         updatedSet.clear();
-         if (currentSet != null)
-            updatedSet.addAll(currentSet);
-         updatedSet.addAll(collection);
-         commit();
-      }
-
-      public T[] toArray(T[] ts)
-      {
-         List<T> currentSet = getCopyForReading();
-         return currentSet.toArray(ts);
-      }
-
-      public boolean isEmpty()
-      {
-         List<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return true;
-
-         return currentList.isEmpty();
-      }
-
-      public int size()
-      {
-         List<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return 0;
-
-         return currentList.size();
-      }
-
    }
 }

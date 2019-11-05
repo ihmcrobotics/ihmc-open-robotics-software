@@ -13,8 +13,6 @@ import java.util.List;
 
 public class MultiStagePlannerListener
 {
-   private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
 
@@ -24,6 +22,7 @@ public class MultiStagePlannerListener
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean broadcastOccupancyMap = new YoBoolean("broadcastOccupancyMap", registry);
    private final YoBoolean broadcastLatticeMap = new YoBoolean("broadcastLatticeMap", registry);
+   private final YoBoolean broadcastLowestCostPlan = new YoBoolean("broadcastLowestCostPlan", registry);
 
    public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
@@ -67,23 +66,12 @@ public class MultiStagePlannerListener
       if (broadcastLatticeMap.getBooleanValue())
          statusOutputManager.reportStatusMessage(getConcatenatedLatticeMap());
 
-
-      Object<FootstepNodeDataMessage> nodeData = nodeDataListMessage.getNodeData();
-      nodeData.clear();
-
-      for (StagePlannerListener listener : listeners)
+      if (broadcastLowestCostPlan.getBooleanValue())
       {
-         FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
-         if (stageNodeList != null)
-         {
-            Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
-            for (int i = 0; i < stageNodeData.size(); i++)
-               nodeData.add().set(stageNodeData.get(i));
-         }
+         FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
+         if (!message.getNodeData().isEmpty())
+            statusOutputManager.reportStatusMessage(message);
       }
-
-      if (!nodeData.isEmpty())
-         statusOutputManager.reportStatusMessage(nodeDataListMessage);
 
       lastBroadcastTime = currentTime;
    }
@@ -155,6 +143,18 @@ public class MultiStagePlannerListener
          }
       }
       return latticeMapMessage;
+   }
+
+   private FootstepNodeDataListMessage getConcatenatedLowestCostNodeData()
+   {
+      FootstepNodeDataListMessage message = new FootstepNodeDataListMessage();
+      message.setIsFootstepGraph(false);
+      for (StagePlannerListener listener : listeners)
+      {
+         for (PlannerNodeData nodeData : listener.getLowestCostPlan().getNodeData())
+            nodeData.getAsMessage(message.getNodeData().add());
+      }
+      return message;
    }
 
    public void reset()
