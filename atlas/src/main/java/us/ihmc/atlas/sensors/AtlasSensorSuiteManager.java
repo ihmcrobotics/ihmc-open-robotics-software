@@ -47,7 +47,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
 
-   private static final String surfixDepthCloudTopicNameToPublish = "_D435";
+   private static final String depthCloudTopicNameSurfixToPublish = "_D435";
    private static final String depthCloudTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
 
    private final RobotROSClockCalculator rosClockCalculator;
@@ -77,7 +77,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, surfixDepthCloudTopicNameToPublish);
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName,
+                                                                              (Class<?> messageType) -> messageType.getSimpleName()
+                                                                                    + depthCloudTopicNameSurfixToPublish);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
       realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
    }
