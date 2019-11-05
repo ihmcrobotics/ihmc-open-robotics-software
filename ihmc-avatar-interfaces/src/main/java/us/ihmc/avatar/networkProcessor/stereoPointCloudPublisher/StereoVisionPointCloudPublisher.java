@@ -18,6 +18,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,6 +36,8 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 public class StereoVisionPointCloudPublisher
 {
    private static final boolean Debug = false;
+
+   private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
    private static final int MAX_NUMBER_OF_POINTS = 200000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -69,34 +72,29 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
-      this(modelFactory, ros2Node, robotConfigurationDataTopicName, "");
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
+           ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                          String surfixTopicNameToPublish)
+                                          MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           surfixTopicNameToPublish);
-   }
-
-   public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, RealtimeRos2Node ros2Node, String robotConfigurationDataTopicName)
-   {
-      this(robotName, fullRobotModel, null, ros2Node, robotConfigurationDataTopicName, "");
+           defaultTopicNameGenerator);
    }
 
    public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                          String robotConfigurationDataTopicName, String surfixTopicNameToPublish)
+                                          String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
-      String generateTopicName = ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(StereoVisionPointCloudMessage.class);
+      String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageType);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName + surfixTopicNameToPublish);
+         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
          pointcloudRealtimePublisher = null;
       }
       else
@@ -104,7 +102,7 @@ public class StereoVisionPointCloudPublisher
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = null;
-         pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName + surfixTopicNameToPublish);
+         pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
       }
    }
 
