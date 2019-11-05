@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Uses QP to wiggle a point away from clusters of other points
+ * towards a desired distance and away a minimum distance.
+ */
 public class PointWiggler
 {
    static Vector2DReadOnly computeBestShiftVectorToAvoidPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistance,
@@ -116,7 +120,7 @@ public class PointWiggler
       if (numberOfPointsAdded == 0)
          return new Vector2D();
 
-      // remove unused constraints
+      // remove unused constraints; still need this?
       while (CI.getNumRows() > numberOfPointsAdded)
       {
          MatrixTools.removeRow(CI, numberOfPointsAdded);

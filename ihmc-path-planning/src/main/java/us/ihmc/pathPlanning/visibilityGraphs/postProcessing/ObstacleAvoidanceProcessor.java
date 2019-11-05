@@ -17,6 +17,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Newer than ObstacleAndCliffAvoidanceProcessor.
+ * Post processing algorithm for modifying a path plan to better avoid obstacles:
+ * - Wiggles points to desired clearance of obstacles
+ * - Can add intermediary waypoints to assist in avoiding obstacles
+ */
 public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
 {
    private static final double minDistanceToMove = 0.01;
@@ -39,7 +45,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       List<Point3D> newPathPositions = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
       if (!parameters.getPerformPostProcessingNodeShifting())
-         return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
+         return new ArrayList<>(newPathPositions);
 
       int pathNodeIndex = 0;
       int waypointIndex = 0;
@@ -82,7 +88,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
          pathNodeIndex++;
       }
 
-      return newPathPositions.parallelStream().map(Point3D::new).collect(Collectors.toList());
+      return new ArrayList<>(newPathPositions);
    }
 
    private List<Point3D> addAndAdjustMidpoints(Point3DReadOnly startPoint, Point3DReadOnly endPoint, VisibilityGraphNode startNode, VisibilityGraphNode endNode,
@@ -94,6 +100,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
                                                                                                                        endNode,
                                                                                                                        desiredDistanceFromObstacleCluster,
                                                                                                                        waypointResolution);
+      // precautionary checks
       PostProcessingTools.removeDuplicated3DPointsFromList(intermediateWaypointsToAdd, waypointResolution);
       PostProcessingTools.removeDuplicateStartOrEndPointsFromList(intermediateWaypointsToAdd, startPoint, endPoint, waypointResolution);
 
@@ -121,6 +128,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       {
          for (Cluster potentialCluster : navigableRegion.getObstacleClusters())
          {
+            // might be unecessary check, points in here were already filtered for this
             if (potentialCluster.getRawPointsInLocal3D().stream().anyMatch(point -> point.getZ() > parameters.getTooHighToStepDistance()))
                obstacleClusters.add(potentialCluster);
          }
@@ -134,7 +142,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
          nodeShiftToAvoidObstacles = new Vector2D();
 
       if (nodeShiftToAvoidObstacles.length() < minDistanceToMove)
-         return;
+         return; // didn't shift significantly or it's NaN, don't need to do following checks
 
       Point2D shiftedPoint = new Point2D(nodeLocationToPack);
       shiftedPoint.add(nodeShiftToAvoidObstacles);
@@ -142,8 +150,9 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>(
             PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
 
-      if (bothRegions.size() > 1)
+      if (bothRegions.size() > 1) // size will always be 2 (see above)
       {
+         // this appears to be named incorrectly, actually looks to see if next point is in *start* region
          boolean pointIsInEndRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(nextPointInWorld2D,
                                                                                                    startRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
                                                                                                    startRegion.getHomeRegionCluster().getNumberOfRawPoints(),
@@ -159,7 +168,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       if (nodeShiftToAvoidObstacles.containsNaN())
          nodeShiftToAvoidObstacles = new Vector2D();
 
-      if (nodeShiftToAvoidObstacles.length() > minDistanceToMove)
+      if (nodeShiftToAvoidObstacles.length() > minDistanceToMove) // if it moved a significant amount or if it's NaN
       {
          nextPointInWorld2D.add(nodeShiftToAvoidObstacles);
          nodeLocationToPack.set(nextPointInWorld2D, PostProcessingTools.findHeightOfPoint(nextPointInWorld2D, bothRegions));
