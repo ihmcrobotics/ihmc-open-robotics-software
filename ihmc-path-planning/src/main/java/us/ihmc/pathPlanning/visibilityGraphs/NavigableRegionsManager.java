@@ -259,7 +259,8 @@ public class NavigableRegionsManager
       double angle = Math.atan(verticalDistance / horizontalDistance);
 
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
-      double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI; // what is this operation?
+      // 2/pi to scale error from {0:90} degrees or {0:pi/2} radians degrees to {0:1}
+      double elevationCost = parameters.getElevationWeight() * angle * (2.0 / Math.PI);
 
       return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
