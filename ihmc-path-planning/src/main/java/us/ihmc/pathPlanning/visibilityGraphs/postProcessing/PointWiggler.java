@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Uses QP to wiggle a point away from clusters of other points
+ * towards a desired distance and away a minimum distance.
+ */
 public class PointWiggler
 {
    static Vector2DReadOnly computeBestShiftVectorToAvoidPoints(Point2DReadOnly pointToShift, List<Point2DReadOnly> pointsToAvoidByDistance,
