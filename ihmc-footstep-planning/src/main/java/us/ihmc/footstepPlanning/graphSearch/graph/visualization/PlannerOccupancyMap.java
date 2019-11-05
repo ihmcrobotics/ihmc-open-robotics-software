@@ -36,11 +36,29 @@ public class PlannerOccupancyMap
       occupiedCells.clear();
    }
 
+   public void set(PlannerOccupancyMap occupancyMap)
+   {
+      occupiedCells.clear();
+      append(occupancyMap);
+   }
+
+   public void append(PlannerOccupancyMap occupancyMap)
+   {
+      occupiedCells.addAll(occupancyMap.getOccupiedCells());
+   }
+
    public void set(FootstepPlannerOccupancyMapMessage message)
    {
       occupiedCells.clear();
       for (FootstepPlannerCellMessage cellMessage : message.getOccupiedCells())
          occupiedCells.add(new PlannerCell(cellMessage));
+   }
+
+   public FootstepPlannerOccupancyMapMessage getAsMessage()
+   {
+      FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
+      getAsMessage(message);
+      return message;
    }
 
    public void getAsMessage(FootstepPlannerOccupancyMapMessage messageToPack)

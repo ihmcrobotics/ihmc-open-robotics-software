@@ -25,8 +25,8 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage message)
+   void broadcastOccupancyMap(PlannerOccupancyMap message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
 }

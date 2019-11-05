@@ -5,14 +5,13 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiStagePlannerListener
 {
-   private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
    private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
 
    private final long occupancyMapBroadcastDt;
@@ -22,7 +21,7 @@ public class MultiStagePlannerListener
 
    private final StatusMessageOutputManager statusOutputManager;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoDouble broadcastOccupancyMap = new YoDouble("broadcastOccupancyMap", registry);
+   private final YoBoolean broadcastOccupancyMap = new YoBoolean("broadcastOccupancyMap", registry);
 
    public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
@@ -53,58 +52,46 @@ public class MultiStagePlannerListener
       if (!isTimeForBroadcast)
          return;
 
-      boolean areListenersUpdated = true;
-      for (StagePlannerListener listener : listeners)
-         areListenersUpdated &= listener.hasNodeData() && listener.hasOccupiedCells();
-
-      if (!areListenersUpdated)
-         return;
-
-      Object<FootstepPlannerCellMessage> occupiedCells = occupancyMapMessage.getOccupiedCells();
-      Object<FootstepNodeDataMessage> nodeData = nodeDataListMessage.getNodeData();
-      occupiedCells.clear();
-      nodeData.clear();
-
+      boolean occupiedCellsUpToDate = true;
+      boolean nodeDataIsUpToDate = true;
       for (StagePlannerListener listener : listeners)
       {
-         FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
-         if (stageOccupancyMap != null)
-         {
-            Object<FootstepPlannerCellMessage> stageOccupiedCells = stageOccupancyMap.getOccupiedCells();
-            for (int i = 0; i < stageOccupiedCells.size(); i++)
-               occupiedCells.add().set(stageOccupiedCells.get(i));
-         }
-
-         FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
-         if (stageNodeList != null)
-         {
-            Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
-            for (int i = 0; i < stageNodeData.size(); i++)
-               nodeData.add().set(stageNodeData.get(i));
-         }
+         nodeDataIsUpToDate &= listener.hasNodeData();
+         occupiedCellsUpToDate &= listener.hasOccupiedCells();
       }
 
-      broadcastOccupancyMap(occupancyMapMessage);
+      if (occupiedCellsUpToDate && nodeDataIsUpToDate)
+         return;
 
-      if (!nodeData.isEmpty())
-         broadcastNodeData(nodeDataListMessage);
+      if (broadcastOccupancyMap.getBooleanValue())
+      {
+         broadcastOccupancyMap(getConcatenatedOccupancyMap());
+      }
+
+
+         Object<FootstepNodeDataMessage> nodeData = nodeDataListMessage.getNodeData();
+         nodeData.clear();
+
+         for (StagePlannerListener listener : listeners)
+         {
+            FootstepNodeDataListMessage stageNodeList = listener.packLowestCostPlanMessage();
+            if (stageNodeList != null)
+            {
+               Object<FootstepNodeDataMessage> stageNodeData = stageNodeList.getNodeData();
+               for (int i = 0; i < stageNodeData.size(); i++)
+                  nodeData.add().set(stageNodeData.get(i));
+            }
+         }
+
+         if (!nodeData.isEmpty())
+            broadcastNodeData(nodeDataListMessage);
 
       lastBroadcastTime = currentTime;
    }
 
    public void plannerFinished(List<FootstepNode> plan)
    {
-      FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
-      for (StagePlannerListener listener : listeners)
-      {
-         FootstepPlannerOccupancyMapMessage stageOccupancyMap = listener.packOccupancyMapMessage();
-         if (stageOccupancyMap != null)
-         {
-            for (int i = 0; i < stageOccupancyMap.getOccupiedCells().size(); i++)
-               occupancyMapMessage.getOccupiedCells().add().set(stageOccupancyMap.getOccupiedCells().get(i));
-         }
-      }
-      broadcastOccupancyMap(occupancyMapMessage);
+      broadcastOccupancyMap(getConcatenatedOccupancyMap());
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
@@ -139,6 +126,17 @@ public class MultiStagePlannerListener
             planningStatistics.getRejectionFractions().set(i, rejectionPercentage);
          }
       }
+   }
+
+   private FootstepPlannerOccupancyMapMessage getConcatenatedOccupancyMap()
+   {
+      FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
+      for (StagePlannerListener listener : listeners)
+      {
+         for (PlannerCell stageCell : listener.getOccupancyMap().getOccupiedCells())
+            stageCell.getAsMessage(occupancyMapMessage.getOccupiedCells().add());
+      }
+      return occupancyMapMessage;
    }
 
    public void reset()

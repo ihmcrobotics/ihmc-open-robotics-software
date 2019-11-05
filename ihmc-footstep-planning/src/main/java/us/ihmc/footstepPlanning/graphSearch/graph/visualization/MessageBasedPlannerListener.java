@@ -22,8 +22,8 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final FootstepNodeSnapperReadOnly snapper;
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final HashSet<PlannerCell> exploredCells = new HashSet<>();
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
+   private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
 
    private final long occupancyMapBroadcastDt;
    private long lastBroadcastTime = -1;
@@ -41,13 +41,12 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          rejectionReasons.clear();
          childMap.clear();
-         exploredCells.clear();
          lowestCostPlan.clear();
       }
       else
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         exploredCells.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+         occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
       }
    }
 
@@ -74,8 +73,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
       if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
       {
-         FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
-         broadcastOccupancyMap(occupancyMapMessage);
+         broadcastOccupancyMap(occupancyMapSinceLastReport);
 
          FootstepNodeDataListMessage nodeDataListMessage = packLowestCostPlanMessage();
          if (nodeDataListMessage != null)
@@ -88,28 +86,13 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void plannerFinished(List<FootstepNode> plan)
    {
-      FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
-      broadcastOccupancyMap(occupancyMapMessage);
+      broadcastOccupancyMap(occupancyMapSinceLastReport);
    }
 
-   abstract void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage occupancyMapMessage);
+   abstract void broadcastOccupancyMap(PlannerOccupancyMap occupancyMap);
 
    abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
 
-   FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
-   {
-      PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
-      FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
-      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      for (int i = 0; i < plannerCells.length; i++)
-      {
-         FootstepPlannerCellMessage plannerCell = occupiedCells.add();
-         plannerCell.setXIndex(plannerCells[i].getXIndex());
-         plannerCell.setYIndex(plannerCells[i].getYIndex());
-      }
-
-      return message;
-   }
 
    FootstepNodeDataListMessage packLowestCostPlanMessage()
    {
