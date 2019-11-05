@@ -1,12 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.ros2.RealtimeRos2Node;
 
 public class RosBasedPlannerListener extends MessageBasedPlannerListener
 {
@@ -19,9 +14,9 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastNodeData(FootstepNodeDataListMessage message)
+   void broadcastNodeData(PlannerNodeDataList message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
 
    @Override

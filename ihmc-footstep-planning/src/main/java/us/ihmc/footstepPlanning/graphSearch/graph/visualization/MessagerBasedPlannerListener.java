@@ -17,7 +17,7 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastNodeData(FootstepNodeDataListMessage message)
+   void broadcastNodeData(PlannerNodeDataList message)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, message);
    }
