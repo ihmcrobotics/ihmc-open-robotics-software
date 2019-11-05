@@ -17,6 +17,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    @FXML
    private ToggleButton enableStereoButton;
    @FXML
+   private ToggleButton enableDepthButton;
+   @FXML
    private Spinner<Integer> sizeOfPointCloudSpinner;
    @FXML
    private Slider navigationFramesSlider;
@@ -51,6 +53,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, enableLidarButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIDepthCloudShow, enableDepthButton.selectedProperty(), true);
+      
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
    }
@@ -65,6 +69,12 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    public void clearStereo()
    {
       uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionClear, true);
+   }
+   
+   @FXML
+   public void clearDepth()
+   {
+      uiMessager.submitMessageInternal(REAModuleAPI.UIDepthCloudClear, true);
    }
 
    @FXML
