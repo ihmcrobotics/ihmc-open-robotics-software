@@ -120,6 +120,8 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIStereoVisionShow = Root.child(UI).child(StereoVision).topic(Show);
    public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
    public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
+   public static final Topic<Boolean> UIDepthCloudShow = Root.child(UI).child(DepthCloud).topic(Show);
+   public static final Topic<Boolean> UIDepthCloudClear = Root.child(UI).child(DepthCloud).topic(Clear);
 
    public static final Topic<Boolean> UISensorPoseHistoryClear = Root.child(UI).child(SensorFrame).topic(Clear);
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);

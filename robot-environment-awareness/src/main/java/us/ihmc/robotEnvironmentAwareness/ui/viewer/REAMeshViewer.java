@@ -49,9 +49,11 @@ public class REAMeshViewer
 
    public REAMeshViewer(REAUIMessager uiMessager)
    {
-      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager);
-      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager);
-      depthPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.DepthPointCloudState, uiMessager);
+      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager, REAModuleAPI.UILidarScanShow, REAModuleAPI.UILidarScanClear);
+      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager, REAModuleAPI.UIStereoVisionShow,
+                                                                      REAModuleAPI.UIStereoVisionClear);
+      depthPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.DepthPointCloudState, uiMessager, REAModuleAPI.UIDepthCloudShow,
+                                                               REAModuleAPI.UIDepthCloudClear);
       lidarBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowLidarBuffer, REAModuleAPI.RequestLidarBuffer,
                                                                  REAModuleAPI.LidarBufferState, Color.DARKRED);
       stereoVisionBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowStereoVisionBuffer,
