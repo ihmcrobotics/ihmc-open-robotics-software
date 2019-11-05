@@ -9,6 +9,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
+/**
+ * Navigable region with visibility graph nodes
+ */
 public class VisibilityGraphNavigableRegion
 {
    private final NavigableRegion navigableRegion;

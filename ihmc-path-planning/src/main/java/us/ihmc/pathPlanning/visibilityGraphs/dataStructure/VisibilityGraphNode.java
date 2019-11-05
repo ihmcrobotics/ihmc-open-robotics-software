@@ -8,6 +8,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
+/**
+ * Visibility graph node data structure associated with a navigable region,
+ * holding cost information, and connected graph edges
+ */
 public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNode>
 {
    private final VisibilityGraphNavigableRegion visibilityGraphNavigableRegion;
