@@ -29,7 +29,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final RecyclingArrayList<FootstepNodeDataMessage> nodeDataMessageList = new RecyclingArrayList<>(FootstepNodeDataMessage::new);
 
    private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
-   private final ConcurrentCopier<FootstepPlannerOccupancyMapMessage> occupancyMapMessage = new ConcurrentCopier<>(FootstepPlannerOccupancyMapMessage::new);
+   private final ConcurrentCopier<PlannerOccupancyMap> plannerOccupancyMap = new ConcurrentCopier<>(PlannerOccupancyMap::new);
 
    private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
    private final AtomicBoolean hasNodeData = new AtomicBoolean(true);
@@ -115,12 +115,12 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
-      FootstepPlannerOccupancyMapMessage occupancyMapMessage = this.occupancyMapMessage.getCopyForReading();
-      occupancyMapSinceLastReport.getAsMessage(occupancyMapMessage);
-      this.occupancyMapMessage.commit();
+      PlannerOccupancyMap concurrentOccupancyMap = this.plannerOccupancyMap.getCopyForReading();
+      concurrentOccupancyMap.set(occupancyMapSinceLastReport);
+      this.plannerOccupancyMap.commit();
       occupancyMapSinceLastReport.clear();
 
-      hasOccupiedCells.set(!occupancyMapMessage.getOccupiedCells().isEmpty());
+      hasOccupiedCells.set(!concurrentOccupancyMap.getOccupiedCells().isEmpty());
    }
 
    private void updateNodeData()
@@ -149,11 +149,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return hasNodeData.get();
    }
 
-   FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
+   PlannerOccupancyMap getOccupancyMap()
    {
       hasOccupiedCells.set(false);
 
-      return occupancyMapMessage.getCopyForReading();
+      return plannerOccupancyMap.getCopyForReading();
    }
 
    FootstepNodeDataListMessage packLowestCostPlanMessage()

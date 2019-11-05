@@ -23,7 +23,7 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage message)
+   void broadcastOccupancyMap(PlannerOccupancyMap message)
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, message);
    }
