@@ -365,6 +365,10 @@ public class DynamicsMatrixCalculator
       return true;
    }
 
+   public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
+   {
+      return massMatrixCalculator;
+   }
 
    public boolean checkFloatingBaseRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F tau,
          DenseMatrix64F rho)
