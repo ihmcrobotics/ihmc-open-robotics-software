@@ -36,6 +36,8 @@ public class VisualizationController
    @FXML
    private CheckBox showOccupancyMap;
    @FXML
+   private CheckBox showExpandedNodes;
+   @FXML
    private CheckBox showSolution;
    @FXML
    private CheckBox showIntermediateSolution;
@@ -73,6 +75,7 @@ public class VisualizationController
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
+      messager.bindBidirectional(ShowExpandedNodes, showExpandedNodes.selectedProperty(), true);
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowNodeData, showIntermediateSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);

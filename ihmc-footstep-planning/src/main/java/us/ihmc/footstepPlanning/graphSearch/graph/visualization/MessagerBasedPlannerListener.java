@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.messager.Messager;
@@ -29,8 +27,8 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    }
 
    @Override
-   void broadcastLatticeMap(PlannerLatticeMap message)
+   void broadcastExpandedNodes(PlannerLatticeMap message)
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.LatticeMap, message);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ExpandedNodesMap, message);
    }
 }

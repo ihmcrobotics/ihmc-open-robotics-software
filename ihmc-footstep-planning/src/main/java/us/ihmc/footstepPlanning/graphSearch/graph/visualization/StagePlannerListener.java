@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -10,10 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
@@ -21,17 +17,20 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepNodeSnapperReadOnly snapper;
    private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
    private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
-   private final PlannerLatticeMap latticeMapSinceLastReport = new PlannerLatticeMap();
+
+   private final ConcurrentList<PlannerCell> occupancyMapCellsSinceLastReport = new ConcurrentList<>();
+   private final ConcurrentList<LatticeNode> expandedNodesSinceLastReport = new ConcurrentList<>();
+
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
+   private final List<PlannerCell> incomingOccupiedCellsThisTick = new ArrayList<>();
+   private final List<LatticeNode> incomingExpandedNodes = new ArrayList<>();
+
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
-   private final ConcurrentCopier<PlannerOccupancyMap> concurrentOccupancyMap = new ConcurrentCopier<>(PlannerOccupancyMap::new);
-   private final ConcurrentCopier<PlannerLatticeMap> concurrentLatticeMap = new ConcurrentCopier<>(PlannerLatticeMap::new);
 
    private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
-   private final AtomicBoolean hasLatticeMap = new AtomicBoolean(true);
-   private final AtomicBoolean hasNodeData = new AtomicBoolean(true);
+   private final AtomicBoolean hasExpandedNodes = new AtomicBoolean(true);
+   private final AtomicBoolean hasLowestCostPlan = new AtomicBoolean(true);
 
    private final long occupancyMapUpdateDt;
    private long lastUpdateTime = -1;
@@ -59,8 +58,10 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       else
       {
          childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
-         latticeMapSinceLastReport.addLatticeNode(new LatticeNode(node.getXIndex(), node.getYIndex(), node.getYawIndex()));
+
+         incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+         incomingExpandedNodes.add(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
+
          totalNodeCount++;
       }
    }
@@ -69,8 +70,13 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       rejectionReasons.clear();
       childMap.clear();
-      occupancyMapSinceLastReport.clear();
-      latticeMapSinceLastReport.clear();
+
+      incomingOccupiedCellsThisTick.clear();
+      incomingExpandedNodes.clear();
+
+      occupancyMapCellsSinceLastReport.clear();
+      expandedNodesSinceLastReport.clear();
+
       lowestCostPlan.clear();
       totalNodeCount = 1;
       rejectionCount.values().forEach(count -> count.setValue(0));
@@ -103,8 +109,8 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          return;
 
       updateOccupiedCells();
-      updateLatticeMap();
-      updateNodeData();
+      updateExpandedNodes();
+      updateLowestCostPlan();
 
       lastUpdateTime = currentTime;
    }
@@ -117,25 +123,21 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
-      PlannerOccupancyMap concurrentOccupancyMap = this.concurrentOccupancyMap.getCopyForWriting();
-      concurrentOccupancyMap.set(occupancyMapSinceLastReport);
-      this.concurrentOccupancyMap.commit();
-      occupancyMapSinceLastReport.clear();
+      occupancyMapCellsSinceLastReport.addAll(incomingOccupiedCellsThisTick);
+      hasOccupiedCells.set(hasOccupiedCells.get() || !incomingOccupiedCellsThisTick.isEmpty());
 
-      hasOccupiedCells.set(!concurrentOccupancyMap.getOccupiedCells().isEmpty());
+      incomingOccupiedCellsThisTick.clear();
    }
 
-   private void updateLatticeMap()
+   private void updateExpandedNodes()
    {
-      PlannerLatticeMap concurrentLatticeMap = this.concurrentLatticeMap.getCopyForWriting();
-      concurrentLatticeMap.set(latticeMapSinceLastReport);
-      this.concurrentLatticeMap.commit();
-      latticeMapSinceLastReport.clear();
+      expandedNodesSinceLastReport.addAll(incomingExpandedNodes);
+      hasExpandedNodes.set(hasExpandedNodes.get() || !incomingExpandedNodes.isEmpty());
 
-      hasLatticeMap.set(!concurrentLatticeMap.getLatticeNodes().isEmpty());
+      incomingExpandedNodes.clear();
    }
 
-   private void updateNodeData()
+   private void updateLowestCostPlan()
    {
       PlannerNodeDataList concurrentNodeDataList = this.concurrentLowestCostNodeDataList.getCopyForWriting();
       concurrentNodeDataList.clear();
@@ -148,7 +150,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       this.concurrentLowestCostNodeDataList.commit();
       lowestCostPlan.clear();
 
-      hasNodeData.set(!concurrentNodeDataList.getNodeData().isEmpty());
+      hasLowestCostPlan.set(!concurrentNodeDataList.getNodeData().isEmpty());
    }
 
    public boolean hasOccupiedCells()
@@ -156,55 +158,45 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return hasOccupiedCells.get();
    }
 
-   public boolean hasLatticeMap()
+   public boolean hasExpandedNodes()
    {
-      return hasLatticeMap.get();
+      return hasExpandedNodes.get();
    }
 
-   public boolean hasNodeData()
+   public boolean hasLowestCostPlan()
    {
-      return hasNodeData.get();
+      return hasLowestCostPlan.get();
    }
 
    PlannerOccupancyMap getOccupancyMap()
    {
-      hasOccupiedCells.set(false);
+      PlannerOccupancyMap occupancyMap = new PlannerOccupancyMap();
+      for (PlannerCell plannerCell : occupancyMapCellsSinceLastReport.getCopyForReading())
+         occupancyMap.addOccupiedCell(plannerCell);
 
-      return concurrentOccupancyMap.getCopyForReading();
+      hasOccupiedCells.set(false);
+      occupancyMapCellsSinceLastReport.clear();
+
+      return occupancyMap;
    }
 
-   PlannerLatticeMap getLatticeMap()
+   PlannerLatticeMap getExpandedNodes()
    {
-      hasLatticeMap.set(false);
+      PlannerLatticeMap latticeMap = new PlannerLatticeMap();
+      for (LatticeNode latticeNode : expandedNodesSinceLastReport.getCopyForReading())
+         latticeMap.addLatticeNode(latticeNode);
 
-      return concurrentLatticeMap.getCopyForReading();
+      hasExpandedNodes.set(false);
+      expandedNodesSinceLastReport.clear();
+
+      return latticeMap;
    }
 
    PlannerNodeDataList getLowestCostPlan()
    {
-      hasNodeData.set(false);
+      hasLowestCostPlan.set(false);
 
       return concurrentLowestCostNodeDataList.getCopyForReading();
-   }
-
-   private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
-   {
-      byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
-
-      nodeDataMessage.setParentNodeId(parentNodeIndex);
-      nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
-      nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
-
-      if (snapper != null)
-      {
-         Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
-         nodeDataMessage.getPosition().set(nodePose.getPosition());
-         nodeDataMessage.getOrientation().set(nodePose.getOrientation());
-      }
-      else
-      {
-         nodeDataMessage.getPosition().set(node.getX(), node.getY(), 0.0);
-      }
    }
 
    public int getTotalNodeCount()
@@ -215,5 +207,55 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public int getRejectionReasonCount(BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
       return rejectionCount.get(rejectionReason).getValue();
+   }
+
+   private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
+   {
+      public ConcurrentList()
+      {
+         super(ArrayList::new);
+      }
+
+      public void clear()
+      {
+         getCopyForWriting().clear();
+         commit();
+      }
+
+      public void addAll(Collection<? extends T> collection)
+      {
+         List<T> currentSet = getCopyForReading();
+         List<T> updatedSet = getCopyForWriting();
+         updatedSet.clear();
+         if (currentSet != null)
+            updatedSet.addAll(currentSet);
+         updatedSet.addAll(collection);
+         commit();
+      }
+
+      public T[] toArray(T[] ts)
+      {
+         List<T> currentSet = getCopyForReading();
+         return currentSet.toArray(ts);
+      }
+
+      public boolean isEmpty()
+      {
+         List<T> currentList = getCopyForReading();
+         if (currentList == null)
+            return true;
+
+         return currentList.isEmpty();
+      }
+
+      public int size()
+      {
+         List<T> currentList = getCopyForReading();
+         if (currentList == null)
+            return 0;
+
+         return currentList.size();
+      }
+
    }
 }

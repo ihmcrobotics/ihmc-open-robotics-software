@@ -31,6 +31,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
+import us.ihmc.footstepPlanning.ui.components.ExpandedNodesRenderer;
 import us.ihmc.footstepPlanning.ui.components.NodeCheckerEditor;
 import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
 import us.ihmc.footstepPlanning.ui.components.StartGoalOrientationEditor;
@@ -79,7 +80,8 @@ public class FootstepPlannerUI
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final OccupancyMapRenderer graphRenderer;
+   private final OccupancyMapRenderer occupancyMapRenderer;
+   private final ExpandedNodesRenderer expandedNodesRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
 
@@ -208,7 +210,8 @@ public class FootstepPlannerUI
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
-      this.graphRenderer = new OccupancyMapRenderer(messager);
+      this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
+      this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -218,7 +221,8 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
-      view3dFactory.addNodeToView(graphRenderer.getRoot());
+      view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
+      view3dFactory.addNodeToView(expandedNodesRenderer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -259,6 +263,7 @@ public class FootstepPlannerUI
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
          startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
+         expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
       }
 
       planarRegionViewer.start();
@@ -272,7 +277,8 @@ public class FootstepPlannerUI
       nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
-      graphRenderer.start();
+      occupancyMapRenderer.start();
+      expandedNodesRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -346,7 +352,8 @@ public class FootstepPlannerUI
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      graphRenderer.stop();
+      occupancyMapRenderer.stop();
+      expandedNodesRenderer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
