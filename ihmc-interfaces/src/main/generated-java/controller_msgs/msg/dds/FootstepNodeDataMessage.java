@@ -48,7 +48,14 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    /**
             * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
             */
+   public int node_id_ = -1;
+   /**
+            * ID of node. This should reference the index of this node in a FootstepNodeDataList
+            */
    public int parent_node_id_ = -1;
+   public int x_index_ = -1;
+   public int y_index_ = -1;
+   public int yaw_index_ = -1;
    /**
             * Node rejection reason. 255 if node was accepted
             */
@@ -72,7 +79,15 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
+      node_id_ = other.node_id_;
+
       parent_node_id_ = other.parent_node_id_;
+
+      x_index_ = other.x_index_;
+
+      y_index_ = other.y_index_;
+
+      yaw_index_ = other.yaw_index_;
 
       bipedal_footstep_planner_node_rejection_reason_ = other.bipedal_footstep_planner_node_rejection_reason_;
 
@@ -114,16 +129,58 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    /**
             * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
             */
+   public void setNodeId(int node_id)
+   {
+      node_id_ = node_id;
+   }
+   /**
+            * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
+            */
+   public int getNodeId()
+   {
+      return node_id_;
+   }
+
+   /**
+            * ID of node. This should reference the index of this node in a FootstepNodeDataList
+            */
    public void setParentNodeId(int parent_node_id)
    {
       parent_node_id_ = parent_node_id;
    }
    /**
-            * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
+            * ID of node. This should reference the index of this node in a FootstepNodeDataList
             */
    public int getParentNodeId()
    {
       return parent_node_id_;
+   }
+
+   public void setXIndex(int x_index)
+   {
+      x_index_ = x_index;
+   }
+   public int getXIndex()
+   {
+      return x_index_;
+   }
+
+   public void setYIndex(int y_index)
+   {
+      y_index_ = y_index;
+   }
+   public int getYIndex()
+   {
+      return y_index_;
+   }
+
+   public void setYawIndex(int yaw_index)
+   {
+      yaw_index_ = yaw_index;
+   }
+   public int getYawIndex()
+   {
+      return yaw_index_;
    }
 
    /**
@@ -163,7 +220,15 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.node_id_, other.node_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.parent_node_id_, other.parent_node_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_index_, other.x_index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_index_, other.y_index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_index_, other.yaw_index_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bipedal_footstep_planner_node_rejection_reason_, other.bipedal_footstep_planner_node_rejection_reason_, epsilon)) return false;
 
@@ -184,7 +249,15 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
+      if(this.node_id_ != otherMyClass.node_id_) return false;
+
       if(this.parent_node_id_ != otherMyClass.parent_node_id_) return false;
+
+      if(this.x_index_ != otherMyClass.x_index_) return false;
+
+      if(this.y_index_ != otherMyClass.y_index_) return false;
+
+      if(this.yaw_index_ != otherMyClass.yaw_index_) return false;
 
       if(this.bipedal_footstep_planner_node_rejection_reason_ != otherMyClass.bipedal_footstep_planner_node_rejection_reason_) return false;
 
@@ -204,8 +277,16 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
+      builder.append("node_id=");
+      builder.append(this.node_id_);      builder.append(", ");
       builder.append("parent_node_id=");
       builder.append(this.parent_node_id_);      builder.append(", ");
+      builder.append("x_index=");
+      builder.append(this.x_index_);      builder.append(", ");
+      builder.append("y_index=");
+      builder.append(this.y_index_);      builder.append(", ");
+      builder.append("yaw_index=");
+      builder.append(this.yaw_index_);      builder.append(", ");
       builder.append("bipedal_footstep_planner_node_rejection_reason=");
       builder.append(this.bipedal_footstep_planner_node_rejection_reason_);
       builder.append("}");
