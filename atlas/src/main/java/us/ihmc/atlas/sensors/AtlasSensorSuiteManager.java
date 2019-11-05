@@ -16,6 +16,7 @@ import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -47,8 +48,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
 
-   private static final String depthCloudTopicNameSurfixToPublish = "_D435";
-   private static final String depthCloudTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
+   private static final String depthTopicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
+   private static final String depthTopicNameSurfixToPublish = "_D435";
+   private static final String depthTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
+   private final MessageTopicNameGenerator depthCloudTopicNameGenerator;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -77,9 +80,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName,
-                                                                              (Class<?> messageType) -> messageType.getSimpleName()
-                                                                                    + depthCloudTopicNameSurfixToPublish);
+      depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(depthTopicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
       realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
    }
@@ -122,7 +124,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (ENABLE_STEREO_PUBLISHER)
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
       if (ENABLE_DEPTH_PUBLISHER)
-         realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthCloudTopicNameToSubscribe, rosMainNode);
+         realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthTopicNameToSubscribe, rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -161,6 +163,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void connect() throws IOException
    {
+
    }
 
    private StereoVisionWorldTransformCalculator createCustomDepthPointCloudWorldTransformCalculator()
