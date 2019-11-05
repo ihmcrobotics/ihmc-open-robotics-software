@@ -17,6 +17,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Newer than ObstacleAndCliffAvoidanceProcessor.
+ * Post processing algorithm for modifying a path plan to better avoid obstacles:
+ * - Wiggles points to desired clearance of obstacles
+ * - Can add intermediary waypoints to assist in avoiding obstacles
+ */
 public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
 {
    private static final double minDistanceToMove = 0.01;
