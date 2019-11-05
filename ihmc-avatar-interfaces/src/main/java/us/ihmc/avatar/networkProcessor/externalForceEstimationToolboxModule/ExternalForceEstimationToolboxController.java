@@ -13,15 +13,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -31,13 +34,17 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 
 public class ExternalForceEstimationToolboxController extends ToolboxController
 {
    private final HumanoidReferenceFrames referenceFrames;
+   private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
@@ -50,6 +57,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private JointBasics[] jointsToIgnore;
    private JointBasics[] joints;
    private final TIntObjectHashMap<RigidBodyBasics> endEffectorHashMap = new TIntObjectHashMap<>();
+   private final HashMap<String, OneDoFJointBasics> jointNameMap = new HashMap<>();
+   private final ToIntFunction<String> jointNameToMatrixIndexFunction;
 
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
 
@@ -83,16 +92,18 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
       this.rootJoint = fullRobotModel.getRootJoint();
-      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator()).subtreeIterable().forEach(rigidBody -> endEffectorHashMap.put(rigidBody.hashCode(), rigidBody));
+      MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
+                          .subtreeIterable()
+                          .forEach(rigidBody -> endEffectorHashMap.put(rigidBody.hashCode(), rigidBody));
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
-                                                                                       9.81,
-                                                                                       fullRobotModel.getRootJoint(),
-                                                                                       joints,
-                                                                                       referenceFrames.getCenterOfMassFrame(),
-                                                                                       robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings(),
-                                                                                       graphicsListRegistry,
-                                                                                       parentRegistry);
+      this.controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
+                                                                9.81,
+                                                                fullRobotModel.getRootJoint(),
+                                                                joints,
+                                                                referenceFrames.getCenterOfMassFrame(),
+                                                                robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings(),
+                                                                graphicsListRegistry,
+                                                                parentRegistry);
 
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -117,10 +128,20 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          massMatrix.set(this.massMatrix);
          coriolisMatrix.set(this.coriolisMatrix);
       };
-
       Consumer<DenseMatrix64F> tauSetter = tau -> tau.set(controllerDesiredTau);
 
       externalForceEstimator = new ExternalForceEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, registry);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointNameMap.put(oneDoFJoints[i].getName(), oneDoFJoints[i]);
+      }
+
+      jointNameToMatrixIndexFunction = jointName ->
+      {
+         OneDoFJointBasics joint = jointNameMap.get(jointName);
+         return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
+      };
 
       graphicsListRegistry.registerYoGraphic("EstimatedExternalForce", externalForceEstimator.getEstimatedForceVectorGraphic());
    }
@@ -160,7 +181,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       RobotDesiredConfigurationData desiredConfigurationData = this.robotDesiredConfigurationData.getAndSet(null);
       if (desiredConfigurationData != null)
       {
-         updateRobotDesiredState(desiredConfigurationData, controllerDesiredQdd);
+         updateRobotDesiredState(desiredConfigurationData, controllerDesiredQdd, jointNameToMatrixIndexFunction);
       }
 
       dynamicsMatrixCalculator.compute();
@@ -174,6 +195,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
       outputStatus.getEstimatedExternalForce().set(externalForceEstimator.getEstimatedExternalForce());
+
       statusOutputManager.reportStatusMessage(outputStatus);
    }
 
@@ -219,29 +241,27 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          oneDoFJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      if (rootJoint != null)
-      {
-         rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
-         rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
-         rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
-         rootJoint.getPredecessor().updateFramesRecursively();
-      }
+      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
+      rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
 
+      rootJoint.getPredecessor().updateFramesRecursively();
       rootJoint.updateFramesRecursively();
    }
 
-   private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DenseMatrix64F controllerDesiredQdd)
+   private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DenseMatrix64F controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
    {
-      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = desiredConfigurationData.getJointDesiredOutputList();
+      CommonOps.fill(controllerDesiredQdd, 0.0);
       desiredConfigurationData.getDesiredRootJointAngularAcceleration().get(0, controllerDesiredQdd);
       desiredConfigurationData.getDesiredRootJointLinearAcceleration().get(3, controllerDesiredQdd);
 
+      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = desiredConfigurationData.getJointDesiredOutputList();
       for (int i = 0; i < jointDesiredOutputList.size(); i++)
       {
-         // TODO hack to offset hokuyo joint for val
-         int offset = (i >= 25) ? 1 : 0;
+         String jointName = jointDesiredOutputList.get(i).getJointName().toString();
+         int matrixIndex = jointNameToMatrixIndex.applyAsInt(jointName);
 
-         controllerDesiredQdd.set(6 + i + offset, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
+         controllerDesiredQdd.set(matrixIndex, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
       }
    }
 }
