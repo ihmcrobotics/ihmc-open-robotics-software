@@ -60,7 +60,7 @@ public class MultiStagePlannerListener
 
       for (StagePlannerListener listener : listeners)
       {
-         stageHasMapUpdate |= listener.hasOccupiedCells() && listener.hasExpandedNodes();
+         stageHasMapUpdate |= listener.hasOccupiedCells();
          stageHasLowestCostPlan |= listener.hasLowestCostPlan();
          stageHasFullGraph |= listener.hasFullGraph();
       }

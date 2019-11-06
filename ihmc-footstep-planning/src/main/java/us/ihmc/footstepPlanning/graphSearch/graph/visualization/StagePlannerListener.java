@@ -4,27 +4,26 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepEdge;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
    private final FootstepNodeSnapper snapper;
 
-   private final ConcurrentSet<PlannerCell> occupancyMapCellsSinceLastReport = new ConcurrentSet<>();
-   private final ConcurrentSet<FootstepNode> expandedNodesSinceLastReport = new ConcurrentSet<>();
-   private final ConcurrentList<PlannerNodeData> fullGraphSinceLastReport = new ConcurrentList<>();
+   private final AtomicReference<Collection<PlannerCell>> occupancyMapCellsSinceLastReportReference = new AtomicReference<>();
+   private final AtomicReference<Collection<FootstepNode>> expandedNodesSinceLastReportReference = new AtomicReference<>();
+   private final AtomicReference<List<PlannerNodeData>> fullGraphToReportReference = new AtomicReference<>();
 
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final List<PlannerNodeData> incomingNodeDataThisTick = new ArrayList<>();
-   private final HashSet<PlannerCell> incomingOccupiedCellsThisTick = new HashSet<>();
-   private final HashSet<FootstepNode> incomingExpandedNodes = new HashSet<>();
-   private final HashMap<FootstepNode, PlannerNodeData> nodeDataThisTick = new HashMap<>();
+   private final List<PlannerNodeData> rejectedNodeData = new ArrayList<>();
 
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
@@ -52,38 +51,22 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
-      int previousNodeDataIndex;
       if (previousNode == null)
-      {
          reset();
-         previousNodeDataIndex = -1;
-      }
-      else
-      {
-         previousNodeDataIndex = previousNode.getNodeIndex();
-         incomingExpandedNodes.add(previousNode);
-      }
-
-      RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
 
       node.setNodeIndex(totalNodeCount);
-      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, node, nodePose, null);
 
-      nodeDataThisTick.put(node, nodeData);
-      incomingNodeDataThisTick.add(nodeData);
-      incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+      occupancyMapCellsSinceLastReportReference.get().add(new PlannerCell(node.getXIndex(), node.getYIndex()));
       totalNodeCount++;
    }
 
    public void reset()
    {
-      nodeDataThisTick.clear();
-      incomingNodeDataThisTick.clear();
-      incomingOccupiedCellsThisTick.clear();
-      incomingExpandedNodes.clear();
+      rejectedNodeData.clear();
 
-      occupancyMapCellsSinceLastReport.clear();
-      expandedNodesSinceLastReport.clear();
+      occupancyMapCellsSinceLastReportReference.set(new HashSet<>());
+      expandedNodesSinceLastReportReference.set(new HashSet<>());
+      fullGraphToReportReference.set(new ArrayList<>());
 
       lowestCostPlan.clear();
       totalNodeCount = 0;
@@ -100,7 +83,10 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      nodeDataThisTick.get(rejectedNode).setRejectionReason(reason);
+      RigidBodyTransform nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
+
+      rejectedNodeData.add(nodeData);
       rejectionCount.get(reason).increment();
    }
 
@@ -117,33 +103,26 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          return;
 
       updateOccupiedCells();
-      updateExpandedNodes();
 //      updateLowestCostPlan();
-      updateFullGraph();
 
       lastUpdateTime = currentTime;
    }
 
    @Override
-   public void plannerFinished(List<FootstepNode> plan)
+   public void plannerFinished(List<FootstepNode> plan, Collection<FootstepNode> expandedNodes, FootstepGraph footstepGraph)
    {
       updateOccupiedCells();
+
+      Collection<FootstepNode> expandedNodesToSet = expandedNodesSinceLastReportReference.get();
+      expandedNodesToSet.clear();
+      expandedNodesToSet.addAll(expandedNodes);
+
+      computeFullGraphData(footstepGraph);
    }
 
    private void updateOccupiedCells()
    {
-      occupancyMapCellsSinceLastReport.addAll(incomingOccupiedCellsThisTick);
-      hasOccupiedCells.set(hasOccupiedCells.get() || !incomingOccupiedCellsThisTick.isEmpty());
-
-      incomingOccupiedCellsThisTick.clear();
-   }
-
-   private void updateExpandedNodes()
-   {
-      expandedNodesSinceLastReport.addAll(incomingExpandedNodes);
-      hasExpandedNodes.set(hasExpandedNodes.get() || !incomingExpandedNodes.isEmpty());
-
-      incomingExpandedNodes.clear();
+      hasOccupiedCells.set(!occupancyMapCellsSinceLastReportReference.get().isEmpty());
    }
 
    private void updateLowestCostPlan()
@@ -162,14 +141,25 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       hasLowestCostPlan.set(!concurrentNodeDataList.getNodeData().isEmpty());
    }
 
-   private void updateFullGraph()
+   private void computeFullGraphData(FootstepGraph footstepGraph)
    {
-      fullGraphSinceLastReport.addAll(incomingNodeDataThisTick);
-      hasFullGraph.set(hasFullGraph.get() || !incomingNodeDataThisTick.isEmpty());
+      List<PlannerNodeData> fullGraphToReport = this.fullGraphToReportReference.get();
+      HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = footstepGraph.getOutgoingEdges();
+      for (FootstepNode footstepNode : outgoingEdges.keySet())
+      {
+         for (FootstepEdge outgoingEdge : outgoingEdges.get(footstepNode))
+         {
+            FootstepNode childNode = outgoingEdge.getEndNode();
+            RigidBodyTransform nodePose = snapper.snapFootstepNode(childNode).getOrComputeSnappedNodeTransform(childNode);
+            PlannerNodeData nodeData = new PlannerNodeData(footstepNode.getNodeIndex(), childNode, nodePose, null);
+            fullGraphToReport.add(nodeData);
+         }
+      }
+      fullGraphToReport.addAll(rejectedNodeData);
 
-      nodeDataThisTick.clear();
-      incomingNodeDataThisTick.clear();
+      hasFullGraph.set(true);
    }
+
 
    public boolean hasOccupiedCells()
    {
@@ -194,26 +184,21 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    PlannerOccupancyMap getOccupancyMap()
    {
       PlannerOccupancyMap occupancyMap = new PlannerOccupancyMap();
-      for (PlannerCell plannerCell : occupancyMapCellsSinceLastReport.getCopyForReading())
+      for (PlannerCell plannerCell : occupancyMapCellsSinceLastReportReference.getAndSet(new HashSet<>()))
          occupancyMap.addOccupiedCell(plannerCell);
 
       hasOccupiedCells.set(false);
-      occupancyMapCellsSinceLastReport.clear();
 
       return occupancyMap;
    }
 
    PlannerLatticeMap getExpandedNodes()
    {
-      if (!hasExpandedNodes.get())
-         updateExpandedNodes();
-
       PlannerLatticeMap latticeMap = new PlannerLatticeMap();
-      for (FootstepNode latticeNode : expandedNodesSinceLastReport.getCopyForReading())
+      for (FootstepNode latticeNode : expandedNodesSinceLastReportReference.getAndSet(new HashSet<>()))
          latticeMap.addFootstepNode(latticeNode);
 
       hasExpandedNodes.set(false);
-      expandedNodesSinceLastReport.clear();
 
       return latticeMap;
    }
@@ -228,16 +213,15 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    PlannerNodeDataList getFullGraph()
    {
       if (!hasFullGraph.get())
-         updateFullGraph();
+         return null;
 
       PlannerNodeDataList plannerNodeDataList = new PlannerNodeDataList();
       plannerNodeDataList.setIsFootstepGraph(true);
 
-      for (PlannerNodeData nodeData : fullGraphSinceLastReport.getCopyForReading())
+      for (PlannerNodeData nodeData : fullGraphToReportReference.getAndSet(new ArrayList<>()))
          plannerNodeDataList.addNode(nodeData);
 
       hasFullGraph.set(false);
-      fullGraphSinceLastReport.clear();
 
       return plannerNodeDataList;
    }
@@ -252,102 +236,4 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return rejectionCount.get(rejectionReason).getValue();
    }
 
-   private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
-   {
-      public ConcurrentList()
-      {
-         super(ArrayList::new);
-      }
-
-      public void clear()
-      {
-         getCopyForWriting().clear();
-         commit();
-      }
-
-      public void addAll(Collection<? extends T> collection)
-      {
-         List<T> currentSet = getCopyForReading();
-         List<T> updatedSet = getCopyForWriting();
-         updatedSet.clear();
-         if (currentSet != null)
-            updatedSet.addAll(currentSet);
-         updatedSet.addAll(collection);
-         commit();
-      }
-
-      public T[] toArray(T[] ts)
-      {
-         List<T> currentSet = getCopyForReading();
-         return currentSet.toArray(ts);
-      }
-
-      public boolean isEmpty()
-      {
-         List<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return true;
-
-         return currentList.isEmpty();
-      }
-
-      public int size()
-      {
-         List<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return 0;
-
-         return currentList.size();
-      }
-   }
-
-   private class ConcurrentSet<T> extends ConcurrentCopier<Set<T>>
-   {
-      public ConcurrentSet()
-      {
-         super(HashSet::new);
-      }
-
-      public void clear()
-      {
-         getCopyForWriting().clear();
-         commit();
-      }
-
-      public void addAll(Collection<? extends T> collection)
-      {
-         Set<T> currentSet = getCopyForReading();
-         Set<T> updatedSet = getCopyForWriting();
-         updatedSet.clear();
-         if (currentSet != null)
-            updatedSet.addAll(currentSet);
-         updatedSet.addAll(collection);
-         commit();
-      }
-
-      public T[] toArray(T[] ts)
-      {
-         Set<T> currentSet = getCopyForReading();
-         return currentSet.toArray(ts);
-      }
-
-      public boolean isEmpty()
-      {
-         Set<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return true;
-
-         return currentList.isEmpty();
-      }
-
-      public int size()
-      {
-         Set<T> currentList = getCopyForReading();
-         if (currentList == null)
-            return 0;
-
-         return currentList.size();
-      }
-
-   }
 }
