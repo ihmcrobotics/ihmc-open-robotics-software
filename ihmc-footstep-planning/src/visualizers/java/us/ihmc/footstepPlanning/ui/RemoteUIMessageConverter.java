@@ -190,7 +190,7 @@ public class RemoteUIMessageConverter
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepNodeDataListMessage.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, new PlannerNodeDataList(s.takeNextData())));
+                                           s -> processNodeDataList(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerOccupancyMapMessage.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
@@ -265,6 +265,14 @@ public class RemoteUIMessageConverter
             .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
                              getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportRegionsParametersPublisher::publish);
+   }
+
+   private void processNodeDataList(FootstepNodeDataListMessage message)
+   {
+      if (message.getIsFootstepGraph())
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraphPart, new PlannerNodeDataList(message));
+      else
+         messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, new PlannerNodeDataList(message));
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)

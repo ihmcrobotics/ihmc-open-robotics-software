@@ -34,10 +34,10 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
-   private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
-   private final AtomicBoolean hasExpandedNodes = new AtomicBoolean(true);
-   private final AtomicBoolean hasFullGraph = new AtomicBoolean(true);
-   private final AtomicBoolean hasLowestCostPlan = new AtomicBoolean(true);
+   private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(false);
+   private final AtomicBoolean hasExpandedNodes = new AtomicBoolean(false);
+   private final AtomicBoolean hasFullGraph = new AtomicBoolean(false);
+   private final AtomicBoolean hasLowestCostPlan = new AtomicBoolean(false);
 
    private final long occupancyMapUpdateDt;
    private long lastUpdateTime = -1;
@@ -73,7 +73,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
       RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
 
-      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      PlannerNodeData nodeData = new PlannerNodeData(totalNodeCount, previousNodeDataIndex, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
       nodeDataMap.put(node, nodeData);
       incomingNodeDataThisTick.add(nodeData);
       incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
@@ -209,6 +209,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    PlannerLatticeMap getExpandedNodes()
    {
+      if (!hasExpandedNodes.get())
+         updateExpandedNodes();
+
       PlannerLatticeMap latticeMap = new PlannerLatticeMap();
       for (LatticeNode latticeNode : expandedNodesSinceLastReport.getCopyForReading())
          latticeMap.addLatticeNode(latticeNode);
@@ -228,6 +231,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    PlannerNodeDataList getFullGraph()
    {
+      if (!hasFullGraph.get())
+         updateFullGraph();
+
       PlannerNodeDataList plannerNodeDataList = new PlannerNodeDataList();
       plannerNodeDataList.setIsFootstepGraph(true);
 

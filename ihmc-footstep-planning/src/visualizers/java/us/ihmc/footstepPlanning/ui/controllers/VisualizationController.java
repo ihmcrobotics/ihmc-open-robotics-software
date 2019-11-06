@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
@@ -44,6 +46,9 @@ public class VisualizationController
    @FXML
    private CheckBox showPostProcessingInfo;
    @FXML
+   private Slider expansionSlider;
+
+   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -79,5 +84,7 @@ public class VisualizationController
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowNodeData, showIntermediateSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
+
+      expansionSlider.valueProperty().addListener((observable, oldValue, newValue) -> messager.submitMessage(ExpansionFractionToShow, newValue.doubleValue()));
    }
 }
