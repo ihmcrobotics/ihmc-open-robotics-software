@@ -9,6 +9,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraph;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -36,12 +37,14 @@ public class UIVisibilityGraphsTopics
 
    public static final Topic<List<Point3DReadOnly>> BodyPathData = topic("BodyPathData");
    
-   public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
+   public static final Topic<Boolean> ShowInnerRegionVisibilityMapEdges = topic("ShowInnerRegionVisibilityMapEdges");
+   public static final Topic<Boolean> ShowInnerRegionVisibilityMapHomeNodes = topic("ShowInnerRegionVisibilityMapHomeNodes");
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = topic("ShowInterRegionVisibilityMap");
    public static final Topic<Boolean> ShowStartVisibilityMap = topic("ShowStartVisibilityMap");
    public static final Topic<Boolean> ShowGoalVisibilityMap = topic("ShowGoalVisibilityMap");
 
    public static final Topic<List<VisibilityMapWithNavigableRegion>> NavigableRegionData = topic("NavigableRegionData");
+   public static final Topic<VisibilityGraph> VisibilityGraph = topic("VisibilityGraph");
    public static final Topic<List<VisibilityMapWithNavigableRegion>> NavigableRegionVisibilityMap = topic("NavigableRegionVisibilityMap");
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = topic("InterRegionVisibilityMap");
    public static final Topic<VisibilityMapHolder> StartVisibilityMap = topic("StartVisibilityMap");

@@ -124,7 +124,7 @@ public class NavigableRegionsManager
          navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
       }
 
-      navigableRegions.createNavigableRegions();
+      navigableRegions.createNavigableRegions(); // big deal; does a lot of computation and finds obstacles
 
       visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
                                             parameters.getPreferredToPreferredInterRegionConnectionFilter(),
@@ -427,6 +427,11 @@ public class NavigableRegionsManager
       {
          return path;
       }
+   }
+
+   public VisibilityGraph getVisibilityGraph()
+   {
+      return visibilityGraph;
    }
 
    public VisibilityMapSolution getVisibilityMapSolution()

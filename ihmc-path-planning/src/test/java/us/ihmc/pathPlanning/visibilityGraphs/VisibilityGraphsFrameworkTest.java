@@ -695,6 +695,7 @@ public class VisibilityGraphsFrameworkTest
          }
 
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
+         visualizerApplication.submitVisibilityGraphToVisualizer(manager.getVisibilityGraph());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path, !simulateOcclusions);

@@ -70,7 +70,7 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private ToggleButton showClusterPreferredNavigableExtrusionsToggleButton, showClusterPreferredNonNavigableExtrusionsToggleButton;
    @FXML
-   private ToggleButton showInnerRegionMapsToggleButton, showInterRegionMapToggleButton;
+   private ToggleButton showInnerRegionMapsToggleButton, showInnerRegionHomeNodesToggleButton, showInterRegionMapToggleButton;
    @FXML
    private ToggleButton showStartMapToggleButton, showGoalMapToggleButton;
    @FXML
@@ -104,7 +104,7 @@ public class VisibilityGraphsTestVisualizer
                                   ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionMeshViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionVisibilityMap);
+      navigableRegionMeshViewer.setTopics(GlobalReset, ShowInnerRegionVisibilityMapEdges, NavigableRegionVisibilityMap);
 
       walkerCollisionsViewer = new WalkerCollisionsViewer(messager);
 
@@ -180,7 +180,8 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowInnerRegionVisibilityMapEdges, showInnerRegionMapsToggleButton.selectedProperty(), false);
+      messager.bindBidirectional(ShowInnerRegionVisibilityMapHomeNodes, showInnerRegionHomeNodesToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
@@ -251,7 +252,6 @@ public class VisibilityGraphsTestVisualizer
 
    @FXML public void nextStepDynamic()
    {
-      LogTools.info("Sending!");
       messager.submitMessage(NextStepDynamic, new Object());
    }
 }
