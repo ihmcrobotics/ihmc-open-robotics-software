@@ -143,7 +143,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
 
-      graphicsListRegistry.registerYoGraphic("EstimatedExternalForce", externalForceEstimator.getEstimatedForceVectorGraphic());
+      if(graphicsListRegistry != null)
+         graphicsListRegistry.registerYoGraphic("EstimatedExternalForce", externalForceEstimator.getEstimatedForceVectorGraphic());
    }
 
    @Override
