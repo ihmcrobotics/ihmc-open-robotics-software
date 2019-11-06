@@ -1,14 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.messager.Messager;
 
 public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
 {
    private final Messager messager;
 
-   public MessagerBasedPlannerListener(Messager messager, FootstepNodeSnapperReadOnly snapper, long broadcastDtMillis)
+   public MessagerBasedPlannerListener(Messager messager, FootstepNodeSnapper snapper, long broadcastDtMillis)
    {
       super(snapper, broadcastDtMillis);
       this.messager = messager;

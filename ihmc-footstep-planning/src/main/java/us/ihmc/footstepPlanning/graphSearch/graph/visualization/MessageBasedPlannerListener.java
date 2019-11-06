@@ -1,19 +1,17 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class MessageBasedPlannerListener implements BipedalFootstepPlannerListener
 {
-   private final FootstepNodeSnapperReadOnly snapper;
+   private final FootstepNodeSnapper snapper;
 
    private final PlannerNodeDataList lowestNodeDataList = new PlannerNodeDataList();
    private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
@@ -25,7 +23,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    private final PlannerNodeDataList allNodes = new PlannerNodeDataList();
 
 
-   public MessageBasedPlannerListener(FootstepNodeSnapperReadOnly snapper, long broadcastDt)
+   public MessageBasedPlannerListener(FootstepNodeSnapper snapper, long broadcastDt)
    {
       this.snapper = snapper;
       this.broadcastDt = broadcastDt;
@@ -47,7 +45,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
          expandedNodesSinceLastReport.addLatticeNode(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
-      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.snapFootstepNode(node).getSnapTransform());
       PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
 
       fullGraphSinceLastReport.addNode(nodeData);
