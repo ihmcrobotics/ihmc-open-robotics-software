@@ -17,9 +17,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerCell;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -30,79 +31,115 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ExpandedNodesRenderer extends AnimationTimer
+public class FullGraphRenderer extends AnimationTimer
 {
-   private static final double nodeOffsetZ = 0.05;
    private static final double cellOpacity = 0.9;
-   private static final Color validFootColor = Color.rgb(219, 62, 87, cellOpacity);
-   private static final Color rejectedCellColor = Color.rgb(139, 0, 0, cellOpacity);
+   private static final Color validFootColor = Color.rgb(0, 255, 0, cellOpacity);
+   private static final Color parentFootColor = Color.rgb(0, 0, 255, cellOpacity);
+   private static final Color rejectedFootColor = Color.rgb(139, 0, 0, cellOpacity);
 
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
 
    private final AtomicReference<Pair<Mesh, Material>> latticeMapToRender = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
+   private final AtomicReference<Integer> stepToShow;
+   private final AtomicReference<BipedalFootstepPlannerNodeRejectionReason> rejectionReasonToShow;
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
+   private final PlannerNodeDataList fullGraph = new PlannerNodeDataList();
+   private final HashMap<LatticeNode, HashSet<PlannerNodeData>> childMap = new HashMap<>();
+   private final ArrayList<LatticeNode> expandedNodes = new ArrayList<>();
+
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = PlannerTools.createDefaultFootPolygons();
 
    private final MeshView latticeMapMeshView = new MeshView();
 
-   public ExpandedNodesRenderer(Messager messager)
+   public FullGraphRenderer(Messager messager)
    {
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpandedNodesMap, latticeMap -> executorService.execute(() -> processExpandedNodes(latticeMap)));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepGraphPart, nodeDataList -> executorService.execute(() -> processFootstepGraph(nodeDataList)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AssumeFlatGround, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
-      show = messager.createInput(FootstepPlannerMessagerAPI.ShowExpandedNodes, true);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpansionStepToShow, data -> updateGraphic());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RejectionReasonToShow, data -> updateGraphic());
+
+      show = messager.createInput(FootstepPlannerMessagerAPI.ShowFullGraph, true);
+      stepToShow = messager.createInput(FootstepPlannerMessagerAPI.ExpansionStepToShow, -1);
+      rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShow, null);
 
       root.getChildren().add(latticeMapMeshView);
    }
 
    private void processExpandedNodes(PlannerLatticeMap latticeMap)
    {
-      palette.clearPalette();
-
-      Collection<LatticeNode> latticeNodes = latticeMap.getLatticeNodes();
-      for (LatticeNode node : latticeNodes)
-      {
-         double x = node.getX();
-         double y = node.getY();
-         double z = getHeightAtPoint(x, y) + nodeOffsetZ;
-         RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(x, y, z);
-         transform.setRotationYaw(node.getYaw());
-
-         Point2D[] vertices = new Point2D[defaultContactPoints.get(RobotSide.LEFT).getNumberOfVertices()];
-         for (int j = 0; j < vertices.length; j++)
-            vertices[j] = new Point2D(defaultContactPoints.get(RobotSide.LEFT).getVertex(j));
-
-         meshBuilder.addMultiLine(transform, vertices, 0.01, validFootColor, true);
-         meshBuilder.addPolygon(transform, defaultContactPoints.get(RobotSide.LEFT), validFootColor);
-      }
-
-      latticeMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+      expandedNodes.addAll(latticeMap.getLatticeNodes());
    }
 
-   private double getHeightAtPoint(double x, double y)
+   private void processFootstepGraph(PlannerNodeDataList nodeDataList)
    {
-      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      if (planarRegionsList == null)
-         return 0.0;
-      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 100.0), planarRegionsList);
-      return projectedPoint == null ? 0.0 : projectedPoint.getZ();
+      fullGraph.getNodeData().addAll(nodeDataList.getNodeData());
+      fullGraph.getNodeData().sort(Comparator.comparingInt(PlannerNodeData::getNodeId));
+
+      for (PlannerNodeData nodeData : nodeDataList.getNodeData())
+      {
+         if (nodeData.getParentNodeId() == -1)
+            continue;
+
+         PlannerNodeData parentNode = fullGraph.getNodeData().get(nodeData.getParentNodeId());
+         childMap.computeIfAbsent(parentNode, data -> new HashSet<>()).add(nodeData);
+      }
+   }
+
+   private void updateGraphic()
+   {
+      LatticeNode nodeToShow = expandedNodes.get(stepToShow.get());
+      Collection<PlannerNodeData> childrenToShow = childMap.get(nodeToShow);
+      PlannerNodeData parentToShow = fullGraph.getDataForNode(nodeToShow);
+
+      palette.clearPalette();
+      meshBuilder.clear();
+
+      addFoot(parentToShow, parentFootColor);
+      for (PlannerNodeData childToShow : childrenToShow)
+      {
+         if (childToShow.getRejectionReason() == null)
+         {
+            addFoot(childToShow, validFootColor);
+         }
+         else if (rejectionReasonToShow.get() == null)
+         {
+            addFoot(childToShow, rejectedFootColor);
+         }
+         else if (rejectionReasonToShow.get() == childToShow.getRejectionReason())
+         {
+            addFoot(childToShow, rejectedFootColor);
+         }
+      }
+
+   }
+
+   private void addFoot(PlannerNodeData nodeData, Color color)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      nodeData.getNodePose().get(transform);
+
+      Point2D[] vertices = new Point2D[defaultContactPoints.get(RobotSide.LEFT).getNumberOfVertices()];
+      for (int j = 0; j < vertices.length; j++)
+         vertices[j] = new Point2D(defaultContactPoints.get(RobotSide.LEFT).getVertex(j));
+
+      meshBuilder.addMultiLine(transform, vertices, 0.01, color, true);
+      meshBuilder.addPolygon(transform, defaultContactPoints.get(RobotSide.LEFT), color);
    }
 
    public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> contactPointParameters)
@@ -130,6 +167,10 @@ public class ExpandedNodesRenderer extends AnimationTimer
          latticeMapToRender.set(null);
          latticeMapMeshView.setMesh(null);
          latticeMapMeshView.setMaterial(null);
+
+         fullGraph.clear();
+         childMap.clear();
+         expandedNodes.clear();
          return;
       }
 
