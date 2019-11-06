@@ -35,6 +35,6 @@ public class MessagerBasedPlannerListener extends MessageBasedPlannerListener
    @Override
    void broadcastFullGraph(PlannerNodeDataList message)
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraph, message);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraphPart, message);
    }
 }

@@ -55,7 +55,15 @@ public class PlannerNodeDataList
       if (node == null)
          return null;
 
-      return nodeDataList.get(nodeDataList.indexOf(node.getLatticeNode()));
+      return getDataForNode(node.getLatticeNode());
+   }
+
+   public PlannerNodeData getDataForNode(LatticeNode node)
+   {
+      if (node == null)
+         return null;
+
+      return nodeDataList.get(nodeDataList.indexOf(node));
    }
 
 
