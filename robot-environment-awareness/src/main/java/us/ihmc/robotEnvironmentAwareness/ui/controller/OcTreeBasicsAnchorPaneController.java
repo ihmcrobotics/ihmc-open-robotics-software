@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceNormalFilterParametersProperty;
@@ -175,31 +176,37 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    
    public void setParametersForStereo()
    {
-      uiMessager.submitMessageToModule(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.StereoVisionBufferEnable, true);
-      uiMessager.submitMessageToModule(REAModuleAPI.DepthCloudBufferEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-1.0f);
       
-      uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, true);
-      uiMessager.submitMessageInternal(REAModuleAPI.DepthCloudBufferEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }
    
    public void setParametersForDepth()
    {
-      uiMessager.submitMessageToModule(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.StereoVisionBufferEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.DepthCloudBufferEnable, true);
-      uiMessager.submitMessageToModule(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
-
-      uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.DepthCloudBufferEnable, true);
-      uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-1.0f);
+      
+      uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }
 }
