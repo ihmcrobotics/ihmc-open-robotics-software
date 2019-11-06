@@ -13,6 +13,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -148,17 +149,16 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       shiftedPoint.add(nodeShiftToAvoidObstacles);
 
       List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>(
-            PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
+            PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, startRegion.getHomeRegionCluster()));
 
-      if (bothRegions.size() > 1) // size will always be 2 (see above)
+      if (endRegion != null && endRegion.getHomeRegionCluster() != null)
       {
-         // this appears to be named incorrectly, actually looks to see if next point is in *start* region
          boolean pointIsInEndRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(nextPointInWorld2D,
-                                                                                                   startRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
-                                                                                                   startRegion.getHomeRegionCluster().getNumberOfRawPoints(),
+                                                                                                endRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
+                                                                                                endRegion.getHomeRegionCluster().getNumberOfRawPoints(),
                                                                                                    true, 0.0);
          if (pointIsInEndRegion)
-            closestCliffObstacleClusterPoints.addAll(PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, startRegion.getHomeRegionCluster()));
+            closestCliffObstacleClusterPoints.addAll(PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
       }
 
       nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
