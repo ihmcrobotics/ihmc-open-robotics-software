@@ -117,21 +117,14 @@ public class NavigableRegionsManager
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
 
-      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
-      Point3DReadOnly goalInWorld;
-      if (accommodateOcclusions)
+      // filterPlanarRegionsWithBoundingCapsule is a chicken or the egg problem with occlusions
+      // maybe bound it instead by surrounding area or different shape?
+      if (!accommodateOcclusions)
       {
-         goalInWorld = finalGoalInWorld;
-
-         // filterPlanarRegionsWithBoundingCapsule is a chicken or the egg problem with occlusions
-         navigableRegions.createNavigableRegions();
-      }
-      else
-      {
-         goalInWorld = finalGoalInWorld;
          navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
-         navigableRegions.createNavigableRegions();
       }
+
+      navigableRegions.createNavigableRegions();
 
       visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
                                             parameters.getPreferredToPreferredInterRegionConnectionFilter(),
@@ -140,6 +133,24 @@ public class NavigableRegionsManager
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
+
+      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
+      Point3DReadOnly goalInWorld;
+      if (accommodateOcclusions)
+      {
+         // find out if navigable regions make it to the goal
+         // try to find path?
+
+         // find closest region to final goal
+
+         // TODO
+
+         goalInWorld = finalGoalInWorld;
+      }
+      else
+      {
+         goalInWorld = finalGoalInWorld;
+      }
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
