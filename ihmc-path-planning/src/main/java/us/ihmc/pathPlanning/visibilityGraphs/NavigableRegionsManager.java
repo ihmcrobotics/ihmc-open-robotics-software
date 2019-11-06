@@ -143,6 +143,11 @@ public class NavigableRegionsManager
 
          // find closest region to final goal
 
+         // gonna have to call planInternal many times??
+         // start from goal and back up until plan found
+         // take cue from explore area behavior
+         // maybe need to know where we've tried to get to before
+
          // TODO
 
          goalInWorld = finalGoalInWorld;
