@@ -60,7 +60,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -249,6 +249,24 @@ public class VisibilityGraphsFrameworkTest
             return dataSet.getPlannerInput().getVisGraphIsTestable();
       };
       List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
+   @Disabled("Occlusion planning needs to be implemented better.")
+   @Test
+   public void testSimulateOcclusionAndDynamicReplanningOnTrickyCorridor()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+
+      boolean testWithOcclusions = true;
+      List<DataSet> allDatasets = new ArrayList<>();
+      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
 
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
    }
@@ -640,7 +658,7 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-         pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph, simulateOcclusions);
          path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 //         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }
@@ -906,7 +924,9 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment.name(); // enum is easier to swap than all these commented lines
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+      String dataSetName = "20191008_153543_TrickCorridor";
 //      String dataSetName = "20171216_111326_CrossoverPlatforms";
 //      String dataSetName = "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
@@ -915,6 +935,8 @@ public class VisibilityGraphsFrameworkTest
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
+      //      String dataSetName = "20191007_185913_SimpleCorridor";
+      //      String dataSetName = "20191007_200400_Corridor1Wall";
 
       VISUALIZE = true;
       test.setup();
@@ -926,8 +948,8 @@ public class VisibilityGraphsFrameworkTest
 //         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, true), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }
