@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerCell;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
@@ -75,8 +76,8 @@ public class ExpandedNodesRenderer extends AnimationTimer
    {
       palette.clearPalette();
 
-      Collection<LatticeNode> latticeNodes = latticeMap.getLatticeNodes();
-      for (LatticeNode node : latticeNodes)
+      Collection<FootstepNode> latticeNodes = latticeMap.getLatticeNodes();
+      for (FootstepNode node : latticeNodes)
       {
          double x = node.getX();
          double y = node.getY();

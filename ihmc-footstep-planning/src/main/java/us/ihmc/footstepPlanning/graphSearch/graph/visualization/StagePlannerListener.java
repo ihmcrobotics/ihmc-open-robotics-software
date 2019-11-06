@@ -2,16 +2,11 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
-import us.ihmc.log.LogTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,14 +16,14 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final FootstepNodeSnapper snapper;
 
    private final ConcurrentList<PlannerCell> occupancyMapCellsSinceLastReport = new ConcurrentList<>();
-   private final ConcurrentList<LatticeNode> expandedNodesSinceLastReport = new ConcurrentList<>();
+   private final ConcurrentList<FootstepNode> expandedNodesSinceLastReport = new ConcurrentList<>();
    private final ConcurrentList<PlannerNodeData> fullGraphSinceLastReport = new ConcurrentList<>();
 
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
    private final List<PlannerNodeData> incomingNodeDataThisTick = new ArrayList<>();
    private final List<PlannerCell> incomingOccupiedCellsThisTick = new ArrayList<>();
-   private final List<LatticeNode> incomingExpandedNodes = new ArrayList<>();
+   private final List<FootstepNode> incomingExpandedNodes = new ArrayList<>();
 
    private final HashMap<FootstepNode, PlannerNodeData> nodeDataMap = new HashMap<>();
 
@@ -68,12 +63,12 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       {
          previousNodeDataIndex = nodeDataMap.get(previousNode).getNodeId();
 
-         incomingExpandedNodes.add(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
+         incomingExpandedNodes.add(previousNode);
       }
 
       RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
 
-      PlannerNodeData nodeData = new PlannerNodeData(totalNodeCount, previousNodeDataIndex, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      PlannerNodeData nodeData = new PlannerNodeData(totalNodeCount, previousNodeDataIndex, node, nodePose, null);
       nodeDataMap.put(node, nodeData);
       incomingNodeDataThisTick.add(nodeData);
       incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
@@ -213,8 +208,8 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          updateExpandedNodes();
 
       PlannerLatticeMap latticeMap = new PlannerLatticeMap();
-      for (LatticeNode latticeNode : expandedNodesSinceLastReport.getCopyForReading())
-         latticeMap.addLatticeNode(latticeNode);
+      for (FootstepNode latticeNode : expandedNodesSinceLastReport.getCopyForReading())
+         latticeMap.addFootstepNode(latticeNode);
 
       hasExpandedNodes.set(false);
       expandedNodesSinceLastReport.clear();

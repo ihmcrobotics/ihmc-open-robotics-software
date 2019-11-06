@@ -46,6 +46,8 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -68,6 +70,9 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +85,8 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
 
       cdr.write_type_2(data.getYawIndex());
 
+      cdr.write_type_9(data.getRobotSide());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -90,6 +97,8 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
       	
       data.setYawIndex(cdr.read_type_2());
       	
+      data.setRobotSide(cdr.read_type_9());
+      	
 
    }
 
@@ -99,6 +108,7 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
       ser.write_type_2("x_index", data.getXIndex());
       ser.write_type_2("y_index", data.getYIndex());
       ser.write_type_2("yaw_index", data.getYawIndex());
+      ser.write_type_9("robot_side", data.getRobotSide());
    }
 
    @Override
@@ -107,6 +117,7 @@ public class FootstepPlannerLatticeNodeMessagePubSubType implements us.ihmc.pubs
       data.setXIndex(ser.read_type_2("x_index"));
       data.setYIndex(ser.read_type_2("y_index"));
       data.setYawIndex(ser.read_type_2("yaw_index"));
+      data.setRobotSide(ser.read_type_9("robot_side"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage src, controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage dest)

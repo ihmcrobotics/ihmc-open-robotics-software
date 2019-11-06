@@ -1,12 +1,6 @@
 # This message is part of the IHMC footstep planning module.
 # This message is sent from the planner in order to visualize and debug planner progress
 
-byte ROBOT_SIDE_LEFT = 0
-byte ROBOT_SIDE_RIGHT = 1
-
-# Footstep node side
-byte robot_side 255
-
 # Specifies snap transform translation. NaN if snap was unsuccessful
 geometry_msgs/Point position
 # Specifies the snap rotation. NaN if snap unsuccessful.
@@ -17,11 +11,7 @@ int32 node_id -1
 # ID of node. This should reference the index of this node in a FootstepNodeDataList
 int32 parent_node_id -1
 
-int32 x_index -1
-
-int32 y_index -1
-
-int32 yaw_index -1
+FootstepPlannerLatticeNodeMessage footstep_node
 
 # Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
 byte STEP_TOO_HIGH_OR_LOW = 0

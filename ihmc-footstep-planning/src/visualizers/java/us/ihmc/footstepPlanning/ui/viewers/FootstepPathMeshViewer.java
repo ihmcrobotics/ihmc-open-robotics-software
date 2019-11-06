@@ -125,7 +125,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
       footstepDataMessage.getLocation().set(nodeData.getNodePose().getPosition());
       footstepDataMessage.getOrientation().set(nodeData.getNodePose().getOrientation());
-      footstepDataMessage.setRobotSide(nodeData.getRobotSide().toByte());
+      footstepDataMessage.setRobotSide(nodeData.getFootstepNode().getRobotSide().toByte());
    }
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)

@@ -40,8 +40,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -50,11 +48,7 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,9 +65,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
@@ -84,14 +75,7 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getCdrSerializedSize(data.getFootstepNode(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -102,40 +86,26 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.FootstepNodeDataMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_9(data.getRobotSide());
-
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       cdr.write_type_2(data.getNodeId());
 
       cdr.write_type_2(data.getParentNodeId());
 
-      cdr.write_type_2(data.getXIndex());
-
-      cdr.write_type_2(data.getYIndex());
-
-      cdr.write_type_2(data.getYawIndex());
-
+      controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.write(data.getFootstepNode(), cdr);
       cdr.write_type_9(data.getBipedalFootstepPlannerNodeRejectionReason());
 
    }
 
    public static void read(controller_msgs.msg.dds.FootstepNodeDataMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setRobotSide(cdr.read_type_9());
-      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       data.setNodeId(cdr.read_type_2());
       	
       data.setParentNodeId(cdr.read_type_2());
       	
-      data.setXIndex(cdr.read_type_2());
-      	
-      data.setYIndex(cdr.read_type_2());
-      	
-      data.setYawIndex(cdr.read_type_2());
-      	
+      controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.read(data.getFootstepNode(), cdr);	
       data.setBipedalFootstepPlannerNodeRejectionReason(cdr.read_type_9());
       	
 
@@ -144,32 +114,28 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepNodeDataMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
       ser.write_type_2("node_id", data.getNodeId());
       ser.write_type_2("parent_node_id", data.getParentNodeId());
-      ser.write_type_2("x_index", data.getXIndex());
-      ser.write_type_2("y_index", data.getYIndex());
-      ser.write_type_2("yaw_index", data.getYawIndex());
+      ser.write_type_a("footstep_node", new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType(), data.getFootstepNode());
+
       ser.write_type_9("bipedal_footstep_planner_node_rejection_reason", data.getBipedalFootstepPlannerNodeRejectionReason());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepNodeDataMessage data)
    {
-      data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
       data.setNodeId(ser.read_type_2("node_id"));
       data.setParentNodeId(ser.read_type_2("parent_node_id"));
-      data.setXIndex(ser.read_type_2("x_index"));
-      data.setYIndex(ser.read_type_2("y_index"));
-      data.setYawIndex(ser.read_type_2("yaw_index"));
+      ser.read_type_a("footstep_node", new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType(), data.getFootstepNode());
+
       data.setBipedalFootstepPlannerNodeRejectionReason(ser.read_type_9("bipedal_footstep_planner_node_rejection_reason"));
    }
 

@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__FootstepNodeDataMessage__idl__
 #define __controller_msgs__msg__FootstepNodeDataMessage__idl__
 
+#include "controller_msgs/msg/./FootstepPlannerLatticeNodeMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
@@ -9,12 +10,6 @@ module controller_msgs
   {
     module dds
     {
-      const octet ROBOT_SIDE_LEFT =
-      0;
-
-      const octet ROBOT_SIDE_RIGHT =
-      1;
-
       /**
        * Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
        */
@@ -75,11 +70,6 @@ module controller_msgs
       struct FootstepNodeDataMessage
       {
         /**
-         * Footstep node side
-         */
-        @defaultValue(value=255)
-        octet robot_side;
-        /**
          * Specifies snap transform translation. NaN if snap was unsuccessful
          */
         geometry_msgs::msg::dds::Point position;
@@ -97,12 +87,7 @@ module controller_msgs
          */
         @defaultValue(value=-1)
         long parent_node_id;
-        @defaultValue(value=-1)
-        long x_index;
-        @defaultValue(value=-1)
-        long y_index;
-        @defaultValue(value=-1)
-        long yaw_index;
+        controller_msgs::msg::dds::FootstepPlannerLatticeNodeMessage footstep_node;
         /**
          * Node rejection reason. 255 if node was accepted
          */
