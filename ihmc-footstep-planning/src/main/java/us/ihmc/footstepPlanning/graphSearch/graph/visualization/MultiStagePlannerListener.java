@@ -21,9 +21,7 @@ public class MultiStagePlannerListener
    private final StatusMessageOutputManager statusOutputManager;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean broadcastOccupancyMap = new YoBoolean("broadcastOccupancyMap", registry);
-   private final YoBoolean broadcastExpandedNodes = new YoBoolean("broadcastExpandedNodes", registry);
    private final YoBoolean broadcastLowestCostPlan = new YoBoolean("broadcastLowestCostPlan", registry);
-   private final YoBoolean broadcastFullGraph = new YoBoolean("broadcastFullGraph", registry);
 
    public MultiStagePlannerListener(StatusMessageOutputManager statusOutputManager, long occupancyMapBroadcastDt, YoVariableRegistry parentRegistry)
    {
@@ -31,8 +29,6 @@ public class MultiStagePlannerListener
       this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
 
       broadcastOccupancyMap.set(true);
-      broadcastExpandedNodes.set(true);
-      broadcastFullGraph.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -74,42 +70,22 @@ public class MultiStagePlannerListener
          if (broadcastOccupancyMap.getBooleanValue())
             statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
 
-         if (broadcastExpandedNodes.getBooleanValue())
-            statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
-
-         if (broadcastLowestCostPlan.getBooleanValue())
-         {
-            FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
-            if (!message.getNodeData().isEmpty())
-               statusOutputManager.reportStatusMessage(message);
-         }
          lastBroadcastTime = currentTime;
       }
 
       if (stageHasLowestCostPlan && broadcastLowestCostPlan.getBooleanValue())
       {
-         FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
-         if (!message.getNodeData().isEmpty())
-            statusOutputManager.reportStatusMessage(message);
+//         FootstepNodeDataListMessage message = getConcatenatedLowestCostNodeData();
+//         if (!message.getNodeData().isEmpty())
+//            statusOutputManager.reportStatusMessage(message);
       }
-
-      if (stageHasFullGraph && broadcastFullGraph.getBooleanValue())
-      {
-         FootstepNodeDataListMessage message = getConcatenatedFullGraph();
-         if (!message.getNodeData().isEmpty())
-            statusOutputManager.reportStatusMessage(message);
-      }
-
    }
 
    public void plannerFinished(List<FootstepNode> plan)
    {
-      if (broadcastOccupancyMap.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
-      if (broadcastExpandedNodes.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
-      if (broadcastFullGraph.getBooleanValue())
-         statusOutputManager.reportStatusMessage(getConcatenatedFullGraph());
+      statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+      statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
+      statusOutputManager.reportStatusMessage(getConcatenatedFullGraph());
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
