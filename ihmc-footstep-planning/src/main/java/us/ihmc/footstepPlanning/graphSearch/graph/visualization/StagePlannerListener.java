@@ -69,7 +69,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       node.setNodeIndex(totalNodeCount);
       PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, node, nodePose, null);
 
-//      nodeDataThisTick.put(node, nodeData);
+      nodeDataThisTick.put(node, nodeData);
       incomingNodeDataThisTick.add(nodeData);
       incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
       totalNodeCount++;
@@ -100,7 +100,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-//      nodeDataThisTick.get(rejectedNode).setRejectionReason(reason);
+      nodeDataThisTick.get(rejectedNode).setRejectionReason(reason);
       rejectionCount.get(reason).increment();
    }
 
@@ -119,7 +119,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       updateOccupiedCells();
       updateExpandedNodes();
 //      updateLowestCostPlan();
-//      updateFullGraph();
+      updateFullGraph();
 
       lastUpdateTime = currentTime;
    }
