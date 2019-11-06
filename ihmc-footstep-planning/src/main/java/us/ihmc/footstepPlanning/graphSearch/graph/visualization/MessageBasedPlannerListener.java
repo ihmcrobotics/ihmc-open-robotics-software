@@ -1,12 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class MessageBasedPlannerListener implements BipedalFootstepPlannerListener
@@ -20,7 +21,9 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    private final long broadcastDt;
    private long lastBroadcastTime = -1;
-   private final PlannerNodeDataList allNodes = new PlannerNodeDataList();
+   private final HashMap<FootstepNode, PlannerNodeData> nodeDataMap = new HashMap<>();
+
+   private int totalNodeCount = 0;
 
 
    public MessageBasedPlannerListener(FootstepNodeSnapper snapper, long broadcastDt)
@@ -41,21 +44,24 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       }
       else
       {
-         previousNodeDataIndex = allNodes.getNodeData().indexOf(previousNode.getLatticeNode());
+         previousNodeDataIndex = nodeDataMap.get(previousNode).getNodeId();
 
          expandedNodesSinceLastReport.addLatticeNode(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
-      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.snapFootstepNode(node).getSnapTransform());
-      PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
-
+      RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
+      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      nodeDataMap.put(node, nodeData);
       fullGraphSinceLastReport.addNode(nodeData);
       occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
+
+      totalNodeCount++;
    }
 
    private void reset()
    {
       lowestNodeDataList.clear();
-      allNodes.clear();
+      nodeDataMap.clear();
+      totalNodeCount = 0;
    }
 
    @Override
@@ -65,7 +71,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       for (int i = 0; i < plan.size(); i++)
       {
          FootstepNode node = plan.get(i);
-         Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+         RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
          lowestNodeDataList.addNode(i - 1, i, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
       }
    }
@@ -73,7 +79,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      fullGraphSinceLastReport.getDataForNode(rejectedNode).setRejectionReason(reason);
+      nodeDataMap.get(rejectedNode).setRejectionReason(reason);
    }
 
    @Override

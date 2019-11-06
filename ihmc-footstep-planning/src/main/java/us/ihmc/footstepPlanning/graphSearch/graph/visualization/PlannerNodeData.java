@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -21,7 +22,14 @@ public class PlannerNodeData
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public PlannerNodeData(int nodeId, int parentNodeId, int xIndex, int yIndex, int yawIndex, RobotSide robotSide, Pose3DReadOnly pose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   public PlannerNodeData(int nodeId, int parentNodeId, LatticeNode latticeNode, RobotSide robotSide, RigidBodyTransform pose,
+                          BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      this(nodeId, parentNodeId, latticeNode.getXIndex(), latticeNode.getYIndex(), latticeNode.getYawIndex(), robotSide, pose, rejectionReason);
+   }
+
+   public PlannerNodeData(int nodeId, int parentNodeId, int xIndex, int yIndex, int yawIndex, RobotSide robotSide, RigidBodyTransform pose,
+                          BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
       this.latticeNode = new LatticeNode(xIndex, yIndex, yawIndex);
       this.nodeId = nodeId;
@@ -36,7 +44,7 @@ public class PlannerNodeData
    public PlannerNodeData(FootstepNodeDataMessage message)
    {
       this(message.getNodeId(), message.getParentNodeId(), message.getXIndex(), message.getYIndex(), message.getYawIndex(),
-           RobotSide.fromByte(message.getRobotSide()), new Pose3D(message.getPosition(), message.getOrientation()),
+           RobotSide.fromByte(message.getRobotSide()), new RigidBodyTransform(message.getOrientation(), message.getPosition()),
            BipedalFootstepPlannerNodeRejectionReason.fromByte(message.getBipedalFootstepPlannerNodeRejectionReason()));
    }
 
