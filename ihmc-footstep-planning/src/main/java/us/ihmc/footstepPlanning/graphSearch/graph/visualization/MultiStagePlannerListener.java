@@ -177,12 +177,13 @@ public class MultiStagePlannerListener
          if (latticeMap == null)
             continue;
 
-         for (LatticeNode stageCell : latticeMap.getLatticeNodes())
+         for (FootstepNode stageCell : latticeMap.getLatticeNodes())
          {
             FootstepPlannerLatticeNodeMessage nodeMessage = latticeMapMessage.getLatticeNodes().add();
             nodeMessage.setXIndex(stageCell.getXIndex());
             nodeMessage.setYIndex(stageCell.getYIndex());
             nodeMessage.setYawIndex(stageCell.getYawIndex());
+            nodeMessage.setRobotSide(stageCell.getRobotSide().toByte());
          }
       }
       return latticeMapMessage;

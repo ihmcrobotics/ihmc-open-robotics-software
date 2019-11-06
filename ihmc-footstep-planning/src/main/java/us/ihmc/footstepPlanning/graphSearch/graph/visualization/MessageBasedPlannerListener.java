@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -46,10 +45,10 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       {
          previousNodeDataIndex = nodeDataMap.get(previousNode).getNodeId();
 
-         expandedNodesSinceLastReport.addLatticeNode(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
+         expandedNodesSinceLastReport.addFootstepNode(previousNode);
       }
       RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
-      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node, nodePose, null);
       nodeDataMap.put(node, nodeData);
       fullGraphSinceLastReport.addNode(nodeData);
       occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));

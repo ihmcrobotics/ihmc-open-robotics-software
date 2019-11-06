@@ -26,6 +26,11 @@ public class FootstepNode
       this(new LatticeNode(x, y, yaw), robotSide);
    }
 
+   public FootstepNode(int xIndex, int yIndex, int yawIndex, RobotSide robotSide)
+   {
+      this(new LatticeNode(xIndex, yIndex, yawIndex), robotSide);
+   }
+
    public FootstepNode(LatticeNode latticeNode, RobotSide robotSide)
    {
       this.latticeNode = latticeNode;

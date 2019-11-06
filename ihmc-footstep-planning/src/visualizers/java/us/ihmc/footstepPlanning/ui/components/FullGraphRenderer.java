@@ -15,6 +15,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
@@ -58,8 +59,8 @@ public class FullGraphRenderer extends AnimationTimer
 
    private final PlannerNodeDataList fullGraph = new PlannerNodeDataList();
    private final List<PlannerNodeData> allNodeData = new ArrayList<>();
-   private final HashMap<LatticeNode, List<PlannerNodeData>> childMap = new HashMap<>();
-   private final ArrayList<LatticeNode> expandedNodes = new ArrayList<>();
+   private final HashMap<FootstepNode, List<PlannerNodeData>> childMap = new HashMap<>();
+   private final ArrayList<FootstepNode> expandedNodes = new ArrayList<>();
 
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = PlannerTools.createDefaultFootPolygons();
 
@@ -98,9 +99,9 @@ public class FullGraphRenderer extends AnimationTimer
             continue;
 
          PlannerNodeData parentNode = fullGraph.getNodeData().get(nodeData.getParentNodeId());
-         if (childMap.get(parentNode.getLatticeNode()) == null)
-            childMap.put(parentNode.getLatticeNode(), new ArrayList<>());
-         childMap.get(parentNode.getLatticeNode()).add(nodeData);
+         if (childMap.get(parentNode.getFootstepNode()) == null)
+            childMap.put(parentNode.getFootstepNode(), new ArrayList<>());
+         childMap.get(parentNode.getFootstepNode()).add(nodeData);
       }
 
       expandedNodes.sort(expansionOrderComparator);
@@ -116,12 +117,12 @@ public class FullGraphRenderer extends AnimationTimer
       double alpha = MathTools.clamp(fractionToShow.get(), 0.0, 1.0);
 
       int frameIndex = (int) (alpha * (expandedNodes.size() - 1));
-      LatticeNode nodeToShow = expandedNodes.get(frameIndex);
+      FootstepNode nodeToShow = expandedNodes.get(frameIndex);
       Collection<PlannerNodeData> childrenToShow = childMap.get(nodeToShow);
       PlannerNodeData parentToShow = null;
       for (PlannerNodeData nodeData : allNodeData)
       {
-         if (nodeData.getLatticeNode().equals(nodeToShow))
+         if (nodeData.getFootstepNode().equals(nodeToShow))
             parentToShow = nodeData;
       }
 
@@ -149,14 +150,14 @@ public class FullGraphRenderer extends AnimationTimer
       footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 
-   private final  Comparator<LatticeNode> expansionOrderComparator = (node1, node2) ->
+   private final  Comparator<FootstepNode> expansionOrderComparator = (node1, node2) ->
    {
          int earliestIndex1 = getEarlistChildNodeIndex(node1);
          int earliestIndex2 = getEarlistChildNodeIndex(node2);
          return Integer.compare(earliestIndex1, earliestIndex2);
    };
 
-   public int getEarlistChildNodeIndex(LatticeNode latticeNode)
+   public int getEarlistChildNodeIndex(FootstepNode latticeNode)
    {
       int smallestIndex = Integer.MAX_VALUE;
       for (PlannerNodeData child : childMap.get(latticeNode))

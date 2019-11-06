@@ -1,10 +1,6 @@
 # This message is part of the IHMC footstep planning module.
 # This message is sent from the planner in order to visualize and debug planner progress
 
-int8 ROBOT_SIDE_LEFT=0
-
-int8 ROBOT_SIDE_RIGHT=1
-
 # Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
 int8 STEP_TOO_HIGH_OR_LOW=0
 
@@ -38,10 +34,6 @@ int8 OBSTACLE_HITTING_BODY=14
 
 int8 AT_CLIFF_BOTTOM=15
 
-# Footstep node side
-# Field default value 255
-int8 robot_side
-
 # Specifies snap transform translation. NaN if snap was unsuccessful
 geometry_msgs/Point position
 
@@ -56,14 +48,7 @@ int32 node_id
 # Field default value -1
 int32 parent_node_id
 
-# Field default value -1
-int32 x_index
-
-# Field default value -1
-int32 y_index
-
-# Field default value -1
-int32 yaw_index
+controller_msgs/FootstepPlannerLatticeNodeMessage footstep_node
 
 # Node rejection reason. 255 if node was accepted
 # Field default value 255

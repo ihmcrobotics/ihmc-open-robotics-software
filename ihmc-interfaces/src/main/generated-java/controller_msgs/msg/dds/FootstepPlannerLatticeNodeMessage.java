@@ -12,6 +12,8 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLatticeNodeMessage> implements Settable<FootstepPlannerLatticeNodeMessage>, EpsilonComparable<FootstepPlannerLatticeNodeMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = (byte) 0;
+   public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
             * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
             */
@@ -24,6 +26,10 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
             * Yaw index of the cell
             */
    public int yaw_index_;
+   /**
+            * Robot side of the cell
+            */
+   public byte robot_side_;
 
    public FootstepPlannerLatticeNodeMessage()
    {
@@ -42,6 +48,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       y_index_ = other.y_index_;
 
       yaw_index_ = other.yaw_index_;
+
+      robot_side_ = other.robot_side_;
 
    }
 
@@ -90,6 +98,21 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       return yaw_index_;
    }
 
+   /**
+            * Robot side of the cell
+            */
+   public void setRobotSide(byte robot_side)
+   {
+      robot_side_ = robot_side;
+   }
+   /**
+            * Robot side of the cell
+            */
+   public byte getRobotSide()
+   {
+      return robot_side_;
+   }
+
 
    public static Supplier<FootstepPlannerLatticeNodeMessagePubSubType> getPubSubType()
    {
@@ -114,6 +137,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_index_, other.yaw_index_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
+
 
       return true;
    }
@@ -133,6 +158,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
 
       if(this.yaw_index_ != otherMyClass.yaw_index_) return false;
 
+      if(this.robot_side_ != otherMyClass.robot_side_) return false;
+
 
       return true;
    }
@@ -148,7 +175,9 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       builder.append("y_index=");
       builder.append(this.y_index_);      builder.append(", ");
       builder.append("yaw_index=");
-      builder.append(this.yaw_index_);
+      builder.append(this.yaw_index_);      builder.append(", ");
+      builder.append("robot_side=");
+      builder.append(this.robot_side_);
       builder.append("}");
       return builder.toString();
    }

@@ -4,8 +4,7 @@ import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -13,44 +12,43 @@ public class PlannerNodeData
 {
    private final int parentNodeId;
    private final int nodeId;
-   private final RobotSide robotSide;
 
    private final Pose3D pose = new Pose3D();
-   private final LatticeNode latticeNode;
+   private final FootstepNode footstepNode;
 
    private final int hashCode;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public PlannerNodeData(int nodeId, int parentNodeId, LatticeNode latticeNode, RobotSide robotSide, RigidBodyTransform pose,
+   public PlannerNodeData(int nodeId, int parentNodeId, FootstepNode node, RigidBodyTransform pose,
                           BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      this(nodeId, parentNodeId, latticeNode.getXIndex(), latticeNode.getYIndex(), latticeNode.getYawIndex(), robotSide, pose, rejectionReason);
+      this(nodeId, parentNodeId, node.getXIndex(), node.getYIndex(), node.getYawIndex(), node.getRobotSide(), pose, rejectionReason);
    }
 
    public PlannerNodeData(int nodeId, int parentNodeId, int xIndex, int yIndex, int yawIndex, RobotSide robotSide, RigidBodyTransform pose,
                           BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      this.latticeNode = new LatticeNode(xIndex, yIndex, yawIndex);
+      this.footstepNode = new FootstepNode(xIndex, yIndex, yawIndex, robotSide);
       this.nodeId = nodeId;
       this.parentNodeId = parentNodeId;
-      this.robotSide = robotSide;
       this.pose.set(pose);
       this.rejectionReason = rejectionReason;
 
-      hashCode = latticeNode.hashCode();
+      hashCode = footstepNode.hashCode();
    }
 
    public PlannerNodeData(FootstepNodeDataMessage message)
    {
-      this(message.getNodeId(), message.getParentNodeId(), message.getXIndex(), message.getYIndex(), message.getYawIndex(),
-           RobotSide.fromByte(message.getRobotSide()), new RigidBodyTransform(message.getOrientation(), message.getPosition()),
+      this(message.getNodeId(), message.getParentNodeId(), message.getFootstepNode().getXIndex(), message.getFootstepNode().getYIndex(),
+           message.getFootstepNode().getYawIndex(), RobotSide.fromByte(message.getFootstepNode().getRobotSide()),
+           new RigidBodyTransform(message.getOrientation(), message.getPosition()),
            BipedalFootstepPlannerNodeRejectionReason.fromByte(message.getBipedalFootstepPlannerNodeRejectionReason()));
    }
 
-   public LatticeNode getLatticeNode()
+   public FootstepNode getFootstepNode()
    {
-      return latticeNode;
+      return footstepNode;
    }
 
    public int getNodeId()
@@ -61,11 +59,6 @@ public class PlannerNodeData
    public int getParentNodeId()
    {
       return parentNodeId;
-   }
-
-   public RobotSide getRobotSide()
-   {
-      return robotSide;
    }
 
    public Pose3DReadOnly getNodePose()
@@ -96,10 +89,10 @@ public class PlannerNodeData
 
       message.setNodeId(getNodeId());
       message.setParentNodeId(getParentNodeId());
-      message.setXIndex(getLatticeNode().getXIndex());
-      message.setYIndex(getLatticeNode().getYIndex());
-      message.setYawIndex(getLatticeNode().getYawIndex());
-      message.setRobotSide(getRobotSide().toByte());
+      message.getFootstepNode().setXIndex(getFootstepNode().getXIndex());
+      message.getFootstepNode().setYIndex(getFootstepNode().getYIndex());
+      message.getFootstepNode().setYawIndex(getFootstepNode().getYawIndex());
+      message.getFootstepNode().setRobotSide(getFootstepNode().getRobotSide().toByte());
       message.getPosition().set(getNodePose().getPosition());
       message.getOrientation().set(getNodePose().getOrientation());
       message.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
@@ -114,6 +107,6 @@ public class PlannerNodeData
    @Override
    public boolean equals(Object obj)
    {
-      return getLatticeNode().equals(obj);
+      return getFootstepNode().equals(obj);
    }
 }
