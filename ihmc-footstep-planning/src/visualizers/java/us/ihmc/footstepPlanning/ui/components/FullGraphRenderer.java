@@ -97,7 +97,7 @@ public class FullGraphRenderer extends AnimationTimer
             continue;
 
          PlannerNodeData parentNode = fullGraph.getNodeData().get(nodeData.getParentNodeId());
-         childMap.computeIfAbsent(parentNode, data -> new HashSet<>()).add(nodeData);
+         childMap.computeIfAbsent(parentNode.getLatticeNode(), data -> new HashSet<>()).add(nodeData);
       }
    }
 

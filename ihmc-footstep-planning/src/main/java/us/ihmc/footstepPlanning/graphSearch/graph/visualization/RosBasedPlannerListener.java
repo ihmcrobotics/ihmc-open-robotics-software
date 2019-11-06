@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 
 public class RosBasedPlannerListener extends MessageBasedPlannerListener
 {
    private final StatusMessageOutputManager statusMessageOutputManager;
 
-   public RosBasedPlannerListener(StatusMessageOutputManager statusMessageOutputManager, FootstepNodeSnapperReadOnly snapper, long broadcastDtMillis)
+   public RosBasedPlannerListener(StatusMessageOutputManager statusMessageOutputManager, FootstepNodeSnapper snapper, long broadcastDtMillis)
    {
       super(snapper, broadcastDtMillis);
       this.statusMessageOutputManager = statusMessageOutputManager;

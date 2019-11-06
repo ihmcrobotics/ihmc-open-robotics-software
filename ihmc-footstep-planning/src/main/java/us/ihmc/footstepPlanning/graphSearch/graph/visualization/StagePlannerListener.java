@@ -3,18 +3,21 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.log.LogTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
-   private final FootstepNodeSnapperReadOnly snapper;
+   private final FootstepNodeSnapper snapper;
 
    private final ConcurrentList<PlannerCell> occupancyMapCellsSinceLastReport = new ConcurrentList<>();
    private final ConcurrentList<LatticeNode> expandedNodesSinceLastReport = new ConcurrentList<>();
@@ -41,7 +44,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
    private int totalNodeCount = 0;
 
-   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapUpdateDt)
+   public StagePlannerListener(FootstepNodeSnapper snapper, long occupancyMapUpdateDt)
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
@@ -69,7 +72,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          incomingExpandedNodes.add(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
 
-      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.snapFootstepNode(node).getSnapTransform());
       PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
 
       incomingNodeDataThisTick.add(nodeData);
@@ -103,7 +106,15 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      PlannerNodeData nodeData = incomingNodeDataThisTick.get(incomingNodeDataThisTick.indexOf(rejectedNode.getLatticeNode()));
+      PlannerNodeData nodeData = null;
+      for (int i = incomingNodeDataThisTick.size() - 1; i >= 0; i--) // reverse order search since it's likely the last one added.
+      {
+         if (incomingNodeDataThisTick.get(i).equals(rejectedNode.getLatticeNode()))
+         {
+            nodeData = incomingNodeDataThisTick.get(i);
+            break;
+         }
+      }
       nodeData.setRejectionReason(reason);
 
       rejectionCount.get(reason).increment();
