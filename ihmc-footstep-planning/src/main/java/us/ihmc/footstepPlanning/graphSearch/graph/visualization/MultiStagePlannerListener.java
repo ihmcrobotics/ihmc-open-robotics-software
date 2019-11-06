@@ -32,6 +32,7 @@ public class MultiStagePlannerListener
 
       broadcastOccupancyMap.set(true);
       broadcastExpandedNodes.set(true);
+      broadcastFullGraph.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -107,6 +108,8 @@ public class MultiStagePlannerListener
          statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
       if (broadcastExpandedNodes.getBooleanValue())
          statusOutputManager.reportStatusMessage(getConcatenatedExpandedNodes());
+      if (broadcastFullGraph.getBooleanValue())
+         statusOutputManager.reportStatusMessage(getConcatenatedFullGraph());
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
@@ -148,8 +151,8 @@ public class MultiStagePlannerListener
       FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
       for (StagePlannerListener listener : listeners)
       {
-         if (!listener.hasOccupiedCells())
-            continue;
+//         if (!listener.hasOccupiedCells())
+//            continue;
 
          PlannerOccupancyMap occupancyMap = listener.getOccupancyMap();
          if (occupancyMap == null)
@@ -167,8 +170,8 @@ public class MultiStagePlannerListener
       FootstepPlannerLatticeMapMessage latticeMapMessage = new FootstepPlannerLatticeMapMessage();
       for (StagePlannerListener listener : listeners)
       {
-         if (!listener.hasExpandedNodes())
-            continue;
+//         if (!listener.hasExpandedNodes())
+//            continue;
 
          PlannerLatticeMap latticeMap = listener.getExpandedNodes();
          if (latticeMap == null)
@@ -214,8 +217,8 @@ public class MultiStagePlannerListener
       {
          StagePlannerListener listener = listeners.get(listenerIdx);
 
-         if (!listener.hasFullGraph())
-            continue;
+//         if (!listener.hasFullGraph())
+//            continue;
 
          PlannerNodeDataList fullGraph = listener.getFullGraph();
          if (fullGraph == null)

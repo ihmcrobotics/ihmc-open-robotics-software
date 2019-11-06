@@ -136,7 +136,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
    public static final Topic<Boolean> ShowExpandedNodes = topic("ShowExpandedNodes");
    public static final Topic<Boolean> ShowFullGraph = topic("ShowFullGraph");
-   public static final Topic<Integer> ExpansionStepToShow = topic("ExpansionStepToShow");
+   public static final Topic<Double> ExpansionFractionToShow = topic("ExpansionFractionToShow");
    public static final Topic<BipedalFootstepPlannerNodeRejectionReason> RejectionReasonToShow = topic("RejectionReasonToShow");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 

@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -56,7 +57,10 @@ public class PlannerNodeDataList
       if (node == null)
          return null;
 
-      return nodeDataList.get(nodeDataList.indexOf(node));
+      int index = nodeDataList.indexOf(node);
+      if (index == -1)
+         LogTools.info("What");
+      return nodeDataList.get(index);
    }
 
    public PlannerNodeData addNode(int parentNodeIndex, int nodeIndex, LatticeNode latticeNode, RobotSide newNodeSide, RigidBodyTransform newNodePose,
