@@ -90,32 +90,48 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+      return calculateBodyPath(start, goal, fullyExpandVisibilityGraph, false);
    }
 
-   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal, boolean fullyExpandVisibilityGraph)
+   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start,
+                                                  final Point3DReadOnly goal,
+                                                  boolean fullyExpandVisibilityGraph,
+                                                  boolean accommodateOcclusions)
    {
-      return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph);
+      return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph, accommodateOcclusions);
    }
 
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
-                                                                        boolean fullyExpandVisibilityGraph)
+                                                                        boolean fullyExpandVisibilityGraph, boolean accommodateOcclusions)
    {
-      if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
+      if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
          return null;
 
       return planInternal();
    }
 
-   private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld, boolean fullyExpandVisibilityGraph, boolean accommodateOcclusions)
    {
-      if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
+      if (!checkIfStartAndGoalAreValid(startInWorld, finalGoalInWorld))
          return false;
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-      navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
 
-      navigableRegions.createNavigableRegions();
+      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
+      Point3DReadOnly goalInWorld;
+      if (accommodateOcclusions)
+      {
+         goalInWorld = finalGoalInWorld;
+
+         // filterPlanarRegionsWithBoundingCapsule is a chicken or the egg problem with occlusions
+         navigableRegions.createNavigableRegions();
+      }
+      else
+      {
+         goalInWorld = finalGoalInWorld;
+         navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
+         navigableRegions.createNavigableRegions();
+      }
 
       visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
                                             parameters.getPreferredToPreferredInterRegionConnectionFilter(),
@@ -350,7 +366,7 @@ public class NavigableRegionsManager
    @Deprecated
    public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      List<Point3DReadOnly> path = calculateBodyPath(start, goal);
+      List<Point3DReadOnly> path = calculateBodyPath(start, goal, fullyExpandVisibilityGraph, false);
 
       if (path == null)
       {
@@ -381,7 +397,7 @@ public class NavigableRegionsManager
                                                                                     closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomePlanarRegion());
 
-         path = calculateBodyPath(start, closestExtrusion);
+         path = calculateBodyPath(start, closestExtrusion, fullyExpandVisibilityGraph, false);
          path.add(goal);
 
          return path;
