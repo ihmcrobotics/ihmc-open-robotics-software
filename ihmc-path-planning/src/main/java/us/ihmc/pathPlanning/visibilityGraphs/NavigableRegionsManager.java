@@ -148,6 +148,8 @@ public class NavigableRegionsManager
          // take cue from explore area behavior
          // maybe need to know where we've tried to get to before
 
+         // might need to compute edge costs early?
+
          // TODO
 
          goalInWorld = finalGoalInWorld;
@@ -260,6 +262,9 @@ public class NavigableRegionsManager
       return path;
    }
 
+   /**
+    * This computes edge costs.
+    */
    List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
    {
       if (nodeToExpand.getHasBeenExpanded())
@@ -267,7 +272,7 @@ public class NavigableRegionsManager
          throw new RuntimeException("Node has already been expanded!!");
       }
 
-      if (!nodeToExpand.getEdgesHaveBeenDetermined())
+      if (!nodeToExpand.getEdgesHaveBeenDetermined()) // compute edge costs
       {
          visibilityGraph.computeInnerAndInterEdges(nodeToExpand);
       }

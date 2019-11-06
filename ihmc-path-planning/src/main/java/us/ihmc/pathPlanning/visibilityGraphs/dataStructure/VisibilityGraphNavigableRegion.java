@@ -136,6 +136,9 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
+   /**
+    * Create visibility graph for this region.
+    */
    public void createGraphBetweenInnerClusterRings(double nonPreferredWeight, double nonPreferredStaticCost)
    {
       List<Cluster> allClusters = navigableRegion.getAllClusters();
