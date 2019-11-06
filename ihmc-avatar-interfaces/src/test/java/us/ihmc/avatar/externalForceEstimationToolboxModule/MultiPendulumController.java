@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.externalForceEstimation;
+package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
