@@ -5,7 +5,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PlannerNodeData
@@ -20,10 +19,10 @@ public class PlannerNodeData
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public PlannerNodeData(int nodeId, int parentNodeId, FootstepNode node, RigidBodyTransform pose,
+   public PlannerNodeData(int parentNodeId, FootstepNode node, RigidBodyTransform pose,
                           BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      this(nodeId, parentNodeId, node.getXIndex(), node.getYIndex(), node.getYawIndex(), node.getRobotSide(), pose, rejectionReason);
+      this(node.getNodeIndex(), parentNodeId, node.getXIndex(), node.getYIndex(), node.getYawIndex(), node.getRobotSide(), pose, rejectionReason);
    }
 
    public PlannerNodeData(int nodeId, int parentNodeId, int xIndex, int yIndex, int yawIndex, RobotSide robotSide, RigidBodyTransform pose,

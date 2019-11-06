@@ -16,7 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
@@ -24,7 +23,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataL
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -152,12 +150,12 @@ public class FullGraphRenderer extends AnimationTimer
 
    private final  Comparator<FootstepNode> expansionOrderComparator = (node1, node2) ->
    {
-         int earliestIndex1 = getEarlistChildNodeIndex(node1);
-         int earliestIndex2 = getEarlistChildNodeIndex(node2);
+         int earliestIndex1 = getEarliestChildNodeIndex(node1);
+         int earliestIndex2 = getEarliestChildNodeIndex(node2);
          return Integer.compare(earliestIndex1, earliestIndex2);
    };
 
-   public int getEarlistChildNodeIndex(FootstepNode latticeNode)
+   public int getEarliestChildNodeIndex(FootstepNode latticeNode)
    {
       int smallestIndex = Integer.MAX_VALUE;
       for (PlannerNodeData child : childMap.get(latticeNode))

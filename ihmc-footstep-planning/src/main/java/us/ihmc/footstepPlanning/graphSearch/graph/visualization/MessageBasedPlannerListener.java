@@ -48,7 +48,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
          expandedNodesSinceLastReport.addFootstepNode(previousNode);
       }
       RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
-      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node, nodePose, null);
+      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, node, nodePose, null);
       nodeDataMap.put(node, nodeData);
       fullGraphSinceLastReport.addNode(nodeData);
       occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
