@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
@@ -25,12 +26,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-
    private final List<PlannerNodeData> incomingNodeDataThisTick = new ArrayList<>();
    private final List<PlannerCell> incomingOccupiedCellsThisTick = new ArrayList<>();
    private final List<LatticeNode> incomingExpandedNodes = new ArrayList<>();
 
-   private final PlannerNodeDataList allNodes = new PlannerNodeDataList();
+   private final HashMap<FootstepNode, PlannerNodeData> nodeDataMap = new HashMap<>();
 
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
@@ -48,7 +48,6 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
-      allNodes.setIsFootstepGraph(true);
 
       for(BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
       {
@@ -67,23 +66,23 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       }
       else
       {
-         previousNodeDataIndex = allNodes.getNodeData().indexOf(previousNode.getLatticeNode());
+         previousNodeDataIndex = nodeDataMap.get(previousNode).getNodeId();
 
          incomingExpandedNodes.add(new LatticeNode(previousNode.getXIndex(), previousNode.getYIndex(), previousNode.getYawIndex()));
       }
 
-      Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.snapFootstepNode(node).getSnapTransform());
-      PlannerNodeData nodeData = allNodes.addNode(previousNodeDataIndex, allNodes.size(), node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
 
+      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, totalNodeCount, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+      nodeDataMap.put(node, nodeData);
       incomingNodeDataThisTick.add(nodeData);
       incomingOccupiedCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
-
       totalNodeCount++;
    }
 
    public void reset()
    {
-      allNodes.clear();
+      nodeDataMap.clear();
       incomingNodeDataThisTick.clear();
       incomingOccupiedCellsThisTick.clear();
       incomingExpandedNodes.clear();
@@ -106,17 +105,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      PlannerNodeData nodeData = null;
-      for (int i = incomingNodeDataThisTick.size() - 1; i >= 0; i--) // reverse order search since it's likely the last one added.
-      {
-         if (incomingNodeDataThisTick.get(i).equals(rejectedNode.getLatticeNode()))
-         {
-            nodeData = incomingNodeDataThisTick.get(i);
-            break;
-         }
-      }
-      nodeData.setRejectionReason(reason);
-
+      nodeDataMap.get(rejectedNode).setRejectionReason(reason);
       rejectionCount.get(reason).increment();
    }
 
@@ -169,7 +158,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       for (int i = 0; i < lowestCostPlan.size(); i++)
       {
          FootstepNode node = lowestCostPlan.get(i);
-         Pose3DReadOnly nodePose = FootstepNodeTools.getNodePoseInWorld(node, snapper.getSnapData(node).getSnapTransform());
+         RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
          concurrentNodeDataList.addNode(-1, i, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
       }
       this.concurrentLowestCostNodeDataList.commit();
