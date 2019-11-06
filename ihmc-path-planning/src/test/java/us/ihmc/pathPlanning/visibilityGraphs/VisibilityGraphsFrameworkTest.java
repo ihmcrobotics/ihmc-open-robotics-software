@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -61,6 +62,8 @@ public class VisibilityGraphsFrameworkTest
 
    // Whether to start the UI or not.
    private static boolean VISUALIZE = true;
+   private static boolean ENABLE_TIMERS = true;
+   private static boolean DYNAMIC_WAIT_FOR_CLICK = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
@@ -94,6 +97,7 @@ public class VisibilityGraphsFrameworkTest
 
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private static Notification nextStepDynamicNotification = new Notification();
 
    private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
@@ -265,6 +269,8 @@ public class VisibilityGraphsFrameworkTest
       }
 
       boolean testWithOcclusions = true;
+      ENABLE_TIMERS = false;
+      DYNAMIC_WAIT_FOR_CLICK = true;
       List<DataSet> allDatasets = new ArrayList<>();
       allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
 
@@ -294,6 +300,7 @@ public class VisibilityGraphsFrameworkTest
          reloadDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
          previousDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
          requestedDatasetPathReference = messager.createInput(UIVisibilityGraphsTopics.CurrentDatasetPath, null);
+         messager.registerTopicListener(UIVisibilityGraphsTopics.NextStepDynamic, obj -> nextStepDynamicNotification.set());
       }
 
       int numberOfFailingDatasets = 0;
@@ -559,11 +566,14 @@ public class VisibilityGraphsFrameworkTest
          long startTime = System.currentTimeMillis();
          errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath, simulateOcclusions);
          long endTime = System.currentTimeMillis();
-         if (endTime - startTime > maxSolveTimeInMilliseconds)
-            errorMessages += fail(datasetName, "Took too long to compute a new body path.");
+         if (ENABLE_TIMERS)
+         {
+            if (endTime - startTime > maxSolveTimeInMilliseconds)
+               errorMessages += fail(datasetName, "Took too long to compute a new body path.");
 
-         if (endTime - totalStartTime > Conversions.secondsToMilliseconds(walkerTotalTime))
-            errorMessages += fail(datasetName, "Took too long to make it through the body path. Made it to " + walkerPosition + ", while the goal was " + goal);
+            if (endTime - totalStartTime > Conversions.secondsToMilliseconds(walkerTotalTime))
+               errorMessages += fail(datasetName, "Took too long to make it through the body path. Made it to " + walkerPosition + ", while the goal was " + goal);
+         }
 
          if (!errorMessages.isEmpty())
             return addPrefixToErrorMessages(datasetName, errorMessages);
@@ -585,6 +595,15 @@ public class VisibilityGraphsFrameworkTest
          {
             if (!messager.isMessagerOpen())
                return addPrefixToErrorMessages(datasetName, errorMessages); // The ui has been closed
+
+            if (DYNAMIC_WAIT_FOR_CLICK)
+            {
+               // next step listener
+               while (!nextStepDynamicNotification.poll())
+               {// wait for button click in UI
+                  Thread.yield();
+               }
+            }
          }
       }
 

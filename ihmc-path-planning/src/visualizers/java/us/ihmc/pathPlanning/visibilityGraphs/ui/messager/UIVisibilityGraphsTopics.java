@@ -77,6 +77,8 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> StopWalker = topic("StopWalker");
    public static final Topic<PlanarRegionsList> ShadowPlanarRegionData = topic("ShadowPlanarRegionData");
 
+   public static final Topic<Object> NextStepDynamic = topic("NextStepDynamic");
+
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private static final <T> Topic<T> topic(String name)
