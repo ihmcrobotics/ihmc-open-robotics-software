@@ -244,7 +244,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       FootstepPlanningResult result = checkResult();
 
       if (result.validForExecution() && listener != null)
-         listener.plannerFinished(null);
+         listener.plannerFinished(null, expandedNodes, graph);
 
       if (debug)
       {
