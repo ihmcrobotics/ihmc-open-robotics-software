@@ -237,7 +237,7 @@ public class VisibilityGraphNavigableRegion
       ArrayList<VisibilityGraphNode> newPreferredNodes = new ArrayList<>();
       ArrayList<VisibilityGraphNode> newNodes = new ArrayList<>();
 
-      // Create all the nodes that are valid first:
+      // create preferred nodes
       for (int nodeIndex = 0; nodeIndex < preferredNavigableExtrusionPoints.size(); nodeIndex++)
       {
          if (arePreferredPointsActuallyNavigable[nodeIndex])
@@ -253,6 +253,7 @@ public class VisibilityGraphNavigableRegion
          }
       }
 
+      // create nodes
       for (int nodeIndex = 0; nodeIndex < navigableExtrusionPoints.size(); nodeIndex++)
       {
          if (arePointsActuallyNavigable[nodeIndex])
