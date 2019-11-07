@@ -84,6 +84,7 @@ public class REAMeshViewer
          {
             lidarScanViewer.render();
             stereoVisionPointCloudViewer.render();
+            depthPointCloudViewer.render();
             ocTreeViewer.render();
 
             if (lidarBufferOctreeMeshBuilder.hasNewMeshAndMaterial())
@@ -115,6 +116,7 @@ public class REAMeshViewer
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarScanViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionPointCloudViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(depthPointCloudViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD,
                                                                           TimeUnit.MILLISECONDS));
