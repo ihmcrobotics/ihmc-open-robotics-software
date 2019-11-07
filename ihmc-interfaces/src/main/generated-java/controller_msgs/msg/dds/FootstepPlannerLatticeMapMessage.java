@@ -15,7 +15,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
    /**
             * This is the ID of the planning request which this message corresponds to
             */
-   public long sequence_id_;
+   public long plan_id_;
    /**
             * List of cells that the planner has explored
             */
@@ -35,7 +35,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
 
    public void set(FootstepPlannerLatticeMapMessage other)
    {
-      sequence_id_ = other.sequence_id_;
+      plan_id_ = other.plan_id_;
 
       lattice_nodes_.set(other.lattice_nodes_);
    }
@@ -43,16 +43,16 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
    /**
             * This is the ID of the planning request which this message corresponds to
             */
-   public void setSequenceId(long sequence_id)
+   public void setPlanId(long plan_id)
    {
-      sequence_id_ = sequence_id;
+      plan_id_ = plan_id;
    }
    /**
             * This is the ID of the planning request which this message corresponds to
             */
-   public long getSequenceId()
+   public long getPlanId()
    {
-      return sequence_id_;
+      return plan_id_;
    }
 
 
@@ -82,7 +82,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
 
       if (this.lattice_nodes_.size() != other.lattice_nodes_.size()) { return false; }
       else
@@ -104,7 +104,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
 
       FootstepPlannerLatticeMapMessage otherMyClass = (FootstepPlannerLatticeMapMessage) other;
 
-      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+      if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
       if (!this.lattice_nodes_.equals(otherMyClass.lattice_nodes_)) return false;
 
@@ -117,8 +117,8 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlannerLatticeMapMessage {");
-      builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("plan_id=");
+      builder.append(this.plan_id_);      builder.append(", ");
       builder.append("lattice_nodes=");
       builder.append(this.lattice_nodes_);
       builder.append("}");

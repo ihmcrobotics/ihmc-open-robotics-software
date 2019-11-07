@@ -72,7 +72,7 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
 
    public static void write(controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_4(data.getPlanId());
 
       if(data.getLatticeNodes().size() <= 100)
       cdr.write_type_e(data.getLatticeNodes());else
@@ -82,7 +82,7 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setPlanId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getLatticeNodes());	
 
@@ -91,14 +91,14 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_4("plan_id", data.getPlanId());
       ser.write_type_e("lattice_nodes", data.getLatticeNodes());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerLatticeMapMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPlanId(ser.read_type_4("plan_id"));
       ser.read_type_e("lattice_nodes", data.getLatticeNodes());
    }
 
