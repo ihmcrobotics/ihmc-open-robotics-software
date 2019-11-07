@@ -141,7 +141,7 @@ public class LIDARBasedREAModule
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
-      moduleStateReporter.registerStereoVisionPointCloudMessage(message);
+      moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
    }
 
