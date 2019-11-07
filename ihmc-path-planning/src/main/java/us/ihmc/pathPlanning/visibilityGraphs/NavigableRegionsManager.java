@@ -107,6 +107,57 @@ public class NavigableRegionsManager
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
          return null;
 
+      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
+      Point3DReadOnly goalInWorld;
+      if (accommodateOcclusions)
+      {
+         // find out if navigable regions make it to the goal
+         // try to find path?
+
+         // find closest region to final goal
+
+         // gonna have to call planInternal many times??
+         // start from goal and back up until plan found
+         // take cue from explore area behavior
+         // maybe need to know where we've tried to get to before
+
+         // might need to compute edge costs early?
+
+         // TODO
+
+         ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
+         for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
+         {
+            for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
+            {
+               homeRegionNodes.add(homeRegionNode);
+            }
+         }
+
+         if (homeRegionNodes.isEmpty())
+         {
+            return false; // trapped!
+         }
+
+         VisibilityGraphNode closestHomeRegionNodeToGoal = homeRegionNodes.get(0);
+         for (VisibilityGraphNode visibilityGraphNode : homeRegionNodes)
+         {
+            if (visibilityGraphNode.getPointInWorld().distance(finalGoalInWorld) < closestHomeRegionNodeToGoal.getPointInWorld().distance(finalGoalInWorld))
+            {
+               closestHomeRegionNodeToGoal = visibilityGraphNode;
+            }
+         }
+
+         goalInWorld = closestHomeRegionNodeToGoal.getPointInWorld();
+      }
+      else
+      {
+         goalInWorld = finalGoalInWorld;
+      }
+
+      if (!resetStackForStartAndGoal(startInWorld, goalInWorld))
+         return null;
+
       return planInternal();
    }
 
@@ -134,31 +185,11 @@ public class NavigableRegionsManager
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
 
-      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
-      Point3DReadOnly goalInWorld;
-      if (accommodateOcclusions)
-      {
-         // find out if navigable regions make it to the goal
-         // try to find path?
+      return true;
+   }
 
-         // find closest region to final goal
-
-         // gonna have to call planInternal many times??
-         // start from goal and back up until plan found
-         // take cue from explore area behavior
-         // maybe need to know where we've tried to get to before
-
-         // might need to compute edge costs early?
-
-         // TODO
-
-         goalInWorld = finalGoalInWorld;
-      }
-      else
-      {
-         goalInWorld = finalGoalInWorld;
-      }
-
+   private boolean resetStackForStartAndGoal(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
+   {
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
@@ -179,7 +210,6 @@ public class NavigableRegionsManager
       startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
-
       return true;
    }
 
