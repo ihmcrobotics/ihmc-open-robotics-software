@@ -50,8 +50,9 @@ public class FusionSensorMeshViewer
    public FusionSensorMeshViewer(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager) throws Exception
    {
       this.reaMessager = reaMessager;
-      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, reaMessager);
-      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, reaMessager);
+      lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, reaMessager, REAModuleAPI.UILidarScanShow, REAModuleAPI.UILidarScanClear);
+      stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, reaMessager, REAModuleAPI.UIStereoVisionShow,
+                                                                      REAModuleAPI.UIStereoVisionClear);
       detectedObjectViewer = new DetectedObjectViewer(ros2Node);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(reaMessager);
       lidarImageFusionDataViewer = new LidarImageFusionDataViewer(messager);
