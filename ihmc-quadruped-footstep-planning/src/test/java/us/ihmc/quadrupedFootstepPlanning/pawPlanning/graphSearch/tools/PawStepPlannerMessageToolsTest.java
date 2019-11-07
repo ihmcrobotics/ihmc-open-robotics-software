@@ -49,7 +49,7 @@ public class PawStepPlannerMessageToolsTest
          else if (key instanceof IntegerStoredPropertyKey)
          {
             IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
-            parameters.set(integerKey, RandomNumbers.nextInt(random, 0, 10));
+            parameters.set(integerKey, RandomNumbers.nextInt(random, 1, 10));
          }
          else if (key instanceof BooleanStoredPropertyKey)
          {

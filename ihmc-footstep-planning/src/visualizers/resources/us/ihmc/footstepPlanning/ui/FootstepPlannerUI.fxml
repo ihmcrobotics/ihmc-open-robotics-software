@@ -44,6 +44,12 @@
                     </content>
                 </Tab>
 
+                <Tab text="Footstep Post Processing">
+                    <content>
+                        <fx:include fx:id="footstepPostProcessingParametersUI" source="FootstepPostProcessingParametersUI.fxml"/>
+                    </content>
+                </Tab>
+
                 <Tab text="Node checking">
                     <content>
                         <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml"/>

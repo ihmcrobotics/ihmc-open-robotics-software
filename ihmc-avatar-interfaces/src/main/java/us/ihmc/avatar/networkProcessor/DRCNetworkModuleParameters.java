@@ -37,7 +37,9 @@ public class DRCNetworkModuleParameters
     */
    private Class<? extends KinematicsStreamingToolboxModule> kinematicsStreamingToolboxLauncherClass;
    private boolean useFootstepPlanningToolbox;
+   private boolean useFootstepPostProcessingToolbox;
    private boolean useFootstepPlanningToolboxVisualizer;
+   private boolean useFootstepPostProcessingToolboxVisualizer;
    private boolean useTextToSpeechModule;
    private boolean useRobotEnvironmentAwarenessModule;
    private boolean useHeightQuadTreeToolbox;
@@ -105,6 +107,11 @@ public class DRCNetworkModuleParameters
       return useFootstepPlanningToolbox;
    }
 
+   public boolean isFootstepPostProcessingToolboxEnabled()
+   {
+      return useFootstepPostProcessingToolbox;
+   }
+
    public boolean isKinematicsToolboxVisualizerEnabled()
    {
       return useKinematicsToolboxVisualizer;
@@ -118,6 +125,11 @@ public class DRCNetworkModuleParameters
    public boolean isFootstepPlanningToolboxVisualizerEnabled()
    {
       return useFootstepPlanningToolboxVisualizer;
+   }
+
+   public boolean isFootstepPostProcessingToolboxVisualizerEnabled()
+   {
+      return useFootstepPostProcessingToolboxVisualizer;
    }
 
    public boolean isHandModuleEnabled()
@@ -236,6 +248,11 @@ public class DRCNetworkModuleParameters
       this.useFootstepPlanningToolbox = useFootstepPlanningToolbox;
    }
 
+   public void enableFootstepPostProcessingToolbox(boolean useFootstepPostProcessingToolbox)
+   {
+      this.useFootstepPostProcessingToolbox = useFootstepPostProcessingToolbox;
+   }
+
    public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
    {
       this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
@@ -249,6 +266,11 @@ public class DRCNetworkModuleParameters
    public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
    {
       this.useFootstepPlanningToolboxVisualizer = useFootstepPlanningToolboxVisualizer;
+   }
+
+   public void enableFootstepPostProcessingToolboxVisualizer(boolean useFootstepPostProcessingToolboxVisualizer)
+   {
+      this.useFootstepPostProcessingToolboxVisualizer = useFootstepPostProcessingToolboxVisualizer;
    }
 
    public void enableWalkingPreviewToolbox(boolean useWalkingPreviewToolbox)

@@ -4,11 +4,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
@@ -36,6 +39,8 @@ public class BehaviorUI
    private final BorderPane mainPane;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
+
+   @FXML private ChoiceBox<String> behaviorSelector;
 
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
@@ -73,6 +78,14 @@ public class BehaviorUI
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
+      behaviorSelector.getItems().add("NONE");
+      for (BehaviorRegistry behavior : BehaviorRegistry.values)
+      {
+         behaviorSelector.getItems().add(behavior.name());
+      }
+      behaviorSelector.valueProperty().addListener(
+            (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
+
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       fancyPosesBehaviorUIController.init(behaviorMessager);
       exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
@@ -93,7 +106,7 @@ public class BehaviorUI
       mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(false);
-      Scene mainScene = new Scene(mainPane, 1350, 900);
+      Scene mainScene = new Scene(mainPane, 1554, 1000);
 
       primaryStage.setScene(mainScene);
    }

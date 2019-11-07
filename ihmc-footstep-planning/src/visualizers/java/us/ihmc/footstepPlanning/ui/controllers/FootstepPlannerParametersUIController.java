@@ -163,7 +163,7 @@ public class FootstepPlannerParametersUIController
       javaFXStoredPropertyMap.put(stepDownHeight, FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
          planningParameters.set(parameters);
 
@@ -189,7 +189,7 @@ public class FootstepPlannerParametersUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 
 

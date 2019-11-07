@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -14,16 +13,12 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -72,10 +67,10 @@ public class RemotePlannerMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
-      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic);
-      plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
-      receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, 0);
+      resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
+      plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
+      receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId, 0);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
 
       registerPubSubs(ros2Node);
@@ -103,8 +98,8 @@ public class RemotePlannerMessageConverter
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                         FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanningResultTopic, request -> checkAndPublishIfInvalidResult());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, request -> publishResultingPlan());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanningResult, request -> checkAndPublishIfInvalidResult());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -134,23 +129,23 @@ public class RemotePlannerMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, regions));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, startPosition);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
+      this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, regions));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, plannerType);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
-      messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
@@ -159,7 +154,7 @@ public class RemotePlannerMessageConverter
       this.planarRegionsList = Optional.of(planarRegionsList);
 
       if (acceptNewPlanarRegionsReference.get())
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
    }
 
    private void publishResultingPlan()

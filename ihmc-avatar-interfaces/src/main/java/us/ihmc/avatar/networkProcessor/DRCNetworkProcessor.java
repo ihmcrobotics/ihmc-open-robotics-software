@@ -5,6 +5,7 @@ import java.io.IOException;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -57,6 +58,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupKinematicsStreamingToolboxModule(robotModel, params));
       tryToStartModule(() -> setupKinematicsPlanningToolboxModule(robotModel, params));
       tryToStartModule(() -> setupFootstepPlanningToolboxModule(robotModel, params));
+      tryToStartModule(() -> setupFootstepPostProcessingToolboxModule(robotModel, params));
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
@@ -116,6 +118,14 @@ public class DRCNetworkProcessor
          return;
 
       new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+   }
+
+   private void setupFootstepPostProcessingToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isFootstepPostProcessingToolboxEnabled())
+         return;
+
+      new FootstepPlanPostProcessingToolboxModule(robotModel, null, params.isFootstepPostProcessingToolboxVisualizerEnabled());
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

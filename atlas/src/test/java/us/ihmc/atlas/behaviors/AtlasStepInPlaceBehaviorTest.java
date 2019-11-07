@@ -34,7 +34,7 @@ public class AtlasStepInPlaceBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");
