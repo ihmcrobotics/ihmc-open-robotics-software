@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.URI;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
+import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
@@ -44,14 +46,19 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final LidarScanPublisher lidarScanPublisher;
    private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
    private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
+   private final TrackingCameraPublisher trackingCameraPublisher;
 
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
+   private static final boolean ENABLE_TRACKING_PUBLISHER = false;
 
-   private static final String depthTopicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
+   private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
    private static final String depthTopicNameSurfixToPublish = "_D435";
    private static final String depthTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
+   private static final String trackingTopicNameSurfixToPublish = "_T265";
+   private static final String trackingTopicNameToSubscribe = AtlasSensorInformation.trackingCameraTopic;
    private final MessageTopicNameGenerator depthCloudTopicNameGenerator;
+   private final MessageTopicNameGenerator trackingCameraTopicNameGenerator;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -80,12 +87,23 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(depthTopicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
+      depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
       realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
       realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
+
+      trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
+      trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
+      trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
    }
 
+   public static void main(String[] args)
+   {
+      MessageTopicNameGenerator gen = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
+      String generateTopicName = gen.generateTopicName(StampedPosePacket.class);
+      System.out.println("generateTopicName "+generateTopicName);
+   }
+   
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
@@ -125,6 +143,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
       if (ENABLE_DEPTH_PUBLISHER)
          realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthTopicNameToSubscribe, rosMainNode);
+      if (ENABLE_TRACKING_PUBLISHER)
+         trackingCameraPublisher.receiveStereoPointCloudFromROS(trackingTopicNameToSubscribe, rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -147,6 +167,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          multisenseStereoVisionPointCloudPublisher.start();
       if (ENABLE_DEPTH_PUBLISHER)
          realsenseDepthPointCloudPublisher.start();
+      if (ENABLE_TRACKING_PUBLISHER)
+         trackingCameraPublisher.start();
 
       rosClockCalculator.setROSMainNode(rosMainNode);
 
