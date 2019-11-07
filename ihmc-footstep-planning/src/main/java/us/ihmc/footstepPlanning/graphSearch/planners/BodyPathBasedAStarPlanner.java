@@ -47,13 +47,19 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
                                     SideDependentList<ConvexPolygon2D> footPolygons, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
                                     BipedalFootstepPlannerListener... listeners)
    {
+      this(prefix, bodyPathPlanner, parameters, footPolygons, new SimplePlanarRegionFootstepNodeSnapper(footPolygons), heuristicWeight, parentRegistry, listeners);
+   }
+
+   public BodyPathBasedAStarPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, FootstepPlannerParametersReadOnly parameters,
+                                    SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, DoubleProvider heuristicWeight, YoVariableRegistry parentRegistry,
+                                    BipedalFootstepPlannerListener... listeners)
+   {
       this.bodyPathPlanner = bodyPathPlanner;
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
       FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, parameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);

@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepEdge;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -78,8 +79,10 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       RigidBodyTransform nodePose;
-      if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP)
+      if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP && snapper != null)
+      {
          nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      }
       else
       {
          nodePose = new RigidBodyTransform();

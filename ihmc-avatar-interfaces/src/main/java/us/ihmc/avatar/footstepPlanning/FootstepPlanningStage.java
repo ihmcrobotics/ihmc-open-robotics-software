@@ -134,12 +134,14 @@ public class FootstepPlanningStage implements FootstepPlanner
                                                                      MultiStagePlannerListener multiStageListener,
                                                                      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
    {
+      // TODO add the snapper in
       StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
       multiStageListener.addStagePlannerListener(plannerListener);
       return new BodyPathBasedAStarPlanner("visGraph_",
                                            bodyPathPlanner,
                                            footstepPlannerParameters,
                                            contactPointsInSoleFrame,
+                                           new SimplePlanarRegionFootstepNodeSnapper(contactPointsInSoleFrame),
                                            footstepPlannerParameters.getAStarHeuristicsWeight(),
                                            registry,
                                            plannerListener);
