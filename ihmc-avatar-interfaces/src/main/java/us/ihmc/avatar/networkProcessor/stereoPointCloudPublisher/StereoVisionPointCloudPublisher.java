@@ -39,7 +39,7 @@ public class StereoVisionPointCloudPublisher
 
    private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
-   private static final int MAX_NUMBER_OF_POINTS = 200000;
+   private static final int MAX_NUMBER_OF_POINTS = 5000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
