@@ -47,15 +47,11 @@ public class ExternalForceEstimator implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean requestInitialize = new YoBoolean("requestInitialize", registry);
 
-   private final double dt;
-
-   private int index = 0;
-   private final int integrationWindow;
-   private final boolean hasFloatingBase;
-
    private static final double integrationTime = 2.5;
    private static final double defaultEstimatorGain = 0.7;
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
+   private final double dt;
+   private final boolean hasFloatingBase;
 
    private final JointBasics[] joints;
    private final int dofs;
@@ -66,14 +62,12 @@ public class ExternalForceEstimator implements RobotController
    private final DenseMatrix64F currentIntegratedValue;
    private final DenseMatrix64F observedExternalJointTorque;
    private final DenseMatrix64F estimatedExternalForceMatrix;
+   private final DenseMatrix64F hqd0;
    private final DenseMatrix64F hqd;
    private final DenseMatrix64F massMatrix;
    private final DenseMatrix64F massMatrixPrev;
    private final DenseMatrix64F massMatrixDot;
    private final DenseMatrix64F coriolisGravityTerm;
-   private final DenseMatrix64F observedExternalJointTorqueHistory;
-   private final DenseMatrix64F integrandHistory;
-   private final DenseMatrix64F hqdHistory;
 
    private final BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
    private final Consumer<DenseMatrix64F> tauSetter;
@@ -117,12 +111,8 @@ public class ExternalForceEstimator implements RobotController
       this.dynamicMatrixSetter = dynamicMatrixSetter;
       this.hasFloatingBase = joints[0] instanceof FloatingJointBasics;
 
-      this.integrationWindow = (int) (integrationTime / dt);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      this.observedExternalJointTorqueHistory = new DenseMatrix64F(dofs, integrationWindow);
-      this.integrandHistory = new DenseMatrix64F(dofs, integrationWindow);
-      this.hqdHistory = new DenseMatrix64F(dofs, integrationWindow);
       this.currentIntegrandValue = new DenseMatrix64F(dofs, 1);
       this.currentIntegratedValue = new DenseMatrix64F(dofs, 1);
       this.observedExternalJointTorque = new DenseMatrix64F(dofs, 1);
@@ -135,6 +125,8 @@ public class ExternalForceEstimator implements RobotController
       this.tau = new DenseMatrix64F(dofs, 1);
       this.qd = new DenseMatrix64F(dofs, 1);
       this.forceEstimateSolver = new DampedLeastSquaresSolver(dofs, 0.05); // new SolvePseudoInverseSvd(dofs, dofs); //
+
+      this.hqd0 = new DenseMatrix64F(dofs, 1);
 
       this.yoObservedExternalJointTorque = new YoDouble[dofs];
       this.yoSimulatedTorqueSensingError = new YoDouble[dofs];
@@ -213,11 +205,8 @@ public class ExternalForceEstimator implements RobotController
    public void initialize()
    {
       firstTick = true;
-      CommonOps.fill(hqdHistory, 0.0);
-      CommonOps.fill(observedExternalJointTorqueHistory, 0.0);
-      CommonOps.fill(integrandHistory, 0.0);
       CommonOps.fill(observedExternalJointTorque, 0.0);
-      index = 0;
+      CommonOps.fill(currentIntegratedValue, 0.0);
    }
 
    @Override
@@ -236,54 +225,47 @@ public class ExternalForceEstimator implements RobotController
       catch(Exception e)
       {
          e.printStackTrace();
-         index = getPreviousIndexWrapped(index, integrationWindow);
       }
 
-      index = getNextIndexWrapped(index, integrationWindow);
       firstTick = false;
    }
 
    private void computeForceEstimate()
    {
-      int nextIndex = getNextIndexWrapped(index, integrationWindow);
       massMatrixPrev.set(massMatrix);
 
       dynamicMatrixSetter.accept(massMatrix, coriolisGravityTerm);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
+      tauSetter.accept(tau);
 
-      if (!firstTick)
+      if (firstTick)
+      {
+         CommonOps.mult(massMatrix, qd, hqd0);
+         firstTick = false;
+      }
+      else
       {
          CommonOps.subtract(massMatrix, massMatrixPrev, massMatrixDot);
          CommonOps.scale(1.0 / dt, massMatrixDot);
       }
-
-      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
-      tauSetter.accept(tau);
 
       for (int i = 0; i < dofs; i++)
       {
          tau.set(i, 0, tau.get(i, 0) - yoSimulatedTorqueSensingError[i].getValue());
       }
 
-      // update current integral
+      // update integral
       currentIntegrandValue.set(tau);
       CommonOps.subtractEquals(currentIntegrandValue, coriolisGravityTerm);
       CommonOps.multAdd(massMatrixDot, qd, currentIntegrandValue);
       CommonOps.addEquals(currentIntegrandValue, observedExternalJointTorque);
+      CommonOps.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
 
-      // update torque estimate
-      MatrixTools.setMatrixBlock(integrandHistory, 0, index, currentIntegrandValue, 0, 0, dofs, 1, dt);
-      CommonOps.sumRows(integrandHistory, currentIntegratedValue);
-
+      // calculate observed external joint torque
       CommonOps.mult(massMatrix, qd, hqd);
-      MatrixTools.setMatrixBlock(hqdHistory, 0, index, hqd, 0, 0, dofs, 1, 1.0);
-
-      observedExternalJointTorque.set(hqd);
-      MatrixTools.addMatrixBlock(observedExternalJointTorque, 0, 0, hqdHistory, 0, nextIndex, dofs, 1, -1.0);
+      CommonOps.subtract(hqd, hqd0, observedExternalJointTorque);
       CommonOps.subtractEquals(observedExternalJointTorque, currentIntegratedValue);
       CommonOps.scale(wrenchEstimationGain.getDoubleValue(), observedExternalJointTorque);
-
-      MatrixTools.addMatrixBlock(observedExternalJointTorque, 0, 0, observedExternalJointTorqueHistory, 0, nextIndex, dofs, 1, 1.0);
-      MatrixTools.setMatrixBlock(observedExternalJointTorqueHistory, 0, index, observedExternalJointTorque, 0, 0, dofs, 1, 1.0);
 
       externalForcePoint.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), externalForcePointOffset);
       
@@ -328,18 +310,6 @@ public class ExternalForceEstimator implements RobotController
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   private static int getPreviousIndexWrapped(int index, int size)
-   {
-      int previousIndex = index - 1;
-      return previousIndex < 0 ? size - 1 : previousIndex;
-   }
-
-   private static int getNextIndexWrapped(int index, int size)
-   {
-      int nextIndex = index + 1;
-      return nextIndex >= size ? 0 : nextIndex;
    }
 
    public void requestInitialize()
