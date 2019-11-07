@@ -40,11 +40,7 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-            * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
-            */
-   public int node_id_ = -1;
-   /**
-            * ID of node. This should reference the index of this node in a FootstepNodeDataList
+            * ID of parent node. This should reference the index of this node in a FootstepNodeDataList
             */
    public int parent_node_id_ = -1;
    public controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage footstep_node_;
@@ -70,8 +66,6 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    {
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-      node_id_ = other.node_id_;
-
       parent_node_id_ = other.parent_node_id_;
 
       controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.staticCopy(other.footstep_node_, footstep_node_);
@@ -98,29 +92,14 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    }
 
    /**
-            * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
-            */
-   public void setNodeId(int node_id)
-   {
-      node_id_ = node_id;
-   }
-   /**
-            * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
-            */
-   public int getNodeId()
-   {
-      return node_id_;
-   }
-
-   /**
-            * ID of node. This should reference the index of this node in a FootstepNodeDataList
+            * ID of parent node. This should reference the index of this node in a FootstepNodeDataList
             */
    public void setParentNodeId(int parent_node_id)
    {
       parent_node_id_ = parent_node_id;
    }
    /**
-            * ID of node. This should reference the index of this node in a FootstepNodeDataList
+            * ID of parent node. This should reference the index of this node in a FootstepNodeDataList
             */
    public int getParentNodeId()
    {
@@ -168,8 +147,6 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.node_id_, other.node_id_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.parent_node_id_, other.parent_node_id_, epsilon)) return false;
 
       if (!this.footstep_node_.epsilonEquals(other.footstep_node_, epsilon)) return false;
@@ -190,8 +167,6 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-      if(this.node_id_ != otherMyClass.node_id_) return false;
-
       if(this.parent_node_id_ != otherMyClass.parent_node_id_) return false;
 
       if (!this.footstep_node_.equals(otherMyClass.footstep_node_)) return false;
@@ -211,8 +186,6 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
-      builder.append("node_id=");
-      builder.append(this.node_id_);      builder.append(", ");
       builder.append("parent_node_id=");
       builder.append(this.parent_node_id_);      builder.append(", ");
       builder.append("footstep_node=");

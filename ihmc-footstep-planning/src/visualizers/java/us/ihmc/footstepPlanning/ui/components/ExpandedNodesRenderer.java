@@ -44,6 +44,8 @@ public class ExpandedNodesRenderer extends AnimationTimer
    private static final double cellOpacity = 0.9;
    private static final Color validFootColor = Color.rgb(219, 62, 87, cellOpacity);
    private static final Color rejectedCellColor = Color.rgb(139, 0, 0, cellOpacity);
+   private static final Color leftFootColor = Color.rgb(0, 204, 0, cellOpacity);
+   private static final Color rightFootColor = Color.rgb(255, 0, 0, cellOpacity);
 
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -63,7 +65,7 @@ public class ExpandedNodesRenderer extends AnimationTimer
 
    public ExpandedNodesRenderer(Messager messager)
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpandedNodesMap, latticeMap -> executorService.execute(() -> processExpandedNodes(latticeMap)));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpandedNodesMap, latticeMap -> executorService.submit(() -> processExpandedNodes(latticeMap)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AssumeFlatGround, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
@@ -72,7 +74,7 @@ public class ExpandedNodesRenderer extends AnimationTimer
       root.getChildren().add(latticeMapMeshView);
    }
 
-   private void processExpandedNodes(PlannerLatticeMap latticeMap)
+   private synchronized void processExpandedNodes(PlannerLatticeMap latticeMap)
    {
       palette.clearPalette();
 

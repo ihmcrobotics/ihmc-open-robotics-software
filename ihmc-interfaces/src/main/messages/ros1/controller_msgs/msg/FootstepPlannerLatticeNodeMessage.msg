@@ -14,4 +14,6 @@ int32 yaw_index
 # Robot side of the cell
 int8 robot_side
 
+int32 node_index
+
 

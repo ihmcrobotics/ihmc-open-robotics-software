@@ -78,12 +78,7 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Quaternion orientation;
         /**
-         * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
-         */
-        @defaultValue(value=-1)
-        long node_id;
-        /**
-         * ID of node. This should reference the index of this node in a FootstepNodeDataList
+         * ID of parent node. This should reference the index of this node in a FootstepNodeDataList
          */
         @defaultValue(value=-1)
         long parent_node_id;

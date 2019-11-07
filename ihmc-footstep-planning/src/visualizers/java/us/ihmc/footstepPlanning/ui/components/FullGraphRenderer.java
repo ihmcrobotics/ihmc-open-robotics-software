@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataL
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -59,6 +60,7 @@ public class FullGraphRenderer extends AnimationTimer
    private final List<PlannerNodeData> allNodeData = new ArrayList<>();
    private final HashMap<FootstepNode, List<PlannerNodeData>> childMap = new HashMap<>();
    private final ArrayList<FootstepNode> expandedNodes = new ArrayList<>();
+   private final ArrayList<FootstepNode> parentNodes = new ArrayList<>();
 
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = PlannerTools.createDefaultFootPolygons();
 
@@ -66,8 +68,8 @@ public class FullGraphRenderer extends AnimationTimer
 
    public FullGraphRenderer(Messager messager)
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpandedNodesMap, latticeMap -> executorService.execute(() -> processExpandedNodes(latticeMap)));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepGraphPart, nodeDataList -> executorService.execute(() -> processFootstepGraph(nodeDataList)));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpandedNodesMap, latticeMap -> executorService.submit(() -> processExpandedNodes(latticeMap)));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepGraphPart, nodeDataList -> executorService.submit(() -> processFootstepGraph(nodeDataList)));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AssumeFlatGround, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpansionFractionToShow, data -> updateGraphicOnThread());
@@ -80,13 +82,19 @@ public class FullGraphRenderer extends AnimationTimer
       root.getChildren().add(footstepGraphMeshView);
    }
 
-   private void processExpandedNodes(PlannerLatticeMap latticeMap)
+   private synchronized void processExpandedNodes(PlannerLatticeMap latticeMap)
    {
+      expandedNodes.clear();
       expandedNodes.addAll(latticeMap.getLatticeNodes());
    }
 
-   private void processFootstepGraph(PlannerNodeDataList nodeDataList)
+   private synchronized void processFootstepGraph(PlannerNodeDataList nodeDataList)
    {
+      fullGraph.clear();
+      allNodeData.clear();
+      childMap.clear();
+      parentNodes.clear();
+
       fullGraph.getNodeData().addAll(nodeDataList.getNodeData());
       fullGraph.getNodeData().sort(Comparator.comparingInt(PlannerNodeData::getNodeId));
       allNodeData.addAll(nodeDataList.getNodeData());
@@ -100,22 +108,28 @@ public class FullGraphRenderer extends AnimationTimer
          if (childMap.get(parentNode.getFootstepNode()) == null)
             childMap.put(parentNode.getFootstepNode(), new ArrayList<>());
          childMap.get(parentNode.getFootstepNode()).add(nodeData);
+
+         if (!parentNodes.contains(parentNode))
+            parentNodes.add(parentNode.getFootstepNode());
       }
 
-      expandedNodes.sort(expansionOrderComparator);
+      if (expandedNodes.size() != childMap.keySet().size())
+         throw new RuntimeException("Wrong size.");
+
+      parentNodes.sort(expansionOrderComparator);
    }
 
    private void updateGraphicOnThread()
    {
-      executorService.execute(this::updateGraphic);
+      executorService.submit(this::updateGraphic);
    }
 
    private void updateGraphic()
    {
       double alpha = MathTools.clamp(fractionToShow.get(), 0.0, 1.0);
 
-      int frameIndex = (int) (alpha * (expandedNodes.size() - 1));
-      FootstepNode nodeToShow = expandedNodes.get(frameIndex);
+      int frameIndex = (int) (alpha * (parentNodes.size() - 1));
+      FootstepNode nodeToShow = parentNodes.get(frameIndex);
       Collection<PlannerNodeData> childrenToShow = childMap.get(nodeToShow);
       PlannerNodeData parentToShow = null;
       for (PlannerNodeData nodeData : allNodeData)
@@ -148,17 +162,18 @@ public class FullGraphRenderer extends AnimationTimer
       footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 
-   private final  Comparator<FootstepNode> expansionOrderComparator = (node1, node2) ->
+   private final Comparator<FootstepNode> expansionOrderComparator = (node1, node2) ->
    {
-         int earliestIndex1 = getEarliestChildNodeIndex(node1);
-         int earliestIndex2 = getEarliestChildNodeIndex(node2);
-         return Integer.compare(earliestIndex1, earliestIndex2);
+      int earliestIndex1 = getEarliestChildNodeIndex(node1);
+      int earliestIndex2 = getEarliestChildNodeIndex(node2);
+      return Integer.compare(earliestIndex1, earliestIndex2);
    };
 
-   public int getEarliestChildNodeIndex(FootstepNode latticeNode)
+   private int getEarliestChildNodeIndex(FootstepNode footstepNode)
    {
       int smallestIndex = Integer.MAX_VALUE;
-      for (PlannerNodeData child : childMap.get(latticeNode))
+      List<PlannerNodeData> childData = childMap.get(footstepNode);
+      for (PlannerNodeData child : childData)
          smallestIndex = Math.min(smallestIndex, child.getNodeId());
 
       return smallestIndex;
@@ -166,7 +181,7 @@ public class FullGraphRenderer extends AnimationTimer
 
    private void addFoot(PlannerNodeData nodeData, Color color)
    {
-      RigidBodyTransform transform = nodeData.getNodePose();
+      RigidBodyTransform transform = new RigidBodyTransform(nodeData.getNodePose());
       transform.getTranslation().addZ(nodeOffsetZ);
 
       Point2D[] vertices = new Point2D[defaultContactPoints.get(RobotSide.LEFT).getNumberOfVertices()];
@@ -207,6 +222,7 @@ public class FullGraphRenderer extends AnimationTimer
          allNodeData.clear();
          childMap.clear();
          expandedNodes.clear();
+         parentNodes.clear();
          return;
       }
 

@@ -6,9 +6,7 @@ geometry_msgs/Point position
 # Specifies the snap rotation. NaN if snap unsuccessful.
 geometry_msgs/Quaternion orientation
 
-# ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
-int32 node_id -1
-# ID of node. This should reference the index of this node in a FootstepNodeDataList
+# ID of parent node. This should reference the index of this node in a FootstepNodeDataList
 int32 parent_node_id -1
 
 FootstepPlannerLatticeNodeMessage footstep_node
