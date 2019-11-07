@@ -10,28 +10,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class PlannerNodeData
 {
    private final int parentNodeId;
-   private final int nodeId;
 
-   private final Pose3D pose = new Pose3D();
+   private final RigidBodyTransform pose;
    private final FootstepNode footstepNode;
 
    private final int hashCode;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
 
-   public PlannerNodeData(int parentNodeId, FootstepNode node, RigidBodyTransform pose,
-                          BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   public PlannerNodeData(int parentNodeId, FootstepNode node, RigidBodyTransform pose, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      this(node.getNodeIndex(), parentNodeId, node.getXIndex(), node.getYIndex(), node.getYawIndex(), node.getRobotSide(), pose, rejectionReason);
-   }
-
-   public PlannerNodeData(int nodeId, int parentNodeId, int xIndex, int yIndex, int yawIndex, RobotSide robotSide, RigidBodyTransform pose,
-                          BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      this.footstepNode = new FootstepNode(xIndex, yIndex, yawIndex, robotSide);
-      this.nodeId = nodeId;
+      this.footstepNode = node;
       this.parentNodeId = parentNodeId;
-      this.pose.set(pose);
+      this.pose = pose;
       this.rejectionReason = rejectionReason;
 
       hashCode = footstepNode.hashCode();
@@ -39,10 +30,14 @@ public class PlannerNodeData
 
    public PlannerNodeData(FootstepNodeDataMessage message)
    {
-      this(message.getNodeId(), message.getParentNodeId(), message.getFootstepNode().getXIndex(), message.getFootstepNode().getYIndex(),
-           message.getFootstepNode().getYawIndex(), RobotSide.fromByte(message.getFootstepNode().getRobotSide()),
-           new RigidBodyTransform(message.getOrientation(), message.getPosition()),
-           BipedalFootstepPlannerNodeRejectionReason.fromByte(message.getBipedalFootstepPlannerNodeRejectionReason()));
+      footstepNode = new FootstepNode(message.getFootstepNode().getXIndex(), message.getFootstepNode().getYIndex(), message.getFootstepNode().getYawIndex(),
+                                      RobotSide.fromByte(message.getFootstepNode().getRobotSide()));
+      footstepNode.setNodeIndex(message.getNodeId());
+      parentNodeId = message.getParentNodeId();
+      pose = new RigidBodyTransform(message.getOrientation(), message.getPosition());
+      rejectionReason = BipedalFootstepPlannerNodeRejectionReason.fromByte(message.getBipedalFootstepPlannerNodeRejectionReason());
+
+      hashCode = footstepNode.hashCode();
    }
 
    public FootstepNode getFootstepNode()
@@ -52,7 +47,7 @@ public class PlannerNodeData
 
    public int getNodeId()
    {
-      return nodeId;
+      return footstepNode.getNodeIndex();
    }
 
    public int getParentNodeId()
@@ -60,7 +55,7 @@ public class PlannerNodeData
       return parentNodeId;
    }
 
-   public Pose3DReadOnly getNodePose()
+   public RigidBodyTransform getNodePose()
    {
       return pose;
    }
@@ -92,8 +87,8 @@ public class PlannerNodeData
       message.getFootstepNode().setYIndex(getFootstepNode().getYIndex());
       message.getFootstepNode().setYawIndex(getFootstepNode().getYawIndex());
       message.getFootstepNode().setRobotSide(getFootstepNode().getRobotSide().toByte());
-      message.getPosition().set(getNodePose().getPosition());
-      message.getOrientation().set(getNodePose().getOrientation());
+      message.getPosition().set(getNodePose().getTranslation());
+      message.getOrientation().set(getNodePose().getRotation());
       message.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
    }
 
