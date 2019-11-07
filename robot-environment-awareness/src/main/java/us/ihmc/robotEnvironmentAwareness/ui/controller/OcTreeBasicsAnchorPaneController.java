@@ -182,7 +182,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       boundindBoxMessage.setMaxY(1.0f);
       boundindBoxMessage.setMinY(-1.0f);
       boundindBoxMessage.setMaxZ(1.0f);
-      boundindBoxMessage.setMinZ(-1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
       
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
@@ -200,7 +200,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       boundindBoxMessage.setMaxY(1.0f);
       boundindBoxMessage.setMinY(-1.0f);
       boundindBoxMessage.setMaxZ(1.0f);
-      boundindBoxMessage.setMinZ(-1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
       
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, false);
