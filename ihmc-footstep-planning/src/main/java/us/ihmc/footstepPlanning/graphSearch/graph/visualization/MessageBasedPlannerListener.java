@@ -73,8 +73,9 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       for (int i = 0; i < plan.size(); i++)
       {
          FootstepNode node = plan.get(i);
+         int parentNodeIndex = i > 0 ? plan.get(i - 1).getNodeIndex() : -1;
          RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
-         lowestNodeDataList.addNode(i - 1, i, node.getLatticeNode(), node.getRobotSide(), nodePose, null);
+         lowestNodeDataList.addNode(parentNodeIndex, node, nodePose, null);
       }
    }
 

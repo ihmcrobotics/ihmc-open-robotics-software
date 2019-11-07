@@ -52,28 +52,11 @@ public class PlannerNodeDataList
       return nodeDataList;
    }
 
-   public PlannerNodeData getDataForNode(LatticeNode node)
-   {
-      if (node == null)
-         return null;
 
-      int index = nodeDataList.indexOf(node);
-      if (index == -1)
-         LogTools.info("What");
-      return nodeDataList.get(index);
-   }
-
-   public PlannerNodeData addNode(int parentNodeIndex, int nodeIndex, LatticeNode latticeNode, RobotSide newNodeSide, RigidBodyTransform newNodePose,
+   public PlannerNodeData addNode(int parentNodeIndex, FootstepNode footstepNode, RigidBodyTransform newNodePose,
                                   BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
-      return addNode(parentNodeIndex, nodeIndex, latticeNode.getXIndex(), latticeNode.getYIndex(), latticeNode.getYawIndex(), newNodeSide, newNodePose,
-                     rejectionReason);
-   }
-
-   public PlannerNodeData addNode(int parentNodeIndex, int nodeIndex, int xIndex, int yIndex, int yawIndex, RobotSide newNodeSide, RigidBodyTransform newNodePose,
-                                  BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      return addNode(new PlannerNodeData(parentNodeIndex, nodeIndex, xIndex, yIndex, yawIndex, newNodeSide, newNodePose, rejectionReason));
+      return addNode(new PlannerNodeData(parentNodeIndex, footstepNode, newNodePose, rejectionReason));
    }
 
    public PlannerNodeData addNode(PlannerNodeData nodeData)

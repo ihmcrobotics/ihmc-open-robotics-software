@@ -57,11 +57,7 @@ public class PlannerCell
       if (getClass() != obj.getClass())
          return false;
       PlannerCell other = (PlannerCell) obj;
-      if (xIndex != other.xIndex)
-         return false;
-      if (yIndex != other.yIndex)
-         return false;
-      return true;
+      return xIndex == other.xIndex && yIndex == other.yIndex;
    }
 
    public void getAsMessage(FootstepPlannerCellMessage messageToPack)

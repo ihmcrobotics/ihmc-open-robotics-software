@@ -123,8 +123,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, PlannerNodeData nodeData)
    {
       FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-      footstepDataMessage.getLocation().set(nodeData.getNodePose().getPosition());
-      footstepDataMessage.getOrientation().set(nodeData.getNodePose().getOrientation());
+      footstepDataMessage.getLocation().set(nodeData.getNodePose().getTranslation());
+      footstepDataMessage.getOrientation().set(nodeData.getNodePose().getRotation());
       footstepDataMessage.setRobotSide(nodeData.getFootstepNode().getRobotSide().toByte());
    }
 

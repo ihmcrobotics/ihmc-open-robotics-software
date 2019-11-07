@@ -166,8 +166,7 @@ public class FullGraphRenderer extends AnimationTimer
 
    private void addFoot(PlannerNodeData nodeData, Color color)
    {
-      RigidBodyTransform transform = new RigidBodyTransform();
-      nodeData.getNodePose().get(transform);
+      RigidBodyTransform transform = nodeData.getNodePose();
       transform.getTranslation().addZ(nodeOffsetZ);
 
       Point2D[] vertices = new Point2D[defaultContactPoints.get(RobotSide.LEFT).getNumberOfVertices()];
